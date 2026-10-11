@@ -4,6 +4,14 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
+- Current development identity: **PPSA99014**, selected by the user after a
+  pre-existing PPSA99012 installation was found on .30. Controllers and the
+  elevation helper are being rebuilt for the new exact title.
+- A PPSA99012 CPU image was uploaded and byte-verified on idle .40 (FW 12.70).
+  ShadowMount mounted UFS2 but rejected registration because icon0.png was absent.
+  No title was launched. The icon fix and staging regression test pass; the old
+  uploaded image remains preserved. Evidence: `results/cpu-deploy-20261011T170003Z/`.
+
 - Repository initialization and implementation planning are complete.
 - G1 is in progress; G2-G12 are planned. No goal has passed yet.
 - LLVM 18.1.8 builds real AMDHSA V5 device-only HIP canaries for gfx1013 and
@@ -29,8 +37,8 @@ Updated: 2026-10-11, America/New_York.
   See `evidence/offline-elevation.json`. Its configured directory is
   `/data/ps5-hip/results`; this is a staging choice, not an executable constant.
   Nineteen host cases pass, including the exported Eden/Lapy wire contract.
-- Read-only preflight contacted both authorized consoles; no deployment or launch
-  has occurred for this project.
+- Preflight contacted both authorized consoles; one unlaunched candidate was
+  deployed on .40. No title execution has occurred for this project.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
   exact extracted-file hashes. Nineteen host test cases pass (sixteen C++, three Python).
@@ -38,14 +46,16 @@ Updated: 2026-10-11, America/New_York.
   bounded application-log checker are implemented; neither sends console traffic.
 - The user authorized 192.168.4.30 or 192.168.4.40 only when idle. Preflight under
   the protocol's workspace `lock.txt` found FTP, klog and elfldr reachable on both.
-  Both current ShadowMount logs ended with PPSA99008 started and no later stop;
-  idle state was not established. No title was closed. The owned lock was released.
-  Raw evidence: `results/preflight-20261011/`. Firmware remains unverified.
+  The later preflight established shell focus after PPSA99008 stopped on both;
+  .30 became busy again before title inspection. Locks were released after every
+  bounded phase. Reported firmware: .30 = 6.02, .40 = 12.70. Both the protocol
+  default lock and Eden's PS5-Claude lock are now coordinated.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Establish an idle authorized console before the frozen CPU startup experiment.
+Finish freezing PPSA99014 with its required icon, then establish an idle authorized
+console for the CPU startup experiment.
 Continue offline preparation of title-specific deployment/log retrieval controls.
 See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
 Generic private-address

@@ -1,7 +1,7 @@
 # First native experiment sequence
 
 Status: offline preparation and read-only preflight. No console run has occurred. The user selected
-title `PPSA99012`. Firmware, service endpoints, lock ownership and package hashes must be recorded
+title `PPSA99014` after a PPSA99012 collision. Firmware, service endpoints, lock ownership and package hashes must be recorded
 in the local experiment receipt before execution. Use the shared-console runbook
 referenced by AGENTS.md; no old project's environment or lock waiver applies.
 
@@ -92,12 +92,14 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
-- Current CPU control: `gfx1013-runtime-9914258279a8`, source `955c989`.
+- Superseded CPU control (PPSA99012): `gfx1013-runtime-9914258279a8`, source `955c989`.
   Includes exact-title `lapy.elf` and `results-dir.txt`; the staged configuration
   selects `/data/ps5-hip/results`. Another normalized absolute directory can be
   selected by restaging, which creates a new package identity. UFS2 check, complete
   extraction comparison and local case verification pass. Compact provenance is
-  in `evidence/offline-elevation.json`.
+  in `evidence/offline-elevation.json`. Its image mounted on .40, but registration
+  failed for a missing icon; no launch occurred. The next candidate uses PPSA99014
+  and includes the required 512x512 icon in its hashed inventory.
 
 - Five earlier `/download0` candidates were staged and packaged from source commit
   `0c2e8c14d5cdd581002b5d315889d67509e9d0fd`. Their manifests and package hashes are

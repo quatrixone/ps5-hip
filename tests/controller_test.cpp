@@ -1,4 +1,4 @@
-#include <cstring>
+﻿#include <cstring>
 #include <stdexcept>
 #include <cstdio>
 #define main controller_main
@@ -17,21 +17,21 @@ int sceUserServiceGetForegroundUser(uint32_t *user) { *user = 27; return user_re
 void sceUserServiceTerminate() { ++terminated; }
 int sceSystemServiceLaunchApp(const char *title, char **args, launch_context_t *context) {
     ++calls;
-    check(std::strcmp(title, "PPSA99012") == 0 && args && !args[0]);
+    check(std::strcmp(title, BOOTSTRAP_TITLE_ID) == 0 && args && !args[0]);
     check(context->size == sizeof(*context) && context->user_id == 27 &&
           !context->options && !context->crash_report && !context->flags);
     return result;
 }
 #else
-namespace { const char *running = "PPSA99012"; int running_id = 42, lookup_result = 0, fallback_id = 0, fallback_calls = 0; }
+namespace { const char *running = BOOTSTRAP_TITLE_ID; int running_id = 42, lookup_result = 0, fallback_id = 0, fallback_calls = 0; }
 int sceLncUtilGetAppIdOfRunningBigApp() { return running_id; }
 int sceLncUtilGetAppTitleId(uint32_t id, char *title) {
     check(id == 42); std::strcpy(title, running); return lookup_result;
 }
 int sceLncUtilKillApp(uint32_t id) {
-    ++calls; check(id == 42 && std::strcmp(running, "PPSA99012") == 0); return result;
+    ++calls; check(id == 42 && std::strcmp(running, BOOTSTRAP_TITLE_ID) == 0); return result;
 }
-int sceSystemServiceGetAppId(const char *title) { check(std::strcmp(title, "PPSA99012") == 0); return fallback_id; }
+int sceSystemServiceGetAppId(const char *title) { check(std::strcmp(title, BOOTSTRAP_TITLE_ID) == 0); return fallback_id; }
 int sceSystemServiceKillApp(int id, int a, int b, int c) {
     ++fallback_calls; check(id == 99 && a == -1 && b == 0 && c == 0); return result;
 }
@@ -64,3 +64,4 @@ int main() {
 #endif
     } catch (const std::exception &error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
 }
+

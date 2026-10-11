@@ -1,7 +1,7 @@
 # Console workflow preparation
 
-Status: read-only preflight completed; neither console was established idle.
-`PPSA99012` is the user-selected title. No controller has been sent.
+Status: the original PPSA99012 image mounted but failed registration (missing icon).
+The user changed the development title to `PPSA99014`. No title has launched.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 
@@ -15,13 +15,13 @@ python3 tools/build_controllers.py --protocol-source /path/to/ps5-homebrew-dev-p
 `ed775bdf67ec3861f2e6c78360a6ec58508f2c22`. The build exports just the committed
 launch/close sources and license into ignored dependencies, then compiles them with
 the same pinned SDK and LLVM 18 used for the title. It records source and output
-hashes under `build/controllers/PPSA99012/receipt.json`. There is no network or
+hashes under `build/controllers/<title-id>/receipt.json`. There is no network or
 send operation in this tool. These ELF payloads are controllers, not title eboots.
 
 The launch controller initializes the user service, obtains the foreground user,
-requests exactly `PPSA99012`, reports the native result and terminates the service.
+requests exactly the configured title, reports the native result and terminates the service.
 The close controller compares the running application's title before closing it;
-its fallback obtains an application ID specifically for `PPSA99012`. It never
+its fallback obtains an application ID specifically for that title. It never
 closes a guessed process ID. Host mocks compile the actual exported sources and
 exercise failure paths and an unrelated running title. This validates controller
 logic, not the console service ABI or successful native launch/close behavior.
@@ -57,7 +57,7 @@ be established before publishing binaries.
 Before console traffic, verify a frozen case against committed evidence:
 
 ```sh
-python3 tools/verify_native_case.py --stage dist/PPSA99012/<candidate>
+python3 tools/verify_native_case.py --stage dist/PPSA99014/<candidate>
 ```
 
 This rejects changed images, controllers, receipts, title identity and staged
@@ -94,7 +94,7 @@ Prepare and test a single-case host workflow that:
 4. Preserves any earlier result, establishes log freshness, captures klog before
    launch, and sends only the frozen launch controller.
 5. Observes for the declared deadline, handles failure/quarantine without retry,
-   closes only `PPSA99012` when needed and verifies teardown/service health.
+   closes only the configured title when needed and verifies teardown/service health.
 6. Retrieves the exact configured title log,
    runs the application checker and records the independent lifecycle evidence.
 7. Releases only its own lock, including on errors.
