@@ -1,7 +1,7 @@
 {
     "schema":  1,
     "hardware_validated":  false,
-    "status":  "offline native link, runtime-control build and host oracle validation; title packaging pending",
+    "status":  "offline linked and packaged; native execution unverified",
     "llvm_version":  "18.1.8",
     "sdk_revision":  "95c08f27386fc698f6bbe21dde3030140a41d10b",
     "native_tools_revision":  "3f3ee69607013b345d2baa6d6a37c86745649a08",
@@ -15,12 +15,14 @@
                                     }
                   },
     "host_tests":  {
+                       "python_staging_case":  1,
                        "sanitizers":  [
                                           "address",
                                           "undefined"
                                       ],
-                       "total":  13,
-                       "passed":  13
+                       "cpp_sanitized_cases":  13,
+                       "total":  14,
+                       "passed":  14
                    },
     "source_sha256":  {
                           "tools/native_canary.cpp":  "6891f38af38e013963e4a09361dce2a2cf1d4fa0f898b87f8e276c5600179de2",
@@ -36,7 +38,7 @@
                           "include/ps5hip/submission.h":  "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
                           "tools/build_native_canary.py":  "ca6e6ae5fe9dac92298f27c92af59b9f1d3c3d7d024f4d844ed58421682563aa",
                           "tools/native_runtime.h":  "9506824d06132aa5b59b1c031c1d0369fa63d652b8c25185dcc57d665568a5f9",
-                          "dependencies.json":  "6e9b4571047930e4aac3ce5670f4b5a7884eafc532aff35c49ff25e48929312a"
+                          "dependencies.json":  "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b"
                       },
     "candidates":  [
                        {
@@ -81,7 +83,6 @@
                    ],
     "limitations":  [
                         "No console run",
-                        "No title metadata or deployment",
                         "Container integrity does not prove native startup or GPU execution",
                         "Host logging test does not prove console mount permissions or persistence"
                     ]

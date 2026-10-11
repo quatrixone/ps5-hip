@@ -85,11 +85,12 @@ Both input buffers must remain unchanged and all three full allocation guards
 must pass. The same completion, external deadline, quarantine and teardown rules
 apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
-## Freeze checklist still to complete offline
+## Offline freeze state and remaining work
 
-- Stage `PPSA99012` and verify its metadata/package using the native build tools.
-- Commit source and record the selected build receipt, compiler/runtime inputs,
-  executable, code object, title metadata and package SHA-256 values and sizes.
+- Five `PPSA99012` candidates are staged and packaged from source commit
+  `0c2e8c14d5cdd581002b5d315889d67509e9d0fd`. Their manifests and package hashes are
+  in `evidence/offline-native-packages.json`; each filesystem check and full-file
+  extraction comparison passed. This is offline evidence only.
 - Prepare title-specific deployment verification, log retrieval and close control.
 - Record expected environment and declared services without probing the console.
 

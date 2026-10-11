@@ -1,0 +1,231 @@
+{
+    "schema":  1,
+    "hardware_validated":  false,
+    "classification":  "offline packaged; no-run",
+    "title_id":  "PPSA99012",
+    "image_tool":  {
+                       "revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                       "dotnet_sdk":  "10.0.112",
+                       "artifacts":  {
+                                         "DokanNet.dll":  "6d1bb743768fd5098d9633590d2493ed7e0c69ef0180c9072fd1a0c9fae96db9",
+                                         "LTRData.Extensions.Native.dll":  "74be95d18b03296637e30fb3452844b81ccf87ccde16bf1c010f561516ebc0d5",
+                                         "LTRData.Extensions.dll":  "d63a9120af050bcb2a3e988ce222eba035a29297eab102aabba5193c96cd44bc",
+                                         "Microsoft.Bcl.AsyncInterfaces.dll":  "0de77cc125ab26e632a3ee2a7d308881c0725596da04b875a5d65abf4f40df2b",
+                                         "UFS2Tool.dll":  "63da2beeeaa57bb2b47c530dd86325f863e25741f03a79b385bbe146e1880291",
+                                         "UFS2Tool.deps.json":  "406578a0cf92450b1e22ae1309bf15930ffaaeb9008e7c520a1a4dc88cb00916",
+                                         "UFS2Tool.runtimeconfig.json":  "97c9700542b659150b230c3578b29530fd76ab01ec66a92cd16945e0245713df"
+                                     }
+                   },
+    "candidates":  [
+                       {
+                           "manifest":  {
+                                            "schema":  1,
+                                            "title_id":  "PPSA99012",
+                                            "target":  "gfx1013",
+                                            "kernel":  "indexed_store",
+                                            "source_commit":  "0c2e8c14d5cdd581002b5d315889d67509e9d0fd",
+                                            "build_receipt_sha256":  "6ee44f06ecac1bf9208b0addfb91a2fcbc5e26f4b556de0ae820c79b3b2671b6",
+                                            "stager_sha256":  "a68dcea4f3bde4fc90e2d2b4808b6f67b573e4c854b2b93961c36e81a8773931",
+                                            "hardware_validated":  false,
+                                            "expected_log":  "/download0/ps5-hip-gfx1013-indexed_store.log",
+                                            "files":  {
+                                                          "canary.hsaco":  {
+                                                                               "sha256":  "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694",
+                                                                               "bytes":  4096
+                                                                           },
+                                                          "eboot.bin":  {
+                                                                            "sha256":  "3c35d9f5ad7ffc0e8d25596869915f2f66bfc9f97baa5dcd39b6be29acd0a251",
+                                                                            "bytes":  806706
+                                                                        },
+                                                          "sce_sys/param.json":  {
+                                                                                     "sha256":  "88601256658a4d1829d2c6f9e596a70211d49de11c076a45eb2630fff297b578",
+                                                                                     "bytes":  735
+                                                                                 }
+                                                      }
+                                        },
+                           "package":  {
+                                           "schema":  1,
+                                           "hardware_validated":  false,
+                                           "title_id":  "PPSA99012",
+                                           "manifest_sha256":  "9e85647ea1dcbde459da830d77b42c33f4446eb9632c4cffc985d9459f13c322",
+                                           "tool_receipt_sha256":  "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+                                           "tool_revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                                           "image":  {
+                                                         "file":  "PPSA99012.ffpkg",
+                                                         "sha256":  "afb70a68f63a405ac5523a79ec0447ed525a7967c609e0113ef2a59b1e5013dd",
+                                                         "bytes":  1605632
+                                                     },
+                                           "filesystem_check":  "passed",
+                                           "extracted_files_match":  true
+                                       }
+                       },
+                       {
+                           "manifest":  {
+                                            "schema":  1,
+                                            "title_id":  "PPSA99012",
+                                            "target":  "gfx1013",
+                                            "kernel":  "runtime",
+                                            "source_commit":  "0c2e8c14d5cdd581002b5d315889d67509e9d0fd",
+                                            "build_receipt_sha256":  "1f1ea1eb0f9b63271db1cba2ff02f301529a427a7e33a2227496f16d7c2f38c6",
+                                            "stager_sha256":  "a68dcea4f3bde4fc90e2d2b4808b6f67b573e4c854b2b93961c36e81a8773931",
+                                            "hardware_validated":  false,
+                                            "expected_log":  "/download0/ps5-hip-gfx1013-runtime.log",
+                                            "files":  {
+                                                          "eboot.bin":  {
+                                                                            "sha256":  "b26362df81ac5ae8377228370d9210d40ce6f24aa8a71fc7b925d12b232b6e9b",
+                                                                            "bytes":  391730
+                                                                        },
+                                                          "sce_sys/param.json":  {
+                                                                                     "sha256":  "88601256658a4d1829d2c6f9e596a70211d49de11c076a45eb2630fff297b578",
+                                                                                     "bytes":  735
+                                                                                 }
+                                                      }
+                                        },
+                           "package":  {
+                                           "schema":  1,
+                                           "hardware_validated":  false,
+                                           "title_id":  "PPSA99012",
+                                           "manifest_sha256":  "883a81c0f6f92b9ccb2a28aae4821985b90b69fa17c8840bace8ca5ac716c333",
+                                           "tool_receipt_sha256":  "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+                                           "tool_revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                                           "image":  {
+                                                         "file":  "PPSA99012.ffpkg",
+                                                         "sha256":  "161e663dc03c03e29c053d8e571d9d63610f0f1867c743175412f01762d42968",
+                                                         "bytes":  1048576
+                                                     },
+                                           "filesystem_check":  "passed",
+                                           "extracted_files_match":  true
+                                       }
+                       },
+                       {
+                           "manifest":  {
+                                            "schema":  1,
+                                            "title_id":  "PPSA99012",
+                                            "target":  "gfx1013",
+                                            "kernel":  "vector_add",
+                                            "source_commit":  "0c2e8c14d5cdd581002b5d315889d67509e9d0fd",
+                                            "build_receipt_sha256":  "28fac8af2e1829ffeb961f046406ee979c3df2a56e901efff45d0c792e2295bc",
+                                            "stager_sha256":  "a68dcea4f3bde4fc90e2d2b4808b6f67b573e4c854b2b93961c36e81a8773931",
+                                            "hardware_validated":  false,
+                                            "expected_log":  "/download0/ps5-hip-gfx1013-vector_add.log",
+                                            "files":  {
+                                                          "canary.hsaco":  {
+                                                                               "sha256":  "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694",
+                                                                               "bytes":  4096
+                                                                           },
+                                                          "eboot.bin":  {
+                                                                            "sha256":  "f14c6f25f066eda4fb42431ac1025d9abbbd16a35c41e3522e01bc72c10bf884",
+                                                                            "bytes":  808434
+                                                                        },
+                                                          "sce_sys/param.json":  {
+                                                                                     "sha256":  "88601256658a4d1829d2c6f9e596a70211d49de11c076a45eb2630fff297b578",
+                                                                                     "bytes":  735
+                                                                                 }
+                                                      }
+                                        },
+                           "package":  {
+                                           "schema":  1,
+                                           "hardware_validated":  false,
+                                           "title_id":  "PPSA99012",
+                                           "manifest_sha256":  "e375ec93570e08394d3b78dea19ce69dc3bb82572d5aed51c363a175e9c63076",
+                                           "tool_receipt_sha256":  "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+                                           "tool_revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                                           "image":  {
+                                                         "file":  "PPSA99012.ffpkg",
+                                                         "sha256":  "d3cb5c8c8a698f84b83d3ca4b09ac11a008695457991b233f69ba9840c8fabbb",
+                                                         "bytes":  1605632
+                                                     },
+                                           "filesystem_check":  "passed",
+                                           "extracted_files_match":  true
+                                       }
+                       },
+                       {
+                           "manifest":  {
+                                            "schema":  1,
+                                            "title_id":  "PPSA99012",
+                                            "target":  "gfx1030",
+                                            "kernel":  "indexed_store",
+                                            "source_commit":  "0c2e8c14d5cdd581002b5d315889d67509e9d0fd",
+                                            "build_receipt_sha256":  "be1983bad64098b054017a7ff8ea50c8b536777acdcef0050518d3278841db4d",
+                                            "stager_sha256":  "a68dcea4f3bde4fc90e2d2b4808b6f67b573e4c854b2b93961c36e81a8773931",
+                                            "hardware_validated":  false,
+                                            "expected_log":  "/download0/ps5-hip-gfx1030-indexed_store.log",
+                                            "files":  {
+                                                          "canary.hsaco":  {
+                                                                               "sha256":  "d356925d18baace8801d6d6abd7dabef827c20a4f6b7312b1ef9365d268a1e4c",
+                                                                               "bytes":  4096
+                                                                           },
+                                                          "eboot.bin":  {
+                                                                            "sha256":  "c2f2a6689ce52d85b982b5267e43e1bf7621737cff0737a3bcfeacd967200821",
+                                                                            "bytes":  806706
+                                                                        },
+                                                          "sce_sys/param.json":  {
+                                                                                     "sha256":  "88601256658a4d1829d2c6f9e596a70211d49de11c076a45eb2630fff297b578",
+                                                                                     "bytes":  735
+                                                                                 }
+                                                      }
+                                        },
+                           "package":  {
+                                           "schema":  1,
+                                           "hardware_validated":  false,
+                                           "title_id":  "PPSA99012",
+                                           "manifest_sha256":  "4ddeacb473b7ea9cf63ccb1723212f5e9e9eba0e1a360aac6b8dbc21e10ec46d",
+                                           "tool_receipt_sha256":  "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+                                           "tool_revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                                           "image":  {
+                                                         "file":  "PPSA99012.ffpkg",
+                                                         "sha256":  "a119fdbb76667c7a0c3fa5d4166f309dc21fbb8dda088edb9abf79eb46aab861",
+                                                         "bytes":  1605632
+                                                     },
+                                           "filesystem_check":  "passed",
+                                           "extracted_files_match":  true
+                                       }
+                       },
+                       {
+                           "manifest":  {
+                                            "schema":  1,
+                                            "title_id":  "PPSA99012",
+                                            "target":  "gfx1030",
+                                            "kernel":  "vector_add",
+                                            "source_commit":  "0c2e8c14d5cdd581002b5d315889d67509e9d0fd",
+                                            "build_receipt_sha256":  "240494e893022d126c6eaaf31ebc6b3b8fc32e261be069c7c0c276a00386f8e2",
+                                            "stager_sha256":  "a68dcea4f3bde4fc90e2d2b4808b6f67b573e4c854b2b93961c36e81a8773931",
+                                            "hardware_validated":  false,
+                                            "expected_log":  "/download0/ps5-hip-gfx1030-vector_add.log",
+                                            "files":  {
+                                                          "canary.hsaco":  {
+                                                                               "sha256":  "d356925d18baace8801d6d6abd7dabef827c20a4f6b7312b1ef9365d268a1e4c",
+                                                                               "bytes":  4096
+                                                                           },
+                                                          "eboot.bin":  {
+                                                                            "sha256":  "f94ed7ab2020833dca1b532a603e0ba968d1999d057fdf2283b5fcd1dd15a0a2",
+                                                                            "bytes":  808434
+                                                                        },
+                                                          "sce_sys/param.json":  {
+                                                                                     "sha256":  "88601256658a4d1829d2c6f9e596a70211d49de11c076a45eb2630fff297b578",
+                                                                                     "bytes":  735
+                                                                                 }
+                                                      }
+                                        },
+                           "package":  {
+                                           "schema":  1,
+                                           "hardware_validated":  false,
+                                           "title_id":  "PPSA99012",
+                                           "manifest_sha256":  "5862ef4a95605731201faecdcb5dd6aab234fbd6ec0c46fd5353d750b136ec85",
+                                           "tool_receipt_sha256":  "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+                                           "tool_revision":  "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+                                           "image":  {
+                                                         "file":  "PPSA99012.ffpkg",
+                                                         "sha256":  "52321fbda8afb101f8a9b7c8c3a9e293e589e4b25461e3905128fdd54732bf5b",
+                                                         "bytes":  1605632
+                                                     },
+                                           "filesystem_check":  "passed",
+                                           "extracted_files_match":  true
+                                       }
+                       }
+                   ],
+    "limitations":  [
+                        "Filesystem check and extraction use the same pinned UFS2 implementation",
+                        "ShadowMount registration, startup, GPU behavior and console teardown remain unverified"
+                    ]
+}

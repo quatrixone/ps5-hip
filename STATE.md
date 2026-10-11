@@ -24,18 +24,19 @@ Updated: 2026-10-11, America/New_York.
 - No HIP runtime or hardware-qualified SDK exists yet.
 - No console has been contacted or modified for this project.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
-  and UFS2 packaging tools are implemented; fourteen host test cases pass.
+  and UFS2 packaging tools pass: five packages have clean filesystem checks and
+  exact extracted-file hashes. Fourteen host test cases pass.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Continue G1/G2 offline: validate the first UFS2 package, prepare title-specific
+Continue G1/G2 offline: prepare title-specific
 deployment/log retrieval/close control and freeze the first bounded experiment.
 Generic private-address
 lowering remains a G3 compiler issue. See
 [offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
-The first implementation changes remain local on `development/offline-bringup`;
-push only after a substantial coherent milestone, as requested.
+The first offline build/package milestone is on `development/offline-bringup`.
+Further pushes remain reserved for substantial coherent milestones, as requested.
 
 The first hardware goal is exact execution of a small HIP-compiled kernel through
 the native PS5 submission path. G3 then requires shared memory, atomics, wave
@@ -54,9 +55,12 @@ Read only the active goal and relevant source slices. Raw logs stay in ignored
 versions, object hashes and instruction inventories without local user paths.
 `evidence/offline-native-canaries.json` records linked native candidates and their
 source/dependency hashes; it is not hardware qualification.
+`evidence/offline-native-packages.json` records all five `PPSA99012` package
+manifests, hashes, source commit and the pinned image tool's binary provenance.
 
 ## Milestones
 
 - 2026-10-11 | planning | twelve measurable goals and pinned research references recorded | next: G1 offline inventory
 - 2026-10-11 | G1 progress | arithmetic and resource probes compiled for two targets; host parser checks pass; private-array flat-scratch incompatibility identified | not a completed gate
 - 2026-10-11 | G1 progress | unmodified compiler emits buffer scratch for explicit-private accesses and 52 real VGPR spills; generic private pointers remain unresolved | not hardware-qualified
+- 2026-10-11 | offline milestone | 0c2e8c1 | PPSA99012 | packaged, no-run: five verified images and fourteen host tests | evidence/offline-native-packages.json | next: console controller
