@@ -268,6 +268,56 @@
         "filesystem_check": "passed",
         "extracted_files_match": true
       }
+    },
+    {
+      "manifest": {
+        "schema": 1,
+        "title_id": "PPSA99014",
+        "target": "gfx1013",
+        "kernel": "runtime",
+        "source_commit": "03a7a72aeeb2ca87f72d7fb4f0449d473844f78a",
+        "build_receipt_sha256": "83d163dc05bb7496760183380ea2ae56d9e4a9173f930b05532a8ca25656b4b7",
+        "stager_sha256": "4d94ead8b877554159b2277282233ac9a33b4840ac3e3700ca45ae7796e4f9ab",
+        "hardware_validated": false,
+        "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log",
+        "files": {
+          "eboot.bin": {
+            "sha256": "89cfeb84139e6d27dfeebad9a11af063ee9a941b94b5c109c56ef9b244584a8f",
+            "bytes": 806101
+          },
+          "lapy.elf": {
+            "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+            "bytes": 155032
+          },
+          "sce_sys/param.json": {
+            "sha256": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+            "bytes": 733
+          },
+          "sce_sys/icon0.png": {
+            "sha256": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+            "bytes": 2199
+          },
+          "results-dir.txt": {
+            "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+            "bytes": 21
+          }
+        }
+      },
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "c055a428d0dd936270d1fe596138a6fce10c479c9f494f852756a91baefe20ec",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "ac85beba81899ddf7ee2aa7eebc33fed6b7c6aa859c97e6cd33a8f3e3f4b28cc",
+          "bytes": 1835008
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      }
     }
   ],
   "limitations": [

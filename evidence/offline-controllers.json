@@ -1,47 +1,71 @@
 {
-    "schema":  1,
-    "hardware_validated":  false,
-    "controller_build":  {
-                             "title_id":  "PPSA99012",
-                             "protocol_revision":  "ed775bdf67ec3861f2e6c78360a6ec58508f2c22",
-                             "sdk_revision":  "95c08f27386fc698f6bbe21dde3030140a41d10b",
-                             "llvm_version":  "18.1.8",
-                             "hardware_validated":  false,
-                             "sources":  {
-                                             "LICENSE":  "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
-                                             "launch.c":  "521f1a7881e9834ecd4d1d0e4887c3d738128a64e41a45d5773da34f400bdbaa",
-                                             "close.c":  "9e4a5ca3f5dab7d3dc3830d8d695589ec4a8f814ca6fc4829eafde1daaed8a2d"
-                                         },
-                             "artifacts":  {
-                                               "launch.elf":  {
-                                                                  "sha256":  "ccc7633b288c746deb62d98979212ff1ed41670415eb2208c6083cb5ebacf6d1",
-                                                                  "bytes":  110544
-                                                              },
-                                               "close.elf":  {
-                                                                 "sha256":  "69e56b7e7c7e0ce2063b76fe2486d69e15c9f59f42cecfcfa6f1789c7057c2df",
-                                                                 "bytes":  110592
-                                                             }
-                                           }
-                         },
-    "host_validation":  {
-                            "python_cases":  2,
-                            "log_contract":  [
-                                                 "exact selected-profile records",
-                                                 "failure/quarantine override",
-                                                 "duplicate/truncated/mismatched records rejected",
-                                                 "log alone never passes hardware gate"
-                                             ],
-                            "ctest_passed":  17,
-                            "controller_models":  [
-                                                      "launch initialization and user failure",
-                                                      "launch native error propagation",
-                                                      "exact-title close",
-                                                      "unrelated running title and exact-title fallback"
-                                                  ],
-                            "cpp_sanitized_cases":  15
-                        },
-    "limitations":  [
-                        "Controllers were not sent",
-                        "No console ABI, log retrieval mapping or lifecycle validation"
-                    ]
+  "schema": 1,
+  "hardware_validated": false,
+  "controller_build": {
+    "title_id": "PPSA99014",
+    "protocol_revision": "ed775bdf67ec3861f2e6c78360a6ec58508f2c22",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "llvm_version": "18.1.8",
+    "hardware_validated": false,
+    "sources": {
+      "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "launch.c": "521f1a7881e9834ecd4d1d0e4887c3d738128a64e41a45d5773da34f400bdbaa",
+      "close.c": "9e4a5ca3f5dab7d3dc3830d8d695589ec4a8f814ca6fc4829eafde1daaed8a2d"
+    },
+    "artifacts": {
+      "launch.elf": {
+        "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+        "bytes": 110544
+      },
+      "close.elf": {
+        "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+        "bytes": 110592
+      }
+    }
+  },
+  "host_validation": {
+    "python_cases": 2,
+    "log_contract": [
+      "exact selected-profile records",
+      "failure/quarantine override",
+      "duplicate/truncated/mismatched records rejected",
+      "log alone never passes hardware gate"
+    ],
+    "ctest_passed": 19,
+    "controller_models": [
+      "launch initialization and user failure",
+      "launch native error propagation",
+      "exact-title close",
+      "unrelated running title and exact-title fallback"
+    ],
+    "cpp_sanitized_cases": 15
+  },
+  "limitations": [
+    "Controllers were not sent",
+    "No console ABI, log retrieval mapping or lifecycle validation"
+  ],
+  "prior_controller_builds": [
+    {
+      "title_id": "PPSA99012",
+      "protocol_revision": "ed775bdf67ec3861f2e6c78360a6ec58508f2c22",
+      "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+      "llvm_version": "18.1.8",
+      "hardware_validated": false,
+      "sources": {
+        "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+        "launch.c": "521f1a7881e9834ecd4d1d0e4887c3d738128a64e41a45d5773da34f400bdbaa",
+        "close.c": "9e4a5ca3f5dab7d3dc3830d8d695589ec4a8f814ca6fc4829eafde1daaed8a2d"
+      },
+      "artifacts": {
+        "launch.elf": {
+          "sha256": "ccc7633b288c746deb62d98979212ff1ed41670415eb2208c6083cb5ebacf6d1",
+          "bytes": 110544
+        },
+        "close.elf": {
+          "sha256": "69e56b7e7c7e0ce2063b76fe2486d69e15c9f59f42cecfcfa6f1789c7057c2df",
+          "bytes": 110592
+        }
+      }
+    }
+  ]
 }
