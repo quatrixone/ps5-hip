@@ -1,7 +1,8 @@
 # Console workflow preparation
 
-Status: offline only. `PPSA99012` is the user-selected title. No console has been
-contacted, and no controller has been sent. The shared-console runbook in AGENTS.md
+Status: read-only preflight completed; neither console was established idle.
+`PPSA99012` is the user-selected title. No controller has been sent.
+The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 
 ## Frozen controller builds
@@ -30,6 +31,38 @@ run must capture its result and title-specific lifecycle evidence independently.
 
 ## Captured application results
 
+The harness now uses the Eden client and a bundled, exact-title Lapy owned-root
+helper. It requires successful filesystem elevation; it does not fall back to
+`/download0`. Stage with `--results-dir /chosen/results` to write that absolute
+directory into `results-dir.txt`. No console path is hardcoded in the executable.
+The chosen directory must exist and be writable before launch. The harness uses
+exclusive creation of its exact result filename and never deletes an earlier log.
+FTP retrieves this ordinary file even after title exit; no download-data image
+extraction is required. GPU objects are opened before elevation changes the root.
+
+Build the helper offline before building a native candidate:
+
+```sh
+python3 tools/prepare_elevation.py --eden-source /path/to/eden --lapy-source /path/to/lapy --logging-header /path/to/pinned/ps5log.h
+```
+
+`elevation-inputs.json` pins the Eden client and Lapy source separately. The older
+Eden helper is not reused: Lapy's owned-root helper supplies the same wire protocol
+with runtime layout and title checks. The exported protocol definitions are tested
+together. This is not proof of the combined integration on console. The Lapy
+source/license and client copyright/SPDX notices remain in the ignored export;
+the client is GPL-3.0-or-later. Logging-header distribution licensing remains to
+be established before publishing binaries.
+
+Before console traffic, verify a frozen case against committed evidence:
+
+```sh
+python3 tools/verify_native_case.py --stage dist/PPSA99012/<candidate>
+```
+
+This rejects changed images, controllers, receipts, title identity and staged
+files. It does not prove console readiness or execution.
+
 ```sh
 python3 tools/check_canary_log.py --log results/<run>/application.log --target gfx1013 --kernel runtime
 ```
@@ -49,9 +82,8 @@ hardware gate decision.
 
 The existing generic protocol runner is not called automatically. It includes
 graphical-stream management and other assumptions that this compute title does
-not require. The Vulkan runner fetches loose files from its own title directory;
-that does not establish how this title's `/download0` log is exposed by the
-selected console environment.
+not require. Result collection uses the exact configured log path from the
+candidate manifest.
 
 Prepare and test a single-case host workflow that:
 
@@ -63,12 +95,14 @@ Prepare and test a single-case host workflow that:
    launch, and sends only the frozen launch controller.
 5. Observes for the declared deadline, handles failure/quarantine without retry,
    closes only `PPSA99012` when needed and verifies teardown/service health.
-6. Retrieves the exact title log or its download-data image, verifies extraction,
+6. Retrieves the exact configured title log,
    runs the application checker and records the independent lifecycle evidence.
 7. Releases only its own lock, including on errors.
 
-Firmware, host, approved service endpoints, lock path and log retrieval mapping
-have not yet been configured for this project. Do not inherit another title's
-settings or infer a stale lock. Native return-from-main behavior also remains a
+The authorized hosts and normal service endpoints are recorded in the ignored
+environment file. Firmware and an idle console remain unverified. Eden's rules
+also name a shared lock in the adjacent PS5-Claude workspace; coordinate it before
+further console work rather than relying only on the protocol helper's default.
+Do not infer a stale lock. Native return-from-main behavior remains a
 CPU-control experiment: another runner's comment about exit signals is not proof
 of normal completion here. A crash after PASS must remain a failed teardown.

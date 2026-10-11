@@ -1,0 +1,12 @@
+{
+  "helper": {
+    "source_url": "https://github.com/blackbearreloaded/PS5-Lapy-JB-Daemon",
+    "revision": "57fcc19b7f57e46c823d6f2a6c6233ebf3288079"
+  },
+  "client": {
+    "source_url": "https://github.com/blackbearreloaded/ProsperoEden",
+    "revision": "0109b7f4330733c2f69c4e334fe529b46addb223",
+    "source_path": "headless/elevation"
+  },
+  "logging_header_sha256": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+}

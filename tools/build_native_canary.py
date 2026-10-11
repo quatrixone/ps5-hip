@@ -28,6 +28,19 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
+    elevation = ROOT / ".deps/elevation"
+    elevation_receipt = json.loads((elevation / "receipt.json").read_text())
+    title = json.loads((ROOT / "title.json").read_text())["title_id"]
+    if (elevation_receipt["inputs"] != json.loads((ROOT / "elevation-inputs.json").read_text()) or
+            elevation_receipt["title_id"] != title or elevation_receipt["sdk_revision"] != lock["sdk"]["revision"] or
+            elevation_receipt["llvm_version"] != version):
+        parser.error("prepare the pinned elevation helper first")
+    for name, expected in elevation_receipt["source_sha256"].items():
+        if hashlib.sha256((elevation / name).read_bytes()).hexdigest() != expected:
+            parser.error("elevation source hash mismatch")
+    helper = elevation / "lapy/build" / ("owned_root_helper-" + title) / "lapy.elf"
+    if hashlib.sha256(helper.read_bytes()).hexdigest() != elevation_receipt["helper_sha256"]:
+        parser.error("elevation helper hash mismatch")
     zlib = ROOT / ".deps" / ("host-zlib-" + lock["host_zlib"]["version"])
     zlib_receipt = json.loads((zlib / "receipt.json").read_text())
     if zlib_receipt["source_sha256"] != lock["host_zlib"]["sha256"] or zlib_receipt["llvm_version"] != version:
@@ -55,17 +68,17 @@ def main():
         "-I", zlib / "root/include", zlib / "root/lib/libz.a", "-o", tool)
     compiler = ROOT / "tools/ps5-clangxx"
     objects = []
-    sources = [native / "app_crt.cpp", ROOT / "tools/native_canary.cpp"]
+    sources = [native / "app_crt.cpp", ROOT / "tools/native_canary.cpp", elevation / "client/elevation.cpp"]
     sources += [ROOT / "src" / name for name in
                 ["code_object.cpp", "launch.cpp", "native_memory.cpp", "submission.cpp", "agc_backend.cpp"]]
     for source in sources:
         output = build / (source.stem + ".o")
-        options = [f'-DPS5HIP_CANARY_TARGET="{args.target}"']
+        options = [f'-DPS5HIP_CANARY_TARGET="{args.target}"', "-DPS5HIP_WITH_ELEVATION=1", "-I", elevation / "client"]
         if args.kernel == "vector_add":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
         if args.kernel == "runtime":
             options.append("-DPS5HIP_RUNTIME_ONLY=1")
-        run(compiler, "-std=c++17", "-O2", "-Wall", "-Wextra", "-Werror", "-fPIC",
+        run(compiler, "-std=c++20", "-O2", "-Wall", "-Wextra", "-Werror", "-fPIC",
             "-fvisibility=hidden", "-I", ROOT / "include", *options, "-c", source, "-o", output)
         objects.append(output)
     stubs = []
@@ -103,17 +116,20 @@ def main():
     candidate.mkdir(exist_ok=True)
     run(tool, "self", "--sign", "--in", elf, "--out", candidate / "eboot.bin")
     run(tool, "self", "--inspect", "--file", candidate / "eboot.bin")
-    artifacts = ["eboot.bin"]
+    shutil.copyfile(helper, candidate / "lapy.elf")
+    artifacts = ["eboot.bin", "lapy.elf"]
     if args.kernel != "runtime":
         shutil.copyfile(ROOT / "build/canaries" / args.target / "canary.hsaco", candidate / "canary.hsaco")
         artifacts.append("canary.hsaco")
     receipt = {"hardware_validated": False, "target": args.target, "kernel": args.kernel,
                "native_tools_revision": revision, "sdk_revision": lock["sdk"]["revision"],
                "llvm_version": version,
-               "host_zlib": zlib_receipt,
+               "host_zlib": zlib_receipt, "elevation": elevation_receipt,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
-                                 [pathlib.Path(__file__).resolve(), ROOT / "tools/native_runtime.h", ROOT / "dependencies.json"]},
+                                 [pathlib.Path(__file__).resolve(), ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
+                                  ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
+                                 [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

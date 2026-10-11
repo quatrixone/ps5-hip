@@ -2,9 +2,9 @@
 
 Updated: 2026-10-11, America/New_York.
 
-Status: planning complete; implementation not started. All goals below are
-`planned`. Source and artifact identities will be recorded in validation receipts
-when work begins. No candidate or hardware-validation commit exists yet.
+Status: G1 is in progress; G2-G12 remain planned. Frozen native candidates and
+offline validation receipts exist; no hardware gate has passed. See `../STATE.md`
+for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 

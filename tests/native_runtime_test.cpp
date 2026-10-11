@@ -10,6 +10,10 @@ int main() {
     const std::string path = std::string(directory) + "/run.log";
     int result = 1;
     try {
+        if (!ps5hip_canary::valid_results_directory("/chosen/results")) return 1;
+        for (const char *invalid : {"/", "relative", "/a/", "/a//b", "/a/../b", "/a/./b", "/a\n", "/a\\b"})
+            if (ps5hip_canary::valid_results_directory(invalid)) return 1;
+        if (ps5hip_canary::valid_results_directory("/" + std::string(240, 'x'))) return 1;
         ps5hip_canary::check_runtime();
         const pid_t child = ::fork();
         if (child == 0) {

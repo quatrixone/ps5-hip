@@ -9,6 +9,19 @@
 #include <unistd.h>
 
 namespace ps5hip_canary {
+inline bool valid_results_directory(const std::string &path) {
+    if (path.size() < 2 || path.size() > 240 || path.front() != '/' || path.back() == '/') return false;
+    for (unsigned char c : path) if (c < 32 || c > 126 || c == '\\') return false;
+    for (size_t begin = 1; begin < path.size();) {
+        const auto end = path.find('/', begin);
+        const auto part = path.substr(begin, end == std::string::npos ? end : end - begin);
+        if (part.empty() || part == "." || part == "..") return false;
+        if (end == std::string::npos) break;
+        begin = end + 1;
+    }
+    return true;
+}
+
 // O_EXCL prevents an old PASS record from being overwritten or reused silently.
 inline bool redirect_log(const char *path) {
     if (std::fflush(nullptr) != 0) return false;

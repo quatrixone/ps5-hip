@@ -14,7 +14,16 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def stage(source_root, build, output, identity, source_commit):
+def validate_results_directory(path):
+    if (not isinstance(path, str) or not 2 <= len(path) <= 240 or not path.startswith("/") or
+            any(ord(c) < 32 or ord(c) > 126 or c == "\\" for c in path) or
+            any(part in ("", ".", "..") for part in path[1:].split("/"))):
+        raise ValueError("results directory must be a normalized absolute path, 2..240 ASCII bytes")
+    return path
+
+
+def stage(source_root, build, output, identity, source_commit, results_directory):
+    validate_results_directory(results_directory)
     title_id, title_name = identity["title_id"], identity["title_name"]
     if not re.fullmatch(r"PPSA[0-9]{5}", title_id) or not isinstance(title_name, str) or not title_name.strip() or any(ord(c) < 32 for c in title_name):
         raise ValueError("invalid title identity")
@@ -23,7 +32,7 @@ def stage(source_root, build, output, identity, source_commit):
     target, kernel = receipt["target"], receipt["kernel"]
     if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add"):
         raise ValueError("unsupported candidate profile")
-    expected = {"eboot.bin"} if kernel == "runtime" else {"eboot.bin", "canary.hsaco"}
+    expected = {"eboot.bin", "lapy.elf"} if kernel == "runtime" else {"eboot.bin", "lapy.elf", "canary.hsaco"}
     if set(receipt["artifacts"]) != expected or receipt.get("hardware_validated") is not False:
         raise ValueError("invalid offline candidate receipt")
     if not receipt["source_sha256"]:
@@ -46,19 +55,20 @@ def stage(source_root, build, output, identity, source_commit):
         "applicationDrmType": "free", "attribute": 0, "attribute2": 0, "attribute3": 0,
         "conceptId": title_id[4:], "contentBadgeType": 1,
         "contentId": f"UP9000-{title_id}_00-PS5HIPCOMPUTE001",
-        "contentVersion": "01.000.000", "downloadDataSize": 256,
+        "contentVersion": "01.000.000", "downloadDataSize": 0,
         "gameIntent": {"permittedIntents": [{"intentType": "launchActivity"}]},
         "localizedParameters": {"defaultLanguage": "en-US", "en-US": {"titleName": title_name}},
         "masterVersion": "01.00", "requiredSystemSoftwareVersion": "0x0000000000000000",
         "sdkVersion": "0x0000000000000000", "titleId": title_id, "versionFileUri": "",
     }
     files["sce_sys/param.json"] = (json.dumps(metadata, indent=2) + "\n").encode()
+    files["results-dir.txt"] = results_directory.encode("ascii")
     manifest = {
         "schema": 1, "title_id": title_id, "target": target, "kernel": kernel,
         "source_commit": source_commit, "build_receipt_sha256": digest(receipt_bytes),
         "stager_sha256": digest(pathlib.Path(__file__).read_bytes()),
         "hardware_validated": False,
-        "expected_log": f"/download0/ps5-hip-{target}-{kernel}.log",
+        "expected_log": f"{results_directory}/ps5-hip-{target}-{kernel}.log",
         "files": {name: {"sha256": digest(data), "bytes": len(data)} for name, data in files.items()},
     }
     # Validate everything before creating output. A failure never replaces a prior candidate.
@@ -76,6 +86,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
     parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add"], required=True)
+    parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())
     build = ROOT / "build/native" / f"{args.target}-{args.kernel}"
@@ -88,11 +99,13 @@ def main():
     if changes:
         parser.error("commit compiled sources, title identity and staging tool before staging")
     # Every input that can change staged bytes contributes to the candidate key.
-    key = digest((build / "receipt.json").read_bytes() + json.dumps(identity, sort_keys=True).encode() + pathlib.Path(__file__).read_bytes())[:12]
+    validate_results_directory(args.results_dir)
+    key = digest((build / "receipt.json").read_bytes() + json.dumps(identity, sort_keys=True).encode() +
+                 pathlib.Path(__file__).read_bytes() + args.results_dir.encode("ascii"))[:12]
     output = ROOT / "dist" / identity["title_id"] / f"{args.target}-{args.kernel}-{key}"
     if not output.resolve().is_relative_to(ROOT.resolve()):
         parser.error("staging output resolves outside this repository")
-    manifest = stage(ROOT, build, output, identity, source_commit)
+    manifest = stage(ROOT, build, output, identity, source_commit, args.results_dir)
     print("Staged", manifest["title_id"], "at", output)
     print("No installation or console access performed.")
 

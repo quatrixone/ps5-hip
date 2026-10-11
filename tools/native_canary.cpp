@@ -5,6 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
+#ifdef PS5HIP_WITH_ELEVATION
+#include "elevation.hpp"
+#endif
 
 #ifndef PS5HIP_CANARY_TARGET
 #error The native experiment must select an explicit compiler target
@@ -124,9 +127,27 @@ int main() {
 #else
         "indexed_store";
 #endif
-    char log_path[128];
-    std::snprintf(log_path, sizeof(log_path), "/download0/ps5-hip-%s-%s.log", PS5HIP_CANARY_TARGET, kernel);
-    if (!ps5hip_canary::redirect_log(log_path)) return 2;
+    // Open sandbox assets before elevation changes the process root.
+    std::ifstream configuration("/app0/results-dir.txt", std::ios::binary);
+    char directory[242]{};
+    configuration.read(directory, sizeof(directory));
+    const auto length = configuration.gcount();
+    if (!configuration.eof() || length < 2 || length > 240) return 2;
+    const std::string results_directory(directory, static_cast<size_t>(length));
+    if (!ps5hip_canary::valid_results_directory(results_directory)) return 2;
+#ifndef PS5HIP_RUNTIME_ONLY
+    std::ifstream input("/app0/canary.hsaco", std::ios::binary | std::ios::ate);
+    if (!input) return 2;
+#endif
+#ifdef PS5HIP_WITH_ELEVATION
+    if (elevation::request(elevation::Capability::filesystem, "/app0/lapy.elf") != elevation::Status::ok)
+        return 2;
+#else
+    // Host oracle tests never launch a native title or simulate successful elevation.
+    return 2;
+#endif
+    const std::string log_path = results_directory + "/ps5-hip-" + PS5HIP_CANARY_TARGET + "-" + kernel + ".log";
+    if (!ps5hip_canary::redirect_log(log_path.c_str())) return 2;
     std::printf("PS5HIP START target=%s kernel=%s\n", PS5HIP_CANARY_TARGET, kernel);
     try {
         ps5hip_canary::check_runtime();
@@ -134,8 +155,6 @@ int main() {
 #ifdef PS5HIP_RUNTIME_ONLY
         std::printf("PS5HIP PASS kernel=runtime gpu_api_calls=0\n");
 #else
-        std::ifstream input("/app0/canary.hsaco", std::ios::binary | std::ios::ate);
-        if (!input) throw ps5hip::ObjectError("cannot open staged canary.hsaco");
         const auto size = input.tellg();
         if (size < 64 || size > 64 * 1024 * 1024) throw ps5hip::ObjectError("invalid canary object size");
         std::vector<uint8_t> bytes(static_cast<size_t>(size));

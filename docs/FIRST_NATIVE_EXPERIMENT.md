@@ -1,6 +1,6 @@
 # First native experiment sequence
 
-Status: offline preparation only. No console run has occurred. The user selected
+Status: offline preparation and read-only preflight. No console run has occurred. The user selected
 title `PPSA99012`. Firmware, service endpoints, lock ownership and package hashes must be recorded
 in the local experiment receipt before execution. Use the shared-console runbook
 referenced by AGENTS.md; no old project's environment or lock waiver applies.
@@ -20,7 +20,12 @@ This control does not read a GPU code object, call AGC, or allocate GPU memory.
 The target string labels the candidate; it does not exercise that GPU ISA.
 Native module import resolution still happens during title loading.
 
-Expected fresh log: `/download0/ps5-hip-gfx1013-runtime.log` containing, in order:
+The current harness first requests filesystem access using the bundled Lapy
+helper, then creates a fresh log in the directory selected with staging's
+`--results-dir`. The directory must already exist. Elevation failure stops before
+the runtime/GPU checks. Include helper lifecycle in klog acceptance.
+
+Expected fresh log: `<results-dir>/ps5-hip-gfx1013-runtime.log` containing, in order:
 
 ```text
 PS5HIP START target=gfx1013 kernel=runtime
@@ -87,11 +92,12 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
-- Five `PPSA99012` candidates are staged and packaged from source commit
+- Five earlier `/download0` candidates were staged and packaged from source commit
   `0c2e8c14d5cdd581002b5d315889d67509e9d0fd`. Their manifests and package hashes are
   in `evidence/offline-native-packages.json`; each filesystem check and full-file
-  extraction comparison passed. This is offline evidence only.
+  extraction comparison passed. They are superseded for new tests by the requested
+  configurable-path/Lapy integration. This is offline evidence only.
 - Prepare title-specific deployment verification, log retrieval and close control.
 - Record expected environment and declared services without probing the console.
 
-Only after this preparation is concrete should console access be requested.
+Console access is authorized on either specified host only when idle.

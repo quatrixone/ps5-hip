@@ -22,20 +22,28 @@ Updated: 2026-10-11, America/New_York.
   the clock. All candidates use exclusive persistent logs. Native conversion uses
   hash-verified static zlib built offline from pinned source.
 - No HIP runtime or hardware-qualified SDK exists yet.
-- No console has been contacted or modified for this project.
+- User-directed storage revision: Eden's elevation client plus an exact-title
+  Lapy owned-root helper; configurable ordinary results directory, no download0
+  dependency. CPU native build passes; new stages must be frozen before testing.
+  Nineteen host cases pass, including the exported Eden/Lapy wire contract.
+- Read-only preflight contacted both authorized consoles; no deployment or launch
+  has occurred for this project.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
   exact extracted-file hashes. Seventeen host test cases pass (fifteen C++, two Python).
 - Pinned title-aware launch/close controllers cross-compile. Host mocks and a
   bounded application-log checker are implemented; neither sends console traffic.
-- The console host/firmware and authoritative environment/lock configuration have
-  been requested from the user. No project or workspace-root ENVIRONMENT.md exists.
+- The user authorized 192.168.4.30 or 192.168.4.40 only when idle. Preflight under
+  the protocol's workspace `lock.txt` found FTP, klog and elfldr reachable on both.
+  Both current ShadowMount logs ended with PPSA99008 started and no later stop;
+  idle state was not established. No title was closed. The owned lock was released.
+  Raw evidence: `results/preflight-20261011/`. Firmware remains unverified.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Continue G1/G2 offline: prepare title-specific
-deployment/log retrieval/close control and freeze the first bounded experiment.
+Establish an idle authorized console before the frozen CPU startup experiment.
+Continue offline preparation of title-specific deployment/log retrieval controls.
 See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
 Generic private-address
 lowering remains a G3 compiler issue. See

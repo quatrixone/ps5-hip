@@ -21,14 +21,16 @@ class StageTests(unittest.TestCase):
         (self.build / "candidate").mkdir(parents=True)
         (self.root / "source.cpp").write_bytes(b"fixture source")
         (self.build / "candidate/eboot.bin").write_bytes(b"fixture container")
+        (self.build / "candidate/lapy.elf").write_bytes(b"fixture helper")
         self.receipt = {"target": "gfx1013", "kernel": "runtime", "hardware_validated": False,
                         "source_sha256": {"source.cpp": module.digest(b"fixture source")},
-                        "artifacts": {"eboot.bin": module.digest(b"fixture container")}}
+                        "artifacts": {"eboot.bin": module.digest(b"fixture container"),
+                                      "lapy.elf": module.digest(b"fixture helper")}}
         self.identity = {"title_id": "PPSA99012", "title_name": "ps5-hip Compute Lab"}
 
     def run_stage(self):
         (self.build / "receipt.json").write_text(json.dumps(self.receipt))
-        return module.stage(self.root, self.build, self.output, self.identity, "a" * 40)
+        return module.stage(self.root, self.build, self.output, self.identity, "a" * 40, "/chosen/results")
 
     def test_runtime_and_immutable_stage(self):
         manifest = self.run_stage()
@@ -36,7 +38,9 @@ class StageTests(unittest.TestCase):
         self.assertEqual(metadata["titleId"], "PPSA99012")
         self.assertEqual(metadata["conceptId"], "99012")
         self.assertRegex(metadata["contentId"], r"^UP9000-PPSA99012_00-[A-Z0-9]{16}$")
-        self.assertEqual(manifest["expected_log"], "/download0/ps5-hip-gfx1013-runtime.log")
+        self.assertEqual(manifest["expected_log"], "/chosen/results/ps5-hip-gfx1013-runtime.log")
+        self.assertEqual((self.output / "app/results-dir.txt").read_bytes(), b"/chosen/results")
+        self.assertEqual(metadata["downloadDataSize"], 0)
         self.assertFalse((self.output / "app/canary.hsaco").exists())
         for name, entry in manifest["files"].items():
             data = (self.output / "app" / name).read_bytes()
@@ -82,6 +86,12 @@ class StageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "identity"):
             self.run_stage()
         self.assertFalse(self.output.exists())
+
+    def test_results_directory_contract(self):
+        for path in ("/", "relative", "/a/", "/a//b", "/a/../b", "/a/./b", "/a\n", "/a\\b", "/" + "x" * 240):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                module.validate_results_directory(path)
+        self.assertEqual(module.validate_results_directory("/chosen/results"), "/chosen/results")
 
     def test_invalid_receipt(self):
         for field, value in (("target", "gfx9999"), ("kernel", "other"),
