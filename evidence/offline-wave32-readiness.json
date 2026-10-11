@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "classification": "wave32-full-partial-offline-ready",
+  "source_commit": "5581dbd074e6d6c32cec0391d1602228a3a36660",
+  "target": "gfx1013",
+  "title_id": "PPSA99014",
+  "hardware_validated": false,
+  "console_access": false,
+  "deployed": false,
+  "probe_provenance": {
+    "reused": "results/wave-native-integration-20261012",
+    "comparison_sha256": "5ddb21c515b125c7d099297761a7a697745e746d0da0d4e003997f44bb600ec4",
+    "all_four_object_metadata_isa_trace_hashes_verified": true,
+    "current_tool_versions_match": true,
+    "source_and_recipes_match": true,
+    "oracle_files_verified": true
+  },
+  "compiled_optimization": "-O2",
+  "host_checks": "27 sanitizer CTests; all four gfx1013/gfx1030 O1/O2 actual-ELF launch preparation and entry packet checks",
+  "entry_state_correction": "Selected gfx1013 LLVM18 O2 objects have six user SGPRs, pointer s[4:5], workgroupX systemSGPR6, rsrc2=0x8c/properties=0x409. They do not exercise two-user-SGPR layout. A hypothetical two-slot profile would place pointer s[0:1] and groupX s2 and requires its own actual-object qualification.",
+  "structural_changes_from_g2": "Native code-object parser/Kernel layout and launch implementation include the host-validated hidden-geometry subset; these wave objects have zero hidden arguments. New harness oracle/profile and wave device instructions also require hardware qualification.",
+  "oracle": {
+    "invocations": 64,
+    "groups": [
+      1,
+      1,
+      1
+    ],
+    "threads": [
+      64,
+      1,
+      1
+    ],
+    "waves": 2,
+    "words_per_invocation": 4,
+    "output_words": 256,
+    "comparison": "exact uint32 broadcast, peer-xor1 shuffle, odd-value ballot, butterfly sum; base value invocation+1",
+    "full": {
+      "active_lanes": "0..31",
+      "ballot": "0x55555555",
+      "sums": [
+        528,
+        1552
+      ]
+    },
+    "partial": {
+      "active_lanes": "4..19",
+      "ballot": "0x55550",
+      "sums": [
+        200,
+        712
+      ],
+      "inactive": "all four words remain0xdeadbeef for lanes0..3,20..31 in each wave"
+    },
+    "guards": "16 prefix words plus every allocated word after logical256 remain0xdeadbeef",
+    "timeout_ms": 2000,
+    "failure": "quarantine unresolved submission ownership, no retry or local teardown",
+    "success": "all256 values/sentinels and guards exact, explicit allocation close, complete finite shell finalization"
+  },
+  "limits": [
+    "No wave operation hardware qualification or G3 completion",
+    "O1 and gfx1030 are offline comparison profiles; only gfx1013 O2 packaged",
+    "No LDS, barriers, scratch, atomics, async overlap, persistent-buffer reuse or full HIP runtime claims",
+    "Driver calls remain outside software poll timeout"
+  ],
+  "raw_receipt": "results/g3-wave32-ready/offline-wave32-readiness.json",
+  "raw_receipt_sha256": "072771da58f91b7e2887a10e9e58ec0e9ac1f56c79271dcb125462c05b485fa7",
+  "candidates": [
+    {
+      "kernel": "wave_full",
+      "stage": ".local/g3-wave32/dist/PPSA99014/gfx1013-wave_full-b547d4b29df3",
+      "build_receipt_sha256": "9710dc26fa7e5d8b2ab9c796216bda5d5d9980524348f95a3d48a147ec2e713f",
+      "manifest_sha256": "661ff9ca835d83b5959885bc5202b00e80ae58a653b120fc958c37cdaeea14e5",
+      "package_receipt_sha256": "b6e866fa458c734655401ff8cf6da63acb664ef98bab12d1cdacc443508899c4",
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "661ff9ca835d83b5959885bc5202b00e80ae58a653b120fc958c37cdaeea14e5",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "f7cbc2ab7807fe8048f00faceef50100b7f995570c26278d344f51eec33b1cd5",
+          "bytes": 3571712
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      },
+      "artifacts": {
+        "eboot.bin": "725779ef50934fdb5ead321ebdd3357e56ea6015a7f23a44c86332cb879d466c",
+        "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+        "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+        "canary.hsaco": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a"
+      },
+      "entry_state": {
+        "kernel": "wave_full",
+        "rsrc1": 1622081536,
+        "rsrc2": 140,
+        "properties": 1033,
+        "entry_offset": 6144,
+        "user_sgprs": 6,
+        "kernarg_sgpr_first": 4,
+        "workgroup_x_sgpr": 6,
+        "kernarg_bytes": 8,
+        "hidden_arguments": 0,
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "threads": [
+          64,
+          1,
+          1
+        ],
+        "packet_dwords": 56
+      },
+      "native_elf_sha256": "5a427a7fec7f1e8535250c7219c6a8e3dc3e96fd57ce8a434381a20af0cd00d7",
+      "llvm_pie_sha256": "5865ece8cdf5b340c10aaeb44e81de12552eed4e042e823e18ffef05c26f0cbc",
+      "catalog_verification": {
+        "passed": true,
+        "log": "results/g3-wave32-ready/wave_full-recorded-verify.json",
+        "sha256": "0a3448004d4c20a64187a670a5a9eef146e726affc2b2d16d9fc208727d49e65"
+      }
+    },
+    {
+      "kernel": "wave_partial",
+      "stage": ".local/g3-wave32/dist/PPSA99014/gfx1013-wave_partial-633254431d9c",
+      "build_receipt_sha256": "ab9e984b1160da96315a0064cda0a38925c660dad6f0265899588140ce78ce64",
+      "manifest_sha256": "f421c06c4b84fcb38d11dd8a7ac5715fefb2e7d2edcea85437762265db4380c9",
+      "package_receipt_sha256": "3fcee9f9a20072896ed8a9411c5c3c0dbfb3ddddb8a7646998d0bddbd4fdb5b0",
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "f421c06c4b84fcb38d11dd8a7ac5715fefb2e7d2edcea85437762265db4380c9",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "700d22aff126b834ae61b236925f72d687f5c49726089c1565b6c82b13f340de",
+          "bytes": 3571712
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      },
+      "artifacts": {
+        "eboot.bin": "fa88ff65fb64b425318c70db5bf451bfc11a74369d4feb569ea0dfbea242a673",
+        "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+        "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+        "canary.hsaco": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a"
+      },
+      "entry_state": {
+        "kernel": "wave_partial",
+        "rsrc1": 1622081536,
+        "rsrc2": 140,
+        "properties": 1033,
+        "entry_offset": 6400,
+        "user_sgprs": 6,
+        "kernarg_sgpr_first": 4,
+        "workgroup_x_sgpr": 6,
+        "kernarg_bytes": 8,
+        "hidden_arguments": 0,
+        "groups": [
+          1,
+          1,
+          1
+        ],
+        "threads": [
+          64,
+          1,
+          1
+        ],
+        "packet_dwords": 56
+      },
+      "native_elf_sha256": "432ddb5568ad4367e5765a85d378c6fa76b358059d21ce243d20c43b34b9f260",
+      "llvm_pie_sha256": "80164667d536f8543f259560de9383f2d3b094ad31d8796b3d686b7e6621984e",
+      "catalog_verification": {
+        "passed": true,
+        "log": "results/g3-wave32-ready/wave_partial-recorded-verify.json",
+        "sha256": "841004677f8d8369e2bab6444ef5e81ff306061318a58ee815494ad3f014e926"
+      }
+    }
+  ],
+  "toolchain": {
+    "llvm_version": "18.1.8",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08"
+  },
+  "compiled_source_sha256": {
+    "tools/native_canary.cpp": "0d10a11aa77f3ae5d6cd779829842e644ce4e7009c4f1bbae3f2637933a721d0",
+    ".deps/elevation/client/elevation.cpp": "037e43b4b2db3d862af54377a5d25a14251ad6bba9c5199cb442bb99043ae79b",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "src/code_object.cpp": "db0044253f5d19278c0df6ecc2991c0790d57fc04a245a12669591b2da6f2505",
+    "src/launch.cpp": "31d9d22ea5243a72a13d4e3662aba1549bb07745867448f793fd555885950b7f",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "b45a86a7f2890f775afc2904b42c5e4781b24af6ce805ad730b093c423825c18",
+    "include/ps5hip/launch.h": "81644d74d7d3cef4632f9018c79292cffb55718a9d8b1fe5ba36edd855906916",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "tools/probe_wave_compiler.py": "737c610acdbbd6a4f67ab4fa0c24a0ec931ac878dea9fe9ed08e93120d3671a3",
+    "kernels/wave.hip": "07f2d2981e96369a08218ef2241e43ad2d14ea0f51edae35cf2494586728aea9",
+    "tools/build_native_canary.py": "0bf7150fce2ff3ebc1a9a64fc140c290e9ef27369f18a09e7010070d3a853f78",
+    "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "elevation-inputs.json": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e",
+    ".deps/elevation/client/elevation.hpp": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+    ".deps/elevation/client/protocol.hpp": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+    ".deps/elevation/client/validate-helper.py": "770827f77c6bc1d856cdea54bb87842cd1f055523c1b24dd41b14a400d219c55",
+    ".deps/elevation/lapy/LICENSE": "5ef18e95f617c9d3a2674cc3256f5c0d6ec2f794a57e9e40f2185dd454c9f8da",
+    ".deps/elevation/lapy/tools/build_owned_daemon.py": "e435ad2b102f642c63c0d18900a672a77267993dd75a27deaa94327aa3fdf07f",
+    ".deps/elevation/lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    ".deps/elevation/lapy/source/donor_transaction.c": "6844275eca240aab25d5d61ae030f94b50b9538116452ccb6078f6518ba876d9",
+    ".deps/elevation/lapy/source/donor_transaction.h": "c976e43a298a3621b2ff0f83f92f1304dc5c177a00d5af14c5a78a9620d2ce5b",
+    ".deps/elevation/lapy/source/vnode_ref_probe.c": "ef49b83a80cdc980ea6b5cdb0477110b08b10feba7e7229cbb0c7db1bf0a87f0",
+    ".deps/elevation/lapy/source/vnode_ref_probe.h": "13e7f3b9ba77c696209f647e5a0fb60f50a6e8112991bb4bfc63da632a6a0153",
+    ".deps/elevation/lapy/source/lapy_elevation_protocol.h": "bb02c4aa814eaba7a7a423a31b29ff41f786212c2953678cf29434e85fa0f869",
+    ".deps/elevation/logging/ps5log.h": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "candidate_stager_sha256": "1095a5e40dfedde52fac34652146c9291333343b79df71715acb81d62accb576",
+  "validation": {
+    "native_imports": "All116 module/library/NID bindings equal the corrected G2 vector candidate, including SuspendPoint in libSceAgc; actual-ELF provider tests pass.",
+    "fself": "Both eboots and libc companions pass integrity checks.",
+    "startup": "Exit installer precedes init, main and catchReturnFromMain.",
+    "device_isa": "Actual O2 code retains readfirstlane, ds_bpermute, active-mask ballot comparison and global stores; partial EXEC branch retained; no scratch/LDS/device calls.",
+    "packages": "Both UFS2 filesystem checks and full extraction comparisons pass.",
+    "host": "27 isolated-source ASan/UBSan CTests pass, plus all4 actual-ELF O1/O2 gfx1013/gfx1030 launch preparation and user-SGPR packet checks.",
+    "raw_log_sha256": {
+      "entry-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gfx1013-O1-entry.log": "5fff77e349322d750cf465adb30d01137d8bf4dd08eb70c3f459c85955bfecf6",
+      "gfx1013-O1-inspect.log": "2f618eed97759227f7d565863f9c0bda9b5ac1c5e40455e0db85207501d5bf77",
+      "gfx1013-O1-launch.log": "b0014a338416542b55e9c7036adebd4797993772f14a0155f32dd55f2b01649d",
+      "gfx1013-O2-entry.log": "5fff77e349322d750cf465adb30d01137d8bf4dd08eb70c3f459c85955bfecf6",
+      "gfx1013-O2-inspect.log": "2f618eed97759227f7d565863f9c0bda9b5ac1c5e40455e0db85207501d5bf77",
+      "gfx1013-O2-launch.log": "b0014a338416542b55e9c7036adebd4797993772f14a0155f32dd55f2b01649d",
+      "gfx1030-O1-entry.log": "5fff77e349322d750cf465adb30d01137d8bf4dd08eb70c3f459c85955bfecf6",
+      "gfx1030-O1-inspect.log": "b7ccfb9e1f8d7e2181ef884c77ab3d9284953bd95b7218325b2952fe60fb9978",
+      "gfx1030-O1-launch.log": "5efa1a3fd6a9338113c0653bf1477037f8e858f1fe0964a53ed72005d17e0108",
+      "gfx1030-O2-entry.log": "5fff77e349322d750cf465adb30d01137d8bf4dd08eb70c3f459c85955bfecf6",
+      "gfx1030-O2-inspect.log": "b7ccfb9e1f8d7e2181ef884c77ab3d9284953bd95b7218325b2952fe60fb9978",
+      "gfx1030-O2-launch.log": "5efa1a3fd6a9338113c0653bf1477037f8e858f1fe0964a53ed72005d17e0108",
+      "host-build.log": "f6845932a5f925569ab0fb5656a8cde7166300364c5f51bfd7a5c8f23ed206b4",
+      "host-configure.log": "cb7c0816892a31019a6796de2e5fa929fc0e294df4ee9d39aaf8ba8f373eaf18",
+      "host-ctest.log": "9428d553176972105cef8d547bd04daa3600d1a1e3f7a8b312535992c7aa5768",
+      "wave_full-build.log": "58144c0488f776e8fd8430330f192d60f812f490248a460c4ad701b5e84087a7",
+      "wave_full-eboot-fself.log": "bda0eace5667fc3d51ea4fabeb2a765eec135e64536baceb1f070956984dc858",
+      "wave_full-imports.log": "b45ffa402b091007d2a33a18680cd9fc48fa64e80bc2f272de6b224dfb568667",
+      "wave_full-isa.log": "ed0cc39b5ff13ccdfa2dd94a09588a820bcebd630c3834b4ea42cfe54b2ef04b",
+      "wave_full-libc-fself.log": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+      "wave_full-package.log": "33c82043f59144e11b6353df6b248ff22bf44ef9e49818da6178ba1e6efde463",
+      "wave_full-stage.log": "5e4d1def55548a4bff3fd366bc64fc2ed2e2b6abc1a9abd5471c4d69629cb26a",
+      "wave_full-startup.log": "17f2b2d95a03749e5c407b824dfff0a7bb0b025e474df18c098fb0e23292941b",
+      "wave_partial-build.log": "d25c53606ec187bacdb46489c3765c6777f1c0d022f6a8e232af0661952dd920",
+      "wave_partial-eboot-fself.log": "b90415ece72dfa5e3cb253af85984f2e8be6e0ffe4e4dcb6f2ad772589428482",
+      "wave_partial-imports.log": "b45ffa402b091007d2a33a18680cd9fc48fa64e80bc2f272de6b224dfb568667",
+      "wave_partial-isa.log": "1bd0bd66d7ce5a7238da8f0483bdcfaffac193169d2d53f91ec82c42f79931ce",
+      "wave_partial-libc-fself.log": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+      "wave_partial-package.log": "8af99540da28e5bb7eebfe9b98bf8ae192980a5530fbbea9b8f78a36e7f5084a",
+      "wave_partial-stage.log": "720b21197b9da8730467efbdd6a413dcd1e34ad6b74ea001f771f5d43fd4ec0d",
+      "wave_partial-startup.log": "f4efb2c7b0a8254fd5b28d0b16bab8a5f4d36eecf802ba569a3a29ef49f4eafe"
+    }
+  },
+  "comparison": {
+    "g2_source": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+    "changed_shared_compiled_source_inputs": [
+      "include/ps5hip/code_object.h",
+      "include/ps5hip/launch.h",
+      "src/code_object.cpp",
+      "src/launch.cpp",
+      "tools/build_native_canary.py",
+      "tools/native_canary.cpp"
+    ],
+    "changed_application_objects_from_g2": [
+      "code_object.o",
+      "launch.o",
+      "native_canary.o"
+    ],
+    "changed_objects_between_wave_profiles": [
+      "native_canary.o"
+    ],
+    "unchanged_from_g2": [
+      "other six application objects",
+      "all116native imports",
+      "elevation helper",
+      "raw and signed libc companion",
+      "native builder tools and exported native tool sources"
+    ],
+    "previous_files_preserved": 452,
+    "preserved_inventory_sha256": "98ace44967776d029f24027acedd27caa6de1d8909b31d8c18dbae4a972c96df"
+  },
+  "catalog_update": {
+    "previous_entries_preserved": 16,
+    "appended_entries": 2
+  },
+  "offline_registration_script_sha256": "d03ce374d9b88545f0fa35f45849925d076ae0a25128eee7891191d98f0fc494"
+}

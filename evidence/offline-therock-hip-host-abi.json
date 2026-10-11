@@ -1,0 +1,701 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-11T21:11:05.769436+00:00",
+  "classification": "full-HIP7-header-and-full-matching-device-library combined-object spike; Linux pass, PS5 explicit-environment pass",
+  "selected_baseline_changed": false,
+  "runtime_linked_or_executed": false,
+  "hardware_validated": false,
+  "source_revisions": {
+    "therock": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+    "llvm": "6da731510c233517c1eeb691d3446d80e9e32525",
+    "rocm_systems": "2f2a92736dbe3f65108539b6659d2c7289d300e8"
+  },
+  "source_fixture": {
+    "original": "results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+    "sha256": "ab11d1e1abd4f313b764436a90ca4a5c55bce48a7276bf305cb0218886c15bba"
+  },
+  "generated_hip_version": "7.17.26405, GITHASH2f2a9273; previously generated from pinned upstream CMake, no substituted macros",
+  "header_inventory_sha256": "22b27fc633a38cc35979d7a356104b2ff1569cc0aef2d2612ed16df25d40838a",
+  "header_counts": {
+    "hip": 32,
+    "hipamd": 57,
+    "generated": 1
+  },
+  "version_generation_provenance": {
+    "header_generation_json_sha256": "d12f773696f7a60023c6ca8b581fe9dcf523559b70a67b249960ee7f6921d179",
+    "generated_header_sha256": "cd0bef414c962be43487a40897bb1cbb52d15db612ffe4b9798194a271dc27f1"
+  },
+  "sdk_wrapper_sha256": "270370c5765306a5a6741c15fa84d617c40c42bf1d4000c4c6bca51b8296ab0f",
+  "sdk_llvm_selector_sha256": "f7ce74547fc5ee1d81f3bb688090851b4e53fd5a6ebc523728839bffbc345279",
+  "tools": {
+    "clang++": {
+      "sha256": "92025a2357d2339401ea7290199ba58b58cc1652a434edae889b8f93603ece75",
+      "bytes": 198096,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libclang-cpp.so.24.0git",
+          "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "llvm-config": {
+      "sha256": "ee591bb081637bb8ab9cdfa5e541c1ebf32408c0365abf06fc4cb0c2efddca31",
+      "bytes": 351648,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "ld.lld": {
+      "sha256": "2ee95f9f5357a6dde399555515d8f1dec632d7ccdfcbcaffe641595b1de3a356",
+      "bytes": 8345568,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "llvm-offload-binary": {
+      "sha256": "2cf39daf633b21731851f82a0460e6e0bdd138529042a3aef4353c2d5f09eaf5",
+      "bytes": 65056,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "clang-linker-wrapper": {
+      "sha256": "ca4c5a3a9b03a052ae0de0a8c68e03580f88e1b50e2c7e06ed0417510a69ef32",
+      "bytes": 278648,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "clang-offload-bundler": {
+      "sha256": "de9b7a79275da857416192a3f99744584b95e966ac5e2ae2d9d9e006396eb726",
+      "bytes": 66104,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libclang-cpp.so.24.0git",
+          "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "llvm-readobj": {
+      "sha256": "c7d6a9b8571582a1f67cb7532d232c0589a00b0e2e9864d1b784508508b8e4a4",
+      "bytes": 2472064,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "llvm-objdump": {
+      "sha256": "c100a642f91d4a2cf6ba86fcf18b07be5e7c7e979243e0ee84e83e42354c2fd8",
+      "bytes": 1235104,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    },
+    "llvm-nm": {
+      "sha256": "2eca3f9b1e76e2327e1715cd6bf40ef4c809f6d5fa53732a6f9b676137e018f2",
+      "bytes": 192360,
+      "resolved_libraries": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        }
+      ]
+    }
+  },
+  "device_libraries": [
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/ockl.bc",
+      "sha256": "4403e5d5a6e69c3b50570a41bdfd458f3fabdb96a754aff3cbb4a82660e92b8a",
+      "bytes": 263196
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/oclc_abi_version_500.bc",
+      "sha256": "fdaf4c42e681f49cb9d225fac01f336972b1140db94af0846a3d3154fab269e4",
+      "bytes": 3072
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/oclc_finite_only_off.bc",
+      "sha256": "966be9158175d702a9141ae3797b22683684e8a409365ff03e71352eb88eef5a",
+      "bytes": 3076
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/oclc_isa_version_1013.bc",
+      "sha256": "2fd81611cbb03ccb7b1d236e1cf30256767f4233ffdca850fca2e1de11704338",
+      "bytes": 3072
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/oclc_unsafe_math_off.bc",
+      "sha256": "ed3d66230af98967aae1b0ead1a539ddfa814888d1985b341e32dbf6d9f195f6",
+      "bytes": 3076
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/oclc_wavefrontsize64_off.bc",
+      "sha256": "689c86343ce9c5a30a8eab824f1f8ad05009e73428f68a8b7ad20b11131f80ae",
+      "bytes": 3156
+    },
+    {
+      "path": "<therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/amdgcn/bitcode/ocml.bc",
+      "sha256": "7c016593caffba6b70dcf348d86cca5f3fcccfdecaaafb7f5e13477a53960d0c",
+      "bytes": 250384
+    }
+  ],
+  "ps5_original_failure": "Unmodified x86_64-sie-ps5 host target reaches clang-offload-bundler, which rejects host-x86_64-sie-ps5 for missing environment component.",
+  "source_references": {
+    "clang/lib/Driver/OffloadBundler.cpp": {
+      "sha256": "d171313752b983f6576e6a3cb9e8b483a5a59df6e06868bc81096d5e65e885c9",
+      "lines": "1748-1753: requires exactly5 or6 hyphen-separated components, including kind and environment"
+    },
+    "clang/tools/clang-offload-bundler/ClangOffloadBundler.cpp": {
+      "sha256": "95de223f996cc3e24bf22dd7462fd1a5c87a535b2f99637efe35340adc2abdd6",
+      "lines": "362-369: rejects malformed bundle ID before target interpretation"
+    },
+    "clang/tools/clang-linker-wrapper/ClangLinkerWrapper.cpp": {
+      "sha256": "b158eeb0ecfae69be5fbd05e09bf6f9fe2dbb894d8aa0077082460524cc97eb1",
+      "lines": "478-488: host bundle ID uses host- plus HostTriple.normalize()"
+    }
+  },
+  "host_triple_abi_proof": {
+    "original_triple": "\"x86_64-sie-ps5\"",
+    "expanded_triple": "\"x86_64-sie-ps5-unknown\"",
+    "data_layout": "\"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"",
+    "entire_host_ir_equal_after_only_triple_and_hip_cuid_symbol_normalization": true,
+    "normalization_scope": "Only the target triple line and 16-hex suffix on __hip_fatbin/__hip_gpubin_handle/__hip_cuid symbols are replaced; every function, attribute, module flag and registration operation must otherwise match.",
+    "normalized_ir_sha256": "276ef3faa6f0c4cf921d2a603e3cb86159918ee5852f31372f65e89df6e59700",
+    "boundary": "Evidence for this vector fixture and selected flags, not proof for every PS5 ABI feature."
+  },
+  "emitted_abi": {
+    "linux": {
+      "host_sha256": "8bbbda2faf05e5664dd91a8e0bdbc99e817899ae789d11355a02cae41921b2bc",
+      "device_sha256": "4255a21e024d1f765715b6f8ddf359fc545cfce5b455775adaf624a3f5fd7e14",
+      "wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "constructor_section": ".init_array",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux-gnu-",
+          "bytes": 0,
+          "offset": 4096
+        },
+        {
+          "target": "hip-amdgcn-amd-amdhsa--gfx1013",
+          "bytes": 4504,
+          "offset": 4096
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc3": "0x0",
+          "rsrc1": "0xe0af0000",
+          "rsrc2": "0x8c",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6
+        }
+      ],
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "loader_returncode": 1,
+      "loader_result": "metadata target mismatch\n",
+      "metadata_target": "amdgpu10.13-amd-amdhsa-unknown-gfx1013",
+      "hidden_argument_kinds": [
+        "hidden_block_count_x",
+        "hidden_block_count_y",
+        "hidden_block_count_z",
+        "hidden_group_size_x",
+        "hidden_group_size_y",
+        "hidden_group_size_z",
+        "hidden_remainder_x",
+        "hidden_remainder_y",
+        "hidden_remainder_z",
+        "hidden_global_offset_x",
+        "hidden_global_offset_y",
+        "hidden_global_offset_z",
+        "hidden_grid_dims"
+      ],
+      "device_elf_header": "OS/ABI: AMDGPU_HSA (0x40)\nABIVersion: 3\nEF_AMDGPU_FEATURE_XNACK_ANY_V4 (0x100)\nEF_AMDGPU_MACH_AMDGCN_GFX1013 (0x42)"
+    },
+    "ps5-explicit-environment": {
+      "host_sha256": "42c7996ca665a82835d8ad1ce0274487bdb13e707e901ff74dbd86c8a9b0c067",
+      "device_sha256": "60facf4f58f80f764291a34f3013a606786c75bffb9eccb2f5262326e63ad207",
+      "wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "constructor_section": ".ctors",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-sie-ps5-unknown-",
+          "bytes": 0,
+          "offset": 4096
+        },
+        {
+          "target": "hip-amdgcn-amd-amdhsa--gfx1013",
+          "bytes": 4504,
+          "offset": 4096
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc3": "0x0",
+          "rsrc1": "0xe0af0000",
+          "rsrc2": "0x8c",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6
+        }
+      ],
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "loader_returncode": 1,
+      "loader_result": "metadata target mismatch\n",
+      "metadata_target": "amdgpu10.13-amd-amdhsa-unknown-gfx1013",
+      "hidden_argument_kinds": [
+        "hidden_block_count_x",
+        "hidden_block_count_y",
+        "hidden_block_count_z",
+        "hidden_group_size_x",
+        "hidden_group_size_y",
+        "hidden_group_size_z",
+        "hidden_remainder_x",
+        "hidden_remainder_y",
+        "hidden_remainder_z",
+        "hidden_global_offset_x",
+        "hidden_global_offset_y",
+        "hidden_global_offset_z",
+        "hidden_grid_dims"
+      ],
+      "device_elf_header": "OS/ABI: AMDGPU_HSA (0x40)\nABIVersion: 3\nEF_AMDGPU_FEATURE_XNACK_ANY_V4 (0x100)\nEF_AMDGPU_MACH_AMDGCN_GFX1013 (0x42)"
+    }
+  },
+  "adaptations": [
+    "Real upstream full hip_runtime.h and explicit Clang runtime wrapper include with -nogpuinc; generated real HIP7 version header reused.",
+    "Use installed full matching device-library selection from driver, including complete ockl.bc and ocml.bc; no workitem slice, fake builtin or stub.",
+    "Use unmodified SDK wrapper selected via LLVM_CONFIG=completed Clang24 llvm-config; compile-only -nostdlib/-nostartfiles route host archives away from device link.",
+    "Retain device-only -Xarch_device -fno-short-wchar; host retains original PS5 wchar/module flags.",
+    "PS5 follow-up adds explicit unknown environment to same x86_64/sie/ps5 triple; original failure remains preserved."
+  ],
+  "limits": [
+    "Combined objects and fatbinary registration emission only: no final native executable link, converter, module registration runtime, native loading or GPU execution.",
+    "Current loader rejects both extracted code objects metadata target spelling; no validation relaxation attempted.",
+    "Code objects use zero private/group storage, wave32 and288-byte kernarg with13 hidden geometry fields; matching broad fields does not qualify newer compiler descriptor/ISA bits on PS5.",
+    "Descriptor rsrc1=0xe0af0000 includes forward-progress bit31; hardware qualification remains separate.",
+    "Only gfx1013 vector fixture tested; full libraries supplied by driver do not prove all library functions or HIP/ggml compatibility.",
+    "Initial incorrect two-argument inspector invocation is retained as usage-diagnostic; correct one-argument invocation produces metadata target mismatch."
+  ],
+  "raw_receipt": {
+    "path": "results/therock-hip-abi-spike/receipt.json",
+    "sha256": "9a0abac7233f434fe9ed55fb3c97d0618bd1b7aa10b76e8e565a91880ac724e1"
+  },
+  "compiler_completion_evidence": {
+    "path": "evidence/offline-therock-component-completion.json",
+    "sha256": "a3ce50f5585993cde5bcfe66feba7859737b3c30f588bc045e7754376063ca8e"
+  },
+  "attempt_summary": [
+    {
+      "path": "attempts.json",
+      "sha256": "aeac0bf3f3b29fd084391f691092076cdde60bcca30690d15b1e6c40eca0e376",
+      "results": [
+        {
+          "host": "linux",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "host": "linux",
+          "phase": "compile",
+          "returncode": 0
+        },
+        {
+          "host": "ps5",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "host": "ps5",
+          "phase": "compile",
+          "returncode": 1
+        }
+      ]
+    },
+    {
+      "path": "explicit-environment-attempts.json",
+      "sha256": "9f896535c166c6cbdd9396d4ffee607d9f420af4f2777ed83e90571962f0ab99",
+      "results": [
+        {
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "phase": "compile",
+          "returncode": 0
+        }
+      ]
+    },
+    {
+      "path": "host-triple-proof-attempts.json",
+      "sha256": "52b4fc9fa2fe287b0c9645a07bfc52c33e893d2fede6d5ae93f9b24d01141331",
+      "results": [
+        {
+          "case": "ps5-original-host-only",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-original-host-only",
+          "phase": "compile",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-expanded-host-only",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-expanded-host-only",
+          "phase": "compile",
+          "returncode": 0
+        }
+      ]
+    }
+  ],
+  "flags": {
+    "common": [
+      "-x hip",
+      "-nogpuinc",
+      "-include __clang_hip_runtime_wrapper.h",
+      "-D__HIP_PLATFORM_AMD__",
+      "explicit pinned HIP/hipamd/generated include directories",
+      "--rocm-device-lib-path=<component-dist>/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1013",
+      "-mcode-object-version=5",
+      "-mno-wavefrontsize64",
+      "-std=c++17",
+      "-O2",
+      "-c"
+    ],
+    "ps5": [
+      "unmodified .deps/sdk/bin/prospero-clang++ with LLVM_CONFIG selecting completed compiler",
+      "-nostdlib",
+      "-nostartfiles",
+      "-Xarch_device -fno-short-wchar"
+    ],
+    "successful_ps5_followup": [
+      "--target=x86_64-sie-ps5-unknown"
+    ]
+  },
+  "verified_raw_files": {
+    "host-abi-normalized.ll": "276ef3faa6f0c4cf921d2a603e3cb86159918ee5852f31372f65e89df6e59700",
+    "host-triple-proof.diff": "2314b67ca263e72dc45c8387b49aaff502e3eab4770629b36510c26c6b013be3",
+    "linux-compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-driver.stderr": "5dc1c4a1b6e93f6a2b75df517636f93af6eb2f9378ad5574fa5e87b7e02a0c66",
+    "linux-loader.txt": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+    "linux.hsaco": "4255a21e024d1f765715b6f8ddf359fc545cfce5b455775adaf624a3f5fd7e14",
+    "linux.o": "8bbbda2faf05e5664dd91a8e0bdbc99e817899ae789d11355a02cae41921b2bc",
+    "ps5-compile.stderr": "4460a96186744ad7a734afa1f6f1ade6b689710e1de43ab8112f6ee6f42ba2f0",
+    "ps5-driver.stderr": "75b6c57f47c9f52fe9cbade6b1c5852833f51f6515f85987835c9ea3a7aea963",
+    "ps5-expanded-host-only-compile.stderr": "106ea5c7e6ca5e1c20a973124be40e076411e228a9bbc2d5c175dd9757560b31",
+    "ps5-expanded-host-only-driver.stderr": "dce8cb7173efec64e2df5638d8d9a8af90d6ba48f27280571a3cabd9acf399aa",
+    "ps5-expanded-host-only.ll": "e694fc2e3796f9bb623cdf9ad6a5781c58b572f1c788906375af4e0b9b71f5f6",
+    "ps5-explicit-environment-compile.stderr": "cdb5526d1cfb39ef3504b8d07ee78b9546ed63f0511d50d9a22425227baf74a4",
+    "ps5-explicit-environment-driver.stderr": "e4875aa357f1eaf089f2d11e56005e3e1e90db225fefa90eb6bd384800596908",
+    "ps5-explicit-environment-loader.txt": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+    "ps5-explicit-environment.hsaco": "60facf4f58f80f764291a34f3013a606786c75bffb9eccb2f5262326e63ad207",
+    "ps5-explicit-environment.o": "42c7996ca665a82835d8ad1ce0274487bdb13e707e901ff74dbd86c8a9b0c067",
+    "ps5-original-host-only-compile.stderr": "106ea5c7e6ca5e1c20a973124be40e076411e228a9bbc2d5c175dd9757560b31",
+    "ps5-original-host-only-driver.stderr": "6a3643e120a6d8009a3bb4b2d885289f6a64cde228b167fbc2c9e402619c37d6",
+    "ps5-original-host-only.ll": "4e760d00d7dbfb437ba7791d508f1811d9366ecf7837020e4d0490cec404e1ee"
+  },
+  "publication_validation": {
+    "original_receipt_hash_matches": true,
+    "all_raw_receipt_file_hashes_match": true,
+    "tool_executable_hashes_match": true,
+    "all_header_inventory_hashes_match": true,
+    "all_device_library_hashes_match": true,
+    "linux_and_ps5_use_same_seven_full_libraries": true,
+    "host_normalized_ir_hash_matches": true,
+    "hardware_operations": false
+  }
+}

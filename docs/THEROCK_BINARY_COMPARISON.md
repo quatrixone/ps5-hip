@@ -23,6 +23,15 @@ matches the build tree, with recorded installation RPATH changes; the component
 dist includes the dependencies missing from a bare stage. This does not establish
 a complete ROCm distribution, artifact packaging or upstream test-suite pass.
 
+The completed component also compiles the real full-HIP-7 vector fixture with
+its full matching device libraries for Linux and PS5 hosts. The PS5 bundler
+requires the explicit `x86_64-sie-ps5-unknown` environment spelling; a host-only
+IR comparison verifies the tested ABI is unchanged apart from triple text and
+generated HIP symbol IDs. Both extracted device objects still fail this loader's
+metadata target check. See [the HIP ABI spike](HIP_HOST_ABI_SPIKE.md#matching-therock-compiler-and-hip-7-headers)
+and `evidence/offline-therock-hip-host-abi.json`. This establishes a bounded
+combined-source route with full library inputs, not native runtime compatibility.
+
 ## Target identity: new spelling, matching processor
 
 | Target | LLVM 18 metadata target | TheRock metadata target | ELF flags, both |

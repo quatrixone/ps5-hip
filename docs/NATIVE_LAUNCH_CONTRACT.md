@@ -77,7 +77,13 @@ For the current arithmetic canaries, private-buffer slots s0:s3 are reserved and
 zeroed, the full kernarg pointer occupies s4:s5, and group ID X follows at s6.
 Group IDs are system-generated; they are not written into the user-SGPR packet.
 The two-user-SGPR layout is also represented when the descriptor omits the four
-private-buffer slots. Neither layout has been run here on hardware.
+private-buffer slots. The G2 indexed-store and two-dispatch vector runs exercised
+the six-slot layout; the two-slot layout remains unqualified. The packaged
+gfx1013 O2 `wave_full` and `wave_partial` objects also use six slots (RSRC2 `0x8c`,
+properties `0x409`), one eight-byte explicit pointer and zero hidden arguments.
+Their entry and packet checks are offline only; see
+`evidence/offline-wave32-readiness.json`. They do not establish hardware support
+for the newer parser/launch implementation or the two-slot layout.
 
 ## Packet fragment
 

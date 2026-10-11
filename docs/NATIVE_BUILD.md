@@ -305,11 +305,24 @@ and shutdown contract. The partial case requires every inactive word to remain
 
 Host negative tests, real-object launch preparation and four PS5 harness
 translation-unit compilations pass; see `evidence/offline-wave-native-harness.json`.
-Both gfx1013 profiles also link natively at source `142d927`; their emitted
-AGC/ShellCoreUtil imports, startup barrier ordering and eboot/libc FSELF integrity
-checks pass. See `evidence/offline-wave-native-link.json`. The gfx1030 profiles
-remain translation-unit compile-only. Neither wave profile is packaged or
-GPU-qualified.
+Both gfx1013 O2 profiles are now linked and packaged offline at isolated source
+`5581dbd`, with the corrected `sceAgcSuspendPoint` provider (`libSceAgc`). See
+`evidence/offline-wave32-readiness.json` for package hashes, exact entry state and
+validation. All 116 native imports match the corrected G2 candidate; startup,
+eboot/libc FSELF integrity, UFS2 filesystem and complete extraction checks pass.
+The isolated source passes 27 sanitizer CTests and actual-object launch/packet
+checks for all four gfx1013/gfx1030 O1/O2 compiler profiles. The earlier
+`142d927` link receipt remains historical evidence and used the subsequently
+corrected import provider; it is not the current candidate.
+
+The selected objects use six user SGPRs, with the kernarg pointer in `s[4:5]`,
+RSRC2 `0x8c` and properties `0x409`. They have one eight-byte pointer argument,
+zero hidden arguments and zero scratch/LDS storage. They do not qualify the
+two-user-SGPR layout. Compared with the G2 source, the parser, launch and harness
+objects also changed: the newer parser/launch structures include the offline
+hidden-geometry subset, which these wave objects do not exercise. Those changes
+and the wave instructions still require native qualification. No wave candidate
+has been deployed or executed; gfx1030 and O1 remain offline comparison profiles.
 
 ## Dependency provenance
 

@@ -11,6 +11,14 @@ The initial newer-TheRock-header experiment below remains useful failure and
 ABI evidence. Its full-header/compiler mismatch is specific to that pair;
 the later 6.2.4 selection supersedes it as the bounded fixture candidate.
 
+A subsequent matching **TheRock Clang 24 / HIP 7.17** experiment emits the
+full-header vector fixture for Linux and PS5 hosts with complete upstream
+`ockl`/`ocml` inputs. PS5 needs an explicit `unknown` triple environment to
+satisfy the newer bundler. The emitted objects still fail the current device
+loader's target-string check. See the final section and
+[`offline-therock-hip-host-abi.json`](../evidence/offline-therock-hip-host-abi.json).
+LLVM 18 remains the selected native route.
+
 Evidence: [`offline-hip-host-abi.json`](../evidence/offline-hip-host-abi.json).
 Raw sources, exact command arrays, diagnostics, ELF inspection and objects are
 preserved under ignored `results/hip-host-abi-spike/`.
@@ -302,3 +310,67 @@ Exact sources, commands, failed attempts, driver traces, bitcode identities,
 metadata, disassembly and object hashes are under ignored
 `results/hip-host-abi-spike/rocm-6.2.4/`. No console, dependency-lock change,
 commit or push was performed for this experiment.
+
+## Matching TheRock compiler and HIP 7 headers
+
+The completed compiler component at LLVM revision
+`6da731510c233517c1eeb691d3446d80e9e32525` was tested with the unchanged
+HIP/CLR headers from `rocm-systems` revision
+`2f2a92736dbe3f65108539b6659d2c7289d300e8`, including the authentic generated
+**HIP 7.17.26405** version header described above. The existing `vector-add.hip`
+fixture was copied byte-for-byte into ignored `results/therock-hip-abi-spike/`.
+This is the smallest full-header fixture using ordinary launch syntax and
+`blockIdx`, `blockDim` and `threadIdx`.
+
+Both hosts use the completed component's real, complete `ockl.bc` and `ocml.bc`,
+plus its ABI-500, gfx1013, wave32, finite-only-off and unsafe-math-off bitcode.
+Driver traces identify all seven identical inputs. No workitem slice, header
+patch, invented version macro, builtin replacement or runtime stub is used.
+Explicit Clang runtime-wrapper inclusion and pinned header directories select
+the real headers; `-nogpuinc` disables automatic header discovery. The selected
+code object is V5, wave32, compiled at `-O2`.
+
+| Host invocation | Combined compile result |
+| --- | --- |
+| Linux, matching Clang 24 | Pass |
+| Unmodified SDK target `x86_64-sie-ps5` | Device compilation reaches bundling; bundle target format is rejected |
+| Same SDK with `--target=x86_64-sie-ps5-unknown` | Pass |
+
+The SDK wrapper is unchanged and selects this compiler through `LLVM_CONFIG`.
+Compile-only `-nostdlib -nostartfiles` avoids forwarding host archives into the
+device link. `-Xarch_device -fno-short-wchar` remains device-only, preserving
+the existing PS5 host flags. The original failure and successful command arrays
+are retained separately.
+
+The pinned `clang/lib/Driver/OffloadBundler.cpp:1748-1753` requires five or six
+hyphen-separated bundle-ID components, including offload kind and environment.
+`clang-linker-wrapper` constructs the host ID from the normalized host triple;
+the three-component PS5 triple lacks that environment. Explicit `unknown`
+supplies the required field without selecting another host OS. This conclusion
+is checked beyond spelling: separate host-only LLVM IR for the original and
+expanded triples is identical after replacing **only** the triple line and
+compiler-generated HIP CUID symbol suffixes. Every function, argument,
+attribute, data layout, module flag and registration operation otherwise
+matches. The complete diff and normalization hash are retained. This proves
+the tested fixture's ABI properties, not every possible PS5 ABI feature.
+
+The combined objects retain the seven undefined symbols listed earlier and the
+24-byte version-1 `0x48495046` wrapper. Linux uses `.init_array`; PS5 uses
+`.ctors`. The empty host bundle entries now reflect their actual host triples;
+the device bundle ID is `hip-amdgcn-amd-amdhsa--gfx1013`. Each extracted device
+ELF is 4,504 bytes, with zero private/group storage, six user SGPRs, 288-byte
+kernarg storage and the same 13 hidden geometry kinds described above.
+
+The metadata target is `amdgpu10.13-amd-amdhsa-unknown-gfx1013`, and the current
+loader rejects both objects with `metadata target mismatch`. Descriptor RSRC1
+is `0xe0af0000`, including the newer forward-progress setting discussed in
+[the compiler comparison](THEROCK_BINARY_COMPARISON.md). Matching argument
+layouts do not qualify those descriptor bits or instructions on the console.
+
+Evidence: [`offline-therock-hip-host-abi.json`](../evidence/offline-therock-hip-host-abi.json).
+It records the original failure, source references, host-IR comparison,
+compiler/shared-library and bitcode hashes, complete header-inventory digest,
+output identities and driver/diagnostic provenance. This is combined-object and
+fatbinary emission only. There is no final native executable link, conversion,
+registration runtime, native load or GPU execution, and supplying full device
+libraries does not prove all their functions or framework compatibility.

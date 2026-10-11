@@ -80,11 +80,22 @@ Use `python3 results/capture-vector-twice-operation.py cycle2` after reading the
 runbook/environment; do not redeploy, rerun cycle1 or close unrelated titles.
 No further console polling is needed while offline work can advance. Full G2
 remains open pending this repeated lifecycle check and final acceptance audit.
-Offline work can now prepare the existing full/partial wave32 probes with the
-corrected AGC import provider and explicit capability boundaries. Preserve their
-older build receipts; do not deploy their older, incorrectly bound binaries.
-Matching TheRock compiler/HIP-header compilation can now be tested offline using
-the completed component; keep the hardware-qualified LLVM18 route unchanged.
+Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
+corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
+checks, native startup/import/ISA and package extraction checks pass. Both measured
+descriptors use six user SGPRs with kernargs in s[4:5]. The catalog now includes
+both images; see `evidence/offline-wave32-readiness.json`. No wave hardware run
+has occurred. Parser/launch changes since the proven G2 source are explicit;
+preserve older receipts and never deploy the older incorrectly bound binaries.
+
+Matching TheRock Clang24, full HIP7 headers and all seven real driver-selected
+device libraries compile the combined vector fixture for Linux and PS5. The newer
+bundler requires the explicit `x86_64-sie-ps5-unknown` spelling. Original and expanded
+PS5 host-only IR match after normalizing only the triple and generated HIP IDs.
+The original failure is preserved; no compiler/header/library patch was needed.
+See `evidence/offline-therock-hip-host-abi.json`. This proves compilation of one
+fixture, not native linking/loading or runtime compatibility. The current loader
+still rejects the newer device target spelling; keep LLVM18 selected.
 Offline analysis confirmed that `sceAgcSuspendPoint` was imported from the wrong
 provider (`libSceAgcDriver` instead of the pinned reference's `libSceAgc`). Its null
 tail-import fits the captured registers; runtime GOT contents were not captured.

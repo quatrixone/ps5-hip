@@ -198,8 +198,13 @@ shuffle, ballot, sum. The two full waves expect sums 528 and 1552 and ballot
 Inactive invocation records must stay unchanged. Use guarded allocations and the
 same completion/teardown requirements as other native cases.
 
-Both probes now have guarded native harnesses; the gfx1013 variants link with
-verified imports, startup ordering and FSELF integrity. See
-`evidence/offline-wave-native-link.json`. The gfx1030 variants remain compile-only.
-Neither probe is packaged or executed. Host oracles and native links do not prove
-PS5 wave semantics, wave64 support or all inactive-lane patterns.
+Both probes now have guarded native harnesses and packaged gfx1013 O2 candidates
+at isolated source `5581dbd`. Corrected native imports, startup ordering, FSELF
+integrity and full package extraction checks pass; see
+`evidence/offline-wave32-readiness.json`. The four O1/O2 compiler profiles pass
+host launch and entry-packet checks, and the isolated source passes 27 sanitizer
+CTests. The packaged objects use six user SGPRs with the kernarg pointer in
+`s[4:5]`; neither uses hidden arguments or the two-user-SGPR entry layout.
+Neither candidate has been deployed or executed. Gfx1030 and O1 remain offline
+comparison profiles. These checks do not prove PS5 wave semantics, wave64 support,
+all inactive-lane patterns or the newer parser/launch implementation on hardware.

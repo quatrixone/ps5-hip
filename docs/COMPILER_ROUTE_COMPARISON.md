@@ -20,7 +20,7 @@ similar command-line options are not proof of equivalent generated code.
 | --- | --- | --- |
 | Device compiler | Installed Clang/LLD 18.1.8, exact version checked | Pinned AMD Clang/LLD 24; configured compiler component built, staged and assembled |
 | Target configuration | Both gfx1013/gfx1030 fixtures compile | gfx1030 declared; gfx1013 needs a custom declaration |
-| Component scope | Device-only HIP, without headers/device libraries | Compiler project plus bundled runtime/device-library components |
+| Component scope | Native baseline uses device-only HIP; separate ROCm 6.2.4 full-header spike uses a workitem slice | Compiler component plus full HIP 7 vector-source emission with matching complete device-library inputs |
 | Artifact evidence | V5 objects, ISA inventories, metadata and host parser tests | Four V5 fixtures compared; new target spelling rejected by current loader |
 | Native PS5 host code | Separate pinned PS5 SDK and native converter | Still requires a distinct PS5 port/integration |
 | GPU qualification | Named gfx1013 store/vector fixtures passed; broader capabilities unqualified | Pending |
@@ -72,6 +72,18 @@ compiler-selection comparison. The configured `amd-llvm` target and staged/compo
 dist installation subsequently completed, including Flang; see
 `evidence/offline-therock-component-completion.json`. Full ROCm artifact packaging
 and upstream tests remain separate. Any changed device code needs native qualification.
+
+The completed matching compiler removes the earlier LLVM18/HIP7 full-header
+builtin mismatch for the tested ordinary vector launch. Linux combined compilation
+passes; PS5 passes with an explicit `unknown` environment in its host triple.
+Separate host-only IR comparisons retain the fixture's PS5 ABI, while the newer
+bundler requires the extra field. The objects retain real registration/fatbinary
+emission and use complete matching `ockl`/`ocml` inputs. Both extracted device
+ELFs remain rejected by the current target-string validator. See
+`evidence/offline-therock-hip-host-abi.json` and
+[HIP_HOST_ABI_SPIKE.md](HIP_HOST_ABI_SPIKE.md#matching-therock-compiler-and-hip-7-headers).
+This is a useful source-compilation path to develop separately; it does not
+replace the selected compiler or provide native registration/runtime integration.
 
 The selected route has
 fresh isolated-userspace reproduction of all four objects, with networking and
