@@ -162,6 +162,26 @@ class StageTests(unittest.TestCase):
                 self.receipt[field] = old
                 self.assertFalse(self.output.exists())
 
+    def test_lds_contract_is_bound_and_preserved(self):
+        self.receipt['artifacts']['canary.hsaco'] = module.digest(b'fixture shader')
+        (self.build / 'candidate/canary.hsaco').write_bytes(b'fixture shader')
+        for kernel in ('lds_static', 'lds_dynamic', 'lds_mixed'):
+            self.receipt['kernel'] = kernel
+            contract = {'groups': 257, 'static_bytes': 0 if kernel == 'lds_dynamic' else 256,
+                        'dynamic_bytes': 0 if kernel == 'lds_static' else 1280,
+                        'allocated_bytes': 1024 if kernel == 'lds_static' else 2048,
+                        'stride': 0 if kernel == 'lds_static' else 5}
+            self.receipt['lds'] = contract.copy(); self.output = self.root / kernel
+            self.assertEqual(self.run_stage()['lds'], contract)
+            self.output = self.root / (kernel + '-rejected')
+            for key in contract:
+                for wrong in (contract[key] + 1, False):
+                    self.receipt['lds'] = dict(contract, **{key: wrong})
+                    with self.assertRaisesRegex(ValueError, 'LDS resource'): self.run_stage()
+                    self.assertFalse(self.output.exists())
+            del self.receipt['lds']
+            with self.assertRaisesRegex(ValueError, 'LDS resource'): self.run_stage()
+
 
 if __name__ == "__main__":
     unittest.main()

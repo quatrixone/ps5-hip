@@ -350,14 +350,17 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
     return image;
 }
 
-static std::string launch_rejection(const Kernel &k, bool scratch) {
+static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false) {
     if (k.wave_size != 32) return "initial launch supports wave32 only";
     if (scratch) {
         if (!k.private_bytes || k.properties != 0x409 || k.rsrc2 != 0x8d || !k.hidden_arguments.empty())
             return "unsupported buffer-scratch entry contract";
     } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
-    if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
+    if (lds) {
+        if (k.group_bytes > 65536 || k.properties != 0x409 || k.rsrc2 != 0x8c || !k.hidden_arguments.empty())
+            return "unsupported LDS entry contract";
+    } else if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
     if (k.preload || k.rsrc3) return "preload/resource3 requires additional launch support";
     if ((k.properties & ~uint16_t(0x409)) || !(k.properties & 8))
         return "unsupported initial user-SGPR contract";
@@ -403,5 +406,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch) {
 
 std::string initial_launch_rejection(const Kernel &k) { return launch_rejection(k, false); }
 std::string buffer_scratch_launch_rejection(const Kernel &k) { return launch_rejection(k, true); }
+
+std::string lds_launch_rejection(const Kernel &k) { return launch_rejection(k, false, true); }
 
 } // namespace ps5hip

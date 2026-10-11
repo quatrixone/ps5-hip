@@ -57,4 +57,24 @@ BufferScratchLaunch prepare_buffer_scratch_launch(
     const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch);
 std::vector<uint32_t> encode_buffer_scratch_dispatch(const BufferScratchLaunch &launch);
 
+struct LdsPlan {
+    uint32_t static_bytes, dynamic_bytes, allocated_bytes, rsrc2_lds;
+};
+
+// PS5 Mesa GFX10.3 allocation policy: 1 KiB allocation granularity, 512-byte
+// register units, at most 64 KiB per group. No backing allocation is needed.
+LdsPlan plan_lds(uint32_t static_bytes, uint32_t dynamic_bytes);
+struct LdsLaunch {
+    InitialLaunch dispatch;
+    LdsPlan lds;
+};
+
+// Experimental explicit-argument 64x1x1 wave32 contract. Dynamic bytes reserve
+// capacity only: shared-pointer/hidden dynamic-size argument ABIs are unsupported.
+LdsLaunch prepare_lds_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes = 0);
+std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch);
+
 } // namespace ps5hip

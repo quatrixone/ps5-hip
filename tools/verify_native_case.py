@@ -46,6 +46,17 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         if (build.get("kernel") != manifest["kernel"] or build.get("target") != manifest["target"] or
                 any(type(item.get("dispatches")) is not int or item["dispatches"] != 2 for item in (manifest, build))):
             raise ValueError("vector_add_twice requires matching two-dispatch provenance")
+    lds_profiles = ("lds_static", "lds_dynamic", "lds_mixed")
+    if manifest["kernel"] in lds_profiles or build.get("kernel") in lds_profiles:
+        kernel = manifest["kernel"]
+        contract = {"groups": 257, "static_bytes": 0 if kernel == "lds_dynamic" else 256,
+                    "dynamic_bytes": 0 if kernel == "lds_static" else 1280,
+                    "allocated_bytes": 1024 if kernel == "lds_static" else 2048,
+                    "stride": 0 if kernel == "lds_static" else 5}
+        if (kernel not in lds_profiles or build.get("kernel") != kernel or build.get("target") != manifest["target"] or
+                any(item.get("lds") != contract or any(type(value) is not int for value in item["lds"].values())
+                    for item in (manifest, build))):
+            raise ValueError("LDS requires matching resource provenance")
     shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
@@ -76,6 +87,8 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
                          "native execution", "clean teardown", "service health"]}
     if manifest["kernel"] == "vector_add_twice":
         result["dispatches"] = 2
+    if manifest["kernel"] in lds_profiles:
+        result["lds"] = manifest["lds"]
     return result
 
 

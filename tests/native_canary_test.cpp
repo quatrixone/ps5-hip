@@ -64,7 +64,38 @@ int main() {
             auto output = buffer();
             require(argument(output).value == output->range().address + 64);
             require(argument(output).buffer_bytes == count * 4);
-#ifdef PS5HIP_CANARY_VECTOR_ADD
+#ifdef PS5HIP_CANARY_LDS
+            check_guards(output, count);
+            require(count == 257 && groups == 257 && input_count == 16448);
+            auto input = buffer(input_count);
+            auto verify = [&] { validate(output, input); };
+            reject(verify);
+            for (uint32_t group = 0; group < 257; ++group) {
+                uint32_t sum = 0;
+                for (uint32_t lane = 0; lane < 64; ++lane) {
+                    const uint32_t value = 4099 * group + 17 * lane + 65536 * (lane / 32);
+                    data(input)[64 * group + lane] = value;
+                    sum += value;
+                }
+#ifdef PS5HIP_CANARY_LDS_MIXED
+                sum ^= (64 * group + 33) ^ 1403613629u;
+#endif
+                data(output)[group] = sum;
+            }
+            verify();
+            for (uint32_t i = 0; i < 257; ++i) {
+                data(output)[i] ^= 1; reject(verify); data(output)[i] ^= 1;
+            }
+            std::swap(data(output)[0], data(output)[256]); reject(verify);
+            std::swap(data(output)[0], data(output)[256]);
+            for (uint32_t i : {0u, 31u, 32u, 63u, 64u, 16447u}) {
+                data(input)[i] ^= 1; reject(verify); data(input)[i] ^= 1;
+            }
+            auto *input_words = static_cast<uint32_t *>(input->cpu());
+            for (size_t i : {size_t(0), size_t(15), size_t(16 + 16448), size_t(input->range().bytes / 4 - 1)}) {
+                input_words[i] ^= 1; reject(verify); input_words[i] ^= 1;
+            }
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
             auto a = buffer(), b = buffer();
             for (uint32_t i = 0; i < count; ++i) {
                 data(a)[i] = bits(float(i) / 2);

@@ -137,6 +137,36 @@ class CaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "title mismatch"):
             self.verify()
 
+    def test_lds_requires_matching_resource_provenance(self):
+        candidate = self.packages['candidates'][0]
+        def freeze(build):
+            self.write(self.stage / 'build-receipt.json', build)
+            candidate['manifest']['build_receipt_sha256'] = module.fingerprint(self.stage / 'build-receipt.json')['sha256']
+            self.write(self.stage / 'manifest.json', candidate['manifest'])
+            candidate['package']['manifest_sha256'] = module.fingerprint(self.stage / 'manifest.json')['sha256']
+            self.write(self.stage / 'package-receipt.json', candidate['package'])
+        for kernel in ('lds_static', 'lds_dynamic', 'lds_mixed'):
+            contract = {'groups': 257, 'static_bytes': 0 if kernel == 'lds_dynamic' else 256,
+                        'dynamic_bytes': 0 if kernel == 'lds_static' else 1280,
+                        'allocated_bytes': 1024 if kernel == 'lds_static' else 2048,
+                        'stride': 0 if kernel == 'lds_static' else 5}
+            build = {'kernel': kernel, 'target': 'gfx1013', 'lds': contract.copy()}
+            candidate['manifest'].update(kernel=kernel, lds=contract.copy())
+            freeze(build); self.assertEqual(self.verify()['lds'], contract)
+            for item in (build, candidate['manifest']):
+                for key in contract:
+                    for wrong in (contract[key] + 1, False):
+                        item['lds'][key] = wrong; freeze(build)
+                        with self.assertRaisesRegex(ValueError, 'LDS requires'): self.verify()
+                        item['lds'][key] = contract[key]
+                for key, wrong in (('kernel', 'indexed_store'), ('target', 'gfx1030')):
+                    old = item[key]; item[key] = wrong; freeze(build)
+                    with self.assertRaisesRegex(ValueError, 'LDS requires'): self.verify()
+                    item[key] = old
+                del item['lds']; freeze(build)
+                with self.assertRaisesRegex(ValueError, 'LDS requires'): self.verify()
+                item['lds'] = contract.copy()
+
 
 if __name__ == "__main__":
     unittest.main()

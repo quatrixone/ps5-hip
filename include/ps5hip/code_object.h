@@ -68,4 +68,8 @@ std::string initial_launch_rejection(const Kernel &kernel);
 // dynamic stack, LDS or additional entry state. Structural eligibility only.
 std::string buffer_scratch_launch_rejection(const Kernel &kernel);
 
+// Experimental explicit-argument wave32 LDS allocation; descriptor LDS bits
+// remain zero, with no scratch or implicit/dynamic-pointer entry state.
+std::string lds_launch_rejection(const Kernel &kernel);
+
 } // namespace ps5hip

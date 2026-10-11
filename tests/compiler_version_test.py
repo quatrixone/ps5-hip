@@ -202,6 +202,50 @@ class VersionTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 builder.require_tool_versions({"clang": "clang version 18.1.8", "other": text}, "18.1.8")
 
+    def test_lds_provenance_and_profile_selection(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            files = {'tools/build_canaries.py': b'shared', 'tools/probe_lds_compiler.py': b'recipe',
+                     'kernels/lds.hip': b'kernel', 'lds/gfx1013-O2/lds.hsaco': b'object',
+                     'lds/gfx1013-O2/driver.txt': b'"/pinned/lld" "elf64_amdgpu" "--whole-archive"'}
+            for name, data in files.items():
+                path = root / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(data)
+            sha = lambda name: hashlib.sha256(files[name]).hexdigest()
+            profiles = {name: {'group_segment_fixed_size': 0 if name == 'lds_dynamic' else 256,
+                              'private_segment_fixed_size': 0, 'kernarg_segment_size': 16 if name == 'lds_static' else 20,
+                              'wavefront_size': 32} for name in ('lds_static', 'lds_dynamic', 'lds_mixed')}
+            case = {'target': 'gfx1013', 'optimization': '-O2', 'bytes': 6, 'profiles': profiles,
+                    'code_sha256': sha('lds/gfx1013-O2/lds.hsaco'), 'driver_sha256': sha('lds/gfx1013-O2/driver.txt')}
+            report = {'recipe_sha256': sha('tools/probe_lds_compiler.py'), 'source_sha256': sha('kernels/lds.hip'),
+                      'shared_recipe_sha256': sha('tools/build_canaries.py'), 'tool_versions': {'lld': 'LLD 18.1.8'}, 'cases': [case]}
+            path = root / 'lds/comparison.json'; path.write_text(json.dumps(report))
+            verify = lambda: native.verified_device_object(root, 'gfx1013', '18.1.8', lds_directory=root / 'lds')
+            with patch.object(native.shutil, 'which', return_value='/pinned/lld'):
+                self.assertEqual(verify()[0], b'object')
+                for name, data in files.items():
+                    (root / name).write_bytes(data + b'changed')
+                    with self.assertRaises(ValueError): verify()
+                    (root / name).write_bytes(data)
+                for cases in ([], [case, case], [dict(case, optimization='-O1')], [dict(case, target='gfx1030')],
+                              [dict(case, bytes=7)], [dict(case, profiles={})]):
+                    report['cases'] = cases; path.write_text(json.dumps(report))
+                    with self.assertRaises(ValueError): verify()
+                report['cases'] = [case]
+                for value in (False, 4):
+                    profiles['lds_dynamic']['private_segment_fixed_size'] = value; path.write_text(json.dumps(report))
+                    with self.assertRaises(ValueError): verify()
+                profiles['lds_dynamic']['private_segment_fixed_size'] = 0; path.write_text(json.dumps(report))
+                with patch.object(native.shutil, 'which', return_value='/wrong/lld'), self.assertRaises(ValueError): verify()
+                with self.assertRaises(ValueError):
+                    native.verified_device_object(root, 'gfx1013', '18.1.8', root / 'wave', lds_directory=root / 'lds')
+        for kernel, extra in (('lds_static', []), ('lds_dynamic', []), ('lds_mixed', []),
+                              ('runtime', ['--lds-probes', '/unused']), ('register_spill', ['--lds-probes', '/unused']),
+                              ('wave_full', ['--wave-probes', '/unused', '--lds-probes', '/unused'])):
+            with patch.object(sys, 'argv', ['native', '--native-source', '/unused', '--target', 'gfx1013', '--kernel', kernel, *extra]), \
+                    patch('sys.stderr'), self.assertRaises(SystemExit) as error:
+                native.main()
+            self.assertEqual(error.exception.code, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

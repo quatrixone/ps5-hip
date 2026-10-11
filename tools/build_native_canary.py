@@ -15,31 +15,42 @@ def run(*args):
     subprocess.run([str(arg) for arg in args], check=True, cwd=ROOT)
 
 
-def verified_device_object(root, target, version, wave_directory=None, fixture="canary"):
+def verified_device_object(root, target, version, wave_directory=None, fixture="canary", lds_directory=None):
     if fixture not in ("canary", "resources") or (wave_directory is not None and fixture != "canary"):
         raise ValueError("unsupported device fixture selection")
-    directory = wave_directory if wave_directory is not None else root / "build/canaries"
+    if lds_directory is not None and (wave_directory is not None or fixture != "canary"):
+        raise ValueError("LDS probes cannot be combined with other fixtures")
+    probe = "lds" if lds_directory is not None else "wave"
+    probe_directory = lds_directory if lds_directory is not None else wave_directory
+    directory = probe_directory if probe_directory is not None else root / "build/canaries"
     report_name = "build.json" if fixture == "canary" else "resources-build.json"
-    report = json.loads((directory / ("comparison.json" if wave_directory is not None else report_name)).read_text())
+    report = json.loads((directory / ("comparison.json" if probe_directory is not None else report_name)).read_text())
     inputs = [("recipe_sha256", root / "tools/build_canaries.py"),
               ("source_sha256", root / "kernels" / (fixture + ".hip"))]
-    if wave_directory is not None:
-        inputs = [("recipe_sha256", root / "tools/probe_wave_compiler.py"),
+    if probe_directory is not None:
+        inputs = [("recipe_sha256", root / "tools" / ("probe_" + probe + "_compiler.py")),
                   ("shared_recipe_sha256", root / "tools/build_canaries.py"),
-                  ("source_sha256", root / "kernels/wave.hip")]
+                  ("source_sha256", root / "kernels" / (probe + ".hip"))]
     for field, path in inputs:
         if report.get(field) != hashlib.sha256(path.read_bytes()).hexdigest():
             raise ValueError("device recipe or kernel changed; rebuild device objects")
     require_tool_versions(report["tool_versions"], version)
     profiles = ([p for p in report["cases"] if p["target"] == target and p["optimization"] == "-O2"]
-                if wave_directory is not None else [p for p in report["profiles"] if p["target"] == target])
+                if probe_directory is not None else [p for p in report["profiles"] if p["target"] == target])
     if len(profiles) != 1:
         raise ValueError("missing or duplicate device target")
     profile = profiles[0]
-    profile_directory = directory / (target + "-O2" if wave_directory is not None else target)
+    if lds_directory is not None:
+        expected = {name: {"group_segment_fixed_size": 0 if name == "lds_dynamic" else 256,
+                           "private_segment_fixed_size": 0, "kernarg_segment_size": 16 if name == "lds_static" else 20,
+                           "wavefront_size": 32} for name in ("lds_static", "lds_dynamic", "lds_mixed")}
+        actual = profile.get("profiles", {})
+        if actual != expected or any(type(value) is not int for fields in actual.values() for value in fields.values()):
+            raise ValueError("LDS probe resource profile changed")
+    profile_directory = directory / (target + "-O2" if probe_directory is not None else target)
     if fixture == "resources":
         profile_directory /= fixture
-    data = (profile_directory / ("wave.hsaco" if wave_directory is not None else fixture + ".hsaco")).read_bytes()
+    data = (profile_directory / (probe + ".hsaco" if probe_directory is not None else fixture + ".hsaco")).read_bytes()
     trace = (profile_directory / "driver.txt").read_bytes()
     if (hashlib.sha256(data).hexdigest() != profile["code_sha256"] or
             len(data) != profile["bytes"] or
@@ -56,13 +67,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"], required=True)
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
+    parser.add_argument("--lds-probes", type=pathlib.Path, help="Verified probe_lds_compiler.py output; selects O2")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
     wave = args.kernel in ("wave_full", "wave_partial")
     if wave != (args.wave_probes is not None):
         parser.error("--wave-probes is required only for wave kernels")
+    lds = args.kernel in ("lds_static", "lds_dynamic", "lds_mixed")
+    if lds != (args.lds_probes is not None):
+        parser.error("--lds-probes is required only for LDS kernels")
     lock = json.loads((ROOT / "dependencies.json").read_text())
     revision = lock["native_tools"]["revision"]
     sdk = ROOT / ".deps/sdk"
@@ -72,7 +87,7 @@ def main():
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
     fixture = "resources" if args.kernel == "register_spill" else "canary"
-    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes, fixture)
+    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes, fixture, args.lds_probes)
                                   if args.kernel != "runtime" else (None, None))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
@@ -133,7 +148,7 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
         if args.kernel == "vector_add_twice":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
-        if wave:
+        if wave or lds:
             options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
         if args.kernel == "register_spill":
             options.append("-DPS5HIP_CANARY_REGISTER_SPILL=1")
@@ -214,8 +229,9 @@ def main():
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
                                  [ROOT / "tools/build_canaries.py"] +
-                                 ([ROOT / "tools/probe_wave_compiler.py"] if wave else []) +
-                                 ([ROOT / "kernels" / ("wave.hip" if wave else fixture + ".hip")] if args.kernel != "runtime" else []) +
+                                 ([ROOT / "tools" / ("probe_" + ("lds" if lds else "wave") + "_compiler.py")] if wave or lds else []) +
+                                 ([ROOT / "tools/native_lds.h"] if lds else []) +
+                                 ([ROOT / "kernels" / ("lds.hip" if lds else "wave.hip" if wave else fixture + ".hip")] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
@@ -223,6 +239,11 @@ def main():
                              for name in artifacts}}
     if args.kernel == "vector_add_twice":
         receipt["dispatches"] = 2
+    if lds:
+        receipt["lds"] = {"groups": 257, "static_bytes": 0 if args.kernel == "lds_dynamic" else 256,
+                          "dynamic_bytes": 0 if args.kernel == "lds_static" else 1280,
+                          "allocated_bytes": 1024 if args.kernel == "lds_static" else 2048,
+                          "stride": 0 if args.kernel == "lds_static" else 5}
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("Built unqualified native candidate:", candidate)
     print("No title metadata, installation or console execution performed.")

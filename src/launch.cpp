@@ -19,12 +19,13 @@ bool overlaps(GpuRange a, GpuRange b) {
 static InitialLaunch prepare_launch(const CodeObject &object, const std::string &name,
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
-                                    const BufferScratchPlan *scratch) {
+                                    const BufferScratchPlan *scratch, bool lds = false) {
     const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
     const auto &k = *found;
-    const auto rejection = scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k);
+    const auto rejection = lds ? lds_launch_rejection(k) :
+        (scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k));
     if (!rejection.empty()) throw ObjectError(rejection);
     require(k.max_workgroup_size >= 64, "kernel cannot support the initial 64-thread group");
     require(k.required_workgroup == std::array<uint32_t, 3>{} ||
@@ -88,18 +89,23 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
     return result;
 }
 
-static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch) {
+static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch, const LdsPlan *lds = nullptr) {
     require(launch.entry_address >= window_begin && launch.entry_address < window_end &&
             launch.entry_address % 256 == 0, "invalid dispatch entry address");
     require(launch.threads == std::array<uint32_t, 3>{64, 1, 1} && launch.groups_x != 0 &&
             launch.groups_x <= UINT32_MAX / 64, "invalid dispatch shape");
     require(launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6, "invalid dispatch user-SGPR count");
-    require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) &&
+    require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~((scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u))) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     if (scratch) {
         require(launch.rsrc2 == 0x8d && launch.user_sgpr_count == 6 &&
                 std::equal(scratch->descriptor.begin(), scratch->descriptor.end(), launch.user_sgprs.begin()),
                 "scratch dispatch entry state mismatch");
+    }
+    if (lds) {
+        require(launch.rsrc2 == (0x8c | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
+                std::all_of(launch.user_sgprs.begin(), launch.user_sgprs.begin() + 4,
+                            [](uint32_t value) { return value == 0; }), "LDS dispatch entry state mismatch");
     }
     require(!(launch.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))), "privileged dispatch unsupported");
     // GFX10 ACQUIRE_MEM: invalidate instruction, scalar, vector, L1 and L2;
@@ -180,4 +186,32 @@ std::vector<uint32_t> encode_buffer_scratch_dispatch(const BufferScratchLaunch &
     validate_scratch_plan(launch.scratch);
     return encode_dispatch(launch.dispatch, &launch.scratch);
 }
+LdsPlan plan_lds(uint32_t static_bytes, uint32_t dynamic_bytes) {
+    const uint64_t total = uint64_t(static_bytes) + dynamic_bytes;
+    const uint64_t allocated = (total + 1023) & ~uint64_t(1023);
+    // Use pinned PS5 Mesa's GFX10.3 allocation policy, not the compiler target ID.
+    require(total <= 65536 && allocated <= 65536 && allocated / 512 <= 511,
+            "LDS allocation exceeds per-group capacity");
+    return {static_bytes, dynamic_bytes, uint32_t(allocated), uint32_t(allocated / 512) << 15};
+}
+
+LdsLaunch prepare_lds_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes) {
+    auto dispatch = prepare_launch(object, name, module, kernarg_storage, groups_x, arguments, nullptr, true);
+    const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
+                                   [&](const Kernel &k) { return k.name == name; });
+    const auto lds = plan_lds(found->group_bytes, dynamic_bytes);
+    require(lds.allocated_bytes != 0, "zero LDS allocation does not require LDS launch");
+    dispatch.rsrc2 |= lds.rsrc2_lds;
+    return {std::move(dispatch), lds};
+}
+std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch) {
+    const auto expected = plan_lds(launch.lds.static_bytes, launch.lds.dynamic_bytes);
+    require(expected.allocated_bytes != 0 && launch.lds.allocated_bytes == expected.allocated_bytes &&
+            launch.lds.rsrc2_lds == expected.rsrc2_lds, "inconsistent LDS plan");
+    return encode_dispatch(launch.dispatch, nullptr, &launch.lds);
+}
+
 } // namespace ps5hip

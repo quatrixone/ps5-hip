@@ -179,6 +179,30 @@ class LogTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.check_log(data, "gfx1013", "vector_add", True)
 
+    def test_lds_logs_bind_resources_oracle_and_shutdown(self):
+        suffix = (b'PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n'
+                  b'PS5HIP SHUTDOWN static-dtor=observed\nPS5HIP SHELL_EXIT application-fini=completed\n'
+                  b'PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n')
+        for kernel in ('lds_static', 'lds_dynamic', 'lds_mixed'):
+            for target in ('gfx1013', 'gfx1030'):
+                static = 0 if kernel == 'lds_dynamic' else 256
+                dynamic, allocated, stride = (0, 1024, 0) if kernel == 'lds_static' else (1280, 2048, 5)
+                data = (f'PS5HIP START target={target} kernel={kernel}\n'
+                        'PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n'
+                        f'PS5HIP SUBMIT target={target} kernel={kernel} invocations=16448 output_words=257 groups=257 static_lds_bytes={static} dynamic_lds_bytes={dynamic} allocated_lds_bytes={allocated} stride={stride} timeout_ms=2000\n'
+                        f'PS5HIP PASS kernel={kernel} exact_values=257 inputs=unchanged guards=unchanged allocations=closed\n').encode()
+                valid = data + suffix
+                result = module.check_log(valid, target, kernel, shell_exit_probe=True)
+                self.assertEqual(result['application_result'], 'application-pass'); self.assertFalse(result['hardware_gate_passed'])
+                fields = {'invocations':16448,'output_words':257,'groups':257,'static_lds_bytes':static,
+                          'dynamic_lds_bytes':dynamic,'allocated_lds_bytes':allocated,'stride':stride,'timeout_ms':2000,'exact_values':257}
+                bad = [data, valid[:-1], valid*2, valid.replace(b'\n',b'\r\n'), valid.replace(b'inputs=unchanged',b'inputs=changed'),
+                       valid.replace(b'guards=unchanged',b'guards=changed'), valid.replace(b'allocations=closed',b'allocations=retained'),
+                       valid+b'PS5HIP QUARANTINED: unresolved\n', valid+b'PS5HIP FAIL: mismatch\n']
+                bad += [valid.replace(f'{key}={value}'.encode(),f'{key}={value+1}'.encode()) for key,value in fields.items()]
+                for wrong in bad:
+                    self.assertNotEqual(module.check_log(wrong,target,kernel,shell_exit_probe=True)['application_result'],'application-pass')
+
 
 if __name__ == "__main__":
     unittest.main()

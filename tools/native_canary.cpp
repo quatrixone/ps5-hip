@@ -11,6 +11,9 @@
 #if defined(PS5HIP_CANARY_WAVE_FULL) || defined(PS5HIP_CANARY_WAVE_PARTIAL)
 #define PS5HIP_CANARY_WAVE 1
 #endif
+#if defined(PS5HIP_CANARY_LDS_STATIC) || defined(PS5HIP_CANARY_LDS_DYNAMIC) || defined(PS5HIP_CANARY_LDS_MIXED)
+#define PS5HIP_CANARY_LDS 1
+#endif
 #ifdef PS5HIP_WITH_ELEVATION
 #include "elevation.hpp"
 #endif
@@ -21,6 +24,7 @@
 
 namespace {
 #ifndef PS5HIP_RUNTIME_ONLY
+#ifndef PS5HIP_CANARY_LDS
 #ifdef PS5HIP_CANARY_WAVE
 constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
@@ -78,6 +82,7 @@ uint32_t bits(float value) {
     return result;
 }
 #endif
+#endif
 [[noreturn]] void quarantine(const char *reason = nullptr) {
     if (reason) std::fprintf(stderr, "PS5HIP FAIL: submission exception: %s\n", reason);
     std::fprintf(stderr, "PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n");
@@ -85,6 +90,9 @@ uint32_t bits(float value) {
     for (;;) ::sleep(1);
 }
 
+#ifdef PS5HIP_CANARY_LDS
+#include "native_lds.h"
+#else
 void validate(const Memory &output
 #ifdef PS5HIP_CANARY_VECTOR_ADD
               , const Memory &a, const Memory &b
@@ -216,12 +224,15 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
 }
 #endif
+#endif
 } // namespace
 
 int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_LDS)
+        lds_kernel;
 #elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
         "vector_add_twice";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)
