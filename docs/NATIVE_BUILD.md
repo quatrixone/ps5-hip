@@ -84,11 +84,16 @@ inputs. No firmware dump or console is needed. These slower converter tests are
 explicit rather than part of every host CTest run.
 
 The optional `--shell-exit-probe` build switch applies a separate conditional
-startup patch and selects the CPU application-finalization barrier described in
+startup patch and selects the finite application-finalization barrier described in
 `docs/CPU_SHUTDOWN_INVESTIGATION.md`. It adds the SystemService stub plus the
 explicit ShellCoreUtil library binding. Its mode, patch and source hashes are
-recorded in the receipt and thus in the immutable staging key. It is rejected for
-GPU profiles and is not enabled by default.
+recorded in the receipt and thus in the immutable staging key. It is available for
+runtime, indexed-store and vector-add profiles, and is not enabled by default.
+Only the CPU lifecycle has been observed on hardware. GPU candidates must finish
+submission, validate output and explicitly close all direct-memory allocations
+before returning zero. Command/marker cleanup failure throws even after completion;
+unresolved GPU ownership parks without unwinding or requesting shell closure.
+Any nonzero main result also parks for the bounded exact-title controller.
 
 The candidate uses native title startup, the pinned SDK's static libc++, ABI and
 unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel

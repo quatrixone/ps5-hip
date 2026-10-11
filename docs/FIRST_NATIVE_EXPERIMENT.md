@@ -1,6 +1,8 @@
 # First native experiment sequence
 
-Status: offline preparation and read-only preflight. No console run has occurred. The user selected
+Status: the CPU shell-managed lifecycle passed one run on firmware 6.02; GPU
+cases remain unrun. Ordinary C exit still faults; see the shutdown investigation
+and `evidence/native-shell-exit.json`. The user selected
 title `PPSA99014` after a PPSA99012 collision. Firmware, service endpoints, lock ownership and package hashes must be recorded
 in the local experiment receipt before execution. Use the shared-console runbook
 referenced by AGENTS.md; no old project's environment or lock waiver applies.
@@ -45,13 +47,27 @@ GPU diagnosis. It can precede main or indicate a failed log open. Capture the
 bounded title-specific loader/service evidence and investigate offline.
 
 External observation deadline: 20 seconds from the confirmed launch request.
-No hardware controller is implemented in this repository yet; the shared-console
-protocol must bound observation and close only the configured development title.
+Pinned title-aware controllers are available; the shared-console protocol must
+bound observation and close only the configured development title.
 
 Next decision: proceed to one GPU case only after startup and teardown pass. If
 startup fails, keep all GPU cases unrun and isolate the CPU/runtime boundary.
 
 ## Case 2: indexed store
+
+Build this candidate explicitly with `--shell-exit-probe`. On successful GPU
+completion, the queue checks command and marker allocation teardown, and the
+harness validates output and closes kernel/code/data allocations before returning
+zero. The shell barrier then observes application callbacks, runs application fini
+and requests closure. Require all six shutdown/shell records from the CPU
+experiment after the GPU PASS record, title self-stop before host cleanup, no
+fatal signal/loader error, sandbox/image release and healthy services. This is
+an explicit shell-managed finite-job contract; it does not qualify ordinary C exit.
+
+If command/marker cleanup fails after completion, the harness reports failure and
+returns nonzero; the barrier parks for host cleanup. If completion is uncertain,
+quarantine retains all potentially active allocations and never enters the barrier.
+Neither path may count as success or trigger an automatic retry.
 
 Hypothesis: the selected HIP compiler profile and native launch state correctly
 establish global pointers, kernarg SGPRs, workgroup/work-item IDs, wave32 execution

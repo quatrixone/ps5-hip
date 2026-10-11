@@ -39,6 +39,21 @@ class LogTests(unittest.TestCase):
                         f"PS5HIP PASS kernel={kernel} exact_values=73 guards=unchanged allocations=closed\n").encode()
                 self.assertEqual(module.check_log(data, target, kernel)["application_result"], "application-pass")
                 self.assertNotEqual(module.check_log(data.replace(b"values=73", b"values=72"), target, kernel)["application_result"], "application-pass")
+                suffix = (b"PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                          b"PS5HIP SHUTDOWN static-dtor=observed\n"
+                          b"PS5HIP SHELL_EXIT application-fini=completed\n"
+                          b"PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+                complete = data + suffix
+                result = module.check_log(complete, target, kernel, shell_exit_probe=True)
+                self.assertEqual(result["application_result"], "application-pass")
+                self.assertFalse(result["hardware_gate_passed"])
+                for bad in (data, suffix + data, complete[:-1],
+                            complete.replace(b"allocations=closed", b"allocations=retained"),
+                            complete.replace(b"request-return=0", b"request-return=-1"),
+                            complete + b"PS5HIP FAIL: cleanup\n",
+                            complete + b"PS5HIP QUARANTINED: unresolved\n"):
+                    self.assertNotEqual(module.check_log(bad, target, kernel, shell_exit_probe=True)
+                                        ["application_result"], "application-pass")
 
     def test_input_bounds(self):
         with self.assertRaises(ValueError):

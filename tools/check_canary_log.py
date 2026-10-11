@@ -7,7 +7,7 @@ import pathlib
 
 
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
-    if (shutdown_probe or shell_exit_probe) and kernel != "runtime":
+    if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
     if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add"):
         raise ValueError("unsupported canary profile")

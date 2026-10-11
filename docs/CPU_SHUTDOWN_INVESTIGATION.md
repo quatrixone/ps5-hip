@@ -140,8 +140,9 @@ process closure instead of running the remaining platform finalizers. The CPU
 case has no worker threads; no claim about thread-local destructors, concurrent
 shutdown, framework teardown or abrupt `_Exit` semantics follows from it.
 
-The original platform-exit diagnostic remains the default. The new option is
-rejected for GPU candidates. If main fails, callback order is wrong, persistence
+The original platform-exit diagnostic remains the default. The option was initially
+CPU-only; finite GPU build preparation now uses the same barrier, with no GPU
+hardware qualification yet. If main fails, callback order is wrong, persistence
 fails, or the service returns an error, the probe records failure and waits for
 the existing exact-title controller; it does not retry or fall back to syscall 1.
 The host model checks real C++ exit-callback ordering with a separate application

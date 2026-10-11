@@ -1,4 +1,4 @@
-// CPU-only diagnostic: finish application callbacks while platform libraries live.
+// Finite canary lifecycle: finish application callbacks while platform libraries live.
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>

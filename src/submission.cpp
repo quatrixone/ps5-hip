@@ -53,6 +53,10 @@ SubmissionResult SubmissionQueue::submit_and_wait(const std::vector<uint32_t> &c
             for (auto &memory : held_) memory->complete_gpu_use();
             held_.clear();
             poisoned_ = false;
+            const bool commands_closed = command_memory->close();
+            const bool marker_closed = marker_memory->close();
+            if (!commands_closed || !marker_closed)
+                throw ObjectError("completed submission allocation teardown failed");
             return {SubmissionStatus::Complete};
         }
         const uint64_t now = backend_.now_ns();

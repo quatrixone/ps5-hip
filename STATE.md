@@ -85,11 +85,13 @@ health were confirmed. Previous image and log bytes were preserved. See
 Ordinary C exit remains unresolved: both previous CPU cases reached SIGSYS after
 runtime checks. Shell-managed closure deliberately leaves remaining platform
 finalizers to process reclamation. This one CPU run establishes neither general
-C exit, worker-thread/framework cleanup nor any GPU capability. The builder still
-rejects the shell probe for GPU candidates. Do not rerun the failed diagnostics.
+C exit, worker-thread/framework cleanup nor any GPU capability. The builder now
+allows an explicit shell probe for finite GPU candidates; none has run.
+Command/marker teardown is checked before reporting submission success, with
+injected unmap/release failure tests. Do not rerun the failed diagnostics.
 The failed .40 process must have recovery established before another run there.
 
-Next prepare an explicit finite-GPU lifecycle offline, including completion,
+Continue finite-GPU lifecycle preparation offline, including completion,
 resource cleanup and failure handling before shell closure. Inspect its ISA,
 commit and freeze the candidate, and define bounded acceptance before deployment.
 The first hardware compute goal remains exact execution of a small HIP-compiled

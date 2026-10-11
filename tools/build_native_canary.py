@@ -19,10 +19,8 @@ def main():
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
     parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add"], required=True)
-    parser.add_argument("--shell-exit-probe", action="store_true", help="CPU-only application lifecycle diagnostic")
+    parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
-    if args.shell_exit_probe and args.kernel != "runtime":
-        parser.error("shell-exit probe is restricted to the CPU runtime case")
     lock = json.loads((ROOT / "dependencies.json").read_text())
     revision = lock["native_tools"]["revision"]
     sdk = ROOT / ".deps/sdk"
@@ -79,7 +77,7 @@ def main():
     compiler = ROOT / "tools/ps5-clangxx"
     objects = []
     sources = [native / "app_crt.cpp", ROOT / "tools/native_canary.cpp", elevation / "client/elevation.cpp"]
-    if args.kernel == "runtime":
+    if args.kernel == "runtime" or args.shell_exit_probe:
         sources.append(ROOT / "tools" / ("native_shell_exit_probe.cpp" if args.shell_exit_probe else "native_shutdown_probe.cpp"))
     sources += [ROOT / "src" / name for name in
                 ["code_object.cpp", "launch.cpp", "native_memory.cpp", "submission.cpp", "agc_backend.cpp"]]

@@ -55,7 +55,8 @@ class CaseTests(unittest.TestCase):
 
     def test_frozen_shutdown_mode_is_exposed_and_restricted(self):
         for mode, kernel, valid in (("shell-request-probe", "runtime", True),
-                                     ("shell-request-probe", "vector_add", False),
+                                     ("shell-request-probe", "vector_add", True),
+                                     ("shell-request-probe", "indexed_store", True),
                                      ("unknown", "runtime", False)):
             self.write(self.stage / "build-receipt.json", {"shutdown_mode": mode})
             candidate = self.packages["candidates"][0]

@@ -8,6 +8,8 @@ namespace {
 std::map<int64_t, void *> allocations;
 int64_t next_id = 1;
 unsigned released = 0;
+bool fail_unmap = false, fail_release = false;
+unsigned cleanup_failures = 0;
 void check(bool ok) { if (!ok) throw std::runtime_error("submission assertion failed"); }
 template<class F> void reject(F f) {
     try { f(); } catch (const ps5hip::ObjectError &) { return; }
@@ -54,8 +56,12 @@ extern "C" int32_t sceKernelAllocateDirectMemory(int64_t, int64_t, size_t bytes,
 extern "C" int32_t sceKernelMapDirectMemory(void **address, size_t, int, int, int64_t physical, size_t) {
     *address = allocations.at(physical); return 0;
 }
-extern "C" int32_t sceKernelMunmap(void *, size_t) { return 0; }
+extern "C" int32_t sceKernelMunmap(void *, size_t) {
+    if (fail_unmap) { fail_unmap = false; ++cleanup_failures; return -1; }
+    return 0;
+}
 extern "C" int32_t sceKernelReleaseDirectMemory(int64_t physical, size_t) {
+    if (fail_release) { fail_release = false; ++cleanup_failures; return -1; }
     std::free(allocations.at(physical)); allocations.erase(physical); ++released; return 0;
 }
 
@@ -72,6 +78,20 @@ int main() {
             model.writes_after = 3;
             check(queue.submit_and_wait(commands, {}, 10).status == SubmissionStatus::Complete);
             check(model.polls == 3);
+        }
+        for (bool unmap : {false, true}) {
+            Model model; SubmissionQueue queue(model);
+            auto resource = std::make_shared<NativeMemory>(64, 64, false);
+            const auto before = released;
+            const auto failures_before = cleanup_failures;
+            fail_unmap = unmap;
+            fail_release = !unmap;
+            reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
+            // Completion released GPU holds, but a cleanup failure must not pass.
+            check(!queue.poisoned() && model.submits == 1);
+            check(cleanup_failures == failures_before + 1);
+            check(released == before + 2 && allocations.size() == 1);
+            check(resource->close() && allocations.empty());
         }
         for (unsigned failure = 0; failure < 6; ++failure) {
             Model model; SubmissionQueue queue(model);

@@ -40,8 +40,7 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
     shutdown_mode = read_json(stage / "build-receipt.json").get("shutdown_mode", "platform-exit")
-    if shutdown_mode not in ("platform-exit", "shell-request-probe") or (
-            shutdown_mode == "shell-request-probe" and manifest["kernel"] != "runtime"):
+    if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
     actual = {}
     for path in (stage / "app").rglob("*"):
