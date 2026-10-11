@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "classification": "offline-wave-harness-host-and-cross-compile",
+  "hardware_validated": false,
+  "full_native_link": false,
+  "source_sha256": {
+    "CMakeLists.txt": "7ccf11958bdd0167cefc9b528ec1efe3fb9c7805d3dd95c6fd866d0f4ff2059d",
+    "tools/native_canary.cpp": "37aabc124e80041706b73cda5723df556f6b4923caed285f298e5114f03810f0",
+    "tools/build_native_canary.py": "f68b41af58bfe670c50df0efef3db9c2b1d72739628465a5ff547712a28ff4aa",
+    "tools/probe_wave_compiler.py": "737c610acdbbd6a4f67ab4fa0c24a0ec931ac878dea9fe9ed08e93120d3671a3",
+    "tools/check_canary_log.py": "bc5f10718d5857c71ac41d53aed7df8f433b1996794828e1ed858567783747ff",
+    "tools/stage_native_title.py": "7d5fdf8fc5c86297f9486c9e17737edf4898d18c3932ec44e88607d5b2c71aaa",
+    "tests/native_canary_test.cpp": "c76a2b18752d618865fc2b39a00d329e4c8552703e34d4d0a5f88dfa66a139c6",
+    "tests/launch_test.cpp": "eca2a646f24ffeab0f0aac3ed5baa6719d6bc2a45d191749c3902899868c520c",
+    "tests/compiler_version_test.py": "1caaebe7302ed74cf8368e86c46337fd4c9aa76f9804dbda8f44b3155b3b7b2d",
+    "tests/canary_log_test.py": "df29aa2a76254fa82405220aa7ae31c43799c97d004a0b6728c196b313cb7e5e",
+    "tests/title_stage_test.py": "72a2e4b11d1833febf0f63b3070a68cec9ce8572ae28bb5b8ddf33d7b8964b4b"
+  },
+  "reports_sha256": {
+    "comparison.json": "5ddb21c515b125c7d099297761a7a697745e746d0da0d4e003997f44bb600ec4",
+    "native-compile/report.json": "a794c47bac5afe290f96ac3df4c6e94ed091861fcd949aa06353244ba405b5bb",
+    "host-checks.json": "59e12d94f53f54eca66df6cb34b149f25b34211552256be8742410eb106bb45c"
+  },
+  "device_recipe_sha256": "737c610acdbbd6a4f67ab4fa0c24a0ec931ac878dea9fe9ed08e93120d3671a3",
+  "tool_versions": {
+    "clang++": "Ubuntu clang version 18.1.8 (20ubuntu8)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n",
+    "ld.lld": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)\n",
+    "llvm-readobj": "Ubuntu LLVM version 18.1.8\n  Optimized build.\n",
+    "llvm-objdump": "Ubuntu LLVM version 18.1.8\n  Optimized build.\n\n\n  Registered Targets:\n    aarch64     - AArch64 (little endian)\n    aarch64_32  - AArch64 (little endian ILP32)\n    aarch64_be  - AArch64 (big endian)\n    amdgcn      - AMD GCN GPUs\n    arm         - ARM\n    arm64       - ARM64 (little endian)\n    arm64_32    - ARM64 (little endian ILP32)\n    armeb       - ARM (big endian)\n    avr         - Atmel AVR Microcontroller\n    bpf         - BPF (host endian)\n    bpfeb       - BPF (big endian)\n    bpfel       - BPF (little endian)\n    hexagon     - Hexagon\n    lanai       - Lanai\n    loongarch32 - 32-bit LoongArch\n    loongarch64 - 64-bit LoongArch\n    m68k        - Motorola 68000 family\n    mips        - MIPS (32-bit big endian)\n    mips64      - MIPS (64-bit big endian)\n    mips64el    - MIPS (64-bit little endian)\n    mipsel      - MIPS (32-bit little endian)\n    msp430      - MSP430 [experimental]\n    nvptx       - NVIDIA PTX 32-bit\n    nvptx64     - NVIDIA PTX 64-bit\n    ppc32       - PowerPC 32\n    ppc32le     - PowerPC 32 LE\n    ppc64       - PowerPC 64\n    ppc64le     - PowerPC 64 LE\n    r600        - AMD GPUs HD2XXX-HD6XXX\n    riscv32     - 32-bit RISC-V\n    riscv64     - 64-bit RISC-V\n    sparc       - Sparc\n    sparcel     - Sparc LE\n    sparcv9     - Sparc V9\n    systemz     - SystemZ\n    thumb       - Thumb\n    thumbeb     - Thumb (big endian)\n    ve          - VE\n    wasm32      - WebAssembly 32-bit\n    wasm64      - WebAssembly 64-bit\n    x86         - 32-bit X86: Pentium-Pro and above\n    x86-64      - 64-bit X86: EM64T and AMD64\n    xcore       - XCore\n    xtensa      - Xtensa 32\n"
+  },
+  "native_compile": {
+    "hardware_validated": false,
+    "compile_only": true,
+    "cases": [
+      {
+        "target": "gfx1013",
+        "kernel": "wave_full",
+        "command": [
+          "<ROOT>/tools/ps5-clangxx",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fPIC",
+          "-fvisibility=hidden",
+          "-I",
+          "<ROOT>/include",
+          "-I",
+          "<ROOT>/.deps/elevation/client",
+          "-DPS5HIP_WITH_ELEVATION=1",
+          "-DPS5HIP_SHELL_EXIT_PROBE=1",
+          "-DPS5HIP_CANARY_TARGET=\"gfx1013\"",
+          "-DPS5HIP_CANARY_WAVE_FULL=1",
+          "-c",
+          "<ROOT>/tools/native_canary.cpp",
+          "-o",
+          "<ROOT>/results/wave-native-integration-20261012/native-compile/gfx1013-wave_full.o"
+        ],
+        "object_sha256": "9c60fe17cc73d2a70654d2a3caa289cb1a69f7787ae36c0e353c7ea1e396bd2f",
+        "device_object_sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a"
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "wave_partial",
+        "command": [
+          "<ROOT>/tools/ps5-clangxx",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fPIC",
+          "-fvisibility=hidden",
+          "-I",
+          "<ROOT>/include",
+          "-I",
+          "<ROOT>/.deps/elevation/client",
+          "-DPS5HIP_WITH_ELEVATION=1",
+          "-DPS5HIP_SHELL_EXIT_PROBE=1",
+          "-DPS5HIP_CANARY_TARGET=\"gfx1013\"",
+          "-DPS5HIP_CANARY_WAVE_PARTIAL=1",
+          "-c",
+          "<ROOT>/tools/native_canary.cpp",
+          "-o",
+          "<ROOT>/results/wave-native-integration-20261012/native-compile/gfx1013-wave_partial.o"
+        ],
+        "object_sha256": "233b189b1230e6f52772288b05e263366bb7a126f608432acbefc7ce226bef0e",
+        "device_object_sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a"
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "wave_full",
+        "command": [
+          "<ROOT>/tools/ps5-clangxx",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fPIC",
+          "-fvisibility=hidden",
+          "-I",
+          "<ROOT>/include",
+          "-I",
+          "<ROOT>/.deps/elevation/client",
+          "-DPS5HIP_WITH_ELEVATION=1",
+          "-DPS5HIP_SHELL_EXIT_PROBE=1",
+          "-DPS5HIP_CANARY_TARGET=\"gfx1030\"",
+          "-DPS5HIP_CANARY_WAVE_FULL=1",
+          "-c",
+          "<ROOT>/tools/native_canary.cpp",
+          "-o",
+          "<ROOT>/results/wave-native-integration-20261012/native-compile/gfx1030-wave_full.o"
+        ],
+        "object_sha256": "7714c04b673c7e68518099c25a194a568d1b3575aeddded720cc5774a127f2e8",
+        "device_object_sha256": "1c4cab59ab9eb8e58f616e62e2a5bbd0c462777e4111dece6e4148a9ae9e2d45"
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "wave_partial",
+        "command": [
+          "<ROOT>/tools/ps5-clangxx",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fPIC",
+          "-fvisibility=hidden",
+          "-I",
+          "<ROOT>/include",
+          "-I",
+          "<ROOT>/.deps/elevation/client",
+          "-DPS5HIP_WITH_ELEVATION=1",
+          "-DPS5HIP_SHELL_EXIT_PROBE=1",
+          "-DPS5HIP_CANARY_TARGET=\"gfx1030\"",
+          "-DPS5HIP_CANARY_WAVE_PARTIAL=1",
+          "-c",
+          "<ROOT>/tools/native_canary.cpp",
+          "-o",
+          "<ROOT>/results/wave-native-integration-20261012/native-compile/gfx1030-wave_partial.o"
+        ],
+        "object_sha256": "30df78e8eddc07f5380a2b9993ea2f3d96777ad646d3eb48b96290bba4c5a410",
+        "device_object_sha256": "1c4cab59ab9eb8e58f616e62e2a5bbd0c462777e4111dece6e4148a9ae9e2d45"
+      }
+    ],
+    "source_sha256": "37aabc124e80041706b73cda5723df556f6b4923caed285f298e5114f03810f0",
+    "device_report_sha256": "5ddb21c515b125c7d099297761a7a697745e746d0da0d4e003997f44bb600ec4"
+  },
+  "host_checks": {
+    "hardware_validated": false,
+    "checks": [
+      {
+        "command": [
+          "ctest",
+          "--test-dir",
+          "<ROOT>/build/host",
+          "-R",
+          "canary|launch_gfx|compiler_version|title_staging",
+          "--output-on-failure"
+        ],
+        "exit_code": 0,
+        "log_sha256": "a5356e55cfadf610105f5fa04327da984fb512edb6c61796a97162f8c826f5ca"
+      },
+      {
+        "command": [
+          "<ROOT>/build/host/launch_test",
+          "<ROOT>/results/wave-native-integration-20261012/gfx1013-O2/wave.hsaco"
+        ],
+        "exit_code": 0,
+        "log_sha256": "b0014a338416542b55e9c7036adebd4797993772f14a0155f32dd55f2b01649d"
+      },
+      {
+        "command": [
+          "<ROOT>/build/host/launch_test",
+          "<ROOT>/results/wave-native-integration-20261012/gfx1030-O2/wave.hsaco"
+        ],
+        "exit_code": 0,
+        "log_sha256": "5efa1a3fd6a9338113c0653bf1477037f8e858f1fe0964a53ed72005d17e0108"
+      }
+    ]
+  },
+  "focused_ctest_cases_passed": 9,
+  "oracle": "64 invocations; four words each; scalar sum/ballot test oracle; all 256 single-word corruptions and allocation guards rejected; partial inactive words remain deadbeef",
+  "launch_checks": "Both entries/targets; one group of64; one8-byte pointer; exact argument bytes and dispatch packet; missing/extra arguments rejected",
+  "limits": [
+    "No package or console run",
+    "No full native link yet",
+    "GPU wave and inactive-lane semantics unqualified",
+    "Frozen indexed-store candidate unchanged"
+  ]
+}

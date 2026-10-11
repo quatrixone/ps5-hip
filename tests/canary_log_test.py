@@ -67,6 +67,23 @@ class LogTests(unittest.TestCase):
         with self.assertRaises(UnicodeDecodeError):
             module.check_log(b"\xff", "gfx1013", "runtime")
 
+    def test_wave_contract(self):
+        for target in ("gfx1013", "gfx1030"):
+            for kernel in ("wave_full", "wave_partial"):
+                data = (f"PS5HIP START target={target} kernel={kernel}\n"
+                        "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n"
+                        f"PS5HIP SUBMIT target={target} kernel={kernel} invocations=64 output_words=256 groups=1 timeout_ms=2000\n"
+                        f"PS5HIP PASS kernel={kernel} exact_values=256 guards=unchanged allocations=closed\n").encode()
+                self.assertEqual(module.check_log(data, target, kernel)["application_result"], "application-pass")
+                for bad in (data.replace(b"invocations=64", b"invocations=32"),
+                            data.replace(b"output_words=256", b"output_words=128"),
+                            data.replace(b"groups=1", b"groups=2"),
+                            data.replace(b"exact_values=256", b"exact_values=128"),
+                            data.replace(b"guards=unchanged", b"guards=changed"), data[:-1],
+                            data.replace(kernel.encode(), b"indexed_store"),
+                            data + b"PS5HIP QUARANTINED: unresolved\n"):
+                    self.assertNotEqual(module.check_log(bad, target, kernel)["application_result"], "application-pass")
+
     def test_shell_exit_requires_returned_success_and_does_not_prove_exit(self):
         suffix = (b"PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
                   b"PS5HIP SHUTDOWN static-dtor=observed\n"

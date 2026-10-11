@@ -64,6 +64,25 @@ class StageTests(unittest.TestCase):
         self.run_stage()
         self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"fixture shader")
 
+    def test_wave_requires_verified_shader(self):
+        for kernel in ("wave_full", "wave_partial"):
+            self.receipt["kernel"] = kernel
+            self.output = self.root / kernel
+            self.receipt["artifacts"].pop("canary.hsaco", None)
+            with self.assertRaisesRegex(ValueError, "invalid offline candidate receipt"):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+            self.receipt["artifacts"]["canary.hsaco"] = module.digest(b"wave shader")
+            shader = self.build / "candidate/canary.hsaco"
+            shader.write_bytes(b"tampered")
+            with self.assertRaisesRegex(ValueError, "candidate digest"):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+            shader.write_bytes(b"wave shader")
+            manifest = self.run_stage()
+            self.assertEqual(manifest["expected_log"], f"/chosen/results/ps5-hip-gfx1013-{kernel}.log")
+            self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"wave shader")
+
     def test_package_inventory(self):
         manifest = self.run_stage()
         app = self.output / "app"

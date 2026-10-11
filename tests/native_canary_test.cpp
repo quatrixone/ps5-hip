@@ -63,7 +63,7 @@ int main() {
         {
             auto output = buffer();
             require(argument(output).value == output->range().address + 64);
-            require(argument(output).buffer_bytes == 73 * 4);
+            require(argument(output).buffer_bytes == count * 4);
 #ifdef PS5HIP_CANARY_VECTOR_ADD
             auto a = buffer(), b = buffer();
             for (uint32_t i = 0; i < count; ++i) {
@@ -76,6 +76,33 @@ int main() {
             data(b)[72] ^= 1; reject(verify); data(b)[72] ^= 1;
             data(a)[-1] ^= 1; reject(verify); data(a)[-1] ^= 1;
             data(b)[count] ^= 1; reject(verify); data(b)[count] ^= 1;
+#elif defined(PS5HIP_CANARY_WAVE)
+            auto verify = [&] { validate(output); };
+            reject(verify);
+#ifdef PS5HIP_CANARY_WAVE_PARTIAL
+            constexpr uint32_t first = 4, end = 20;
+#else
+            constexpr uint32_t first = 0, end = 32;
+#endif
+            for (uint32_t base : {0u, 32u}) {
+                uint32_t sum = 0, ballot = 0;
+                for (uint32_t lane = first; lane < end; ++lane) {
+                    sum += base + lane + 1;
+                    if ((base + lane + 1) % 2) ballot |= 1u << lane;
+                }
+                for (uint32_t lane = first; lane < end; ++lane) {
+                    auto *record = data(output) + (base + lane) * 4;
+                    record[0] = base + first + 1;
+                    record[1] = base + lane + (lane % 2 ? 0 : 2);
+                    record[2] = ballot;
+                    record[3] = sum;
+                }
+            }
+            verify();
+            // Every component and every inactive sentinel must participate in validation.
+            for (uint32_t i = 0; i < count; ++i) {
+                data(output)[i] ^= 1; reject(verify); data(output)[i] ^= 1;
+            }
 #else
             auto verify = [&] { validate(output); };
             reject(verify); // A completion marker without shader writes must fail.

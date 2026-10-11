@@ -267,6 +267,27 @@ instructions are cross-compiled but not exercised by these mock tests. Thirteen
 C++ CTest cases pass with sanitizers; a fourteenth Python case covers seven staging
 and package-inventory scenarios. None constitutes GPU evidence.
 
+## Offline wave harness
+
+The native harness also accepts `wave_full` and `wave_partial`. Generate a fresh
+`probe_wave_compiler.py` result and supply it explicitly:
+
+```sh
+python3 tools/probe_wave_compiler.py --output results/wave-probes
+python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel wave_full --wave-probes results/wave-probes --shell-exit-probe
+```
+
+Use `wave_partial` for the active-lanes-4-through-19 case. The builder verifies
+the O2 object's source/recipe/tool identities, size/hash and actual linker trace.
+Both profiles dispatch one group of 64 threads with one output pointer, validate
+256 words and the full allocation guards, and use the existing timeout/quarantine
+and shutdown contract. The partial case requires every inactive word to remain
+`0xdeadbeef`. These later probes do not replace the frozen indexed-store experiment.
+
+Host negative tests, real-object launch preparation and four PS5 harness
+translation-unit compilations pass; see `evidence/offline-wave-native-harness.json`.
+This is not a full native link, packaged candidate or GPU wave qualification.
+
 ## Dependency provenance
 
 The SDK fork is `mihawk-99/PS5_PayloadSDK` at

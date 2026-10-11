@@ -17,6 +17,26 @@ int main(int argc, char **argv) {
         using ps5hip::GpuRange;
         using ps5hip::LaunchArgument;
         const GpuRange module{0x200040000, 0x4000}, kernarg{0x4000000000, 0x4000};
+        if (!object.kernels.empty() && object.kernels[0].name == "wave_full") {
+            check(object.kernels.size() == 2 && object.kernels[1].name == "wave_partial");
+            const std::vector<LaunchArgument> wave_args{{0x4000008000, 64 * 4 * 4}};
+            for (const auto &kernel : object.kernels) {
+                check(kernel.arguments.size() == 1 && kernel.arguments[0].kind == "global_buffer" &&
+                      kernel.arguments[0].size == 8 && kernel.arguments[0].offset == 0 && kernel.kernarg_size == 8);
+                const auto launch = ps5hip::prepare_initial_launch(object, kernel.name, module, kernarg, 1, wave_args);
+                check(launch.groups_x == 1 && launch.threads == std::array<uint32_t, 3>{64, 1, 1});
+                check(launch.entry_address == module.address + kernel.entry_address);
+                check(launch.kernargs == std::vector<uint8_t>({0, 0x80, 0, 0, 0x40, 0, 0, 0}));
+                const auto words = ps5hip::encode_initial_dispatch(launch);
+                check(words.size() >= 5 && std::vector<uint32_t>(words.end() - 5, words.end()) ==
+                      std::vector<uint32_t>({0xc0031502, 1, 1, 1, 0x8005}));
+                reject([&] { ps5hip::prepare_initial_launch(object, kernel.name, module, kernarg, 1, {}); });
+                reject([&] { ps5hip::prepare_initial_launch(object, kernel.name, module, kernarg, 1,
+                                                           {wave_args[0], {64, 0}}); });
+            }
+            std::cout << object.target << ": both wave entry, single-pointer packing and one-group dispatch checks passed\n";
+            return 0;
+        }
         const std::vector<LaunchArgument> args{{0x4000008000, 256}, {64, 0}};
         auto prepare = [&](GpuRange code, GpuRange params, uint32_t groups,
                            const std::vector<LaunchArgument> &values) {

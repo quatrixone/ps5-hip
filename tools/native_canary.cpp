@@ -5,6 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
+#if defined(PS5HIP_CANARY_WAVE_FULL) || defined(PS5HIP_CANARY_WAVE_PARTIAL)
+#define PS5HIP_CANARY_WAVE 1
+#endif
 #ifdef PS5HIP_WITH_ELEVATION
 #include "elevation.hpp"
 #endif
@@ -15,12 +18,21 @@
 
 namespace {
 #ifndef PS5HIP_RUNTIME_ONLY
+#ifdef PS5HIP_CANARY_WAVE
+constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
+#else
 constexpr uint32_t count = 73, guard_words = 16, poison = 0xa5a5a5a5;
+#endif
 using Memory = std::shared_ptr<ps5hip::NativeMemory>;
 
 Memory buffer() {
     auto memory = std::make_shared<ps5hip::NativeMemory>((count + 2 * guard_words) * 4, 256, false);
+#ifdef PS5HIP_CANARY_WAVE
+    auto *words = static_cast<uint32_t *>(memory->cpu());
+    for (size_t i = 0; i < memory->range().bytes / 4; ++i) words[i] = poison;
+#else
     std::memset(memory->cpu(), 0xa5, memory->range().bytes);
+#endif
     return memory;
 }
 uint32_t *data(const Memory &memory) {
@@ -56,7 +68,20 @@ void validate(const Memory &output
 ) {
     check_guards(output);
     for (uint32_t i = 0; i < count; ++i) {
-#ifdef PS5HIP_CANARY_VECTOR_ADD
+#ifdef PS5HIP_CANARY_WAVE
+        const uint32_t invocation = i / 4, lane = invocation % 32, base = invocation - lane;
+#ifdef PS5HIP_CANARY_WAVE_PARTIAL
+        constexpr uint32_t first = 4, active = 16, ballot = 0x55550;
+#else
+        constexpr uint32_t first = 0, active = 32, ballot = 0x55555555;
+#endif
+        uint32_t expected = poison;
+        if (lane >= first && lane < first + active) {
+            const uint32_t values[] = {base + first + 1, base + first + ((lane - first) ^ 1u) + 1,
+                                      ballot, active * (2 * (base + first + 1) + active - 1) / 2};
+            expected = values[i % 4];
+        }
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
         const uint32_t expected = bits(float(i) * 0.25f + 2.0f);
         if (data(a)[i] != bits(float(i) * 0.5f) || data(b)[i] != bits(-float(i) * 0.25f + 2.0f))
             throw ps5hip::ObjectError("read-only input modified");
@@ -83,6 +108,11 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     std::vector<Memory> resources{module, kernarg, output};
     std::vector<ps5hip::LaunchArgument> arguments;
     const char *kernel = "indexed_store";
+#ifdef PS5HIP_CANARY_WAVE_FULL
+    kernel = "wave_full";
+#elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
+    kernel = "wave_partial";
+#endif
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     kernel = "vector_add";
     auto a = buffer(), b = buffer();
@@ -92,14 +122,26 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     }
     resources.push_back(a); resources.push_back(b);
     arguments = {argument(a), argument(b), argument(output), {count}};
+#elif defined(PS5HIP_CANARY_WAVE)
+    arguments = {argument(output)};
 #else
     arguments = {argument(output), {count}};
 #endif
+#ifdef PS5HIP_CANARY_WAVE
+    constexpr uint32_t groups = 1;
+#else
+    constexpr uint32_t groups = 2;
+#endif
     const auto launch = ps5hip::prepare_initial_launch(object, kernel, module->range(),
-                                                      kernarg->range(), 2, arguments);
+                                                      kernarg->range(), groups, arguments);
     std::memcpy(kernarg->cpu(), launch.kernargs.data(), launch.kernargs.size());
+#ifdef PS5HIP_CANARY_WAVE
+    std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=64 output_words=256 groups=1 timeout_ms=2000\n",
+                PS5HIP_CANARY_TARGET, kernel);
+#else
     std::printf("PS5HIP SUBMIT target=%s kernel=%s count=%u groups=2 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel, count);
+#endif
     std::fflush(nullptr);
     const auto result = queue.submit_and_wait(ps5hip::encode_initial_dispatch(launch), resources, 2000);
     if (result.status != ps5hip::SubmissionStatus::Complete) {
@@ -125,6 +167,10 @@ int main() {
         "runtime";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)
         "vector_add";
+#elif defined(PS5HIP_CANARY_WAVE_FULL)
+        "wave_full";
+#elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
+        "wave_partial";
 #else
         "indexed_store";
 #endif

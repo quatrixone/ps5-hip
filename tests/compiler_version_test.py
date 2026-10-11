@@ -96,6 +96,50 @@ class VersionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 builder.require_device_linker(trace, '/pinned/lld')
 
+    def test_native_wave_build_rejects_stale_or_ambiguous_provenance(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            files = {'tools/build_canaries.py': b'shared', 'tools/probe_wave_compiler.py': b'wave recipe',
+                     'kernels/wave.hip': b'wave source', 'wave/gfx1013-O2/wave.hsaco': b'object',
+                     'wave/gfx1013-O2/driver.txt': b'"/pinned/lld" "elf64_amdgpu" "--whole-archive"'}
+            for name, data in files.items():
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+            sha = lambda name: hashlib.sha256(files[name]).hexdigest()
+            case = {'target': 'gfx1013', 'optimization': '-O2', 'bytes': 6,
+                    'code_sha256': sha('wave/gfx1013-O2/wave.hsaco'),
+                    'driver_sha256': sha('wave/gfx1013-O2/driver.txt')}
+            report = {'recipe_sha256': sha('tools/probe_wave_compiler.py'),
+                      'shared_recipe_sha256': sha('tools/build_canaries.py'),
+                      'source_sha256': sha('kernels/wave.hip'),
+                      'tool_versions': {'lld': 'LLD 18.1.8'}, 'cases': [case]}
+            path = root / 'wave/comparison.json'
+            path.write_text(json.dumps(report))
+            with patch.object(native.shutil, 'which', return_value='/pinned/lld'):
+                self.assertEqual(native.verified_device_object(root, 'gfx1013', '18.1.8', root / 'wave')[0], b'object')
+                for name, data in files.items():
+                    (root / name).write_bytes(data + b'changed')
+                    with self.assertRaises(ValueError):
+                        native.verified_device_object(root, 'gfx1013', '18.1.8', root / 'wave')
+
+                    (root / name).write_bytes(data)
+                for cases in ([], [dict(case, optimization='-O1')], [case, case], [dict(case, bytes=7)],
+                              [{key: value for key, value in case.items() if key != 'driver_sha256'}]):
+                    report['cases'] = cases
+                    path.write_text(json.dumps(report))
+                    with self.assertRaises(ValueError):
+                        native.verified_device_object(root, 'gfx1013', '18.1.8', root / 'wave')
+
+    def test_wave_probe_option_is_bound_to_wave_kernels(self):
+        for kernel, extra in (('wave_full', []), ('wave_partial', []),
+                              ('runtime', ['--wave-probes', '/unused']),
+                              ('indexed_store', ['--wave-probes', '/unused'])):
+            argv = ['native', '--native-source', '/unused', '--target', 'gfx1013', '--kernel', kernel, *extra]
+            with patch.object(sys, 'argv', argv), patch('sys.stderr'), self.assertRaises(SystemExit) as error:
+                native.main()
+            self.assertEqual(error.exception.code, 2)
+
     def test_pinned_compiler_linker_and_inspectors(self):
         builder.require_tool_versions({"clang": "Ubuntu clang version 18.1.8 (20ubuntu8)",
                                        "lld": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",

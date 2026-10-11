@@ -150,7 +150,11 @@ atomics, wave operations and deliberate spilling; vector addition is insufficien
 Separate wave32 broadcast/shuffle/ballot/reduction probes compile at O1 and O2 for
 both targets, including lanes 4-19 active with lane zero inactive. Scalar expected
 outputs and ISA inventories are retained in `evidence/offline-wave-probes.json`.
-They have no native harness or GPU result and do not change the frozen candidate.
+Both now have guarded native harness profiles with 256-word oracles, strict log
+and staging support, verified O2 object provenance, and one-group launch checks.
+Nine focused host CTest cases and four PS5 harness translation-unit compilations
+pass; full linking and GPU behavior remain unverified. See
+`evidence/offline-wave-native-harness.json`. The frozen candidate is unchanged.
 The tested generic volatile private-address path remains a G3 compiler issue.
 An isolated contrast without `volatile` retains 144 private bytes but uses buffer
 scratch on both targets, with 33 private-address IR accesses and no flat-scratch

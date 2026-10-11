@@ -84,7 +84,8 @@ def main():
             assert 's_cbranch_execz' in partial_ops
             assert partial_ops & {'s_and_saveexec_b32', 'v_cmpx_gt_u32_e32'}
             result['cases'].append({'target': target, 'optimization': opt, 'command': command,
-                                    'code_sha256': sha(code), 'isa': inventory,
+                                    'code_sha256': sha(code), 'bytes': code.stat().st_size,
+                                    'driver_sha256': sha(directory / 'driver.txt'), 'isa': inventory,
                                     'metadata_sha256': sha(directory / 'metadata.txt'),
                                     'disassembly_sha256': sha(directory / 'isa.txt')})
     (args.output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n')
