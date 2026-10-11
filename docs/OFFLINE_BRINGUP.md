@@ -116,6 +116,10 @@ requires volatile semantics. Arbitrary generic private pointers are not qualifie
 The explicit address-space cast remains a diagnostic, not a public source
 requirement. Buffer-scratch allocation, descriptor setup, per-wave offsets and
 actual spill correctness also remain unimplemented/unverified.
+An isolated, proof-limited IR rewrite can preserve the volatile accesses and emit
+buffer instructions, but still requests flat-scratch initialization in its kernel
+descriptor even after reoptimization. It is not an accepted workaround. See
+[volatile private-address research](VOLATILE_PRIVATE_LOWERING.md).
 
 Native launch-state construction, cross-build and packaging now exist; see
 `STATE.md` for their separate CPU lifecycle results and limitations. Remaining

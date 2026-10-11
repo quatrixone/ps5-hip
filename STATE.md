@@ -151,6 +151,10 @@ An isolated contrast without `volatile` retains 144 private bytes but uses buffe
 scratch on both targets, with 33 private-address IR accesses and no flat-scratch
 setup. See `evidence/offline-private-inference.json`. This does not qualify
 arbitrary pointers or native scratch execution and is not a volatile-semantics fix.
+Further isolated IR research preserves the volatile accesses and gets buffer
+instructions, but the descriptor still requests flat-scratch initialization;
+the initial loader rejects it. See `docs/VOLATILE_PRIVATE_LOWERING.md` and
+`evidence/offline-volatile-private-lowering.json`. No compiler workaround is accepted.
 
 G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
 by default, and accepts gfx1013 through its custom-target hook. This is target
