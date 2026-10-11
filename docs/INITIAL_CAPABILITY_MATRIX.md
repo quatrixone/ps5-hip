@@ -44,5 +44,5 @@ console experiment. Unknown instructions, scratch setup, LDS use, device calls,
 matrix instructions and privileged/debug state are outside this first experiment.
 
 The authoritative package/controller hashes are in
-`evidence/offline-corrected-gpu-package.json` and the package catalog. Runtime
+`evidence/offline-diagnostic-gpu-package.json` and the package catalog. Runtime
 acceptance and timeouts remain those in `FIRST_NATIVE_EXPERIMENT.md`.

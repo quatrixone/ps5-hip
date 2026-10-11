@@ -109,12 +109,14 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
-- Current next GPU candidate: `PPSA99014/gfx1013-indexed_store-1288205d1a2a`,
-  source `5eb664d5c361784e7d9845b2b89261b3192a04b8`, shell-managed shutdown,
-  image SHA-256 `61e81d5e7103ff120f7b2b8f7bbcaeecc4eb72106ab639932e27bbe7ae0cf5f3`.
+- Current next GPU candidate: `PPSA99014/gfx1013-indexed_store-3d295773d2fb`,
+  source `15bfc358f014b4231fcf9f84918b79b1b301008f`, shell-managed shutdown,
+  image SHA-256 `fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
+  It adds exception-reason logging before quarantine without changing ownership
+  or retry behavior. The preceding `1288205d1a2a` package is preserved as history.
   Corrected LLVM/LLD 18.1.8 device object and native imports were inspected;
   filesystem, full extraction and local candidate/controller verification pass.
-  See `evidence/offline-corrected-gpu-package.json`. It has not run. Complete the
+  See `evidence/offline-diagnostic-gpu-package.json`. It has not run. Complete the
   outstanding G1 compiler comparison before console use, then reverify the exact
   candidate and current environment. The earlier image with digest `aaa74094...`
   is revoked in the package catalog because it used the unintended host linker.

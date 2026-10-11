@@ -47,7 +47,7 @@ Host boundary tests use explicit mock AGC functions; no system GPU API is called
 ```sh
 python3 tools/prepare_host_zlib.py --archive /path/to/zlib-1.3.2.tar.gz
 python3 tools/prepare_elevation.py --eden-source /path/to/ProsperoEden --lapy-source /path/to/PS5-Lapy-JB-Daemon --logging-header /path/to/pinned/ps5log.h
-python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel indexed_store
+python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel indexed_store --shell-exit-probe
 ```
 
 The target must be `gfx1013` or `gfx1030`; the kernel must be `indexed_store` or
@@ -134,7 +134,7 @@ sources, identity and staging tool before running:
 ```sh
 python3 tools/stage_native_title.py --target gfx1013 --kernel runtime --results-dir /chosen/results
 python3 tools/prepare_ufs2tool.py --source /path/to/cached/UFS2Tool
-python3 tools/package_native_title.py --stage dist/PPSA99012/<candidate-directory>
+python3 tools/package_native_title.py --stage dist/PPSA99014/<candidate-directory>
 ```
 
 Staging validates the build receipt against current source and candidate bytes,
@@ -244,6 +244,9 @@ operations. A submit/kick error, post-submit exception, backward clock or timeou
 leaves the queue poisoned and its allocations retained. A late marker cannot
 silently restore the queue. Each backend allows only one queue lifetime; the native
 AGC adapter allows only one initialization attempt per process.
+The harness logs a standard exception's reason before quarantining a poisoned
+queue, with an explicit unknown-exception fallback. Those diagnostics do not
+change ownership, parking or the prohibition on automatic retry.
 
 The initial API accepts at most 16,384 caller command words and a completion wait
 of 1-10,000 ms. A finite poll budget also terminates a clock that stops advancing.

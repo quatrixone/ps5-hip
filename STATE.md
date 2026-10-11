@@ -122,16 +122,21 @@ Command/marker teardown is checked before reporting submission success, with
 injected unmap/release failure tests. Do not rerun the failed diagnostics.
 The failed .40 process must have recovery established before another run there.
 
-The finite-GPU indexed-store package is frozen at source `5eb664d`, stage
-`gfx1013-indexed_store-1288205d1a2a`, image SHA
-`61e81d5e7103ff120f7b2b8f7bbcaeecc4eb72106ab639932e27bbe7ae0cf5f3`.
+The finite-GPU indexed-store package is frozen at source `15bfc35`, stage
+`gfx1013-indexed_store-3d295773d2fb`, image SHA
+`fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
+It preserves standard/unknown exception reasons before the existing quarantine
+park; focused host oracle/log tests pass. Ownership and retry behavior are unchanged.
+The earlier `1288205d1a2a` image remains preserved as superseded evidence.
 Startup ordering and emitted AGC/ShellCoreUtil imports were independently inspected;
 the corrected device object was disassembled and inspected. UFS2 filesystem,
 full extracted-file hashes and local candidate/controller verification pass.
-See `evidence/offline-corrected-gpu-package.json`. No GPU run or push followed.
+See `evidence/offline-diagnostic-gpu-package.json`. No GPU run or push followed.
 Native GPU builds now reject stale source/recipe/object/driver hashes and embed
-the verified device report. Continue the remaining G1 compiler comparison and
-license review before using the console. Isolated userspace reproduction passes;
+the verified device report. Complete the remaining G1 compiler comparison
+before using the console. The compiler source-notice inventory is now
+recorded in `evidence/offline-compiler-provenance.json`; binary redistribution
+accounting remains a later release obligation. Isolated userspace reproduction passes;
 a separate physical host has not been tested. This alone does not close G1.
 The first hardware compute goal remains exact execution of a small HIP-compiled
 kernel through the native submission path. G3 additionally requires shared memory,

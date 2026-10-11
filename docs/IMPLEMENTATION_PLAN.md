@@ -317,6 +317,9 @@ instruction subset into complete `gfx1013` or `gfx1030` compatibility.
 Before expanding the API, inventory actual symbol and semantic requirements from
 small upstream HIP examples and the intended ggml HIP client. Use that evidence to
 choose the runtime architecture from section 3.2 and document the decision.
+The pinned source inventory is in [HIP client requirements](HIP_CLIENT_REQUIREMENTS.md);
+it records the example slice, broader ggml contract and architecture-dependent
+instruction selection that still needs qualification.
 
 Implement the first coherent API slice:
 

@@ -1,0 +1,52 @@
+{
+    "schema":  1,
+    "classification":  "offline-package-pass",
+    "hardware_gate_passed":  false,
+    "source_commit":  "15bfc358f014b4231fcf9f84918b79b1b301008f",
+    "stage":  "dist/PPSA99014/gfx1013-indexed_store-3d295773d2fb",
+    "image":  {
+                  "file":  "PPSA99014.ffpkg",
+                  "sha256":  "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+                  "bytes":  3571712
+              },
+    "shutdown_mode":  "shell-request-probe",
+    "verified_imports":  {
+                             "sceShellCoreUtilExitApp":  [
+                                                             "libSceSystemService",
+                                                             "libSceShellCoreUtil"
+                                                         ],
+                             "sceAgcInit":  [
+                                                "libSceAgc",
+                                                "libSceAgc"
+                                            ],
+                             "sceAgcDriverSubmitDcb":  [
+                                                           "libSceAgcDriver",
+                                                           "libSceAgcDriver"
+                                                       ],
+                             "sceAgcSuspendPoint":  [
+                                                        "libSceAgcDriver",
+                                                        "libSceAgcDriver"
+                                                    ]
+                         },
+    "startup_barrier_before_initializers":  true,
+    "device_object_sha256":  "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "indexed_store_review":  "73 bounds-checked indexed XOR stores; kernarg s4:s5, group X s6, local X v0; wave32, no LDS/private storage or calls",
+    "filesystem_check":  "passed",
+    "extracted_files_match":  true,
+    "limits":  [
+                   "No GPU instruction execution proven",
+                   "No full gate passed",
+                   "No console traffic or push",
+                   "Built-TheRock comparison remains open; isolated reproduction and compiler notice inventory are recorded"
+               ],
+    "inspection_script_sha256":  "c663b048fbf12e668527955bbda4211f1582dc6d49fdb81bcb68cfb5423cd582",
+    "startup_disassembly_sha256":  "4871bbe6fff8e7ecad32159ac0ebdef221103da9284d39f2d897b05cc85baa99",
+    "device_disassembly_sha256":  "f8afd49e4b25f47d10bc3334051230f5b9bf357ba4b6b1906a6dd0826c5494a6",
+    "quarantine_diagnostics":  {
+                                   "ownership_or_retry_change":  false,
+                                   "unknown_exception":  "explicit fallback",
+                                   "focused_ctest_cases_passed":  3,
+                                   "standard_exception_reason":  "preserved before quarantine",
+                                   "tests_scope":  "host log/park behavior and quarantine classification; not full native title execution"
+                               }
+}
