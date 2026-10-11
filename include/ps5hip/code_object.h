@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <array>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -22,6 +23,7 @@ struct Kernel {
     uint32_t rsrc1, rsrc2, rsrc3, max_workgroup_size, wave_size;
     uint32_t sgpr_spills, vgpr_spills;
     uint16_t properties, preload;
+    std::array<uint32_t, 3> required_workgroup{};
     std::vector<KernelArgument> arguments;
 };
 

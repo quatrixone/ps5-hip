@@ -304,6 +304,18 @@ CodeObject inspect_code_object(const uint8_t *data, size_t size) {
         k.wave_size = item.field(".wavefront_size").integer();
         k.sgpr_spills = item.field(".sgpr_spill_count").integer();
         k.vgpr_spills = item.field(".vgpr_spill_count").integer();
+        for (const auto &field : item.fields) if (field.first == ".reqd_workgroup_size") {
+            require(field.second.type == Value::Array && field.second.items.size() == 3,
+                    "invalid required workgroup shape");
+            uint64_t threads = 1;
+            for (unsigned axis = 0; axis < 3; ++axis) {
+                k.required_workgroup[axis] = field.second.items[axis].integer();
+                require(k.required_workgroup[axis] > 0 && k.required_workgroup[axis] <= 1024,
+                        "invalid required workgroup dimension");
+                threads *= k.required_workgroup[axis];
+            }
+            require(threads <= k.max_workgroup_size, "required workgroup exceeds kernel limit");
+        }
         require(k.kernarg_size == item.field(".kernarg_segment_size").integer() &&
                 k.private_bytes == item.field(".private_segment_fixed_size").integer() &&
                 k.group_bytes == item.field(".group_segment_fixed_size").integer(), "descriptor/metadata size mismatch");

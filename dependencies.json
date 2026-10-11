@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "offline build inputs; hardware qualification pending",
+  "llvm": {"version": "18.1.8", "observed_package": "Ubuntu 20ubuntu8"},
+  "sdk": {
+    "source_url": "https://github.com/mihawk-99/PS5_PayloadSDK",
+    "revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "release_url": "https://github.com/ps5-payload-dev/sdk/releases/download/v0.42/ps5-payload-sdk.zip",
+    "release_sha256": "8cfbc7cd5811e719eb4f0c47eea668d3dc7b40bc8ab11c4a5031d40c23ec02da",
+    "license": "GPL-3.0-or-later by default; FreeBSD headers BSD; component exceptions retained upstream"
+  },
+  "mesa_reference": {
+    "source_url": "https://github.com/mihawk-99/PS5_Mesa",
+    "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+    "usage": "inspected native boundary and register definitions; not linked",
+    "platform_license": "MIT"
+  }
+}
