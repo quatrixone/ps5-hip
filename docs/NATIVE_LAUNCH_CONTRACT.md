@@ -6,8 +6,9 @@ compiler state, implemented host controls and untested hardware requirements.
 Status: host preparation and packet-fragment tests pass; native memory code
 cross-builds with mocked cleanup tests. Submission ownership and the AGC adapter
 also cross-compile with model tests. Initial cache/state commands and a dedicated
-canary title now link; packaging/runtime and GPU execution remain unverified.
-This is not a passed gate.
+canary title now link. Frozen packaging checks and one CPU shell-managed lifecycle
+run pass; ordinary C exit remains unresolved and GPU execution is unverified.
+No G1-G12 gate has passed.
 
 ## Source provenance
 

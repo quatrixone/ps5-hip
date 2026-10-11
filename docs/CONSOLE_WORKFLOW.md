@@ -1,9 +1,10 @@
 # Console workflow preparation
 
-Status: the original PPSA99012 image mounted but failed registration (missing icon).
-The user changed the development title to `PPSA99014`. Its first launch failed
-with PRX_SCE_MODULE_LOAD_ERROR before application entry. The builder now includes
-the missing clean-room loader companion; the corrected package is unrun.
+Status: the PPSA99014 CPU shell-managed lifecycle passed one run on .30, firmware
+6.02, including runtime checks, application finalization, self-stop and service
+health. See `evidence/native-shell-exit.json`. Ordinary C exit still faults after
+main returns; do not repeat those diagnostics. No GPU candidate has run. The .40
+loader-failure process had unresolved teardown; establish recovery before reuse.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 
@@ -51,10 +52,13 @@ python3 tools/prepare_elevation.py --eden-source /path/to/eden --lapy-source /pa
 `elevation-inputs.json` pins the Eden client and Lapy source separately. The older
 Eden helper is not reused: Lapy's owned-root helper supplies the same wire protocol
 with runtime layout and title checks. The exported protocol definitions are tested
-together. This is not proof of the combined integration on console. The Lapy
+together. The CPU lifecycle experiment exercised the combined integration on .30;
+other environments remain unqualified. The Lapy
 source/license and client copyright/SPDX notices remain in the ignored export;
-the client is GPL-3.0-or-later. Logging-header distribution licensing remains to
-be established before publishing binaries.
+the client is GPL-3.0-or-later. The exact logging header is identified as
+GPL-3.0-or-later by its upstream NOTICE; see `docs/DEPENDENCY_PROVENANCE.md` and
+`evidence/offline-logging-provenance.json`. Binary-distribution accounting remains
+separate work before any release.
 
 Before console traffic, verify a frozen case against committed evidence:
 
@@ -80,14 +84,15 @@ remote artifact identity, process status, teardown and service health remain
 unproven by a log file alone. Its zero exit status must not be used as the full
 hardware gate decision.
 
-## Remaining host control work
+## Single-case host control contract
 
 The existing generic protocol runner is not called automatically. It includes
 graphical-stream management and other assumptions that this compute title does
 not require. Result collection uses the exact configured log path from the
 candidate manifest.
 
-Prepare and test a single-case host workflow that:
+The CPU lifecycle experiment used a single-case host workflow. Preserve this
+contract for each subsequent frozen candidate:
 
 1. Verifies the frozen package/controller receipts locally before opening sockets.
 2. Uses the declared environment's lock, endpoints and title lifecycle controls.
@@ -102,9 +107,11 @@ Prepare and test a single-case host workflow that:
 7. Releases only its own lock, including on errors.
 
 The authorized hosts and normal service endpoints are recorded in the ignored
-environment file. Firmware and an idle console remain unverified. Eden's rules
+environment file. Recheck current idle state and environment at each console
+milestone; the earlier observation of FW 6.02 on .30 is historical evidence.
+Eden's rules
 also name a shared lock in the adjacent PS5-Claude workspace; coordinate it before
 further console work rather than relying only on the protocol helper's default.
-Do not infer a stale lock. Native return-from-main behavior remains a
-CPU-control experiment: another runner's comment about exit signals is not proof
-of normal completion here. A crash after PASS must remain a failed teardown.
+Do not infer a stale lock. Use the explicit `shell-request-probe` lifecycle for the
+next finite GPU experiment. Its CPU pass does not qualify GPU cleanup, worker
+threads or general C exit. A crash after PASS remains a failed teardown.

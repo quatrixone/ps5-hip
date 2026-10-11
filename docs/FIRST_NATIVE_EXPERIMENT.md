@@ -12,10 +12,11 @@ referenced by AGENTS.md; no old project's environment or lock waiver applies.
 Hypothesis: the native module loader, system libc and pinned static C++ runtime
 support the startup and error-handling mechanisms required by the GPU harness.
 
-Candidate recipe:
+The CPU shell-managed control already passed; do not rerun it or the failed
+ordinary-exit diagnostics merely to begin the GPU phase. Its reproducible recipe is:
 
 ```sh
-python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel runtime
+python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel runtime --shell-exit-probe
 ```
 
 This control does not read a GPU code object, call AGC, or allocate GPU memory.
@@ -108,6 +109,16 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
+- Current next GPU candidate: `PPSA99014/gfx1013-indexed_store-1288205d1a2a`,
+  source `5eb664d5c361784e7d9845b2b89261b3192a04b8`, shell-managed shutdown,
+  image SHA-256 `61e81d5e7103ff120f7b2b8f7bbcaeecc4eb72106ab639932e27bbe7ae0cf5f3`.
+  Corrected LLVM/LLD 18.1.8 device object and native imports were inspected;
+  filesystem, full extraction and local candidate/controller verification pass.
+  See `evidence/offline-corrected-gpu-package.json`. It has not run. Complete the
+  outstanding G1 compiler comparison before console use, then reverify the exact
+  candidate and current environment. The earlier image with digest `aaa74094...`
+  is revoked in the package catalog because it used the unintended host linker.
+
 - Superseded CPU control (PPSA99012): `gfx1013-runtime-9914258279a8`, source `955c989`.
   Includes exact-title `lapy.elf` and `results-dir.txt`; the staged configuration
   selects `/data/ps5-hip/results`. Another normalized absolute directory can be
@@ -122,7 +133,10 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
   in `evidence/offline-native-packages.json`; each filesystem check and full-file
   extraction comparison passed. They are superseded for new tests by the requested
   configurable-path/Lapy integration. This is offline evidence only.
-- Prepare title-specific deployment verification, log retrieval and close control.
-- Record expected environment and declared services without probing the console.
+- The CPU lifecycle run established title-specific deployment, log retrieval and
+  close observation. Adapt its identity guards to the current frozen GPU image;
+  do not rerun old deployment scripts with stale expected image hashes.
+- The local environment records endpoints and locks. Recheck readiness only when
+  the offline milestone is complete and a bounded console experiment is ready.
 
 Console access is authorized on either specified host only when idle.
