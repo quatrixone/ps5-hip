@@ -153,3 +153,32 @@ qualifying the actual buffer-scratch contract; do not equate reserved flat-init
 inputs with executed hardware initialization or forge descriptor bits. Native
 scratch allocation, descriptor programming and GPU readback remain separate G3
 work. No full compiler build or hardware experiment was performed for this study.
+
+## Follow-up: indexed arrays and retained calls
+
+Fresh, unmodified generic-pointer probes are recorded in
+[`offline-private-call-followup.json`](../evidence/offline-private-call-followup.json).
+LLVM18 O1/O2 on both targets emits buffer-only scratch for ordinary indexed arrays
+and inlined address-taken locals: 144 private bytes, eight user SGPRs, properties
+0x429 and RSRC2 0x91. Their incoming s6:s7 values are overwritten before use;
+group X and wave offset occupy s8 and s9. A separate, identity-pinned eight-slot
+buffer-scratch profile is the smallest proposed runtime extension after the
+six-slot spill slice. **That extension is not implemented or hardware-qualified.**
+The same descriptor fields also occur in volatile entries that actually consume
+s6:s7 and initialize flat scratch, so metadata alone cannot admit this profile.
+
+The nested-call probe has buffer stores in its entry, but its two retained callees
+perform actual flat private loads/stores and use the callable stack/frame ABI.
+Both calls remain in the linked object. All 55 function inventories across five
+new linked objects were checked against their actual disassembly. The volatile
+inline probe retains 33 stores and two loads at O2; a separate runtime choice
+between global and private pointers remains generic. The recognized feature
+`-mattr=-enable-flat-scratch` does not remove these flat accesses or initialization.
+
+Completed pinned Clang24 eliminates private storage from the simple ordinary
+probes by using registers, and removes conservative flat setup from a global-only
+call. It still emits flat scratch for volatile and nested-private probes; its
+objects also remain outside the selected loader's metadata contract. These
+results require inspecting the full reachable call graph and preserving generic
+and volatile semantics. They do not relax G3's requirements for indexed arrays,
+address-taken locals and actual nested calls, or repeat the earlier IR rewrite.

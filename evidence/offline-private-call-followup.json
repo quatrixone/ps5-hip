@@ -1,0 +1,1066 @@
+{
+  "schema": 1,
+  "classification": "offline-private-storage-and-call-graph-followup",
+  "hardware_validated": false,
+  "accepted_compiler_route_changed": false,
+  "eight_user_sgpr_runtime_implemented": false,
+  "raw_evidence": {
+    "analysis.json": {
+      "path": "results/g3-private-followup/analysis.json",
+      "bytes": 138022,
+      "sha256": "2417c19165647e5e705b687ee9242fde15d9cfc6872de32b5f491659d866bc0e"
+    },
+    "tool-identities.json": {
+      "path": "results/g3-private-followup/tool-identities.json",
+      "bytes": 3070,
+      "sha256": "d03eabacd7a438b4d7212ad928fdd1dbdafe064c82e57dde679eea76ac36c283"
+    },
+    "README.md": {
+      "path": "results/g3-private-followup/README.md",
+      "bytes": 7745,
+      "sha256": "cda68cc29e82abba4ec47657799c417c3020a381ddf70f528b58e51b9adf1a74"
+    }
+  },
+  "fixture": {
+    "file": "probes-groups.hip",
+    "bytes": 2484,
+    "sha256": "239c413876980940f20afe252fee606ef189f092021497911151d0f6425f8310",
+    "source": "using u32 = unsigned int;\n#define DEV __attribute__((device))\n#define INLINE DEV __attribute__((always_inline)) inline\n#define CALL DEV __attribute__((noinline))\n#define KERNEL extern \"C\" __attribute__((global))\nINLINE u32 local_read(u32 *p, u32 k) { p[k & 31u] += 3; return p[(k + 7) & 31u]; }\nINLINE u32 volatile_read(volatile u32 *p, u32 k) { p[k & 31u] += 3; return p[(k + 7) & 31u]; }\nCALL u32 call_leaf(u32 *p, u32 k) { p[k & 31u] += 3; return p[(k + 7) & 31u]; }\nCALL u32 call_middle(u32 *p, u32 k) {\n u32 inner[32];\n for (u32 j=0;j<32;++j) inner[j]=p[j]+j;\n return call_leaf(inner,k)+p[k&31u];\n}\nCALL u32 volatile_leaf(volatile u32 *p, u32 k) { p[k&31u]+=3; return p[(k+7)&31u]; }\nCALL u32 global_leaf(const u32 *p, u32 k) { return p[k]+7; }\nKERNEL void indexed_ordinary(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n output[i]=values[input[i]&31u];\n}\nKERNEL void address_taken_inline(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n output[i]=local_read(values,input[i]);\n}\nKERNEL void address_taken_volatile_inline(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); volatile u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n output[i]=volatile_read(values,input[i]);\n}\nKERNEL void nested_private(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n output[i]=call_middle(values,input[i]);\n}\nKERNEL void called_volatile_private(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); volatile u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n output[i]=volatile_leaf(values,input[i]);\n}\nKERNEL void ambiguous_volatile(const u32 *input,u32 *output,u32 choose) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); volatile u32 values[32];\n for(u32 j=0;j<32;++j) values[j]=input[i]+j;\n const volatile u32 *p=choose? values : input+i;\n output[i]=p[0];\n}\nKERNEL void global_call_only(const u32 *input,u32 *output) {\n u32 i=(__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x()); output[i]=global_leaf(input,i);\n}\n",
+    "scope": "Seven new entries with original generic pointer types and volatile operations intact; retained noinline calls. Workgroup X variants are authoritative for native ABI comparison; original no-group-X pilot remains separate."
+  },
+  "compile_contract": {
+    "llvm18_version": "18.1.8 Ubuntu20ubuntu8",
+    "llvm24_version": "AMD clang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)",
+    "flags": [
+      "-x",
+      "hip",
+      "--cuda-device-only",
+      "--no-gpu-bundle-output",
+      "-B<matching LLVM bin>",
+      "-nogpuinc",
+      "-nogpulib",
+      "--offload-arch=<target>",
+      "-mcode-object-version=5",
+      "-mno-wavefrontsize64",
+      "-O1 or -O2",
+      "-std=c++17",
+      "-fno-fast-math",
+      "-c"
+    ],
+    "actual_driver_linkers_verified": true,
+    "source_ir_rewrite": false,
+    "descriptor_bits_forged": false
+  },
+  "tool_identities": {
+    "llvm18_executables": {
+      "clang++-18": {
+        "bytes": 140672,
+        "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4"
+      },
+      "ld.lld-18": {
+        "bytes": 5150720,
+        "sha256": "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19"
+      },
+      "llc-18": {
+        "bytes": 164632,
+        "sha256": "15300bab42ea40e4b5c35779ac95d43640c0187fd70580f9fe8e7038d0d26c6d"
+      },
+      "llvm-readobj-18": {
+        "bytes": 1938800,
+        "sha256": "3dad3c6cfdbf380edf0415299ce5c8e6a52381f296690f2362da63d2562a4f04"
+      },
+      "llvm-objdump-18": {
+        "bytes": 920000,
+        "sha256": "dae6cd5e22c931a4e24f0c892be3e621d0f7a856fbe00a2050e4d26d15c831a4"
+      }
+    },
+    "llvm24": {
+      "clang++": {
+        "resolved_executable": "clang-24",
+        "bytes": 198096,
+        "sha256": "92025a2357d2339401ea7290199ba58b58cc1652a434edae889b8f93603ece75",
+        "linked_compiler_libraries": {
+          "libclang-cpp.so.24.0git": {
+            "bytes": 88753640,
+            "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3"
+          },
+          "libLLVM.so.24.0git": {
+            "bytes": 137405208,
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+          }
+        }
+      },
+      "ld.lld": {
+        "resolved_executable": "lld",
+        "bytes": 8345568,
+        "sha256": "2ee95f9f5357a6dde399555515d8f1dec632d7ccdfcbcaffe641595b1de3a356",
+        "linked_compiler_libraries": {
+          "libLLVM.so.24.0git": {
+            "bytes": 137405208,
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+          }
+        }
+      },
+      "llvm-readobj": {
+        "resolved_executable": "llvm-readobj",
+        "bytes": 2472064,
+        "sha256": "c7d6a9b8571582a1f67cb7532d232c0589a00b0e2e9864d1b784508508b8e4a4",
+        "linked_compiler_libraries": {
+          "libLLVM.so.24.0git": {
+            "bytes": 137405208,
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+          }
+        }
+      },
+      "llvm-objdump": {
+        "resolved_executable": "llvm-objdump",
+        "bytes": 1235104,
+        "sha256": "c100a642f91d4a2cf6ba86fcf18b07be5e7c7e979243e0ee84e83e42354c2fd8",
+        "linked_compiler_libraries": {
+          "libLLVM.so.24.0git": {
+            "bytes": 137405208,
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781"
+          }
+        }
+      },
+      "source_revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "identity_scope": "Read after isolated compilation; no compiler or source changes were made by this research. No before/after invocation identity claim."
+    }
+  },
+  "supported_feature_negative": {
+    "option": "llc-18 -mattr=-enable-flat-scratch",
+    "diagnostics": "",
+    "flat_setup_functions": [
+      "address_taken_volatile_inline",
+      "nested_private",
+      "called_volatile_private",
+      "ambiguous_volatile",
+      "global_call_only"
+    ],
+    "output": {
+      "bytes": 65875,
+      "sha256": "6887b1908da41a203a11b447e17986657c7f6b986c3fcc02f2aa20a851752e3a"
+    },
+    "interpretation": "Accepted target feature selects scratch_* versus buffer lowering for explicit private operations; the five generic/call flat-setup entries remain. It is not the invalid -flat-scratch spelling checked earlier."
+  },
+  "abi_comparison": {
+    "six_user_sgpr_register_spill": {
+      "properties": "0x409",
+      "rsrc2": "0x8d",
+      "private_buffer": "s0:s3",
+      "kernarg": "s4:s5",
+      "workgroup_x": "s6",
+      "wave_offset": "s7"
+    },
+    "eight_user_sgpr_ordinary": {
+      "properties": "0x429",
+      "rsrc2": "0x91",
+      "private_buffer": "s0:s3",
+      "kernarg": "s4:s5",
+      "reserved_flat_init": "s6:s7",
+      "workgroup_x": "s8",
+      "wave_offset": "s9",
+      "incoming_flat_init_use": "None in inspected ordinary entries; first s_load_dwordx4 s[4:7], s[4:5] overwrites both reserved words before uses.",
+      "private_bytes": 144,
+      "proposed_planner_values": {
+        "wave_stride_bytes": 5120,
+        "wave_capacity": 1280,
+        "ring_bytes": 6553600,
+        "tmpring": "0x5500"
+      }
+    },
+    "metadata_limit": "Volatile entries also have properties0x429/rsrc2=0x91, but consume incoming s6:s7 and write HW_REG_FLAT_SCR_LO/HI. Identical requested slots do not prove identical hardware behavior."
+  },
+  "conclusions": [
+    "LLVM18 O1/O2 on both targets already provides buffer-only ordinary indexed arrays and inlined address-taken locals with144 private bytes and8 user SGPRs; existing6-slot profile does not admit them.",
+    "The smallest next runtime experiment is a separate explicitly selected, identity-pinned8-slot buffer-only fixture path preserving the reserved input slots; it is not implemented by this receipt.",
+    "Inspect the entire reachable call graph: nested_private has buffer-only entry stores, but call_middle and call_leaf perform actual generic flat private accesses and retain nested calls.",
+    "Volatile-inline O2 retains33 stores/2loads. Runtime mixed global/private pointers require preserved generic semantics; proven-private specialization cannot unconditionally rewrite ambiguous pointers.",
+    "A noinline nested case with uses_dynamic_stack=false still requires call/stack/flat behavior. Dynamic-stack metadata alone is insufficient admission.",
+    "Clang24 removes private storage from simple ordinary probes using register select chains; this does not qualify scratch. It removes unnecessary flat setup from global-only calls, but retains flat scratch for volatile and nested-private probes.",
+    "Restricted volatile address-space inference and proof-based internal callee specialization remain possible compiler work, not a verified solution. Preserve generic fallback, volatile order/accesses and callable ABI."
+  ],
+  "g3_requirement_boundary": "This evidence strengthens the full-call-graph requirement. It neither narrows G3 acceptance nor claims address-taken locals, general generic private pointers or retained nested calls are supported in production.",
+  "source_references": [
+    {
+      "revision": "llvmorg-18.1.8",
+      "file": "llvm/lib/Target/AMDGPU/SIFrameLowering.cpp",
+      "sha256": "5366188cacab9edfe90e7e811eb707e8a32d84cc05063933793f2b21750908ba",
+      "line_ranges": [
+        [
+          688,
+          714
+        ]
+      ],
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp"
+    },
+    {
+      "revision": "llvmorg-18.1.8",
+      "file": "llvm/docs/AMDGPUUsage.rst",
+      "sha256": "4222ab6cb3f1c73f5cdbdaedf8690a638528a9f6ba6ea3cca35ed325b8242c4c",
+      "line_ranges": [
+        [
+          5186,
+          5261
+        ],
+        [
+          5411,
+          5435
+        ],
+        [
+          5493,
+          5516
+        ],
+        [
+          5525,
+          5577
+        ],
+        [
+          14060,
+          14101
+        ],
+        [
+          14340,
+          14363
+        ]
+      ],
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/docs/AMDGPUUsage.rst"
+    },
+    {
+      "revision": "llvmorg-18.1.8",
+      "file": "llvm/include/llvm/Analysis/TargetTransformInfoImpl.h",
+      "sha256": "f60302a4a84355676aef1923505b29580ed3e286da5c7780b8af2c995d5ab213",
+      "line_ranges": [
+        [
+          300,
+          318
+        ]
+      ],
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/include/llvm/Analysis/TargetTransformInfoImpl.h"
+    },
+    {
+      "revision": "llvmorg-18.1.8",
+      "file": "llvm/lib/Target/AMDGPU/AMDGPUTargetTransformInfo.h",
+      "sha256": "8333f172ec53d0b9a2bbda369b1e754d9f4fb15233b7c4759652b3c23a6c3687",
+      "line_ranges": [],
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/AMDGPUTargetTransformInfo.h"
+    },
+    {
+      "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "file": "llvm/lib/Target/AMDGPU/SIFrameLowering.cpp",
+      "sha256": "93dcbabe8a51773433956002b4a5d94c7f60882612ba76ba14508dc980e9fdbb",
+      "line_ranges": [
+        [
+          923,
+          941
+        ]
+      ],
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp"
+    },
+    {
+      "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "file": "llvm/lib/Target/AMDGPU/AMDGPU.td",
+      "sha256": "e63cc35f09c1835160473bade4f1627b286a98b648662bd49d0ee855d5fbb7af",
+      "line_ranges": [
+        [
+          142,
+          157
+        ]
+      ],
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/Target/AMDGPU/AMDGPU.td"
+    },
+    {
+      "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "file": "llvm/include/llvm/Analysis/TargetTransformInfoImpl.h",
+      "sha256": "15ac4c8486f87ce34fd7a5b015be774ad57465ddde1569458947ebc66856f93a",
+      "line_ranges": [
+        [
+          436,
+          442
+        ]
+      ],
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/include/llvm/Analysis/TargetTransformInfoImpl.h"
+    }
+  ],
+  "verification": {
+    "saved_artifacts_rehashed": 57,
+    "function_inventories_checked_against_linked_disassembly": 55,
+    "tool_source_hashes_rechecked": true,
+    "compiler_runs_repeated": false,
+    "source_compiler_identity_scope": "Existing receipts capture post-compilation tool identity; verification here does not retrospectively claim before/after invocation locking."
+  },
+  "limits": [
+    "All opcode counts are static, not dynamic loop trip counts. O1 loops are not equivalent to fewer executed accesses.",
+    "Fresh fixtures preserve volatile keywords and ordinary generic pointer source types; no IR rewriting or descriptor forging.",
+    "Original no-workgroup-X pilot outputs remain separate; group-X variants are authoritative for comparing native entry slots.",
+    "Initial pilot summary volatile-access extraction spanned earlier definitions; use this independently parsed per-function inventory instead.",
+    "Clang24 ordinary probes became register-only and do not qualify scratch.",
+    "LLVM24 metadata target and entry flags remain outside selected native route; no loader relaxation.",
+    "Kernel descriptors alone cannot distinguish consumed flat initialization: inspected eight-slot ordinary and volatile kernels both reserve that pair.",
+    "Nested callees contain actual generic flat loads/stores on private pointers; checking only kernel entry buffer opcodes would miss them.",
+    "Current initial-loader inspection rejects private storage; Clang24 output is rejected for metadata target mismatch. No loader relaxation was applied.",
+    "Six-slot scratch implementation remains a separate offline slice; eight-slot admission is only a proposal.",
+    "No GPU ISA execution, ring programming, cache visibility, generic trapping behavior, real stack/call execution, or hardware recovery is qualified."
+  ],
+  "entry_measurements": {
+    "Clang18-groups-gfx1013-O1": {
+      "indexed_ordinary": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_load_dword": 1,
+          "buffer_store_dword": 1
+        },
+        "flat_setup": false
+      },
+      "address_taken_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_load_dword": 2,
+          "buffer_store_dword": 2
+        },
+        "flat_setup": false
+      },
+      "address_taken_volatile_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 2,
+        "volatile_ir_loads": 2,
+        "opcodes": {
+          "flat_store_dword": 2,
+          "flat_load_dword": 2,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "nested_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 288,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_store_dword": 1,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "called_volatile_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 1,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "flat_store_dword": 1,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "ambiguous_volatile": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 20,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 1,
+        "volatile_ir_loads": 1,
+        "opcodes": {
+          "flat_store_dword": 1,
+          "flat_load_dword": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "global_call_only": {
+        "descriptor": {
+          "private_segment_fixed_size": 0,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 0,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      }
+    },
+    "Clang18-groups-gfx1013-O2": {
+      "indexed_ordinary": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_load_dword": 1,
+          "buffer_store_dword": 32
+        },
+        "flat_setup": false
+      },
+      "address_taken_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_load_dword": 2,
+          "buffer_store_dword": 33
+        },
+        "flat_setup": false
+      },
+      "address_taken_volatile_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 33,
+        "volatile_ir_loads": 2,
+        "opcodes": {
+          "flat_store_dword": 33,
+          "flat_load_dword": 2,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "nested_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 288,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_store_dword": 32,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "called_volatile_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 32,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "flat_store_dword": 32,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "ambiguous_volatile": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 20,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 32,
+        "volatile_ir_loads": 1,
+        "opcodes": {
+          "flat_store_dword": 32,
+          "flat_load_dword": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "global_call_only": {
+        "descriptor": {
+          "private_segment_fixed_size": 0,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 0,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      }
+    },
+    "Clang24-therock24-gfx1013-O2": {
+      "indexed_ordinary": {
+        "descriptor": {
+          "private_segment_fixed_size": 0,
+          "kernarg_size": 16,
+          "user_sgpr_count": 6,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 0,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 0,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {},
+        "flat_setup": false
+      },
+      "address_taken_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 0,
+          "kernarg_size": 16,
+          "user_sgpr_count": 6,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 0,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 0,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {},
+        "flat_setup": false
+      },
+      "address_taken_volatile_inline": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 33,
+        "volatile_ir_loads": 2,
+        "opcodes": {
+          "flat_store_dword": 33,
+          "flat_load_dword": 2,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "nested_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 288,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "buffer_store_dword": 32,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "called_volatile_private": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 16,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 32,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "flat_store_dword": 32,
+          "s_swappc_b64": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "ambiguous_volatile": {
+        "descriptor": {
+          "private_segment_fixed_size": 144,
+          "kernarg_size": 20,
+          "user_sgpr_count": 8,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 1,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 1,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 32,
+        "volatile_ir_loads": 1,
+        "opcodes": {
+          "flat_store_dword": 32,
+          "flat_load_dword": 1,
+          "s_setreg_b32": 2
+        },
+        "flat_setup": true
+      },
+      "global_call_only": {
+        "descriptor": {
+          "private_segment_fixed_size": 0,
+          "kernarg_size": 16,
+          "user_sgpr_count": 6,
+          "user_sgpr_private_segment_buffer": 1,
+          "user_sgpr_flat_scratch_init": 0,
+          "uses_dynamic_stack": 0,
+          "system_sgpr_private_segment_wavefront_offset": 0,
+          "system_sgpr_workgroup_id_x": 1,
+          "wavefront_size32": 1
+        },
+        "volatile_ir_stores": 0,
+        "volatile_ir_loads": 0,
+        "opcodes": {
+          "s_swappc_b64": 1
+        },
+        "flat_setup": false
+      }
+    }
+  },
+  "builds": [
+    {
+      "directory": "groups/gfx1013-O1",
+      "compiler": "Clang18",
+      "callees": {
+        "_Z9call_leafPjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11call_middlePjj": {
+          "opcodes": {
+            "s_swappc_b64": 1,
+            "buffer_load_dword": 1,
+            "buffer_store_dword": 2,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z13volatile_leafPVjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11global_leafPKjj": {
+          "opcodes": {
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        }
+      },
+      "linked_object": {
+        "bytes": 10328,
+        "sha256": "080fa7a4783d3dc1e994d6e58c23a7fe3310c9ad988cec0c64c3dfa69816a90c"
+      },
+      "optimized_ir": {
+        "bytes": 19179,
+        "sha256": "1b9b7e26958a83a8c1621fb7b0ae127e75bc1511ecaae64e3d072be7908e6560"
+      },
+      "linked_disassembly": {
+        "bytes": 46838,
+        "sha256": "5e7efd182df875e725cf86a060e030169b3f2765cc55c3753081c2fb459ecb4d"
+      },
+      "driver_trace": {
+        "bytes": 3594,
+        "sha256": "e9079d0cddcf174f4d61a624946385acf64c7004093a60a215e0b7898a100d7a"
+      },
+      "metadata": {
+        "bytes": 9676,
+        "sha256": "eb8f1279f49404e9231e72cc5ba46155ddd3e1deed2e9c3165574a5cd9d18463"
+      },
+      "existing_inspector_exit": 0,
+      "existing_inspector_output": {
+        "bytes": 2313,
+        "sha256": "cb0a54f9ce546f1135d600aaf0bc4e237525e2d94dea9c2449a71db57204c224"
+      },
+      "entry_measurements": "Clang18-groups-gfx1013-O1"
+    },
+    {
+      "directory": "groups/gfx1013-O2",
+      "compiler": "Clang18",
+      "callees": {
+        "_Z9call_leafPjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11call_middlePjj": {
+          "opcodes": {
+            "s_swappc_b64": 1,
+            "buffer_load_dword": 1,
+            "buffer_store_dword": 33,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 33
+          },
+          "flat_setup": false
+        },
+        "_Z13volatile_leafPVjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11global_leafPKjj": {
+          "opcodes": {
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        }
+      },
+      "linked_object": {
+        "bytes": 16472,
+        "sha256": "53dc1640acd07e49679575ff3b5943fdb94ae1ed930bdd6fb944140b2fde76eb"
+      },
+      "optimized_ir": {
+        "bytes": 59581,
+        "sha256": "51c153e090e34c347449127fcc17ffb1e0526b54a5878fe2f73fd77caab6b54a"
+      },
+      "linked_disassembly": {
+        "bytes": 138315,
+        "sha256": "ee255e31330ec286f22e037fd179231b39cc0f5500b1534e0b3ac01e49712b10"
+      },
+      "driver_trace": {
+        "bytes": 3630,
+        "sha256": "afbfbaf65b2c86b9e22f0412906924a055736eaa475d3813659a63dcf094f4bc"
+      },
+      "metadata": {
+        "bytes": 9683,
+        "sha256": "00359e1d63fb7fc8e4617b502b3f02b7f686411146bf899066734ae71ee309c8"
+      },
+      "existing_inspector_exit": 0,
+      "existing_inspector_output": {
+        "bytes": 2313,
+        "sha256": "4e909b2aa5d631bba567fab0416d4247d9e0e35afe8993cb064a78d38a43b4b9"
+      },
+      "entry_measurements": "Clang18-groups-gfx1013-O2"
+    },
+    {
+      "directory": "groups/gfx1030-O1",
+      "compiler": "Clang18",
+      "callees": {
+        "_Z9call_leafPjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11call_middlePjj": {
+          "opcodes": {
+            "s_swappc_b64": 1,
+            "buffer_load_dword": 1,
+            "buffer_store_dword": 2,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z13volatile_leafPVjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11global_leafPKjj": {
+          "opcodes": {
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        }
+      },
+      "linked_object": {
+        "bytes": 10328,
+        "sha256": "22703664d18a7e0fdd5ada20497c3925ae44de02988cbb24e62570fee2500b9c"
+      },
+      "optimized_ir": {
+        "bytes": 19795,
+        "sha256": "065629e417993381c69810d4d765cad450bcbda2ab59c8a9a74b811a0e8cec7b"
+      },
+      "linked_disassembly": {
+        "bytes": 46838,
+        "sha256": "0a5373a6d5dc8b691d0bef3a3a9d87c692272a9d26922f933661195a1fcc7ee8"
+      },
+      "driver_trace": {
+        "bytes": 3594,
+        "sha256": "ff0532260db6efc875fbbaec62488635cc4923598edd2241a1e895d08778ed17"
+      },
+      "metadata": {
+        "bytes": 9676,
+        "sha256": "2644e25cc3339b51d0b4ff77bf499dadec404e4c552525ecb30056f20583b116"
+      },
+      "existing_inspector_exit": 0,
+      "existing_inspector_output": {
+        "bytes": 2313,
+        "sha256": "9b38e7f48b5c967c5f4334a725eea4a2e5c4273b766eec6eb151a57af762670d"
+      },
+      "entry_measurements": "Clang18-groups-gfx1013-O1"
+    },
+    {
+      "directory": "groups/gfx1030-O2",
+      "compiler": "Clang18",
+      "callees": {
+        "_Z9call_leafPjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11call_middlePjj": {
+          "opcodes": {
+            "s_swappc_b64": 1,
+            "buffer_load_dword": 1,
+            "buffer_store_dword": 33,
+            "flat_load_dwordx4": 8,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        },
+        "_Z13volatile_leafPVjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11global_leafPKjj": {
+          "opcodes": {
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        }
+      },
+      "linked_object": {
+        "bytes": 15704,
+        "sha256": "0f4e92922d7fd2b6bf8cc0e042cd0117c0d55aea130d7e93f8ac0c131ce7e4df"
+      },
+      "optimized_ir": {
+        "bytes": 60109,
+        "sha256": "3ebf4191545e7daaff442deea6724b3a4cfbc57cea98ae87e984c576ef24f472"
+      },
+      "linked_disassembly": {
+        "bytes": 127501,
+        "sha256": "05d9a62e0977b73fb0d050e5fc2279b9d705215dda5dfe76ec60a73573d4a230"
+      },
+      "driver_trace": {
+        "bytes": 3630,
+        "sha256": "b134e74178d8ba206010285de9ccc4e08da42aba44edc84ef0cf83de7782cf45"
+      },
+      "metadata": {
+        "bytes": 9682,
+        "sha256": "8b2523453759b3ef9bfe6e5e09abee13e994aebe8ee485ce8b515b9c99de295c"
+      },
+      "existing_inspector_exit": 0,
+      "existing_inspector_output": {
+        "bytes": 2313,
+        "sha256": "a14fb422a792923377ccf8515fcb5141284d5824cbded5c22d25a657acd12573"
+      },
+      "entry_measurements": "Clang18-groups-gfx1013-O2"
+    },
+    {
+      "directory": "therock24-gfx1013-O2",
+      "compiler": "Clang24",
+      "callees": {
+        "_Z9call_leafPjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11call_middlePjj": {
+          "opcodes": {
+            "s_swappc_b64": 1,
+            "buffer_load_dword": 1,
+            "buffer_store_dword": 33,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 33
+          },
+          "flat_setup": false
+        },
+        "_Z13volatile_leafPVjj": {
+          "opcodes": {
+            "flat_store_dword": 1,
+            "s_setpc_b64": 1,
+            "flat_load_dword": 2
+          },
+          "flat_setup": false
+        },
+        "_Z11global_leafPKjj": {
+          "opcodes": {
+            "s_setpc_b64": 1,
+            "flat_load_dword": 1
+          },
+          "flat_setup": false
+        }
+      },
+      "linked_object": {
+        "bytes": 16392,
+        "sha256": "d62f0b5bd4f8d5030ab5ad2d15d2a41d314c6bd8fd5c4f46d8cd2110bde46d6e"
+      },
+      "optimized_ir": {
+        "bytes": 61019,
+        "sha256": "3403506916cd729e4e447a14462e3dee9e2eb709b9038b216fcb08438d3b898b"
+      },
+      "linked_disassembly": {
+        "bytes": 128175,
+        "sha256": "ac6783a77aff0087ef940309d6260fd724b0cceb4fb109f7dc9ebaa726287b32"
+      },
+      "driver_trace": {
+        "bytes": 3657,
+        "sha256": "348889403fd819222f27beaa6d2c3e74009d6ab72c2c907bdcd81cc3cb4381b5"
+      },
+      "metadata": {
+        "bytes": 9896,
+        "sha256": "37b7ecb661496cb485a4ce8931541b2c74e12008bc2b0d5ed1a309ad9116657a"
+      },
+      "existing_inspector_exit": 1,
+      "existing_inspector_output": {
+        "bytes": 25,
+        "sha256": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5"
+      },
+      "entry_measurements": "Clang24-therock24-gfx1013-O2"
+    }
+  ]
+}
