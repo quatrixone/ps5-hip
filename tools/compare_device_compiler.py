@@ -71,7 +71,11 @@ def main():
             if trace.returncode:
                 case['failure'] = 'driver rejected profile'
                 continue
-            require_device_linker(trace.stderr, tools['lld'])
+            try:
+                require_device_linker(trace.stderr, tools['lld'])
+            except ValueError as error:
+                case['failure'] = str(error)
+                continue
             compiled = capture(command, directory / 'compile.txt')
             if compiled.returncode:
                 case['failure'] = 'compilation failed'

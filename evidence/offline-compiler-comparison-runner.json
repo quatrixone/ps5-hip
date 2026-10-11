@@ -1,10 +1,11 @@
 {
     "schema":  1,
     "classification":  "comparison-runner-baseline-self-check",
-    "recipe_sha256":  "3f55aae287925e5ed35aa91fd2bcf091d0ea4dd47cbfe364aeab472bec868cd3",
+    "recipe_sha256":  "41438fabd63a73f47a5fdb69774a81eaf36b040e42fede4dc78ba143c666119d",
     "case_count":  4,
     "all_byte_identical":  true,
     "all_metadata_isa_loader_checks_passed":  true,
     "hardware_validated":  false,
-    "therock_compiler_compared":  false
+    "therock_compiler_compared":  false,
+    "linker_rejection_continuation_test":  "passed: all four failed cases retained; no compile after linker rejection"
 }

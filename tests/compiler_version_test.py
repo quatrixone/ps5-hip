@@ -3,6 +3,7 @@ import pathlib
 import hashlib
 import json
 import sys
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -14,9 +15,50 @@ sys.modules['build_canaries'] = builder
 native_spec = importlib.util.spec_from_file_location("native_builder", pathlib.Path(__file__).resolve().parents[1] / "tools/build_native_canary.py")
 native = importlib.util.module_from_spec(native_spec)
 native_spec.loader.exec_module(native)
+comparison_spec = importlib.util.spec_from_file_location("comparison", pathlib.Path(__file__).resolve().parents[1] / "tools/compare_device_compiler.py")
+comparison = importlib.util.module_from_spec(comparison_spec)
+comparison_spec.loader.exec_module(comparison)
 
 
 class VersionTests(unittest.TestCase):
+    def test_comparison_preserves_all_linker_rejections(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            for name in ('tools/build_canaries.py', 'build/host/ps5hip-inspect',
+                         'bin/clang++', 'bin/lld', 'bin/llvm-readobj', 'bin/llvm-objdump'):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b'fixture')
+            for fixture in ('canary', 'resources'):
+                source = root / 'kernels' / (fixture + '.hip')
+                source.parent.mkdir(exist_ok=True)
+                source.write_bytes(b'fixture')
+                profiles = []
+                for target in ('gfx1013', 'gfx1030'):
+                    code = root / 'build/canaries' / target / ('canary.hsaco' if fixture == 'canary' else 'resources/resources.hsaco')
+                    code.parent.mkdir(parents=True, exist_ok=True)
+                    code.write_bytes(b'fixture')
+                    profiles.append({'target': target, 'code_sha256': comparison.sha(code),
+                                     'compile_command': ['clang++', '-B/old', '-c', str(source), '-o', str(code)]})
+                report = {'source_sha256': comparison.sha(source),
+                          'recipe_sha256': comparison.sha(root / 'tools/build_canaries.py'), 'profiles': profiles}
+                (root / 'build/canaries' / ('build.json' if fixture == 'canary' else 'resources-build.json')).write_text(json.dumps(report))
+
+            def capture(command, output):
+                self.assertTrue('--version' in command or '-###' in command, 'rejected linker must never compile')
+                stderr = '\"/wrong/lld\" \"elf64_amdgpu\" \"--whole-archive\"' if '-###' in command else ''
+                output.write_text('test version\n' + stderr)
+                return subprocess.CompletedProcess(command, 0, 'test version\n', stderr)
+
+            output = root / 'output'
+            with patch.object(comparison, 'ROOT', root), patch.object(comparison, 'capture', side_effect=capture), \
+                    patch.object(sys, 'argv', ['comparison', '--compiler-bin', str(root / 'bin'), '--output', str(output)]), \
+                    patch('builtins.print'):
+                self.assertEqual(comparison.main(), 1)
+            cases = json.loads((output / 'comparison.json').read_text())['cases']
+            self.assertEqual(len(cases), 4)
+            self.assertTrue(all(not case['compiled'] and 'linker differs' in case['failure'] for case in cases))
+
     def test_native_build_rejects_stale_device_inputs(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = pathlib.Path(temporary)
