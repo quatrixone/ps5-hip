@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "source_url": "https://github.com/mpereiraesaa/ps5-agc-gears",
+  "revision": "1ae1f9182abd2770c131b97419034fb85173c2dc",
+  "files": {
+    "native/ps5log/ps5log.h": {
+      "sha256": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6",
+      "git_blob": "9448cb6631a58eb692426f4393feed9e300f80e4"
+    },
+    "LICENSE": {
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7"
+    },
+    "NOTICE.md": {
+      "sha256": "78a94fdd38f3f590c7d279dc9435d3fcbd90e7e130dd92eadd3c2cd323badcb9",
+      "git_blob": "8e99762dccb9efe2dd5ecae37e27edef8c2ea3da"
+    }
+  },
+  "observed_license": "GPL-3.0-or-later",
+  "license_basis": "NOTICE.md ps5log client section explicitly covers native/ps5log",
+  "matches_current_helper_input": true,
+  "helper_binary_changed": false,
+  "limits": [
+    "Does not select ps5-hip project license",
+    "Does not complete linked-member or binary-distribution audit"
+  ]
+}
