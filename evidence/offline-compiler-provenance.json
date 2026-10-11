@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "classification": "compiler-source-notice-inventory",
+  "hardware_validated": false,
+  "scope": "Selected Ubuntu LLVM 18 host tools and pinned TheRock compiler source notices; not binary redistribution clearance",
+  "selected_ubuntu_llvm": {
+    "packages": [
+      {
+        "package": "clang-18",
+        "version": "1:18.1.8-20ubuntu8",
+        "source_package": "llvm-toolchain-18",
+        "architecture": "amd64",
+        "copyright_path": "/usr/share/doc/clang-18/copyright",
+        "copyright_sha256": "dc2a171c75ca72818f7f4312602f27cb0e4bf6d010a86e7073a3797cb228ddff",
+        "fresh_root_copyright_matches": true
+      },
+      {
+        "package": "lld-18",
+        "version": "1:18.1.8-20ubuntu8",
+        "source_package": "llvm-toolchain-18",
+        "architecture": "amd64",
+        "copyright_path": "/usr/share/doc/lld-18/copyright",
+        "copyright_sha256": "dc2a171c75ca72818f7f4312602f27cb0e4bf6d010a86e7073a3797cb228ddff",
+        "fresh_root_copyright_matches": true
+      },
+      {
+        "package": "llvm-18",
+        "version": "1:18.1.8-20ubuntu8",
+        "source_package": "llvm-toolchain-18",
+        "architecture": "amd64",
+        "copyright_path": "/usr/share/doc/llvm-18/copyright",
+        "copyright_sha256": "dc2a171c75ca72818f7f4312602f27cb0e4bf6d010a86e7073a3797cb228ddff",
+        "fresh_root_copyright_matches": true
+      },
+      {
+        "package": "libclang-cpp18",
+        "version": "1:18.1.8-20ubuntu8",
+        "source_package": "llvm-toolchain-18",
+        "architecture": "amd64",
+        "copyright_path": "/usr/share/doc/libclang-cpp18/copyright",
+        "copyright_sha256": "dc2a171c75ca72818f7f4312602f27cb0e4bf6d010a86e7073a3797cb228ddff",
+        "fresh_root_copyright_matches": true
+      },
+      {
+        "package": "libllvm18",
+        "version": "1:18.1.8-20ubuntu8",
+        "source_package": "llvm-toolchain-18",
+        "architecture": "amd64",
+        "copyright_path": "/usr/share/doc/libllvm18/copyright",
+        "copyright_sha256": "dc2a171c75ca72818f7f4312602f27cb0e4bf6d010a86e7073a3797cb228ddff",
+        "fresh_root_copyright_matches": true
+      }
+    ],
+    "upstream_source_url_in_notice": "https://llvm.org/releases/download.html",
+    "default_license_as_recorded": "APACHE-2-LLVM-EXCEPTIONS",
+    "additional_notice_licenses": [
+      "APACHE-2-LLVM-EXCEPTIONS",
+      "BSD-3-Clause",
+      "BSD-3-clause",
+      "MIT",
+      "Python",
+      "solar-public-domain"
+    ],
+    "apache_license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "identity_boundary": "The exact Ubuntu source-package version is observed; no claim that the installed package was rebuilt from an upstream Git commit",
+    "reproduction_evidence": "evidence/offline-isolated-compiler.json"
+  },
+  "therock_components": [
+    {
+      "path": ".",
+      "source_url": "https://github.com/ROCm/TheRock",
+      "revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+      "notice_summary": "MIT for TheRock build orchestration; not a license for its component sources",
+      "notices": [
+        {
+          "path": "LICENSE",
+          "git_blob": "5c22b7e0496700a306b37a37fcfb23bfaa6a986f",
+          "sha256": "7728762ecd3256782c89e28b1887727a484deda6356887ef2f2898598e950cb8",
+          "bytes": 1113
+        },
+        {
+          "path": ".gitmodules",
+          "git_blob": "f66529b732d18d0ba7bcef20564dbab984d14397",
+          "sha256": "2ca133ba3b009c258cb8e0ca0ecc72348c267f073179836f4f26764960dcd06f",
+          "bytes": 1420
+        }
+      ]
+    },
+    {
+      "path": "compiler/amd-llvm",
+      "source_url": "https://github.com/ROCm/llvm-project",
+      "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "notice_summary": "Apache-2.0 WITH LLVM-exception default with legacy NCSA and per-file/subtree exceptions; amd/device-libs has its own NCSA notice",
+      "notices": [
+        {
+          "path": "LICENSE.TXT",
+          "git_blob": "fa6ac540007032cbd0ec772a1c72e6cb5527a4fe",
+          "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+          "bytes": 15141
+        },
+        {
+          "path": "llvm/LICENSE.TXT",
+          "git_blob": "fa6ac540007032cbd0ec772a1c72e6cb5527a4fe",
+          "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+          "bytes": 15141
+        },
+        {
+          "path": "clang/LICENSE.TXT",
+          "git_blob": "24806ab4c9eb291db4d28e159901f7a0901b9fd1",
+          "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+          "bytes": 15140
+        },
+        {
+          "path": "lld/LICENSE.TXT",
+          "git_blob": "cba22f66a9e0d384b4de547b60b5eb45350be7d6",
+          "sha256": "f7891568956e34643eb6a0db1462db30820d40d7266e2a78063f2fe233ece5a0",
+          "bytes": 15138
+        },
+        {
+          "path": "clang-tools-extra/LICENSE.TXT",
+          "git_blob": "24806ab4c9eb291db4d28e159901f7a0901b9fd1",
+          "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+          "bytes": 15140
+        },
+        {
+          "path": "flang/LICENSE.TXT",
+          "git_blob": "53bb2e7fbc76434fe747bceffdfb5c19e1cca362",
+          "sha256": "94b301bb652ae351f5941655bf533f1a136300ad1396be7452c8a04ff2c91374",
+          "bytes": 13151
+        },
+        {
+          "path": "flang-rt/LICENSE.TXT",
+          "git_blob": "53bb2e7fbc76434fe747bceffdfb5c19e1cca362",
+          "sha256": "94b301bb652ae351f5941655bf533f1a136300ad1396be7452c8a04ff2c91374",
+          "bytes": 13151
+        },
+        {
+          "path": "compiler-rt/LICENSE.TXT",
+          "git_blob": "5a79a1b9d5cb0af9a779751f07033e44ca3b14d8",
+          "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+          "bytes": 16708
+        },
+        {
+          "path": "libunwind/LICENSE.TXT",
+          "git_blob": "1e3120621caeb62648745a42f7a9a25d1e2731ab",
+          "sha256": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d",
+          "bytes": 16706
+        },
+        {
+          "path": "libcxx/LICENSE.TXT",
+          "git_blob": "e159d283443f92ac78b964d2bccebe8f95d5d445",
+          "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+          "bytes": 16703
+        },
+        {
+          "path": "libcxxabi/LICENSE.TXT",
+          "git_blob": "b75c0441bcd5be32b5a07e2a1ffc7e67b6d99f16",
+          "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+          "bytes": 16706
+        },
+        {
+          "path": "libc/LICENSE.TXT",
+          "git_blob": "24806ab4c9eb291db4d28e159901f7a0901b9fd1",
+          "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+          "bytes": 15140
+        },
+        {
+          "path": "openmp/LICENSE.TXT",
+          "git_blob": "9907566382922012bef0c339f7b2b757c0f43e92",
+          "sha256": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4",
+          "bytes": 19741
+        },
+        {
+          "path": "amd/device-libs/LICENSE.TXT",
+          "git_blob": "bcfb226f486b6d79931893914a84183c99856ebd",
+          "sha256": "a4e8e3ba6e9255928a29d3085f929de402e61413cb0c49276e16b558effa8a2a",
+          "bytes": 1952
+        }
+      ]
+    },
+    {
+      "path": "compiler/spirv-llvm-translator",
+      "source_url": "https://github.com/ROCm/SPIRV-LLVM-Translator",
+      "revision": "24a9abfe0af17e3d2a0b37abfc3d21bf56a3ac2d",
+      "notice_summary": "NCSA root notice; additional per-file/subtree notices retained",
+      "notices": [
+        {
+          "path": "LICENSE.TXT",
+          "git_blob": "922092b05217e160241de38926df358159417fa1",
+          "sha256": "e3bc36440fc927c62d5cc24efeefe225a14d4e34ffeb0c92e430625cce9ee444",
+          "bytes": 3281
+        }
+      ]
+    },
+    {
+      "path": "compiler/hipify",
+      "source_url": "https://github.com/ROCm/HIPIFY",
+      "revision": "118b213d89bea7bb7bedddae3e5ec7b14d4a26c5",
+      "notice_summary": "Apache-2.0 WITH LLVM-exception; fetched input, not evidence of a completed HIPIFY build",
+      "notices": [
+        {
+          "path": "LICENSE.txt",
+          "git_blob": "f3e7c3ba79f0d44380e996b674203da6a8a3b697",
+          "sha256": "5932b14fabf42fd596f63f55fed4161edbfe585d356bb2bc4912e3cfdc442643",
+          "bytes": 14410
+        }
+      ]
+    },
+    {
+      "path": "base/half",
+      "source_url": "https://github.com/ROCm/half",
+      "revision": "207ee58595a64b5c4a70df221f1e6e704b807811",
+      "notice_summary": "MIT",
+      "notices": [
+        {
+          "path": "LICENSE.txt",
+          "git_blob": "9e4618bb77d000e29573dbb18a3dc028c70a5be7",
+          "sha256": "1269110471a5506d5cc9c115c57b855206f69a90cc57bbbf27860907067ed946",
+          "bytes": 1100
+        }
+      ]
+    },
+    {
+      "path": "base/rocm-cmake",
+      "source_url": "https://github.com/ROCm/rocm-cmake",
+      "revision": "10155d7272ea1bf79f6b5a9dbc339657af1aa372",
+      "notice_summary": "MIT",
+      "notices": [
+        {
+          "path": "LICENSE",
+          "git_blob": "16c0eb9cc780a36359aef58ebfc9e769bda03595",
+          "sha256": "88d4e50ccb9e041cd667888f9639d21a9caf600b4aca5f899ea03f30752ba5f1",
+          "bytes": 1085
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Source notice identities do not prove compiler build completion or generated-code compatibility",
+    "No complete compiler dependency graph, linked archive member or source-bundle redistribution audit",
+    "No project distribution license selected",
+    "TheRock MIT does not replace LLVM/device-library/third-party notices",
+    "No console access or compiler input changes"
+  ]
+}

@@ -42,7 +42,8 @@ uint32_t bits(float value) {
     return result;
 }
 #endif
-[[noreturn]] void quarantine() {
+[[noreturn]] void quarantine(const char *reason = nullptr) {
+    if (reason) std::fprintf(stderr, "PS5HIP FAIL: submission exception: %s\n", reason);
     std::fprintf(stderr, "PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n");
     ps5hip_canary::sync_log();
     for (;;) ::sleep(1);
@@ -166,7 +167,14 @@ int main() {
         ps5hip::AgcBackend backend;
         ps5hip::SubmissionQueue queue(backend);
         try { run(queue, object, image); }
-        catch (...) { if (queue.poisoned()) quarantine(); throw; }
+        catch (const std::exception &error) {
+            if (queue.poisoned()) quarantine(error.what());
+            throw;
+        }
+        catch (...) {
+            if (queue.poisoned()) quarantine("unknown exception");
+            throw;
+        }
 #endif
         return ps5hip_canary::sync_log() ? 0 : 3;
     } catch (const std::exception &error) {

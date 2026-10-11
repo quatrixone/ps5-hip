@@ -30,6 +30,12 @@ class LogTests(unittest.TestCase):
                                (b"PS5HIP QUARANTINED: unresolved\n", "quarantined")):
             self.assertEqual(module.check_log(self.runtime + suffix, "gfx1013", "runtime")["application_result"], result)
 
+    def test_submission_exception_remains_quarantined(self):
+        for reason in (b"monotonic clock failed", b"unknown exception"):
+            data = (b"PS5HIP FAIL: submission exception: " + reason + b"\n"
+                    b"PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n")
+            self.assertEqual(module.check_log(data, "gfx1013", "indexed_store")["application_result"], "quarantined")
+
     def test_gpu_contract(self):
         for target in ("gfx1013", "gfx1030"):
             for kernel in ("indexed_store", "vector_add"):

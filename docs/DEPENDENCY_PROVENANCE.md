@@ -15,7 +15,10 @@ Exact revisions are recorded in `dependencies.json` and `elevation-inputs.json`.
 | zlib | Pinned source archive, retained upstream license | Host converter dependency |
 | UFS2Tool | Pinned source/tool receipt, BSD-2-Clause recorded in dependency lock | Host filesystem packaging and inspection |
 | Mesa | Pinned public source references with original per-file notices | Inspected native/register behavior; not linked into this candidate |
-| TheRock compiler | Exact submodule heads and upstream patch workflow recorded in build-setup evidence | Local compiler comparison in progress; no redistributed compiler bundle |
+| Selected Ubuntu LLVM 18 tools | Source package llvm-toolchain-18, version 1:18.1.8-20ubuntu8; installed copyright records Apache-2.0 with LLVM exceptions by default and separate file-specific notices | Host device compiler, linker and object inspection; no compiler bundle redistributed |
+| TheRock build orchestration | MIT at pinned TheRock revision; component licenses remain separate | Local compiler comparison in progress |
+| TheRock LLVM component | Apache-2.0 WITH LLVM-exception default; root retains legacy NCSA and third-party boundaries; amd/device-libs has a separate NCSA notice | Pinned compiler/runtime sources; build success and generated-code compatibility are separate evidence |
+| TheRock compiler support inputs | SPIR-V translator root notice: NCSA; HIPIFY: Apache-2.0 WITH LLVM-exception; half and rocm-cmake: MIT | Source-notice inventory, not a claim that every fetched project was built |
 
 The logging header identity is
 `394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6`.
@@ -26,6 +29,31 @@ directory as GPL-3.0-or-later. Header, LICENSE and NOTICE Git blob IDs and SHA-2
 hashes are in `evidence/offline-logging-provenance.json`; the exact source/notice
 copies are retained in ignored `.deps/logging-provenance`. No helper bytes changed.
 The helper's MIT license does not replace the logging input's separate notice.
+
+## Compiler source notices
+
+`evidence/offline-compiler-provenance.json` records the selected Ubuntu package
+identities and copyright hashes for clang-18, lld-18, llvm-18, libclang-cpp18 and
+libllvm18. Their installed notices match the independently extracted package root
+used for the isolated reproduction. The package source identity is
+`llvm-toolchain-18` version `1:18.1.8-20ubuntu8`; this does not assert an upstream
+Git revision or an independently rebuilt Ubuntu compiler package. Its copyright
+file records additional MIT, BSD, Python and public-domain notices for specific
+paths. The receipt also hashes the referenced Apache 2.0 text.
+
+The same evidence records exact revisions, Git blob IDs and SHA-256 hashes for
+the pinned TheRock root and compiler/component notices. All 20 recorded files
+were compared with their pinned Git blobs, including LLVM's project/runtime
+notices and `amd/device-libs/LICENSE.TXT`. TheRock's MIT notice covers its own
+orchestration; it does not replace component or embedded third-party notices.
+The LLVM root explicitly preserves separate subtree/file terms and a legacy NCSA
+notice. Device libraries and the SPIR-V translator have their own NCSA notices.
+These distinctions matter if a future compiler or device-library bundle is shipped.
+
+This closes the narrow compiler source-notice inventory for the selected route
+and comparison inputs. It does not inventory the complete compiler dependency
+graph or determine the obligations of a future binary distribution. It does not
+establish that the ongoing TheRock build or compiler comparison has passed.
 
 Before a binary SDK/release milestone, inventory the actual linked archive members
 and their notices, select the project

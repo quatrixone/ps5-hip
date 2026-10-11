@@ -1,10 +1,15 @@
 // Exercise the actual harness oracle without running its title entry point.
+#include "../tools/native_runtime.h"
+extern "C" unsigned mock_quarantine_sleep(unsigned);
+#define sleep mock_quarantine_sleep
 #define main native_title_main_not_called
 #include "../tools/native_canary.cpp"
 #undef main
+#undef sleep
 #include <ps5platform/kernel.h>
 #include <cstdlib>
 #include <map>
+#include <sys/wait.h>
 
 namespace {
 std::map<int64_t, void *> allocations;
@@ -32,9 +37,29 @@ extern "C" int32_t sceKernelReleaseDirectMemory(int64_t physical, size_t) {
 extern "C" int32_t sceAgcInit(uint32_t) { std::abort(); }
 extern "C" int32_t sceAgcDriverSubmitDcb(void *) { std::abort(); }
 extern "C" int32_t sceAgcSuspendPoint() { std::abort(); }
+extern "C" unsigned mock_quarantine_sleep(unsigned seconds) { ::_exit(seconds == 1 ? 0 : 4); }
 
 int main() {
     try {
+        for (const char *reason : {static_cast<const char *>(nullptr), "monotonic clock failed", "unknown exception"}) {
+            FILE *log = std::tmpfile();
+            require(log != nullptr);
+            const pid_t child = ::fork();
+            if (child == 0) {
+                if (::dup2(::fileno(log), STDOUT_FILENO) < 0 || ::dup2(::fileno(log), STDERR_FILENO) < 0)
+                    ::_exit(2);
+                quarantine(reason);
+            }
+            int status = 0;
+            require(child > 0 && ::waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
+            std::rewind(log);
+            char text[512]{};
+            const size_t bytes = std::fread(text, 1, sizeof(text), log);
+            std::fclose(log);
+            const std::string expected = (reason ? std::string("PS5HIP FAIL: submission exception: ") + reason + "\n" : "") +
+                "PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n";
+            require(std::string(text, bytes) == expected);
+        }
         {
             auto output = buffer();
             require(argument(output).value == output->range().address + 64);
