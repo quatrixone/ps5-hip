@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "classification": "pass",
+  "scope": "single CPU application lifecycle on firmware 6.02",
+  "hardware_gate_passed": false,
+  "title_id": "PPSA99014",
+  "firmware": "6.02",
+  "pid": 293,
+  "source_commit": "3346166ab10b743269fc6d3e5f6ce2407c5baad9",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0",
+    "bytes": 3538944
+  },
+  "shutdown_mode": "shell-request-probe",
+  "application_check": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "runtime",
+    "log_sha256": "84d1b89260e4dc214dc382ebbe75a7da3537d50d155d524ae8a5cc24976ffdf4",
+    "bytes": 372,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "title_self_stopped_before_host_close": true,
+  "shell_close": "suspend then KillApp with forceKill=0 and killReason=0",
+  "fatal_signal_observed": false,
+  "loader_error_observed": false,
+  "sandbox_removed": true,
+  "image_unmounted": true,
+  "service_health": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "elapsed_before_cleanup_seconds": 6.442591525999887,
+  "preservation": {
+    "image": "/data/homebrew/PPSA99014.ffpkg.e9025b496227.preserved",
+    "log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log.065c1fb23397.preserved",
+    "old_image_sha256": "e9025b4962279785ebdeeb0f4a65bdf4a55ecaf4269a637944c9a4b12845842b"
+  },
+  "evidence_sha256": {
+    "after.log": "c926d5fae7060b9342731f87f70de2749e1ce1f4352b61195291f5e9ecae118d",
+    "application.log": "84d1b89260e4dc214dc382ebbe75a7da3537d50d155d524ae8a5cc24976ffdf4",
+    "before-close.json": "a03a07a4a1da628146e0cbc95d6add2f1bca78809aac72540741a305e6824fe2",
+    "before.log": "433bef9b0f555352391536720121e93cab21b5ba7d68fb22b437e38c60efd71c",
+    "case.json": "60e4dfaea3d6ac971f7b6a6944845438c4f23c60c29a536e88e2c47dac52cb8b",
+    "close-response.log": "aa9ce57b52913a8c5e959a47d120a872aa98ee3f23644bdebb8cee6863bf30e9",
+    "health.json": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+    "klog.log": "261573b72499d4d00133b20763a8a525cc68cad29c4beab3c87e852f2b38a4cd",
+    "launch-response.log": "41a7e39f19bd274e8b8362f10a79f0b518ad3f078b7548a10da767b08a754ebc",
+    "observed.log": "c926d5fae7060b9342731f87f70de2749e1ce1f4352b61195291f5e9ecae118d",
+    "registration.json": "4edcc0b3d3cbb499026f917b0a238d2a267cd6d008c4463dc04236167d71e5a4"
+  },
+  "limitations": [
+    "One run and one firmware",
+    "No GPU API calls or compute qualification",
+    "Ordinary C exit still faults; this uses the explicitly scoped shell-managed lifecycle",
+    "No worker-thread or framework teardown qualification",
+    "Firmware 12.70 earlier loader-failure recovery remains unproven"
+  ],
+  "next_decision": "Use this evidence to prepare the first finite GPU candidate with explicit resource cleanup; preserve ordinary exit failure as a separate runtime issue."
+}

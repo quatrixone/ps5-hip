@@ -89,15 +89,16 @@ there is no evidence justifying that substitution.
 
 The same reference exposes a separate shell-managed exit service. Its no-argument
 entry returns an integer service result; the `WithValue` variant instead consumes
-a pointer and copies a bounded string. Neither has been called. Do not infer a
+a pointer and copies a bounded string. At this stage neither had been called;
+the later no-argument test is recorded below. Do not infer a
 signature from the suffix or treat shell closure as proof of C `exit` semantics.
 
-Before testing this service, the converter needs explicit import-library mapping:
+The converter required explicit import-library mapping before testing this service:
 the symbol belongs to library `libSceShellCoreUtil` inside module
-`libSceSystemService`. The pinned converter currently derives both names from the
+`libSceSystemService`. The original pinned converter derives both names from the
 stub soname and assigns one library per module. Adding the module's SDK stub alone
-would not encode the observed library contract. A host-tested converter change
-is the next offline step. Existing imports must remain byte-identical without
+would not encode the observed library contract. The explicit mapping patch and
+its integration checks now implement that contract. Existing imports must remain byte-identical without
 an override, and unknown or ambiguous overrides must fail before packaging.
 
 Compact provenance and limitations: `evidence/offline-exit-reference.json`.
@@ -156,3 +157,21 @@ sandbox/image release and healthy services. A host-forced close, missing service
 return or missing teardown evidence cannot pass. Any failure ends the experiment;
 analyze offline without a repeat. The application-log checker accepts the new
 sequence only with `--shell-exit-probe` and never certifies native teardown.
+
+## Shell-managed experiment result
+
+The frozen source `3346166`, image SHA
+`d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0`, ran
+once on .30, firmware 6.02, as PPSA99014/PID 293. All nine expected application
+records appeared, ending in `request-return=0`. The title stopped before host
+close (observed after 6.44 seconds). Klog showed shell suspend/termination with
+`forceKill=0` and `killReason=0`, without an observed fatal signal or loader error.
+ShadowMount confirmed sandbox removal and image unmount; all three services
+remained reachable. Previous image and log bytes were preserved before deployment.
+
+This passes the declared CPU lifecycle experiment. See
+`../evidence/native-shell-exit.json` for hashes and scope. The embedded application
+check alone cannot prove freshness or teardown; the outer receipt records those
+independent deployment and lifecycle observations. All 22 current host CTest cases
+also pass. No GPU calls ran, no implementation gate has passed, and ordinary C
+exit, platform finalizers and threaded/framework teardown remain unresolved.

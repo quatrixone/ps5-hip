@@ -58,7 +58,7 @@ Updated: 2026-10-11, America/New_York.
   Nineteen host cases pass, including the exported Eden/Lapy wire contract.
 - Preflight contacted both authorized consoles; PPSA99012 and PPSA99014 images
   were deployed on .40. Only PPSA99014 was launched, once, and failed in loading.
-- The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
+- The original `PPSA99012` staging identity is historical; use `PPSA99014`. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
   exact extracted-file hashes. Nineteen host test cases pass (sixteen C++, three Python).
 - Pinned title-aware launch/close controllers cross-compile. Host mocks and a
@@ -73,82 +73,41 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-TheRock's pinned target configuration was exercised offline: gfx1030 passes,
-gfx1013 fails by default, and gfx1013 passes through its custom-target hook.
-Its LLVM submodule pin and build scope are now recorded in
-`docs/COMPILER_ROUTE_COMPARISON.md` and `evidence/offline-therock-comparison.json`.
-The standalone LLVM 18.1.8 route remains selected for bring-up; a built-TheRock
-binary comparison and clean-machine reproduction remain outstanding.
+The opt-in CPU shell-managed lifecycle passed its single declared experiment on
+.30, firmware 6.02, using PPSA99014. Source `3346166` and frozen image
+`gfx1013-runtime-9ac5d150b5db` (SHA `d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0`)
+passed runtime checks, application callbacks, destructor observation and application
+fini. The shell request returned zero; the title stopped before host cleanup,
+with no observed fatal signal or loader error. Sandbox/image release and service
+health were confirmed. Previous image and log bytes were preserved. See
+`evidence/native-shell-exit.json`. All 22 current host CTest cases pass.
 
-The shell-exit deployment preflight found ProsperoStore PPSA99000/PID 237 active
-on .30. No image was uploaded and no title launched; both shared locks were
-released. See `evidence/shell-exit-no-run.json`. Recheck idle before the next
-console phase; never close that unrelated application.
+Ordinary C exit remains unresolved: both previous CPU cases reached SIGSYS after
+runtime checks. Shell-managed closure deliberately leaves remaining platform
+finalizers to process reclamation. This one CPU run establishes neither general
+C exit, worker-thread/framework cleanup nor any GPU capability. The builder still
+rejects the shell probe for GPU candidates. Do not rerun the failed diagnostics.
+The failed .40 process must have recovery established before another run there.
 
-While the console was busy, the device recipe was fixed to enforce the exact
-pinned versions of Clang, LLD and both LLVM inspectors before writing artifacts.
-Fresh arithmetic/resource builds for both targets match their earlier bytes and
-pass parser/resource checks. `evidence/offline-compiler-reproduction.json` records
-this same-host reproduction, not clean-machine or GPU qualification.
+Next prepare an explicit finite-GPU lifecycle offline, including completion,
+resource cleanup and failure handling before shell closure. Inspect its ISA,
+commit and freeze the candidate, and define bounded acceptance before deployment.
+The first hardware compute goal remains exact execution of a small HIP-compiled
+kernel through the native submission path. G3 additionally requires shared memory,
+atomics, wave operations and deliberate spilling; vector addition is insufficient.
+Generic private-address lowering remains an unresolved G3 compiler issue.
 
-Offline reference analysis now points to syscall 1 as a plausible final exit
-boundary, with an explicit cross-firmware caveat. Before a different lifecycle
-experiment, explicit import-library mapping is now implemented and host-tested
-as a pinned converter patch: shell-managed exit is exported by `libSceShellCoreUtil` within module
-`libSceSystemService`, which the original converter could not express. Five
-integration cases pass, including byte-identical default output against a freshly
-built unpatched converter and a link-only fixture using the actual SDK's shell
-service export alongside a default-library import. Existing CPU executable bytes
-remain unchanged. Offline reference tracing supports the entry argument's
-teardown-callback interpretation; it does not prove completion on firmware 6.02.
-See `evidence/offline-exit-reference.json` and `docs/NATIVE_BUILD.md`.
-The opt-in CPU `--shell-exit-probe` now registers an early exit barrier so
-application callbacks and static destructors run first. It then runs application
-fini once, flushes/syncs output and requests shell closure while platform libraries
-remain initialized. Host ordering/failure checks, seven log-contract cases and
-six candidate-identity cases pass. Native linking and FSELF integrity pass;
-the candidate has not run. The platform-exit path remains the default. Remaining
-platform finalizers are deliberately delegated to shell closure in this diagnostic,
-so it does not establish general C exit or multithreaded cleanup semantics.
-Source `3346166` is frozen as `gfx1013-runtime-9ac5d150b5db`; image SHA starts
-`d9a9e95cfc3e10b0`. FSELF, UFS2, extraction and exact local candidate checks pass.
-The emitted ShellCoreUtil binding and startup registration order were inspected.
-See `evidence/offline-shell-exit-probe.json`. It has not been deployed or run.
-Next qualify its self-stop and cleanup on idle .30, preserving the prior observer
-image and its 260-byte log before replacement.
+G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
+by default, and accepts gfx1013 through its custom-target hook. This is target
+configuration only. The selected LLVM 18.1.8 route reproduces four device objects
+byte for byte on the same host; built-TheRock binary comparison, clean-machine
+reproduction and dependency license review remain outstanding. See
+`docs/COMPILER_ROUTE_COMPARISON.md`, `evidence/offline-therock-comparison.json`
+and `evidence/offline-compiler-reproduction.json`.
 
-The CPU-only build now contains a shutdown observer using the startup's existing
-hook. Host callback-order and log-contract checks pass; native qualification is
-now measured on .30: all three observer checkpoints ran, followed by the same
-SIGSYS in libkernel. Title stop, sandbox release, image unmount and service health
-were confirmed. This remains a failed lifecycle case; see
-`evidence/native-shutdown-observer.json`. Source `c0bf77e` is frozen as
-`gfx1013-runtime-18338ea3d37b`; FSELF integrity,
-UFS2 filesystem checks, extraction hashes and local candidate verification pass.
-The image SHA starts `e9025b4962279785`; full provenance is in
-`evidence/offline-shutdown-observer.json`. The previous image and result were
-preserved on .30 before deploying this diagnostic. Do not repeat this candidate.
-See [shutdown investigation](docs/CPU_SHUTDOWN_INVESTIGATION.md) for the
-hypothesis, bounded experiment and rejection criteria. This is diagnostic code,
-not an exit fix, and changes no GPU candidate.
-
-Investigate abnormal CPU shutdown offline before another bounded startup case.
-The saved backtrace address 0x400175 is the return address of the imported exit
-call in the pinned startup code; the actual fault RIP is in libkernel. This does
-not establish that exit returned or identify the failing syscall. Do not replace
-normal exit with forced termination or proceed to a GPU case. Establish fresh
-idle state and preserve the existing application log before any new candidate.
-Continue offline preparation of title-specific deployment/log retrieval controls.
-See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
-Generic private-address
-lowering remains a G3 compiler issue. See
-[offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
-The first offline build/package milestone is on `development/offline-bringup`.
-Further pushes remain reserved for substantial coherent milestones, as requested.
-
-The first hardware goal is exact execution of a small HIP-compiled kernel through
-the native PS5 submission path. G3 then requires shared memory, atomics, wave
-operations and deliberate spilling; vector addition alone does not qualify a runtime.
+Console access remains restricted to idle consoles, both shared locks and the
+exact-title controls. Read `docs/CONSOLE_WORKFLOW.md` and the local environment
+before a new console phase. Pushes remain reserved for coherent milestones.
 
 ## Entry points
 
@@ -173,3 +132,5 @@ manifests, hashes, source commit and the pinned image tool's binary provenance.
 - 2026-10-11 | G1 progress | arithmetic and resource probes compiled for two targets; host parser checks pass; private-array flat-scratch incompatibility identified | not a completed gate
 - 2026-10-11 | G1 progress | unmodified compiler emits buffer scratch for explicit-private accesses and 52 real VGPR spills; generic private pointers remain unresolved | not hardware-qualified
 - 2026-10-11 | offline milestone | 0c2e8c1 | PPSA99012 | packaged, no-run: five verified images and fourteen host tests | evidence/offline-native-packages.json | next: console controller
+
+- 2026-10-11 | CPU lifecycle milestone | 3346166 | PPSA99014 | one shell-managed startup/finalization/self-close passed on FW 6.02; 22 host cases pass | evidence/native-shell-exit.json | no G1-G12 gate passed
