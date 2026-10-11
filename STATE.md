@@ -91,9 +91,17 @@ Command/marker teardown is checked before reporting submission success, with
 injected unmap/release failure tests. Do not rerun the failed diagnostics.
 The failed .40 process must have recovery established before another run there.
 
-Continue finite-GPU lifecycle preparation offline, including completion,
-resource cleanup and failure handling before shell closure. Inspect its ISA,
-commit and freeze the candidate, and define bounded acceptance before deployment.
+The finite-GPU indexed-store package is frozen at source `64d1de3`, stage
+`gfx1013-indexed_store-63b6e0402149`, image SHA
+`aaa74094c557be7234ed38f3c32da058bdf471601ac0acac2b257d164f9cd151`.
+Startup ordering and emitted AGC/ShellCoreUtil imports were independently inspected;
+the unchanged device object was disassembled and inspected. UFS2 filesystem,
+full extracted-file hashes and local candidate/controller verification pass.
+See `evidence/offline-finite-gpu-package.json`. No GPU run or push followed.
+Continue the remaining G1 offline compiler reproduction/comparison work before
+using the console. The existing WSL host has no Docker, Podman or debootstrap
+on PATH; choose an isolated build route rather than claiming a second directory
+is a clean host. Current artifact creation alone does not close G1.
 The first hardware compute goal remains exact execution of a small HIP-compiled
 kernel through the native submission path. G3 additionally requires shared memory,
 atomics, wave operations and deliberate spilling; vector addition is insufficient.

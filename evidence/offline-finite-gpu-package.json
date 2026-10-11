@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "offline-package-pass",
+  "hardware_gate_passed": false,
+  "source_commit": "64d1de3847a2a27fc1fb027ad757a57f93414643",
+  "stage": "dist/PPSA99014/gfx1013-indexed_store-63b6e0402149",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "aaa74094c557be7234ed38f3c32da058bdf471601ac0acac2b257d164f9cd151",
+    "bytes": 3571712
+  },
+  "shutdown_mode": "shell-request-probe",
+  "verified_imports": {
+    "sceShellCoreUtilExitApp": [
+      "libSceSystemService",
+      "libSceShellCoreUtil"
+    ],
+    "sceAgcInit": [
+      "libSceAgc",
+      "libSceAgc"
+    ],
+    "sceAgcDriverSubmitDcb": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ],
+    "sceAgcSuspendPoint": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ]
+  },
+  "startup_barrier_before_initializers": true,
+  "device_object_sha256": "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694",
+  "indexed_store_review": "73 bounds-checked indexed XOR stores; kernarg s4:s5, group X s6, local X v0; wave32, no LDS/private storage or calls",
+  "filesystem_check": "passed",
+  "extracted_files_match": true,
+  "limits": [
+    "No GPU instruction execution proven",
+    "No full gate passed",
+    "No console traffic or push",
+    "G1 clean-host reproduction and compiler comparison remain open"
+  ],
+  "inspection_script_sha256": "35d4f908f0598d9a20fc37269f4a3802223f8c90a96fd35f0f2d3455092f58a1",
+  "startup_disassembly_sha256": "d66c468ad48f7ddc0f97327f0cdf90698bc886fcd3c5293af4b756831aa2fd01",
+  "device_disassembly_sha256": "d5a91370081c97752df7f6674b32bcf98732e351c1a61351489b405a441cad72"
+}
