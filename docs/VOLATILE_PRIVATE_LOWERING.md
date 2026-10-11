@@ -2,9 +2,11 @@
 
 Status: isolated compiler experiment, not an accepted compiler route. Rewriting
 proven private pointers in the existing volatile-array fixture produces buffer
-scratch instructions while retaining all volatile accesses. **The emitted
-descriptor still requests flat-scratch initialization, eight user SGPRs and
-144 private bytes.** The initial loader rejects this kernel. Nothing here
+scratch instructions while retaining all volatile accesses. **Native private
+storage remains unimplemented: the descriptor requests eight user SGPRs and
+144 private bytes.** Its flat-scratch-init flag reserves two incoming SGPRs;
+inspection below shows this kernel does not consume those incoming values or
+initialize hardware flat scratch. The initial loader still rejects this kernel. Nothing here
 qualifies PS5 scratch execution or changes the frozen indexed-store candidate.
 
 ## Source-level cause
@@ -67,7 +69,67 @@ RSRC3/preload zero, wave32, kernarg size 16/alignment 8, no LDS and 144 private
 bytes. They request the private buffer, kernarg pointer, flat-scratch init,
 private-wave offset and group X. The inspector reports that private storage
 requires a qualified scratch implementation. Absence of flat-memory instructions
-does not authorize deleting requested ABI state.
+does not authorize deleting requested ABI slots or changing descriptor bits.
+
+## Reserved inputs versus executed flat scratch
+
+The pre-existing `private_explicit` fixture has exactly the rewritten kernel's
+resource fields, private size and eight-user-SGPR layout on both targets. It
+also emits 32 buffer stores and one buffer load without flat-scratch register
+setup. This demonstrates that the requested flat-init SGPR pair is not, by
+itself, evidence of unavoidable hardware flat-scratch execution.
+
+The pinned LLVM 18
+[SGPR setup order](https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/docs/AMDGPUUsage.rst#L5186)
+gives these layouts; actual entry instructions confirm their use:
+
+| Input | Rewritten volatile / private_explicit | register_spill |
+| --- | --- | --- |
+| Private buffer descriptor | s0:s3, used | s0:s3, copied to s8:s11 before use |
+| Kernarg pointer | s4:s5, used | s4:s5, used |
+| Flat-scratch initialization | s6:s7 reserved; overwritten by kernarg loads before any incoming-value use | Not requested |
+| Group X | s8, used | s6, used |
+| Scratch wave offset | s9, added to buffer base s0:s1 | s7, added to copied buffer base s8:s9 |
+| Local X | v0 | v0 |
+
+In `private_explicit` and the rewrite, the first `s_load_dwordx4 s[4:7], s[4:5]`
+loads the input/output pointers over the reserved flat-init pair. Subsequent
+uses of s6:s7 refer to that loaded output pointer, not incoming flat-init data.
+There are no calls or flat-scratch register accesses in these inspected entries.
+By contrast, `private_array` consumes incoming s6:s7, adds s9 and writes
+`HW_REG_FLAT_SCR_LO/HI` before its 32 flat stores and one flat load.
+
+`register_spill` requests only six user SGPRs (properties `0x409`, RSRC2 `0x8d`),
+212 private bytes and 52 VGPR spills. Its scratch traffic is 52 buffer stores
+and 52 buffer loads, without flat-scratch setup. It also emits 64 flat loads and
+64 flat stores for the volatile **global input/output** pointers; these are not
+evidence of private flat-scratch addressing.
+
+[SIFrameLowering.cpp:700](https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp#L700)
+separately decides whether to emit hardware flat-scratch initialization from
+actual FLAT_SCR register use, calls and the selected scratch mode. Buffer
+descriptor setup follows a separate path. The descriptor request and executed
+prologue are therefore distinct. The current rejection means the initial
+loader/runtime has no private-storage implementation; it does not establish a
+fundamental inability to run these buffer-scratch kernels natively.
+
+## Native dependencies left for G3
+
+Pinned Mesa `0b2d6d1` provides implementation references, not qualification of
+this HIP ABI. `radv_emit_compute_scratch` in `radv_queue.c:488` keeps scratch
+storage resident, emits the pre-GFX11 base/swizzle state through compute user
+data and writes `COMPUTE_TMPRING_SIZE`. `ac_get_scratch_tmpring_size` in
+`ac_shader_util.c:1054` encodes aligned bytes per wave and scratch wave capacity,
+and requires wave size to remain constant while the backing buffer is in use.
+Mesa's two-word graphics-compiler scratch convention is not the complete
+four-word HSA buffer descriptor and must not be copied blindly.
+
+A future native path needs the correct wave32 scratch descriptor/swizzle layout,
+adequate aligned backing storage and wave capacity, `SCRATCH_EN`/temporary-ring
+state, correct hardware-provided wave offsets, all requested SGPR slot positions,
+and allocation lifetime through verified completion. Existing PS5 memory/submission
+code does not yet supply that contract. No descriptor bits were forged and no
+scratch setup was implemented by this study.
 
 ## Options and possible adaptation
 
@@ -86,8 +148,8 @@ demonstrates the backend's ability to emit buffer instructions for these accesse
 
 The next compiler experiment should test that narrow adaptation with the bounded
 fixture and negative cases for ambiguous/escaped pointers, global/LDS volatile
-accesses and atomics. Independently trace why scratch descriptors retain
-flat-scratch initialization after optimization; satisfy or validly eliminate that
-requirement through compiler analysis, never by forging descriptor bits. Native
+accesses and atomics. Preserve requested SGPR slots while implementing and
+qualifying the actual buffer-scratch contract; do not equate reserved flat-init
+inputs with executed hardware initialization or forge descriptor bits. Native
 scratch allocation, descriptor programming and GPU readback remain separate G3
 work. No full compiler build or hardware experiment was performed for this study.

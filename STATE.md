@@ -152,8 +152,11 @@ scratch on both targets, with 33 private-address IR accesses and no flat-scratch
 setup. See `evidence/offline-private-inference.json`. This does not qualify
 arbitrary pointers or native scratch execution and is not a volatile-semantics fix.
 Further isolated IR research preserves the volatile accesses and gets buffer
-instructions, but the descriptor still requests flat-scratch initialization;
-the initial loader rejects it. See `docs/VOLATILE_PRIVATE_LOWERING.md` and
+instructions. The descriptor reserves flat-init input registers, but the inspected
+entry overwrites them before use and emits no hardware flat-scratch setup.
+The initial loader rejects its unimplemented private-storage contract; this is
+not evidence of a fundamental buffer-scratch limitation. See
+`docs/VOLATILE_PRIVATE_LOWERING.md` and
 `evidence/offline-volatile-private-lowering.json`. No compiler workaround is accepted.
 
 G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013

@@ -758,11 +758,11 @@
     "Research IR modification, not a production pass or accepted compiler profile",
     "Preserved volatile operation text/order and backend instruction counts do not establish all target-specific volatile/trapping semantics",
     "No general pointer, atomic, MMIO, or invalid-pointer behavior qualification",
-    "Rewritten descriptors still request flat scratch initialization, eight user SGPRs and 144 private bytes; current initial loader rejects scratch",
-    "No PS5 scratch allocation/descriptor/execution result or change to frozen first-launch candidate"
+    "No PS5 scratch allocation/descriptor/execution result or change to frozen first-launch candidate",
+    "Rewritten descriptors retain two reserved flat-init SGPR slots, but inspected entries do not consume their incoming values. Current rejection is absence of qualified private-memory runtime support, not a demonstrated fundamental flat-scratch blocker."
   ],
   "negative_reinference_result": "Linked V5 objects byte-identical to baseline on both targets",
-  "post_rewrite_optimization_result": "Both targets retain 32 buffer stores, one buffer load, no flat-scratch instructions, but flat_scratch_init=1, eight user SGPRs and 144 private bytes. Re-running optimization/AMDGPU Attributor did not clear the descriptor requirement.",
+  "post_rewrite_optimization_result": "Both targets retain 32 buffer stores, one buffer load, no flat-scratch instructions, but flat_scratch_init=1, eight user SGPRs and 144 private bytes. Re-running optimization/AMDGPU Attributor did not clear the descriptor requirement. Follow-up def/use inspection shows the reserved flat-init pair is overwritten before use; this is not proof of unavoidable hardware flat scratch.",
   "therock_source_check": {
     "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
     "observation": "AMDGPU has no hasVolatileVariant override; base TTI returns false and inference retains its volatile guard",
@@ -780,5 +780,311 @@
         "sha256": "a5a51fb5a2b8e490a15177bd5af7bd22fbf1a3b439a13454a71a431295d61807"
       }
     ]
+  },
+  "abi_discrimination": {
+    "classification": "reserved-flat-init-inputs-not-executed-in-inspected-buffer-scratch-entries",
+    "source_references": [
+      {
+        "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp",
+        "sha256": "5366188cacab9edfe90e7e811eb707e8a32d84cc05063933793f2b21750908ba"
+      },
+      {
+        "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/docs/AMDGPUUsage.rst",
+        "sha256": "4222ab6cb3f1c73f5cdbdaedf8690a638528a9f6ba6ea3cca35ed325b8242c4c"
+      },
+      {
+        "url": "https://github.com/mihawk-99/PS5_Mesa/blob/0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8/src/amd/vulkan/radv_queue.c",
+        "sha256": "de7e48165aedd6ad8a0f1a2266f2e626ed278a903ab7c1fff39f6545dfb4bd37",
+        "checkout_matches_after_line_ending_normalization": true
+      },
+      {
+        "url": "https://github.com/mihawk-99/PS5_Mesa/blob/0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8/src/amd/common/ac_shader_util.c",
+        "sha256": "91b28d0dc39b95b8fa737ab2a3bd3732518c0641481cb8168af908289e8dcc64",
+        "checkout_matches_after_line_ending_normalization": true
+      }
+    ],
+    "cases": {
+      "gfx1013": {
+        "private_array": {
+          "isa_sha256": "89dfe8bb0f8825685ff1b2aa72239c102006cdcdf833b90af9fdec109ece060a",
+          "flat_scratch_setup": true,
+          "opcodes": {
+            "s_add_u32": 2,
+            "s_addc_u32": 2,
+            "s_setreg_b32": 2,
+            "s_load_dwordx4": 1,
+            "v_mov_b32_e32": 3,
+            "v_lshl_add_u32": 2,
+            "v_or_b32_e64": 3,
+            "s_mov_b64": 1,
+            "s_movk_i32": 15,
+            "v_lshlrev_b64": 1,
+            "v_add_nc_u32_e64": 28,
+            "v_cmp_ne_u32_e64": 30,
+            "v_cndmask_b32_e64": 62,
+            "s_waitcnt": 4,
+            "v_add_co_u32": 2,
+            "v_add_co_ci_u32_e32": 2,
+            "v_cmp_ne_u32_e32": 2,
+            "global_load_dword": 2,
+            "v_cndmask_b32_e32": 2,
+            "flat_store_dword": 32,
+            "s_waitcnt_vscnt": 32,
+            "v_add_nc_u32_e32": 31,
+            "v_and_b32_e32": 1,
+            "flat_load_dword": 1,
+            "global_store_dword": 1,
+            "s_endpgm": 1,
+            "s_nop": 18
+          },
+          "entry_instructions": [
+            "\ts_add_u32 s6, s6, s9                                       // 000000002600: 80060906",
+            "\ts_addc_u32 s7, s7, 0                                       // 000000002604: 82078007",
+            "\ts_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6                 // 000000002608: B986F814",
+            "\ts_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7                 // 00000000260C: B987F815",
+            "\ts_load_dwordx4 s[36:39], s[4:5], null                      // 000000002610: F4080902 FA000000",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000002618: 7E020280",
+            "\tv_lshl_add_u32 v0, s8, 6, v0                               // 00000000261C: D7460000 04010C08",
+            "\tv_or_b32_e64 v7, 16, 4                                     // 000000002624: D51C0007 00010890"
+          ]
+        },
+        "private_explicit": {
+          "isa_sha256": "1a72640bcee2a40680bacc1802a12e076fa9a19b6f46eee4ac8c8ae920e94e8c",
+          "flat_scratch_setup": false,
+          "opcodes": {
+            "s_load_dwordx4": 1,
+            "v_mov_b32_e32": 1,
+            "v_lshl_add_u32": 2,
+            "s_add_u32": 1,
+            "s_addc_u32": 1,
+            "v_lshlrev_b64": 1,
+            "s_waitcnt": 3,
+            "v_add_co_u32": 2,
+            "v_add_co_ci_u32_e32": 2,
+            "global_load_dword": 1,
+            "buffer_store_dword": 32,
+            "s_waitcnt_vscnt": 32,
+            "v_add_nc_u32_e32": 31,
+            "v_and_b32_e32": 1,
+            "buffer_load_dword": 1,
+            "global_store_dword": 1,
+            "s_endpgm": 1,
+            "s_nop": 37
+          },
+          "entry_instructions": [
+            "\ts_load_dwordx4 s[4:7], s[4:5], null                        // 000000002D00: F4080102 FA000000",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000002D08: 7E020280",
+            "\tv_lshl_add_u32 v0, s8, 6, v0                               // 000000002D0C: D7460000 04010C08",
+            "\ts_add_u32 s0, s0, s9                                       // 000000002D14: 80000900",
+            "\ts_addc_u32 s1, s1, 0                                       // 000000002D18: 82018001",
+            "\tv_lshlrev_b64 v[0:1], 2, v[0:1]                            // 000000002D1C: D6FF0000 00020082",
+            "\ts_waitcnt lgkmcnt(0)                                       // 000000002D24: BF8CC07F",
+            "\tv_add_co_u32 v2, vcc_lo, s4, v0                            // 000000002D28: D70F6A02 00020004"
+          ]
+        },
+        "register_spill": {
+          "isa_sha256": "f87ab96f3ca81189cf693b4a02c4d67de700d668b82618ce4c4a5c0194cac096",
+          "flat_scratch_setup": false,
+          "opcodes": {
+            "s_mov_b64": 2,
+            "s_load_dwordx4": 1,
+            "v_lshlrev_b32_e32": 1,
+            "v_mov_b32_e32": 1,
+            "s_add_u32": 1,
+            "s_addc_u32": 1,
+            "v_lshl_add_u32": 1,
+            "v_lshlrev_b64": 1,
+            "s_waitcnt": 118,
+            "v_add_co_u32": 128,
+            "v_add_co_ci_u32_e32": 128,
+            "flat_load_dword": 64,
+            "buffer_store_dword": 52,
+            "flat_store_dword": 64,
+            "s_waitcnt_vscnt": 64,
+            "buffer_load_dword": 52,
+            "s_endpgm": 1,
+            "s_code_end": 63
+          },
+          "entry_instructions": [
+            "\ts_mov_b64 s[10:11], s[2:3]                                 // 000000003000: BE8A0402",
+            "\ts_mov_b64 s[8:9], s[0:1]                                   // 000000003004: BE880400",
+            "\ts_load_dwordx4 s[0:3], s[4:5], null                        // 000000003008: F4080002 FA000000",
+            "\tv_lshlrev_b32_e32 v0, 6, v0                                // 000000003010: 34000086",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000003014: 7E020280",
+            "\ts_add_u32 s8, s8, s7                                       // 000000003018: 80080708",
+            "\ts_addc_u32 s9, s9, 0                                       // 00000000301C: 82098009",
+            "\tv_lshl_add_u32 v0, s6, 12, v0                              // 000000003020: D7460000 04011806"
+          ]
+        }
+      },
+      "gfx1030": {
+        "private_array": {
+          "isa_sha256": "dbde504ee6d2e88c9f41dc852f64cdbfc586a07b0db0fbbf5a3ade7896914926",
+          "flat_scratch_setup": true,
+          "opcodes": {
+            "s_add_u32": 2,
+            "s_addc_u32": 2,
+            "s_setreg_b32": 2,
+            "s_load_dwordx4": 1,
+            "v_mov_b32_e32": 3,
+            "v_lshl_add_u32": 2,
+            "v_or_b32_e64": 3,
+            "s_mov_b64": 1,
+            "s_movk_i32": 15,
+            "v_lshlrev_b64": 1,
+            "v_add_nc_u32_e64": 28,
+            "v_cmp_ne_u32_e64": 29,
+            "v_cndmask_b32_e64": 61,
+            "s_waitcnt": 4,
+            "v_add_co_u32": 2,
+            "v_add_co_ci_u32_e32": 2,
+            "v_cmp_ne_u32_e32": 3,
+            "global_load_dword": 2,
+            "v_cndmask_b32_e32": 3,
+            "flat_store_dword": 32,
+            "s_waitcnt_vscnt": 32,
+            "v_add_nc_u32_e32": 31,
+            "v_and_b32_e32": 1,
+            "flat_load_dword": 1,
+            "global_store_dword": 1,
+            "s_endpgm": 1,
+            "s_nop": 20
+          },
+          "entry_instructions": [
+            "\ts_add_u32 s6, s6, s9                                       // 000000002600: 80060906",
+            "\ts_addc_u32 s7, s7, 0                                       // 000000002604: 82078007",
+            "\ts_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6                 // 000000002608: B986F814",
+            "\ts_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7                 // 00000000260C: B987F815",
+            "\ts_load_dwordx4 s[28:31], s[4:5], null                      // 000000002610: F4080702 FA000000",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000002618: 7E020280",
+            "\tv_lshl_add_u32 v0, s8, 6, v0                               // 00000000261C: D7460000 04010C08",
+            "\tv_or_b32_e64 v7, 16, 4                                     // 000000002624: D51C0007 00010890"
+          ]
+        },
+        "private_explicit": {
+          "isa_sha256": "1a72640bcee2a40680bacc1802a12e076fa9a19b6f46eee4ac8c8ae920e94e8c",
+          "flat_scratch_setup": false,
+          "opcodes": {
+            "s_load_dwordx4": 1,
+            "v_mov_b32_e32": 1,
+            "v_lshl_add_u32": 2,
+            "s_add_u32": 1,
+            "s_addc_u32": 1,
+            "v_lshlrev_b64": 1,
+            "s_waitcnt": 3,
+            "v_add_co_u32": 2,
+            "v_add_co_ci_u32_e32": 2,
+            "global_load_dword": 1,
+            "buffer_store_dword": 32,
+            "s_waitcnt_vscnt": 32,
+            "v_add_nc_u32_e32": 31,
+            "v_and_b32_e32": 1,
+            "buffer_load_dword": 1,
+            "global_store_dword": 1,
+            "s_endpgm": 1,
+            "s_nop": 37
+          },
+          "entry_instructions": [
+            "\ts_load_dwordx4 s[4:7], s[4:5], null                        // 000000002D00: F4080102 FA000000",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000002D08: 7E020280",
+            "\tv_lshl_add_u32 v0, s8, 6, v0                               // 000000002D0C: D7460000 04010C08",
+            "\ts_add_u32 s0, s0, s9                                       // 000000002D14: 80000900",
+            "\ts_addc_u32 s1, s1, 0                                       // 000000002D18: 82018001",
+            "\tv_lshlrev_b64 v[0:1], 2, v[0:1]                            // 000000002D1C: D6FF0000 00020082",
+            "\ts_waitcnt lgkmcnt(0)                                       // 000000002D24: BF8CC07F",
+            "\tv_add_co_u32 v2, vcc_lo, s4, v0                            // 000000002D28: D70F6A02 00020004"
+          ]
+        },
+        "register_spill": {
+          "isa_sha256": "afe483048d88635599b47d94615c7c674d63a0c3305f360575896b81a290284a",
+          "flat_scratch_setup": false,
+          "opcodes": {
+            "s_mov_b64": 2,
+            "s_load_dwordx4": 1,
+            "v_lshlrev_b32_e32": 1,
+            "v_mov_b32_e32": 1,
+            "s_add_u32": 1,
+            "s_addc_u32": 1,
+            "v_lshl_add_u32": 1,
+            "v_lshlrev_b64": 1,
+            "s_waitcnt": 118,
+            "v_add_co_u32": 2,
+            "v_add_co_ci_u32_e32": 2,
+            "flat_load_dword": 64,
+            "buffer_store_dword": 52,
+            "buffer_load_dword": 52,
+            "flat_store_dword": 64,
+            "s_waitcnt_vscnt": 64,
+            "s_endpgm": 1,
+            "s_code_end": 55
+          },
+          "entry_instructions": [
+            "\ts_mov_b64 s[10:11], s[2:3]                                 // 000000003000: BE8A0402",
+            "\ts_mov_b64 s[8:9], s[0:1]                                   // 000000003004: BE880400",
+            "\ts_load_dwordx4 s[0:3], s[4:5], null                        // 000000003008: F4080002 FA000000",
+            "\tv_lshlrev_b32_e32 v0, 6, v0                                // 000000003010: 34000086",
+            "\tv_mov_b32_e32 v1, 0                                        // 000000003014: 7E020280",
+            "\ts_add_u32 s8, s8, s7                                       // 000000003018: 80080708",
+            "\ts_addc_u32 s9, s9, 0                                       // 00000000301C: 82098009",
+            "\tv_lshl_add_u32 v0, s6, 12, v0                              // 000000003020: D7460000 04011806"
+          ]
+        }
+      }
+    },
+    "baseline_object_sha256": {
+      "gfx1013": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+      "gfx1030": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706"
+    },
+    "sgpr_layout": {
+      "private_explicit_and_rewrite": {
+        "private_buffer": "s0:s3",
+        "kernarg": "s4:s5",
+        "reserved_flat_init": "s6:s7",
+        "group_x": "s8",
+        "private_wave_offset": "s9",
+        "local_x": "v0"
+      },
+      "register_spill": {
+        "private_buffer": "s0:s3 copied to s8:s11",
+        "kernarg": "s4:s5",
+        "reserved_flat_init": "not requested",
+        "group_x": "s6",
+        "private_wave_offset": "s7",
+        "local_x": "v0"
+      }
+    },
+    "def_use_findings": [
+      "private_explicit and rewrite: s_load_dwordx4 s[4:7], s[4:5] overwrites incoming s6:s7 before their subsequent use as output-pointer words",
+      "private_explicit and rewrite: s_add_u32 s0,s0,s9 / s_addc_u32 s1,s1,0 use the incoming private-buffer base and wave offset",
+      "private_array: incoming s6:s7 plus s9 are consumed by explicit HW_REG_FLAT_SCR_LO/HI writes",
+      "register_spill: private-buffer s0:s3 is copied to s8:s11; s7 is added to its base; no flat-scratch setup",
+      "register_spill flat loads/stores address volatile global input/output; scratch traffic is separately buffer-based"
+    ],
+    "descriptor_comparison": {
+      "private_explicit_and_rewrite": {
+        "rsrc1": "0x60af0044",
+        "rsrc2": "0x91",
+        "properties": "0x429",
+        "private_bytes": 144,
+        "user_sgprs": 8
+      },
+      "register_spill": {
+        "rsrc1": "0x60af0041",
+        "rsrc2": "0x8d",
+        "properties": "0x409",
+        "private_bytes": 212,
+        "vgpr_spills": 52,
+        "user_sgprs": 6
+      }
+    },
+    "interpretation": "The flat-init descriptor flag reserves ABI inputs; it does not prove executed hardware flat-scratch initialization. These inspected buffer-private entries do not read the incoming pair. Preserve requested slot positions; no descriptor mutation or general unused-input proof is claimed.",
+    "remaining_native_dependencies": [
+      "HSA four-word private buffer descriptor with correct wave32/swizzle/size fields",
+      "Aligned resident backing storage and bounded scratch wave capacity",
+      "SCRATCH_EN and COMPUTE_TMPRING_SIZE with correct hardware wave offsets",
+      "SGPR layout and checked allocation lifetime through completion",
+      "Native GPU qualification; current initial loader rejects all private storage"
+    ],
+    "mesa_boundary": "Pinned Mesa pre-GFX11 compute setup supplies two base/swizzle words for its own compiler convention; it is not a complete HSA descriptor recipe"
   }
 }
