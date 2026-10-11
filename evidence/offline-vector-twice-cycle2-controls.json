@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-11T20:58:58.507274+00:00",
+  "scope": "offline cycle2 binding and AST-extracted/fake I/O checks only; no operational script executed",
+  "acceptance": {
+    "path": "results/vector-twice-cycle1-acceptance.json",
+    "sha256": "c195f73dc40284d0789a41be788f3a00a0896537a2c359cd5b2324a2b04e1c0a",
+    "independent_reviewer": "native_review",
+    "raw_file_count": 34,
+    "all_raw_file_hashes_rechecked_after_wrapper_update": true
+  },
+  "image_sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+  "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "first_vector_log": {
+    "sha256": "a0f414a237ddc3415798e98ef339543adbf716eba5bfc0a3cb7012dd9659f27d",
+    "bytes": 854,
+    "remote_preserved_suffix": ".a0f414a237dd.cycle1.preserved"
+  },
+  "script_sha256": {
+    "results/bind-vector-twice-cycle2.py": "d7bff4eb7499557b9f3e801c6a76e707d5fefcda51740a95a9aad1a67216b9bb",
+    "results/run-vector-twice-cycle2.py": "56eb0e2463bd5f7e744caa21c1065221ed8a860339984ab65c567cd63b2dc222",
+    "results/capture-vector-twice-operation.py": "52996f8b27337c850d82652ac6c3fc684553d14c3d67b0cda4322a6827bccce2",
+    "results/capture-vector-twice-operation.pre-cycle2.py": "cbf0f59ec8158ee9c93c53a972940bae61303d7dbb3631bbdcd8b4e509b0b304",
+    "results/check-vector-twice-cycle2-bound.py": "c88d66821f96b8c8effcd3cc25255fb0f965be27d7b633518841051be40f3e89",
+    "results/check-vector-twice-cycle2-capture.py": "dc12297cd5b0b7eb150cf86372a229c5e3e304bcdf1375f9c47256864b909c40",
+    "results/check-vector-twice-cycle2-bound-cycle1-deadlines.py": "d3f8199d9cbe304753810f7c0924ab413082b570287cef69ac9abaed750cf456",
+    "results/check-vector-twice-cycle2-bound-cycle2-deadlines.py": "e7d789c8cddc0906abab428bed194b3f970adad859491626a6325429f5201dd9",
+    "results/run-vector-twice-cycle2.template.py": "b734bd926f6716be592fb185d4d9e5fc96f7428975a2c76141c36e8b96774a5c"
+  },
+  "checks": {
+    "check-vector-twice-cycle2-bound": {
+      "exit_code": 0,
+      "stdout_sha256": "8365fc8db3e5085a3b4199ae24effea0e9c5b7ebbb56e33d9a9bd11c76089681"
+    },
+    "check-vector-twice-cycle2-capture": {
+      "exit_code": 0,
+      "stdout_sha256": "643dd04e2c33f380b8e0a3a069a76190955906a48140f0d2dbd2058561981a62"
+    }
+  },
+  "wrapper": "Explicit cycle2 option added with exact script hash; prior deploy/cycle1 entries unchanged; previous wrapper retained byte-for-byte; no chaining or automatic invocation.",
+  "gates": [
+    "reviewed acceptance identity, seven required true booleans, image/source/log identities and all raw hashes before output or locks",
+    "fresh idle, registration and exact remote image identity",
+    "exact first vector log hash/bytes, absent preservation conflict, idle/log recheck before rename",
+    "verify preserved log bytes, then inherited immediate prelaunch idle guard",
+    "20-second shared launch/observation deadline; separate bounded exact-title cleanup and health; owned-lock release"
+  ],
+  "limits": [
+    "No cycle2 console operation or hardware result is claimed.",
+    "Inherited pre-launch login/LIST use socket timeouts, not an overall absolute duration deadline.",
+    "No rollback after a partial remote rename failure.",
+    "Abrupt process/host termination may leave started capture receipt without final exit code."
+  ]
+}
