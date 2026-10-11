@@ -73,6 +73,15 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+The pinned TheRock compiler component is configured and its build has started.
+WSL task directory: `/tmp/ps5hip-therock-comparison`; build log: `build.log` there.
+The active exec session was `40611` at this checkpoint. Poll that handle and
+inspect the same build before restarting anything. Eight compile jobs, one LLVM
+link job and two Flang jobs are configured. No compiler binary comparison has
+passed. Exact source heads/options: `evidence/offline-therock-build-setup.json`.
+The ignored `results/build-therock-compiler.py` contains the configure/build
+invocation. All changes and build outputs remain local; no console run or push.
+
 Isolated-userspace reproduction exposed and fixed a linker-selection bug:
 Clang 18's HIP driver ignored `-fuse-ld` and invoked host `lld` 21.1.8.
 The recipe now supplies the pinned program-search directory and verifies the

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "component-configured-build-started",
+  "compiler_build_passed": false,
+  "hardware_gate_passed": false,
+  "therock_revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+  "component_heads": {
+    "base/half": "207ee58595a64b5c4a70df221f1e6e704b807811",
+    "base/rocm-cmake": "10155d7272ea1bf79f6b5a9dbc339657af1aa372",
+    "compiler/amd-llvm": "6da731510c233517c1eeb691d3446d80e9e32525",
+    "compiler/hipify": "118b213d89bea7bb7bedddae3e5ec7b14d4a26c5",
+    "compiler/spirv-llvm-translator": "24a9abfe0af17e3d2a0b37abfc3d21bf56a3ac2d",
+    "rocm-systems": "2f2a92736dbe3f65108539b6659d2c7289d300e8"
+  },
+  "source_fetch": "fetch_sources.py --depth 1 --jobs 3 --no-include-debug-tools --no-include-rocm-libraries --no-include-ml-frameworks --no-include-media-libs --no-include-math-libraries",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DTHEROCK_ENABLE_ALL=OFF",
+    "-DTHEROCK_ENABLE_COMPILER=ON",
+    "-DTHEROCK_ENABLE_BASE=ON",
+    "-DTHEROCK_ENABLE_SYSDEPS=ON",
+    "-DTHEROCK_AMDGPU_TARGETS=gfx1030",
+    "-DTHEROCK_DIST_AMDGPU_TARGETS=gfx1030",
+    "-DBUILD_TESTING=OFF",
+    "-DTHEROCK_BUILD_TESTING=OFF",
+    "-DTHEROCK_BUILD_LLVM_TOOLS=ON",
+    "-DLLVM_PARALLEL_LINK_JOBS=1",
+    "-DFLANG_PARALLEL_COMPILE_JOBS=2"
+  ],
+  "build_target": "amd-llvm",
+  "parallel_jobs": 8,
+  "host_setup": "Dedicated virtualenv; patchelf 0.18.0-1.4build1 extracted locally; no host package installation",
+  "scope": "Actual TheRock component and its dependencies, not a standalone LLVM approximation",
+  "limits": [
+    "Build completion and binary comparison pending",
+    "No console use or push"
+  ]
+}
