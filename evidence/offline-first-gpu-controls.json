@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "classification": "offline-first-gpu-control-preparation",
+  "console_contacted": false,
+  "hardware_validated": false,
+  "title": "PPSA99014",
+  "target": "gfx1013",
+  "kernel": "indexed_store",
+  "image_sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+  "previous_image_sha256": "d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0",
+  "previous_cpu_log_sha256": "84d1b89260e4dc214dc382ebbe75a7da3537d50d155d524ae8a5cc24976ffdf4",
+  "scripts_sha256": {
+    "deploy-indexed-store.py": "87a39587ce9b0625b768923fd64547c067f098e4228a693f9ce1731653ba8465",
+    "run-indexed-store.py": "fef4e2dfba8dab9f5568746e0d2f1acf5997e7dc898d0a4cd61241083993429a",
+    "prepare-indexed-store-case.py": "26e4393407920e04b160a92ff9841bf13c9ab8f19b745fe5c143757e92f6ad64",
+    "check-indexed-store-deadlines.py": "7e2cc68f226216fd9ce2b172f2fd8a009fea5c90258ccb9e52eaf96aab050079"
+  },
+  "checks": [
+    "AST syntax and generator parity",
+    "six idle-history assertions per script, including concurrent applications",
+    "bounded FTP binary transfer and byte limits",
+    "fake-clock cumulative controller/observation deadlines",
+    "real local POSIX-timer interruption and handler restoration",
+    "reject nested timers",
+    "preserve partial controller response",
+    "timeout discards ambiguous FTP stream, closes exact title once, checks services"
+  ],
+  "selfcheck_result": "pass; only extracted helpers, no operational script execution",
+  "observation_deadline_seconds": 20,
+  "close_deadline_seconds": 8,
+  "limits": [
+    "Deploy and prelaunch login/LIST retain socket/byte limits rather than one absolute phase deadline",
+    "Readiness, remote identity, execution, teardown and health still require a console experiment",
+    "No automatic retry or process kill"
+  ]
+}

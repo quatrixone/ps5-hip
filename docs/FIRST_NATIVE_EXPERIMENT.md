@@ -138,6 +138,12 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 - The CPU lifecycle run established title-specific deployment, log retrieval and
   close observation. Adapt its identity guards to the current frozen GPU image;
   do not rerun old deployment scripts with stale expected image hashes.
+  Prepared scripts now verify all unmatched title/PID starts and recheck idle
+  immediately before launch. Controller and FTP observation I/O share an absolute
+  20-second deadline; exact-title cleanup has a separate eight-second deadline.
+  Timeout preserves partial evidence and discards an ambiguous FTP stream.
+  Extracted-helper/fake-socket/timer checks pass without console traffic; hashes
+  and remaining prelaunch I/O limits are in `evidence/offline-first-gpu-controls.json`.
 - The local environment records endpoints and locks. Recheck readiness only when
   the offline milestone is complete and a bounded console experiment is ready.
 
