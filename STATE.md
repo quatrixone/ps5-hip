@@ -71,6 +71,14 @@ checks and complete extraction comparison; all 730 prior artifacts remain unchan
 See `evidence/offline-lds-native-readiness.json`. They are cataloged as unrun
 candidates. No LDS hardware execution or G3 qualification follows from these checks.
 
+Contended atomic probes now compile at O1/O2 for both targets: 32/64-bit
+fetch-add and CAS, plus runtime-address additions that avoid wave aggregation.
+The CAS64 fixture uses a nonzero upper token word. Exact permutation/winner
+oracles pass 13 synthetic mutation tests; actual objects fit the existing entry
+structure. See `evidence/offline-atomic-contention-probe.json`. Native harness,
+GPU execution and memory-scope qualification remain pending; these results do
+not advertise atomic support.
+
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
 then passed. See `docs/FIRST_GPU_FAULT.md`. Its revoked image and the earlier

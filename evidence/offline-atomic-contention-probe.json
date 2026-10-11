@@ -1,0 +1,855 @@
+{
+  "schema": 1,
+  "classification": "offline-atomic-compiler-and-oracle-probe",
+  "hardware_validated": false,
+  "native_harness_implemented": false,
+  "source": "using u32 = unsigned int;\nusing u64 = unsigned long long;\n#define KERNEL extern \"C\" __attribute__((global))\n#define INDEX (__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x())\nKERNEL void atomic_ticket32(u32 *counter,u32 *tickets) {\n    tickets[INDEX]=__atomic_fetch_add(counter,1u,__ATOMIC_RELAXED);\n}\nKERNEL void atomic_ticket64(u64 *counter,u64 *tickets) {\n    tickets[INDEX]=__atomic_fetch_add(counter,1ull,__ATOMIC_RELAXED);\n}\nKERNEL void atomic_cas32(u32 *winner,u32 *observed) {\n    u32 expected=0;\n    __atomic_compare_exchange_n(winner,&expected,INDEX+1,false,__ATOMIC_RELAXED,__ATOMIC_RELAXED);\n    observed[INDEX]=expected;\n}\nKERNEL void atomic_cas64(u64 *winner,u64 *observed) {\n    u64 expected=0;\n    __atomic_compare_exchange_n(winner,&expected,0x13579bdf00000000ull | (u64(INDEX)+1),false,__ATOMIC_RELAXED,__ATOMIC_RELAXED);\n    observed[INDEX]=expected;\n}\n\nKERNEL void atomic_indirect32(u32 *counter,u32 *tickets,const u32 *offsets) {\n    const u32 i=INDEX;\n    tickets[i]=__atomic_fetch_add(counter+offsets[i],1u,__ATOMIC_RELAXED);\n}\nKERNEL void atomic_indirect64(u64 *counter,u64 *tickets,const u32 *offsets) {\n    const u32 i=INDEX;\n    tickets[i]=__atomic_fetch_add(counter+offsets[i],1ull,__ATOMIC_RELAXED);\n}\n",
+  "source_sha256": "42bc699fb32a445ffbb8ad31cc87c21d9f124ec257ad811bcff8402c4fda403b",
+  "compiler_cases": [
+    {
+      "target": "gfx1013",
+      "optimization": "O1",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B/usr/lib/llvm-18/bin",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O1",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/g3-atomics-direct/atomics.hip",
+        "-o",
+        "<ROOT>/results/g3-atomics-direct/gfx1013-O1/atomics.hsaco"
+      ],
+      "files": {
+        "atomics.hsaco": "39e8c08b947673d1f6620e6d7871a06bef1c61183d2c0a2e0a37a791fcedb0d9",
+        "compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "driver.txt": "fead49a163ae536d587e5daaba30271686c85a16a803257cc203de8b0437ac52",
+        "isa.txt": "5f6dbb26b3c8ea07bd0026f1bddd80c9a2f69a103beea3cc075d46ddd6bb0abb",
+        "metadata.txt": "e16f6d1d2eb4d813993909ff727856c38773ab4da1783f620e8c1ba27ae6ba88"
+      },
+      "isa": {
+        "atomic_ticket32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_store_dword",
+            "s_and_saveexec_b32",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "s_waitcnt_depctr",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_ticket64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_store_dwordx2",
+            "s_and_saveexec_b32",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "s_waitcnt_depctr",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_ci_u32_e64",
+            "v_add_co_u32",
+            "v_cmp_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas32": {
+          "opcodes": [
+            "global_atomic_cmpswap",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas64": {
+          "opcodes": [
+            "global_atomic_cmpswap_x2",
+            "global_store_dwordx2",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_load_dword",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_load_dword",
+            "global_store_dwordx2",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      }
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B/usr/lib/llvm-18/bin",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O2",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/g3-atomics-direct/atomics.hip",
+        "-o",
+        "<ROOT>/results/g3-atomics-direct/gfx1013-O2/atomics.hsaco"
+      ],
+      "files": {
+        "atomics.hsaco": "fb8c32a84c62755f37157bf60435f2d86ade4f8d093bc3d5b2a9f6c9c7186bc1",
+        "compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "driver.txt": "3088135cbc499ce90fa2e781906491f6c2330fca8b1ee70a51742461543652f8",
+        "isa.txt": "9c3d4493f7586c737adde553021e271315bbe81ed4b755f890e35dce9ec15f5c",
+        "metadata.txt": "f5812758d589a8553b44461606b08f48fc7bbcc88cf1421699e80dd30dae6da1"
+      },
+      "isa": {
+        "atomic_ticket32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_store_dword",
+            "s_and_saveexec_b32",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "s_waitcnt_depctr",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_ticket64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_store_dwordx2",
+            "s_and_saveexec_b32",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "s_waitcnt_depctr",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_ci_u32_e64",
+            "v_add_co_u32",
+            "v_cmp_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas32": {
+          "opcodes": [
+            "global_atomic_cmpswap",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas64": {
+          "opcodes": [
+            "global_atomic_cmpswap_x2",
+            "global_store_dwordx2",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_load_dword",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_load_dword",
+            "global_store_dwordx2",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      }
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O1",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B/usr/lib/llvm-18/bin",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O1",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/g3-atomics-direct/atomics.hip",
+        "-o",
+        "<ROOT>/results/g3-atomics-direct/gfx1030-O1/atomics.hsaco"
+      ],
+      "files": {
+        "atomics.hsaco": "66fb1eed5f70bb8b3837ab5dc42e7d8d35685612f9638432cf44ca347e1fd0af",
+        "compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "driver.txt": "9f3596098d84f840ecc21bb62db87aaccd4cf8cd4593901cf4b3e134f1dd9eda",
+        "isa.txt": "5932ab0fef0df77c06f229050f0a180af8448e4e92c01c74839eb3f9c76bc733",
+        "metadata.txt": "89c9bab14e25f0bfd443154fb0332f84cb7458440cd4c5dc3c42249858350771"
+      },
+      "isa": {
+        "atomic_ticket32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_store_dword",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_cmpx_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_ticket64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_store_dwordx2",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_ci_u32_e64",
+            "v_add_co_u32",
+            "v_cmpx_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas32": {
+          "opcodes": [
+            "global_atomic_cmpswap",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas64": {
+          "opcodes": [
+            "global_atomic_cmpswap_x2",
+            "global_store_dwordx2",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_load_dword",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_load_dword",
+            "global_store_dwordx2",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      }
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O2",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B/usr/lib/llvm-18/bin",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O2",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/g3-atomics-direct/atomics.hip",
+        "-o",
+        "<ROOT>/results/g3-atomics-direct/gfx1030-O2/atomics.hsaco"
+      ],
+      "files": {
+        "atomics.hsaco": "fc65d98ae2cdb34e6d5e37b940d3170abc416b5b5d3f1fd98dfc4fa2e51d16d2",
+        "compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "driver.txt": "1d047c9b858ad626ad6bcd05a892ddcaa264fd1cb2ee9cc3761862dc30a89072",
+        "isa.txt": "f3a0d0815973cd6fcf9ab1730b140bd7ef627f066c5660c3c3ea5a952a6de316",
+        "metadata.txt": "160dd0ce2c018c257cfaa8be74a4ab0d382d6251b1111666308853e634567724"
+      },
+      "isa": {
+        "atomic_ticket32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_store_dword",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_cmpx_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_ticket64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_store_dwordx2",
+            "s_bcnt1_i32_b32",
+            "s_cbranch_execz",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_mov_b32",
+            "s_nop",
+            "s_or_b32",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_ci_u32_e64",
+            "v_add_co_u32",
+            "v_cmpx_eq_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mbcnt_lo_u32_b32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas32": {
+          "opcodes": [
+            "global_atomic_cmpswap",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_cas64": {
+          "opcodes": [
+            "global_atomic_cmpswap_x2",
+            "global_store_dwordx2",
+            "s_endpgm",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_add_nc_u32_e32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect32": {
+          "opcodes": [
+            "global_atomic_add",
+            "global_load_dword",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "atomic_indirect64": {
+          "opcodes": [
+            "global_atomic_add_x2",
+            "global_load_dword",
+            "global_store_dwordx2",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_load_dwordx4",
+            "s_waitcnt",
+            "v_add_co_ci_u32_e32",
+            "v_add_co_u32",
+            "v_lshl_add_u32",
+            "v_lshlrev_b64",
+            "v_mov_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      }
+    }
+  ],
+  "entry_contract": {
+    "wave_size": 32,
+    "user_sgprs": 6,
+    "properties": "0x409",
+    "rsrc2": "0x8c",
+    "private_bytes": 0,
+    "static_lds_bytes": 0,
+    "hidden_arguments": 0,
+    "kernarg_bytes": {
+      "ticket_and_CAS": 16,
+      "indirect": 24
+    }
+  },
+  "coverage": {
+    "logical_invocations": 16448,
+    "groups": 257,
+    "threads_per_group": 64,
+    "uniform_ticket": "514 hardware wave reservations; permutation of16448 logical old values",
+    "indirect_ticket": "runtime offset perlane; all zero offsets produce16448 direct hardware atomic operations",
+    "CAS": "one strong relaxed attempt perlane;64-bit desired highword0x13579bdf",
+    "oracle_tests": 13,
+    "loader": "all24 final kernel descriptors structurally eligible; no execution claim"
+  },
+  "review": "# Atomic probe review (offline only)\n\nThe final six-entry source and all four O1/O2 gfx1013/gfx1030 objects in\n`results/g3-atomics-direct` are ready to promote as compiler/research fixtures.\nNo actionable lowering error was found. This is not native or GPU qualification.\nThe original `g3-atomics-probe` pilot remains independently recorded in\n`inspection.json`; `direct-inspection.json` binds the strengthened final objects.\nThe intermediate `g3-atomics-wide` variant was not separately re-inspected here.\n\n## Lowering and entry requirements\n\n- Original and final `atomic_ticket32/64` use wave aggregation: EXEC population\n  count and lane rank, one elected atomic add returning a wave reservation,\n  broadcast and per-lane rank addition. With 257 groups of 64 wave32 threads,\n  that is 514 contending reservations producing 16,448 logical tickets, not\n  16,448 independent hardware add operations. O1/O2 and both targets agree.\n- Final `atomic_indirect32/64` load each lane's runtime offset, compute a full\n  address and execute `global_atomic_add`/`global_atomic_add_x2` without EXEC\n  election, population-count aggregation or first-lane broadcast. Initializing\n  all 16,448 offsets to zero gives direct per-lane contention at one counter.\n  Preserve and check the entire offsets input after completion. No compiler\n  toggle or special lowering is needed for this inspected varying-address form.\n- CAS is per lane, strong (source `weak=false`), expected value zero. The original\n  u64 pilot desired `u64(id)+1` never exercises nonzero upper words; it cannot\n  detect high-word truncation. Final CAS64 puts `0x13579bdf` in the desired high\n  VGPR, id+1 in its low VGPR, and zero in both compare VGPRs before\n  `global_atomic_cmpswap_x2`. Returned old memory is stored as a full dword pair.\n  Final CAS32 similarly supplies desired id+1 and compare zero.\n- All 24 final descriptors request six user SGPRs, properties0x409, RSRC2=0x8c,\n  RSRC3=0, private/group bytes0. Kernargs are16 bytes for ticket/CAS or24 for\n  indirect (two/three explicit global pointers, offsets0/8[/16], align8).\n  Metadata is wave32, max workgroup1024, no hidden args, dynamic stack or spills.\n  Entry instructions consume s4:s5 kernarg, s6 groupX and v0 localX; no scratch\n  initialization, calls or private traffic was observed. Keep64x1x1 explicitly.\n  This matches the existing structural entry profile; it does not certify atomics.\n- Each atomic has `glc` and a destination for the returned old value. The saved\n  ISA waits for vmcnt before using/storing the result; indirect paths also wait\n  for the loaded offset. Aggregated paths restore EXEC and wait before broadcast.\n  Preserve the emitted target-specific waits (including gfx1013 depctr).\n  Neither these waits nor `glc` prove CPU/GPU cache coherence or system scope.\n\n## Exact output oracle\n\n`oracle.py` fixes the invocation count at16,448 and validates unsigned widths\nwithout accepting bools, truncating integers or reducing erroneous input modulo\n2^width. Ticket initial value is2^width-4096; final must be12,352. Every observed\nold value must map uniquely to one offset in[0,16448) from that initial value,\nmodulo the selected width. Any permutation is accepted; duplicates, omissions,\nout-of-range tickets and incorrect final values fail. The u64 case crosses the\nfull64-bit wrap and catches32-bit truncation even though its final value is small.\n\nFor CAS, final must be an invocation token. Token base is0 for CAS32 and the\noriginal64-bit pilot; final64-bit qualification uses0x13579bdf00000000. Exactly\none observation is zero, at invocation(final-token_base-1). All other observations\nmust equal the complete final token. Any winner is valid; no thread ordering is\nassumed. Strong CAS on an initially zero counter with distinct nonzero desired\nvalues has one success; subsequent failures return that unchanged winner.\n\n`validate_indirect` applies the same ticket oracle and checks exactly16,448\nunchanged zero offsets. Native qualification must additionally check counter and\noutput guards, full allocation extents, input initialization, natural4/8-byte\ncounter alignment, retained ownership, completion/readback and clean teardown.\nSynthetic arrays here deliberately establish none of those properties.\n\n## Scope and verification\n\nSource requests `__ATOMIC_RELAXED` on GCC-style builtins with no explicit scope\nargument. The saved experiment did not emit LLVM IR, so this review makes no new\nIR-syncscope claim. The proposed experiment observes contention among GPU\ninvocations within one dispatch after the existing completion/readback path.\nIt does not qualify acquire/release, sequential consistency, concurrent host\natomics, system-wide coherency, cross-dispatch publication, misaligned atomics,\nother widths, general progress or physical CU coverage.\n\nThe review rehashed original and final source/recipes plus40 saved artifacts,\nchecked40 kernel descriptors and both sets of actual opcode/entry behavior,\nand resolved all8 driver linker paths to LLVM18. Final inspections can be replayed\nwith `python3 -B inspect_saved.py`; it reads saved files only. Thirteen synthetic\nmutation-test methods passed via `python3 -B test_oracle.py`: wrong finals,\nduplicate/lost/out-of-range tickets, u64 truncation, inconsistent CAS winner,\nmissing/multiple successes, bogus observations, changed offsets and malformed\ninput types/extents. Positive tests include shuffled/reversed ticket orders and\nseveral arbitrary winners. `validation.json` binds commands and raw logs.\nNo production code, compiler rerun or console operation was performed.\n",
+  "raw_files": [
+    {
+      "path": "results/g3-atomics-direct/atomics.hip",
+      "sha256": "42bc699fb32a445ffbb8ad31cc87c21d9f124ec257ad811bcff8402c4fda403b",
+      "bytes": 1251
+    },
+    {
+      "path": "results/g3-atomics-direct/check_direct.py",
+      "sha256": "2540420de58f766dc8fe4092259fa25bafef6c50715d72a2dd9032ddffaa6e54",
+      "bytes": 489
+    },
+    {
+      "path": "results/g3-atomics-direct/comparison.json",
+      "sha256": "e5c8d47a5e2ca13d6ce6e5a2ac67c0306da98a486615529d8b58d2a1de4183b7",
+      "bytes": 20564
+    },
+    {
+      "path": "results/g3-atomics-direct/compile.py",
+      "sha256": "39d8abc7db4549e558904dc7cdf0d4367f26055e033197c3cc0ce8a60efeae15",
+      "bytes": 2258
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/atomics.hsaco",
+      "sha256": "39e8c08b947673d1f6620e6d7871a06bef1c61183d2c0a2e0a37a791fcedb0d9",
+      "bytes": 8272
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/driver.txt",
+      "sha256": "fead49a163ae536d587e5daaba30271686c85a16a803257cc203de8b0437ac52",
+      "bytes": 3522
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/isa.txt",
+      "sha256": "5f6dbb26b3c8ea07bd0026f1bddd80c9a2f69a103beea3cc075d46ddd6bb0abb",
+      "bytes": 32048
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/loader-inspection.txt",
+      "sha256": "80a3bec1149fc1d5bf6874355ea8573bfb5b9b2081a9c584de2637abdb165bc0",
+      "bytes": 1640
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O1/metadata.txt",
+      "sha256": "e16f6d1d2eb4d813993909ff727856c38773ab4da1783f620e8c1ba27ae6ba88",
+      "bytes": 7870
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/atomics.hsaco",
+      "sha256": "fb8c32a84c62755f37157bf60435f2d86ade4f8d093bc3d5b2a9f6c9c7186bc1",
+      "bytes": 8272
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/driver.txt",
+      "sha256": "3088135cbc499ce90fa2e781906491f6c2330fca8b1ee70a51742461543652f8",
+      "bytes": 3558
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/isa.txt",
+      "sha256": "9c3d4493f7586c737adde553021e271315bbe81ed4b755f890e35dce9ec15f5c",
+      "bytes": 32202
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/loader-inspection.txt",
+      "sha256": "80a3bec1149fc1d5bf6874355ea8573bfb5b9b2081a9c584de2637abdb165bc0",
+      "bytes": 1640
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1013-O2/metadata.txt",
+      "sha256": "f5812758d589a8553b44461606b08f48fc7bbcc88cf1421699e80dd30dae6da1",
+      "bytes": 7872
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/atomics.hsaco",
+      "sha256": "66fb1eed5f70bb8b3837ab5dc42e7d8d35685612f9638432cf44ca347e1fd0af",
+      "bytes": 8272
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/driver.txt",
+      "sha256": "9f3596098d84f840ecc21bb62db87aaccd4cf8cd4593901cf4b3e134f1dd9eda",
+      "bytes": 3522
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/isa.txt",
+      "sha256": "5932ab0fef0df77c06f229050f0a180af8448e4e92c01c74839eb3f9c76bc733",
+      "bytes": 32048
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/loader-inspection.txt",
+      "sha256": "720068c4eb61d962d9a38bdb7b2a5f8e0467a9d022f52702979cf5634a30e79c",
+      "bytes": 1640
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O1/metadata.txt",
+      "sha256": "89c9bab14e25f0bfd443154fb0332f84cb7458440cd4c5dc3c42249858350771",
+      "bytes": 7870
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/atomics.hsaco",
+      "sha256": "fc65d98ae2cdb34e6d5e37b940d3170abc416b5b5d3f1fd98dfc4fa2e51d16d2",
+      "bytes": 8272
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/driver.txt",
+      "sha256": "1d047c9b858ad626ad6bcd05a892ddcaa264fd1cb2ee9cc3761862dc30a89072",
+      "bytes": 3558
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/isa.txt",
+      "sha256": "f3a0d0815973cd6fcf9ab1730b140bd7ef627f066c5660c3c3ea5a952a6de316",
+      "bytes": 32202
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/loader-inspection.txt",
+      "sha256": "720068c4eb61d962d9a38bdb7b2a5f8e0467a9d022f52702979cf5634a30e79c",
+      "bytes": 1640
+    },
+    {
+      "path": "results/g3-atomics-direct/gfx1030-O2/metadata.txt",
+      "sha256": "160dd0ce2c018c257cfaa8be74a4ab0d382d6251b1111666308853e634567724",
+      "bytes": 7872
+    },
+    {
+      "path": "results/g3-atomics-direct/inspect.py",
+      "sha256": "21c218496be9ecb0c3ef0cd076de064e08fed40b6106aff3d2a322905e447b4c",
+      "bytes": 672
+    },
+    {
+      "path": "results/g3-atomics-direct/loader-inspections.json",
+      "sha256": "a45d6de07e3c1cc0e0ac29b614f10e6e6cd6f8bf299465049126a9c21b842f99",
+      "bytes": 595
+    },
+    {
+      "path": "results/g3-atomics-probe/review/FINDINGS.md",
+      "sha256": "47c96b65c243e528cd3657395cd92473552f3a2c434099a5f415edb807a44be3",
+      "bytes": 5583
+    },
+    {
+      "path": "results/g3-atomics-probe/review/direct-inspection.json",
+      "sha256": "ff567f9805271c7383ec6a51d9dd0899a2d4d3949d297a07091b2a0de3fe8b3c",
+      "bytes": 11257
+    },
+    {
+      "path": "results/g3-atomics-probe/review/inspect_saved.py",
+      "sha256": "81ddc7c2b9f4d00132206e80326ede9dc2ac8ff6e80f4c33387e7725d0cda36b",
+      "bytes": 4042
+    },
+    {
+      "path": "results/g3-atomics-probe/review/inspect_saved.py.log",
+      "sha256": "e38baeef722c801d15ef812f22d472453c7d39fb821a9c1aee6c5a852eaef56a",
+      "bytes": 119
+    },
+    {
+      "path": "results/g3-atomics-probe/review/inspection.json",
+      "sha256": "5b1df99a198fd2f296596f637dc4571da69462327a7150195efbb02360aeb7b6",
+      "bytes": 8370
+    },
+    {
+      "path": "results/g3-atomics-probe/review/oracle.py",
+      "sha256": "5867dd92dc90f4ae61c5641be045552391fa18da13aaf9abd17c9bfa7da085ea",
+      "bytes": 3153
+    },
+    {
+      "path": "results/g3-atomics-probe/review/receipt.json",
+      "sha256": "e94e136adb9cc13394e89783326608b6f55d37dec776f0394635971d1f782a0c",
+      "bytes": 1423
+    },
+    {
+      "path": "results/g3-atomics-probe/review/test_oracle.py",
+      "sha256": "b04359668e1a88cf8af2d032b9cf0b94716b0a2781f377443f939168e7390d40",
+      "bytes": 5033
+    },
+    {
+      "path": "results/g3-atomics-probe/review/test_oracle.py.log",
+      "sha256": "9e35cca24150858dedb9d88eac700d4627efbd5c77e55a85d3d5d1fb042a1121",
+      "bytes": 1277
+    },
+    {
+      "path": "results/g3-atomics-probe/review/validation.json",
+      "sha256": "357d0a94ed7b663fc588308772999cbe8280a247827cdf01f8ffd7d8e1bb9af7",
+      "bytes": 589
+    }
+  ],
+  "next_step": "Promote frozen compiler fixture/recipe and exact native oracle; add guarded native harness and provenance before hardware acceptance. Preserve pilots separately.",
+  "limits": [
+    "Synthetic oracle mutation tests do not execute GPU atomics",
+    "No acquire/release,seq_cst,host concurrent atomics,system coherency or cross-dispatch publication qualification",
+    "Natural4/8-byte alignment, guards,ownership and teardown still require native fixture",
+    "Scope default not separately inspected in LLVM IR; no new syncscope claim"
+  ]
+}
