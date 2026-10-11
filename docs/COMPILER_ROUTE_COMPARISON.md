@@ -55,21 +55,30 @@ probe, place that exact target file under
 `python3 tools/probe_therock_targets.py`. The script checks the source digest
 before evaluation. It does not configure or compile the entire TheRock tree.
 
-## Remaining comparison work
+## Completed compiler comparison and limits
 
 The pinned TheRock build-tree tools compiled the four frozen fixtures with
 explicit V5 and wave32 settings. The [binary comparison](THEROCK_BINARY_COMPARISON.md)
 records target spelling, descriptors, kernargs, resource use and instruction
-differences, including shared compiler-library identities. Keep LLVM 18 selected.
-Complete the component build and verify staged identities before finalizing this
-comparison. Run native qualification separately for any changed device code.
+differences, including shared compiler-library identities. A second comparison
+brackets execution with stable executable, resolved-library, source and inspector
+hashes; see `evidence/offline-therock-verified-comparison.json`. Output-path-dependent
+compilation IDs change symbol/string/hash tables, while the four objects' code,
+descriptor and metadata sections match the first comparison exactly. Whole-object
+equality is explicitly false; the additional fixed-ID diagnostic did not establish it.
 
-G1 stays open pending component completion and final comparison verification. The selected route now has
+Keep LLVM 18 selected. Comparing the relevant built compiler tools satisfies the
+compiler-selection comparison; the entire `amd-llvm` target and staged installation
+remain separate, incomplete build work. G1 does not require every bundled compiler
+runtime or Flang component to finish. Any changed device code needs native qualification.
+
+The selected route has
 fresh isolated-userspace reproduction of all four objects, with networking and
 the development compiler filesystem excluded; it shares the WSL kernel and CPU.
 See `evidence/offline-isolated-compiler.json`. Source-notice identities are recorded
 in `evidence/offline-compiler-provenance.json`. A future binary-distribution audit
-is separate from this offline compiler selection.
+is separate from this offline compiler selection. G1's requirement-by-requirement
+decision is recorded in `evidence/offline-g1-acceptance.json`.
 
 ## Executable comparison
 

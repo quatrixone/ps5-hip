@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "classification": "G1-offline-acceptance",
+  "observed_utc": "2026-10-11T20:12:41.293364+00:00",
+  "gate_status_changed": true,
+  "parent_review_required": false,
+  "gate_status": "passed-offline",
+  "hardware_validated": false,
+  "assessment": "Parent reviewed the unchanged G1 requirements, verified linked receipt/input/object hashes, and accepts offline G1 for the selected LLVM18 initial route. G2 and hardware execution remain unpassed.",
+  "plan_basis": {
+    "path": "docs/IMPLEMENTATION_PLAN.md",
+    "section": "5. G1 \u2014 Freeze the compiler and platform contract",
+    "g1_section_utf8_sha256": "86493b0032951e29f5ef1ffe7e7c4931ece83f7b421abd94c6a49c0dfae4600d",
+    "whole_plan_or_status_document_hashes_recorded": false
+  },
+  "selected_configuration": {
+    "compiler": "Ubuntu LLVM/LLD 18.1.8",
+    "ubuntu_package_version": "1:18.1.8-20ubuntu8",
+    "code_object": "AMDHSA V5",
+    "first_target": "gfx1013",
+    "wave_size": 32,
+    "first_kernel": "indexed_store",
+    "development_title": "PPSA99014",
+    "device_object_sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "frozen_source_commit": "15bfc358f014b4231fcf9f84918b79b1b301008f",
+    "frozen_image_sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb"
+  },
+  "evidence_receipt_sha256": {
+    "evidence/offline-isolated-compiler.json": "dc648f6fe385b75bfea5a8116ebf4bb58ff05a84bc64c9bf2c5160d9801f2b5a",
+    "evidence/offline-compiler-provenance.json": "6873cab446fdd5244cb6c3a61ca7246af0bcd2fe6053ef4d4c61724ccbfcfff0",
+    "evidence/offline-logging-provenance.json": "9996dc58540d8befbaafccd65a2fcd1601a8b888c1c2302947db06ba73a75df2",
+    "evidence/offline-therock-binary-comparison.json": "c9fa1278b48c00b2250fb09edc7a3a2b8a005cf99a1f15e4afcdabccd39343de",
+    "evidence/offline-therock-verified-comparison.json": "29d603720af8f6b637045817ff0d924bcef54cc5462b3d3c881771bddee7d3dd",
+    "evidence/offline-compiler-comparison-runner.json": "e395a9452b2d1fa97f80754a47019e61ad6e88f27d836a60d8ce193ecfa3a058",
+    "evidence/offline-diagnostic-gpu-package.json": "bb6c085420cc398fe1ce3bfc0f7edebd0de9e338bc4dd7ebba5f7f89d8352e01"
+  },
+  "current_verified_baseline_inputs": {
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "kernels/canary.hip": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+    "kernels/resources.hip": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad"
+  },
+  "current_verified_baseline_objects": {
+    "gfx1013/canary.hsaco": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "gfx1013/resources/resources.hsaco": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+    "gfx1030/canary.hsaco": "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f",
+    "gfx1030/resources/resources.hsaco": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706"
+  },
+  "implementation_requirements": [
+    {
+      "id": "G1.I1",
+      "requirement": "Inventory public SDK, packaging, native submission/memory/completion and pinned Mesa boundary; identify reusable and extraction pieces.",
+      "assessment": "evidenced",
+      "evidence": [
+        "docs/NATIVE_LAUNCH_CONTRACT.md#source-provenance",
+        "docs/NATIVE_BUILD.md",
+        "dependencies.json"
+      ],
+      "finding": "Pinned PS5 Mesa native boundary and register/completion files are identified; SDK/converter/startup and packaging routes are recorded. Current source is not presented as a qualified Mesa binary dependency.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.I2",
+      "requirement": "Inspect provenance before reuse and record dependency URLs, revisions, licenses, build patches, host tools and expected outputs.",
+      "assessment": "evidenced-with-distributed-lock-records",
+      "evidence": [
+        "dependencies.json",
+        "elevation-inputs.json",
+        "docs/DEPENDENCY_PROVENANCE.md",
+        "docs/NATIVE_BUILD.md",
+        "evidence/offline-compiler-provenance.json",
+        "evidence/offline-logging-provenance.json",
+        "evidence/offline-diagnostic-gpu-package.json"
+      ],
+      "finding": "Lock files, build/package manifests and provenance receipts collectively record these identities. dependencies.json alone is not the full inventory. Ubuntu source-package identity is recorded honestly instead of assigning an upstream Git commit.",
+      "missing_required_proof": [],
+      "boundary": "Complete archive-member/distribution notice accounting and project distribution-license selection are later release work."
+    },
+    {
+      "id": "G1.I3",
+      "requirement": "Compare compact standalone LLVM/HIP with corresponding TheRock component build; select one working compatible toolchain and code-object version.",
+      "assessment": "evidenced-with-explicit-build-scope",
+      "evidence": [
+        "evidence/offline-therock-binary-comparison.json",
+        "evidence/offline-therock-verified-comparison.json",
+        "evidence/offline-isolated-compiler.json"
+      ],
+      "finding": "Real Clang/LLD24 tools produced by the pinned TheRock component build compiled four fixtures. Stable pre/post executable/library identities resolve the prior observation-time gap. LLVM18.1.8 with AMDHSA V5 remains selected; newer target spelling and resource/ISA changes are explicitly compared.",
+      "missing_required_proof": [],
+      "boundary": "The full amd-llvm target, including Flang, and staged installation remain incomplete/unverified. The plan asks compiler comparison and one selected working route, not completion of every target or installation of the unselected route."
+    },
+    {
+      "id": "G1.I4",
+      "requirement": "Compile indexed-store, vector-add and reduction canaries and inspect metadata, entry state, ISA, wave mode, SGPR/VGPR, LDS and private storage; keep first kernel free of prohibited features.",
+      "assessment": "evidenced",
+      "evidence": [
+        "tools/build_canaries.py",
+        "kernels/canary.hip",
+        "kernels/resources.hip",
+        "build/canaries/build.json",
+        "build/canaries/resources-build.json",
+        "docs/INITIAL_CAPABILITY_MATRIX.md",
+        "evidence/offline-diagnostic-gpu-package.json"
+      ],
+      "finding": "Current arithmetic/resource objects and retained metadata/disassembly cover these probes. Frozen indexed-store has zero private/LDS storage and no calls, printf, dynamic allocation or matrix instructions.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.I5",
+      "requirement": "Write observed/hypothesized/untested capability contract and explicit initial instruction/metadata boundary; do not equate disassembly with complete validation.",
+      "assessment": "evidenced",
+      "evidence": [
+        "docs/INITIAL_CAPABILITY_MATRIX.md",
+        "docs/NATIVE_LAUNCH_CONTRACT.md",
+        "docs/OFFLINE_BRINGUP.md"
+      ],
+      "finding": "Matrix separates observed/implemented facts from untested hardware and rejection boundaries; lists the frozen entry instructions and descriptor/resource fields. Loader structural checks are explicitly distinguished from an arbitrary-ISA whitelist.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.I6",
+      "requirement": "Choose dedicated development title and record authorized local hardware environment and coordination protocol.",
+      "assessment": "evidenced",
+      "evidence": [
+        ".local/ENVIRONMENT.md (ignored)",
+        "docs/CONSOLE_WORKFLOW.md",
+        "evidence/offline-diagnostic-gpu-package.json"
+      ],
+      "finding": "PPSA99014 is selected and locally configured, with idle-only authorization, declared services, exact-title controls and both shared coordination locks. Local addresses are intentionally excluded.",
+      "missing_required_proof": []
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "G1.A1",
+      "criterion": "A clean host can reproduce the canaries.",
+      "assessment": "evidenced",
+      "evidence": [
+        "evidence/offline-isolated-compiler.json"
+      ],
+      "finding": "Fresh authenticated Ubuntu packages in isolated userspace reproduced all four complete baseline objects with networking disabled. Current source/recipe/dependency and object hashes were rechecked during this audit.",
+      "boundary": "Shared WSL kernel and CPU; no second physical machine claim. G1 does not explicitly require a separate physical host.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.A2",
+      "criterion": "Every requested initial execution-state field has an identified implementation or named blocker.",
+      "assessment": "evidenced",
+      "evidence": [
+        "docs/INITIAL_CAPABILITY_MATRIX.md",
+        "docs/NATIVE_LAUNCH_CONTRACT.md",
+        "src/launch.cpp"
+      ],
+      "finding": "Initial entry/code window, arguments, reserved private-buffer slots, kernarg s4:s5, group X s6, local X v0, wave32, dimensions, resource registers, FP mode, initialization, visibility/completion and ownership are mapped to implementation and explicit hardware unknowns.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.A3",
+      "criterion": "Audited outputs contain no known unsupported feature.",
+      "assessment": "evidenced-for-selected-initial-profile",
+      "evidence": [
+        "docs/INITIAL_CAPABILITY_MATRIX.md",
+        "evidence/offline-diagnostic-gpu-package.json"
+      ],
+      "finding": "Selected gfx1013 indexed-store entry is scratch/LDS/call-free; its object hash matches the isolated reproduction and frozen package. No known unsupported requested feature was identified in that entry.",
+      "boundary": "Resource probes with private memory and unselected TheRock objects remain explicitly unsupported/rejected by the initial profile. This criterion does not advertise those research artifacts as launchable.",
+      "missing_required_proof": []
+    },
+    {
+      "id": "G1.A4",
+      "criterion": "Normalize recorded nondeterministic metadata or explain it; do not falsely demand byte-identical artifacts.",
+      "assessment": "explained-with-diagnostic-limit",
+      "evidence": [
+        "evidence/offline-therock-verified-comparison.json"
+      ],
+      "finding": "TheRock replay uses a fresh output path. Pinned driver/AST/CodeGen source explains output-argument-derived CUID symbols. Executable instructions, descriptors and metadata sections match; differences are confined to CUID/symbol/hash/string tables and their sizes/indices. Unmodified whole-object equality remains false.",
+      "boundary": "Extra explicit-CUID exact-byte diagnostic was inconclusive and is not represented as a pass or added acceptance requirement.",
+      "missing_required_proof": []
+    }
+  ],
+  "missing_required_proof_identified": [],
+  "not_required_to_claim_G1": [
+    "Second physical compiler host",
+    "Completed Flang/full amd-llvm build or staged installation of unselected TheRock route",
+    "Binary SDK redistribution/license-bundle audit",
+    "Native GPU execution, throughput or repeated hardware lifecycle qualification",
+    "General volatile-private lowering or native scratch implementation",
+    "Full HIP headers/runtime/framework compatibility"
+  ],
+  "documentation_reconciliation": [
+    "Status-only documents are deliberately not hashed; parent will reconcile G1 status separately.",
+    "Older offline-resource-probes.json has superseded object hashes; use current build reports and isolated reproduction for current artifact identity.",
+    "Do not describe full TheRock component or staged installation as complete.",
+    "Retain unmodified replay strict_whole_object_equality=false and inconclusive separate diagnostic."
+  ],
+  "audit_limits": [
+    "No new console traffic, hardware execution, commit or push",
+    "No acceptance-criterion changes; only G1 status is updated after parent review",
+    "Existing native test/runtime results are separate from the offline compiler gate",
+    "The diagnostic did not reconstruct the original CUID exactly; no general bitwise-reproducible TheRock claim"
+  ]
+}

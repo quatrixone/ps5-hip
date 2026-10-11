@@ -32,7 +32,7 @@ Updated: 2026-10-11, America/New_York.
   uploaded image remains preserved. Evidence: `results/cpu-deploy-20261011T170003Z/`.
 
 - Repository initialization and implementation planning are complete.
-- G1 is in progress; G2-G12 are planned. No goal has passed yet.
+- G1 passed offline; G2 is in progress. G3-G12 remain planned; no GPU gate has passed.
 - LLVM 18.1.8 builds real AMDHSA V5 device-only HIP canaries for gfx1013 and
   gfx1030. A host code-object inspector/materializer and sanitizer tests pass.
 - Initial launch preparation and compute packet fragments pass six host test
@@ -73,125 +73,82 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-The pinned TheRock compiler component is still building. Its build-tree AMD
-Clang/LLD 24 tools compiled all four frozen fixtures; the current loader rejects
-their documented new target-ID spelling. Kernargs match, but resource-register
-settings and instruction encodings change. LLVM 18 remains selected. See
-`docs/THEROCK_BINARY_COMPARISON.md` and its preliminary evidence receipt.
-WSL task directory: `/tmp/ps5hip-therock-comparison`; build log: `build.log` there.
-The active exec session was `40611` at this checkpoint. Poll that handle and
-inspect the same build before restarting anything. Eight compile jobs, one LLVM
-link job and two Flang jobs are configured. Full component completion and staged
-tool verification remain outstanding. Exact source heads/options:
-`evidence/offline-therock-build-setup.json`.
-The ignored `results/build-therock-compiler.py` contains the configure/build
-invocation. All changes and build outputs remain local; no console run or push.
-The LLVM subproject itself configured successfully and has begun its 8,739-step
-build. Its detailed logs are `build/logs/amd-llvm_configure.log` and
-`build/logs/amd-llvm_build.log` under that task directory. This is a running build,
-not an unavailable compiler or a completed comparison. The dependency notice
-inventory is in `docs/DEPENDENCY_PROVENANCE.md`. The logging header exactly matches
-ps5-agc-gears `1ae1f918`, whose NOTICE explicitly licenses it GPL-3.0-or-later;
-`evidence/offline-logging-provenance.json` records source and notice identities.
-Linked-member accounting and binary-distribution requirements remain unresolved.
-`docs/INITIAL_CAPABILITY_MATRIX.md` now records the initial entry-state contract,
-exact resource fields, inspected first-kernel instructions and hardware unknowns.
-The object inspector prints raw descriptor resource fields for compiler comparison.
+G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
+requirement to evidence and records the selected LLVM/LLD 18.1.8, AMDHSA V5,
+wave32, gfx1013 indexed-store route. Four whole baseline objects reproduce in a
+fresh authenticated Ubuntu userspace with networking and the development compiler
+filesystem excluded. The WSL kernel/CPU are shared; no second physical host claim.
+The corrected recipe verifies the actual LLVM 18 device linker. Older objects
+built by unintended host LLD 21 are superseded; image `aaa74094...` is revoked.
 
-Isolated-userspace reproduction exposed and fixed a linker-selection bug:
-Clang 18's HIP driver ignored `-fuse-ld` and invoked host `lld` 21.1.8.
-The recipe now supplies the pinned program-search directory and verifies the
-actual device-link command before compiling. All four corrected objects match
-byte-for-byte in a freshly extracted Ubuntu userspace with networking disabled;
-22 host tests pass. See `evidence/offline-isolated-compiler.json` and
-`docs/OFFLINE_BRINGUP.md`. This shares the WSL kernel, not its compiler filesystem.
-The earlier `63b6e0402149` indexed-store image is superseded and explicitly
-revoked by local verification. The corrected candidate below replaces it.
-TheRock binary comparison remains outstanding. Compiler/native source notices are
-inventoried; binary-distribution accounting remains separate release work.
+The actual pinned TheRock Clang/LLD 24 tools compiled four comparison fixtures.
+Before/after executable, resolved-library, source and inspector identities match.
+Fresh output paths change compilation-ID symbols and associated ELF lookup tables;
+code, descriptor and metadata sections match the first comparison. Whole-object
+replay equality is false, and the extra fixed-ID diagnostic was inconclusive.
+New target-ID spelling is rejected by our loader; resource registers and instruction
+encodings also differ from LLVM 18. Keep LLVM 18 selected. See
+`docs/THEROCK_BINARY_COMPARISON.md` and `evidence/offline-therock-verified-comparison.json`.
 
-The opt-in CPU shell-managed lifecycle passed its single declared experiment on
-.30, firmware 6.02, using PPSA99014. Source `3346166` and frozen image
-`gfx1013-runtime-9ac5d150b5db` (SHA `d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0`)
-passed runtime checks, application callbacks, destructor observation and application
-fini. The shell request returned zero; the title stopped before host cleanup,
-with no observed fatal signal or loader error. Sandbox/image release and service
-health were confirmed. Previous image and log bytes were preserved. See
-`evidence/native-shell-exit.json`. All 22 current host CTest cases pass.
+Full TheRock `amd-llvm` target completion and staged installation remain unverified.
+That broader build is separate from G1's comparison of relevant compiler tools.
+The existing build is under `/tmp/ps5hip-therock-comparison`; exec session `40611`
+was running at this checkpoint. Inspect that build before restarting anything.
+Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
+`evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
 
-Ordinary C exit remains unresolved: both previous CPU cases reached SIGSYS after
-runtime checks. Shell-managed closure deliberately leaves remaining platform
-finalizers to process reclamation. This one CPU run establishes neither general
-C exit, worker-thread/framework cleanup nor any GPU capability. The builder now
-allows an explicit shell probe for finite GPU candidates; none has run.
-Command/marker teardown is checked before reporting submission success, with
-injected unmap/release failure tests. Do not rerun the failed diagnostics.
-The failed .40 process must have recovery established before another run there.
-
-The finite-GPU indexed-store package is frozen at source `15bfc35`, stage
+The next decisive experiment is one bounded indexed-store run on idle .30 using
+PPSA99014. The candidate remains frozen at source `15bfc35`, stage
 `gfx1013-indexed_store-3d295773d2fb`, image SHA
 `fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
-It preserves standard/unknown exception reasons before the existing quarantine
-park; focused host oracle/log tests pass. Ownership and retry behavior are unchanged.
-The earlier `1288205d1a2a` image remains preserved as superseded evidence.
-Startup ordering and emitted AGC/ShellCoreUtil imports were independently inspected;
-the corrected device object was disassembled and inspected. UFS2 filesystem,
-full extracted-file hashes and local candidate/controller verification pass.
-See `evidence/offline-diagnostic-gpu-package.json`. No GPU run or push followed.
-Native GPU builds now reject stale source/recipe/object/driver hashes and embed
-the verified device report. Complete the remaining G1 compiler comparison
-before using the console. The compiler source-notice inventory is now
-recorded in `evidence/offline-compiler-provenance.json`; binary redistribution
-accounting remains a later release obligation. Isolated userspace reproduction passes;
-a separate physical host has not been tested. This alone does not close G1.
-The first hardware compute goal remains exact execution of a small HIP-compiled
-kernel through the native submission path. G3 additionally requires shared memory,
-atomics, wave operations and deliberate spilling; vector addition is insufficient.
-Separate wave32 broadcast/shuffle/ballot/reduction probes compile at O1 and O2 for
-both targets, including lanes 4-19 active with lane zero inactive. Scalar expected
-outputs and ISA inventories are retained in `evidence/offline-wave-probes.json`.
-Both now have guarded native harness profiles with 256-word oracles, strict log
-and staging support, verified O2 object provenance, and one-group launch checks.
-Nine focused host CTest cases and four PS5 harness translation-unit compilations
-pass; see `evidence/offline-wave-native-harness.json`. Both gfx1013 wave profiles
-now link at source `142d927`, with checked imports, startup ordering and FSELF
-integrity (`evidence/offline-wave-native-link.json`). The gfx1030 profiles remain
-compile-only; neither wave profile is packaged or GPU-qualified. The frozen
-indexed-store candidate is unchanged.
-The tested generic volatile private-address path remains a G3 compiler issue.
-An isolated contrast without `volatile` retains 144 private bytes but uses buffer
-scratch on both targets, with 33 private-address IR accesses and no flat-scratch
-setup. See `evidence/offline-private-inference.json`. This does not qualify
-arbitrary pointers or native scratch execution and is not a volatile-semantics fix.
-Further isolated IR research preserves the volatile accesses and gets buffer
-instructions. The descriptor reserves flat-init input registers, but the inspected
-entry overwrites them before use and emits no hardware flat-scratch setup.
-The initial loader rejects its unimplemented private-storage contract; this is
-not evidence of a fundamental buffer-scratch limitation. See
-`docs/VOLATILE_PRIVATE_LOWERING.md` and
-`evidence/offline-volatile-private-lowering.json`. No compiler workaround is accepted.
+Corrected device bytes, native imports/startup, FSELF, UFS2 and extracted-file hashes
+pass local verification. See `evidence/offline-diagnostic-gpu-package.json`.
+Later host/ABI work has not rebuilt or substituted this candidate.
 
-The full-header HIP ABI spike compiles twelve combined fixtures with authentic
-ROCm 6.2.4 headers and a source-derived workitem-library slice, across Linux/PS5
-hosts and both GPU targets. Full OCKL still fails. PS5 needs explicit header
-routing and a separate device wchar ABI choice. Real vector code requires
-288-byte kernargs with thirteen hidden geometry fields; the current loader
-correctly rejects them. See `docs/HIP_HOST_ABI_SPIKE.md` and
-`evidence/offline-compatible-hip-headers.json`. No HIP runtime is linked or run.
+Prepared deployment/observation scripts and their generator are hashed in
+`evidence/offline-first-gpu-controls.json`. Offline idle-history, fake-socket and
+real local timer checks pass. They coordinate both locks, verify/preserve the known
+CPU image/log, recheck idle immediately before launch, observe for an absolute
+20 seconds and close only PPSA99014 once with a separate eight-second deadline.
+No automatic retry or guessed process termination. Read `docs/CONSOLE_WORKFLOW.md`,
+the shared runbook and `.local/ENVIRONMENT.md` before traffic. No GPU run yet.
 
-G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
-by default, and accepts gfx1013 through its custom-target hook. This is target
-configuration only. The selected LLVM 18.1.8 route reproduces four device objects
-byte for byte in a fresh, isolated compiler userspace. That satisfies the offline
-reproduction test with the explicit shared-kernel/CPU limitation; a separate
-physical machine is not required by G1. Source notices are inventoried, and the
-built-TheRock binary comparison remains outstanding. See
-`docs/COMPILER_ROUTE_COMPARISON.md`, `evidence/offline-therock-comparison.json`
-and `evidence/offline-compiler-reproduction.json`.
+The CPU shell-managed lifecycle passed once on .30, FW 6.02, at source `3346166`,
+stage `gfx1013-runtime-9ac5d150b5db`, image SHA
+`d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0`.
+Runtime checks, callbacks, destructor/fini observation, shell-request return zero,
+self-stop before host cleanup, sandbox/image release and service health passed.
+See `evidence/native-shell-exit.json`. Ordinary C exit still faults with SIGSYS;
+do not repeat the failed diagnostics. Threaded/framework cleanup is unqualified.
+The failed .40 PID 204 teardown remains unresolved; establish recovery before reuse.
 
-Console access remains restricted to idle consoles, both shared locks and the
-exact-title controls. Read `docs/CONSOLE_WORKFLOW.md` and the local environment
-before a new console phase. Pushes remain reserved for coherent milestones.
+Offline work ahead of G2/G3/G4:
+
+- All 25 host CTests pass, including registered hidden-geometry regression coverage.
+  Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
+  twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and
+  thirteen hidden arguments are separated; checked uniform 64x1x1 geometry is
+  generated in zeroed 256-byte implicit storage. Unsupported layouts fail. See
+  `evidence/offline-hidden-geometry.json`. Existing frozen titles do not exercise it.
+- Twelve real combined HIP header fixtures compile for Linux/PS5 and both targets.
+  Authentic matching headers, host registration/fatbinary layouts, device ABI flags
+  and a source-derived workitem-only library are recorded in
+  `docs/HIP_HOST_ABI_SPIKE.md`. Full OCKL still fails; no HIP runtime is linked or run.
+- Wave32 full/partial-lane probes compile at O1/O2 for both targets. Both guarded
+  gfx1013 native profiles link with checked imports/startup/FSELF; gfx1030 remains
+  compile-only. Neither is packaged or executed. See `evidence/offline-wave-native-link.json`.
+- Generic volatile private lowering remains a G3 issue. An isolated IR contrast
+  preserves volatile operations and emits buffer instructions; reserved flat-init
+  registers are overwritten before use, with no hardware flat-scratch setup.
+  Native scratch backing, descriptors, offsets, state and lifetime remain
+  unimplemented. See `docs/VOLATILE_PRIVATE_LOWERING.md`; no workaround is accepted.
+
+Source notices are inventoried, including the exact ps5log GPL-3.0-or-later notice.
+Linked archive-member accounting and binary redistribution remain release work.
+The first kernel's instruction/entry contract is in `docs/INITIAL_CAPABILITY_MATRIX.md`.
+G2 still needs exact device output, guards and repeated clean lifecycle coverage;
+G3 additionally requires LDS/barriers, atomics, waves and deliberate spilling.
+Pushes remain reserved for coherent milestones.
 
 ## Entry points
 
@@ -218,3 +175,5 @@ manifests, hashes, source commit and the pinned image tool's binary provenance.
 - 2026-10-11 | offline milestone | 0c2e8c1 | PPSA99012 | packaged, no-run: five verified images and fourteen host tests | evidence/offline-native-packages.json | next: console controller
 
 - 2026-10-11 | CPU lifecycle milestone | 3346166 | PPSA99014 | one shell-managed startup/finalization/self-close passed on FW 6.02; 22 host cases pass | evidence/native-shell-exit.json | no G1-G12 gate passed
+
+- 2026-10-11 | G1 passed offline | LLVM18 + gfx1013 selected; isolated reproduction, TheRock comparison, 25 host tests | evidence/offline-g1-acceptance.json | next: bounded G2 store run

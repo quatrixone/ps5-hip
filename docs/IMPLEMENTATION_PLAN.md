@@ -2,8 +2,8 @@
 
 Updated: 2026-10-11, America/New_York.
 
-Status: G1 is in progress; G2-G12 remain planned. Frozen native candidates and
-offline validation receipts exist; no hardware gate has passed. See `../STATE.md`
+Status: G1 passed its offline acceptance; G2 is in progress and G3-G12 remain planned.
+Frozen native candidates and validation receipts exist; no GPU gate has passed. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
@@ -175,8 +175,8 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 
 | Goal | Outcome | Dependencies | Status |
 | --- | --- | --- | --- |
-| G1 | Reproducible compiler and platform contract | None | planned |
-| G2 | Native execution of a real HIP code object | G1 | planned |
+| G1 | Reproducible compiler and platform contract | None | passed offline |
+| G2 | Native execution of a real HIP code object | G1 | in progress; GPU unrun |
 | G3 | Correct general compute semantics | G2 | planned |
 | G4 | Real HIP C++ source compatibility | G3 | planned |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
@@ -323,8 +323,8 @@ instruction selection that still needs qualification.
 The [host ABI spike](HIP_HOST_ABI_SPIKE.md) now identifies real registration
 symbols, fat-binary layout and a compatible full-header fixture using ROCm 6.2.4.
 Its vector kernel requires 288-byte kernarg storage with runtime-generated hidden
-geometry fields. Implement checked explicit/hidden argument separation rather
-than treating every metadata entry as a user argument. Preserve the PS5 host ABI
+geometry fields. Checked explicit/hidden separation and uniform 64x1x1 packing
+now pass host tests; the native fixtures remain unrun. Preserve the PS5 host ABI
 while routing device ABI flags separately. The complete device-library build
 remains unresolved; the successful workitem-only fixture is not a library port.
 

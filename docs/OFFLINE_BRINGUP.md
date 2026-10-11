@@ -1,6 +1,7 @@
 # Offline compiler and object loading
 
-Status: G1 work in progress. Nothing in this document establishes GPU execution.
+Status: G1 passed offline; see `evidence/offline-g1-acceptance.json`.
+Nothing in this document establishes GPU execution.
 No console connection is needed for these checks.
 
 ## Reproduction
@@ -117,17 +118,18 @@ The explicit address-space cast remains a diagnostic, not a public source
 requirement. Buffer-scratch allocation, descriptor setup, per-wave offsets and
 actual spill correctness also remain unimplemented/unverified.
 An isolated, proof-limited IR rewrite can preserve the volatile accesses and emit
-buffer instructions, but still requests flat-scratch initialization in its kernel
-descriptor even after reoptimization. It is not an accepted workaround. See
+buffer instructions. Its descriptor reserves flat-init registers, but the entry
+overwrites them before use and emits no hardware flat-scratch setup. It is not an
+accepted workaround or a native scratch implementation. See
 [volatile private-address research](VOLATILE_PRIVATE_LOWERING.md).
 
 Native launch-state construction, cross-build and packaging now exist; see
 `STATE.md` for their separate CPU lifecycle results and limitations. Remaining
-offline qualification still needs the built-TheRock comparison. Fresh isolated
-userspace reproduction and compiler source-notice inventory are now recorded below
+offline compiler selection is complete, including the identity-verified TheRock
+comparison. Fresh isolated userspace reproduction and source-notice inventory are recorded below
 and in `docs/DEPENDENCY_PROVENANCE.md`; binary-distribution auditing is later work.
 Generic private-address
-lowering remains a G3 issue. G1 remains open; these updates do not certify native
+lowering remains a G3 issue. G1 passed offline; these updates do not certify native
 execution. Scratch, LDS, atomics, synchronization and spill behavior require dedicated
 G3 coverage; the arithmetic canaries cannot qualify them.
 
@@ -164,7 +166,8 @@ The script rejects an existing output and checks all four complete object hashes
 it does not normalize away linker differences. Evidence is in
 `evidence/offline-isolated-compiler.json`. Rebuild native candidates embedding old
 objects; preserve their frozen images as superseded history. TheRock's built
-compiler comparison remains outstanding.
+compiler comparison is recorded in `evidence/offline-therock-verified-comparison.json`;
+the full component build and staged installation remain unverified.
 
 ## Wave32 probe preparation for G3
 
@@ -195,6 +198,8 @@ shuffle, ballot, sum. The two full waves expect sums 528 and 1552 and ballot
 Inactive invocation records must stay unchanged. Use guarded allocations and the
 same completion/teardown requirements as other native cases.
 
-There is no native harness or execution result for these probes yet. Compilation
-and scalar oracle self-checks do not prove PS5 wave semantics, wave64 support or
-all inactive-lane patterns. They prepare required G3 cases without advancing G3.
+Both probes now have guarded native harnesses; the gfx1013 variants link with
+verified imports, startup ordering and FSELF integrity. See
+`evidence/offline-wave-native-link.json`. The gfx1030 variants remain compile-only.
+Neither probe is packaged or executed. Host oracles and native links do not prove
+PS5 wave semantics, wave64 support or all inactive-lane patterns.

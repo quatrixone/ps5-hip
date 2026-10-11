@@ -1,0 +1,1347 @@
+{
+  "schema": 1,
+  "classification": "identity-stable-replay-with-output-path-dependent-cuid",
+  "observed_utc": "2026-10-11T20:04:09.972227+00:00",
+  "hardware_validated": false,
+  "full_component_build_complete": false,
+  "staged_installation_verified": false,
+  "selected_route": "Ubuntu LLVM/LLD 18.1.8",
+  "therock_revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+  "llvm_revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+  "prior_evidence_sha256": "c9fa1278b48c00b2250fb09edc7a3a2b8a005cf99a1f15e4afcdabccd39343de",
+  "comparison_receipt_sha256": "20719ddbf6fd4d8243cfebcb42d25af9e42e55195158e15b9418da2854a6f01a",
+  "replay_script_sha256": "ee8b6ef6d75414d3573a5451f65c20bad35eedbf41b57e34ac45820853427c3c",
+  "analysis_script_sha256": "92537b0d7e62dd81191c79e660d2ae44bf615e364852605257faacf3547ffa01",
+  "identity_checks": {
+    "before_equals_after": true,
+    "executable_and_library_identities_match_prior_receipt": true,
+    "host_inspector_stable": true,
+    "recipes_and_sources_stable": true,
+    "strict_whole_object_equality": false,
+    "all_four_expected_loader_rejections": true
+  },
+  "before": {
+    "tools": {
+      "clang++": {
+        "sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "bytes": 198096,
+        "resolved_filename": "clang-24",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "2b67c42a80d783ac7c55844324648b24ac0bb249ca7c9a3660986bdf354e7b28",
+            "bytes": 88753640,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "lld": {
+        "sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "bytes": 8345568,
+        "resolved_filename": "lld",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-readobj": {
+        "sha256": "dcd53f7ca7e8305819cd368a5dab2289ed56c07421da28d2f943eb6d11b820be",
+        "bytes": 2472064,
+        "resolved_filename": "llvm-readobj",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-objdump": {
+        "sha256": "03918493b00227d071b1c523b391a5c3df43f285e4827bebd5a20469e5e954c1",
+        "bytes": 1235104,
+        "resolved_filename": "llvm-objdump",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      }
+    },
+    "host_inspector_sha256": "b1b4e10ce5ff10a643542a22cddb12a9f9f161447cb054cc9f26a38ef6a8c38b",
+    "sources": {
+      "tools/compare_device_compiler.py": "41438fabd63a73f47a5fdb69774a81eaf36b040e42fede4dc78ba143c666119d",
+      "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+      "kernels/canary.hip": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "kernels/resources.hip": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b"
+    }
+  },
+  "after": {
+    "tools": {
+      "clang++": {
+        "sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "bytes": 198096,
+        "resolved_filename": "clang-24",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "2b67c42a80d783ac7c55844324648b24ac0bb249ca7c9a3660986bdf354e7b28",
+            "bytes": 88753640,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "lld": {
+        "sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "bytes": 8345568,
+        "resolved_filename": "lld",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-readobj": {
+        "sha256": "dcd53f7ca7e8305819cd368a5dab2289ed56c07421da28d2f943eb6d11b820be",
+        "bytes": 2472064,
+        "resolved_filename": "llvm-readobj",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-objdump": {
+        "sha256": "03918493b00227d071b1c523b391a5c3df43f285e4827bebd5a20469e5e954c1",
+        "bytes": 1235104,
+        "resolved_filename": "llvm-objdump",
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock build tree"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      }
+    },
+    "host_inspector_sha256": "b1b4e10ce5ff10a643542a22cddb12a9f9f161447cb054cc9f26a38ef6a8c38b",
+    "sources": {
+      "tools/compare_device_compiler.py": "41438fabd63a73f47a5fdb69774a81eaf36b040e42fede4dc78ba143c666119d",
+      "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+      "kernels/canary.hip": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "kernels/resources.hip": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b"
+    }
+  },
+  "cases": [
+    {
+      "target": "gfx1013",
+      "fixture": "canary",
+      "source_sha256": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "baseline_sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+      "compiled": true,
+      "code_sha256": "19f38c17ceb8fb4a5b0962b8df1ff54a34af1d1b6f4947dd14655a49b576df64",
+      "bytes": 4784,
+      "byte_identical": false,
+      "metadata_accepted": true,
+      "metadata_report_sha256": "8da4efa19d4f5d58ab0fe36a9c92457171aac8ea95f04e6d6bcc546f41cfa622",
+      "isa_accepted": true,
+      "isa_report_sha256": "7aa239ef3597fb99bc495e8cb53d398875196e5e2ad212eabf56a450391872e8",
+      "loader_accepted": false,
+      "loader_report_sha256": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+      "loader_report": "metadata target mismatch\n",
+      "prior_object_sha256": "cab247dba49d41c45c33932e7477dd78f365ef6bfe15f51c5980ed74bb1d292d",
+      "whole_object_byte_identical_to_prior": false,
+      "different_byte_count": 49,
+      "changed_sections": [
+        {
+          "section": ".gnu.hash",
+          "prior_sha256": "cd266db231a704928e03311f0307239752a1fb1c340904926fa60da5f0af4a90",
+          "replay_sha256": "c76c2fa9a2fe0d535d9d95e825434742d6735d091b7387016cdbd156e6dba466",
+          "prior_bytes": 48,
+          "replay_bytes": 48
+        },
+        {
+          "section": ".dynstr",
+          "prior_sha256": "54d95782156b3213d61dacfca4706ddd26dbf19576ef8122095ad178a50f119a",
+          "replay_sha256": "9d59f8f8ed907461161de222d4837549d30a0430375a1898c09eefe231a2b048",
+          "prior_bytes": 85,
+          "replay_bytes": 84
+        },
+        {
+          "section": ".dynamic",
+          "prior_sha256": "edc6207552ba3673a699ca60f1b5f70d968f73accc63a7c1e7f40354ab9584bf",
+          "replay_sha256": "694716d757c61151ef88ee1065011af56d1bbcf504fb692d0c340eb530b87680",
+          "prior_bytes": 112,
+          "replay_bytes": 112
+        },
+        {
+          "section": ".symtab",
+          "prior_sha256": "1eb119b085b85234ab3559272a8e21ed9b02d19a212306987591404ed0ce89b7",
+          "replay_sha256": "266071b4d8adbffaf8d6b07790bdf8f8b713d6add9527370b94f143344090d8a",
+          "prior_bytes": 168,
+          "replay_bytes": 168
+        },
+        {
+          "section": ".strtab",
+          "prior_sha256": "8fd0524b30007bcadb869c3b6f032e68be4df4d0b058f16e9050abe5ae82b352",
+          "replay_sha256": "d75c04c69a9d13bc787beb7c43ae982c536d2bfb405632578bac99754672e14e",
+          "prior_bytes": 94,
+          "replay_bytes": 93
+        }
+      ],
+      "unchanged_execution_sections_sha256": {
+        ".text": "35bfaf76faf20e10c91afe7e39f76ca45816698a6d9204301d7331e23eabd5fc",
+        ".rodata": "0ce7dfd13963d1b3177ce713c6fcdf071b137d4bddaaf70ca3b049ea44b5676e",
+        ".note": "0f46c0391be2bcc797a191706f4f147cb99dbddbccd8b8dbf3b14c4a73f9330b",
+        ".eh_frame": "bcb223a693972b52d440aa9b595ff5b6e83e4266053e9b08394dd8c36c1d0850",
+        ".AMDGPU.gpr_maximums": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "normalized_symbol_tables_equal": true,
+      "normalized_string_tables_equal": true,
+      "dynamic_table_equal_except_actual_string_table_size": true,
+      "all_differences_within_listed_sections_and_section_headers": true,
+      "prior_cuid_symbol": "__hip_cuid_c9b81c2955f3f18c",
+      "replay_cuid_symbol": "__hip_cuid_d1a60d4906b4e5a",
+      "disassembly_identical_except_output_filename": true,
+      "driver_trace_sha256": "22aecfbee87b4c7c27f31501dee2183aeec99ef5b3908632b338a7e4255e7ff4",
+      "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actual_driver_invocations_sanitized": [
+        [
+          "<compiler-build>/bin/clang-24",
+          "-cc1",
+          "-mcode-object-version=5",
+          "-mllvm",
+          "--amdhsa-code-object-version=5",
+          "-triple",
+          "amdgpu10.13-amd-amdhsa",
+          "-aux-triple",
+          "x86_64-unknown-linux-gnu",
+          "-O2",
+          "-Werror=atomic-alignment",
+          "-emit-obj",
+          "-disable-free",
+          "-clear-ast-before-backend",
+          "-disable-llvm-verifier",
+          "-discard-value-names",
+          "-main-file-name",
+          "canary.hip",
+          "-mrelocation-model",
+          "pic",
+          "-pic-level",
+          "2",
+          "-fhalf-no-semantic-interposition",
+          "-mframe-pointer=none",
+          "-fno-rounding-math",
+          "-mconstructor-aliases",
+          "-funwind-tables=2",
+          "-aux-target-cpu",
+          "x86-64",
+          "-fcuda-is-device",
+          "-fno-threadsafe-statics",
+          "-mllvm",
+          "-amdgpu-internalize-symbols",
+          "-fvisibility=hidden",
+          "-fapply-global-visibility-to-externs",
+          "-target-cpu",
+          "gfx1013",
+          "-debugger-tuning=gdb",
+          "-fdebug-compilation-dir=<repo>",
+          "-fcoverage-compilation-dir=<repo>",
+          "-resource-dir",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-std=c++17",
+          "-fdeprecated-macro",
+          "-fno-autolink",
+          "-ferror-limit",
+          "19",
+          "-fhip-new-launch-api",
+          "--no-offloadlib",
+          "-fgnuc-version=4.2.1",
+          "-fskip-odr-check-in-gmf",
+          "-fcxx-exceptions",
+          "-fexceptions",
+          "-vectorize-loops",
+          "-vectorize-slp",
+          "-cuid=799b65d131f3f57d",
+          "-fcuda-allow-variadic-functions",
+          "-faddrsig",
+          "-fdwarf2-cfi-asm",
+          "-o",
+          "<temporary-object>",
+          "-x",
+          "hip",
+          "<repo>/kernels/canary.hip"
+        ],
+        [
+          "<compiler-build>/bin/lld",
+          "-flavor",
+          "gnu",
+          "-m",
+          "elf64_amdgpu",
+          "--no-undefined",
+          "-shared",
+          "-plugin-opt=-amdgpu-internalize-symbols",
+          "-plugin-opt=mcpu=gfx1013",
+          "-plugin-opt=O2",
+          "--lto-CGO2",
+          "--whole-archive",
+          "-o",
+          "<repo>/results/therock-identity-verified-comparison/gfx1013-canary/canary.hsaco",
+          "<temporary-object>",
+          "--no-whole-archive"
+        ]
+      ]
+    },
+    {
+      "target": "gfx1030",
+      "fixture": "canary",
+      "source_sha256": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "baseline_sha256": "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f",
+      "compiled": true,
+      "code_sha256": "7ca235b8469c4bd7c4e1f3492609e196143fa82e6ba6ee30b56fdb73b82bce7d",
+      "bytes": 4784,
+      "byte_identical": false,
+      "metadata_accepted": true,
+      "metadata_report_sha256": "bd26ac394c1fd8c7b5b5649582a9639048a0b9b7019cb4e71f354b491b80deba",
+      "isa_accepted": true,
+      "isa_report_sha256": "0aeb9471c05c4ad5c69969f7dcfd52be43818d68752ab58613aae160e9229a22",
+      "loader_accepted": false,
+      "loader_report_sha256": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+      "loader_report": "metadata target mismatch\n",
+      "prior_object_sha256": "7d3ed37ed20859eb015890b9a1bee228a871e6cc5588ad54210ccd5e3151090a",
+      "whole_object_byte_identical_to_prior": false,
+      "different_byte_count": 36,
+      "changed_sections": [
+        {
+          "section": ".gnu.hash",
+          "prior_sha256": "15c2c3208432677e2821009847e14d36594ebafa7348a9c0d44d10d52a6f415e",
+          "replay_sha256": "f1dc6adaec2ffa42633de3127fb6e6ec6e7df3b109fa51c0c00767edb692ca78",
+          "prior_bytes": 48,
+          "replay_bytes": 48
+        },
+        {
+          "section": ".hash",
+          "prior_sha256": "f5d0d7f16f2095d306e937d7f9d85574be8a1ea9ad1ff562b64dc4cea602a190",
+          "replay_sha256": "c0a0a55f1f686713cf26918d9ebc4e9230317eb8633cc5398e2148c4a313a6a5",
+          "prior_bytes": 56,
+          "replay_bytes": 56
+        },
+        {
+          "section": ".dynstr",
+          "prior_sha256": "b97c8f475cb9d0b5f30d3c5d94ce6a72f20551eec5a109c42fa1c6cc9ea4d5f8",
+          "replay_sha256": "820377e0e767c4004925c4b5cf7a2c139da20a7f855ba058b06f71b55446a592",
+          "prior_bytes": 85,
+          "replay_bytes": 85
+        },
+        {
+          "section": ".strtab",
+          "prior_sha256": "03a29edffcf54553cca9f00d09bc66f68b56468071936e7d86c36144ec2aa18b",
+          "replay_sha256": "32addb3b66784a8bac31b6fa50dec0477545e87ed4ff64913bb1ff479eae9ea1",
+          "prior_bytes": 94,
+          "replay_bytes": 94
+        }
+      ],
+      "unchanged_execution_sections_sha256": {
+        ".text": "a43098221cc491772e6bffe208e2a74e885bde112ba8dceb08762e54e994fceb",
+        ".rodata": "0ce7dfd13963d1b3177ce713c6fcdf071b137d4bddaaf70ca3b049ea44b5676e",
+        ".note": "06575571a13e1d91f0189063cf47de4abe75680d9af40bd13f0beef1c153252b",
+        ".eh_frame": "5b495fc1239ba702de8b455c8e4084ee39adcd29d05d937726b6fc2466772681",
+        ".AMDGPU.gpr_maximums": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "normalized_symbol_tables_equal": true,
+      "normalized_string_tables_equal": true,
+      "dynamic_table_equal_except_actual_string_table_size": true,
+      "all_differences_within_listed_sections_and_section_headers": true,
+      "prior_cuid_symbol": "__hip_cuid_d9a3960589a73e09",
+      "replay_cuid_symbol": "__hip_cuid_815320d5cdc7d09f",
+      "disassembly_identical_except_output_filename": true,
+      "driver_trace_sha256": "5c41bb26d4b85bbccb72dc22a143c1f892b496c155cc89e9f0374734aad26671",
+      "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actual_driver_invocations_sanitized": [
+        [
+          "<compiler-build>/bin/clang-24",
+          "-cc1",
+          "-mcode-object-version=5",
+          "-mllvm",
+          "--amdhsa-code-object-version=5",
+          "-triple",
+          "amdgpu10.30-amd-amdhsa",
+          "-aux-triple",
+          "x86_64-unknown-linux-gnu",
+          "-O2",
+          "-Werror=atomic-alignment",
+          "-emit-obj",
+          "-disable-free",
+          "-clear-ast-before-backend",
+          "-disable-llvm-verifier",
+          "-discard-value-names",
+          "-main-file-name",
+          "canary.hip",
+          "-mrelocation-model",
+          "pic",
+          "-pic-level",
+          "2",
+          "-fhalf-no-semantic-interposition",
+          "-mframe-pointer=none",
+          "-fno-rounding-math",
+          "-mconstructor-aliases",
+          "-funwind-tables=2",
+          "-aux-target-cpu",
+          "x86-64",
+          "-fcuda-is-device",
+          "-fno-threadsafe-statics",
+          "-mllvm",
+          "-amdgpu-internalize-symbols",
+          "-fvisibility=hidden",
+          "-fapply-global-visibility-to-externs",
+          "-target-cpu",
+          "gfx1030",
+          "-debugger-tuning=gdb",
+          "-fdebug-compilation-dir=<repo>",
+          "-fcoverage-compilation-dir=<repo>",
+          "-resource-dir",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-std=c++17",
+          "-fdeprecated-macro",
+          "-fno-autolink",
+          "-ferror-limit",
+          "19",
+          "-fhip-new-launch-api",
+          "--no-offloadlib",
+          "-fgnuc-version=4.2.1",
+          "-fskip-odr-check-in-gmf",
+          "-fcxx-exceptions",
+          "-fexceptions",
+          "-vectorize-loops",
+          "-vectorize-slp",
+          "-cuid=2694e34f862f20da",
+          "-fcuda-allow-variadic-functions",
+          "-faddrsig",
+          "-fdwarf2-cfi-asm",
+          "-o",
+          "<temporary-object>",
+          "-x",
+          "hip",
+          "<repo>/kernels/canary.hip"
+        ],
+        [
+          "<compiler-build>/bin/lld",
+          "-flavor",
+          "gnu",
+          "-m",
+          "elf64_amdgpu",
+          "--no-undefined",
+          "-shared",
+          "-plugin-opt=-amdgpu-internalize-symbols",
+          "-plugin-opt=mcpu=gfx1030",
+          "-plugin-opt=O2",
+          "--lto-CGO2",
+          "--whole-archive",
+          "-o",
+          "<repo>/results/therock-identity-verified-comparison/gfx1030-canary/canary.hsaco",
+          "<temporary-object>",
+          "--no-whole-archive"
+        ]
+      ]
+    },
+    {
+      "target": "gfx1013",
+      "fixture": "resources",
+      "source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "baseline_sha256": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+      "compiled": true,
+      "code_sha256": "f8bd20daab29f88b63652840bcefbbe612d8cdee68964b4be8f534087f497ed4",
+      "bytes": 14896,
+      "byte_identical": false,
+      "metadata_accepted": true,
+      "metadata_report_sha256": "d2493a46cb9b595306f1ca20e108d5cd45b9461b39d766050213aacf9e16f8ef",
+      "isa_accepted": true,
+      "isa_report_sha256": "a4e9165e3f211e5543073a3fc3e46b2663e4550310d762b09eba40077ee573fb",
+      "loader_accepted": false,
+      "loader_report_sha256": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+      "loader_report": "metadata target mismatch\n",
+      "prior_object_sha256": "17d830a1edac28bfbc5745f9e5c2b893d454c5b827efa20c3263d702484cf5b5",
+      "whole_object_byte_identical_to_prior": false,
+      "different_byte_count": 105,
+      "changed_sections": [
+        {
+          "section": ".dynsym",
+          "prior_sha256": "fb3451cef0ed94472beb2156ab5eb4227403b4f405cc125d3dbf38e45e82d44f",
+          "replay_sha256": "46105c6e32a7d83703dc24871687f0f09e92689d87588b1ff3473fc7b998d0de",
+          "prior_bytes": 336,
+          "replay_bytes": 336
+        },
+        {
+          "section": ".gnu.hash",
+          "prior_sha256": "79ee2956af43006a647ad8e058b5fd8d8ff23f61101ecd86cd6d4aa7806b895b",
+          "replay_sha256": "2cf42043db8007b29854eecdc61913851e169b0aab9a3337311b1e34d6065399",
+          "prior_bytes": 112,
+          "replay_bytes": 112
+        },
+        {
+          "section": ".hash",
+          "prior_sha256": "7040c50903d4a58abeeb8ecad9efb0583e2cd891d86e2afc2941d12eb7862e1d",
+          "replay_sha256": "37804fb773aff39286971a1aea1cbc890716ea08ea3a248323c6035c1de76630",
+          "prior_bytes": 120,
+          "replay_bytes": 120
+        },
+        {
+          "section": ".dynstr",
+          "prior_sha256": "93ec9f2227b05e17d1e81de43a6967e33384825093e52111e037024d4b106dc0",
+          "replay_sha256": "956f10607cc03b541072868825c93993518deee48954a9b87439780babc08920",
+          "prior_bytes": 215,
+          "replay_bytes": 215
+        },
+        {
+          "section": ".strtab",
+          "prior_sha256": "9ac4ff4ed1fba819c18e0ce7ae9fc91d5c73d63b6a1df2411d16c4420f84cd7d",
+          "replay_sha256": "74386fa58317f9b13bf9a28211e25c38cafec45d1d1b8f581553a881d0397aca",
+          "prior_bytes": 224,
+          "replay_bytes": 224
+        }
+      ],
+      "unchanged_execution_sections_sha256": {
+        ".text": "e03f6780f501a98b0509320bfff5ada570bf6659af61e9af8b806978232f36c8",
+        ".rodata": "8242cc4048e8ce9328131065ab08c7f90f8b7b58c376123ada77c87826feb49b",
+        ".note": "f42ab76cf939abe902824396f822bcca6cf12ee4d1a853f124ffa09d444d4ce7",
+        ".eh_frame": "2cbd11ff6883e3371fb3d65f0edd84674acd7bc2d8fa6e1c4b0cbfd4474b4a7e",
+        ".AMDGPU.gpr_maximums": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "normalized_symbol_tables_equal": true,
+      "normalized_string_tables_equal": true,
+      "dynamic_table_equal_except_actual_string_table_size": true,
+      "all_differences_within_listed_sections_and_section_headers": true,
+      "prior_cuid_symbol": "__hip_cuid_df5b0a3e8217bc22",
+      "replay_cuid_symbol": "__hip_cuid_7d92f75019cc3626",
+      "disassembly_identical_except_output_filename": true,
+      "driver_trace_sha256": "6b94bdfc5e76baa0770c6863e56db247d9dd15aae831400c69845941b20020ad",
+      "compile_log_sha256": "33b3317d27b9df576421e4084e64f11d707152da5f2cde7d6183a4da116e391d",
+      "actual_driver_invocations_sanitized": [
+        [
+          "<compiler-build>/bin/clang-24",
+          "-cc1",
+          "-mcode-object-version=5",
+          "-mllvm",
+          "--amdhsa-code-object-version=5",
+          "-triple",
+          "amdgpu10.13-amd-amdhsa",
+          "-aux-triple",
+          "x86_64-unknown-linux-gnu",
+          "-O2",
+          "-Werror=atomic-alignment",
+          "-emit-obj",
+          "-disable-free",
+          "-clear-ast-before-backend",
+          "-disable-llvm-verifier",
+          "-discard-value-names",
+          "-main-file-name",
+          "resources.hip",
+          "-mrelocation-model",
+          "pic",
+          "-pic-level",
+          "2",
+          "-fhalf-no-semantic-interposition",
+          "-mframe-pointer=none",
+          "-fno-rounding-math",
+          "-mconstructor-aliases",
+          "-funwind-tables=2",
+          "-aux-target-cpu",
+          "x86-64",
+          "-fcuda-is-device",
+          "-fno-threadsafe-statics",
+          "-mllvm",
+          "-amdgpu-internalize-symbols",
+          "-fvisibility=hidden",
+          "-fapply-global-visibility-to-externs",
+          "-target-cpu",
+          "gfx1013",
+          "-debugger-tuning=gdb",
+          "-fdebug-compilation-dir=<repo>",
+          "-fcoverage-compilation-dir=<repo>",
+          "-resource-dir",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-std=c++17",
+          "-fdeprecated-macro",
+          "-fno-autolink",
+          "-ferror-limit",
+          "19",
+          "-fhip-new-launch-api",
+          "--no-offloadlib",
+          "-fgnuc-version=4.2.1",
+          "-fskip-odr-check-in-gmf",
+          "-fcxx-exceptions",
+          "-fexceptions",
+          "-vectorize-loops",
+          "-vectorize-slp",
+          "-cuid=24bdee03879fae41",
+          "-fcuda-allow-variadic-functions",
+          "-faddrsig",
+          "-fdwarf2-cfi-asm",
+          "-o",
+          "<temporary-object>",
+          "-x",
+          "hip",
+          "<repo>/kernels/resources.hip"
+        ],
+        [
+          "<compiler-build>/bin/lld",
+          "-flavor",
+          "gnu",
+          "-m",
+          "elf64_amdgpu",
+          "--no-undefined",
+          "-shared",
+          "-plugin-opt=-amdgpu-internalize-symbols",
+          "-plugin-opt=mcpu=gfx1013",
+          "-plugin-opt=O2",
+          "--lto-CGO2",
+          "--whole-archive",
+          "-o",
+          "<repo>/results/therock-identity-verified-comparison/gfx1013-resources/resources.hsaco",
+          "<temporary-object>",
+          "--no-whole-archive"
+        ]
+      ]
+    },
+    {
+      "target": "gfx1030",
+      "fixture": "resources",
+      "source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "baseline_sha256": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706",
+      "compiled": true,
+      "code_sha256": "dcddfd52b38538801e3e864fa802d14c4de2dde1a868038b42c1376a823e4df4",
+      "bytes": 12976,
+      "byte_identical": false,
+      "metadata_accepted": true,
+      "metadata_report_sha256": "608c4dd95a8d157a67184f29a998b1d330c317504dce50a9cc026b0119b6fc69",
+      "isa_accepted": true,
+      "isa_report_sha256": "46bf3f5cae4de665a9c585a924d7ad81941191b6a93b979debefba244fa2c04d",
+      "loader_accepted": false,
+      "loader_report_sha256": "9a6b558b532e5c58a5d069f55db53e766ae01fbc9d482c8c0bf478e2bcb34ee5",
+      "loader_report": "metadata target mismatch\n",
+      "prior_object_sha256": "83ed56d464f7b77a3ebfb33b66030cf76f20ef36cbdb23ee42a00efd163cce2c",
+      "whole_object_byte_identical_to_prior": false,
+      "different_byte_count": 42,
+      "changed_sections": [
+        {
+          "section": ".gnu.hash",
+          "prior_sha256": "79e788ec35949562162d852d776161632abdfa0930dd40f02539ff8ccb0ce9c3",
+          "replay_sha256": "88046fbda5c2e0f15dfe01f0bbfe5cefa37cde44d9d1c243cc088346cc365b14",
+          "prior_bytes": 112,
+          "replay_bytes": 112
+        },
+        {
+          "section": ".hash",
+          "prior_sha256": "e247cbccc877e1a4611537963f3881b56818aa5be2469cd1bfd68413fb4ca25e",
+          "replay_sha256": "37804fb773aff39286971a1aea1cbc890716ea08ea3a248323c6035c1de76630",
+          "prior_bytes": 120,
+          "replay_bytes": 120
+        },
+        {
+          "section": ".dynstr",
+          "prior_sha256": "ee3734aeaa8661d007c5ff49e423172bb7e95f252cdf9f33a8cdf664b712f102",
+          "replay_sha256": "25448b525bcc05ad71bee07cd0d5dc4beeefdb1d348dbdbae87f2f770ffd1e91",
+          "prior_bytes": 215,
+          "replay_bytes": 215
+        },
+        {
+          "section": ".strtab",
+          "prior_sha256": "a8d8fc0a7fae9a014fa57207df609157ac4d6591b28f21ad0ccfe6fa5961ec88",
+          "replay_sha256": "7ed827aac07c0dcd17a46eb3b110883c872fb196b249a8a341b1ee86f40bed2d",
+          "prior_bytes": 224,
+          "replay_bytes": 224
+        }
+      ],
+      "unchanged_execution_sections_sha256": {
+        ".text": "1a55b92126ef19016a306b485705371c46a173b05acf77e6d6d4332f2ea55f4f",
+        ".rodata": "8242cc4048e8ce9328131065ab08c7f90f8b7b58c376123ada77c87826feb49b",
+        ".note": "faee9e9b1d48078b48b21ee7429135bbc8b7ce1903939f943cc01fe53a4a0c93",
+        ".eh_frame": "52cba98f2d2fec0f32249976e534df064040f691de838791b7bbd4ab1b6cc95b",
+        ".AMDGPU.gpr_maximums": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "normalized_symbol_tables_equal": true,
+      "normalized_string_tables_equal": true,
+      "dynamic_table_equal_except_actual_string_table_size": true,
+      "all_differences_within_listed_sections_and_section_headers": true,
+      "prior_cuid_symbol": "__hip_cuid_c9280efbc22ac160",
+      "replay_cuid_symbol": "__hip_cuid_620c9046563dd078",
+      "disassembly_identical_except_output_filename": true,
+      "driver_trace_sha256": "bb5b18abbbe63dff8ef50655015b55ec961251d5286ffe1256c8bc09ca60adf7",
+      "compile_log_sha256": "d78b2b49b255e64453c15ef1ce2831189263a956658c4c1893f5b5ea7691fd59",
+      "actual_driver_invocations_sanitized": [
+        [
+          "<compiler-build>/bin/clang-24",
+          "-cc1",
+          "-mcode-object-version=5",
+          "-mllvm",
+          "--amdhsa-code-object-version=5",
+          "-triple",
+          "amdgpu10.30-amd-amdhsa",
+          "-aux-triple",
+          "x86_64-unknown-linux-gnu",
+          "-O2",
+          "-Werror=atomic-alignment",
+          "-emit-obj",
+          "-disable-free",
+          "-clear-ast-before-backend",
+          "-disable-llvm-verifier",
+          "-discard-value-names",
+          "-main-file-name",
+          "resources.hip",
+          "-mrelocation-model",
+          "pic",
+          "-pic-level",
+          "2",
+          "-fhalf-no-semantic-interposition",
+          "-mframe-pointer=none",
+          "-fno-rounding-math",
+          "-mconstructor-aliases",
+          "-funwind-tables=2",
+          "-aux-target-cpu",
+          "x86-64",
+          "-fcuda-is-device",
+          "-fno-threadsafe-statics",
+          "-mllvm",
+          "-amdgpu-internalize-symbols",
+          "-fvisibility=hidden",
+          "-fapply-global-visibility-to-externs",
+          "-target-cpu",
+          "gfx1030",
+          "-debugger-tuning=gdb",
+          "-fdebug-compilation-dir=<repo>",
+          "-fcoverage-compilation-dir=<repo>",
+          "-resource-dir",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/x86_64-linux-gnu/c++/15",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../include/c++/15/backward",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-internal-isystem",
+          "<compiler-build>/lib/clang/24/include",
+          "-internal-isystem",
+          "<compiler-build>/bin/../include/x86_64-unknown-linux-gnu",
+          "-internal-isystem",
+          "/usr/local/include",
+          "-internal-isystem",
+          "/usr/lib/gcc/x86_64-linux-gnu/15/../../../../x86_64-linux-gnu/include",
+          "-internal-externc-isystem",
+          "/usr/include/x86_64-linux-gnu",
+          "-internal-externc-isystem",
+          "/include",
+          "-internal-externc-isystem",
+          "/usr/include",
+          "-std=c++17",
+          "-fdeprecated-macro",
+          "-fno-autolink",
+          "-ferror-limit",
+          "19",
+          "-fhip-new-launch-api",
+          "--no-offloadlib",
+          "-fgnuc-version=4.2.1",
+          "-fskip-odr-check-in-gmf",
+          "-fcxx-exceptions",
+          "-fexceptions",
+          "-vectorize-loops",
+          "-vectorize-slp",
+          "-cuid=3b54a7fadc4ae167",
+          "-fcuda-allow-variadic-functions",
+          "-faddrsig",
+          "-fdwarf2-cfi-asm",
+          "-o",
+          "<temporary-object>",
+          "-x",
+          "hip",
+          "<repo>/kernels/resources.hip"
+        ],
+        [
+          "<compiler-build>/bin/lld",
+          "-flavor",
+          "gnu",
+          "-m",
+          "elf64_amdgpu",
+          "--no-undefined",
+          "-shared",
+          "-plugin-opt=-amdgpu-internalize-symbols",
+          "-plugin-opt=mcpu=gfx1030",
+          "-plugin-opt=O2",
+          "--lto-CGO2",
+          "--whole-archive",
+          "-o",
+          "<repo>/results/therock-identity-verified-comparison/gfx1030-resources/resources.hsaco",
+          "<temporary-object>",
+          "--no-whole-archive"
+        ]
+      ]
+    }
+  ],
+  "source_references": [
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/clang/lib/Driver/Driver.cpp",
+      "sha256": "b78a59c1bbe3a11e2b925b85d701c4130ae7748259bffbc34a287775637b043c"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/clang/lib/Driver/ToolChains/Clang.cpp",
+      "sha256": "736e1fafa47a02acdd0821e5b17504600ca65b75b627f1ccea5325f3c5649ee4"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/clang/lib/AST/ASTContext.cpp",
+      "sha256": "57b7dd19e83c4be9f69d97e028e1599c1240670e79fe22adb448eb932a0edec9"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/clang/lib/CodeGen/CodeGenModule.cpp",
+      "sha256": "970bbb1356c83e252d56b4cd9f1b4d6e59c8d67468a96ccb1e7b96a026be1d60"
+    }
+  ],
+  "cuid_explanation": "Driver.cpp:161-200 defaults to hash mode; hashes input filename then every non-input argument, including output path and -###. Clang.cpp:8503-8505 forwards this ID to cc1. Fresh output path changes the symbol; the separate -### trace also hashes differently from actual compilation. ASTContext.cpp:15533-15539 hashes the driver CUID again using MD5-low64; CodeGenModule.cpp:1333-1341 emits that hash as the __hip_cuid suffix.",
+  "limits": [
+    "Strict whole-object replay assertion failed; not reported as byte-identical reproduction",
+    "GNU/SysV symbol-hash sections differ along with CUID; hash-table contents are not normalized by this analysis",
+    "Only build-tree tools compared; full amd-llvm component and staged installation remain unverified",
+    "Identical executable/descriptor/metadata sections do not establish PS5 execution or loader acceptance",
+    "No baseline/compiler recipe changes, console traffic, pushes or commits",
+    "Extra fixed-CUID diagnostic was inconclusive and does not override the failed strict whole-object equality assertion"
+  ],
+  "fixed_cuid_diagnostic": {
+    "classification": "bounded-diagnostic-inconclusive",
+    "exact_byte_reproduction_proven": false,
+    "selected_recipe_changed": false,
+    "script_sha256": "0de198496eb9c4e12e7e4fdd10016bc6fce8e9a38b5c35ba7e83589ff12413d9",
+    "symbol_suffix_attempt": {
+      "target": "gfx1013",
+      "fixture": "canary",
+      "extra_argument": "-cuid=c9b81c2955f3f18c",
+      "compiled": true,
+      "object_sha256": "3919835b9d8d1b8fdeeb96fd697e20e08b65433d5bfc175edb47fc7027c5138c",
+      "matches_prior_object": false,
+      "driver_sha256": "efd19c1e8afa617dcf4dcf89c260afa21e30ab173a9dbb797de9680776a6b1c1",
+      "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "explanation": "The object suffix is already MD5-low64 of the driver CUID. Passing the suffix as -cuid hashes it a second time."
+    },
+    "driver_job_recovery_attempt": {
+      "method": "Tiny helper calls Driver.BuildCompilation with original arguments, prints jobs and never executes them",
+      "source_sha256": "4b6bbaf1c36caf637c63e1e7831e99f1ccf987f9aa057a431c59a051cb03b474",
+      "binary_sha256": "2bc0ab9bba96ae351f40b6416956b82f8ad22907f4d4ea159fbbf66f43c9ecce",
+      "job_trace_sha256": "797388353a2a807fe106b3a7df1ddfec4588b29e9cbc7842c78943e15023cee0",
+      "recovered_driver_cuid": "55bc8c60b5b90730",
+      "resulting_symbol_hash": "421fe3285a6a0f94",
+      "matches_prior_symbol": false,
+      "compiler_jobs_executed": false,
+      "limitation": "Helper reconstruction did not reproduce original driver CUID; driver-main argument preprocessing equivalence was not established. No further recovery attempted."
+    },
+    "interpretation": "This diagnostic does not establish whole-object equality. The separately recorded unmodified replay and section-level comparison remain authoritative. Explained metadata differences are explicitly allowed by G1; this additional diagnostic is not a new acceptance criterion."
+  }
+}

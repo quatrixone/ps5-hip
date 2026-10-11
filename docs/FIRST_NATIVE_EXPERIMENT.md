@@ -116,9 +116,9 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
   or retry behavior. The preceding `1288205d1a2a` package is preserved as history.
   Corrected LLVM/LLD 18.1.8 device object and native imports were inspected;
   filesystem, full extraction and local candidate/controller verification pass.
-  See `evidence/offline-diagnostic-gpu-package.json`. It has not run. Complete the
-  outstanding G1 compiler comparison before console use, then reverify the exact
-  candidate and current environment. The earlier image with digest `aaa74094...`
+  See `evidence/offline-diagnostic-gpu-package.json`. It has not run. G1 passed
+  offline (`evidence/offline-g1-acceptance.json`); reverify the exact candidate and
+  current environment before console use. The earlier image with digest `aaa74094...`
   is revoked in the package catalog because it used the unintended host linker.
 
 - Superseded CPU control (PPSA99012): `gfx1013-runtime-9914258279a8`, source `955c989`.

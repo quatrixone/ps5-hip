@@ -8,7 +8,7 @@ cross-builds with mocked cleanup tests. Submission ownership and the AGC adapter
 also cross-compile with model tests. Initial cache/state commands and a dedicated
 canary title now link. Frozen packaging checks and one CPU shell-managed lifecycle
 run pass; ordinary C exit remains unresolved and GPU execution is unverified.
-No G1-G12 gate has passed.
+G1 passed its offline compiler/platform contract; G2-G12 remain unpassed.
 
 ## Source provenance
 

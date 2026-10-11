@@ -1,4 +1,4 @@
-# Preliminary TheRock compiler comparison
+# TheRock compiler comparison
 
 Status: **build-tree compiler binaries only; full component completion and staged
 installation remain pending.** The four frozen arithmetic/resource fixtures
@@ -109,9 +109,35 @@ hardware validation described in `VOLATILE_PRIVATE_LOWERING.md`.
 
 ## Next decision
 
-Complete and verify the actual TheRock component build, then check staged tool
-identities before treating this as a finished toolchain comparison. The current
-evidence supports keeping LLVM 18 for initial execution and records concrete
-future compatibility work: explicit new target-ID validation, changed register
-settings/encodings, and independent G3 private-memory implementation. No G1 or
-hardware gate is passed by this preliminary result.
+Keep LLVM 18 for initial execution. Future compatibility work includes explicit
+new target-ID validation, changed register settings/encodings, and independent
+G3 private-memory implementation. The full `amd-llvm` component build and staged
+installation remain unverified; this comparison qualifies neither that installation
+nor PS5 execution.
+
+## Identity-verified replay
+
+`evidence/offline-therock-verified-comparison.json` supplements the original
+preliminary receipt without replacing it. All four compiler runs were bracketed
+by executable, resolved shared-library, source/recipe and host-inspector hashes.
+Those identities were stable and matched the first comparison's compiler identities.
+The current loader again rejected all four objects for the documented target spelling.
+
+The fresh output directory changed `__hip_cuid_*` and its symbol/string/hash tables;
+whole-object equality is **false**. All four `.text`, `.rodata`, `.note`, `.eh_frame`
+and `.AMDGPU.gpr_maximums` sections are byte-identical to the first comparison.
+The pinned driver hashes non-input arguments, including `-o` and `-###`, into its
+compilation ID; AST/code generation hashes that ID again for the exported symbol.
+Consequently a separate driver trace is not the original compilation's ID.
+The receipt records changed sections and corresponding ELF size/offset effects.
+
+A diagnostic passing the exported symbol suffix as `-cuid` did not reproduce the
+original bytes: it hashes that suffix again. A source-derived driver job-printer
+also failed to recover the original ID and executed no compiler jobs after its
+failed precheck. These attempts are retained as failed diagnostics, not normalized
+into a success claim. GNU/SysV hash-table contents were not individually normalized.
+
+G1 explicitly permits explained metadata differences. The comparison supports
+selecting the independently reproducible LLVM 18 route; it does not require the
+newer compiler to produce identical binaries. Full Flang/component completion and
+staged installation are distinct from this completed comparison of the relevant tools.

@@ -6,9 +6,11 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: one CPU startup, application-finalization and shell-managed closure
-experiment passed on firmware 6.02 using PPSA99014; 22 host tests pass.
+**Status: G1's reproducible compiler/platform contract passed offline; 25 host
+tests pass. One CPU startup/finalization/shell-close experiment passed on FW 6.02.
 No GPU execution or general HIP runtime is qualified yet.**
+The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
+requirement, selected LLVM 18 route, TheRock comparison and remaining limits.
 The repository is private.
 
 ## Start here
