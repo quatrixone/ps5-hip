@@ -123,8 +123,8 @@ def main():
         objects.append(output)
     stubs = []
     for library, declarations in {
-        "libSceAgc": "int sceAgcInit(unsigned v) { return -1; }",
-        "libSceAgcDriver": "int sceAgcDriverSubmitDcb(void *p) { return -1; } int sceAgcSuspendPoint(void) { return -1; }",
+        "libSceAgc": "int sceAgcInit(unsigned v) { return -1; } int sceAgcSuspendPoint(void) { return -1; }",
+        "libSceAgcDriver": "int sceAgcDriverSubmitDcb(void *p) { return -1; }",
     }.items():
         source = build / (library + ".cpp")
         # Host-link symbols only. These implementations are never staged.
