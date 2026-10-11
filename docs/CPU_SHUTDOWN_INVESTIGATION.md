@@ -61,3 +61,19 @@ termination. If they do not, investigate the first missing callback boundary.
 Neither outcome authorizes a GPU test. Platform-managed application close is a
 separate lifecycle to qualify explicitly; it does not prove return-from-main
 semantics needed by future framework clients.
+
+## Observed result
+
+The frozen observer at source `c0bf77e`, image SHA
+`e9025b4962279785ebdeeb0f4a65bdf4a55ecaf4269a637944c9a4b12845842b`, ran once on
+.30, firmware 6.02. All three observer checkpoints appeared in order. PID 204
+then logged exit_value=0 and received SIGSYS at the same libkernel address
+0x8000003ac, with startup return address 0x400175. The title stopped and its
+sandbox and image mounts were released; FTP, klog and elfldr remained reachable.
+Evidence: `evidence/native-shutdown-observer.json`.
+
+This rejects failure before these user callbacks. It leaves later destructors,
+the loader callback and platform process termination unresolved. No GPU work ran.
+The next step is offline analysis of that later boundary, not another run of this
+observer. The failed PID 204 on .40 is a separate process on a different console;
+its recovery is still unproven.

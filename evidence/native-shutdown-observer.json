@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "failed",
+  "highest_stage": "CPU checks and instrumented exit callbacks",
+  "hardware_gate_passed": false,
+  "title_id": "PPSA99014",
+  "firmware": "6.02",
+  "source_commit": "c0bf77edef3d8e9d29893a4f5b92f6c9e0602ebd",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "e9025b4962279785ebdeeb0f4a65bdf4a55ecaf4269a637944c9a4b12845842b",
+    "bytes": 3538944
+  },
+  "pid": 204,
+  "launch_return": "0x00000017",
+  "application_check": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "runtime",
+    "log_sha256": "065c1fb233979c4f66cdadbf96ced38042c9f57fa10d80189cb0eebc0daa439a",
+    "bytes": 260,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "fatal_signal": "SIGSYS (12)",
+  "fault_rip": "0x00000008000003ac",
+  "startup_return_address": "0x0000000000400175",
+  "normal_exit": false,
+  "title_stop": true,
+  "sandbox_removed": true,
+  "image_unmounted": true,
+  "service_health": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "registration": "Existing installed title: remote metadata exactly matched staged param.json; mount link unchanged; replacement image hash verified.",
+  "preservation": {
+    "image": "/data/homebrew/PPSA99014.ffpkg.4377510ea802.preserved",
+    "log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log.216d74420bd3.preserved",
+    "old_image_sha256": "4377510ea802e3953416a8efda3a43af362d81346498427f346a8c7351687068"
+  },
+  "evidence_sha256": {
+    "after.log": "33bdfb5c1b9a4284d359c215772c299c3bfc560ac23acd135e191ccbabc8eabc",
+    "application.log": "065c1fb233979c4f66cdadbf96ced38042c9f57fa10d80189cb0eebc0daa439a",
+    "before.log": "81dc3ee4fb4a96a465b4618183601ab8dd24f70c98aa8dc9e2296e6db33e7f63",
+    "case.json": "78af9976ae5034b0646311618e6584abb95aa9b084e8472df068d410c02fef40",
+    "close-response.log": "aa9ce57b52913a8c5e959a47d120a872aa98ee3f23644bdebb8cee6863bf30e9",
+    "health.json": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+    "klog.log": "6d261bcd195419c211610ff01f8629518967516f22bba3903243c7380f9274fe",
+    "launch-response.log": "41a7e39f19bd274e8b8362f10a79f0b518ad3f078b7548a10da767b08a754ebc",
+    "observed.log": "9f8d7d39a762987cddd3fdbcabb68837c087959808570d97134b67140254c337",
+    "registration.json": "4edcc0b3d3cbb499026f917b0a238d2a267cd6d008c4463dc04236167d71e5a4"
+  },
+  "interpretation": "main returned zero; registered atexit callback and one static destructor ran before the same libkernel SIGSYS. This does not prove all runtime or loader cleanup completed.",
+  "next_decision": "Do not repeat this diagnostic. Investigate later platform termination and loader teardown offline; GPU gate remains closed."
+}

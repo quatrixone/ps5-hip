@@ -75,10 +75,15 @@ Updated: 2026-10-11, America/New_York.
 
 The CPU-only build now contains a shutdown observer using the startup's existing
 hook. Host callback-order and log-contract checks pass; native qualification is
-pending. Source `c0bf77e` is frozen as `gfx1013-runtime-18338ea3d37b`; FSELF integrity,
+now measured on .30: all three observer checkpoints ran, followed by the same
+SIGSYS in libkernel. Title stop, sandbox release, image unmount and service health
+were confirmed. This remains a failed lifecycle case; see
+`evidence/native-shutdown-observer.json`. Source `c0bf77e` is frozen as
+`gfx1013-runtime-18338ea3d37b`; FSELF integrity,
 UFS2 filesystem checks, extraction hashes and local candidate verification pass.
 The image SHA starts `e9025b4962279785`; full provenance is in
-`evidence/offline-shutdown-observer.json`. This candidate has not been deployed.
+`evidence/offline-shutdown-observer.json`. The previous image and result were
+preserved on .30 before deploying this diagnostic. Do not repeat this candidate.
 See [shutdown investigation](docs/CPU_SHUTDOWN_INVESTIGATION.md) for the
 hypothesis, bounded experiment and rejection criteria. This is diagnostic code,
 not an exit fix, and changes no GPU candidate.
