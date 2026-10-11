@@ -26,9 +26,9 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments);
 
-// Encodes only compute state and DISPATCH_DIRECT. A native submission must add
-// initialization, cache visibility, completion, bounded waiting and ownership.
-// Never submit this fragment by itself.
+// Encodes the initial cache-invalidation prefix, compute state and DISPATCH_DIRECT.
+// A native submission still needs AGC initialization, CPU upload visibility,
+// compute drain/completion, bounded waiting and ownership. Never submit alone.
 std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch);
 
 } // namespace ps5hip

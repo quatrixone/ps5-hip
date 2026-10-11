@@ -11,17 +11,22 @@ Updated: 2026-10-11, America/New_York.
 - Initial launch preparation and compute packet fragments pass six host test
   cases across the two targets; no fragment is submitted or GPU-qualified.
 - Pinned SDK preparation and LLVM 18 PS5 cross-build succeed. The native memory
-  library and CPU-only smoke executable link; the host suite now has seven passing
-  sanitizer tests, including injected native-allocation failures.
-- No native launcher, HIP runtime or hardware-qualified SDK exists yet.
+  library and CPU-only smoke executable link. Submission lifecycle and AGC adapter
+  cross-compile; twelve host sanitizer tests pass, including timeout quarantine,
+  driver failure injection, AGC ABI models and both guarded canary output oracles.
+- Initial cache/state commands and compute-drain/completion packets are encoded.
+  Indexed-store and vector-add native candidates for both targets link with real
+  AGC module imports and convert to integrity-checked FSELF containers.
+  Packaging/runtime/GPU behavior is unverified.
+- No HIP runtime or hardware-qualified SDK exists yet.
 - No console has been contacted or modified for this project.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Continue G1/G2 offline: complete native submission around the tested launch fragment
-and native allocation, establish dedicated-title startup/packaging, then cross-build
-a bounded GPU canary harness. Generic private-address
+Continue G1/G2 offline: audit title startup/runtime and logging, establish
+dedicated-title packaging and freeze the
+first bounded experiment. Generic private-address
 lowering remains a G3 compiler issue. See
 [offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
 The first implementation changes remain local on `development/offline-bringup`;

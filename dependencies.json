@@ -9,6 +9,12 @@
     "release_sha256": "8cfbc7cd5811e719eb4f0c47eea668d3dc7b40bc8ab11c4a5031d40c23ec02da",
     "license": "GPL-3.0-or-later by default; FreeBSD headers BSD; component exceptions retained upstream"
   },
+  "native_tools": {
+    "source_url": "https://github.com/mihawk-99/PS5_Vulkan",
+    "revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
+    "usage": "native module converter and title startup, exported from committed source",
+    "license": "GPL-3.0-or-later"
+  },
   "mesa_reference": {
     "source_url": "https://github.com/mihawk-99/PS5_Mesa",
     "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",

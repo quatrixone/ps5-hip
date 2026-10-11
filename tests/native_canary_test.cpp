@@ -1,0 +1,73 @@
+// Exercise the actual harness oracle without running its title entry point.
+#define main native_title_main_not_called
+#include "../tools/native_canary.cpp"
+#undef main
+#include <ps5platform/kernel.h>
+#include <cstdlib>
+#include <map>
+
+namespace {
+std::map<int64_t, void *> allocations;
+int64_t next_id = 1;
+void require(bool value) { if (!value) throw std::runtime_error("canary test assertion"); }
+template<class F> void reject(F f) {
+    try { f(); } catch (const ps5hip::ObjectError &) { return; }
+    throw std::runtime_error("bad canary result accepted");
+}
+}
+extern "C" int64_t sceKernelGetDirectMemorySize() { return int64_t(12) << 30; }
+extern "C" int32_t sceKernelAllocateDirectMemory(int64_t, int64_t, size_t bytes, size_t alignment, int, int64_t *physical) {
+    void *memory = nullptr;
+    if (posix_memalign(&memory, alignment, bytes)) return -1;
+    *physical = next_id++; allocations[*physical] = memory; return 0;
+}
+extern "C" int32_t sceKernelMapDirectMemory(void **address, size_t, int, int, int64_t physical, size_t) {
+    *address = allocations.at(physical); return 0;
+}
+extern "C" int32_t sceKernelMunmap(void *, size_t) { return 0; }
+extern "C" int32_t sceKernelReleaseDirectMemory(int64_t physical, size_t) {
+    std::free(allocations.at(physical)); allocations.erase(physical); return 0;
+}
+// An accidental entry into the GPU path must fail this host test immediately.
+extern "C" int32_t sceAgcInit(uint32_t) { std::abort(); }
+extern "C" int32_t sceAgcDriverSubmitDcb(void *) { std::abort(); }
+extern "C" int32_t sceAgcSuspendPoint() { std::abort(); }
+
+int main() {
+    try {
+        {
+            auto output = buffer();
+            require(argument(output).value == output->range().address + 64);
+            require(argument(output).buffer_bytes == 73 * 4);
+#ifdef PS5HIP_CANARY_VECTOR_ADD
+            auto a = buffer(), b = buffer();
+            for (uint32_t i = 0; i < count; ++i) {
+                data(a)[i] = bits(float(i) / 2);
+                data(b)[i] = bits(2 - float(i) / 4);
+                data(output)[i] = bits(float(i) / 4 + 2);
+            }
+            auto verify = [&] { validate(output, a, b); };
+            data(a)[37] ^= 1; reject(verify); data(a)[37] ^= 1;
+            data(b)[72] ^= 1; reject(verify); data(b)[72] ^= 1;
+            data(a)[-1] ^= 1; reject(verify); data(a)[-1] ^= 1;
+            data(b)[count] ^= 1; reject(verify); data(b)[count] ^= 1;
+#else
+            auto verify = [&] { validate(output); };
+            reject(verify); // A completion marker without shader writes must fail.
+            for (uint32_t i = 0; i < count; ++i) data(output)[i] = i ^ 0x5a17c9e3u;
+#endif
+            verify();
+            for (uint32_t i : {0u, 63u, 64u, 72u}) {
+                data(output)[i] ^= 1; reject(verify); data(output)[i] ^= 1;
+            }
+            auto *words = static_cast<uint32_t *>(output->cpu());
+            for (size_t i : {size_t(0), size_t(15), size_t(guard_words + count), size_t(output->range().bytes / 4 - 1)}) {
+                words[i] ^= 1; reject(verify); words[i] ^= 1;
+            }
+            verify();
+        }
+        require(allocations.empty());
+    } catch (const std::exception &error) {
+        std::fprintf(stderr, "%s\n", error.what()); return 1;
+    }
+}

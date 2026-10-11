@@ -29,10 +29,12 @@ int main(int argc, char **argv) {
         check(launch.kernargs == std::vector<uint8_t>({0, 0x80, 0, 0, 0x40, 0, 0, 0, 64, 0, 0, 0}));
         check(launch.threads == std::array<uint32_t, 3>{64, 1, 1});
         const auto words = ps5hip::encode_initial_dispatch(launch);
-        check(words.size() == 32);
+        check(words.size() == 56);
+        check(std::vector<uint32_t>(words.begin(), words.begin() + 10) ==
+              std::vector<uint32_t>({0xc0065800, 0, 0xffffffff, 0xff, 0, 0, 10, 0x4381, 0xc0004200, 0}));
         // Decode packet framing independently, then check semantic register values.
         std::vector<std::pair<uint32_t, uint32_t>> registers;
-        size_t pos = 0;
+        size_t pos = 10;
         while (((words.at(pos) >> 8) & 255) == 0x76) {
             const uint32_t header = words.at(pos++);
             check((header >> 30) == 3 && (header & 3) == 0);
@@ -47,6 +49,8 @@ int main(int argc, char **argv) {
         };
         check((uint64_t(reg(0xb834)) << 40 | uint64_t(reg(0xb830)) << 8) == launch.entry_address);
         check(reg(0xb848) == object.kernels[0].rsrc1 && reg(0xb84c) == object.kernels[0].rsrc2);
+        check(reg(0xb858) == 0xffffffff && reg(0xb85c) == 0xffffffff);
+        check(reg(0xb864) == 0 && reg(0xb868) == 0 && reg(0xb890) == 0 && reg(0xb89c) == 0);
         check(reg(0xb81c) == 64 && reg(0xb820) == 1 && reg(0xb824) == 1);
         check(reg(0xb900) == 0 && reg(0xb90c) == 0 && reg(0xb910) == 0 && reg(0xb914) == 0x40);
         check(pos + 5 == words.size() && words[pos] == 0xc0031502 && words[pos + 1] == 1);

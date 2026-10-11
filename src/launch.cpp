@@ -80,7 +80,10 @@ std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~0xbeu) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     require(!(launch.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))), "privileged dispatch unsupported");
-    std::vector<uint32_t> words;
+    // GFX10 ACQUIRE_MEM: invalidate instruction, scalar, vector, L1 and L2;
+    // CPU upload flushes precede submission and earlier submissions are retired.
+    std::vector<uint32_t> words{0xc0065800u, 0, 0xffffffffu, 0xff, 0, 0, 10, 0x4381u,
+                                0xc0004200u, 0}; // PFP_SYNC_ME
     auto registers = [&](uint32_t address, const uint32_t *values, unsigned count) {
         words.push_back(0xc0007600u | (count << 16)); // SET_SH_REG
         words.push_back((address - 0xb000u) / 4);
@@ -88,6 +91,11 @@ std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
     };
     const uint32_t program[] = {uint32_t(launch.entry_address >> 8), uint32_t(launch.entry_address >> 40)};
     const uint32_t resources[] = {launch.rsrc1, launch.rsrc2};
+    const uint32_t destinations[] = {0xffffffffu, 0xffffffffu};
+    const uint32_t zeros[] = {0, 0, 0, 0};
+    registers(0xb858, destinations, 2);
+    registers(0xb864, zeros, 2);
+    registers(0xb890, zeros, 4);
     registers(0xb830, program, 2);
     registers(0xb848, resources, 2);
     registers(0xb8a0, &launch.rsrc3, 1);

@@ -1,8 +1,10 @@
 # Initial native launch contract
 
 Status: host preparation and packet-fragment tests pass; native memory code
-cross-builds with mocked cleanup tests. GPU submission/execution is unimplemented
-and unverified. This is part of G1/G2, not a passed gate.
+cross-builds with mocked cleanup tests. Submission ownership and the AGC adapter
+also cross-compile with model tests. Initial cache/state commands and a dedicated
+canary title now link; packaging/runtime and GPU execution remain unverified.
+This is not a passed gate.
 
 ## Source provenance
 
@@ -24,6 +26,11 @@ Relevant paths within that revision:
   compute resource-limit calculation.
 - `src/amd/registers/gfx10.json`, `src/amd/common/sid.h` and
   `src/amd/common/ac_cmdbuf.h`: register fields and packet format.
+- `src/amd/common/ac_cmdbuf_cp.c`: GFX10 ACQUIRE_MEM encoding.
+
+The raw compute path in PS5_Vulkan `src/diagnostics.cpp`, pinned at
+`3f3ee69607013b345d2baa6d6a37c86745649a08`, additionally supplies the observed
+destination-mask, accumulator and CS_PARTIAL_FLUSH ordering reference.
 
 The implementation here encodes the inspected register/packet contract. Any
 subsequent reuse of source files must preserve their original license notices
@@ -57,10 +64,15 @@ private-buffer slots. Neither layout has been run here on hardware.
 
 ## Packet fragment
 
-`encode_initial_dispatch` emits these state writes followed by DISPATCH_DIRECT:
+`encode_initial_dispatch` emits GFX10 ACQUIRE_MEM with GCR `0x4381` (instruction,
+scalar, vector, L1 and L2 invalidation), PFP_SYNC_ME, then these state writes and
+DISPATCH_DIRECT. This assumes CPU upload flushes and no unretired earlier work.
 
 | Register | Initial value |
 | --- | --- |
+| COMPUTE_STATIC_THREAD_MGMT_SE0/1 | `0xffffffff` |
+| COMPUTE_STATIC_THREAD_MGMT_SE2/3 | Zero |
+| COMPUTE_USER_ACCUM_0..3 | Zero |
 | COMPUTE_PGM_LO/HI | Full entry address shifted by 8, split into register fields |
 | COMPUTE_PGM_RSRC1/2 | Inspected descriptor values |
 | COMPUTE_PGM_RSRC3 | Zero in this profile |
@@ -74,8 +86,9 @@ bits used by Mesa are not enabled. Program high bits are explicitly written to
 avoid inheriting an old value. Tests decode packet lengths and register addresses
 independently and check the resulting semantics for both real compiler fixtures.
 
-**This fragment must never be submitted alone.** It has no initialization,
-cache-visibility sequence, completion marker or lifetime management.
+**This fragment must never be submitted alone.** It still needs native AGC
+initialization, CPU flushes, completion and allocation lifetime management.
+It contains 56 dwords for the current six-user-SGPR canaries.
 
 ## Remaining native work
 
@@ -85,18 +98,14 @@ execution, so model completion cannot validate kernel results. The queue owns
 command storage until completion; application storage must not be handed to a
 GPU indirect buffer based solely on the host model working.
 
-Before the first native launch, implement and cross-build:
+Before the first native launch, finish qualifying:
 
-1. Finish the native submission integration on top of the pinned SDK and tested
-   per-allocation GPU-use tracking described in [Native build](NATIVE_BUILD.md).
-2. Command storage owned by the native submission path, required context state,
-   CPU flushes and GPU instruction/data cache visibility.
-3. The native completion/cache-release sequence, a bounded wait, and failure
-   reporting that never treats timeout as successful execution or safe reclamation.
-4. A separate development-title harness with guarded buffers, exact indexed-store
-   results and declared float tolerances. Freeze its source, tools and binary hash.
+1. Startup/runtime and packaging for the linked title in [Native build](NATIVE_BUILD.md).
+2. The combined cache, compute-state and completion sequence against inspected ISA.
+3. External bounded control and reliable capture of failure/quarantine output.
+4. The development-title identity and frozen source, tool and binary hashes.
 
 The existing driver uses a RELEASE_MEM completion packet with event 20, index 5,
-GCR actions `0x30c`, and a 32-bit memory marker. That is a reference to integrate
-and validate with the full submission sequence, not a proof that appending eight
-words makes any arbitrary compute fragment safe or correct.
+GCR actions `0x30c`, and a 32-bit memory marker. The submission queue now appends
+CS_PARTIAL_FLUSH (event 7, index 4) before this event, ten words total. Packet-model
+checks validate the encoding; they cannot prove hardware completion ordering.

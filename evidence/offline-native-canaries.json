@@ -1,0 +1,71 @@
+{
+    "schema":  1,
+    "hardware_validated":  false,
+    "status":  "offline native link and oracle validation; packaging and runtime audit pending",
+    "llvm_version":  "18.1.8",
+    "sdk_revision":  "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision":  "3f3ee69607013b345d2baa6d6a37c86745649a08",
+    "host_tests":  {
+                       "sanitizers":  [
+                                          "address",
+                                          "undefined"
+                                      ],
+                       "total":  12,
+                       "passed":  12
+                   },
+    "source_sha256":  {
+                          "tools/native_canary.cpp":  "9382998bd8603ab4038ed2a1770c2c514a67ef18c0e6d7f120e325cbcdf1238b",
+                          "src/code_object.cpp":  "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5",
+                          "src/launch.cpp":  "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba",
+                          "src/native_memory.cpp":  "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+                          "src/submission.cpp":  "6601146875b49c666ba2cdda4844df78cbe93d0fd42677eb4b21c5fa2831ad3d",
+                          "src/agc_backend.cpp":  "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+                          "include/ps5hip/agc_backend.h":  "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+                          "include/ps5hip/code_object.h":  "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02",
+                          "include/ps5hip/launch.h":  "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b",
+                          "include/ps5hip/native_memory.h":  "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+                          "include/ps5hip/submission.h":  "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+                          "tools/build_native_canary.py":  "e627d73bb2cb9d919dc0808d43af129b2b2f6854b8b2f3e088f40e6270e790e1",
+                          "dependencies.json":  "d351a92f79368732324fd4d32dec10b7b1d6a68917f646de91b8a5ca23a7f741"
+                      },
+    "candidates":  [
+                       {
+                           "target":  "gfx1013",
+                           "kernel":  "indexed_store",
+                           "artifacts":  {
+                                             "eboot.bin":  "76a7d4356c723fbc83b235a44e46b275b26962e3009c635e13af49cd50c8591d",
+                                             "canary.hsaco":  "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694"
+                                         }
+                       },
+                       {
+                           "target":  "gfx1013",
+                           "kernel":  "vector_add",
+                           "artifacts":  {
+                                             "eboot.bin":  "7d4471071fc165675def9f75e5aabf92eb5d77c760b4e4df46fb19b6524a3437",
+                                             "canary.hsaco":  "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694"
+                                         }
+                       },
+                       {
+                           "target":  "gfx1030",
+                           "kernel":  "indexed_store",
+                           "artifacts":  {
+                                             "eboot.bin":  "e120de39fbb08db4add12d64012068d5237279a346d234510dfe47deb6ed100f",
+                                             "canary.hsaco":  "d356925d18baace8801d6d6abd7dabef827c20a4f6b7312b1ef9365d268a1e4c"
+                                         }
+                       },
+                       {
+                           "target":  "gfx1030",
+                           "kernel":  "vector_add",
+                           "artifacts":  {
+                                             "eboot.bin":  "4b79f4b004bf5148bc9ef6773e4bf6aac96b951b903e8e917ed4dad2c97c65da",
+                                             "canary.hsaco":  "d356925d18baace8801d6d6abd7dabef827c20a4f6b7312b1ef9365d268a1e4c"
+                                         }
+                       }
+                   ],
+    "limitations":  [
+                        "No console run",
+                        "Host zlib not yet pinned",
+                        "No title metadata or deployment",
+                        "Container integrity does not prove native startup or GPU execution"
+                    ]
+}
