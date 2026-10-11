@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "classification": "offline same-host reproduction",
+  "hardware_gate_passed": false,
+  "tools": {
+    "clang++-18": "Ubuntu clang version 18.1.8 (20ubuntu8)",
+    "ld.lld-18": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",
+    "llvm-readobj-18": "Ubuntu LLVM version 18.1.8",
+    "llvm-objdump-18": "Ubuntu LLVM version 18.1.8"
+  },
+  "artifacts": [
+    {
+      "fixture": "canary",
+      "target": "gfx1013",
+      "sha256": "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694",
+      "bytes": 4096,
+      "identical_to_prior_artifact": true,
+      "parser_test": "gfx1013: fixture, materialization, truncation, rejection and 5000 mutation checks passed"
+    },
+    {
+      "fixture": "canary",
+      "target": "gfx1030",
+      "sha256": "d356925d18baace8801d6d6abd7dabef827c20a4f6b7312b1ef9365d268a1e4c",
+      "bytes": 4096,
+      "identical_to_prior_artifact": true,
+      "parser_test": "gfx1030: fixture, materialization, truncation, rejection and 5000 mutation checks passed"
+    },
+    {
+      "fixture": "resources",
+      "target": "gfx1013",
+      "sha256": "4fe62768bb853d767d1f521e358b96805177fc72efb2791192d76c1adec968f3",
+      "bytes": 14720,
+      "identical_to_prior_artifact": true,
+      "parser_test": "gfx1013: resource requirements correctly classified"
+    },
+    {
+      "fixture": "resources",
+      "target": "gfx1030",
+      "sha256": "ec6c7c7e55af90d2f2cbf2ecc7ef2eb684dfa3ad535647bd4eb9b80d150797c3",
+      "bytes": 12800,
+      "identical_to_prior_artifact": true,
+      "parser_test": "gfx1030: resource requirements correctly classified"
+    }
+  ],
+  "limitations": [
+    "Not a clean-machine rebuild",
+    "No GPU execution or new ISA qualification"
+  ],
+  "builder_sha256": "9cf14d14147aedcff2c4f84697dfe51aedfb83758622b66c559c1c6c483adc29"
+}

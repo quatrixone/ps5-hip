@@ -73,6 +73,17 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+The shell-exit deployment preflight found ProsperoStore PPSA99000/PID 237 active
+on .30. No image was uploaded and no title launched; both shared locks were
+released. See `evidence/shell-exit-no-run.json`. Recheck idle before the next
+console phase; never close that unrelated application.
+
+While the console was busy, the device recipe was fixed to enforce the exact
+pinned versions of Clang, LLD and both LLVM inspectors before writing artifacts.
+Fresh arithmetic/resource builds for both targets match their earlier bytes and
+pass parser/resource checks. `evidence/offline-compiler-reproduction.json` records
+this same-host reproduction, not clean-machine or GPU qualification.
+
 Offline reference analysis now points to syscall 1 as a plausible final exit
 boundary, with an explicit cross-firmware caveat. Before a different lifecycle
 experiment, explicit import-library mapping is now implemented and host-tested

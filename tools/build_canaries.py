@@ -43,6 +43,13 @@ def isa_inventory(disassembly, expected):
     return result
 
 
+def require_tool_versions(versions, expected):
+    for name, text in versions.items():
+        match = re.search(r"(?:version\s+|LLD\s+)(\d+\.\d+\.\d+)(?![\w.+-])", text)
+        if not match or match[1] != expected:
+            raise ValueError(f"{name} does not match pinned LLVM {expected}: {text.splitlines()[0] if text else 'no version'}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=pathlib.Path, default=ROOT / "build/canaries")
@@ -52,11 +59,13 @@ def main():
                 ("clang++-18", "ld.lld-18", "llvm-readobj-18", "llvm-objdump-18")}
     if not all(commands.values()):
         parser.error("Required tools: " + ", ".join(k for k, v in commands.items() if not v))
+    versions = {name: run([path, "--version"]) for name, path in commands.items()}
+    expected_version = json.loads((ROOT / "dependencies.json").read_text())["llvm"]["version"]
+    require_tool_versions(versions, expected_version)
     args.output.mkdir(parents=True, exist_ok=True)
     source = ROOT / "kernels" / (args.fixture + ".hip")
     report = {"hardware_validated": False, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-              "tool_versions": {name: run([path, "--version"]).splitlines()[0]
-                                for name, path in commands.items()}, "profiles": []}
+              "tool_versions": {name: text.splitlines()[0] for name, text in versions.items()}, "profiles": []}
     for target in ("gfx1013", "gfx1030"):
         directory = args.output / target
         if args.fixture != "canary":

@@ -26,6 +26,11 @@ work. `--no-gpu-bundle-output` produces a linked ELF rather than a bundled devic
 container. The recipe explicitly selects LLD 18, code-object V5 and wave32.
 `build/canaries/build.json` records compiler commands, versions and artifact hashes.
 LLVM readobj and disassembly outputs remain beside each artifact for inspection.
+The recipe rejects a compiler, linker or inspector version that differs from the
+exact LLVM version in `dependencies.json`, before creating output. Same-host
+rebuilds in a separate directory reproduced all four arithmetic/resource code
+objects byte for byte; see `evidence/offline-compiler-reproduction.json`. This
+does not replace the planned clean-machine reproduction requirement.
 
 ## Observed contract
 
@@ -101,8 +106,10 @@ address-space cast is a diagnostic probe, not a requirement we intend to impose
 on normal HIP source. Buffer-scratch allocation, descriptor setup, per-wave offsets
 and actual spill correctness also remain unimplemented/unverified.
 
-Still outstanding offline: generic private-address lowering, expanded semantic
-negative fixtures, dependency/license lock, native launch-state construction,
-native cross-build and the first bounded hardware experiment package. G1 remains
-open. Scratch, LDS, atomics, synchronization and spill behavior require dedicated
+Native launch-state construction, cross-build and packaging now exist; see
+`STATE.md` for their separate CPU lifecycle results and limitations. Remaining
+offline qualification includes clean-machine reproduction, final dependency/license
+review and the explicit toolchain-route comparison. Generic private-address
+lowering remains a G3 issue. G1 remains open; these updates do not certify native
+execution. Scratch, LDS, atomics, synchronization and spill behavior require dedicated
 G3 coverage; the arithmetic canaries cannot qualify them.

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "title_id": "PPSA99014",
+  "host": "192.168.4.30",
+  "reason": "ProsperoStore PPSA99000 PID 237 active; no later stop in captured log",
+  "uploaded": false,
+  "launched": false,
+  "shared_locks_released": true,
+  "candidate": {
+    "local_artifacts_verified": true,
+    "hardware_gate_passed": false,
+    "title_id": "PPSA99014",
+    "target": "gfx1013",
+    "kernel": "runtime",
+    "shutdown_mode": "shell-request-probe",
+    "source_commit": "3346166ab10b743269fc6d3e5f6ce2407c5baad9",
+    "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0",
+      "bytes": 3538944
+    },
+    "controllers": {
+      "launch.elf": {
+        "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+        "bytes": 110544
+      },
+      "close.elf": {
+        "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+        "bytes": 110592
+      }
+    },
+    "unproven": [
+      "console idle state",
+      "remote bytes",
+      "registration",
+      "log freshness",
+      "native execution",
+      "clean teardown",
+      "service health"
+    ]
+  },
+  "before_log_sha256": "56dd0844198d28bede31c5d667be7679a78763d1d2e67727101677f089d8ef23"
+}
