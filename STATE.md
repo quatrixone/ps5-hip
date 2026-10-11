@@ -73,6 +73,12 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+The CPU-only build now contains a shutdown observer using the startup's existing
+hook. Host callback-order and log-contract checks pass; native qualification is
+pending. See [shutdown investigation](docs/CPU_SHUTDOWN_INVESTIGATION.md) for the
+hypothesis, bounded experiment and rejection criteria. This is diagnostic code,
+not an exit fix, and changes no GPU candidate.
+
 Investigate abnormal CPU shutdown offline before another bounded startup case.
 The saved backtrace address 0x400175 is the return address of the imported exit
 call in the pinned startup code; the actual fault RIP is in libkernel. This does

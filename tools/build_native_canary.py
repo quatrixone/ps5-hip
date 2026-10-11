@@ -71,6 +71,8 @@ def main():
     compiler = ROOT / "tools/ps5-clangxx"
     objects = []
     sources = [native / "app_crt.cpp", ROOT / "tools/native_canary.cpp", elevation / "client/elevation.cpp"]
+    if args.kernel == "runtime":
+        sources.append(ROOT / "tools/native_shutdown_probe.cpp")
     sources += [ROOT / "src" / name for name in
                 ["code_object.cpp", "launch.cpp", "native_memory.cpp", "submission.cpp", "agc_backend.cpp"]]
     for source in sources:

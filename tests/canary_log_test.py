@@ -46,6 +46,20 @@ class LogTests(unittest.TestCase):
         with self.assertRaises(UnicodeDecodeError):
             module.check_log(b"\xff", "gfx1013", "runtime")
 
+    def test_shutdown_probe_requires_all_checkpoints_but_never_certifies_exit(self):
+        checkpoints = [b"PS5HIP SHUTDOWN main-return=0\n", b"PS5HIP SHUTDOWN atexit=observed\n",
+                       b"PS5HIP SHUTDOWN static-dtor=observed\n"]
+        data = self.runtime + b"".join(checkpoints)
+        result = module.check_log(data, "gfx1013", "runtime", True)
+        self.assertEqual(result["application_result"], "application-pass")
+        self.assertFalse(result["hardware_gate_passed"])
+        for partial in (self.runtime, data[:-1], data + checkpoints[-1],
+                        self.runtime + b"".join(reversed(checkpoints))):
+            self.assertNotEqual(module.check_log(partial, "gfx1013", "runtime", True)["application_result"],
+                                "application-pass")
+        with self.assertRaises(ValueError):
+            module.check_log(data, "gfx1013", "vector_add", True)
+
 
 if __name__ == "__main__":
     unittest.main()
