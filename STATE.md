@@ -12,20 +12,22 @@ Updated: 2026-10-11, America/New_York.
   cases across the two targets; no fragment is submitted or GPU-qualified.
 - Pinned SDK preparation and LLVM 18 PS5 cross-build succeed. The native memory
   library and CPU-only smoke executable link. Submission lifecycle and AGC adapter
-  cross-compile; twelve host sanitizer tests pass, including timeout quarantine,
-  driver failure injection, AGC ABI models and both guarded canary output oracles.
+  cross-compile; thirteen host sanitizer tests pass, including timeout quarantine,
+  driver failure injection, AGC ABI models, guarded canary oracles and log capture.
 - Initial cache/state commands and compute-drain/completion packets are encoded.
   Indexed-store and vector-add native candidates for both targets link with real
   AGC module imports and convert to integrity-checked FSELF containers.
   Packaging/runtime/GPU behavior is unverified.
+- A CPU-only startup control checks constructors, heap, exception cleanup, TLS and
+  the clock. All candidates use exclusive persistent logs. Native conversion uses
+  hash-verified static zlib built offline from pinned source.
 - No HIP runtime or hardware-qualified SDK exists yet.
 - No console has been contacted or modified for this project.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Continue G1/G2 offline: audit title startup/runtime and logging, establish
-dedicated-title packaging and freeze the
+Continue G1/G2 offline: establish dedicated-title packaging and freeze the
 first bounded experiment. Generic private-address
 lowering remains a G3 compiler issue. See
 [offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
@@ -47,6 +49,8 @@ Read only the active goal and relevant source slices. Raw logs stay in ignored
 `results/`; compact, sanitized validation receipts live under `evidence/`.
 `evidence/offline-resource-probes.json` records the current source hash, compiler
 versions, object hashes and instruction inventories without local user paths.
+`evidence/offline-native-canaries.json` records linked native candidates and their
+source/dependency hashes; it is not hardware qualification.
 
 ## Milestones
 

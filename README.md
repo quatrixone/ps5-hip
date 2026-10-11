@@ -6,8 +6,8 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: offline compiler, loader and native canary development. Four native
-canary candidates link and twelve host tests pass; no console validation or
+**Status: offline compiler, loader and native canary development. Native startup
+and GPU canary candidates link and thirteen host tests pass; no console validation or
 general HIP runtime yet.**
 The repository is private.
 

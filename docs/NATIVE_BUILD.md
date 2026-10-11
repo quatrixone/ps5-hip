@@ -45,16 +45,19 @@ Host boundary tests use explicit mock AGC functions; no system GPU API is called
 ## Dedicated native canary candidate
 
 ```sh
+python3 tools/prepare_host_zlib.py --archive /path/to/zlib-1.3.2.tar.gz
 python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel indexed_store
 ```
 
 The target must be `gfx1013` or `gfx1030`; the kernel must be `indexed_store` or
-`vector_add`. Each executable runs only its selected experiment. The builder
+`vector_add`, or `runtime` for the CPU-only startup control. Each executable runs
+only its selected experiment. The builder
 exports the exact native-tool revision in `dependencies.json`, preserving its
-notices, and builds the host converter with Clang 18 and host zlib development
-files. It does not use the reference checkout's local modifications. Host zlib
-is not yet a locked build input, so these are development candidates, not a fully
-reproducible release toolchain.
+notices, and builds the host converter with Clang 18 and pinned static zlib 1.3.2.
+`prepare_host_zlib.py` checks the cached source archive's SHA-256 before extracting
+or building it, retains the source license, and records installed library/header
+hashes. The candidate builder verifies those hashes before linking. Neither step
+downloads anything or uses the reference checkout's local modifications.
 
 The candidate uses native title startup, the pinned SDK's static libc++, ABI and
 unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel
@@ -64,12 +67,13 @@ Link-only AGC stubs are not packaged. No proprietary implementation is copied.
 
 Output is under `build/native/<target>-<kernel>/`: an intermediate PIE, converted
 native ELF, a validated plaintext FSELF container in `candidate/eboot.bin`, the
-matching `canary.hsaco`, and a receipt with source/artifact hashes. The converted
+matching `canary.hsaco` for GPU cases, and a receipt with source/artifact hashes.
+The runtime control needs no GPU code object. The converted
 ELF uses type `0xfe10`, FreeBSD OSABI 9/ABI 2 and 16 KiB load alignment. Native
 imports and container integrity are offline structural checks, not loader proof.
 No title ID, title metadata or deployment is generated yet.
 
-The harness reads `/app0/canary.hsaco`, checks its target, performs a C++ exception
+The GPU harness reads `/app0/canary.hsaco`, checks its target, performs the runtime
 self-check before AGC initialization, and submits two 64-thread groups for 73
 elements. All rounded data allocations are poisoned, with a 64-byte prefix guard
 and the entire remaining tail checked. Integer output is exact; vector-add inputs
@@ -81,9 +85,34 @@ boundaries, input corruption and guard corruption. They do not execute GPU code.
 An unresolved submission parks the title while retaining allocations and prints
 `QUARANTINED`; it does not retry or return through process teardown. The external
 controller must impose the run deadline and follow the shared-console protocol.
-Logging capture, runtime startup/exception behavior, development-title packaging,
-artifact freeze and the first experiment record remain to be qualified before
+Native runtime behavior, development-title packaging, artifact freeze and the
+first experiment record remain to be qualified before
 console use. A successful link does not justify skipping those steps.
+
+### Runtime control and persistent log
+
+Build `--target gfx1013 --kernel runtime` for the first startup control. It checks
+a dynamic global constructor, heap-backed strings, exception type/message and
+cross-function destructor unwinding, main-thread emulated TLS, and monotonic clock
+ordering. It never calls an AGC API or allocates GPU direct memory. This is a
+single-thread startup check, not general TLS/threading qualification.
+
+All variants first open `/download0/ps5-hip-<target>-<kernel>.log` exclusively and
+redirect stdout/stderr there without buffering. Existing files cause refusal;
+before a later authorized run the controller must preserve the previous log and
+remove only that exact file. The harness never deletes logs. A host child-process
+test verifies both streams are captured, old buffered output is excluded, and an
+existing log is preserved. Checkpoints are flushed; runtime completion, final
+result and quarantine attempt `fsync`. A missing log is failure/inconclusive,
+never evidence of startup success. Native mount permissions and persistence still
+require the CPU-only control on hardware.
+
+Static inspection found no unresolved payload-loader hooks in the linked title.
+The SDK's `libcxx.sh` builds libunwind in bare-metal mode; the explicit ELF frame
+boundaries match that configuration. These findings remove a known payload-only
+dependency concern, but do not prove that the console loader, system libc and
+our static C++ runtime cooperate correctly. The startup control precedes every
+GPU experiment for that reason.
 
 ## Memory behavior
 
@@ -137,7 +166,7 @@ submit and kick errors, driver exceptions, pre-submit flush failure, frozen and
 backward clocks, late completion and refusal to replace a queue. AGC boundary
 models verify version 8 initialization, the 16-byte submit ABI with a zero flag,
 argument rejection, initialization failure and native error propagation. CPU cache
-instructions are cross-compiled but not exercised by these mock tests. Twelve host
+instructions are cross-compiled but not exercised by these mock tests. Thirteen host
 CTest cases pass with the sanitizer build; none constitutes GPU evidence.
 
 ## Dependency provenance

@@ -1,5 +1,6 @@
 #include "ps5hip/agc_backend.h"
 #include "ps5hip/submission.h"
+#include "native_runtime.h"
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -10,6 +11,7 @@
 #endif
 
 namespace {
+#ifndef PS5HIP_RUNTIME_ONLY
 constexpr uint32_t count = 73, guard_words = 16, poison = 0xa5a5a5a5;
 using Memory = std::shared_ptr<ps5hip::NativeMemory>;
 
@@ -39,7 +41,7 @@ uint32_t bits(float value) {
 #endif
 [[noreturn]] void quarantine() {
     std::fprintf(stderr, "PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n");
-    std::fflush(nullptr);
+    ps5hip_canary::sync_log();
     for (;;) ::sleep(1);
 }
 
@@ -110,15 +112,28 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
         if (!memory->close()) throw ps5hip::ObjectError("canary allocation teardown failed");
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
 }
+#endif
 } // namespace
 
 int main() {
+    const char *kernel =
+#if defined(PS5HIP_RUNTIME_ONLY)
+        "runtime";
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
+        "vector_add";
+#else
+        "indexed_store";
+#endif
+    char log_path[128];
+    std::snprintf(log_path, sizeof(log_path), "/download0/ps5-hip-%s-%s.log", PS5HIP_CANARY_TARGET, kernel);
+    if (!ps5hip_canary::redirect_log(log_path)) return 2;
+    std::printf("PS5HIP START target=%s kernel=%s\n", PS5HIP_CANARY_TARGET, kernel);
     try {
-        // Exercise exception unwinding before entering the GPU driver.
-        bool caught = false;
-        try { throw ps5hip::ObjectError("native runtime check"); }
-        catch (const ps5hip::ObjectError &) { caught = true; }
-        if (!caught) return 2;
+        ps5hip_canary::check_runtime();
+        if (!ps5hip_canary::sync_log()) throw ps5hip::ObjectError("startup log sync failed");
+#ifdef PS5HIP_RUNTIME_ONLY
+        std::printf("PS5HIP PASS kernel=runtime gpu_api_calls=0\n");
+#else
         std::ifstream input("/app0/canary.hsaco", std::ios::binary | std::ios::ate);
         if (!input) throw ps5hip::ObjectError("cannot open staged canary.hsaco");
         const auto size = input.tellg();
@@ -133,11 +148,11 @@ int main() {
         ps5hip::SubmissionQueue queue(backend);
         try { run(queue, object, image); }
         catch (...) { if (queue.poisoned()) quarantine(); throw; }
-        std::fflush(nullptr);
-        return 0;
+#endif
+        return ps5hip_canary::sync_log() ? 0 : 3;
     } catch (const std::exception &error) {
         std::fprintf(stderr, "PS5HIP FAIL: %s\n", error.what());
-        std::fflush(nullptr);
+        ps5hip_canary::sync_log();
         return 1;
     }
 }
