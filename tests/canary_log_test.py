@@ -46,6 +46,22 @@ class LogTests(unittest.TestCase):
         with self.assertRaises(UnicodeDecodeError):
             module.check_log(b"\xff", "gfx1013", "runtime")
 
+    def test_shell_exit_requires_returned_success_and_does_not_prove_exit(self):
+        suffix = (b"PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                  b"PS5HIP SHUTDOWN static-dtor=observed\n"
+                  b"PS5HIP SHELL_EXIT application-fini=completed\n"
+                  b"PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+        data = self.runtime + suffix
+        result = module.check_log(data, "gfx1013", "runtime", shell_exit_probe=True)
+        self.assertEqual(result["application_result"], "application-pass")
+        self.assertFalse(result["hardware_gate_passed"])
+        for bad in (data.rsplit(b"PS5HIP SHELL_EXIT request-return=0", 1)[0],
+                    data.replace(b"request-return=0", b"request-return=-1"),
+                    data.replace(b"PS5HIP SHELL_EXIT application-fini=completed\n", b""),
+                    data + b"PS5HIP FAIL: shell-exit timeout\n"):
+            self.assertNotEqual(module.check_log(bad, "gfx1013", "runtime", shell_exit_probe=True)
+                                ["application_result"], "application-pass")
+
     def test_shutdown_probe_requires_all_checkpoints_but_never_certifies_exit(self):
         checkpoints = [b"PS5HIP SHUTDOWN main-return=0\n", b"PS5HIP SHUTDOWN atexit=observed\n",
                        b"PS5HIP SHUTDOWN static-dtor=observed\n"]

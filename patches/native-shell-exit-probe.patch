@@ -1,0 +1,23 @@
+--- a/app_crt.cpp
++++ b/app_crt.cpp
+@@ -53,6 +53,10 @@
+     (void)status;
+ }
+ 
++#ifdef PS5HIP_SHELL_EXIT_PROBE
++extern "C" void ps5hip_install_shell_exit_probe();
++#endif
++
+ extern "C" void _init()
+ {
+     run_forward(__preinit_array_start, __preinit_array_end);
+@@ -79,6 +83,9 @@
+     if (loader_teardown != nullptr)
+         (void)atexit(loader_teardown);
+     (void)atexit(_fini);
++#ifdef PS5HIP_SHELL_EXIT_PROBE
++    ps5hip_install_shell_exit_probe();
++#endif
+     _init();
+     const int status = application_main(argc, argv, nullptr);
+     catchReturnFromMain(status);

@@ -51,6 +51,24 @@ class CaseTests(unittest.TestCase):
         result = self.verify()
         self.assertTrue(result["local_artifacts_verified"])
         self.assertFalse(result["hardware_gate_passed"])
+        self.assertEqual(result["shutdown_mode"], "platform-exit")
+
+    def test_frozen_shutdown_mode_is_exposed_and_restricted(self):
+        for mode, kernel, valid in (("shell-request-probe", "runtime", True),
+                                     ("shell-request-probe", "vector_add", False),
+                                     ("unknown", "runtime", False)):
+            self.write(self.stage / "build-receipt.json", {"shutdown_mode": mode})
+            candidate = self.packages["candidates"][0]
+            candidate["manifest"]["kernel"] = kernel
+            candidate["manifest"]["build_receipt_sha256"] = module.fingerprint(self.stage / "build-receipt.json")["sha256"]
+            self.write(self.stage / "manifest.json", candidate["manifest"])
+            candidate["package"]["manifest_sha256"] = module.fingerprint(self.stage / "manifest.json")["sha256"]
+            self.write(self.stage / "package-receipt.json", candidate["package"])
+            if valid:
+                self.assertEqual(self.verify()["shutdown_mode"], mode)
+            else:
+                with self.assertRaisesRegex(ValueError, "shutdown mode"):
+                    self.verify()
 
     def test_changed_artifacts_and_receipts_are_rejected(self):
         for path in (self.stage / "app/eboot.bin", self.stage / (self.title + ".ffpkg"),

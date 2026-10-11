@@ -39,6 +39,10 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         raise ValueError("manifest bytes changed")
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
+    shutdown_mode = read_json(stage / "build-receipt.json").get("shutdown_mode", "platform-exit")
+    if shutdown_mode not in ("platform-exit", "shell-request-probe") or (
+            shutdown_mode == "shell-request-probe" and manifest["kernel"] != "runtime"):
+        raise ValueError("unsupported shutdown mode")
     actual = {}
     for path in (stage / "app").rglob("*"):
         if path.is_symlink():
@@ -59,6 +63,7 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
             raise ValueError(f"controller bytes changed: {name}")
     return {"local_artifacts_verified": True, "hardware_gate_passed": False,
             "title_id": title, "target": manifest["target"], "kernel": manifest["kernel"],
+            "shutdown_mode": shutdown_mode,
             "source_commit": manifest["source_commit"], "expected_log": manifest["expected_log"],
             "image": image, "controllers": control["artifacts"],
             "unproven": ["console idle state", "remote bytes", "registration", "log freshness",

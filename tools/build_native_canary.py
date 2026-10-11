@@ -19,7 +19,10 @@ def main():
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
     parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add"], required=True)
+    parser.add_argument("--shell-exit-probe", action="store_true", help="CPU-only application lifecycle diagnostic")
     args = parser.parse_args()
+    if args.shell_exit_probe and args.kernel != "runtime":
+        parser.error("shell-exit probe is restricted to the CPU runtime case")
     lock = json.loads((ROOT / "dependencies.json").read_text())
     revision = lock["native_tools"]["revision"]
     sdk = ROOT / ".deps/sdk"
@@ -64,6 +67,9 @@ def main():
             ["git", "-C", str(args.native_source), "show", f"{revision}:{name}"]))
     import_patch = ROOT / "patches/native-import-libraries.patch"
     run("patch", "--batch", "--fuzz=0", "-p1", "-d", native, "-i", import_patch)
+    shell_patch = ROOT / "patches/native-shell-exit-probe.patch"
+    if args.shell_exit_probe:
+        run("patch", "--batch", "--fuzz=0", "-p1", "-d", native, "-i", shell_patch)
     build = ROOT / "build/native" / f"{args.target}-{args.kernel}"
     build.mkdir(parents=True, exist_ok=True)
     tool = build / "ps5-native-tool"
@@ -74,7 +80,7 @@ def main():
     objects = []
     sources = [native / "app_crt.cpp", ROOT / "tools/native_canary.cpp", elevation / "client/elevation.cpp"]
     if args.kernel == "runtime":
-        sources.append(ROOT / "tools/native_shutdown_probe.cpp")
+        sources.append(ROOT / "tools" / ("native_shell_exit_probe.cpp" if args.shell_exit_probe else "native_shutdown_probe.cpp"))
     sources += [ROOT / "src" / name for name in
                 ["code_object.cpp", "launch.cpp", "native_memory.cpp", "submission.cpp", "agc_backend.cpp"]]
     for source in sources:
@@ -84,6 +90,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
         if args.kernel == "runtime":
             options.append("-DPS5HIP_RUNTIME_ONLY=1")
+        if args.shell_exit_probe:
+            options.append("-DPS5HIP_SHELL_EXIT_PROBE=1")
         run(compiler, "-std=c++20", "-O2", "-Wall", "-Wextra", "-Werror", "-fPIC",
             "-fvisibility=hidden", "-I", ROOT / "include", *options, "-c", source, "-o", output)
         objects.append(output)
@@ -114,10 +122,13 @@ def main():
         "--start-group", *[sdk / "target/lib" / name for name in
                              ["libc++.a", "libc++abi.a", "libunwind.a", "libc.a", "libps5platform.a"]],
         "--end-group", "--as-needed", *[sdk / "target/lib" / name for name in
-                                         ["libkernel.so", "libSceLibcInternal.so", "libSceNet.so"]])
+                                         ["libkernel.so", "libSceLibcInternal.so", "libSceNet.so"]],
+        *([sdk / "target/lib/libSceSystemService.so"] if args.shell_exit_probe else []))
     elf = build / "eboot.elf"
     run(tool, "link", "--in", pie, "--out", elf, "--stub-dir", sdk / "target/lib",
-        "--stub", stubs[0], "--stub", stubs[1], "--file-name", "eboot.elf")
+        "--stub", stubs[0], "--stub", stubs[1], "--file-name", "eboot.elf",
+        *(["--import-library", "libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil"]
+          if args.shell_exit_probe else []))
     candidate = build / "candidate"
     candidate.mkdir(exist_ok=True)
     run(tool, "self", "--sign", "--in", elf, "--out", candidate / "eboot.bin")
@@ -143,6 +154,7 @@ def main():
         shutil.copyfile(ROOT / "build/canaries" / args.target / "canary.hsaco", candidate / "canary.hsaco")
         artifacts.append("canary.hsaco")
     receipt = {"hardware_validated": False, "target": args.target, "kernel": args.kernel,
+               "shutdown_mode": "shell-request-probe" if args.shell_exit_probe else "platform-exit",
                "native_tools_revision": revision, "sdk_revision": lock["sdk"]["revision"],
                "native_tool_source_sha256": {name: hashlib.sha256((native / name).read_bytes()).hexdigest()
                                              for name in files},
@@ -150,6 +162,7 @@ def main():
                "host_zlib": zlib_receipt, "elevation": elevation_receipt,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
+                                 ([shell_patch] if args.shell_exit_probe else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},

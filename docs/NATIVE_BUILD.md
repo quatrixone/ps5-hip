@@ -83,6 +83,13 @@ It checks mixed libraries, shared-library reuse, unchanged defaults and rejected
 inputs. No firmware dump or console is needed. These slower converter tests are
 explicit rather than part of every host CTest run.
 
+The optional `--shell-exit-probe` build switch applies a separate conditional
+startup patch and selects the CPU application-finalization barrier described in
+`docs/CPU_SHUTDOWN_INVESTIGATION.md`. It adds the SystemService stub plus the
+explicit ShellCoreUtil library binding. Its mode, patch and source hashes are
+recorded in the receipt and thus in the immutable staging key. It is rejected for
+GPU profiles and is not enabled by default.
+
 The candidate uses native title startup, the pinned SDK's static libc++, ABI and
 unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel
 and libSceLibcInternal. The SDK unwinder needs explicit start/end symbols for

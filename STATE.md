@@ -84,9 +84,15 @@ service export alongside a default-library import. Existing CPU executable bytes
 remain unchanged. Offline reference tracing supports the entry argument's
 teardown-callback interpretation; it does not prove completion on firmware 6.02.
 See `evidence/offline-exit-reference.json` and `docs/NATIVE_BUILD.md`.
-Next, design the separate shell-managed lifecycle probe without claiming it fixes
-C `exit` or skipping required runtime cleanup. No platform exit API has been
-substituted, and no additional console was contacted for this analysis.
+The opt-in CPU `--shell-exit-probe` now registers an early exit barrier so
+application callbacks and static destructors run first. It then runs application
+fini once, flushes/syncs output and requests shell closure while platform libraries
+remain initialized. Host ordering/failure checks, seven log-contract cases and
+six candidate-identity cases pass. Native linking and FSELF integrity pass;
+the candidate has not run. The platform-exit path remains the default. Remaining
+platform finalizers are deliberately delegated to shell closure in this diagnostic,
+so it does not establish general C exit or multithreaded cleanup semantics.
+Freeze/package the diagnostic, then qualify its self-stop and cleanup on idle .30.
 
 The CPU-only build now contains a shutdown observer using the startup's existing
 hook. Host callback-order and log-contract checks pass; native qualification is

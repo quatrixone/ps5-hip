@@ -121,3 +121,38 @@ alive to send the request. Calling the service before cleanup, or calling it
 after destroying its required runtime state, is not a justified solution. Keep
 ordinary C exit failure tracked separately even if a native self-close contract
 can be qualified for finite compute jobs.
+
+## Opt-in application-finalization barrier
+
+`build_native_canary.py --kernel runtime --shell-exit-probe` selects a separate
+CPU-only diagnostic. It registers a barrier before application initializers run,
+after startup registers the platform teardown and application `_fini` callbacks.
+The existing `exit` machinery therefore invokes subsequently registered
+application callbacks and static destructors first. The barrier then calls
+application `_fini` once, flushes stdio and syncs the log, and requests
+`sceShellCoreUtilExitApp` while the earlier platform callbacks have not run.
+It never returns into a second `_fini` or the known-failing final exit syscall.
+
+This is a proposed native application lifecycle, not a claim that standard C
+termination is fixed. It delegates platform resource reclamation to shell-managed
+process closure instead of running the remaining platform finalizers. The CPU
+case has no worker threads; no claim about thread-local destructors, concurrent
+shutdown, framework teardown or abrupt `_Exit` semantics follows from it.
+
+The original platform-exit diagnostic remains the default. The new option is
+rejected for GPU candidates. If main fails, callback order is wrong, persistence
+fails, or the service returns an error, the probe records failure and waits for
+the existing exact-title controller; it does not retry or fall back to syscall 1.
+The host model checks real C++ exit-callback ordering with a separate application
+object, exactly one fini call and request, a rejected service request, nonzero main
+and missing registration. Service behavior is mocked only in that host test.
+
+Experiment: after freezing and verifying its package, preserve the prior image
+and log on idle .30 under both locks. Capture klog before one launch; observe at
+most 20 seconds, then use the exact-title controller if the title still exists.
+For a diagnostic pass require all runtime/destructor/fini checkpoints, service
+return zero, title self-stop before host close, no fatal signal or loader error,
+sandbox/image release and healthy services. A host-forced close, missing service
+return or missing teardown evidence cannot pass. Any failure ends the experiment;
+analyze offline without a repeat. The application-log checker accepts the new
+sequence only with `--shell-exit-probe` and never certifies native teardown.

@@ -12,3 +12,8 @@ default conversion path retains its original output. Overrides are explicit
 separately. No firmware code or export database is included in this patch.
 
 Validation and usage are in `docs/NATIVE_BUILD.md`.
+
+`native-shell-exit-probe.patch` adds a conditional, pre-initializer registration
+point to the same pinned startup source. It is applied only for the CPU shell-exit
+diagnostic and inherits the startup source's GPL-3.0-or-later license. This does
+not change the default startup source or general platform-exit behavior.
