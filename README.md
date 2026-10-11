@@ -7,7 +7,7 @@ HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
 **Status: offline compiler, loader and native canary development. Native startup
-and GPU canary candidates link and fourteen host tests pass; no console validation or
+and GPU canary candidates link and seventeen host tests pass; no console validation or
 general HIP runtime yet.**
 The repository is private.
 

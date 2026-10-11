@@ -12,7 +12,7 @@ Updated: 2026-10-11, America/New_York.
   cases across the two targets; no fragment is submitted or GPU-qualified.
 - Pinned SDK preparation and LLVM 18 PS5 cross-build succeed. The native memory
   library and CPU-only smoke executable link. Submission lifecycle and AGC adapter
-  cross-compile; thirteen host sanitizer tests pass, including timeout quarantine,
+  cross-compile; fifteen C++ host sanitizer tests pass, including timeout quarantine,
   driver failure injection, AGC ABI models, guarded canary oracles and log capture.
 - Initial cache/state commands and compute-drain/completion packets are encoded.
   Indexed-store and vector-add native candidates for both targets link with real
@@ -25,13 +25,18 @@ Updated: 2026-10-11, America/New_York.
 - No console has been contacted or modified for this project.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
-  exact extracted-file hashes. Fourteen host test cases pass.
+  exact extracted-file hashes. Seventeen host test cases pass (fifteen C++, two Python).
+- Pinned title-aware launch/close controllers cross-compile. Host mocks and a
+  bounded application-log checker are implemented; neither sends console traffic.
+- The console host/firmware and authoritative environment/lock configuration have
+  been requested from the user. No project or workspace-root ENVIRONMENT.md exists.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
 Continue G1/G2 offline: prepare title-specific
 deployment/log retrieval/close control and freeze the first bounded experiment.
+See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
 Generic private-address
 lowering remains a G3 compiler issue. See
 [offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
@@ -57,6 +62,7 @@ versions, object hashes and instruction inventories without local user paths.
 source/dependency hashes; it is not hardware qualification.
 `evidence/offline-native-packages.json` records all five `PPSA99012` package
 manifests, hashes, source commit and the pinned image tool's binary provenance.
+`evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
 
