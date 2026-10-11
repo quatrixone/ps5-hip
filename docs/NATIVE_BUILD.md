@@ -46,6 +46,7 @@ Host boundary tests use explicit mock AGC functions; no system GPU API is called
 
 ```sh
 python3 tools/prepare_host_zlib.py --archive /path/to/zlib-1.3.2.tar.gz
+python3 tools/prepare_elevation.py --eden-source /path/to/ProsperoEden --lapy-source /path/to/PS5-Lapy-JB-Daemon --logging-header /path/to/pinned/ps5log.h
 python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel indexed_store
 ```
 
@@ -80,7 +81,7 @@ generates title metadata. No tool described here deploys anything.
 sources, identity and staging tool before running:
 
 ```sh
-python3 tools/stage_native_title.py --target gfx1013 --kernel runtime
+python3 tools/stage_native_title.py --target gfx1013 --kernel runtime --results-dir /chosen/results
 python3 tools/prepare_ufs2tool.py --source /path/to/cached/UFS2Tool
 python3 tools/package_native_title.py --stage dist/PPSA99012/<candidate-directory>
 ```
@@ -88,7 +89,7 @@ python3 tools/package_native_title.py --stage dist/PPSA99012/<candidate-director
 Staging validates the build receipt against current source and candidate bytes,
 then writes a new `app/` folder, matching `sce_sys/param.json`, the build receipt
 and a manifest containing every file's size/hash. The candidate directory key
-includes build provenance, title identity and staging-tool bytes. Existing stages
+includes build provenance, title identity, results directory and staging-tool bytes. Existing stages
 are refused. Each kernel/target is a separate candidate for the same title, never
 a request to install several titles or run a sequence automatically.
 
@@ -134,7 +135,8 @@ cross-function destructor unwinding, main-thread emulated TLS, and monotonic clo
 ordering. It never calls an AGC API or allocates GPU direct memory. This is a
 single-thread startup check, not general TLS/threading qualification.
 
-All variants first open `/download0/ps5-hip-<target>-<kernel>.log` exclusively and
+All variants request the bundled Lapy helper's filesystem capability, then open
+`<results-dir>/ps5-hip-<target>-<kernel>.log` exclusively and
 redirect stdout/stderr there without buffering. Existing files cause refusal;
 before a later authorized run the controller must preserve the previous log and
 remove only that exact file. The harness never deletes logs. A host child-process

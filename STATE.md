@@ -24,13 +24,16 @@ Updated: 2026-10-11, America/New_York.
 - No HIP runtime or hardware-qualified SDK exists yet.
 - User-directed storage revision: Eden's elevation client plus an exact-title
   Lapy owned-root helper; configurable ordinary results directory, no download0
-  dependency. CPU native build passes; new stages must be frozen before testing.
+  dependency. CPU and indexed-store native builds pass. The revised CPU package
+  is frozen at source 955c989; filesystem and full extraction/hash checks pass.
+  See `evidence/offline-elevation.json`. Its configured directory is
+  `/data/ps5-hip/results`; this is a staging choice, not an executable constant.
   Nineteen host cases pass, including the exported Eden/Lapy wire contract.
 - Read-only preflight contacted both authorized consoles; no deployment or launch
   has occurred for this project.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
-  exact extracted-file hashes. Seventeen host test cases pass (fifteen C++, two Python).
+  exact extracted-file hashes. Nineteen host test cases pass (sixteen C++, three Python).
 - Pinned title-aware launch/close controllers cross-compile. Host mocks and a
   bounded application-log checker are implemented; neither sends console traffic.
 - The user authorized 192.168.4.30 or 192.168.4.40 only when idle. Preflight under

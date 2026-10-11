@@ -92,6 +92,13 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
+- Current CPU control: `gfx1013-runtime-9914258279a8`, source `955c989`.
+  Includes exact-title `lapy.elf` and `results-dir.txt`; the staged configuration
+  selects `/data/ps5-hip/results`. Another normalized absolute directory can be
+  selected by restaging, which creates a new package identity. UFS2 check, complete
+  extraction comparison and local case verification pass. Compact provenance is
+  in `evidence/offline-elevation.json`.
+
 - Five earlier `/download0` candidates were staged and packaged from source commit
   `0c2e8c14d5cdd581002b5d315889d67509e9d0fd`. Their manifests and package hashes are
   in `evidence/offline-native-packages.json`; each filesystem check and full-file

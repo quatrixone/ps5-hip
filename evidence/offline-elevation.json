@@ -1,0 +1,87 @@
+{
+  "inputs": {
+    "helper": {
+      "source_url": "https://github.com/blackbearreloaded/PS5-Lapy-JB-Daemon",
+      "revision": "57fcc19b7f57e46c823d6f2a6c6233ebf3288079"
+    },
+    "client": {
+      "source_url": "https://github.com/blackbearreloaded/ProsperoEden",
+      "revision": "0109b7f4330733c2f69c4e334fe529b46addb223",
+      "source_path": "headless/elevation"
+    },
+    "logging_header_sha256": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+  "llvm_version": "18.1.8",
+  "title_id": "PPSA99012",
+  "source_sha256": {
+    "client/elevation.cpp": "037e43b4b2db3d862af54377a5d25a14251ad6bba9c5199cb442bb99043ae79b",
+    "client/elevation.hpp": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+    "client/protocol.hpp": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+    "client/validate-helper.py": "770827f77c6bc1d856cdea54bb87842cd1f055523c1b24dd41b14a400d219c55",
+    "lapy/LICENSE": "5ef18e95f617c9d3a2674cc3256f5c0d6ec2f794a57e9e40f2185dd454c9f8da",
+    "lapy/tools/build_owned_daemon.py": "e435ad2b102f642c63c0d18900a672a77267993dd75a27deaa94327aa3fdf07f",
+    "lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    "lapy/source/donor_transaction.c": "6844275eca240aab25d5d61ae030f94b50b9538116452ccb6078f6518ba876d9",
+    "lapy/source/donor_transaction.h": "c976e43a298a3621b2ff0f83f92f1304dc5c177a00d5af14c5a78a9620d2ce5b",
+    "lapy/source/vnode_ref_probe.c": "ef49b83a80cdc980ea6b5cdb0477110b08b10feba7e7229cbb0c7db1bf0a87f0",
+    "lapy/source/vnode_ref_probe.h": "13e7f3b9ba77c696209f647e5a0fb60f50a6e8112991bb4bfc63da632a6a0153",
+    "lapy/source/lapy_elevation_protocol.h": "bb02c4aa814eaba7a7a423a31b29ff41f786212c2953678cf29434e85fa0f869",
+    "logging/ps5log.h": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "helper_sha256": "cf3674985d05f09e80021d3fc3c28f903fecf4454e45be399eb2a0733adff4bf",
+  "hardware_validated": false,
+  "ctest_passed": 19,
+  "cpu_package": {
+    "manifest": {
+      "schema": 1,
+      "title_id": "PPSA99012",
+      "target": "gfx1013",
+      "kernel": "runtime",
+      "source_commit": "955c98978c66636a7df288807c50406de8b8efb5",
+      "build_receipt_sha256": "37ac7f5798296634e3f3742dabe38803230307d920643082397b40ad69256bb2",
+      "stager_sha256": "777dbcf07955a90ab1198dd4f72145099b6f9a3e029a2d6796cdf3d07ee8f7ba",
+      "hardware_validated": false,
+      "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log",
+      "files": {
+        "eboot.bin": {
+          "sha256": "89cfeb84139e6d27dfeebad9a11af063ee9a941b94b5c109c56ef9b244584a8f",
+          "bytes": 806101
+        },
+        "lapy.elf": {
+          "sha256": "cf3674985d05f09e80021d3fc3c28f903fecf4454e45be399eb2a0733adff4bf",
+          "bytes": 155032
+        },
+        "sce_sys/param.json": {
+          "sha256": "aaf475210d39d36cfe2bb37a4f8ce0845373c4560c9ba8d852c92d760f179743",
+          "bytes": 733
+        },
+        "results-dir.txt": {
+          "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+          "bytes": 21
+        }
+      }
+    },
+    "package": {
+      "schema": 1,
+      "hardware_validated": false,
+      "title_id": "PPSA99012",
+      "manifest_sha256": "bd6c95cfb32c99d1578f0abc785e91ccb9515d9b8bd993985fb25a177470a73f",
+      "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+      "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+      "image": {
+        "file": "PPSA99012.ffpkg",
+        "sha256": "7b13f50e26583ce20d9a40bb1c370e1210132e648fbd7ca0e19442e7ec6b3d78",
+        "bytes": 1802240
+      },
+      "filesystem_check": "passed",
+      "extracted_files_match": true
+    }
+  },
+  "limitations": [
+    "No console execution",
+    "Wire compatibility does not prove runtime elevation",
+    "Chosen results directory must be created and verified before launch",
+    "Logging header distribution license not yet established"
+  ]
+}
