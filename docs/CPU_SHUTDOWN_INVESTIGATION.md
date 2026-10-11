@@ -77,3 +77,28 @@ the loader callback and platform process termination unresolved. No GPU work ran
 The next step is offline analysis of that later boundary, not another run of this
 observer. The failed PID 204 on .40 is a separate process on a different console;
 its recovery is still unproven.
+
+## Offline platform reference
+
+Local 12.70 ELF inspection identifies `_exit` at offset 0x3a0 and syscall 1 at
+0x3aa; the following instruction is at 0x3ac. The 6.02 crash offset therefore
+matches a plausible final exit-syscall boundary. This is cross-firmware evidence,
+not proof of the bytes or kernel policy on the tested console. Replacing `exit`
+with `_exit` would bypass C++ cleanup and plausibly reach the same boundary;
+there is no evidence justifying that substitution.
+
+The same reference exposes a separate shell-managed exit service. Its no-argument
+entry returns an integer service result; the `WithValue` variant instead consumes
+a pointer and copies a bounded string. Neither has been called. Do not infer a
+signature from the suffix or treat shell closure as proof of C `exit` semantics.
+
+Before testing this service, the converter needs explicit import-library mapping:
+the symbol belongs to library `libSceShellCoreUtil` inside module
+`libSceSystemService`. The pinned converter currently derives both names from the
+stub soname and assigns one library per module. Adding the module's SDK stub alone
+would not encode the observed library contract. A host-tested converter change
+is the next offline step. Existing imports must remain byte-identical without
+an override, and unknown or ambiguous overrides must fail before packaging.
+
+Compact provenance and limitations: `evidence/offline-exit-reference.json`.
+Firmware files and bounded disassembly extracts remain local and ignored.

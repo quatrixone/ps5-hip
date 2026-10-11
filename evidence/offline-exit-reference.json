@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "offline reference analysis; not a firmware 6.02 verification",
+  "reference_firmware_directory": "12.70",
+  "hardware_gate_passed": false,
+  "reference_files": {
+    "libkernel.sprx": "a3fb057464c74541c1e8edb0701023b20fe7d3d4746fe38324cea4b727cb7381",
+    "libSceLibcInternal.sprx": "3d044888ac28c817b990d024af99365bedbdaeec9bb945bb638d934d63862759",
+    "libSceSystemService.sprx": "03c3c341a3e209cce555c9f42049a6c18b3c451d0bbb2b7c248b9b4e52e0a3d3"
+  },
+  "method": "Read ELF program/dynamic headers and symbols; locate exports by the converter's symbol-name hash; inspect bounded function disassembly locally. Firmware binaries and instruction extracts are not committed.",
+  "exit_reference": {
+    "export": "_exit",
+    "nid": "6Z83sYWFlA8",
+    "function_offset": "0x3a0",
+    "syscall_number": 1,
+    "syscall_instruction_offset": "0x3aa",
+    "following_instruction_offset": "0x3ac",
+    "inference": "The 6.02 fault offset matches the instruction after syscall 1 in this 12.70 reference. This supports a final process-exit syscall failure but does not establish identical code or kernel behavior on 6.02."
+  },
+  "shell_exit_reference": {
+    "export": "sceShellCoreUtilExitApp",
+    "nid": "hnvi3LgVeDM",
+    "function_offset": "0x10af0",
+    "module": "libSceSystemService",
+    "export_library": "libSceShellCoreUtil",
+    "export_library_id": 27,
+    "observed_interface": "No incoming argument consumed; returns an integer result from a service call.",
+    "qualification": "Not called. Firmware 6.02 binding and behavior remain unverified."
+  },
+  "with_value_caution": "The reference sceShellCoreUtilExitAppWithValue reads its argument as a pointer and bounds a string copy; do not guess that it accepts an integer exit status.",
+  "converter_constraint": {
+    "revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
+    "source": "tooling/native/elf_object.cpp and tooling/native/sce_module_writer.cpp",
+    "finding": "Stub loading sets library_name=module_name. The writer allocates exactly one import library per needed module. That cannot express libSceShellCoreUtil inside libSceSystemService without an explicit library mapping change.",
+    "next_step": "Implement and host-test explicit import-library mapping before considering a shell-exit candidate. Keep current imports unchanged and reject ambiguous mappings."
+  }
+}

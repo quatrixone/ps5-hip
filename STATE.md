@@ -73,6 +73,14 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+Offline reference analysis now points to syscall 1 as a plausible final exit
+boundary, with an explicit cross-firmware caveat. Before a different lifecycle
+experiment, implement/test explicit import-library mapping in the native
+converter: shell-managed exit is exported by `libSceShellCoreUtil` within module
+`libSceSystemService`, which its current one-library-per-module model cannot
+express. See `evidence/offline-exit-reference.json`. No platform exit API has been
+substituted, and no additional console was contacted for this analysis.
+
 The CPU-only build now contains a shutdown observer using the startup's existing
 hook. Host callback-order and log-contract checks pass; native qualification is
 now measured on .30: all three observer checkpoints ran, followed by the same
