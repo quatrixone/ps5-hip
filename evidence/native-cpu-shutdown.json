@@ -1,0 +1,47 @@
+{
+    "schema":  1,
+    "classification":  "failed-shutdown",
+    "hardware_gate_passed":  false,
+    "title_id":  "PPSA99014",
+    "reported_firmware":  "6.02",
+    "source_commit":  "1b6f717eac51c0b4b750807fc80f00f5df9611de",
+    "package_sha256":  "4377510ea802e3953416a8efda3a43af362d81346498427f346a8c7351687068",
+    "launch_return":  "0x0000c017",
+    "pid":  193,
+    "application_result":  "application-pass",
+    "runtime_checks":  [
+                           "constructors",
+                           "heap",
+                           "unwind",
+                           "tls",
+                           "clock"
+                       ],
+    "gpu_api_calls":  0,
+    "normal_exit":  false,
+    "exit_value_logged":  0,
+    "fatal_signal":  "SIGSYS (12)",
+    "fault_rip":  "0x00000008000003ac",
+    "fault_module":  "libkernel",
+    "startup_return_address":  "0x0000000000400175",
+    "title_stop_observed":  true,
+    "sandbox_removal_observed":  true,
+    "image_unmount_observed":  true,
+    "service_health":  {
+                           "2121":  "reachable",
+                           "3232":  "reachable",
+                           "9021":  "reachable"
+                       },
+    "evidence_sha256":  {
+                            "after.log":  "9652da9f78706b649ff041a77ed22dc51caa30bca2a6c65159fa28f85ded5e94",
+                            "application.log":  "216d74420bd3f1907afcc7ac0fc54db7f35c91dd6125cac763e8ac3164fcb1b1",
+                            "before.log":  "7abf7220c17f2e1cb0518568767acb29a67b329c0ac06f65bcc40ab8a1534d22",
+                            "case.json":  "9446c1d5689c37a93e3332bba4d5f0d72b287622a6d0344c5d985f52e2c34851",
+                            "close-response.log":  "aa9ce57b52913a8c5e959a47d120a872aa98ee3f23644bdebb8cee6863bf30e9",
+                            "health.json":  "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+                            "klog.log":  "779a90d49178d88c8779eaedbc39a8a13dc047c34b0b339a575debbc06ac459a",
+                            "launch-response.log":  "85a738e016b09fc0202da99be4ba308becd0123709d2a40a99a9265e78b958f0",
+                            "observed.log":  "35b003e7cc1dd8279e721de33e5d2a4e1ebb0d74f05ec7b7e5c32b1b2789a80d"
+                        },
+    "interpretation":  "Application checks pass; normal process exit fails. The startup return address follows its imported exit call; this does not prove that exit returned. No failing syscall has been identified.",
+    "next_decision":  "Investigate startup/runtime termination offline. Preserve existing result before a new frozen candidate. No GPU run until normal CPU shutdown passes."
+}

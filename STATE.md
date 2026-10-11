@@ -17,7 +17,15 @@ Updated: 2026-10-11, America/New_York.
   FSELF integrity passes. Staging rejects its absence. This corrected candidate
   is packaged as `gfx1013-runtime-4a0334b256d6` at source `1b6f717`, with clean
   filesystem/extraction and artifact checks. See `evidence/offline-loader-companion.json`.
-  It has not been run.
+  On .30 (FW 6.02), this candidate passed constructors, heap, exception unwinding,
+  TLS and clock checks with zero GPU API calls, then exited abnormally with SIGSYS
+  in libkernel after logging exit_value=0. Title stop, sandbox removal and image
+  unmount were observed; services remained reachable. The CPU startup/exit gate
+  still fails. See `evidence/native-cpu-shutdown.json`.
+- On .40, PID 204 from the earlier loader failure remained present after one
+  identity-guarded SIGKILL. No repeated termination or relaunch was attempted;
+  complete teardown remains unproven. Do not use .40 for another experiment
+  without establishing recovery. See the first-run evidence's cleanup followup.
 - A PPSA99012 CPU image was uploaded and byte-verified on idle .40 (FW 12.70).
   ShadowMount mounted UFS2 but rejected registration because icon0.png was absent.
   No title was launched. The icon fix and staging regression test pass; the old
@@ -65,8 +73,12 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-Establish complete teardown/idle state before another bounded CPU startup case;
-do not repeat the failed bytes or proceed to a GPU case.
+Investigate abnormal CPU shutdown offline before another bounded startup case.
+The saved backtrace address 0x400175 is the return address of the imported exit
+call in the pinned startup code; the actual fault RIP is in libkernel. This does
+not establish that exit returned or identify the failing syscall. Do not replace
+normal exit with forced termination or proceed to a GPU case. Establish fresh
+idle state and preserve the existing application log before any new candidate.
 Continue offline preparation of title-specific deployment/log retrieval controls.
 See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
 Generic private-address

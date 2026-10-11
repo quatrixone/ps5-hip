@@ -41,5 +41,27 @@
     "close-response.log": "063a256626a1fc1fb9a677f0af61369a248833101f6d9c21295802441aa094c8",
     "health.json": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543"
   },
-  "next_decision": "Reproduce and include the pinned clean-room libc.prx loader companion; no automatic relaunch of the failed bytes. Re-establish idle state before any new candidate."
+  "next_decision": "Reproduce and include the pinned clean-room libc.prx loader companion; no automatic relaunch of the failed bytes. Re-establish idle state before any new candidate.",
+  "cleanup_followup": {
+    "observed_pid": 204,
+    "initial_status": "pid exists, no running foreground big app, title app=0x00002018",
+    "action": "one SIGKILL after live sceKernelGetAppInfo confirmed PPSA99014",
+    "action_result": 0,
+    "post_action_status": "pid still exists; teardown unproven",
+    "relaunch": false,
+    "evidence": {
+      "status-20261011T171329Z": {
+        "receipt.json": "d0c31730209492a8034b6d989334761a2cb33829dce9d3af06065ae6932c1d54",
+        "response.log": "d0d041911ac243984b33bf011c1e62a6574ddbc9de1e59b7ca6f9db78ded9162"
+      },
+      "cleanup-20261011T171439Z": {
+        "receipt.json": "ba17ebe8c9d5b1052e54d81d67a5960904f53020ae430a72a591b5c02f9235f3",
+        "response.log": "36943deebb41cd365c26667eff44438c42df2711d4e371c7a50397864d12cf8d"
+      },
+      "status-20261011T171441Z": {
+        "receipt.json": "d0c31730209492a8034b6d989334761a2cb33829dce9d3af06065ae6932c1d54",
+        "response.log": "d0d041911ac243984b33bf011c1e62a6574ddbc9de1e59b7ca6f9db78ded9162"
+      }
+    }
+  }
 }
