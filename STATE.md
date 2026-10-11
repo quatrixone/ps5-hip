@@ -73,6 +73,13 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+TheRock's pinned target configuration was exercised offline: gfx1030 passes,
+gfx1013 fails by default, and gfx1013 passes through its custom-target hook.
+Its LLVM submodule pin and build scope are now recorded in
+`docs/COMPILER_ROUTE_COMPARISON.md` and `evidence/offline-therock-comparison.json`.
+The standalone LLVM 18.1.8 route remains selected for bring-up; a built-TheRock
+binary comparison and clean-machine reproduction remain outstanding.
+
 The shell-exit deployment preflight found ProsperoStore PPSA99000/PID 237 active
 on .30. No image was uploaded and no title launched; both shared locks were
 released. See `evidence/shell-exit-no-run.json`. Recheck idle before the next

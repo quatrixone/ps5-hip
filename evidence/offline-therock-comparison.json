@@ -1,0 +1,64 @@
+{
+  "revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+  "files": {
+    "compiler/CMakeLists.txt": {
+      "git_blob": "4e897a8d1ae9d5c4c36008f96877a99be281cf6c",
+      "sha256": "75e4494e0a6dab6955355fdec28cb7b69e2382df3dc372f3db65de5ece1ceb63"
+    },
+    "cmake/therock_amdgpu_targets.cmake": {
+      "git_blob": "014d93ed4bbdf819954994b7b350c0cb49acad69",
+      "sha256": "9804daea3e725fecea4bf73990e6a4e6bfbdd4885795725ef1c89c3f0703d76e"
+    },
+    "BUILD_TOPOLOGY.toml": {
+      "git_blob": "7894a7b77634b8b0b9975b4901b64a40c9071bfb",
+      "sha256": "67d0f5c39322c6639eeb9182c76f5b6fcb440e98ba358e438d7a625446081c30"
+    },
+    ".gitmodules": {
+      "git_blob": "f66529b732d18d0ba7bcef20564dbab984d14397",
+      "sha256": "2ca133ba3b009c258cb8e0ca0ecc72348c267f073179836f4f26764960dcd06f"
+    },
+    "FLAGS.cmake": {
+      "git_blob": "3cbd9b2093762d30aafaa5dfd3c6a05c28e49b8f",
+      "sha256": "ac8cd73d7505be72a32ec2670ad39ad899c3a589c3b5e960ce05c73a6b054fd4"
+    },
+    "compiler/pre_hook_amd-llvm.cmake": {
+      "git_blob": "e55fee2be2215447140453ea35b4ba9f84a9f9ac",
+      "sha256": "4e21bb141fb50c2341f97e05a0b5a2a177344ac3762d7eaa4f8ff23cf180480e"
+    },
+    "compiler/artifact-amd-llvm.toml": {
+      "git_blob": "b79a062a507ac4f5636670289f2080e1d39d4142",
+      "sha256": "da4763c0639ec29eaf2024d9e39dc2ed1f433329b90253a6fd95a37a1e9abd13"
+    }
+  },
+  "compiler_submodule": {
+    "url": "https://github.com/ROCm/llvm-project.git",
+    "revision": "6da731510c233517c1eeb691d3446d80e9e32525"
+  },
+  "schema": 1,
+  "classification": "source and target-configuration comparison; TheRock compiler not built",
+  "hardware_gate_passed": false,
+  "configuration_probes": [
+    {
+      "target": "gfx1030",
+      "custom_target_hook": false,
+      "configuration_passed": true
+    },
+    {
+      "target": "gfx1013",
+      "custom_target_hook": false,
+      "configuration_passed": false
+    },
+    {
+      "target": "gfx1013",
+      "custom_target_hook": true,
+      "configuration_passed": true
+    }
+  ],
+  "cmake_version": "cmake version 4.2.3",
+  "script_sha256": "80f941077a4220861b434351bca2490c67b630e1c1de3f8378e8f6f404a8e5ae",
+  "selected_bringup_route": "existing LLVM 18.1.8 standalone device compiler",
+  "limitations": [
+    "Custom target registration is not compiler or library qualification",
+    "No binary/ISA comparison against a built TheRock compiler yet"
+  ]
+}
