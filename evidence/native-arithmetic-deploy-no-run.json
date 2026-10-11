@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "goal": "G2",
+  "operation": "deployment",
+  "observed_utc": "2026-10-11T22:00:38.730419+00:00",
+  "host": "192.168.4.30",
+  "title_id": "PPSA99014",
+  "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+    "bytes": 3571712
+  },
+  "kernel": "arithmetic_suite",
+  "target": "gfx1013",
+  "reason": "Unrelated PPSA99008 PID404 active; initial idle guard rejected before remote artifact reads, upload or preservation.",
+  "deployment_attempted": false,
+  "launch_attempted": false,
+  "close_sent": false,
+  "remote_files_renamed": false,
+  "hardware_gate_passed": false,
+  "owned_locks_released": true,
+  "remote_artifact_identity_reverified": false,
+  "existing_artifacts": "No remote artifact was changed by this operation. The previously successful vector image/log remain expected controls, but their current bytes were not read because the console was busy.",
+  "raw_files": {
+    "results/arithmetic-deploy-20261011T220038Z/before.log": {
+      "sha256": "2b67ca04bf98829c42c4dadb268287441ccafabb7e1b3f64e50a31b6a32bd634",
+      "bytes": 340532
+    },
+    "results/arithmetic-deploy-20261011T220038Z/case.json": {
+      "sha256": "ec97f80ce8fd1a947b48ba54247c9d8ef904438627ba1fd6f34e774e5ceabc35",
+      "bytes": 1039
+    },
+    "results/arithmetic-capture-deploy-20261011T220038.730419Z/operation.json": {
+      "sha256": "6d753833ff5d3bbc50b01f0dd41841ae68b5a75674f31e872027b1f81555848b",
+      "bytes": 626
+    },
+    "results/arithmetic-capture-deploy-20261011T220038.730419Z/stderr.txt": {
+      "sha256": "d3cc777cbf894a3813735b7cbf7b953bae70f1b050817a907ef463c8cc3828a7",
+      "bytes": 335
+    },
+    "results/arithmetic-capture-deploy-20261011T220038.730419Z/stdout.txt": {
+      "sha256": "bd495e1576b0291883abe087b42a2959d3e06189da6aa58cf27e9320a86aa134",
+      "bytes": 21
+    },
+    "results/deploy-arithmetic.py": {
+      "sha256": "610ae4e97df8cd6aed7a1ee9e570aa39002d264be36efefb3e3fa716cd22b42f",
+      "bytes": 10247
+    },
+    "results/capture-arithmetic-operation.py": {
+      "sha256": "f6c248fbaa57f02a00a739c193340cead1c282ae95126c3a88073f94505be902",
+      "bytes": 2201
+    },
+    "results/g2-arithmetic-suite-ready/bound-controls.json": {
+      "sha256": "77ac5393efc5c3a4a2a68dd8d1f84c1047ed7f9f9fefb50c0a6e3832b7b92541",
+      "bytes": 2626
+    },
+    "results/record-arithmetic-no-run.py": {
+      "sha256": "7abd17c32de66a72104dfa59a381c971edc02cd63e3ccf2cae43eb7ca4ca1b13",
+      "bytes": 3729
+    }
+  },
+  "next_action": "Continue offline work. A later separately selected deployment may use the frozen candidate and controls after their hashes and idle state pass; never close the unrelated title."
+}

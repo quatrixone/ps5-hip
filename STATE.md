@@ -34,6 +34,11 @@ Updated: 2026-10-11, America/New_York.
   corruption and second-dispatch quarantine checks pass, as do native package
   checks. See `evidence/offline-arithmetic-suite-native-readiness.json` and
   `docs/G2_ARITHMETIC_ACCEPTANCE.md`. It has not been deployed or run.
+- Its deployment preflight at 22:00 UTC returned **no-run**: unrelated
+  PPSA99008 PID404 was active on .30. No remote artifact read/upload/rename,
+  launch or close followed; both locks were released. See
+  `evidence/native-arithmetic-deploy-no-run.json`. Do not poll for availability
+  while independent offline G3 work can advance.
 - CPU constructors, heap, exceptions, TLS and clock checks pass under the finite
   shell-managed lifecycle. Ordinary C exit still faults with SIGSYS; threaded or
   framework teardown is unqualified. See `evidence/native-shell-exit.json` and
@@ -93,9 +98,11 @@ under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
 The next hardware candidate is the frozen `5b74ac8` combined arithmetic image,
 as G2 item 5 explicitly requires. Its offline readiness and host evidence are
-recorded, and the package catalog preserves all 19 earlier entries. Bind the
-reviewed controls to the committed catalog and exact candidate checker/verifier,
-then qualify two separately reviewed clean cycles when .30 is idle. This
+recorded, and the package catalog preserves all 19 earlier entries. Reviewed
+controls are bound to committed catalog `2ad6d9b` and the exact candidate tools;
+their first deployment invocation stopped at the busy-console idle guard.
+Continue offline LDS/private-storage preparation. At the next suitable milestone,
+qualify two separately reviewed clean cycles when .30 is idle. This
 supersedes the planned vector-only cycle-two action;
 preserve that control and its first-cycle evidence, but do not spend console time
 on it as a G2-closing test. The installed vector image and log must still be
@@ -148,11 +155,10 @@ are identical; only the vector-selected canary object changes among the nine
 application objects. FSELF, UFS2, extracted-file and local case/controller checks
 pass. The corrected store prerequisite has now passed once, with exact output,
 guards, clean teardown and healthy services, in
-`results/provider-fixed-store-run-20261011T203845Z`. Vector-add still requires a
-fresh idle/identity preflight; it has not run and full G2 remains open. Prepare a
-fixed two-dispatch vector profile to combine vector and queue-reuse coverage in
-the next console milestone, retaining this single-vector control. The store
-candidate remains unchanged. See `evidence/offline-provider-fixed-vector.json`.
+`results/provider-fixed-store-run-20261011T203845Z`. This single-vector package
+remains an unrun control; the later two-vector image passed one clean cycle.
+The combined arithmetic candidate now supersedes both as the next G2 case.
+The store candidate remains unchanged. See `evidence/offline-provider-fixed-vector.json`.
 
 Do not rerun the failed candidate. It is revoked for new runs and preserved at source `15bfc35`, stage
 `gfx1013-indexed_store-3d295773d2fb`, image SHA
@@ -210,8 +216,9 @@ Offline work ahead of G2/G3/G4:
   `evidence/offline-candidate-host-c37f0db.json`.
   Deployment preserved the successful store image/log. Cycle one then passed
   two native dispatches and clean teardown. Reviewed acceptance and separately
-  tested cycle-two controls are ready; the initial idle guard rejected cycle two
-  before log preservation because another application was active.
+  tested cycle-two controls are preserved; the initial idle guard rejected cycle
+  two before log preservation because another application was active. The
+  combined arithmetic suite supersedes that vector-only cycle as the next case.
 - Host CTests include registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
   twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and
@@ -221,20 +228,26 @@ Offline work ahead of G2/G3/G4:
 - Twelve real combined HIP header fixtures compile for Linux/PS5 and both targets.
   Authentic matching headers, host registration/fatbinary layouts, device ABI flags
   and a source-derived workitem-only library are recorded in
-  `docs/HIP_HOST_ABI_SPIKE.md`. Full OCKL still fails; no HIP runtime is linked or run.
+  `docs/HIP_HOST_ABI_SPIKE.md`. Full OCKL failed on LLVM 18; the later matching
+  TheRock/HIP 7 spike compiled its fixture with complete matching device libraries. No HIP
+  runtime is linked or run; the newer code-object format remains rejected.
 - Wave32 full/partial-lane probes compile at O1/O2 for both targets. Both guarded
   gfx1013 native profiles link with checked imports/startup/FSELF; gfx1030 remains
-  compile-only. Neither is packaged or executed. See `evidence/offline-wave-native-link.json`.
+  compile-only. Both gfx1013 profiles are now packaged at `5581dbd`, but neither
+  has executed. See `evidence/offline-wave32-readiness.json`.
 - Generic volatile private lowering remains a G3 issue. An isolated IR contrast
   preserves volatile operations and emits buffer instructions; reserved flat-init
   registers are overwritten before use, with no hardware flat-scratch setup.
-  Native scratch backing, descriptors, offsets, state and lifetime remain
-  unimplemented. See `docs/VOLATILE_PRIVATE_LOWERING.md`; no workaround is accepted.
+  The isolated `1e0428f` spill experiment implements buffer scratch backing,
+  descriptors, offsets, state and lifetime for six-user-SGPR entries only; it
+  remains unrun. The eight-user-SGPR indexed-private layout and generic lowering
+  remain unsupported. See `docs/VOLATILE_PRIVATE_LOWERING.md`; no generic-pointer
+  workaround is accepted.
 
 Source notices are inventoried, including the exact ps5log GPL-3.0-or-later notice.
 Linked archive-member accounting and binary redistribution remain release work.
 The first kernel's instruction/entry contract is in `docs/INITIAL_CAPABILITY_MATRIX.md`.
-G2 still needs exact device output, guards and repeated clean lifecycle coverage;
+G2 still needs the combined image's exact output, guards and two clean cycles;
 G3 additionally requires LDS/barriers, atomics, waves and deliberate spilling.
 Pushes remain reserved for coherent milestones.
 
