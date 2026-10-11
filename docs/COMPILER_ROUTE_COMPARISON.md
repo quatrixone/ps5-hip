@@ -64,8 +64,12 @@ requirements and instruction inventories; investigate differences before changin
 the selected compiler. Run native qualification separately for any changed device
 code. A successful custom-target configuration is not a substitute for these steps.
 
-G1 stays open: clean-machine reproduction and the built-compiler comparison are
-not established by the current same-host and source/configuration evidence.
+G1 stays open pending the built-compiler comparison. The selected route now has
+fresh isolated-userspace reproduction of all four objects, with networking and
+the development compiler filesystem excluded; it shares the WSL kernel and CPU.
+See `evidence/offline-isolated-compiler.json`. Source-notice identities are recorded
+in `evidence/offline-compiler-provenance.json`. A future binary-distribution audit
+is separate from this offline compiler selection.
 
 ## Executable comparison
 

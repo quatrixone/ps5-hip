@@ -102,7 +102,8 @@ byte-for-byte in a freshly extracted Ubuntu userspace with networking disabled;
 `docs/OFFLINE_BRINGUP.md`. This shares the WSL kernel, not its compiler filesystem.
 The earlier `63b6e0402149` indexed-store image is superseded and explicitly
 revoked by local verification. The corrected candidate below replaces it.
-TheRock binary comparison and dependency license review remain outstanding.
+TheRock binary comparison remains outstanding. Compiler/native source notices are
+inventoried; binary-distribution accounting remains separate release work.
 
 The opt-in CPU shell-managed lifecycle passed its single declared experiment on
 .30, firmware 6.02, using PPSA99014. Source `3346166` and frozen image
@@ -154,8 +155,10 @@ arbitrary pointers or native scratch execution and is not a volatile-semantics f
 G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
 by default, and accepts gfx1013 through its custom-target hook. This is target
 configuration only. The selected LLVM 18.1.8 route reproduces four device objects
-byte for byte on the same host; built-TheRock binary comparison, clean-machine
-reproduction and dependency license review remain outstanding. See
+byte for byte in a fresh, isolated compiler userspace. That satisfies the offline
+reproduction test with the explicit shared-kernel/CPU limitation; a separate
+physical machine is not required by G1. Source notices are inventoried, and the
+built-TheRock binary comparison remains outstanding. See
 `docs/COMPILER_ROUTE_COMPARISON.md`, `evidence/offline-therock-comparison.json`
 and `evidence/offline-compiler-reproduction.json`.
 

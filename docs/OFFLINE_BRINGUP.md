@@ -119,8 +119,10 @@ actual spill correctness also remain unimplemented/unverified.
 
 Native launch-state construction, cross-build and packaging now exist; see
 `STATE.md` for their separate CPU lifecycle results and limitations. Remaining
-offline qualification includes clean-machine reproduction, final dependency/license
-review and the explicit toolchain-route comparison. Generic private-address
+offline qualification still needs the built-TheRock comparison. Fresh isolated
+userspace reproduction and compiler source-notice inventory are now recorded below
+and in `docs/DEPENDENCY_PROVENANCE.md`; binary-distribution auditing is later work.
+Generic private-address
 lowering remains a G3 issue. G1 remains open; these updates do not certify native
 execution. Scratch, LDS, atomics, synchronization and spill behavior require dedicated
 G3 coverage; the arithmetic canaries cannot qualify them.
