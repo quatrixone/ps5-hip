@@ -1,0 +1,43 @@
+# Local configuration and credentials
+.local/
+.env
+.env.*
+!.env.example
+
+# Downloaded dependencies, toolchains and generated builds
+.deps/
+build/
+dist/
+out/
+.cache/
+CMakeUserPresets.json
+compile_commands.json
+
+# Raw hardware evidence and downloaded model data
+results/
+models/
+*.gguf
+*.safetensors
+*.onnx
+*.pt
+*.pth
+*.log
+*.core
+*.dmp
+
+# Generated native artifacts; intentional small test fixtures can be reviewed later
+*.elf
+*.hsaco
+*.o
+*.a
+*.so
+*.prx
+*.bin
+*.zip
+
+# Host caches
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+Thumbs.db
