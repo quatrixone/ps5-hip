@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "status": "offline-integrated-tests-passed",
+  "hardware_validated": false,
+  "native_linked": false,
+  "native_packaged": false,
+  "base_commit": "1e0428f1d4d6069cc813f8a280a31460b3e37d63",
+  "source_state": "frozen clean development/g3-lds; all listed tested source identities unchanged",
+  "source_files": [
+    {
+      "path": ".local/g3-lds/CMakeLists.txt",
+      "sha256": "0f4443f0c83728442f1704f95aa9e2bf29c162f08b5d1b5441460b9f22c67e8e",
+      "bytes": 9445
+    },
+    {
+      "path": ".local/g3-lds/docs/LDS_LAUNCH_PLAN.md",
+      "sha256": "4a93ac39fa963ea38a51c475ca5aea79422cffa5ede255eb2a9bddc16d8efcdc",
+      "bytes": 5251
+    },
+    {
+      "path": ".local/g3-lds/include/ps5hip/code_object.h",
+      "sha256": "dc777c9e0d3e5c94b04a322999a0b4cb5a58d37a07b61e09afc44f3797a7e6a5",
+      "bytes": 2887
+    },
+    {
+      "path": ".local/g3-lds/include/ps5hip/launch.h",
+      "sha256": "28ef42d5c672b0d6d06e42f7b3678910189608e4c43fba8abab76ea2e1c6b1b8",
+      "bytes": 3515
+    },
+    {
+      "path": ".local/g3-lds/kernels/lds.hip",
+      "sha256": "d0180e07a382ee658d5c623282b041c1ac5265a8b56fb391224bac8e9aea8431",
+      "bytes": 2028
+    },
+    {
+      "path": ".local/g3-lds/src/code_object.cpp",
+      "sha256": "b715cc17a5a5acbd9533460c9024ad8babb6788f12e83bbe5fd20841d4661b9b",
+      "bytes": 23017
+    },
+    {
+      "path": ".local/g3-lds/src/launch.cpp",
+      "sha256": "8fdcf0f743bdf2738e3c976fed41c471d0c326b2c0cde1d68f983f47a3352b87",
+      "bytes": 12799
+    },
+    {
+      "path": ".local/g3-lds/tests/canary_log_test.py",
+      "sha256": "7ccede98bf414fa0a49afa707e69b65b04e5a19c7e0043dc1a1fb5a1d7f116a0",
+      "bytes": 15530
+    },
+    {
+      "path": ".local/g3-lds/tests/compiler_version_test.py",
+      "sha256": "9d7fc881a077a47565d63d2be5d36ad54b449fdc905624683c22073dbc5452ad",
+      "bytes": 17041
+    },
+    {
+      "path": ".local/g3-lds/tests/lds_test.cpp",
+      "sha256": "67a4efba1f4956e866b417fc292d34b9ff2d61dd29701d05e3f04ee35c63c074",
+      "bytes": 11472
+    },
+    {
+      "path": ".local/g3-lds/tests/native_canary_test.cpp",
+      "sha256": "2db446c4366c261bfa055124defd5f84b09ff4664df67ba7647982aa5b544ebb",
+      "bytes": 9534
+    },
+    {
+      "path": ".local/g3-lds/tests/native_case_test.py",
+      "sha256": "2cd38cb1721ef0b318e4d03fe9fe6656233b73131d391128ceec5d182778240b",
+      "bytes": 9465
+    },
+    {
+      "path": ".local/g3-lds/tests/title_stage_test.py",
+      "sha256": "ea2f07c61b2d5c524b16f3c37fca4dd805c1e18f03095af19fdf00ff27b9fdb9",
+      "bytes": 9905
+    },
+    {
+      "path": ".local/g3-lds/tools/build_native_canary.py",
+      "sha256": "a68302ec34aa70ee6853e6c424b87beb0957a47994dfa8a39a70802d58d77b13",
+      "bytes": 16689
+    },
+    {
+      "path": ".local/g3-lds/tools/check_canary_log.py",
+      "sha256": "4fbe7c110e15038ee5ffedcbdd37488f505706479a4ef499ac33858456364dec",
+      "bytes": 5061
+    },
+    {
+      "path": ".local/g3-lds/tools/native_canary.cpp",
+      "sha256": "c42e52abe61093f6e2bad349f3a46dfda741877004f2db13642a2cf8b2c41fcf",
+      "bytes": 13333
+    },
+    {
+      "path": ".local/g3-lds/tools/native_lds.h",
+      "sha256": "3255ae69b71d628753a77e8457e8cbf7511e6517c128252129c711f1ed23c8f8",
+      "bytes": 5198
+    },
+    {
+      "path": ".local/g3-lds/tools/probe_lds_compiler.py",
+      "sha256": "b1d4c52f4491bb7505ee94d742cf97f5113b7d91e7fdf1361d308403d84c213f",
+      "bytes": 6336
+    },
+    {
+      "path": ".local/g3-lds/tools/stage_native_title.py",
+      "sha256": "f34d0091e3638412ec4adb3db088935dd08624aa7238e644dcf5fc39529a76af",
+      "bytes": 7784
+    },
+    {
+      "path": ".local/g3-lds/tools/verify_native_case.py",
+      "sha256": "555a45b214a1073f9dcd3a35f126775f94a35c8c63efee4b8677ef1ffb0e3130",
+      "bytes": 5645
+    }
+  ],
+  "validation": {
+    "ctests": 41,
+    "failures": 0,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "native_sdk_object_compiles": 3,
+    "compiler_cases": "LLVM18 O1/O2 gfx1013/gfx1030",
+    "manual_review": [
+      "All waves restore EXEC before barriers; O1 loop has six iterations after initialization",
+      "Mixed linked dynamic base256; separate static tag33 at byte132",
+      "All257 saved oracle outputs independently recomputed"
+    ],
+    "tooling_review": "Independent read-only review found no actionable findings in build provenance, typed LDS contracts, stage/case identity and strict logs; existing profile branches retained."
+  },
+  "raw_files": [
+    {
+      "path": ".local/g3-lds/results/lds-integrated-20261011T221956Z/build.log",
+      "sha256": "83090cfcd369f34e4f34510fc6312214d050fe81d72412271b2ee602aef78e83",
+      "bytes": 2173
+    },
+    {
+      "path": ".local/g3-lds/results/lds-integrated-20261011T221956Z/commands.json",
+      "sha256": "bb85d5f8c5800da8d56865d30e2d89a68f988ed3c9f444fa2f5f2651b3816002",
+      "bytes": 993
+    },
+    {
+      "path": ".local/g3-lds/results/lds-integrated-20261011T221956Z/configure.log",
+      "sha256": "227e1b5336967fc6a13f6ca654339b9a83fa6e30ad6bb451b773278f760fb7cb",
+      "bytes": 174
+    },
+    {
+      "path": ".local/g3-lds/results/lds-integrated-20261011T221956Z/ctest.log",
+      "sha256": "ab9b1efe85f7c043c27064d11de214033faae7365a2a97268b5574d423f5e5d4",
+      "bytes": 4630
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/compile.json",
+      "sha256": "5e85898a5abc9aa06d720679b80db20ca93bf7bcc883e5a02af2ed984747898f",
+      "bytes": 4219
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_dynamic.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_dynamic.o",
+      "sha256": "c004588ba22e67a579ae02beb1bd7608ce4e5b95ff9177bf02fe4218a886a13c",
+      "bytes": 44760
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_mixed.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_mixed.o",
+      "sha256": "a8a5ff8b29571a62d244200bba8e5b2d849873fd1907a8fb6e0f48610f073c6c",
+      "bytes": 44776
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_static.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/lds_static.o",
+      "sha256": "5972aae683f76054f5cedec53877682ef7ea1692355caae5ebf3593eeaf622e6",
+      "bytes": 44616
+    },
+    {
+      "path": ".local/g3-lds/results/lds-native-harness/python-tests.log",
+      "sha256": "25415d23021c30b5e7286e14278a07ac56474e8dd15ce325f216405c741c1e94",
+      "bytes": 142
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/comparison.json",
+      "sha256": "8fb907b5e39f6c3ace2169491825da89d03eb5c0edbc0a351859c15f59d63c85",
+      "bytes": 21366
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O1/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O1/driver.txt",
+      "sha256": "271929ceafe52dd9778674ea37e677f70a9c27a3a92057b384dd0c1d2ebefbaf",
+      "bytes": 3496
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O1/isa.txt",
+      "sha256": "aa4665235919c03020024e10630a0482df078234975bea2402e08789a8455063",
+      "bytes": 23972
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O1/lds.hsaco",
+      "sha256": "fa34d113542f457c89f0fe193dbec665e2eb39bae6218119456d8e85c4232bfc",
+      "bytes": 5568
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O1/metadata.txt",
+      "sha256": "5b30893af216711cd0ba68fae46e26fa87d973fe04594ef08825da78aa052a29",
+      "bytes": 4363
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O2/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O2/driver.txt",
+      "sha256": "a962d116aec7bdac4aff36cc7508a02f8ccfe63b547fadc1b965411630e5f9a1",
+      "bytes": 3532
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O2/isa.txt",
+      "sha256": "c3a623fb476836af26d4ab1c9b44b722947d4b5982608b2fdd576ad4b4de8172",
+      "bytes": 38737
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O2/lds.hsaco",
+      "sha256": "58b031f5dd1636cfd330e11ae1b89eae149b260b25707a44ea3f21c343470c11",
+      "bytes": 6464
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1013-O2/metadata.txt",
+      "sha256": "7974f7b64388f6f5d1e5a9facf4b2fbde862ddb0baef43661062c268263351e8",
+      "bytes": 4363
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O1/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O1/driver.txt",
+      "sha256": "87395d3030d5a38fd081a8ee5e1c735fa9f1fa9b3e61ad67b6ee91d5bff335b6",
+      "bytes": 3496
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O1/isa.txt",
+      "sha256": "47a17663670aba1104f5d069b06221f99785bd55c874ba7b6dc8ae5c194a6b4f",
+      "bytes": 29246
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O1/lds.hsaco",
+      "sha256": "cde778df4697778c98e852ea37d78f091b635979a0a6c21e18d2f1d53b7e72a1",
+      "bytes": 5824
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O1/metadata.txt",
+      "sha256": "e61d0a8f9be608bce211f17920a3be40d36494a18469338dfc0a038d25cfdc2c",
+      "bytes": 4363
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O2/compile.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O2/driver.txt",
+      "sha256": "f6d037523f97fad8c424f313110ff5f8a115f65477535c8c9e1468aed91702d7",
+      "bytes": 3532
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O2/isa.txt",
+      "sha256": "08d56e61fd7203805a878ae5bf3e622bcc73e41cb1c6e241bb858a8febcd1459",
+      "bytes": 37361
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O2/lds.hsaco",
+      "sha256": "9d25dbb90721d4b664a6ce5f9653ae64a803907b7e6af5dd3a9dc428cf254e59",
+      "bytes": 6400
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/gfx1030-O2/metadata.txt",
+      "sha256": "336cb6318067048f17bf9e60f58e646069dcebe4bf960926ba48801c6e25b233",
+      "bytes": 4363
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/lds_dynamic-expected.bin",
+      "sha256": "cd6971c395a1c1adf4254018bba9a087bf6cfd754472c658343084a59863e46b",
+      "bytes": 1028
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/lds_mixed-expected.bin",
+      "sha256": "644984cc86cc103f0dc6de0b155e645f01f29bf523b27b6c3c4395d9183628c0",
+      "bytes": 1028
+    },
+    {
+      "path": ".local/g3-lds/build/lds-probes/lds_static-expected.bin",
+      "sha256": "cd6971c395a1c1adf4254018bba9a087bf6cfd754472c658343084a59863e46b",
+      "bytes": 1028
+    }
+  ],
+  "limits": [
+    "Host oracle tests do not execute GPU shaders or actual title entry",
+    "Native harness is compiled only; no link, package or console run",
+    "Barrier control flow and linked LDS offsets are manually inspected, not proved by automated instruction-presence checks",
+    "No combined scratch/LDS, general dynamic shared-pointer ABI, or hardware-qualified G3 claim"
+  ],
+  "frozen_source_commit": "27165fd51fb16798d6bc340b5f254c8298c501b5"
+}

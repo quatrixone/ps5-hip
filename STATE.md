@@ -60,6 +60,15 @@ Updated: 2026-10-11, America/New_York.
   unchanged. See `evidence/offline-scratch-native-readiness.json`. No scratch
   execution has occurred; AGC ring state, wave offsets and visibility are unproven.
 
+Experimental LDS implementation is frozen separately at `27165fd` on
+`development/g3-lds`. All 41 integrated host CTests pass with ASan/UBSan,
+including static/dynamic/mixed output and guard oracles. Four LLVM 18 objects
+(O1/O2, gfx1013/gfx1030) and all three PS5 harness object compiles pass;
+independent review checked uniform barriers and separate mixed static/dynamic
+addresses. See `evidence/offline-lds-integrated.json` and the isolated branch's
+`docs/LDS_LAUNCH_PLAN.md`. Native linking/package verification is the next offline
+step. No LDS hardware execution or G3 qualification follows from these checks.
+
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
 then passed. See `docs/FIRST_GPU_FAULT.md`. Its revoked image and the earlier
