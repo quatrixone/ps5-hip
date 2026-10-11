@@ -81,6 +81,12 @@ link job and two Flang jobs are configured. No compiler binary comparison has
 passed. Exact source heads/options: `evidence/offline-therock-build-setup.json`.
 The ignored `results/build-therock-compiler.py` contains the configure/build
 invocation. All changes and build outputs remain local; no console run or push.
+The LLVM subproject itself configured successfully and has begun its 8,739-step
+build. Its detailed logs are `build/logs/amd-llvm_configure.log` and
+`build/logs/amd-llvm_build.log` under that task directory. This is a running build,
+not an unavailable compiler or a completed comparison. The dependency notice
+inventory is in `docs/DEPENDENCY_PROVENANCE.md`; logging-header provenance and
+binary-distribution requirements remain explicitly unresolved.
 
 Isolated-userspace reproduction exposed and fixed a linker-selection bug:
 Clang 18's HIP driver ignored `-fuse-ld` and invoked host `lld` 21.1.8.
