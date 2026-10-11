@@ -171,6 +171,14 @@ not evidence of a fundamental buffer-scratch limitation. See
 `docs/VOLATILE_PRIVATE_LOWERING.md` and
 `evidence/offline-volatile-private-lowering.json`. No compiler workaround is accepted.
 
+The full-header HIP ABI spike compiles twelve combined fixtures with authentic
+ROCm 6.2.4 headers and a source-derived workitem-library slice, across Linux/PS5
+hosts and both GPU targets. Full OCKL still fails. PS5 needs explicit header
+routing and a separate device wchar ABI choice. Real vector code requires
+288-byte kernargs with thirteen hidden geometry fields; the current loader
+correctly rejects them. See `docs/HIP_HOST_ABI_SPIKE.md` and
+`evidence/offline-compatible-hip-headers.json`. No HIP runtime is linked or run.
+
 G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
 by default, and accepts gfx1013 through its custom-target hook. This is target
 configuration only. The selected LLVM 18.1.8 route reproduces four device objects

@@ -320,6 +320,13 @@ choose the runtime architecture from section 3.2 and document the decision.
 The pinned source inventory is in [HIP client requirements](HIP_CLIENT_REQUIREMENTS.md);
 it records the example slice, broader ggml contract and architecture-dependent
 instruction selection that still needs qualification.
+The [host ABI spike](HIP_HOST_ABI_SPIKE.md) now identifies real registration
+symbols, fat-binary layout and a compatible full-header fixture using ROCm 6.2.4.
+Its vector kernel requires 288-byte kernarg storage with runtime-generated hidden
+geometry fields. Implement checked explicit/hidden argument separation rather
+than treating every metadata entry as a user argument. Preserve the PS5 host ABI
+while routing device ABI flags separately. The complete device-library build
+remains unresolved; the successful workitem-only fixture is not a library port.
 
 Implement the first coherent API slice:
 

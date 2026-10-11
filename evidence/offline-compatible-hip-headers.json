@@ -1,0 +1,4193 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-11",
+  "scope": "Offline compiler/header/device-library fixture compatibility; no executable link, runtime implementation, console access or hardware qualification",
+  "compiler": "Ubuntu LLVM/Clang 18.1.8 (20ubuntu8)",
+  "release_reference": "https://rocm.docs.amd.com/en/docs-6.2.4/about/release-notes.html",
+  "selected_release": "ROCm 6.2.4",
+  "generated_hip_version": "6.2.41134",
+  "satisfies_pinned_ggml_minimum_hip_6_1": true,
+  "input_sources": {
+    "HIP": {
+      "url": "https://codeload.github.com/ROCm/HIP/tar.gz/d3b75fbb82113374e2d6103baa96a9c61425da48",
+      "revision": "d3b75fbb82113374e2d6103baa96a9c61425da48",
+      "tag": "rocm-6.2.4",
+      "tag_object": "2be6a30435e5925f609d94d3310ec2e064124d45",
+      "archive_bytes": 1483363,
+      "archive_sha256": "18315a21757f7302deace880fd5b6e75c46d0bc75870285e444e01ad0f502b3e",
+      "source_dir": "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/hip-d3b75fbb82113374e2d6103baa96a9c61425da48"
+    },
+    "clr": {
+      "url": "https://codeload.github.com/ROCm/clr/tar.gz/65d174c3e35423bf25c9c369513780c9d9ca760c",
+      "revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+      "tag": "rocm-6.2.4",
+      "tag_object": "b45f6d2d815b1b21e0881e8506607536076ea89e",
+      "archive_bytes": 2080580,
+      "archive_sha256": "b36c0d7d7be2bda98cc62cc46cef2048fd723afa940cab79a33ea4b3558e2420",
+      "source_dir": "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/clr-65d174c3e35423bf25c9c369513780c9d9ca760c"
+    }
+  },
+  "device_libraries_source": {
+    "repository": "https://github.com/ROCm/llvm-project",
+    "revision": "1e2c94795ee0d6ab8e2ff3035965a6b74e11b475",
+    "subtree": "773cdc752dbe3099317134dcd2b8ec5d4b086473",
+    "source_files": 704,
+    "bytes": 1588598,
+    "manifest": "results/hip-host-abi-spike/rocm-6.2.4/device-libs-sources.json",
+    "manifest_sha256": "a4c794124d0e6cb59450168d1f667f08eec602a06cebf6132c839f58cf479dd8"
+  },
+  "header_generation": {
+    "command": [
+      "cmake",
+      "-S",
+      "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-generator",
+      "-B",
+      "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-build",
+      "-DHIP_COMMON_DIR=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/hip-d3b75fbb82113374e2d6103baa96a9c61425da48",
+      "-DHIP_PLATFORM=amd",
+      "-DCMAKE_INSTALL_PREFIX=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/unused-install"
+    ],
+    "returncode": 0,
+    "source_sha256": "53c43f4650fb2d5c7dcbbfc442933b52fc3a136c384fda8da898d20c700ea022",
+    "changes": [
+      "Extract through upstream share/hip/version write, before runtime targets.",
+      "Use LANGUAGES NONE and actual CLR metadata directory.",
+      "Stage unchanged source headers, generated version header and upstream share/hip/version metadata."
+    ]
+  },
+  "device_library_build": {
+    "command": [
+      "cmake",
+      "--build",
+      "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/device-libs-wrapper-build",
+      "--target",
+      "rocm-device-libs",
+      "--parallel",
+      "2"
+    ],
+    "returncode": 1
+  },
+  "device_library_build_adaptations": [
+    "Ignored superproject imports actual installed LLVM18 executables, avoiding installed ClangConfig reference to absent libclangBasic.a.",
+    "Only CMP0053 OLD to NEW changed in a separate source copy for current CMake. Device helper source bytes unchanged."
+  ],
+  "commands_and_results": {
+    "compile-attempts.json": {
+      "raw_sha256": "fc78123753ee5ff460a16728cc93d123560d4f77c7d208b82c54f01c146d8b03",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1013",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-launch-gfx1030",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1013",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1030",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1013",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030",
+          "phase": "compile",
+          "returncode": 1
+        }
+      ]
+    },
+    "device-wchar4-attempts.json": {
+      "raw_sha256": "d06d43058c7b2e1e1b8352c937b4740122b6fb84d342d039482621df9e27d0cb",
+      "results": [
+        {
+          "case": "ps5-launch-gfx1013-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-device-wchar4",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-device-wchar4",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        }
+      ]
+    },
+    "driver-includes-attempts.json": {
+      "raw_sha256": "dd9d81e8d052886ab3cee3faeeddf13350c6a93209ad4a9ba4c74194932ee824",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1013-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-launch-gfx1030-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1013-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1030-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1013-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-driver-includes",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-driver-includes",
+          "phase": "compile",
+          "returncode": 1
+        }
+      ]
+    },
+    "explicit-wrapper-attempts.json": {
+      "raw_sha256": "c0960d2d28f55a78feac51a6bfd23a5b51f403c92e54a1333da7172d843050b7",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013-explicit-wrapper",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-explicit-wrapper",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-explicit-wrapper",
+          "scope": "host-only",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-explicit-wrapper-device-ir",
+          "scope": "unlinked-device-ir",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-explicit-wrapper",
+          "scope": "host-only",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-explicit-wrapper-device-ir",
+          "scope": "unlinked-device-ir",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-explicit-wrapper",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-explicit-wrapper",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-explicit-wrapper",
+          "scope": "host-only",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-explicit-wrapper-device-ir",
+          "scope": "unlinked-device-ir",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-explicit-wrapper",
+          "scope": "host-only",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-explicit-wrapper-device-ir",
+          "scope": "unlinked-device-ir",
+          "returncode": 1
+        }
+      ]
+    },
+    "newer-explicit-wrapper-attempts.json": {
+      "raw_sha256": "8489f1f85fa08e0876274f386b390e10728f33da173beb22792bddc12ea434e3",
+      "results": [
+        {
+          "case": "linux-newer-explicit-wrapper",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-newer-explicit-wrapper",
+          "returncode": 1
+        }
+      ]
+    },
+    "package-attempts.json": {
+      "raw_sha256": "649a81ce5f29343e74e819b85440a9a5484797c408cf9627b87cb2b3977c94fa",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1013-package",
+          "phase": "compile",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-package",
+          "phase": "compile",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-package",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1030-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-package",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1013-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-package",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-package",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-package",
+          "phase": "compile",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-package",
+          "phase": "driver",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-package",
+          "phase": "compile",
+          "returncode": 1
+        }
+      ]
+    },
+    "routed-device-ir-attempts.json": {
+      "raw_sha256": "004914ca0df1ea7a4c460972518e8d5df41dfd291cf548f09a608246b3838370",
+      "results": [
+        {
+          "case": "ps5-vector-add-gfx1013-explicit-wrapper-routed-device-ir",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-explicit-wrapper-routed-device-ir",
+          "returncode": 0
+        }
+      ]
+    },
+    "with-routed-workitem-slice-attempts.json": {
+      "raw_sha256": "892f248bcb2df515a8905260cd6d2d9ac49a8661a7517250182525c56f6aa888",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-launch-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-dimensions-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-dimensions-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-vector-add-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-dimensions-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "linux-dimensions-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-launch-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-with-routed-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 0
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-with-routed-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        }
+      ]
+    },
+    "with-workitem-slice-attempts.json": {
+      "raw_sha256": "20e730f761516544e123042d02e3d5a0e477ded08dd1fdf54b7e71c337ac39f5",
+      "results": [
+        {
+          "case": "linux-launch-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-launch-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-launch-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-launch-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-dimensions-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-dimensions-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-vector-add-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-dimensions-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "linux-dimensions-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-launch-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1013-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-vector-add-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-with-workitem-slice",
+          "phase": "driver",
+          "scope": "combined-host-device",
+          "returncode": 1
+        },
+        {
+          "case": "ps5-dimensions-gfx1030-with-workitem-slice",
+          "phase": "compile",
+          "scope": "combined-host-device",
+          "returncode": 1
+        }
+      ]
+    }
+  },
+  "successful_final_commands": [
+    {
+      "case": "linux-launch-gfx1013-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/launch.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-launch-gfx1013-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-launch-gfx1030-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/launch.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-launch-gfx1030-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-vector-add-gfx1013-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1013-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-dimensions-gfx1013-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/dimensions.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1013-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-vector-add-gfx1030-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1030-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-dimensions-gfx1030-with-routed-workitem-slice",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/dimensions.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1030-with-routed-workitem-slice.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-launch-gfx1013-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/launch.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-launch-gfx1013-device-wchar4.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-launch-gfx1030-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/launch.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-launch-gfx1030-device-wchar4.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-vector-add-gfx1013-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1013-device-wchar4.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-dimensions-gfx1013-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/dimensions.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1013.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1013-device-wchar4.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-vector-add-gfx1030-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1030-device-wchar4.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-dimensions-gfx1030-device-wchar4",
+      "phase": "compile",
+      "scope": "combined-host-device",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-B/usr/lib/llvm-18/bin",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-D__HIP_PLATFORM_AMD__",
+        "-std=c++17",
+        "-O2",
+        "-fno-fast-math",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/dimensions.hip",
+        "--hip-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage",
+        "-I<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/package-stage/include",
+        "-include",
+        "__clang_hip_runtime_wrapper.h",
+        "--rocm-device-lib-path=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/workitem-slice",
+        "--hip-device-lib=ockl-workitem-only.bc",
+        "--hip-device-lib=oclc_abi_version_500.bc",
+        "--hip-device-lib=oclc_isa_version_1030.bc",
+        "-Xarch_device",
+        "-fno-short-wchar",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1030-device-wchar4.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "emitted_objects": {
+    "linux-launch-gfx1013-with-routed-workitem-slice": {
+      "bytes": 14368,
+      "sha256": "8ae0acb9d79d742d69dc7af653d8477b0abf4d8ee60b4537fbe18903dd69d8a7",
+      "device_sha256": "85c514dde4b5e4e82c15a3a09516e3a27ecd7e65dd50784475aca33666be71f3",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 3128
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z9store_onePj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 8,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        }
+      ]
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice": {
+      "bytes": 14368,
+      "sha256": "5a86c6233380a75118b5b9c56207e6d882eee27eb386445ed610b463711ae12e",
+      "device_sha256": "66ed334effd15a9f58dd3260c0a5c9da89dcee03e8dd81cc9f9709ecc954f0ad",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 3128
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z9store_onePj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 8,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        }
+      ]
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice": {
+      "bytes": 15344,
+      "sha256": "841f2b892a7bd09090af664d788ffd16254aa99cb0817e3edaac8a61a4ac7280",
+      "device_sha256": "29032d2b84070eee099cb83a43a1795d1f3cb63a6ec218ddbf56a618e32f838e",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 4040
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 24,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 32,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 36,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 40,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 44,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 46,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 48,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 50,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 52,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 54,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 72,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 80,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 88,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 96,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice": {
+      "bytes": 14952,
+      "sha256": "cde306e7e4a8244835fd0087d8e9a80254b470ae207214ab96825991998716b2",
+      "device_sha256": "be4543c79119dab8f4e1411b180224b8695d9fe090e190423a4bce68d375cdd6",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 3704
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10dimensionsPj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 264,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 12,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 16,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 20,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 22,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 24,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 26,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 28,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 30,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 48,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 56,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 64,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 72,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice": {
+      "bytes": 15344,
+      "sha256": "0f91be6ce6c4b742708b0d82d9bbbc43c405fb0e10beadf64835521cf6b7aadc",
+      "device_sha256": "ff63fb9785e06e47a2be6b6d863181b3a1880a81cabefbf4e352d7fe2f69a813",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 4040
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 24,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 32,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 36,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 40,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 44,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 46,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 48,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 50,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 52,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 54,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 72,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 80,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 88,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 96,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice": {
+      "bytes": 14952,
+      "sha256": "22aca4bcab87793452c8195711c581907bca4773eaa7a3bfbeb298a7e4f6d8c1",
+      "device_sha256": "ff2304bd2e52040aa5c45948901c95caf16fda984f8c1f16f0a4a6a5c0bc4c17",
+      "constructor_section": ".init_array",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 3704
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10dimensionsPj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 264,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 12,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 16,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 20,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 22,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 24,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 26,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 28,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 30,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 48,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 56,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 64,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 72,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "ps5-launch-gfx1013-device-wchar4": {
+      "bytes": 14936,
+      "sha256": "e00c4ca545ee8e86e1d81a274349d9e816232bfaa5beb02d20f1bd5451f4c08f",
+      "device_sha256": "c6d08e93a34772fc90873bf7e3db914718516de7d6550424720f4a7ae5dea1d8",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 3128
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z9store_onePj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 8,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        }
+      ]
+    },
+    "ps5-launch-gfx1030-device-wchar4": {
+      "bytes": 14936,
+      "sha256": "94bae4a4a70e86af10fb12a6ca14701afd2048ece5551bf4ca2a294965132eb8",
+      "device_sha256": "f66ef038fac51e4e0751f20283cac40aec26938af41e541db87e8cb6935edc6e",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 3128
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z9store_onePj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 8,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        }
+      ]
+    },
+    "ps5-vector-add-gfx1013-device-wchar4": {
+      "bytes": 15880,
+      "sha256": "b0c2518f45e63787221655374a0d678c02527eaf72c66a64b96fe3378333ddf0",
+      "device_sha256": "a6ab8bf13688777e6ca9af7048263147550b163bd365f263fb7abd2f3d2fb88b",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 4040
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 24,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 32,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 36,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 40,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 44,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 46,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 48,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 50,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 52,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 54,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 72,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 80,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 88,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 96,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "ps5-dimensions-gfx1013-device-wchar4": {
+      "bytes": 15528,
+      "sha256": "eec95506891910998406c6769595a07625118fe96a3ae5ba0e3d37663115e1b1",
+      "device_sha256": "de1a9f3f1e8f423d93ef9b6b0f86cf2729b822baf1f018a409ce0919907bff59",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "bytes": 3704
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10dimensionsPj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 264,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 12,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 16,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 20,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 22,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 24,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 26,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 28,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 30,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 48,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 56,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 64,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 72,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "ps5-vector-add-gfx1030-device-wchar4": {
+      "bytes": 15880,
+      "sha256": "1c09b42977a78aa4dc3983d18e430da65e803dc13722ab47e6c77e244f55e56b",
+      "device_sha256": "2cfe4b5cc56db82c3044bf65424036a72740cc994e3790129bf1f5efd3c14212",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 4040
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10vector_addPKfS0_Pfj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 288,
+          "rsrc1": "0x60af0040",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 24,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 32,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 36,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 40,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 44,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 46,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 48,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 50,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 52,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 54,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 72,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 80,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 88,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 96,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    },
+    "ps5-dimensions-gfx1030-device-wchar4": {
+      "bytes": 15528,
+      "sha256": "cf6754e4e5232359a7931d3d371fa231bc86fd64ae00425b3e39b637de1a2cb3",
+      "device_sha256": "ce44ac5355df29b793d0c41a0e75c36f299ad7550bb4a07b2d528a73e180d4c7",
+      "constructor_section": ".ctors",
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "fatbin_wrapper_hex": "465049480100000000000000000000000000000000000000",
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "bytes": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1030",
+          "offset": 4096,
+          "bytes": 3704
+        }
+      ],
+      "descriptors": [
+        {
+          "symbol": "_Z10dimensionsPj.kd",
+          "group_bytes": 0,
+          "private_bytes": 0,
+          "kernarg_bytes": 264,
+          "rsrc1": "0x60af0000",
+          "rsrc2": "0x8c",
+          "rsrc3": "0x0",
+          "properties": "0x409",
+          "user_sgprs": 6,
+          "preload": 0
+        }
+      ],
+      "argument_metadata": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 12,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 16,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 20,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 22,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 24,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 26,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 28,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 30,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 48,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 56,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 64,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 72,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ]
+    }
+  },
+  "driver_bitcode_selections": {
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "linux-launch-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "linux-launch-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-dimensions-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-dimensions-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-launch-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-launch-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-vector-add-gfx1013-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-vector-add-gfx1030-with-routed-workitem-slice-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-dimensions-gfx1013-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-dimensions-gfx1030-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-launch-gfx1013-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-launch-gfx1030-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ],
+    "ps5-vector-add-gfx1013-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1013.bc"
+    ],
+    "ps5-vector-add-gfx1030-device-wchar4-driver.stderr": [
+      "ockl-workitem-only.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_isa_version_1030.bc"
+    ]
+  },
+  "built_constant_bitcode": [
+    {
+      "name": "oclc_abi_version_500.bc",
+      "bytes": 2076,
+      "sha256": "d097461b741b52519bb713b82e64f90af8aa741527d5a911d978b5aec2a86bbb"
+    },
+    {
+      "name": "oclc_isa_version_1013.bc",
+      "bytes": 2076,
+      "sha256": "19576c2b782919ebbaab0ed5bd98dcfb3df19565576e3f3311ba3c4b772e8d2b"
+    },
+    {
+      "name": "oclc_isa_version_1030.bc",
+      "bytes": 2076,
+      "sha256": "76c3423eb8486f4e5aed2e3a7e7f0a954c5a9c33cd8e457fcd28aa38fba1bc9a"
+    }
+  ],
+  "workitem_slice": {
+    "name": "ockl-workitem-only.bc",
+    "sha256": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+    "scope": "Unchanged upstream workitem.cl, compiled with upstream command and processed by upstream prepare-builtins; not complete OCKL",
+    "commands": [
+      {
+        "command": [
+          "cmake",
+          "--build",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/device-libs-wrapper-build",
+          "--target",
+          "upstream/ockl/workitem.bc",
+          "oclc_abi_version_500",
+          "oclc_isa_version_1013",
+          "oclc_isa_version_1030",
+          "--parallel",
+          "2"
+        ],
+        "returncode": 0
+      },
+      {
+        "command": [
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/device-libs-wrapper-build/upstream/utils/prepare-builtins/prepare-builtins",
+          "-o",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ockl-workitem-only.bc",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/device-libs-wrapper-build/upstream/ockl/workitem.bc"
+        ],
+        "returncode": 0
+      }
+    ]
+  },
+  "raw_results_directory": "results/hip-host-abi-spike/rocm-6.2.4",
+  "raw_file_hashes": {
+    "HIP.tar.gz": {
+      "sha256": "18315a21757f7302deace880fd5b6e75c46d0bc75870285e444e01ad0f502b3e",
+      "bytes": 1483363
+    },
+    "add-metadata-evidence.py": {
+      "sha256": "9a2aa7508c6ed887f173023a882b46d544d1a98b7cbfdd0a99d28d25f0a7fcef",
+      "bytes": 582
+    },
+    "build-device-libs-policy.py": {
+      "sha256": "b3ade977adddf2ac31118b2f1e68d1d7ac6a5b0f35a2f88d651fafb58351b27c",
+      "bytes": 1514
+    },
+    "build-device-libs.py": {
+      "sha256": "b5868dc1e6d448e3e5b18c0bc703787e4a8bb104a2fa19e09511601500a975da",
+      "bytes": 1789
+    },
+    "build-workitem.py": {
+      "sha256": "f8cfec0448f2978e0b85c7eab2ecdb89abbe142079e92e191d93b3e53af7f936",
+      "bytes": 978
+    },
+    "check-newer-wrapper.py": {
+      "sha256": "bda84133147099f120b072feb50d870abb6ee373a37633a09d4f4bdd60210d5c",
+      "bytes": 697
+    },
+    "clr-metadata-commands.json": {
+      "sha256": "3d0c1679f05369bb40db1de448c825f44d3715e64256f979dc355f87411a3bc5",
+      "bytes": 2292
+    },
+    "clr.tar.gz": {
+      "sha256": "b36c0d7d7be2bda98cc62cc46cef2048fd723afa940cab79a33ea4b3558e2420",
+      "bytes": 2080580
+    },
+    "compatible-emitted-abi.json": {
+      "sha256": "7b73e15c990b1839c752e5f270763f8f01a980346adf801caf6a6c057a2c4c80",
+      "bytes": 14255
+    },
+    "compile-attempts.json": {
+      "sha256": "fc78123753ee5ff460a16728cc93d123560d4f77c7d208b82c54f01c146d8b03",
+      "bytes": 18643
+    },
+    "compile-device-wchar4.py": {
+      "sha256": "399c521af9139a0707119dce5acfc0044b4ecd9c98faea70c2ca57fd8708f796",
+      "bytes": 926
+    },
+    "compile-driver-includes.py": {
+      "sha256": "f557e21fa443644cff68f5f9c1c565f28f7aa21dba643b48b3328b8ef50b7586",
+      "bytes": 1534
+    },
+    "compile-explicit-wrapper.py": {
+      "sha256": "6674ab1300b592db89321ff42963fc32947f1b39564b81391c105572fa467d87",
+      "bytes": 1557
+    },
+    "compile-package.py": {
+      "sha256": "495542ec04c6a15f6da2f318626419c3c2f18ecafb5e388fdcead30a28a38d79",
+      "bytes": 2625
+    },
+    "compile-routed-ir.py": {
+      "sha256": "bcb677c435490022a702213c96d41b22adc1159505c916ab1d3ce17ef8c86fde",
+      "bytes": 714
+    },
+    "compile-with-device-libs.py": {
+      "sha256": "0415029277e6d996d32bc547ea26a819d81ff425d890d410eac1b5173f3f3af6",
+      "bytes": 1504
+    },
+    "compile-with-routed-workitem-slice.py": {
+      "sha256": "41ac6cecd123673689bd5be9f9b7b06775bcd267240c078ec55f9c28af331d84",
+      "bytes": 1723
+    },
+    "compile-with-workitem-slice.py": {
+      "sha256": "e7f365ff186dee3fcd84e4b8e588ff0ef20dd6f2f26c5a7a3de42fa7baf4fa6b",
+      "bytes": 1695
+    },
+    "compile.py": {
+      "sha256": "a7e30da448076a3dd32665c4bbe03219971af21f28392aa1a6d2d0351b0b3912",
+      "bytes": 1633
+    },
+    "configure-device-libs.py": {
+      "sha256": "1cb6aabd2fbd3d9400ba7796ca58f5be2c53a25e633d44d895107113fc632c56",
+      "bytes": 712
+    },
+    "device-libs-build.json": {
+      "sha256": "e5eb68bab60624849a56c22af2d85d43952898a46762d888925c2aaa0159f235",
+      "bytes": 262
+    },
+    "device-libs-build.log": {
+      "sha256": "17989e0d76aa81f25a37aab016af648ced7350c4dfdf179a9fd3cfa9e321bc89",
+      "bytes": 18348
+    },
+    "device-libs-configure.json": {
+      "sha256": "74fbe435998cb50329b465827f54cc22339904305f54e831464e0b546a8f4f0b",
+      "bytes": 562
+    },
+    "device-libs-configure.stderr": {
+      "sha256": "5ad2b096809144ce5228ad40a242ba9cf83f615f45cce3e7b23cca2509b15af2",
+      "bytes": 1273
+    },
+    "device-libs-configure.stdout": {
+      "sha256": "182c9dcab183e931cbb2d902cd062e024d465d7efc2ffb26114e75a9e32dc6ee",
+      "bytes": 1269
+    },
+    "device-libs-policy-configure.json": {
+      "sha256": "1bed7a898df481c489ba0c8bb7cc1461a003376c1b4dd24d804c9363cd7db15f",
+      "bytes": 399
+    },
+    "device-libs-policy-configure.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "device-libs-policy-configure.stdout": {
+      "sha256": "59f52e165848971c9982a3d5c84dbe1d797a9ad5648bcfb406344fbcbeb83f9e",
+      "bytes": 319
+    },
+    "device-libs-sources.json": {
+      "sha256": "a4c794124d0e6cb59450168d1f667f08eec602a06cebf6132c839f58cf479dd8",
+      "bytes": 153127
+    },
+    "device-libs-tree.json": {
+      "sha256": "fa60ba7037947a473bca758acec49f4a710bb26867fc019a58afd181a73f7e1c",
+      "bytes": 169925
+    },
+    "device-libs-wrapper-configure.json": {
+      "sha256": "2ad52bdc037d33a2c5e1006292ff16588fbf4aa81bcb4e8c97eb915156b28062",
+      "bytes": 519
+    },
+    "device-libs-wrapper-configure.stderr": {
+      "sha256": "23159949a9204345d04dd65df34c9f91f78cdd400b1367b8e5bc2ce0a4f67540",
+      "bytes": 751
+    },
+    "device-libs-wrapper-configure.stdout": {
+      "sha256": "60cd0abb94d03a72340b1f3c8946f414b9f43177c2fcbbba3666bbad5cfdd0bb",
+      "bytes": 1251
+    },
+    "device-source-verification.json": {
+      "sha256": "c1b5e49612a9de362393c4e5f104745734ea3ca833a5053ce581e7eb6e803353",
+      "bytes": 143
+    },
+    "device-wchar4-attempts.json": {
+      "sha256": "d06d43058c7b2e1e1b8352c937b4740122b6fb84d342d039482621df9e27d0cb",
+      "bytes": 17049
+    },
+    "dimensions.hip": {
+      "sha256": "84dc81053727f8b10565bdf4efafd1951bf3be1813f08fcb16648b62a04a529f",
+      "bytes": 209
+    },
+    "driver-includes-attempts.json": {
+      "sha256": "dd9d81e8d052886ab3cee3faeeddf13350c6a93209ad4a9ba4c74194932ee824",
+      "bytes": 13731
+    },
+    "explicit-wrapper-attempts.json": {
+      "sha256": "c0960d2d28f55a78feac51a6bfd23a5b51f403c92e54a1333da7172d843050b7",
+      "bytes": 12921
+    },
+    "fetch-device-libs.py": {
+      "sha256": "ee412d151dc6d4996d63e36c6103de4b22d8b0e4ed1106261fac3d2025bf441c",
+      "bytes": 1414
+    },
+    "fetch-driver-source.py": {
+      "sha256": "91db4b56310b29e7a111885f0876f36de17557a194f71bf228771659204414b1",
+      "bytes": 298
+    },
+    "fetch-ockl-source.py": {
+      "sha256": "24007ae631ad8f5dad52c654e84808498b35e98a35bb3180f9e30322210b8752",
+      "bytes": 659
+    },
+    "fetch.py": {
+      "sha256": "924b1d2a82b0ce877346f8747b74dd1b1d7df5615847fb3cc81b5fbcf7db4358",
+      "bytes": 1033
+    },
+    "finalize.py": {
+      "sha256": "32ed75ebd0a9dfec8f7a09d3d0cc321e6ed692ff69e1ac64966c09c090773917",
+      "bytes": 3871
+    },
+    "generate-header.py": {
+      "sha256": "ff8487cbc55032b637f44f9ac38caf3ceb59910c8bace850c257235bf642388c",
+      "bytes": 2297
+    },
+    "header-generation.json": {
+      "sha256": "be7c52753807de178bada896b353bb147b7b7f9a26e3310e72a2c61cf08928f3",
+      "bytes": 1075
+    },
+    "header-generation.stderr": {
+      "sha256": "c08f355fa3704ad914a6726969dc846dabaad74ae5449b51b212ed33d38dd1f1",
+      "bytes": 653
+    },
+    "header-generation.stdout": {
+      "sha256": "b8b60e4efdfd470a7402afe5c9b60b5e34bc0ee76c017e67862a3a793c22973b",
+      "bytes": 849
+    },
+    "inspect-compatible.py": {
+      "sha256": "610dce2230863565c61dca045e5a158155537dd8823d1c4fb3e0ea02ae79f19d",
+      "bytes": 2944
+    },
+    "launch.hip": {
+      "sha256": "91ebd4764280b5ffecfb4c33939dbd5267c737a5f452709fec23832ef1ddebf8",
+      "bytes": 148
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "d08e1cf03b255618e83ca44beff746bcc46f5e97f4b706398edc2e7deedd344a",
+      "bytes": 6766
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "41ba48c3841fd1e63ef53145cac898696286427705eddd04360f787e95c03946",
+      "bytes": 3886
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "dc3c4e58fdc6b035081d977aee5fffefb4b7d720bbad3028f0b3eb277fe7a40a",
+      "bytes": 9159
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "593b0b665f7dcc572981fe872c4736843aec856259f12abefd2485d555cd3dd9",
+      "bytes": 10637
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice.hsaco": {
+      "sha256": "be4543c79119dab8f4e1411b180224b8695d9fe090e190423a4bce68d375cdd6",
+      "bytes": 3704
+    },
+    "linux-dimensions-gfx1013-with-routed-workitem-slice.o": {
+      "sha256": "cde306e7e4a8244835fd0087d8e9a80254b470ae207214ab96825991998716b2",
+      "bytes": 14952
+    },
+    "linux-dimensions-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "26bbb252a7f8d8e83d13b7ccf72e53c5ab3fb24302348bfe318f8856484475d4",
+      "bytes": 594
+    },
+    "linux-dimensions-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "e7eded4698d73152903322c08555e7bfe84007ea3ac1cb6398bc2c068ead7da6",
+      "bytes": 9752
+    },
+    "linux-dimensions-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "529169e931782a6e788b1e0ad92660fce8769379f81c6dc472bfc3c268d73305",
+      "bytes": 6766
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "0e8d46dc9bccd5d6f57bd983ee2dbc73b97a31d8459abce46c26ceaa69cc39b8",
+      "bytes": 3841
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "10985f1077bfeebe44122deef2898997570cb3959e8a3b4de2ad25493ea14b1c",
+      "bytes": 9159
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "8645c21e025bb12b1f94a7786188c27ba9493f55cf5b2247da14ba3632396881",
+      "bytes": 10637
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice.hsaco": {
+      "sha256": "ff2304bd2e52040aa5c45948901c95caf16fda984f8c1f16f0a4a6a5c0bc4c17",
+      "bytes": 3704
+    },
+    "linux-dimensions-gfx1030-with-routed-workitem-slice.o": {
+      "sha256": "22aca4bcab87793452c8195711c581907bca4773eaa7a3bfbeb298a7e4f6d8c1",
+      "bytes": 14952
+    },
+    "linux-dimensions-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "314e887184edd0de22dd75ebc44e9e6a14309c5166161064cec048d7f51b31c6",
+      "bytes": 594
+    },
+    "linux-dimensions-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-dimensions-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "55232af4875cac65e68fa8c4741c47bcb4bcc37c09bc7c8ab771d576d2562ffe",
+      "bytes": 9752
+    },
+    "linux-dimensions-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-compile.stderr": {
+      "sha256": "1fe9fb11276419758289be4c4517f341c68a31c761c2ece1722b7b86699c35e6",
+      "bytes": 2293
+    },
+    "linux-launch-gfx1013-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-driver-includes-compile.stderr": {
+      "sha256": "7e177d822d6ccc673162b73a49d272f04b32d3f9c810fd5f6f15adb62237ffae",
+      "bytes": 2151
+    },
+    "linux-launch-gfx1013-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-driver-includes-driver.stderr": {
+      "sha256": "467b778cf8bd3bd105e6cb67056e23c895928a44ca43d5f4bc23a60304c46a4b",
+      "bytes": 7350
+    },
+    "linux-launch-gfx1013-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-driver.stderr": {
+      "sha256": "359eac20029e4775d586d1a8a18750f08a353b7617c40e14b98620551450552a",
+      "bytes": 8542
+    },
+    "linux-launch-gfx1013-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-explicit-wrapper-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1013-explicit-wrapper.o": {
+      "sha256": "b1e1875204b343e66a4c5c61d4fb3f9597376906f073768d455433ee83d67bcd",
+      "bytes": 14112
+    },
+    "linux-launch-gfx1013-explicit-wrapper.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-package-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-package-driver.stderr": {
+      "sha256": "6b61b4ba73e2b96fe7b9e302464359c796cf2bbfb82142a66dc6d23e925ad383",
+      "bytes": 7460
+    },
+    "linux-launch-gfx1013-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-package-readobj.txt": {
+      "sha256": "d4b95c09b487fc9fec3765c8fb4f1415eb957f7ef2a291fdd08d6160a5a52cde",
+      "bytes": 10593
+    },
+    "linux-launch-gfx1013-package-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1013-package.o": {
+      "sha256": "b1e1875204b343e66a4c5c61d4fb3f9597376906f073768d455433ee83d67bcd",
+      "bytes": 14112
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "92b9bc80be8ce4c337c85c4f8d4ac1c4a8f1aec240fc5bc4d6e039e27e58f744",
+      "bytes": 5591
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "1db33ebac0021b6ca507547db8e2f959e8e308dd6ec434a5d65404a4fb2b303e",
+      "bytes": 2566
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "81ee40c39cd50c5d543be1284a426c04ae58ea30041eb0fda57f179e203ba5e8",
+      "bytes": 9099
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "15a22d7d2f04a9be08d31e8459e3caceadfce40bc198d4e0837c2c47312802e9",
+      "bytes": 10612
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice.hsaco": {
+      "sha256": "85c514dde4b5e4e82c15a3a09516e3a27ecd7e65dd50784475aca33666be71f3",
+      "bytes": 3128
+    },
+    "linux-launch-gfx1013-with-routed-workitem-slice.o": {
+      "sha256": "8ae0acb9d79d742d69dc7af653d8477b0abf4d8ee60b4537fbe18903dd69d8a7",
+      "bytes": 14368
+    },
+    "linux-launch-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "26bbb252a7f8d8e83d13b7ccf72e53c5ab3fb24302348bfe318f8856484475d4",
+      "bytes": 594
+    },
+    "linux-launch-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "c3e2ce8aaf986146c454babc4346dada7086b0296f8f5399023e1107dd594b93",
+      "bytes": 9692
+    },
+    "linux-launch-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-compile.stderr": {
+      "sha256": "7de58c417fc6e15923615d22defe866d191b422f60b95b39cefaefb928f6cd23",
+      "bytes": 2293
+    },
+    "linux-launch-gfx1030-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-driver-includes-compile.stderr": {
+      "sha256": "5d1e402ee0b7cf046ccf926b3e23253c31ecb829ee7c9126b5d860524b851e67",
+      "bytes": 2151
+    },
+    "linux-launch-gfx1030-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-driver-includes-driver.stderr": {
+      "sha256": "28746d46999bec8c1b334ba83c4cb846812ae58f5edee49b34914cf3b486e504",
+      "bytes": 7350
+    },
+    "linux-launch-gfx1030-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-driver.stderr": {
+      "sha256": "b06b4c3792b56adbc174616d65e1ee34d4b4df6c1fe91c9e5d7b1687055ac666",
+      "bytes": 8542
+    },
+    "linux-launch-gfx1030-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-explicit-wrapper-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1030-explicit-wrapper.o": {
+      "sha256": "7a5cfb8b7d79f84ed7aa5f0835828a1728b0bf43cdab434e270bdfd223e1d35c",
+      "bytes": 14112
+    },
+    "linux-launch-gfx1030-explicit-wrapper.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-package-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-package-driver.stderr": {
+      "sha256": "32a04ffe302452c25cbea8085863c6a0de29beaa04660e7579f1378490dec4dc",
+      "bytes": 7460
+    },
+    "linux-launch-gfx1030-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-package-readobj.txt": {
+      "sha256": "7c069dd82b8c1b8c88c087e696b9b566d0899c100cc48b5a6d479c2e89642789",
+      "bytes": 10593
+    },
+    "linux-launch-gfx1030-package-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1030-package.o": {
+      "sha256": "7a5cfb8b7d79f84ed7aa5f0835828a1728b0bf43cdab434e270bdfd223e1d35c",
+      "bytes": 14112
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "a4fa515e8db23de8e95f118b541c68bd9a8ad0e5ed5c8287a8e1152b41490b80",
+      "bytes": 5591
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "f03c52983f7c54302bb40c4687232e0fc52e7bad78ea8c788cd811b63acd168c",
+      "bytes": 2522
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "3bcd1e2e93394ce31987e8aede9a27a4301b67441d6dbbe892bd239c69d532a4",
+      "bytes": 9099
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "1f00a24eb35ccf6e02891b724146808733bc61a506c38ca6dec4f75e5b960a0e",
+      "bytes": 10612
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice.hsaco": {
+      "sha256": "66ed334effd15a9f58dd3260c0a5c9da89dcee03e8dd81cc9f9709ecc954f0ad",
+      "bytes": 3128
+    },
+    "linux-launch-gfx1030-with-routed-workitem-slice.o": {
+      "sha256": "5a86c6233380a75118b5b9c56207e6d882eee27eb386445ed610b463711ae12e",
+      "bytes": 14368
+    },
+    "linux-launch-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "314e887184edd0de22dd75ebc44e9e6a14309c5166161064cec048d7f51b31c6",
+      "bytes": 594
+    },
+    "linux-launch-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-launch-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "09a8c233e5e22d13bcd7ece0464959aec614ac8fe9daf814ff1734b9b73a6d1e",
+      "bytes": 9692
+    },
+    "linux-launch-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-newer-explicit-wrapper.stderr": {
+      "sha256": "d9ba793c41b9658f99593ded5cbe365cc8f6492085e2de8e7708d0a83befc885",
+      "bytes": 7342
+    },
+    "linux-newer-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-compile.stderr": {
+      "sha256": "249cbdab307e66197ab62d3d3b5c5533b2cd27b32ea73c1fd523c6641b0fb501",
+      "bytes": 2301
+    },
+    "linux-vector-add-gfx1013-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-driver-includes-compile.stderr": {
+      "sha256": "298dde775985a8988a4f68010e21509047880bc706ca30170d319b00812bebd5",
+      "bytes": 2159
+    },
+    "linux-vector-add-gfx1013-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-driver-includes-driver.stderr": {
+      "sha256": "0583c0ecb69d20e7dff2ee95c18f8f6c6e3edd48b3e6af598a33f97429be9532",
+      "bytes": 7410
+    },
+    "linux-vector-add-gfx1013-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-driver.stderr": {
+      "sha256": "7f1c46728dfe02d859e1613c0e20f341238288c4e27e6a8dd46926aad87862e2",
+      "bytes": 8602
+    },
+    "linux-vector-add-gfx1013-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper-device-ir.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper-undefined.txt": {
+      "sha256": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+      "bytes": 311
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper.ll": {
+      "sha256": "85a90c6ecac8772e28bbefc704c893e661bdf1446a9a399c0fe81aca11f28ef4",
+      "bytes": 3584
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper.o": {
+      "sha256": "2f7c207c61aabed476218b4723e98971575175187db395264fbdb96d888cb7db",
+      "bytes": 3720
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper.stderr": {
+      "sha256": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+      "bytes": 113
+    },
+    "linux-vector-add-gfx1013-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-package-compile.stderr": {
+      "sha256": "c3d2cc2865c9ee6023f283f31d3801faf817ef25c16dbe5b85f9e8f4bc33bf9f",
+      "bytes": 949
+    },
+    "linux-vector-add-gfx1013-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-package-driver.stderr": {
+      "sha256": "6642642d951c07694657157da463e89e91dc38fb21e440d5adaca71d40d9eaed",
+      "bytes": 7520
+    },
+    "linux-vector-add-gfx1013-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "e07ba4b3cdb0730c1ed86310dcf65051e18b2bc99533959e87670defeb9ef95a",
+      "bytes": 7540
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "f3cfe22f4864138d3241587ea5818c6f684c931e27bb5b480f9020c47253d1e5",
+      "bytes": 4255
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "a821c956479e4f37fc2bc873846b17292e59d056dad121f691b24c16bb26e1c6",
+      "bytes": 9159
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "243bba35634b7788aeba7d71e6ff0edbd582e751cdd570c5be12bcd5e96296e9",
+      "bytes": 10694
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice.hsaco": {
+      "sha256": "29032d2b84070eee099cb83a43a1795d1f3cb63a6ec218ddbf56a618e32f838e",
+      "bytes": 4040
+    },
+    "linux-vector-add-gfx1013-with-routed-workitem-slice.o": {
+      "sha256": "841f2b892a7bd09090af664d788ffd16254aa99cb0817e3edaac8a61a4ac7280",
+      "bytes": 15344
+    },
+    "linux-vector-add-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "26bbb252a7f8d8e83d13b7ccf72e53c5ab3fb24302348bfe318f8856484475d4",
+      "bytes": 594
+    },
+    "linux-vector-add-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "8a22e774cb21e685576cd0cd2c84d43c7127acc0db3709551e9990b9c099e16d",
+      "bytes": 9752
+    },
+    "linux-vector-add-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-compile.stderr": {
+      "sha256": "a4441e30940451fccb5e3e38714523bc80f28a6cf9a7c2f9666434b5f75ec744",
+      "bytes": 2301
+    },
+    "linux-vector-add-gfx1030-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-driver-includes-compile.stderr": {
+      "sha256": "155e1798ed9d1144e6e2e27b1baf898332761d3a24980a8ed97aa699fb92948d",
+      "bytes": 2159
+    },
+    "linux-vector-add-gfx1030-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-driver-includes-driver.stderr": {
+      "sha256": "cbbe425316b41aace893ecdd7a3438d06233e58b2cdf349848cf4beed3f521ed",
+      "bytes": 7410
+    },
+    "linux-vector-add-gfx1030-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-driver.stderr": {
+      "sha256": "280449a9814bc8376d215588e54108a6d5ac35e4c74422510489bebf6b5a8937",
+      "bytes": 8602
+    },
+    "linux-vector-add-gfx1030-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper-device-ir.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper-undefined.txt": {
+      "sha256": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+      "bytes": 311
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper.ll": {
+      "sha256": "3946012a732b9390cb20527cec98c9a9df4048fc6a456ba7134a4681c3279e9e",
+      "bytes": 3760
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper.o": {
+      "sha256": "2f7c207c61aabed476218b4723e98971575175187db395264fbdb96d888cb7db",
+      "bytes": 3720
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper.stderr": {
+      "sha256": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+      "bytes": 113
+    },
+    "linux-vector-add-gfx1030-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-package-compile.stderr": {
+      "sha256": "fe3fb82829f1cacae32c89e185a0e3d42775735d121b8e69ff88c6a75d271cf2",
+      "bytes": 949
+    },
+    "linux-vector-add-gfx1030-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-package-driver.stderr": {
+      "sha256": "fa0e15e27de2702e4e989ae6b9fc51c81dbbe57031c44221b2305d058c042e86",
+      "bytes": 7520
+    },
+    "linux-vector-add-gfx1030-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-device-isa.txt": {
+      "sha256": "f97ec052f6bfd8602ce7a7e1dc4f3c0ea6b4e26081be7d102671122273f98f0f",
+      "bytes": 7463
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-device-readobj.txt": {
+      "sha256": "c7fb16c9e78e0ad1d1d754fa246e9cfda54debbf7c8749ae7147dff1cfe21529",
+      "bytes": 4211
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "fc1bb064b335b279bb983ffcc758c37fd8ea5ffa0d28396c14fc0e96e60380e7",
+      "bytes": 9159
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-host-readobj.txt": {
+      "sha256": "b6a845de4ab83295d149f3c316ca312a84253bcdcc6200a798ace106cb297113",
+      "bytes": 10694
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice.hsaco": {
+      "sha256": "ff63fb9785e06e47a2be6b6d863181b3a1880a81cabefbf4e352d7fe2f69a813",
+      "bytes": 4040
+    },
+    "linux-vector-add-gfx1030-with-routed-workitem-slice.o": {
+      "sha256": "0f91be6ce6c4b742708b0d82d9bbbc43c405fb0e10beadf64835521cf6b7aadc",
+      "bytes": 15344
+    },
+    "linux-vector-add-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "314e887184edd0de22dd75ebc44e9e6a14309c5166161064cec048d7f51b31c6",
+      "bytes": 594
+    },
+    "linux-vector-add-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "linux-vector-add-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "6f8e25862570965f43a5224a04444e6c886376264c0630e8085c506ed52132b4",
+      "bytes": 9752
+    },
+    "linux-vector-add-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "llvm18-AMDGPU.cpp": {
+      "sha256": "ff020ac5fa2f4340cebefc9194435f59320fc2bb84a3b831206c2280d54c21af",
+      "bytes": 38878
+    },
+    "llvm18-HIPAMD.cpp": {
+      "sha256": "dd71c91578972a8b3a823a34855bff080034a9c3e0784ed50d2b2c5a68ebb84f",
+      "bytes": 17076
+    },
+    "newer-explicit-wrapper-attempts.json": {
+      "sha256": "8489f1f85fa08e0876274f386b390e10728f33da173beb22792bddc12ea434e3",
+      "bytes": 1884
+    },
+    "ockl-source.json": {
+      "sha256": "fae5653bb2ef5dae38cd212bf1badc69088c02c519619d0e2a1157c3083c333a",
+      "bytes": 441
+    },
+    "ockl-workitem-only.bc": {
+      "sha256": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+      "bytes": 7740
+    },
+    "ockl-workitem.cl": {
+      "sha256": "0b3ca6ff7629cf89686580ad4f3842ebfc9b902472fdaee0d347cdd3af1c206d",
+      "bytes": 11432
+    },
+    "package-attempts.json": {
+      "sha256": "649a81ce5f29343e74e819b85440a9a5484797c408cf9627b87cb2b3977c94fa",
+      "bytes": 13491
+    },
+    "package-generation.json": {
+      "sha256": "435a049f284cfdaefd3ee4c74377e8ed52bbcd491e508b9d12b3a759e883c2e1",
+      "bytes": 985
+    },
+    "package-generation.stderr": {
+      "sha256": "c08f355fa3704ad914a6726969dc846dabaad74ae5449b51b212ed33d38dd1f1",
+      "bytes": 653
+    },
+    "package-generation.stdout": {
+      "sha256": "b7ba2a580563db86fda418c05524cedbfec4c77566b0ea737346857fcb9cc023",
+      "bytes": 850
+    },
+    "prepare-routed-slice.py": {
+      "sha256": "8020e93de6b235f1d659fae48c19f6ac780e64e7787dff84ba54dbaa79c27dc7",
+      "bytes": 926
+    },
+    "prepare-slice-compile.py": {
+      "sha256": "1c459789b17a89c4c11645dea6a25192e29931ba04f5cadea8e15c356173267d",
+      "bytes": 631
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-device-isa.txt": {
+      "sha256": "417e89431b4263d8f31c36b5a0beebb7dc551dd13c6f9f21ee7a7d410dfbfafa",
+      "bytes": 6751
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-device-readobj.txt": {
+      "sha256": "39c4c492a04144e6b1390cd771a2ce7cb86d4b91fd19a6cf88d6cc5982f8ae0d",
+      "bytes": 3834
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-driver.stderr": {
+      "sha256": "1629c6a88a4e785a5fd6711f7333ea24019fbc910ee047f592cde9b5441a2a7f",
+      "bytes": 11643
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-host-readobj.txt": {
+      "sha256": "ebd63fd7dc46a5b04142a2abd65c3b9a7e62cf61665fd5099c117e8c37f5e621",
+      "bytes": 13904
+    },
+    "ps5-dimensions-gfx1013-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-dimensions-gfx1013-device-wchar4.hsaco": {
+      "sha256": "de1a9f3f1e8f423d93ef9b6b0f86cf2729b822baf1f018a409ce0919907bff59",
+      "bytes": 3704
+    },
+    "ps5-dimensions-gfx1013-device-wchar4.o": {
+      "sha256": "eec95506891910998406c6769595a07625118fe96a3ae5ba0e3d37663115e1b1",
+      "bytes": 15528
+    },
+    "ps5-dimensions-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "1662f6cf3f7d24f1401482accd883a421b184b6bca205f44c26469485fd1ddbc",
+      "bytes": 573
+    },
+    "ps5-dimensions-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "aa557b67a70fe92f50cb949e1bd2d6c89aee6a2f37e6aa5a0a6ccdf13e32de7e",
+      "bytes": 11629
+    },
+    "ps5-dimensions-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "1dbf97e94a6778369d959d06263b1f5b685cc67c329990a4a40fb2b0f85266da",
+      "bytes": 585
+    },
+    "ps5-dimensions-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "a0c3aa18afb73d52982313a81e35e638e571122a7f5bc94438f8fabbe6e83613",
+      "bytes": 12213
+    },
+    "ps5-dimensions-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-device-isa.txt": {
+      "sha256": "1da9fd8849352a4c4e1616f0c8bf9cebdd5bd48a3cea5165e4885e4dc843f0ed",
+      "bytes": 6751
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-device-readobj.txt": {
+      "sha256": "0e0c7737e8b23cce5c4739efdf21cf7cb8961fc166a0b2dff4b2fcb6b2115269",
+      "bytes": 3789
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-driver.stderr": {
+      "sha256": "e202e3167b8c91bbb5372426c26a13a7a30e5e91a075fc6f658bca3b489e474f",
+      "bytes": 11641
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-host-readobj.txt": {
+      "sha256": "8ee3809cf4522cd56a612e8f51157a8796e029c956a400dcf3d99e8569907d91",
+      "bytes": 13904
+    },
+    "ps5-dimensions-gfx1030-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-dimensions-gfx1030-device-wchar4.hsaco": {
+      "sha256": "ce44ac5355df29b793d0c41a0e75c36f299ad7550bb4a07b2d528a73e180d4c7",
+      "bytes": 3704
+    },
+    "ps5-dimensions-gfx1030-device-wchar4.o": {
+      "sha256": "cf6754e4e5232359a7931d3d371fa231bc86fd64ae00425b3e39b637de1a2cb3",
+      "bytes": 15528
+    },
+    "ps5-dimensions-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "99d9f1259ace909ff7929b7dc2ff906ebbc20e4f5c54d032713cb36aa3bd9cfc",
+      "bytes": 572
+    },
+    "ps5-dimensions-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "3bd7609d249da6b1266e4f18c181a5b8e398359d083bd84e3ac0e750c2fb7f1d",
+      "bytes": 11629
+    },
+    "ps5-dimensions-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "9e1f11b8e6a80cade5e0dc2dda97a994de26a5ae9810a3a7430975fdcfb90791",
+      "bytes": 585
+    },
+    "ps5-dimensions-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-dimensions-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "f9e9d7f8f7b8be8fde14dcddada3c38b53d6956fc7af246b376ad8cca904d5b4",
+      "bytes": 12213
+    },
+    "ps5-dimensions-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-compile.stderr": {
+      "sha256": "1fe9fb11276419758289be4c4517f341c68a31c761c2ece1722b7b86699c35e6",
+      "bytes": 2293
+    },
+    "ps5-launch-gfx1013-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-device-wchar4-device-isa.txt": {
+      "sha256": "e409ab229935e1fc337d311dabf80d91038f8c659f6a8617ebf0d33b4196fa05",
+      "bytes": 5576
+    },
+    "ps5-launch-gfx1013-device-wchar4-device-readobj.txt": {
+      "sha256": "d53e55f31d4a8450357a640db729073be548197660c608b8a01493e63807887e",
+      "bytes": 2514
+    },
+    "ps5-launch-gfx1013-device-wchar4-driver.stderr": {
+      "sha256": "0c6320a7e10ff61cef91d7f64e7d4d08fadd5ef8b5b5e973bea70641ac3c5bbe",
+      "bytes": 11583
+    },
+    "ps5-launch-gfx1013-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-device-wchar4-host-readobj.txt": {
+      "sha256": "900893fd6fdd79c544cc0168705d97a7e00216abd5e14eba2ade689c7cd795fd",
+      "bytes": 13815
+    },
+    "ps5-launch-gfx1013-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-launch-gfx1013-device-wchar4.hsaco": {
+      "sha256": "c6d08e93a34772fc90873bf7e3db914718516de7d6550424720f4a7ae5dea1d8",
+      "bytes": 3128
+    },
+    "ps5-launch-gfx1013-device-wchar4.o": {
+      "sha256": "e00c4ca545ee8e86e1d81a274349d9e816232bfaa5beb02d20f1bd5451f4c08f",
+      "bytes": 14936
+    },
+    "ps5-launch-gfx1013-driver-includes-compile.stderr": {
+      "sha256": "7e177d822d6ccc673162b73a49d272f04b32d3f9c810fd5f6f15adb62237ffae",
+      "bytes": 2151
+    },
+    "ps5-launch-gfx1013-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-driver-includes-driver.stderr": {
+      "sha256": "337f024d6d17967a5021d96999088df5d5b50e7aa3a8e77451eb66507b6bf06c",
+      "bytes": 9886
+    },
+    "ps5-launch-gfx1013-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-driver.stderr": {
+      "sha256": "9527e7974f28cec81796aebbf9b3ece46b0c2d0e6ed49213cf6ca7b52a59ecf6",
+      "bytes": 11207
+    },
+    "ps5-launch-gfx1013-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-explicit-wrapper-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-launch-gfx1013-explicit-wrapper.o": {
+      "sha256": "8350e9f10011dd4fd8cbeb5d42de652fa9b8e9ead77885d825bbb7fedb7ff551",
+      "bytes": 14680
+    },
+    "ps5-launch-gfx1013-explicit-wrapper.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-package-compile.stderr": {
+      "sha256": "0cce27eb1185ccf8efc974166f2dc57369f5245cddf7f1e8f6e37393b7075dee",
+      "bytes": 275
+    },
+    "ps5-launch-gfx1013-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-package-driver.stderr": {
+      "sha256": "8448d560c99de73389ef2573d0b51cd94e4d56fa9f8106038f5720edd34acf87",
+      "bytes": 9930
+    },
+    "ps5-launch-gfx1013-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "cdb066870fd5bdbf8a3aacb2f960688864efb40526ab9c188e832e49b3063743",
+      "bytes": 578
+    },
+    "ps5-launch-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "854728877ac8e5e5d366d878aa47750ae47edbaf8bdda94ddb9c56585096013e",
+      "bytes": 11569
+    },
+    "ps5-launch-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "1dbf97e94a6778369d959d06263b1f5b685cc67c329990a4a40fb2b0f85266da",
+      "bytes": 585
+    },
+    "ps5-launch-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "263d13cb961c9c56cb11a359b337fa36cb80b44799e636193228769b798e43de",
+      "bytes": 12153
+    },
+    "ps5-launch-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-compile.stderr": {
+      "sha256": "7de58c417fc6e15923615d22defe866d191b422f60b95b39cefaefb928f6cd23",
+      "bytes": 2293
+    },
+    "ps5-launch-gfx1030-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-device-wchar4-device-isa.txt": {
+      "sha256": "24f578bfdae0d5919f64ef8457cda7b48f4ae6708889c2010237c3ef276083d3",
+      "bytes": 5576
+    },
+    "ps5-launch-gfx1030-device-wchar4-device-readobj.txt": {
+      "sha256": "a483273313ef65a23ca9f1a6fd149d36ece5812fc3512a75cd38f04a7a8c1725",
+      "bytes": 2470
+    },
+    "ps5-launch-gfx1030-device-wchar4-driver.stderr": {
+      "sha256": "1fea8272b4de9b82477078639d0fe85c98513ce17bade72f50fc7ac76a8870be",
+      "bytes": 11583
+    },
+    "ps5-launch-gfx1030-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-device-wchar4-host-readobj.txt": {
+      "sha256": "296c48c5f7b66635dcf15b34d7094194990be3751cdb3a172a60ebaa4fd63e4a",
+      "bytes": 13815
+    },
+    "ps5-launch-gfx1030-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-launch-gfx1030-device-wchar4.hsaco": {
+      "sha256": "f66ef038fac51e4e0751f20283cac40aec26938af41e541db87e8cb6935edc6e",
+      "bytes": 3128
+    },
+    "ps5-launch-gfx1030-device-wchar4.o": {
+      "sha256": "94bae4a4a70e86af10fb12a6ca14701afd2048ece5551bf4ca2a294965132eb8",
+      "bytes": 14936
+    },
+    "ps5-launch-gfx1030-driver-includes-compile.stderr": {
+      "sha256": "5d1e402ee0b7cf046ccf926b3e23253c31ecb829ee7c9126b5d860524b851e67",
+      "bytes": 2151
+    },
+    "ps5-launch-gfx1030-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-driver-includes-driver.stderr": {
+      "sha256": "59c12e5fdcc0385f208a16d2be2b38df727a8fc7669f7615097608ded5281491",
+      "bytes": 9886
+    },
+    "ps5-launch-gfx1030-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-driver.stderr": {
+      "sha256": "dbd759789360e778c596ae7e9b24ebdc3682e8e0ba5c274ba569dd9c4243038b",
+      "bytes": 11207
+    },
+    "ps5-launch-gfx1030-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-explicit-wrapper-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-launch-gfx1030-explicit-wrapper.o": {
+      "sha256": "2c8d9f556c7999168cb5d059cc0bfb0b395873fec934c63e176c1fdb77772371",
+      "bytes": 14680
+    },
+    "ps5-launch-gfx1030-explicit-wrapper.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-package-compile.stderr": {
+      "sha256": "0cce27eb1185ccf8efc974166f2dc57369f5245cddf7f1e8f6e37393b7075dee",
+      "bytes": 275
+    },
+    "ps5-launch-gfx1030-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-package-driver.stderr": {
+      "sha256": "176a16f7c99caf7e8967507436b593834956261498d35bc130d9046198477fec",
+      "bytes": 9930
+    },
+    "ps5-launch-gfx1030-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "9909d6e513d6c5ba529c2314cefa0248dc87d974655ceff9fc0067fb9190c0fa",
+      "bytes": 577
+    },
+    "ps5-launch-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "615a54716d564571409eb4821c47f1e97b23415579807a75afe960b6341feb2a",
+      "bytes": 11569
+    },
+    "ps5-launch-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "9e1f11b8e6a80cade5e0dc2dda97a994de26a5ae9810a3a7430975fdcfb90791",
+      "bytes": 585
+    },
+    "ps5-launch-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-launch-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "e02890c1dae667ec3535e659cd2ce19b387ace3941ef2a7cac94f695daa5c6e5",
+      "bytes": 12153
+    },
+    "ps5-launch-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-newer-explicit-wrapper.stderr": {
+      "sha256": "d9ba793c41b9658f99593ded5cbe365cc8f6492085e2de8e7708d0a83befc885",
+      "bytes": 7342
+    },
+    "ps5-newer-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-compile.stderr": {
+      "sha256": "249cbdab307e66197ab62d3d3b5c5533b2cd27b32ea73c1fd523c6641b0fb501",
+      "bytes": 2301
+    },
+    "ps5-vector-add-gfx1013-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-device-isa.txt": {
+      "sha256": "5eb04b19cdbcedf77bc361a7e700de3e976999813e4b1030084c033d683a5ae6",
+      "bytes": 7525
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-device-readobj.txt": {
+      "sha256": "e95ac9c4609daf74c6c478535c142672f350fd2aede94f6915828d1c421488b7",
+      "bytes": 4203
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-driver.stderr": {
+      "sha256": "efa875bae6d7b96c85fc6bad48f89fee3148f79029eb16a367aa069471200ad5",
+      "bytes": 11643
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-host-readobj.txt": {
+      "sha256": "6f561248552e5296dd01273fcf455cf45d1b5656dac0883bfe2afbb3d22cb06d",
+      "bytes": 14081
+    },
+    "ps5-vector-add-gfx1013-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-vector-add-gfx1013-device-wchar4.hsaco": {
+      "sha256": "a6ab8bf13688777e6ca9af7048263147550b163bd365f263fb7abd2f3d2fb88b",
+      "bytes": 4040
+    },
+    "ps5-vector-add-gfx1013-device-wchar4.o": {
+      "sha256": "b0c2518f45e63787221655374a0d678c02527eaf72c66a64b96fe3378333ddf0",
+      "bytes": 15880
+    },
+    "ps5-vector-add-gfx1013-driver-includes-compile.stderr": {
+      "sha256": "298dde775985a8988a4f68010e21509047880bc706ca30170d319b00812bebd5",
+      "bytes": 2159
+    },
+    "ps5-vector-add-gfx1013-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-driver-includes-driver.stderr": {
+      "sha256": "391b1e94e8a7253c3f793de2a40fc99d330ae8bbe97690779c439165f1c0a527",
+      "bytes": 9946
+    },
+    "ps5-vector-add-gfx1013-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-driver.stderr": {
+      "sha256": "b086f5064c3f846581d9f1f708490e7ebe3445ff0f04cd6260869051bd984d6c",
+      "bytes": 11267
+    },
+    "ps5-vector-add-gfx1013-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-device-ir.stderr": {
+      "sha256": "2a74bcb99b89214c8200ef0fb3cc428b6ece975bad54085dcf052cffa6a30350",
+      "bytes": 72
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-routed-device-ir.ll": {
+      "sha256": "8a8a23704154a794f93b494c081e5768cc0725ac5056a7c37dcaa2c200bb2402",
+      "bytes": 3690
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-routed-device-ir.stderr": {
+      "sha256": "cdb5526d1cfb39ef3504b8d07ee78b9546ed63f0511d50d9a22425227baf74a4",
+      "bytes": 103
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-routed-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper-undefined.txt": {
+      "sha256": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+      "bytes": 311
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper.o": {
+      "sha256": "7e7078368b306ba0984d57e61097a9e066c4d0752c2b7c534b188ce67243271f",
+      "bytes": 4184
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper.stderr": {
+      "sha256": "62fd2d8d24212015da7531043e04a681ef7a9e6bbc04ec40caa7c715cd7681f9",
+      "bytes": 110
+    },
+    "ps5-vector-add-gfx1013-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-package-compile.stderr": {
+      "sha256": "b74e67259dc7b3d8e84b928a9c8b28e1111ee6e61f737d760899d0bc52400342",
+      "bytes": 925
+    },
+    "ps5-vector-add-gfx1013-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-package-driver.stderr": {
+      "sha256": "ddcd7156128004bd4ab4ee32a1ca1d4f41361aad34a1184175084201003fcee1",
+      "bytes": 9990
+    },
+    "ps5-vector-add-gfx1013-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "0c3ac63bbc3c4c9fb5316e2b56976ceb8cbbc4e2299357593830b2b7819b15b8",
+      "bytes": 579
+    },
+    "ps5-vector-add-gfx1013-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "a59d5ac25aa5fc7fcd240689bee05d0fdc79e9b00279e83e7fabdb2d2d49c577",
+      "bytes": 11629
+    },
+    "ps5-vector-add-gfx1013-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-with-workitem-slice-compile.stderr": {
+      "sha256": "1dbf97e94a6778369d959d06263b1f5b685cc67c329990a4a40fb2b0f85266da",
+      "bytes": 585
+    },
+    "ps5-vector-add-gfx1013-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1013-with-workitem-slice-driver.stderr": {
+      "sha256": "dbf6afee2218f71bef3f507b8e376532d730491179ba1f02bb2529057739e74f",
+      "bytes": 12213
+    },
+    "ps5-vector-add-gfx1013-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-compile.stderr": {
+      "sha256": "a4441e30940451fccb5e3e38714523bc80f28a6cf9a7c2f9666434b5f75ec744",
+      "bytes": 2301
+    },
+    "ps5-vector-add-gfx1030-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-compile.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-device-isa.txt": {
+      "sha256": "acfe1b41a82c36a642afce8eac341bac0c094f53ef53ab9a9b800f729b253a07",
+      "bytes": 7448
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-device-readobj.txt": {
+      "sha256": "6d93a999b4ca80413b7c3a0eacdea220c09059301efa2d5a4f7a341fde9c59b4",
+      "bytes": 4159
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-driver.stderr": {
+      "sha256": "164f35dc16d094b8953f9d364613e6cf76b8b975b7f1724ca14a561ba7841087",
+      "bytes": 11643
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-host-readobj.txt": {
+      "sha256": "165c334e5301e87935acf5d328c1ddc0bafeb8ff9dc7252096bf1aa154232492",
+      "bytes": 14081
+    },
+    "ps5-vector-add-gfx1030-device-wchar4-undefined.txt": {
+      "sha256": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+      "bytes": 279
+    },
+    "ps5-vector-add-gfx1030-device-wchar4.hsaco": {
+      "sha256": "2cfe4b5cc56db82c3044bf65424036a72740cc994e3790129bf1f5efd3c14212",
+      "bytes": 4040
+    },
+    "ps5-vector-add-gfx1030-device-wchar4.o": {
+      "sha256": "1c09b42977a78aa4dc3983d18e430da65e803dc13722ab47e6c77e244f55e56b",
+      "bytes": 15880
+    },
+    "ps5-vector-add-gfx1030-driver-includes-compile.stderr": {
+      "sha256": "155e1798ed9d1144e6e2e27b1baf898332761d3a24980a8ed97aa699fb92948d",
+      "bytes": 2159
+    },
+    "ps5-vector-add-gfx1030-driver-includes-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-driver-includes-driver.stderr": {
+      "sha256": "fcf35a0409237fd46433e5a96bd87716958bd01265906b79c5a9ebe9dff6412c",
+      "bytes": 9946
+    },
+    "ps5-vector-add-gfx1030-driver-includes-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-driver.stderr": {
+      "sha256": "97372fa56cf6a30ac7b9d9f52dfd6b67bd2dc9cd8e8e4a58e043ab40388e0032",
+      "bytes": 11267
+    },
+    "ps5-vector-add-gfx1030-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-device-ir.stderr": {
+      "sha256": "2a74bcb99b89214c8200ef0fb3cc428b6ece975bad54085dcf052cffa6a30350",
+      "bytes": 72
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-routed-device-ir.ll": {
+      "sha256": "3988941b300489d017389cfed23fa3c30bf2058672d0ee068393ad4add36fbba",
+      "bytes": 3866
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-routed-device-ir.stderr": {
+      "sha256": "cdb5526d1cfb39ef3504b8d07ee78b9546ed63f0511d50d9a22425227baf74a4",
+      "bytes": 103
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-routed-device-ir.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper-undefined.txt": {
+      "sha256": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+      "bytes": 311
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper.o": {
+      "sha256": "7e7078368b306ba0984d57e61097a9e066c4d0752c2b7c534b188ce67243271f",
+      "bytes": 4184
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper.stderr": {
+      "sha256": "62fd2d8d24212015da7531043e04a681ef7a9e6bbc04ec40caa7c715cd7681f9",
+      "bytes": 110
+    },
+    "ps5-vector-add-gfx1030-explicit-wrapper.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-package-compile.stderr": {
+      "sha256": "e6c93916d5e0d680a24ec8ca72b1b34b7423c997201ef4e6e24df5676b20d056",
+      "bytes": 925
+    },
+    "ps5-vector-add-gfx1030-package-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-package-driver.stderr": {
+      "sha256": "45e94421f220ca9c1c88d709b052923db5e6f508fbd997138b1d08427357bcdc",
+      "bytes": 9990
+    },
+    "ps5-vector-add-gfx1030-package-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-with-routed-workitem-slice-compile.stderr": {
+      "sha256": "7d3cf0d5fa04877ae62bdfd2fb2c15d5ffaa4321b2d7c24a5ff3ddcc2c0df022",
+      "bytes": 566
+    },
+    "ps5-vector-add-gfx1030-with-routed-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-with-routed-workitem-slice-driver.stderr": {
+      "sha256": "4ad6c971cabc8381e9b759d9aee0e07026e24a5e7f449a1f89a6601b06ace1bd",
+      "bytes": 11629
+    },
+    "ps5-vector-add-gfx1030-with-routed-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-with-workitem-slice-compile.stderr": {
+      "sha256": "9e1f11b8e6a80cade5e0dc2dda97a994de26a5ae9810a3a7430975fdcfb90791",
+      "bytes": 585
+    },
+    "ps5-vector-add-gfx1030-with-workitem-slice-compile.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ps5-vector-add-gfx1030-with-workitem-slice-driver.stderr": {
+      "sha256": "0604ff88690f0e6fa81fc5479ae85054fd0804da9dca8459bced7c9eb59cccfb",
+      "bytes": 12213
+    },
+    "ps5-vector-add-gfx1030-with-workitem-slice-driver.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "routed-device-ir-attempts.json": {
+      "sha256": "004914ca0df1ea7a4c460972518e8d5df41dfd291cf548f09a608246b3838370",
+      "bytes": 2341
+    },
+    "source-inputs.json": {
+      "sha256": "c27a5e7d38325497f95a0e0f971325ffe7166b4a62423ac74be4c6cf1f91911a",
+      "bytes": 1083
+    },
+    "vector-add.hip": {
+      "sha256": "ab11d1e1abd4f313b764436a90ca4a5c55bce48a7276bf305cb0218886c15bba",
+      "bytes": 346
+    },
+    "with-routed-workitem-slice-attempts.json": {
+      "sha256": "892f248bcb2df515a8905260cd6d2d9ac49a8661a7517250182525c56f6aa888",
+      "bytes": 32955
+    },
+    "with-workitem-slice-attempts.json": {
+      "sha256": "20e730f761516544e123042d02e3d5a0e477ded08dd1fdf54b7e71c337ac39f5",
+      "bytes": 38355
+    },
+    "workitem-build.json": {
+      "sha256": "77e7fe1bbe279ede009098f628b3cfdcf3f2a1551e7bcb63c9b7f268bc2c0da7",
+      "bytes": 910
+    },
+    "workitem-build.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "workitem-build.stdout": {
+      "sha256": "79af003381c3151c8208a7cbf7a1c6a8eb9b34a9c752526f73500608b7e8fb97",
+      "bytes": 208
+    },
+    "write-evidence.py": {
+      "sha256": "8dbe0675119fd6a1714963a68e549656956940b24e925564a2ce78947ac7a74d",
+      "bytes": 4367
+    },
+    "package-stage/include/hip/hip_version.h": {
+      "sha256": "821db9b6ce45aa91920fea177d6ce67eba3092a99a69d79452b903dede23b89a",
+      "bytes": 405
+    },
+    "package-stage/share/hip/version": {
+      "sha256": "129ba0c795ab14a9405dc9a7ba0ed987f6220b7825d377242ff092b1f397b2cc",
+      "bytes": 227
+    },
+    "package-generator/CMakeLists.txt": {
+      "sha256": "667e6f2eab2a9e364a9d7c9eb7b342bd94a6d1decca8ba5f7ab2692004bb9be2",
+      "bytes": 12835
+    },
+    "device-libs-wrapper/CMakeLists.txt": {
+      "sha256": "0de08767e6125476e38e6a68ebdf018df7b6ea4613ce3c3c5b592f795875b9fe",
+      "bytes": 550
+    },
+    "device-libs-cmake-compatible/cmake/OCL.cmake": {
+      "sha256": "bfb8dc164920ccaf0059f0b26d8ab99cd96ade2ae49c8dde3167cd1ec79a133b",
+      "bytes": 8125
+    }
+  },
+  "full_device_library_build_failure": "ockl/src/dm.cl:307,320: __builtin_amdgcn_ballot_w64 needs target feature wavefrontsize64 for generic target",
+  "ps5_device_library_abi_choice": "-Xarch_device -fno-short-wchar selects wchar_size=4 in device compilation only; default PS5 auxiliary triple emits wchar_size=2 and fails linking Linux-built bitcode. Host triple remains x86_64-sie-ps5.",
+  "not_established": [
+    "Complete ROCm device-library build",
+    "General HIP API or C++ compatibility",
+    "ggml build or execution",
+    "Native executable registration and teardown",
+    "PS5 GPU architecture identity or dispatch correctness",
+    "Any hardware gate"
+  ],
+  "path_tokens": {
+    "<ROOT>": "ps5-hip repository checkout root"
+  }
+}

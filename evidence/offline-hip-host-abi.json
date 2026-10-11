@@ -1,0 +1,531 @@
+{
+  "schema": 1,
+  "classification": "narrow-api-header-host-and-device-emission-pass-full-runtime-header-incompatible",
+  "hardware_validated": false,
+  "hip_source_compatibility_proven": false,
+  "linux_host_object_emitted": true,
+  "ps5_host_object_emitted": true,
+  "source_sha256": "91ebd4764280b5ffecfb4c33939dbd5267c737a5f452709fec23832ef1ddebf8",
+  "compiler_versions": {
+    "clang++-18": "Ubuntu clang version 18.1.8 (20ubuntu8)",
+    "llvm-config-18": "18.1.8"
+  },
+  "rocm_systems_revision": "2f2a92736dbe3f65108539b6659d2c7289d300e8",
+  "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+  "inputs": {
+    "hip_runtime.h": {
+      "path": "<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include/hip/hip_runtime.h",
+      "sha256": "d8f2980c757faef2045c58d36774a1af26a93c9de8be5558c616fa9231f01cd2"
+    },
+    "hip_VERSION": {
+      "path": "<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/VERSION",
+      "sha256": "9fcf059030c7dac0f4c71d9f92e0fb9f704eac5f10fd15fb44850e7623b057ab"
+    },
+    "clr_hipamd_CMakeLists.txt": {
+      "path": "<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/CMakeLists.txt",
+      "sha256": "a951a48c7a46fd21010c37d46799f49b66c8b32cbbadbcea487294011802d2d8"
+    },
+    "ps5_compiler_wrapper": {
+      "path": "<ROOT>/tools/ps5-clangxx",
+      "sha256": "6d2ffb092e76be69e687477c6177ff57385f9242df9d1d4a3df679c31bae9131"
+    },
+    "sdk_compiler_wrapper": {
+      "path": "<ROOT>/.deps/sdk/bin/prospero-clang++",
+      "sha256": "270370c5765306a5a6741c15fa84d617c40c42bf1d4000c4c6bca51b8296ab0f"
+    }
+  },
+  "attempts": [
+    {
+      "case": "linux",
+      "phase": "driver",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux.o",
+        "-###"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux",
+      "phase": "compile",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux.o"
+      ],
+      "returncode": 1
+    },
+    {
+      "case": "ps5",
+      "phase": "driver",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5.o",
+        "-###"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5",
+      "phase": "compile",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5.o"
+      ],
+      "returncode": 1
+    },
+    {
+      "case": "linux-generated-header",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux-generated-header.o"
+      ],
+      "returncode": 1
+    },
+    {
+      "case": "ps5-generated-header",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5-generated-header.o"
+      ],
+      "returncode": 1
+    },
+    {
+      "case": "linux-api-header",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux-api-header.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-api-header",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "--cuda-host-only",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5-api-header.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-combined-api",
+      "phase": "driver",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-B/usr/lib/llvm-18/bin",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux-combined-api.o",
+        "-###"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "linux-combined-api",
+      "phase": "compile",
+      "command": [
+        "/usr/bin/clang++-18",
+        "-x",
+        "hip",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-B/usr/lib/llvm-18/bin",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/linux-combined-api.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-combined-api",
+      "phase": "driver",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-B/usr/lib/llvm-18/bin",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5-combined-api.o",
+        "-###"
+      ],
+      "returncode": 0
+    },
+    {
+      "case": "ps5-combined-api",
+      "phase": "compile",
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-x",
+        "hip",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip/include",
+        "-I<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/clr/hipamd/include",
+        "-std=c++17",
+        "-O0",
+        "-c",
+        "<ROOT>/results/hip-host-abi-spike/launch-api.hip",
+        "-I<ROOT>/results/hip-host-abi-spike/header-build/include",
+        "-B/usr/lib/llvm-18/bin",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-o",
+        "<ROOT>/results/hip-host-abi-spike/ps5-combined-api.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "raw_files": {
+    "results/hip-host-abi-spike/api-header-attempts.json": "4cfc522e56d2205001840f360c51a090f9b89722ecc19ccb7b0d3d6fdd07871d",
+    "results/hip-host-abi-spike/clang++-18.version.txt": "2f2f9918b8673fe34510b66bf4ba3a1b9832efeef334d4c615dc7e4064422088",
+    "results/hip-host-abi-spike/combined-api-attempts.json": "51fe4571332cbd40fe15ddf494a9594b4e61e73618cd4a3ed0fb5a1bd8f23847",
+    "results/hip-host-abi-spike/compile-api-header.py": "c9b0aae10bcf710395da87676b1f9ca8fdcf739ddb7822bc6234ceb65ebb67b0",
+    "results/hip-host-abi-spike/compile-combined-api.py": "e6fa26407ff87947752efd469677def21f2243a674bb96584a3fdc1d54d94b99",
+    "results/hip-host-abi-spike/compile-generated-header.py": "8cba96fd3974d607cbfc810715f24b5bb07bfa4eaed340586fd55650c7f006b7",
+    "results/hip-host-abi-spike/emitted-abi.json": "471199844ef428812d4b72bf14032d4091a3de389d55d64bc9861b99f0156667",
+    "results/hip-host-abi-spike/generated-header-attempts.json": "119b15f0671f5d7b6772dc74f542644d3f4281684c80b1b1c86befa0378a8952",
+    "results/hip-host-abi-spike/header-build/include/hip/hip_version.h": "cd0bef414c962be43487a40897bb1cbb52d15db612ffe4b9798194a271dc27f1",
+    "results/hip-host-abi-spike/header-generation.json": "d12f773696f7a60023c6ca8b581fe9dcf523559b70a67b249960ee7f6921d179",
+    "results/hip-host-abi-spike/header-generation.stderr": "da11f76c0cb3e1954d107a3b656888ef8d3622fe5a37feb6a897405332eb3a10",
+    "results/hip-host-abi-spike/header-generation.stdout": "ea192c05def875dbd958b87bf5ddeef115beaf4aa81a1fa1d3d92d7b413aac8e",
+    "results/hip-host-abi-spike/header-generator/CMakeLists.txt": "5509616dcd7a6e1c2b508872a5ab057b87ca7af54fd42ba8f2e38c63336e486a",
+    "results/hip-host-abi-spike/header-generator/upstream-prefix.cmake": "d541dde9c6c12eb23d5cbbbdd400852d0505fc2b2f9ffb4cb84cf6c4922516f1",
+    "results/hip-host-abi-spike/initial-attempts.json": "fa1b26ad8e771a8d2b7089a032f35a595ad70d4ddfc8b5e98d9706705df5f9b2",
+    "results/hip-host-abi-spike/inspect-objects.py": "80705573664d7038ecaa8fbb2636c6f225a32b4880ec882a3f6ff955af78a2c0",
+    "results/hip-host-abi-spike/launch-api.hip": "2c20447689d5e697376bc9f7016d959b5aecdc07449149bb7b3bf23b11d2777f",
+    "results/hip-host-abi-spike/launch.hip": "91ebd4764280b5ffecfb4c33939dbd5267c737a5f452709fec23832ef1ddebf8",
+    "results/hip-host-abi-spike/linux-api-header-objdump.txt": "33ad18eb0a02ab92666e8402c65e3d5af40cda93fd5b7abe8488dbfd9f3bfb45",
+    "results/hip-host-abi-spike/linux-api-header-readobj.txt": "c47e408548bb17adccd85e4ac56bd6a01d8d5318b497db527127f5bc17a0e8ee",
+    "results/hip-host-abi-spike/linux-api-header-undefined.txt": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+    "results/hip-host-abi-spike/linux-api-header.o": "6fddd92c268b178cc62802fa66c155f99af9eca6c512b627bf87b8587ebf2d02",
+    "results/hip-host-abi-spike/linux-api-header.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-api-header.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-combined-api-compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-combined-api-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-combined-api-device-readobj.txt": "47d382c2edb49cd9dcad21f8b8cf4db945673671ca802a3ab811af243490e9b5",
+    "results/hip-host-abi-spike/linux-combined-api-driver.stderr": "146165d25ff08348d50c2b7c73ead71a9bdd97aa0f017d558155f8949e548e9c",
+    "results/hip-host-abi-spike/linux-combined-api-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-combined-api-objdump.txt": "f274cbb442febba54912352d215f8df5a0ce7c9e39b056874d811fee1739b8c1",
+    "results/hip-host-abi-spike/linux-combined-api-readobj.txt": "79a4f83af816ad197c6fd28aa36a117255ca546b51edca0555becde378745d2a",
+    "results/hip-host-abi-spike/linux-combined-api-undefined.txt": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+    "results/hip-host-abi-spike/linux-combined-api.hsaco": "0168f0b7f57f91567e497179235b4b4a6871ba03a3227b7c31f0298afaf4e93b",
+    "results/hip-host-abi-spike/linux-combined-api.o": "cde63a514cf78f825137911603770b684010c45de63af5e8bacccdfb32cff240",
+    "results/hip-host-abi-spike/linux-compile.stderr": "16cf1bb0ebe447c1671884f4b1ba6937354ea077c7a89d85c208d4fb77ede87f",
+    "results/hip-host-abi-spike/linux-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-driver.stderr": "68a688825f1e58410b62364b535b61b96569f8b46f8867d9b6cdfe1b55fb8310",
+    "results/hip-host-abi-spike/linux-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/linux-generated-header.stderr": "d9ba793c41b9658f99593ded5cbe365cc8f6492085e2de8e7708d0a83befc885",
+    "results/hip-host-abi-spike/linux-generated-header.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/llvm-config-18.version.txt": "be9dc5ce956678e5c2ceb953961e75881785713e3bb2a2666aa7b03bf4bf599f",
+    "results/hip-host-abi-spike/ps5-api-header-objdump.txt": "96223fb261a10994f65571c89c07bbaa478f4a4dc3da55561854c4ac54d41916",
+    "results/hip-host-abi-spike/ps5-api-header-readobj.txt": "f75192fc1fb77f4c649209978418c0747c4119d187cb8aebd9597ca36eba0625",
+    "results/hip-host-abi-spike/ps5-api-header-undefined.txt": "e59d8b262694b4725aeaab641313f85068cf74cf2f1173c072db0c4d08110855",
+    "results/hip-host-abi-spike/ps5-api-header.o": "4a5a14509400d1325ef4c908897d5010608765d946621d108f02e4af76da1fd6",
+    "results/hip-host-abi-spike/ps5-api-header.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-api-header.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-combined-api-compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-combined-api-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-combined-api-device-readobj.txt": "c4d696a5ef84a8793ff00e0da9d760aec75adcdea114eb7bd6663bcdfb71abee",
+    "results/hip-host-abi-spike/ps5-combined-api-driver.stderr": "f6ac501f3f3e23f85187c7486a73e5f177801704b799479854490ab6c5b7712a",
+    "results/hip-host-abi-spike/ps5-combined-api-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-combined-api-objdump.txt": "d8043ac7d005d7abf0002e63a60e312fdec406b7475ef141fd6ffa80d5080a04",
+    "results/hip-host-abi-spike/ps5-combined-api-readobj.txt": "6c914bcf8420540a4a77fd0567ba641dcd26315c5d65b1c976f00ce3fa0d8582",
+    "results/hip-host-abi-spike/ps5-combined-api-undefined.txt": "89458031fa7ca0ffb010d9baebab644eb9d2a9b380be29915fac0a24171dc947",
+    "results/hip-host-abi-spike/ps5-combined-api.hsaco": "e53c19a1d2d8653db8ccd1a14aebd882eb0c9b5f27077d5a564fc567755b68be",
+    "results/hip-host-abi-spike/ps5-combined-api.o": "305347d0971fc3803a25fdaed063484c26f7bfb4c9f19c45a395a7d26114c657",
+    "results/hip-host-abi-spike/ps5-compile.stderr": "16cf1bb0ebe447c1671884f4b1ba6937354ea077c7a89d85c208d4fb77ede87f",
+    "results/hip-host-abi-spike/ps5-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-driver.stderr": "e7c6e0959910781617ca24685259b5d7d38b4e8d61472ef36584d95bb9095f1e",
+    "results/hip-host-abi-spike/ps5-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/ps5-generated-header.stderr": "d9ba793c41b9658f99593ded5cbe365cc8f6492085e2de8e7708d0a83befc885",
+    "results/hip-host-abi-spike/ps5-generated-header.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/hip-host-abi-spike/run.py": "6e744fbd976d026c341bd1e046ae48d38355d16e2e75d462d9cb07ee752acadb"
+  },
+  "not_observed": [
+    "PS5 executable/native module link",
+    "registration/launch runtime behavior",
+    "GPU execution",
+    "full hip_runtime.h compatibility",
+    "multi-TU/template/global registration or per-thread-default ABI"
+  ],
+  "limits": [
+    "Narrow actual hip_runtime_api.h fixture compiles for both host targets; it is not full HIP source compatibility.",
+    "Combined objects contain real gfx1013 device ELF and unresolved HIP runtime references; no fake implementations were linked.",
+    "Linux and PS5 host constructors use different sections. Native startup/linker handling remains to be integrated and tested.",
+    "Fat-binary empty host placeholder says Linux for both hosts; actual outer PS5 object was emitted with x86_64-sie-ps5.",
+    "Default stream mode only; no hipLaunchKernel_spt emission was tested.",
+    "No live TheRock build, frozen candidate, dependency lock or console was changed."
+  ],
+  "header_generation": {
+    "command": [
+      "cmake",
+      "-S",
+      "<ROOT>/results/hip-host-abi-spike/header-generator",
+      "-B",
+      "<ROOT>/results/hip-host-abi-spike/header-build",
+      "-DHIP_COMMON_DIR=<THEROCK_BUILD_ROOT>/therock/rocm-systems/projects/hip",
+      "-DHIP_PLATFORM=amd",
+      "-DCMAKE_INSTALL_PREFIX=<ROOT>/results/hip-host-abi-spike/unused-install"
+    ],
+    "returncode": 0,
+    "source_sha256": "a951a48c7a46fd21010c37d46799f49b66c8b32cbbadbcea487294011802d2d8",
+    "changes": [
+      "Extract through exact upstream hip_version.h write; no runtime targets.",
+      "Declare CMake minimum and LANGUAGES NONE for header-only configuration.",
+      "Point upstream metadata queries to original pinned source directory.",
+      "Omit only git fetch --unshallow to preserve existing pinned history."
+    ],
+    "generated_header_sha256": "cd0bef414c962be43487a40897bb1cbb52d15db612ffe4b9798194a271dc27f1"
+  },
+  "generated_hip_version": "7.17.26405",
+  "emitted_abi": {
+    "linux-combined-api": {
+      "sha256": "cde63a514cf78f825137911603770b684010c45de63af5e8bacccdfb32cff240",
+      "bytes": 15688,
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "constructor_section": ".init_array",
+      "wrapper": {
+        "magic": "0x48495046",
+        "version": 1,
+        "bytes": 24,
+        "pointer_relocation_offset": 8,
+        "reserved": 0
+      },
+      "bundle_alignment": 4096,
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "size": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "size": 4064
+        }
+      ],
+      "device_sha256": "0168f0b7f57f91567e497179235b4b4a6871ba03a3227b7c31f0298afaf4e93b"
+    },
+    "ps5-combined-api": {
+      "sha256": "305347d0971fc3803a25fdaed063484c26f7bfb4c9f19c45a395a7d26114c657",
+      "bytes": 16696,
+      "undefined_symbols": [
+        "__hipPopCallConfiguration",
+        "__hipPushCallConfiguration",
+        "__hipRegisterFatBinary",
+        "__hipRegisterFunction",
+        "__hipUnregisterFatBinary",
+        "atexit",
+        "hipLaunchKernel"
+      ],
+      "constructor_section": ".ctors",
+      "wrapper": {
+        "magic": "0x48495046",
+        "version": 1,
+        "bytes": 24,
+        "pointer_relocation_offset": 8,
+        "reserved": 0
+      },
+      "bundle_alignment": 4096,
+      "bundle_targets": [
+        {
+          "target": "host-x86_64-unknown-linux--",
+          "offset": 4096,
+          "size": 0
+        },
+        {
+          "target": "hipv4-amdgcn-amd-amdhsa--gfx1013",
+          "offset": 4096,
+          "size": 4320
+        }
+      ],
+      "device_sha256": "e53c19a1d2d8653db8ccd1a14aebd882eb0c9b5f27077d5a564fc567755b68be"
+    }
+  },
+  "sources": {
+    "launch.hip": "91ebd4764280b5ffecfb4c33939dbd5267c737a5f452709fec23832ef1ddebf8",
+    "launch-api.hip": "2c20447689d5e697376bc9f7016d959b5aecdc07449149bb7b3bf23b11d2777f"
+  },
+  "initial_blocker": {
+    "diagnostic": "hip_runtime.h:37:10: fatal error: 'hip/hip_version.h' file not found",
+    "same_on_linux_and_ps5": true,
+    "upstream_generation": "projects/clr/hipamd/CMakeLists.txt:91-150 reads HIP VERSION and commit metadata; :308-323 writes PROJECT_BINARY_DIR/include/hip/hip_version.h",
+    "supported_configuration": "TheRock core/CMakeLists.txt:292-333 hip-clr component configures projects/clr with HIP_PLATFORM=amd, HIP_COMMON_DIR=<projects/hip>, CLR_BUILD_HIP=ON; requires amd-llvm, amd-comgr, hipcc, rocm-core, rocm-kpack and platform dependencies",
+    "generated_version_macros_invented": false,
+    "resolved": true
+  },
+  "remaining_blocker": {
+    "header": "hip/hip_runtime.h",
+    "diagnostic": "builtin functions must be directly called",
+    "first_location": "projects/clr/hipamd/include/hip/amd_detail/amd_device_functions.h:199",
+    "construct": "__builtin_amdgcn_is_invocable(__builtin_amdgcn_alignbit)",
+    "same_on_linux_and_ps5": true,
+    "compiler": "18.1.8",
+    "scope": "Actual pinned full runtime header cannot compile this tiny host fixture with LLVM18; API-only header succeeds."
+  },
+  "path_tokens": {
+    "<ROOT>": "ps5-hip repository checkout root",
+    "<THEROCK_BUILD_ROOT>": "isolated TheRock comparison source/build root"
+  }
+}
