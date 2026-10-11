@@ -92,7 +92,12 @@ six candidate-identity cases pass. Native linking and FSELF integrity pass;
 the candidate has not run. The platform-exit path remains the default. Remaining
 platform finalizers are deliberately delegated to shell closure in this diagnostic,
 so it does not establish general C exit or multithreaded cleanup semantics.
-Freeze/package the diagnostic, then qualify its self-stop and cleanup on idle .30.
+Source `3346166` is frozen as `gfx1013-runtime-9ac5d150b5db`; image SHA starts
+`d9a9e95cfc3e10b0`. FSELF, UFS2, extraction and exact local candidate checks pass.
+The emitted ShellCoreUtil binding and startup registration order were inspected.
+See `evidence/offline-shell-exit-probe.json`. It has not been deployed or run.
+Next qualify its self-stop and cleanup on idle .30, preserving the prior observer
+image and its 260-byte log before replacement.
 
 The CPU-only build now contains a shutdown observer using the startup's existing
 hook. Host callback-order and log-contract checks pass; native qualification is
