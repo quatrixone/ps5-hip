@@ -4,7 +4,10 @@ Status: the provider-corrected indexed-store passed one GPU dispatch and clean
 shell-managed lifecycle on firmware 6.02; see `evidence/native-provider-fixed-store.json`.
 The preceding candidate failed with CPU SIGSEGV at RIP zero after its SUBMIT
 checkpoint. Do not rerun that failed image; see `evidence/native-indexed-store-first.json`.
-Vector-add remains unrun. Ordinary C exit still faults; see the shutdown investigation
+The two-dispatch vector profile then passed one clean cycle; its second cycle
+was blocked before launch by another application. See
+`evidence/native-vector-twice-cycle1.json` and `evidence/native-vector-twice-cycle2-no-run.json`.
+Ordinary C exit still faults; see the shutdown investigation
 and `evidence/native-shell-exit.json`. The user selected
 title `PPSA99014` after a PPSA99012 collision. Firmware, service endpoints, lock ownership and package hashes must be recorded
 in the local experiment receipt before execution. Use the shared-console runbook
@@ -146,6 +149,14 @@ fresh idle/identity check. No automatic retry or unrelated-title closure.
 If both cycles pass, audit the unchanged G2 requirements for the explicitly
 declared arithmetic launch set; hidden geometry, other workgroup shapes, waves,
 scratch and a public HIP host runtime remain separate qualifications.
+
+Observed: cycle one passed all criteria (PID 377, 146 exact values, self-stop
+before host cleanup at 6.47 seconds). The independently reviewed acceptance is
+frozen and its evidence hashes are rechecked by cycle-two controls. Cycle two
+found PPSA99930 PID394 active and stopped before launch or log preservation.
+Its first-cycle log remains at the original path. A later idle-gated second run
+uses the same deployment and prepared controls; no additional deployment or
+automatic retry is appropriate. Full G2 stays open pending that cycle.
 
 ## Offline freeze state and remaining work
 

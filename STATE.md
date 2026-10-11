@@ -4,6 +4,14 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
+- The two-dispatch vector candidate `c37f0db` passed one complete cycle on .30,
+  FW 6.02: both 73-element results exact (146 total), inputs/guards unchanged,
+  allocations closed, title self-stop before cleanup and sandbox/runtime/image
+  released. All declared services remained reachable. See
+  `evidence/native-vector-twice-cycle1.json`. The separately prepared second
+  cycle was blocked before launch/log preservation by unrelated PPSA99930 PID394;
+  both locks released. See `evidence/native-vector-twice-cycle2-no-run.json`.
+  The successful vector image and original first-cycle log remain installed.
 - The provider-corrected indexed-store passed once on idle .30, FW 6.02: 73 exact
   values, unchanged full guards, explicit allocation closure, complete application
   finalization and title self-stop before host cleanup. Sandbox/runtime/image
@@ -113,8 +121,18 @@ was running at this checkpoint. Inspect that build before restarting anything.
 Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
 `evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
 
-The next action is an offline two-dispatch vector-add profile, followed by
-separately observed clean lifecycle cycles of its frozen image when idle.
+The next hardware action is the separately prepared second cycle of the frozen
+two-dispatch vector image, only when .30 is idle. Cycle one passed; cycle two's
+idle guard blocked before any mutation. The exact reviewed first-cycle acceptance
+and all raw evidence hashes are required before its controls can acquire locks.
+Use `python3 results/capture-vector-twice-operation.py cycle2` after reading the
+runbook/environment; do not redeploy, rerun cycle1 or close unrelated titles.
+No further console polling is needed while offline work can advance. Full G2
+remains open pending this repeated lifecycle check and final acceptance audit.
+Offline work can now prepare the existing full/partial wave32 probes with the
+corrected AGC import provider and explicit capability boundaries. Preserve their
+older build receipts; do not deploy their older, incorrectly bound binaries.
+The full TheRock build can also be inspected for completion without restarting it.
 Offline analysis confirmed that `sceAgcSuspendPoint` was imported from the wrong
 provider (`libSceAgcDriver` instead of the pinned reference's `libSceAgc`). Its null
 tail-import fits the captured registers; runtime GOT contents were not captured.
@@ -131,8 +149,8 @@ FSELF, UFS2, extracted files and local controller/candidate verification pass;
 26 CTests pass, including the actual native import provider regression. See
 `evidence/offline-agc-provider-fix.json`. After an earlier busy-console no-run,
 it passed once in `results/provider-fixed-store-run-20261011T203845Z` (PID 362).
-See `evidence/native-provider-fixed-store.json`. The deployed corrected image and
-its successful result log now exist: preserve both before any later experiment.
+See `evidence/native-provider-fixed-store.json`. Its image and successful log
+were hash-verified and preserved before the vector candidate replaced it.
 Do not reuse deployment/run scripts with stale image or log-absence assumptions.
 The current host-test
 cache selects that worktree's converted ELF for the artifact import check.
@@ -172,8 +190,8 @@ CPU image/log, recheck idle immediately before launch, observe for an absolute
 20 seconds and close only PPSA99014 once with a separate eight-second deadline.
 No automatic retry or guessed process termination. Read `docs/CONSOLE_WORKFLOW.md`,
 the shared runbook and `.local/ENVIRONMENT.md` before traffic. These single-case
-scripts have now run: the remote image is the provider-corrected GPU candidate,
-its successful result log exists, and the failed GPU and successful CPU evidence
+scripts have now run: the remote image is the two-dispatch vector candidate,
+its successful first-cycle log exists, and the successful store, failed GPU and CPU evidence
 remain preserved. Do not reuse them as
 fresh-case scripts or erase that evidence.
 
@@ -205,7 +223,10 @@ Offline work ahead of G2/G3/G4:
   this exact isolated source, separately from main's 27 tests. Source and all
   114 existing native build/stage files remain unchanged; see
   `evidence/offline-candidate-host-c37f0db.json`.
-  Prepare preservation controls before deployment; this profile has not run.
+  Deployment preserved the successful store image/log. Cycle one then passed
+  two native dispatches and clean teardown. Reviewed acceptance and separately
+  tested cycle-two controls are ready; the initial idle guard rejected cycle two
+  before log preservation because another application was active.
 - Host CTests include registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
   twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and
@@ -262,3 +283,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G1 passed offline | LLVM18 + gfx1013 selected; isolated reproduction, TheRock comparison, 25 host tests | evidence/offline-g1-acceptance.json | next: bounded G2 store run
 - 2026-10-11 | G2 failed | 15bfc35 | FW6.02 PPSA99014 | CPU SIGSEGV/RIP0 after SUBMIT; title released, services reachable | evidence/native-indexed-store-first.json | next: offline fault mapping
 - 2026-10-11 | G2 progress | b8bc2b0 | FW6.02 PPSA99014 | one indexed-store GPU dispatch and clean teardown passed | evidence/native-provider-fixed-store.json | next: repeated vector dispatch
+- 2026-10-11 | G2 progress | c37f0db | FW6.02 | two vector dispatches and one clean cycle passed | evidence/native-vector-twice-cycle1.json | next: idle-gated second cycle

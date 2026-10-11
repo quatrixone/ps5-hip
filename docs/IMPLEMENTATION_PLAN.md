@@ -176,7 +176,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | Goal | Outcome | Dependencies | Status |
 | --- | --- | --- | --- |
 | G1 | Reproducible compiler and platform contract | None | passed offline |
-| G2 | Native execution of a real HIP code object | G1 | in progress; indexed-store execution and one clean lifecycle passed |
+| G2 | Native execution of a real HIP code object | G1 | in progress; store and two vector dispatches passed; repeated vector lifecycle pending |
 | G3 | Correct general compute semantics | G2 | planned |
 | G4 | Real HIP C++ source compatibility | G3 | planned |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |

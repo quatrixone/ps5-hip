@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "goal": "G2",
+  "cycle": 2,
+  "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+    "bytes": 3571712
+  },
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "kernel": "vector_add_twice",
+  "observed_utc": "2026-10-11T20:59:41Z",
+  "reason": "Unrelated PPSA99930 PID394 active; initial idle guard rejected before controller transfer or log preservation",
+  "launch_attempted": false,
+  "close_sent": false,
+  "log_renamed": false,
+  "hardware_gate_passed": false,
+  "owned_locks_released": true,
+  "existing_result": "First successful vector-cycle log remains at its original remote path; no second-cycle log exists",
+  "raw_files": {
+    "results/vector-twice-cycle2-run-20261011T205941Z/before.log": {
+      "sha256": "a41426cb71ab385160b8bcf634edb1798590b2c93ed700dcd25e0df6a7f3aebf",
+      "bytes": 332743
+    },
+    "results/vector-twice-cycle2-run-20261011T205941Z/case.json": {
+      "sha256": "a154b3773d207b6d0b64856ba3553cce7614cf4b1b49f982951a8c3fea7da393",
+      "bytes": 972
+    },
+    "results/vector-twice-capture-cycle2-20261011T205941.689031Z/operation.json": {
+      "sha256": "cfa7a199413d82e59654d96e57607a08f981b8d142ba9971dda6fd2b7ae24f3a",
+      "bytes": 638
+    },
+    "results/vector-twice-capture-cycle2-20261011T205941.689031Z/stderr.txt": {
+      "sha256": "df59eb6c54ad411c51e1f4ab2d02f610cc2233e28e1900e5ce6eb92b1d6c3361",
+      "bytes": 341
+    },
+    "results/vector-twice-capture-cycle2-20261011T205941.689031Z/stdout.txt": {
+      "sha256": "285ecc7b5aa7d2a39d9dd4730440917e6ef25908f4663ed0fd1e01d0063377cd",
+      "bytes": 125
+    }
+  },
+  "next_action": "A later separately invoked cycle2 may use the same prepared script if all acceptance/artifact/log hashes still match and the console is idle; do not redeploy or close the unrelated title"
+}
