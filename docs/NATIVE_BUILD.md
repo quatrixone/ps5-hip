@@ -50,8 +50,9 @@ python3 tools/prepare_elevation.py --eden-source /path/to/ProsperoEden --lapy-so
 python3 tools/build_native_canary.py --native-source /path/to/PS5_Vulkan --target gfx1013 --kernel indexed_store --shell-exit-probe
 ```
 
-The target must be `gfx1013` or `gfx1030`; the kernel must be `indexed_store` or
-`vector_add`, or `runtime` for the CPU-only startup control. Each executable runs
+The target must be `gfx1013` or `gfx1030`; the initial kernel profiles are
+`indexed_store`, `vector_add`, `vector_add_twice`, or `runtime` for the CPU-only
+startup control. Each executable runs
 only its selected experiment. The builder
 exports the exact native-tool revision in `dependencies.json`, preserving its
 notices, and builds the host converter with Clang 18 and pinned static zlib 1.3.2.
@@ -59,6 +60,17 @@ notices, and builds the host converter with Clang 18 and pinned static zlib 1.3.
 or building it, retains the source license, and records installed library/header
 hashes. The candidate builder verifies those hashes before linking. Neither step
 downloads anything or uses the reference checkout's local modifications.
+
+`vector_add_twice` runs the existing 73-element vector kernel twice using one
+backend and submission queue. Each dispatch allocates and poisons fresh buffers,
+checks exact output, unchanged inputs and full guards, then explicitly closes
+its resources. Numbered checkpoints and a final 146-value summary distinguish
+this profile from a duplicated single-run log. Build/stage receipts require
+exactly two dispatches; the log checker requires the complete ordered sequence.
+It keeps the same two-second completion timeout per dispatch and quarantine on
+unresolved GPU ownership. Repeated title lifecycles require independent console
+observations and preservation of each previous log; this profile alone does not
+qualify asynchronous work or inter-kernel GPU memory dependencies.
 
 The builder then applies `patches/native-import-libraries.patch` with zero fuzz.
 The patch extends the pinned converter with repeatable

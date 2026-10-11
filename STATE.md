@@ -188,7 +188,17 @@ The failed .40 PID 204 teardown remains unresolved; establish recovery before re
 
 Offline work ahead of G2/G3/G4:
 
-- All 26 host CTests pass, including registered hidden-geometry and native import coverage.
+- The fixed `vector_add_twice` profile reuses one queue for two fresh guarded
+  vector dispatches and requires ordered per-dispatch records plus a final summary.
+  Repeated resource ownership/completion and second-round failure quarantine tests
+  pass. Build/stage/case metadata enforce the profile; single-run contracts remain
+  unchanged. All 27 host CTests pass; see `evidence/offline-vector-repeat-host.json`.
+  Its isolated native source is `c37f0db`, parent `b8bc2b0`, on
+  `development/g2-vector-repeat` in the existing `.local/g2-agc-provider-fix`
+  worktree. Only harness/build/stage profile changes enter that source; no later
+  hidden-geometry or wave implementation enters the experiment. Native packaging
+  and console qualification are separate.
+- Host CTests include registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
   twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and
   thirteen hidden arguments are separated; checked uniform 64x1x1 geometry is

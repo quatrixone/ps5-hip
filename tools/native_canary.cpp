@@ -5,6 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
+#ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
+#define PS5HIP_CANARY_VECTOR_ADD 1
+#endif
 #if defined(PS5HIP_CANARY_WAVE_FULL) || defined(PS5HIP_CANARY_WAVE_PARTIAL)
 #define PS5HIP_CANARY_WAVE 1
 #endif
@@ -165,6 +168,8 @@ int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
+        "vector_add_twice";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)
         "vector_add";
 #elif defined(PS5HIP_CANARY_WAVE_FULL)
@@ -212,7 +217,17 @@ int main() {
         const auto image = ps5hip::materialize_code_object(bytes.data(), bytes.size());
         ps5hip::AgcBackend backend;
         ps5hip::SubmissionQueue queue(backend);
-        try { run(queue, object, image); }
+        try {
+#ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
+            for (unsigned dispatch = 1; dispatch <= 2; ++dispatch) {
+                std::printf("PS5HIP DISPATCH index=%u/2 kernel=vector_add\n", dispatch);
+                run(queue, object, image);
+            }
+            std::printf("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
+#else
+            run(queue, object, image);
+#endif
+        }
         catch (const std::exception &error) {
             if (queue.poisoned()) quarantine(error.what());
             throw;

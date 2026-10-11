@@ -9,7 +9,7 @@ import pathlib
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "wave_full", "wave_partial"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"):
         raise ValueError("unsupported canary profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
@@ -18,6 +18,12 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                 "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass"]
     if kernel == "runtime":
         expected.append("PS5HIP PASS kernel=runtime gpu_api_calls=0")
+    elif kernel == "vector_add_twice":
+        for dispatch in (1, 2):
+            expected += [f"PS5HIP DISPATCH index={dispatch}/2 kernel=vector_add",
+                         f"PS5HIP SUBMIT target={target} kernel=vector_add count=73 groups=2 timeout_ms=2000",
+                         "PS5HIP PASS kernel=vector_add exact_values=73 guards=unchanged allocations=closed"]
+        expected.append("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed")
     elif kernel in ("wave_full", "wave_partial"):
         expected += [f"PS5HIP SUBMIT target={target} kernel={kernel} invocations=64 output_words=256 groups=1 timeout_ms=2000",
                      f"PS5HIP PASS kernel={kernel} exact_values=256 guards=unchanged allocations=closed"]
@@ -49,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "wave_full", "wave_partial"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

@@ -51,7 +51,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "wave_full", "wave_partial"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"], required=True)
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
@@ -125,6 +125,8 @@ def main():
         options = [f'-DPS5HIP_CANARY_TARGET="{args.target}"', "-DPS5HIP_WITH_ELEVATION=1", "-I", elevation / "client"]
         if args.kernel == "vector_add":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
+        if args.kernel == "vector_add_twice":
+            options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
         if wave:
             options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
         if args.kernel == "runtime":
@@ -211,6 +213,8 @@ def main():
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
+    if args.kernel == "vector_add_twice":
+        receipt["dispatches"] = 2
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("Built unqualified native candidate:", candidate)
     print("No title metadata, installation or console execution performed.")

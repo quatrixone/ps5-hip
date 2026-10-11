@@ -41,7 +41,12 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         raise ValueError("manifest bytes changed")
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
-    shutdown_mode = read_json(stage / "build-receipt.json").get("shutdown_mode", "platform-exit")
+    build = read_json(stage / "build-receipt.json")
+    if "vector_add_twice" in (manifest["kernel"], build.get("kernel")):
+        if (build.get("kernel") != manifest["kernel"] or build.get("target") != manifest["target"] or
+                any(type(item.get("dispatches")) is not int or item["dispatches"] != 2 for item in (manifest, build))):
+            raise ValueError("vector_add_twice requires matching two-dispatch provenance")
+    shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
     actual = {}
@@ -62,13 +67,16 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
     for name, expected in control["artifacts"].items():
         if fingerprint(controllers / name) != expected:
             raise ValueError(f"controller bytes changed: {name}")
-    return {"local_artifacts_verified": True, "hardware_gate_passed": False,
+    result = {"local_artifacts_verified": True, "hardware_gate_passed": False,
             "title_id": title, "target": manifest["target"], "kernel": manifest["kernel"],
             "shutdown_mode": shutdown_mode,
             "source_commit": manifest["source_commit"], "expected_log": manifest["expected_log"],
             "image": image, "controllers": control["artifacts"],
             "unproven": ["console idle state", "remote bytes", "registration", "log freshness",
                          "native execution", "clean teardown", "service health"]}
+    if manifest["kernel"] == "vector_add_twice":
+        result["dispatches"] = 2
+    return result
 
 
 def main():

@@ -89,6 +89,36 @@ class CaseTests(unittest.TestCase):
                     self.verify()
                 path.write_bytes(original)
 
+    def test_two_dispatch_profile_has_matching_frozen_provenance(self):
+        build = {"kernel": "vector_add_twice", "target": "gfx1013", "dispatches": 2}
+        candidate = self.packages["candidates"][0]
+        manifest = candidate["manifest"]
+        manifest.update(kernel="vector_add_twice", dispatches=2)
+
+        def freeze():
+            self.write(self.stage / "build-receipt.json", build)
+            manifest["build_receipt_sha256"] = module.fingerprint(self.stage / "build-receipt.json")["sha256"]
+            self.write(self.stage / "manifest.json", manifest)
+            candidate["package"]["manifest_sha256"] = module.fingerprint(self.stage / "manifest.json")["sha256"]
+            self.write(self.stage / "package-receipt.json", candidate["package"])
+
+        freeze()
+        self.assertEqual(self.verify()["dispatches"], 2)
+        for item, key, bad in ((build, "kernel", "vector_add"), (manifest, "kernel", "vector_add"),
+                               (build, "target", "gfx1030"), (build, "dispatches", 1),
+                               (manifest, "dispatches", 3), (build, "dispatches", 2.0),
+                               (manifest, "dispatches", "2")):
+            original = item[key]
+            item[key] = bad
+            freeze()
+            with self.assertRaisesRegex(ValueError, "two-dispatch provenance"):
+                self.verify()
+            item[key] = original
+        del build["dispatches"]
+        freeze()
+        with self.assertRaisesRegex(ValueError, "two-dispatch provenance"):
+            self.verify()
+
     def test_extra_staged_file_is_rejected(self):
         (self.stage / "app/extra").write_bytes(b"extra")
         with self.assertRaises(ValueError):

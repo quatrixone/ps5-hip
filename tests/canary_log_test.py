@@ -67,6 +67,32 @@ class LogTests(unittest.TestCase):
         with self.assertRaises(UnicodeDecodeError):
             module.check_log(b"\xff", "gfx1013", "runtime")
 
+    def test_two_dispatch_vector_contract(self):
+        start = (b"PS5HIP START target=gfx1013 kernel=vector_add_twice\n"
+                 b"PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n")
+        def dispatch(index):
+            return (f"PS5HIP DISPATCH index={index}/2 kernel=vector_add\n"
+                    "PS5HIP SUBMIT target=gfx1013 kernel=vector_add count=73 groups=2 timeout_ms=2000\n"
+                    "PS5HIP PASS kernel=vector_add exact_values=73 guards=unchanged allocations=closed\n").encode()
+        summary = b"PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n"
+        valid = start + dispatch(1) + dispatch(2) + summary
+        self.assertEqual(module.check_log(valid, "gfx1013", "vector_add_twice")["application_result"], "application-pass")
+        for bad in (start + dispatch(1) + summary, start + dispatch(2) + dispatch(1) + summary,
+                    start + dispatch(1) * 2 + summary, valid + dispatch(3), valid[:-1],
+                    valid.replace(b"exact_values=146", b"exact_values=73"),
+                    valid.replace(b"index=2/2", b"index=3/2"),
+                    valid.replace(b"allocations=closed", b"allocations=retained"),
+                    valid + b"PS5HIP QUARANTINED: unresolved\n"):
+            self.assertNotEqual(module.check_log(bad, "gfx1013", "vector_add_twice")["application_result"], "application-pass")
+        self.assertNotEqual(module.check_log(valid, "gfx1013", "vector_add")["application_result"], "application-pass")
+        self.assertNotEqual(module.check_log(valid, "gfx1013", "vector_add_twice", shell_exit_probe=True)
+                            ["application_result"], "application-pass")
+        suffix = (b"PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                  b"PS5HIP SHUTDOWN static-dtor=observed\nPS5HIP SHELL_EXIT application-fini=completed\n"
+                  b"PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+        self.assertEqual(module.check_log(valid + suffix, "gfx1013", "vector_add_twice", shell_exit_probe=True)
+                         ["application_result"], "application-pass")
+
     def test_wave_contract(self):
         for target in ("gfx1013", "gfx1030"):
             for kernel in ("wave_full", "wave_partial"):

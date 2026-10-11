@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "offline_only": true,
+  "code_changed_by_validation": false,
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "<ROOT>/build/host",
+    "--output-on-failure"
+  ],
+  "exit_code": 0,
+  "ctest_passed": 27,
+  "source_sha256": {
+    "CMakeLists.txt": "2aa827452cff1896d83978bc2ed051d63b348550ba53182bff9aaef53d67b9d6",
+    "tools/native_canary.cpp": "0d10a11aa77f3ae5d6cd779829842e644ce4e7009c4f1bbae3f2637933a721d0",
+    "tools/build_native_canary.py": "0bf7150fce2ff3ebc1a9a64fc140c290e9ef27369f18a09e7010070d3a853f78",
+    "tools/stage_native_title.py": "1095a5e40dfedde52fac34652146c9291333343b79df71715acb81d62accb576",
+    "tools/verify_native_case.py": "170388d1bc00263ed4bec71c897521a7a3400577d9f99ca1cddab0d3bef1f848",
+    "tools/check_canary_log.py": "136c9bad624e200bc619916fd36e55d47a285de6a7d2751dc9ca0a9661262f52",
+    "tests/submission_test.cpp": "d385fd1a95e7f9b0a5afe0e4d3b075649d786d660cba9e602409d848e45b25da",
+    "tests/title_stage_test.py": "41521a674ff448e6bc4f1c2aae9df5493339f5b7f3d3fec2b8a3dd0f5a56638b",
+    "tests/native_case_test.py": "e31218a853f4838e593c6087cedd5440d030285712dbb1127a3bcc71ea64fe40",
+    "tests/canary_log_test.py": "2262a34a74459f066d29fffa4beed77db8c72fa9a4208f0d1637201a0666e9f0",
+    "tests/native_canary_test.cpp": "c76a2b18752d618865fc2b39a00d329e4c8552703e34d4d0a5f88dfa66a139c6",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009"
+  },
+  "artifacts": {
+    "capture.py": "1f7177a51ffee84da4c597458ccdabd5562c90f55d084ea283661932321eb0c8",
+    "invocation.json": "1d6d7700c419c67ba2c6cdf992abde4c512cc1a7753e62f29ad6265b963d1868",
+    "ctest.stdout.txt": "01386d959fa804d16faceaefa877ae100a0c9791347e2c27c2dd30a9d8051703",
+    "ctest.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "configuration": {
+    "sanitizers": "PS5HIP_SANITIZE=ON",
+    "native_import_elf": ".local/g2-agc-provider-fix/build/native/gfx1013-indexed_store/eboot.elf"
+  },
+  "limitations": [
+    "host tests do not execute title main or a GPU",
+    "native candidate build and hardware qualification remain separate"
+  ],
+  "raw_receipt_sha256": "fb21b01d55bed360dace1c9a0af7b068996c1fac87c49abcf4327721b1e805e3",
+  "native_experiment_source": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "native_experiment_scope": "Isolated b8bc2b0 plus reviewed three-file profile patch; native build remains separately evidenced",
+  "isolated_patch_sha256": "799a933c45fa2395eba1dac916483f96ca00dd270c21b8710110d0dc42d04fac",
+  "review_receipt_sha256": "c2953a55fdaacce5668d692bee6bf6978b01e9c5ab9ebb01d77bcda60006d0f6"
+}

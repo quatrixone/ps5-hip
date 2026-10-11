@@ -83,6 +83,20 @@ class StageTests(unittest.TestCase):
             self.assertEqual(manifest["expected_log"], f"/chosen/results/ps5-hip-gfx1013-{kernel}.log")
             self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"wave shader")
 
+    def test_two_dispatch_profile_requires_exact_count(self):
+        self.receipt["kernel"] = "vector_add_twice"
+        self.receipt["artifacts"]["canary.hsaco"] = module.digest(b"fixture shader")
+        (self.build / "candidate/canary.hsaco").write_bytes(b"fixture shader")
+        for invalid in (None, 0, 1, 3, True, 2.0, "2"):
+            self.receipt["dispatches"] = invalid
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(ValueError, "two dispatches"):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+        self.receipt["dispatches"] = 2
+        manifest = self.run_stage()
+        self.assertEqual(manifest["dispatches"], 2)
+        self.assertEqual(manifest["expected_log"], "/chosen/results/ps5-hip-gfx1013-vector_add_twice.log")
+
     def test_package_inventory(self):
         manifest = self.run_stage()
         app = self.output / "app"

@@ -102,6 +102,42 @@ int main() {
             check(released == before + 2 && allocations.size() == 1);
             check(resource->close() && allocations.empty());
         }
+        {
+            Model model; SubmissionQueue queue(model);
+            auto resource = std::make_shared<NativeMemory>(64, 64, false);
+            for (unsigned round = 0; round < 2; ++round) {
+                *static_cast<uint32_t *>(resource->cpu()) = 0x12340000u + round;
+                const auto before = released;
+                // A delayed second marker must not inherit the first completion.
+                model.writes_after = round ? 3 : 0;
+                check(queue.submit_and_wait(commands, {resource}, 10).status == SubmissionStatus::Complete);
+                check(!queue.poisoned() && model.submits == round + 1);
+                check(released == before + 2 && allocations.size() == 1);
+                check(*static_cast<uint32_t *>(resource->cpu()) == 0x12340000u + round);
+            }
+            check(model.polls == 3 && resource->close() && allocations.empty());
+        }
+        for (unsigned failure = 0; failure < 3; ++failure) {
+            Model model; SubmissionQueue queue(model);
+            auto first = std::make_shared<NativeMemory>(64, 64, false);
+            check(queue.submit_and_wait(commands, {first}, 10).status == SubmissionStatus::Complete);
+            check(first->close() && allocations.empty());
+            auto second = std::make_shared<NativeMemory>(64, 64, false);
+            model.writes_after = 10000;
+            if (failure == 0) model.submit_error = -10;
+            if (failure == 1) model.kick_error = -20;
+            const auto before = released;
+            const auto result = queue.submit_and_wait(commands, {second}, 1);
+            check(result.status == (failure == 0 ? SubmissionStatus::SubmitFailed :
+                                    failure == 1 ? SubmissionStatus::KickFailed : SubmissionStatus::Timeout));
+            check(queue.poisoned() && model.submits == 2 && !second->close() && released == before);
+            *model.marker = 1;
+            reject([&] { queue.submit_and_wait(commands, {second}, 1); });
+            check(model.submits == 2 && !second->close() && released == before);
+            // The model has no GPU; release quarantined backing only between cases.
+            for (auto &entry : allocations) std::free(entry.second);
+            allocations.clear();
+        }
         for (unsigned failure = 0; failure < 11; ++failure) {
             Model model; SubmissionQueue queue(model);
             auto resource = std::make_shared<NativeMemory>(64, 64, false);
