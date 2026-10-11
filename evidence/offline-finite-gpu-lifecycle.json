@@ -1,0 +1,32 @@
+{
+    "schema":  1,
+    "source_commit":  "c5fab8b410f81192f2a308b0fd5f3e8898dc81a1",
+    "classification":  "offline-build-pass",
+    "hardware_gate_passed":  false,
+    "title_id":  "PPSA99014",
+    "target":  "gfx1013",
+    "kernel":  "indexed_store",
+    "shutdown_mode":  "shell-request-probe",
+    "artifacts":  {
+                      "eboot.bin":  "964d228fa75e9a597fd085d552e644a609998ffeeab5a6d395256068bd62275a",
+                      "lapy.elf":  "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+                      "sce_module/libc.prx":  "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+                      "canary.hsaco":  "b829731f36b891de55bb21daa031d1203f9d60c2171084c010a298e83b1ba694"
+                  },
+    "build_receipt_sha256":  "db741efa1cde487a164a830a98d4eb0e9194ffb6f30aa69cbcc8052ec51b8716",
+    "build_log_sha256":  "e3440557ff6e62847e563d2aa13d689e604b6f3f49f04b77323da8d50f5e906b",
+    "validation":  [
+                       "22 host CTest cases passed",
+                       "Submission completion rejects command/marker cleanup failure",
+                       "Injected unmap and release failures are reported after completion without claiming unresolved GPU ownership",
+                       "GPU application-log contract requires complete shutdown and shell-request sequence",
+                       "Native indexed-store link and signed-container integrity passed"
+                   ],
+    "limitations":  [
+                        "No console traffic or GPU execution",
+                        "Not yet staged or packaged",
+                        "No instruction or emitted import reinspection for this new executable yet",
+                        "No general C exit or worker-thread cleanup qualification",
+                        "No GitHub push for this incremental change"
+                    ]
+}
