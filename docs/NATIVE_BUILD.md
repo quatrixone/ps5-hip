@@ -324,6 +324,33 @@ hidden-geometry subset, which these wave objects do not exercise. Those changes
 and the wave instructions still require native qualification. No wave candidate
 has been deployed or executed; gfx1030 and O1 remain offline comparison profiles.
 
+## Buffer-scratch candidate
+
+The gfx1013 `register_spill` profile is linked and packaged offline at isolated
+source `1e0428f`. See `evidence/offline-scratch-native-readiness.json` for the
+frozen stage, package hashes and catalog-backed verification. The selected O2
+object uses 212 private bytes per work-item and 52 VGPR spills, with 52 buffer
+stores and 52 buffer loads in its ISA. Its six user SGPRs carry the full scratch
+descriptor in `s[0:3]` and kernarg pointer in `s[4:5]`; workgroup X is in `s6`
+and the incoming private-wave offset is in `s7`.
+
+The experiment prepares one 64x1x1 group, a 9,175,040-byte scratch ring with
+64-KiB guards, and 4,096 distinct exact output values. Validation checks every
+output, unchanged inputs, full allocation guards and evidence that scratch was
+written. Uncertain submission retains resources in the poisoned queue without
+retry or local teardown. Actual-object host checks, the frozen scratch log
+contract tests, corrected native imports, startup/FSELF checks, UFS2 validation
+and complete package extraction pass. All 18 earlier catalog entries remain.
+
+This candidate has not been deployed or run. The 1,280-wave ring capacity is a
+provisional pinned-Mesa topology calculation. SPI offsets, the full buffer
+descriptor, AGC ring-state preservation and scratch visibility still need
+hardware qualification; descriptor OOB mode does not enforce allocation bounds.
+The two-second polling timeout cannot bound a blocked driver call. Only O2 is
+packaged; O1 remains an offline comparison. This records no G3 completion,
+general scratch support or HIP runtime compatibility. The main log checker does
+not yet recognize this isolated scratch profile.
+
 ## Dependency provenance
 
 The SDK fork is `mihawk-99/PS5_PayloadSDK` at

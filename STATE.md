@@ -15,8 +15,12 @@ Updated: 2026-10-11, America/New_York.
   `evidence/native-vector-twice-cycle1.json`. These observations cover only the
   declared gfx1013, wave32, explicit-argument 64x1x1-thread arithmetic fixtures;
   no general ISA, coherence, throughput or stability claim follows.
-- The same vector image still needs a second independently observed title cycle.
-  Its prepared control was blocked before launch or log preservation by unrelated
+- Strict G2 audit found that numbered item 5 requires one frozen application
+  candidate to execute indexed-write followed by vector-add. Existing successes
+  use two images, so another vector-only cycle cannot close G2. Prepare a combined
+  arithmetic suite using the unchanged proven kernels/core, then qualify two
+  clean cycles of that same image. The earlier vector cycle-two control was
+  blocked before launch or log preservation by unrelated
   PPSA99930 PID394. Both locks were released. See
   `evidence/native-vector-twice-cycle2-no-run.json`. The successful vector image
   and original first-cycle log remain installed; preserve them before replacement.
@@ -35,6 +39,14 @@ Updated: 2026-10-11, America/New_York.
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
   `evidence/offline-candidate-host-c37f0db.json`. Host checks are not GPU evidence.
+- Experimental buffer scratch is implemented and packaged on isolated branch
+  `development/g3-scratch`, source `1e0428f`. Its 30 sanitizer CTests passed;
+  subsequent test-only checks cover both gfx1013/gfx1030 at O1 and O2. O1 needs
+  712 private bytes/177 spills, O2 212 bytes/52 spills. The native profile is fixed
+  to O2 and checks 4096 distinct values, inputs, scratch activity and full guards.
+  Imports, startup, FSELF and package extraction pass; 622 earlier files remain
+  unchanged. See `evidence/offline-scratch-native-readiness.json`. No scratch
+  execution has occurred; AGC ring state, wave offsets and visibility are unproven.
 
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
@@ -72,14 +84,17 @@ See `evidence/offline-therock-component-completion.json`. Full ROCm distribution
 artifact packaging and upstream tests remain separate work. The build and logs
 under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
-The next hardware action is the separately prepared second cycle of the frozen
-two-dispatch vector image, only when .30 is idle. Cycle one passed; cycle two's
-idle guard blocked before any mutation. The exact reviewed first-cycle acceptance
-and all raw evidence hashes are required before its controls can acquire locks.
-Use `python3 results/capture-vector-twice-operation.py cycle2` after reading the
-runbook/environment; do not redeploy, rerun cycle1 or close unrelated titles.
-No further console polling is needed while offline work can advance. Full G2
-remains open pending this repeated lifecycle check and final acceptance audit.
+The next hardware candidate must combine indexed-store and vector-add in one
+frozen application, as G2 item 5 explicitly requires. Implement `arithmetic_suite`
+from the clean proven `c37f0db` source without changing loader, launch, memory,
+submission or device code; use two ordered dispatches and 146 exact values with
+fresh guarded allocations. Freeze/package it offline, then qualify two clean
+cycles when .30 is idle. This supersedes the planned vector-only cycle-two action;
+preserve that control and its first-cycle evidence, but do not spend console time
+on it as a G2-closing test. The installed vector image and log must still be
+verified and preserved before any replacement. No console polling is needed while
+offline work can advance. Full G2 remains open for the combined-candidate proof,
+repeated lifecycle check and final acceptance audit.
 Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
 corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
 checks, native startup/import/ISA and package extraction checks pass. Both measured
@@ -247,3 +262,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G2 failed | 15bfc35 | FW6.02 PPSA99014 | CPU SIGSEGV/RIP0 after SUBMIT; title released, services reachable | evidence/native-indexed-store-first.json | next: offline fault mapping
 - 2026-10-11 | G2 progress | b8bc2b0 | FW6.02 PPSA99014 | one indexed-store GPU dispatch and clean teardown passed | evidence/native-provider-fixed-store.json | next: repeated vector dispatch
 - 2026-10-11 | G2 progress | c37f0db | FW6.02 | two vector dispatches and one clean cycle passed | evidence/native-vector-twice-cycle1.json | next: idle-gated second cycle
+- 2026-10-11 | G3 offline | 1e0428f | gfx1013 | forced-spill image packaged; no hardware run | evidence/offline-scratch-native-readiness.json | next: combined G2 acceptance candidate

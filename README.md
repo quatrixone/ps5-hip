@@ -14,9 +14,10 @@ The first GPU candidate faulted on a CPU import boundary. Changing only the
 [the execution receipt](evidence/native-provider-fixed-store.json) and
 [the fault analysis](docs/FIRST_GPU_FAULT.md). A later title cycle passed two
 vector dispatches through one queue: [vector evidence](evidence/native-vector-twice-cycle1.json).
-The 27 host tests and ten exact-candidate sanitizer checks pass. A second cycle
-of the same vector image remains pending; its idle guard blocked launch when
-another application was running.
+The 27 host tests and ten exact-candidate sanitizer checks pass. A strict audit
+identified the remaining G2 requirement: one frozen application must run both
+indexed-store and vector-add, then pass repeated clean title cycles. The existing
+separate profile images do not establish that combined-candidate proof.
 The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
 requirement, selected LLVM 18 route, TheRock comparison and remaining limits.
 The repository is private.

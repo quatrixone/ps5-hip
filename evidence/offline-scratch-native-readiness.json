@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "classification": "register-spill-buffer-scratch-offline-ready",
+  "source_commit": "1e0428f1d4d6069cc813f8a280a31460b3e37d63",
+  "target": "gfx1013",
+  "kernel": "register_spill",
+  "title_id": "PPSA99014",
+  "hardware_validated": false,
+  "deployed": false,
+  "console_access": false,
+  "stage": ".local/g3-scratch/dist/PPSA99014/gfx1013-register_spill-8ce90d0bc1a6",
+  "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-register_spill.log",
+  "build_receipt_sha256": "87fd197c76f44005ea76adfb224321b9daf881e78bc4b2c82a53c9a7ac4c7729",
+  "manifest_sha256": "6cdfa53e5e3b41f835e59ae6fb179b7cee6ce84ca4e25597a507135ea89125bf",
+  "package_receipt_sha256": "819f4a540c7a4ca09e618d5b89375788d2eced7b7bf2bf77e0f0f9cacf3b4f0b",
+  "package": {
+    "schema": 1,
+    "hardware_validated": false,
+    "title_id": "PPSA99014",
+    "manifest_sha256": "6cdfa53e5e3b41f835e59ae6fb179b7cee6ce84ca4e25597a507135ea89125bf",
+    "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+    "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "0b081edfb997e8b54320ff01dab9c69010de2df38340497ac79af5c39405da57",
+      "bytes": 3637248
+    },
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "artifacts": {
+    "eboot.elf": {
+      "sha256": "ee21331978024f091b5646408528dd7d4b64605be5e070cee1e69e6de5c7c7a7",
+      "bytes": 930236
+    },
+    "llvm-pie.elf": {
+      "sha256": "fea3dfbe090aea113500cf00811b20e29dedc1d48dda8d64937c83b8c0beb216",
+      "bytes": 1161080
+    },
+    "candidate/eboot.bin": {
+      "sha256": "84fce7fd3e08b5be3359287c9a4bbc8e5fe481beb98cfa8c3ede1c668c66c009",
+      "bytes": 821266
+    },
+    "candidate/canary.hsaco": {
+      "sha256": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+      "bytes": 14720
+    },
+    "candidate/lapy.elf": {
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+      "bytes": 155032
+    },
+    "candidate/sce_module/libc.prx": {
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+      "bytes": 1284674
+    }
+  },
+  "toolchain": {
+    "llvm_version": "18.1.8",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08"
+  },
+  "source_sha256": {
+    "tools/native_canary.cpp": "7b2a6d748599ebfc57755d83cc4a14bdac7b1b7d4dfcb96b4dc4a16e7ef09ade",
+    ".deps/elevation/client/elevation.cpp": "037e43b4b2db3d862af54377a5d25a14251ad6bba9c5199cb442bb99043ae79b",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "src/code_object.cpp": "d22921e0509af43ba342a2894cd2c5776f27b95ccb904a1b30715b07c2d81c2a",
+    "src/launch.cpp": "5e951bbc147a07519e4f7e33f3802e235586b2813507a47c2c03c9045af88ef6",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "575980923e4542c6c52757ae899fce48250579286500bdb0efb455115d5ec409",
+    "include/ps5hip/launch.h": "818083797278e6f4e803a0736484d04e319efe444edc32ef0d1ef1e88db49cbb",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "kernels/resources.hip": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+    "tools/build_native_canary.py": "67e898cd2b204db8bda4f350144dd705f9913e900fc6c174ede5abe226a58e26",
+    "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "elevation-inputs.json": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e",
+    ".deps/elevation/client/elevation.hpp": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+    ".deps/elevation/client/protocol.hpp": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+    ".deps/elevation/client/validate-helper.py": "770827f77c6bc1d856cdea54bb87842cd1f055523c1b24dd41b14a400d219c55",
+    ".deps/elevation/lapy/LICENSE": "5ef18e95f617c9d3a2674cc3256f5c0d6ec2f794a57e9e40f2185dd454c9f8da",
+    ".deps/elevation/lapy/tools/build_owned_daemon.py": "e435ad2b102f642c63c0d18900a672a77267993dd75a27deaa94327aa3fdf07f",
+    ".deps/elevation/lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    ".deps/elevation/lapy/source/donor_transaction.c": "6844275eca240aab25d5d61ae030f94b50b9538116452ccb6078f6518ba876d9",
+    ".deps/elevation/lapy/source/donor_transaction.h": "c976e43a298a3621b2ff0f83f92f1304dc5c177a00d5af14c5a78a9620d2ce5b",
+    ".deps/elevation/lapy/source/vnode_ref_probe.c": "ef49b83a80cdc980ea6b5cdb0477110b08b10feba7e7229cbb0c7db1bf0a87f0",
+    ".deps/elevation/lapy/source/vnode_ref_probe.h": "13e7f3b9ba77c696209f647e5a0fb60f50a6e8112991bb4bfc63da632a6a0153",
+    ".deps/elevation/lapy/source/lapy_elevation_protocol.h": "bb02c4aa814eaba7a7a423a31b29ff41f786212c2953678cf29434e85fa0f869",
+    ".deps/elevation/logging/ps5log.h": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "device_build_receipt_sha256": "2f8a74c518058ae28331396dafe58d26c311ca1fe2a8d52539eb89c83353b9e1",
+  "native_imports": {
+    "all_116_bindings_identical_to_corrected_wave_candidate": true,
+    "agc": {
+      "sceAgcInit": [
+        "libSceAgc",
+        "libSceAgc"
+      ],
+      "sceAgcDriverSubmitDcb": [
+        "libSceAgcDriver",
+        "libSceAgcDriver"
+      ],
+      "sceAgcSuspendPoint": [
+        "libSceAgc",
+        "libSceAgc"
+      ]
+    }
+  },
+  "device_contract": {
+    "optimization": "-O2",
+    "wave_size": 32,
+    "groups": [
+      1,
+      1,
+      1
+    ],
+    "threads": [
+      64,
+      1,
+      1
+    ],
+    "kernarg_bytes": 16,
+    "pointer_offsets": [
+      0,
+      8
+    ],
+    "properties": "0x409",
+    "rsrc2": "0x8d",
+    "user_sgprs": 6,
+    "scratch_descriptor_sgprs": "s0:s3",
+    "kernarg_pointer_sgprs": "s4:s5",
+    "workgroup_x_sgpr": "s6",
+    "private_wave_offset_sgpr": "s7",
+    "private_bytes": 212,
+    "vgpr_spills": 52,
+    "sgpr_spills": 0,
+    "lds_bytes": 0,
+    "opcode_counts": {
+      "buffer_store_dword": 52,
+      "buffer_load_dword": 52,
+      "flat_load_dword": 64,
+      "flat_store_dword": 64
+    },
+    "flat_scratch_setup": false
+  },
+  "scratch_plan": {
+    "descriptor_word3": "0x21c14fac",
+    "wave_stride_bytes": 7168,
+    "capacity_waves": 1280,
+    "ring_payload_bytes": 9175040,
+    "tmpring_size": "0x7500",
+    "prefix_guard_bytes": 65536,
+    "minimum_suffix_guard_bytes": 65536,
+    "backing_allocation_bytes": 9306112,
+    "capacity_basis": "provisional pinned Mesa topology, not hardware measurement",
+    "bounds": "OOB_SELECT2 does not enforce extent; full guards are checked after completion"
+  },
+  "oracle": {
+    "exact_values": 4096,
+    "expected": "(uint32(index)*0x9e3779b9) xor0x6c8e9cf5",
+    "unique_expected_values": 4096,
+    "poison_collisions": 0,
+    "poison": "0xa5a5a5a5",
+    "checks": [
+      "all output words exact",
+      "all input words immutable",
+      "input/output prefix16words and entire rounded suffix unchanged",
+      "scratch prefix64KiB and full remaining suffix unchanged",
+      "at least one scratch payload word modified",
+      "all allocations closed only after completion and validation"
+    ],
+    "timeout_ms": 2000,
+    "failure": "uncertain submission retains scratch/resources in poisoned queue and quarantines without retry/local teardown"
+  },
+  "limits": [
+    "No scratch GPU execution or G3 completion claim",
+    "SPI s7 offsets, full HSA buffer descriptor, AGC ring-state preservation and scratch visibility require hardware qualification",
+    "O1 fixtures were inspected/tested separately but only O2 private212/spills52 is packaged",
+    "No indexed-private, flat-scratch-init, dynamic stack, LDS, device calls, repeated scratch dispatches or general HIP runtime qualification",
+    "Driver calls are outside the software poll timeout"
+  ],
+  "raw_receipt": "results/g3-scratch-ready/offline-scratch-native-readiness.json",
+  "raw_receipt_sha256": "6efd8ea67fc2e53ee34377e89dce0ca39a37b82bd64930de7e363de99c8c55aa",
+  "candidate_stager_sha256": "55fa5172279ae864f23df418ad7daecb99e71bca4fd2269336df9f5c04b1dbfa",
+  "validation": {
+    "startup": "exit installer before init/main/catchReturnFromMain",
+    "fself": "eboot and libc valid",
+    "filesystem": "UFS2 check and complete extraction pass",
+    "actual_object_scratch_model": "passed using packaged ELF object bytes",
+    "scratch_log_checker": "isolated frozen-source contract suite passed; main checker does not yet recognize scratch",
+    "preserved_previous_files": 622,
+    "preserved_inventory_sha256": "014ababa090c3d947bffc48964b82fbda656ed10f5196600a72c8e88dd93ac0a",
+    "source_clean": true
+  },
+  "catalog_verification": {
+    "command": [
+      "python3",
+      "tools/verify_native_case.py",
+      "--stage",
+      ".local/g3-scratch/dist/PPSA99014/gfx1013-register_spill-8ce90d0bc1a6"
+    ],
+    "passed": true,
+    "local_artifacts_verified": true,
+    "hardware_gate_passed": false,
+    "log": "results/g3-scratch-ready/recorded-verify.json",
+    "sha256": "38f3d445683f684d53ef23f7849f666c7b4af25874c7d2bc6fa0ef7fc9b2ab2b"
+  },
+  "comparison_to_wave_candidate": {
+    "source_commit": "5581dbd074e6d6c32cec0391d1602228a3a36660",
+    "changed_objects": [
+      "code_object.o",
+      "launch.o",
+      "native_canary.o"
+    ],
+    "unchanged_objects": 6,
+    "byte_identical_files": [
+      "libc.raw.elf",
+      "candidate/sce_module/libc.prx",
+      "candidate/lapy.elf",
+      "ps5-native-tool",
+      "libc-builder"
+    ]
+  },
+  "raw_log_sha256": {
+    "actual-object-scratch-test.log": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "agc-imports.log": "b45ffa402b091007d2a33a18680cd9fc48fa64e80bc2f272de6b224dfb568667",
+    "build.log": "7c19c8fe7b4df5883a16c24ac5ba3a1ba1e13319990f03fb7ab307d6bbc3bdfc",
+    "device-inspect.log": "c64e1f21f0790ba95ac4f32b72ed0f9cf02ee1af36e9b874afabf3e4b8345b3e",
+    "eboot-fself.log": "8cea31e3544a00e758dd1f255f03ad08d2d48b24acd48c338572401d25124e1f",
+    "libc-fself.log": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+    "package.log": "dca415db8f865179774ea1b99f398ee9f50a3bdceb3c4ab0333590382b62a7b4",
+    "register-spill-isa.log": "a58596aefee0ff40b1b54b856e2162308dd08341be431a8bd11bdf50510b1a9a",
+    "scratch-log-contract-tests.log": "a403b031ca53505b1068c5c1262f30475f8ef294ae83636c47835f0a12e632af",
+    "stage.log": "535f59f4ae3f000bf8870098a8730046c0b38c7794b5785180f827a620d2bd81",
+    "startup.log": "18b4fcf1af58ac7ce3aca473b33356fd254cbf09a17d6cfff8781ccafa187963",
+    "verify-native-case.log": "38f3d445683f684d53ef23f7849f666c7b4af25874c7d2bc6fa0ef7fc9b2ab2b"
+  },
+  "verification_correction": {
+    "note": "The offline ISA assertion initially expected commuted add operands; corrected to actual s_add_u32 s8,s8,s7 and s_addc_u32 s9,s9,0. Verification resumed without rebuilding or changing candidate bytes.",
+    "files_sha256": {
+      "initial-verification-failure.json": "849693d58d5421cfe167b170deafb2d8d294fc87c25537d0d0f43a190b9246e1",
+      "prepare-initial.py": "b89a0d2bcf282b2578a6fecdc641009cacd1a1d84740e2f937ba9772af7b5ed1",
+      "prepare.py": "02fa590025509c5b5899779a8be94efda61f9ee22315d0d7c29426ebdbd39e63"
+    }
+  },
+  "catalog_update": {
+    "previous_entries_preserved": 18,
+    "appended_entries": 1
+  },
+  "offline_registration_script_sha256": "badf469aff2c11007c27f3ddea076ab4c89c2b5f14f953371be2c744b4c82ea7"
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-11T21:30:20.924624+00:00",
+  "classification": "readiness-audit-incomplete",
+  "goal": "G2",
+  "hardware_gate_passed": false,
+  "g2_complete": false,
+  "console_contacted": false,
+  "main_source_commit": "4307ebd50537c443156436fdc7172b41ad77feef",
+  "plan": {
+    "path": "docs/IMPLEMENTATION_PLAN.md",
+    "sha256": "a140d038ea37ef0e31760bcfd93a7e3725871b9765f94b4db43e5fa09f34d77e",
+    "unchanged_numbered_requirements": true,
+    "item5_literal_requirement": "Freeze one application candidate and run exact indexed-write then vector-add checks"
+  },
+  "requirements": [
+    {
+      "item": 1,
+      "status": "implemented_and_offline_tested_for_declared_subset",
+      "evidence": "Exact c37f0db host tests cover bounded parsing, truncation/mutation rejection, descriptor agreement and materialization; 22 raw evidence files rehashed successfully."
+    },
+    {
+      "item": 2,
+      "status": "implemented_for_declared_subset",
+      "evidence": "Frozen arithmetic code objects executed from aligned native shader storage; relative PT_LOAD materialization is tested. Relocation subset is empty; unsupported relocations/unresolved symbols are rejected.",
+      "limits": "No general globals/constants/linking hardware qualification."
+    },
+    {
+      "item": 3,
+      "status": "accounted_for_frozen_arithmetic_entries_only",
+      "evidence": "Wave32, properties0x409, RSRC1=0x60af0040, RSRC2=0x8c, RSRC3=0, six user SGPRs, kernarg s4:s5, groupX s6/localX v0, no scratch/LDS/implicit records.",
+      "limits": "Main hidden-geometry support is newer than frozen hardware candidates and remains offline-only."
+    },
+    {
+      "item": 4,
+      "status": "individual_arithmetic_hardware_proof_preserved",
+      "evidence": "Frozen store proves native global writes; frozen vector proves global loads/writes and exact FP32 quarter-increment sums over73elements/two X groups.",
+      "limits": "No general IEEE, ISA or multidimensional claim."
+    },
+    {
+      "item": 5,
+      "status": "incomplete",
+      "requirement": "Freeze one application candidate and run exact indexed-write then vector-add checks",
+      "observed": "Store and vector passed in separate frozen profile images. No one frozen image has executed the ordered indexed-store then vector-add suite.",
+      "reason": "Interpreting one candidate as separate per-experiment freezes weakens the unchanged numbered requirement. Shared core source does not substitute for the requested integrated execution evidence."
+    },
+    {
+      "item": 6,
+      "status": "individual_declared_shape_and_multidispatch_proof_preserved",
+      "evidence": "73elements,64x1x1threads,2x1x1groups, full tail/allocation guards; two serialized vector dispatches through one queue. Frozen host checks reject unsupported shapes/resources.",
+      "limits": "Fresh per-dispatch allocations; no persistent-buffer reuse, asynchronous overlap, wave64 or multidimensional hardware qualification."
+    }
+  ],
+  "frozen_hardware_evidence": {
+    "indexed_store": {
+      "source_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+      "image_sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+      "exact_values": 73,
+      "clean_title_cycles": 1
+    },
+    "vector_add_twice": {
+      "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+      "image_sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+      "dispatches_in_cycle1": 2,
+      "exact_values_per_dispatch": 73,
+      "clean_title_cycles": 1,
+      "stage": ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792"
+    },
+    "firmware": "6.02",
+    "scope": "Named gfx1013 wave32 explicit-argument arithmetic fixtures only",
+    "source_distinction": "Store/vector src and include files are identical; their three-file profile extension and distinct images remain distinct experiments. Main hidden geometry is not hardware-qualified."
+  },
+  "remaining_requirements": [
+    "Implement/freeze one combined application executing indexed_store then vector_add, with exact73-value oracles/fullguards/explicit allocation closure on one backend/queue. Existing code object already contains both kernels.",
+    "Observe and independently audit repeated clean launch/close cycles of that same combined frozen image, with fresh artifact/log identity, idle preflight, teardown, service reachability and lock release."
+  ],
+  "second_vector_cycle_alone_closes_g2": false,
+  "next_console_selection": "Prefer the combined suite after offline preparation over the pending vector-only repeat; no console run authorized by this audit.",
+  "local_verification": {
+    "vector_stage_and_catalog_verified": true,
+    "controller_bytes_verified": true,
+    "vector_tracked_source_hashes_match_commit": 22,
+    "store_raw_hashes_match": 20,
+    "vector_cycle1_raw_hashes_match": 34,
+    "exact_candidate_host_raw_hashes_match": 22,
+    "cycle2_no_run_raw_hashes_match": 5,
+    "cycle1_acceptance_sha256": "c195f73dc40284d0789a41be788f3a00a0896537a2c359cd5b2324a2b04e1c0a",
+    "remote_state_proven_current": false
+  },
+  "bound_inputs_sha256": {
+    "evidence/native-provider-fixed-store.json": "680e7b60b21da6690e03df1254a03e3ae93f7c8b877236a8e1125b2a98f7facf",
+    "evidence/native-vector-twice-cycle1.json": "110c53ffcd1cc829a149327af155f0bcc359e4779a2b8001606bf3f69ec6b0d3",
+    "evidence/offline-candidate-host-c37f0db.json": "e167347508d721abc147867ffbf47c6fa40a9367e5125097cd8c7e874ed81cab",
+    "evidence/native-vector-twice-cycle2-no-run.json": "a2f8a94735cf1505e3fff22a3d95569084d9fe6fc34dd7caf4e6e4659cfacd76",
+    "evidence/offline-native-packages.json": "c7c63a612736815f741ce5942e0b75291af88127198c273b479db91e70f27983",
+    "evidence/offline-controllers.json": "83e122665be7abd8700eacf0fd510e41aac9aeb76b7d6dc0c1307415472e6b09",
+    "tools/verify_native_case.py": "170388d1bc00263ed4bec71c897521a7a3400577d9f99ca1cddab0d3bef1f848",
+    "tools/check_canary_log.py": "136c9bad624e200bc619916fd36e55d47a285de6a7d2751dc9ca0a9661262f52",
+    "docs/INITIAL_CAPABILITY_MATRIX.md": "78dd01aec004b634e4d9362d901278d8ae4762d01c853ac8a5d44bcb8578ed4d",
+    ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792/manifest.json": "d93a5db79f38539182bc5df351425de721a7e0da2f0fda61b1bc5abad57dad5d",
+    ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792/build-receipt.json": "71d9d6ed1c5b7ac536f7b2cb5de4dd0b7b851456507877ea12c17affd325693b",
+    ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792/package-receipt.json": "07aca6a20d3c352a6bb2a8209136ebc5cc96a5f2a6d9c6c526debe96cb006d23",
+    "build/controllers/PPSA99014/receipt.json": "a2c01897d9e49da40bf7e0e00ae9ffd890c24294f46f4a3f025cc56b218592f5",
+    "build/controllers/PPSA99014/launch.elf": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+    "build/controllers/PPSA99014/close.elf": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd"
+  },
+  "raw_evidence": {
+    "results/g2-readiness-audit-20261011T213020Z/verification.json": "2f8ae5ed676516d9436e7cfe46c0508eeca5c2888fcbbf5672c4d072dd5370dd",
+    "results/g2-readiness-audit-20261011T213020Z/verify.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/g2-readiness-audit-20261011T213020Z/verify.stdout.json": "eecbf8610806d6937fac40effdde94be93a5e322c4f9c21ee1adf865ac73152a"
+  },
+  "verification_command": [
+    "python3",
+    "<ROOT>/tools/verify_native_case.py",
+    "--stage",
+    "<ROOT>/.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792"
+  ],
+  "limits": [
+    "No console contacts, builds or new tests during this audit. The local verifier was executed read-only.",
+    "No current console idle/remote byte/log freshness claim. Prior cycle2 no-run observation is not repeat-cycle evidence.",
+    "Existing successful individual hardware observations remain valid; G2 acceptance is not declared."
+  ]
+}

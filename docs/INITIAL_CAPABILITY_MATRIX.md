@@ -3,8 +3,10 @@
 Scope: corrected LLVM/LLD 18.1.8 arithmetic fixtures, AMDHSA V5, little-endian
 ELF64, targets gfx1013 and gfx1030. Hardware evidence now covers the frozen
 gfx1013 indexed-store once and vector-add twice in one later title cycle on
-firmware 6.02. Both title cycles completed cleanly. A second cycle of the same
-vector image remains pending. gfx1030 is offline-only. These results qualify
+firmware 6.02. Both title cycles completed cleanly. G2 still requires one frozen
+application running indexed-store followed by vector-add, with repeated clean
+cycles of that combined image; separate profile images do not satisfy item 5's
+literal requirement. gfx1030 is offline-only. These results qualify
 the named arithmetic fixtures and launch shape, not arbitrary structurally
 eligible objects, later hidden-geometry support or a general ISA/runtime.
 
