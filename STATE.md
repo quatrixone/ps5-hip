@@ -136,6 +136,10 @@ a separate physical host has not been tested. This alone does not close G1.
 The first hardware compute goal remains exact execution of a small HIP-compiled
 kernel through the native submission path. G3 additionally requires shared memory,
 atomics, wave operations and deliberate spilling; vector addition is insufficient.
+Separate wave32 broadcast/shuffle/ballot/reduction probes compile at O1 and O2 for
+both targets, including lanes 4-19 active with lane zero inactive. Scalar expected
+outputs and ISA inventories are retained in `evidence/offline-wave-probes.json`.
+They have no native harness or GPU result and do not change the frozen candidate.
 The tested generic volatile private-address path remains a G3 compiler issue.
 An isolated contrast without `volatile` retains 144 private bytes but uses buffer
 scratch on both targets, with 33 private-address IR accesses and no flat-scratch

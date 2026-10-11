@@ -159,3 +159,36 @@ it does not normalize away linker differences. Evidence is in
 `evidence/offline-isolated-compiler.json`. Rebuild native candidates embedding old
 objects; preserve their frozen images as superseded history. TheRock's built
 compiler comparison remains outstanding.
+
+## Wave32 probe preparation for G3
+
+`kernels/wave.hip` separately exercises first-active-lane broadcast, XOR-one
+shuffle, odd-value ballot and integer butterfly reduction. `wave_full` uses all
+32 lanes; `wave_partial` activates only lanes 4 through 19, including a case where
+lane zero is inactive. Every shuffle source is an active lane. These probes do
+not change the arithmetic/resource fixtures or the frozen first-launch image.
+
+Run the compile-only checks with a fresh output directory:
+
+```sh
+python3 tools/probe_wave_compiler.py --output results/wave-compiler-qualification-new
+```
+
+The tool checks the pinned compiler and actual device linker, compiles both
+targets at O1 and O2, and retains metadata/disassembly plus independent scalar
+expected-output files. All four profiles preserve `v_readfirstlane_b32` and
+`ds_bpermute_b32`, wave32, and zero private/LDS bytes. The partial-wave branch uses
+`s_and_saveexec_b32` on gfx1013 and `v_cmpx_gt_u32_e32` on gfx1030. Ballot values
+come from the active-lane comparison mask; they need no standalone ballot opcode.
+See `evidence/offline-wave-probes.json` for source/recipe hashes and inventories.
+
+The future native test must launch exactly one 64-thread workgroup and initialize
+256 output words to `0xdeadbeef`. Each invocation writes four words: broadcast,
+shuffle, ballot, sum. The two full waves expect sums 528 and 1552 and ballot
+`0x55555555`; the two partial waves expect sums 200 and 712 and ballot `0x55550`.
+Inactive invocation records must stay unchanged. Use guarded allocations and the
+same completion/teardown requirements as other native cases.
+
+There is no native harness or execution result for these probes yet. Compilation
+and scalar oracle self-checks do not prove PS5 wave semantics, wave64 support or
+all inactive-lane patterns. They prepare required G3 cases without advancing G3.

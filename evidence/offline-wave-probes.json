@@ -1,0 +1,337 @@
+{
+  "schema": 1,
+  "hardware_validated": false,
+  "source_sha256": "07f2d2981e96369a08218ef2241e43ad2d14ea0f51edae35cf2494586728aea9",
+  "recipe_sha256": "e412dec729617b6ebb0973e9b3cdebfb9f033de142abf7c7e9e46e3d50fceef6",
+  "shared_recipe_sha256": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+  "tool_versions": {
+    "clang++": "Ubuntu clang version 18.1.8 (20ubuntu8)",
+    "ld.lld": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",
+    "llvm-readobj": "Ubuntu LLVM version 18.1.8",
+    "llvm-objdump": "Ubuntu LLVM version 18.1.8"
+  },
+  "cases": [
+    {
+      "target": "gfx1013",
+      "optimization": "-O1",
+      "command": [
+        "clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B<LLVM18_BIN>",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O1",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "kernels/wave.hip",
+        "-o",
+        "<OUTPUT>/wave.hsaco"
+      ],
+      "code_sha256": "5aa03654906d4d790b665534290adc4fc77c03ab8a133ea0be8ff3a68d3d5358",
+      "isa": {
+        "wave_full": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e64",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_or_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "wave_partial": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dword",
+            "s_and_saveexec_b32",
+            "s_cbranch_execz",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e64",
+            "v_cmp_gt_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_or_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      },
+      "metadata_sha256": "a963787f4c610782c6516af9b283cfc7ccfa640b8071cb65319bdb158e8a1729",
+      "disassembly_sha256": "f06d5d899ff84a5e908725c6f1a494686f61c06b2480c0e3fa1406ed611b6742"
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "-O2",
+      "command": [
+        "clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B<LLVM18_BIN>",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1013",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O2",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "kernels/wave.hip",
+        "-o",
+        "<OUTPUT>/wave.hsaco"
+      ],
+      "code_sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a",
+      "isa": {
+        "wave_full": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dwordx4",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "wave_partial": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dwordx4",
+            "s_and_saveexec_b32",
+            "s_cbranch_execz",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_cmp_gt_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      },
+      "metadata_sha256": "16d51c09810a540011971ed7f9c4caa7e83aaf654ddeb3ff15dffbaa1aceb8bb",
+      "disassembly_sha256": "325fac0941fdeb08dcc6361dc532d11700964db30a4857ecb5cd8c0daa7e7def"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "-O1",
+      "command": [
+        "clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B<LLVM18_BIN>",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O1",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "kernels/wave.hip",
+        "-o",
+        "<OUTPUT>/wave.hsaco"
+      ],
+      "code_sha256": "85a1c4874c30c559f3dbc3c9af5383bd784550b4ffcd723248e64c2bb570feea",
+      "isa": {
+        "wave_full": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dword",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e64",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_or_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "wave_partial": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dword",
+            "s_cbranch_execz",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e64",
+            "v_cmpx_gt_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_or_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      },
+      "metadata_sha256": "2c1bb428b355fc5224d8e8cc1759afe87ec4dbcfd1021c3875a4cda0bbe9494d",
+      "disassembly_sha256": "4faebb617759b8ed0aef9ee0f5a7b7d175989c8ec625eb10986128cdfac00fdf"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "-O2",
+      "command": [
+        "clang++-18",
+        "-x",
+        "hip",
+        "--cuda-device-only",
+        "--no-gpu-bundle-output",
+        "-B<LLVM18_BIN>",
+        "-nogpuinc",
+        "-nogpulib",
+        "--offload-arch=gfx1030",
+        "-mcode-object-version=5",
+        "-mno-wavefrontsize64",
+        "-O2",
+        "-std=c++17",
+        "-fno-fast-math",
+        "-c",
+        "kernels/wave.hip",
+        "-o",
+        "<OUTPUT>/wave.hsaco"
+      ],
+      "code_sha256": "1c4cab59ab9eb8e58f616e62e2a5bbd0c462777e4111dece6e4148a9ae9e2d45",
+      "isa": {
+        "wave_full": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dwordx4",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_nop",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        },
+        "wave_partial": {
+          "opcodes": [
+            "ds_bpermute_b32",
+            "global_store_dwordx4",
+            "s_cbranch_execz",
+            "s_code_end",
+            "s_endpgm",
+            "s_load_dwordx2",
+            "s_mov_b32",
+            "s_waitcnt",
+            "v_add_nc_u32_e32",
+            "v_and_b32_e32",
+            "v_cmp_eq_u32_e32",
+            "v_cmpx_gt_u32_e32",
+            "v_lshlrev_b32_e32",
+            "v_mov_b32_e32",
+            "v_readfirstlane_b32",
+            "v_xor_b32_e32"
+          ],
+          "flat_scratch_setup": false
+        }
+      },
+      "metadata_sha256": "66980a3861756bbd5c2a1553ff0e79d9b5e9d283be56ffc588e91e4dfae57617",
+      "disassembly_sha256": "323e28087a6974320c807e980a909a2f5d9faeb22c814c4cf640756110c4ef8e"
+    }
+  ],
+  "oracle": {
+    "wave_full": {
+      "bytes": 1024,
+      "sha256": "9811574f7d0bcf130f8a674495c250f87fe27adaf1feaef66e0056d4cf02647c"
+    },
+    "wave_partial": {
+      "bytes": 1024,
+      "sha256": "e5ba21aec1604e52d4ce7237c873d297c9dd69a2f97f034deb926f1ef06d17d3"
+    }
+  },
+  "classification": "offline-wave32-compilation-and-oracle",
+  "raw_report_sha256": "e082892c7c527fd2f771be0c5b19062693b37333923dcbaa156bee07d90982a8",
+  "launch_contract": {
+    "workgroups": [
+      1,
+      1,
+      1
+    ],
+    "threads": [
+      64,
+      1,
+      1
+    ],
+    "output_u32": 256,
+    "initial_value": "0xdeadbeef",
+    "layout": [
+      "broadcast",
+      "xor-one shuffle",
+      "odd-value ballot",
+      "integer sum"
+    ],
+    "wave_full_active_lanes": [
+      0,
+      31
+    ],
+    "wave_partial_active_lanes": [
+      4,
+      19
+    ]
+  },
+  "limits": [
+    "No native harness, deployment or execution for these probes.",
+    "Compiler checks do not validate wave semantics on PS5.",
+    "Wave64 and additional inactive-lane patterns remain unqualified.",
+    "The arithmetic baseline and frozen first-launch image are unchanged."
+  ]
+}
