@@ -20,9 +20,11 @@ struct Model : ps5hip::SubmissionBackend {
     uint64_t clock = 0;
     unsigned submits = 0, polls = 0, writes_after = 0;
     bool frozen_clock = false, throw_flush = false, throw_submit = false, reverse_clock = false;
+    bool throw_kick = false, throw_clock = false, throw_sleep = false;
+    unsigned flushes = 0, fail_flush_at = 0;
     volatile uint32_t *marker = nullptr;
     void flush(void *, size_t) override {
-        if (throw_flush) throw ps5hip::ObjectError("injected flush failure");
+        if (++flushes == fail_flush_at || throw_flush) throw ps5hip::ObjectError("injected flush failure");
     }
     int32_t submit(uint32_t *words, uint32_t count) override {
         ++submits;
@@ -37,9 +39,16 @@ struct Model : ps5hip::SubmissionBackend {
         if (writes_after == 0) *marker = 1;
         return submit_error;
     }
-    int32_t kick() override { return kick_error; }
-    uint64_t now_ns() override { return clock; }
+    int32_t kick() override {
+        if (throw_kick) throw ps5hip::ObjectError("injected kick exception");
+        return kick_error;
+    }
+    uint64_t now_ns() override {
+        if (throw_clock) throw ps5hip::ObjectError("injected clock exception");
+        return clock;
+    }
     void sleep_us(unsigned us) override {
+        if (throw_sleep) throw ps5hip::ObjectError("injected sleep exception");
         ++polls;
         if (reverse_clock) clock -= 1;
         else if (!frozen_clock) clock += uint64_t(us) * 1000;
@@ -93,7 +102,7 @@ int main() {
             check(released == before + 2 && allocations.size() == 1);
             check(resource->close() && allocations.empty());
         }
-        for (unsigned failure = 0; failure < 6; ++failure) {
+        for (unsigned failure = 0; failure < 11; ++failure) {
             Model model; SubmissionQueue queue(model);
             auto resource = std::make_shared<NativeMemory>(64, 64, false);
             model.writes_after = 10000;
@@ -102,8 +111,13 @@ int main() {
             if (failure == 3) model.frozen_clock = true;
             if (failure == 4) model.throw_submit = true;
             if (failure == 5) { model.reverse_clock = true; model.clock = 1000; }
+            if (failure == 6) model.throw_kick = true;
+            if (failure == 7) model.throw_clock = true;
+            if (failure == 8) model.throw_sleep = true;
+            if (failure == 9) model.fail_flush_at = 4; // First marker poll after three upload flushes.
+            if (failure == 10) { model.writes_after = 0; model.fail_flush_at = 5; } // Readback after marker.
             const auto before = released;
-            if (failure == 4) reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
+            if (failure == 4 || failure >= 6) reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
             else {
                 const auto result = queue.submit_and_wait(commands, {resource}, 1);
                 check(result.status == (failure == 0 ? SubmissionStatus::SubmitFailed :

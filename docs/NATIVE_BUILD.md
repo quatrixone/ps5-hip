@@ -253,7 +253,11 @@ timeouts nor destructor cleanup implement GPU cancellation.
 
 The host model covers immediate/delayed completion, duplicate buffer references,
 submit and kick errors, driver exceptions, pre-submit flush failure, frozen and
-backward clocks, late completion and refusal to replace a queue. AGC boundary
+backward clocks, late completion and refusal to replace a queue. Post-submit
+exceptions from kick, clock, sleep, marker flush and readback flush also retain
+allocation holds and prohibit resubmission, including a readback exception after
+the marker was observed. These failure-injection cases pass under sanitizers.
+AGC boundary
 models verify version 8 initialization, the 16-byte submit ABI with a zero flag,
 argument rejection, initialization failure and native error propagation. CPU cache
 instructions are cross-compiled but not exercised by these mock tests. Thirteen
