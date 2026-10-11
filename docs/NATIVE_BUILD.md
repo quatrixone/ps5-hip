@@ -107,6 +107,13 @@ unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel
 and libSceLibcInternal. The SDK unwinder needs explicit start/end symbols for
 `.eh_frame` and `.eh_frame_hdr`; the build derives them from linked sections.
 Link-only AGC stubs are not packaged. No proprietary implementation is copied.
+`sceAgcInit` and `sceAgcSuspendPoint` must import from `libSceAgc`;
+`sceAgcDriverSubmitDcb` imports from `libSceAgcDriver`. The first GPU candidate
+bound SuspendPoint to the wrong provider and faulted on the CPU. The actual-ELF
+regression checks this independent mapping; see [fault analysis](FIRST_GPU_FAULT.md).
+Host CTest uses `PS5HIP_NATIVE_AGC_ELF` to select a converted native ELF, defaulting
+to `build/native/gfx1013-indexed_store/eboot.elf`. If absent, configuration reports
+the artifact check unavailable; a host-only run does not qualify native imports.
 
 The builder also reproduces `sce_module/libc.prx` from the same pinned tooling's
 independently authored emitter and API manifests. It verifies raw SHA-256
@@ -123,7 +130,7 @@ matching `canary.hsaco` for GPU cases, and a receipt with source/artifact hashes
 The runtime control needs no GPU code object. The converted
 ELF uses type `0xfe10`, FreeBSD OSABI 9/ABI 2 and 16 KiB load alignment. Native
 imports and container integrity are offline structural checks, not loader proof.
-The separate staging tool assigns the user-selected `PPSA99012` identity and
+The separate staging tool assigns the current user-selected `PPSA99014` identity and
 generates title metadata. No tool described here deploys anything.
 
 ### Stage and package

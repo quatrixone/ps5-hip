@@ -116,6 +116,13 @@ This correction addresses a CPU import boundary. It does not justify changing
 GPU family selection, shader ISA, kernarg layout, cache packets or completion
 rules based on this run.
 
+The corrected image subsequently passed once on idle .30, firmware 6.02: all
+73 indexed-store values matched, full guards were unchanged, allocations closed,
+and the application completed its shell-managed lifecycle before host cleanup.
+See [the hardware receipt](../evidence/native-provider-fixed-store.json).
+This controlled outcome supports the provider diagnosis and proves this device
+kernel executed; vector-add and repeated-dispatch/lifecycle coverage remain open.
+
 Exact commands, disassembly, relocation tables, pinned source snapshots and the
 mapping receipt are preserved locally under
 `results/first-gpu-fault-analysis/frozen-mapping/`. Receipt SHA256:

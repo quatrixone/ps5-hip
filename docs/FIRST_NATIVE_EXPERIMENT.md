@@ -1,9 +1,9 @@
 # First native experiment sequence
 
-Status: the CPU shell-managed lifecycle passed one run on firmware 6.02. The first
-indexed-store candidate then failed with CPU SIGSEGV at RIP zero after its SUBMIT
-checkpoint; GPU execution is unproven. Title/runtime/image release and service
-health were observed. Do not rerun it; see `evidence/native-indexed-store-first.json`.
+Status: the provider-corrected indexed-store passed one GPU dispatch and clean
+shell-managed lifecycle on firmware 6.02; see `evidence/native-provider-fixed-store.json`.
+The preceding candidate failed with CPU SIGSEGV at RIP zero after its SUBMIT
+checkpoint. Do not rerun that failed image; see `evidence/native-indexed-store-first.json`.
 Vector-add remains unrun. Ordinary C exit still faults; see the shutdown investigation
 and `evidence/native-shell-exit.json`. The user selected
 title `PPSA99014` after a PPSA99012 collision. Firmware, service endpoints, lock ownership and package hashes must be recorded
@@ -102,6 +102,12 @@ visibility and submission; two inconclusive attempts require reassessment.
 
 ## Case 3: vector addition
 
+This case follows corrected indexed-store success: exact output and guards,
+clean title teardown and healthy services. That prerequisite passed once in
+`results/provider-fixed-store-run-20261011T203845Z`. A fresh idle/identity preflight
+is still required for vector-add; offline readiness does not establish its
+execution result, and full G2 remains open.
+
 Keep the successful target and platform configuration. Change only the selected
 kernel and its corresponding arguments/buffers. There are 73 elements:
 `a[i] = i/2`, `b[i] = 2-i/4`, and expected `output[i] = 2+i/4`. These binary
@@ -118,11 +124,27 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
   Its nine application objects, LLVM PIE and device/helper/libc bytes match the
   failed candidate. The only semantic change is the `sceAgcSuspendPoint` import
   provider, corrected to `libSceAgc`. Offline package checks and 26 host tests pass;
-  it has not run. See `evidence/offline-agc-provider-fix.json`. Deployment verified
-  and preserved the failed image/log, but PPSA99008 became active before launch;
-  the idle guard blocked execution. See `evidence/native-provider-fixed-no-run.json`.
-  Reuse the verified deployment only after a new idle preflight; do not redeploy
-  with stale previous-image assumptions or close the unrelated application.
+  one later idle-console run passed exact output, guards and clean teardown. See
+  `evidence/offline-agc-provider-fix.json` and `evidence/native-provider-fixed-store.json`.
+  The preceding busy-console no-run remains recorded separately. The successful
+  image and log must be preserved before replacement; existing single-case
+  scripts now have stale image/log preconditions and must not simply be rerun.
+
+- Provider-fixed vector candidate: source `b8bc2b0`, stage
+  `.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add-93752ddb9ec6`,
+  image SHA `fb2ecdc7feded72005ef5c228b02511071de707ef87ac47c1728a7e49f55fb57`.
+  Source identities, all imports and device/helper/libc bytes match the corrected
+  store; only the vector-selected canary object differs among nine application
+  objects. FSELF integrity, filesystem/extraction and main local case/controller
+  verification pass. It is offline-ready, not deployed or run; the corrected store
+  prerequisite passed once, and fresh idle/identity checks remain required.
+  Exact 73-value bitwise,
+  input-preservation and full-allocation guard oracles are recorded in
+  `evidence/offline-provider-fixed-vector.json`; its manifest/package are appended
+  to `evidence/offline-native-packages.json` with prior entries preserved.
+  To minimize console cycles, prepare a fixed two-dispatch vector profile next;
+  retain this single-dispatch image as the offline control. Qualify the new
+  profile across separately observed clean cycles before closing full G2.
 
 - Failed first GPU candidate: `PPSA99014/gfx1013-indexed_store-3d295773d2fb`,
   source `15bfc358f014b4231fcf9f84918b79b1b301008f`, shell-managed shutdown,

@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "classification": "pass",
+  "goal": "G2",
+  "scope": "One HIP-compiled indexed-store dispatch and clean shell-managed title lifecycle",
+  "observed_utc": "2026-10-11T20:38:45Z",
+  "title_id": "PPSA99014",
+  "firmware": "6.02 (ShadowMount reported)",
+  "console": "authorized idle primary console",
+  "source_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+    "bytes": 3571712
+  },
+  "target": "gfx1013",
+  "kernel": "indexed_store",
+  "pid": 362,
+  "app_id": "0x00004017",
+  "hardware_gate_passed": false,
+  "gpu_execution_proven": true,
+  "g2_complete": false,
+  "single_case_acceptance_passed": true,
+  "changed_variable": "Only sceAgcSuspendPoint import provider relative to failed candidate",
+  "application_check": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "indexed_store",
+    "log_sha256": "38ce830f71a2db56bdad5366996d111b56732fab7a2bf5dcd2518e8b03e6eb4b",
+    "bytes": 504,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "application_check_mode": "--target gfx1013 --kernel indexed_store --shell-exit-probe",
+  "checker_diagnostic": "Initial invocation omitted shell-exit-probe and correctly rejected its suffix; wrong-mode result preserved separately",
+  "oracle": {
+    "exact_values": 73,
+    "groups": [
+      2,
+      1,
+      1
+    ],
+    "threads_per_group": [
+      64,
+      1,
+      1
+    ],
+    "full_allocation_guards": "unchanged",
+    "allocations": "explicitly closed after completion"
+  },
+  "observation": {
+    "title_stopped_before_host_close": true,
+    "observation_error": null,
+    "elapsed_seconds": 6.429802948998258
+  },
+  "lifecycle": {
+    "normal_application_completion": true,
+    "title_stopped_before_host_close": true,
+    "sandbox_removed": true,
+    "runtime_layers_released": true,
+    "image_unmounted": true,
+    "fatal_signal_observed": false,
+    "loader_error_observed": false,
+    "exact_title_close_sent_once": true,
+    "automatic_retry": false,
+    "process_kill_sent": false
+  },
+  "service_health": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "locks": {
+    "release_observation": "exec tool transcript reported OWNED_LOCKS_RELEASED and exit code 0",
+    "post_run_local_check": "Both coordinated lock paths absent",
+    "raw_stdout_saved": false
+  },
+  "preservation": {
+    "image": "/data/homebrew/PPSA99014.ffpkg.fb634e34a1a6.preserved",
+    "log": "/data/ps5-hip/results/ps5-hip-gfx1013-indexed_store.log.0b232070e344.preserved",
+    "old_image_sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+    "old_image_bytes": 3571712,
+    "old_log_sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+    "old_log_bytes": 208
+  },
+  "raw_files": {
+    "results/provider-fixed-store-deploy-20261011T203059Z/before.log": {
+      "sha256": "7121ea302e8eb52e9313ee551f55aa9ded44f4c2670cfb6cf72df486f6a9c6bb",
+      "bytes": 304089
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/case.json": {
+      "sha256": "ca195c1a84ccdcf1465842461b4d39e2e182bc47a04fca5dfc650ed5905d08d4",
+      "bytes": 947
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/deployment.json": {
+      "sha256": "be01b3b26b359e1f45673a4801539f29b5d7a22a12c82f1344371e9550057380",
+      "bytes": 338
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/preservation.json": {
+      "sha256": "4fd5794226c83715900e053cd01dfd015144a880227de559a4b57e84b830ce7a",
+      "bytes": 393
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/preserved-application.log": {
+      "sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+      "bytes": 208
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/registration.log": {
+      "sha256": "f5a4f459de31a7c70168dd36981c8587f14105f7f89ee0d9e27a82743db4dfd1",
+      "bytes": 305451
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/after.log": {
+      "sha256": "9d481fdb1f5bc9f521dd1ff194739a80ebae8171617f339f40b4ee826df8705a",
+      "bytes": 311327
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/application-check-wrong-mode.json": {
+      "sha256": "7317795a6ec4b2858b6ac0aee7450a85cfb26f41b9c2c5dd16e3761ae7c19e8c",
+      "bytes": 386
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/application-check.json": {
+      "sha256": "fe4ef4f09247b47543e9dfcedd200a3ddd4757545245c1fd69acac4c328d1cc5",
+      "bytes": 378
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/application.log": {
+      "sha256": "38ce830f71a2db56bdad5366996d111b56732fab7a2bf5dcd2518e8b03e6eb4b",
+      "bytes": 504
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/before-close.json": {
+      "sha256": "880c4450be702971a024274760db21c7b907ba59591267e462d3736fd7e67de8",
+      "bytes": 114
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/before-launch.log": {
+      "sha256": "72364819549718b01d4dc68e9e51bad268d9de48e27fbfb5ab968b56e6c9c3b2",
+      "bytes": 308891
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/before.log": {
+      "sha256": "72364819549718b01d4dc68e9e51bad268d9de48e27fbfb5ab968b56e6c9c3b2",
+      "bytes": 308891
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/case.json": {
+      "sha256": "ca195c1a84ccdcf1465842461b4d39e2e182bc47a04fca5dfc650ed5905d08d4",
+      "bytes": 947
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/close-response.log": {
+      "sha256": "aa9ce57b52913a8c5e959a47d120a872aa98ee3f23644bdebb8cee6863bf30e9",
+      "bytes": 124
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/health.json": {
+      "sha256": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+      "bytes": 71
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/klog.log": {
+      "sha256": "52ce04f8e8ed25fcd223830ef05820fb1e0edc2e508b858433dc99ff9fbac0ce",
+      "bytes": 34079
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/launch-response.log": {
+      "sha256": "604e49833c2a2570402df40d77c1f0f09d848d6218dd0cbd5a40011744f5af5b",
+      "bytes": 167
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/observed.log": {
+      "sha256": "9d481fdb1f5bc9f521dd1ff194739a80ebae8171617f339f40b4ee826df8705a",
+      "bytes": 311327
+    },
+    "results/provider-fixed-store-run-20261011T203845Z/registration.json": {
+      "sha256": "4edcc0b3d3cbb499026f917b0a238d2a267cd6d008c4463dc04236167d71e5a4",
+      "bytes": 149
+    }
+  },
+  "limitations": [
+    "One dispatch, one cycle, one console and firmware",
+    "No vector-add, repeated dispatch/lifecycle, wave, scratch, HIP runtime or framework qualification",
+    "Uses explicit shell-managed lifecycle; ordinary C exit remains unresolved"
+  ],
+  "next_decision": "Prepare a bounded two-dispatch vector candidate offline, then qualify repeated clean cycles; G2 stays open"
+}

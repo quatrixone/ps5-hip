@@ -4,8 +4,10 @@ Status: the PPSA99014 CPU shell-managed lifecycle passed one run on .30, firmwar
 6.02, including runtime checks, application finalization, self-stop and service
 health. See `evidence/native-shell-exit.json`. Ordinary C exit still faults after
 main returns; do not repeat those diagnostics. The first GPU candidate failed with
-CPU SIGSEGV/RIP zero after the pre-submit checkpoint; GPU execution is unproven.
-See `evidence/native-indexed-store-first.json`; do not rerun the failed case. The .40
+CPU SIGSEGV/RIP zero after the pre-submit checkpoint. Its isolated import-provider
+correction then passed one indexed-store GPU dispatch and clean lifecycle; see
+`evidence/native-provider-fixed-store.json`. Preserve both runs; do not rerun the
+failed case in `evidence/native-indexed-store-first.json`. The .40
 loader-failure process had unresolved teardown; establish recovery before reuse.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.

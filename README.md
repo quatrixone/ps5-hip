@@ -6,13 +6,14 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: G1's reproducible compiler/platform contract passed offline; 26 host
-tests pass. One CPU startup/finalization/shell-close experiment passed on FW 6.02.
-No GPU execution or general HIP runtime is qualified yet.**
-The first GPU candidate reached its pre-submit checkpoint, then faulted on the CPU
-at RIP zero. Offline diagnosis found and corrected a wrong AGC import provider;
-the isolated replacement is deployed but unrun because the console became busy. See
-[the fault analysis](docs/FIRST_GPU_FAULT.md).
+**Status: a real HIP-compiled indexed-store kernel executed natively on PS5,
+with all 73 results exact, unchanged guards and clean title teardown on FW 6.02.
+G1 passed offline; G2 remains in progress. No general HIP runtime is qualified.**
+The first GPU candidate faulted on a CPU import boundary. Changing only the
+`sceAgcSuspendPoint` provider produced the successful run. See
+[the execution receipt](evidence/native-provider-fixed-store.json) and
+[the fault analysis](docs/FIRST_GPU_FAULT.md). The 26 host tests pass; vector-add,
+repeated dispatches and repeated clean lifecycle qualification remain ahead.
 The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
 requirement, selected LLVM 18 route, TheRock comparison and remaining limits.
 The repository is private.

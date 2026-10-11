@@ -4,10 +4,18 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
-- The provider-corrected image is deployed and byte-verified on .30, but its run
-  was blocked before launch when unrelated PPSA99008 PID 355 became active.
-  No controller was sent; both owned locks were released. The failed GPU image/log
-  remain preserved. See `evidence/native-provider-fixed-no-run.json`.
+- The provider-corrected indexed-store passed once on idle .30, FW 6.02: 73 exact
+  values, unchanged full guards, explicit allocation closure, complete application
+  finalization and title self-stop before host cleanup. Sandbox/runtime/image
+  released and all declared services stayed reachable. This proves one native
+  HIP-compiled GPU dispatch; full G2 remains open. See
+  `evidence/native-provider-fixed-store.json`. The earlier busy-console no-run
+  and failed image/log remain preserved.
+- The provider-fixed vector-add candidate is packaged and locally verified at
+  the same isolated source `b8bc2b0`. It has not been deployed or run and remains
+  conditional on fresh idle/identity checks. Corrected indexed-store has now
+  passed once, including exact output, guards and clean teardown; full G2 remains
+  open. See `evidence/offline-provider-fixed-vector.json`.
 - First GPU-candidate run on .30, FW 6.02, failed with CPU SIGSEGV at RIP zero
   after the pre-submit checkpoint. No GPU execution is proven. PPSA99014 PID 341
   stopped, sandbox/runtime/image were released, and declared services remained
@@ -105,7 +113,8 @@ was running at this checkpoint. Inspect that build before restarting anything.
 Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
 `evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
 
-The next action is one separately prepared, bounded corrected-provider experiment.
+The next action is an offline two-dispatch vector-add profile, followed by
+separately observed clean lifecycle cycles of its frozen image when idle.
 Offline analysis confirmed that `sceAgcSuspendPoint` was imported from the wrong
 provider (`libSceAgcDriver` instead of the pinned reference's `libSceAgc`). Its null
 tail-import fits the captured registers; runtime GOT contents were not captured.
@@ -120,13 +129,27 @@ The new stage is `.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_stor
 image SHA `679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442`.
 FSELF, UFS2, extracted files and local controller/candidate verification pass;
 26 CTests pass, including the actual native import provider regression. See
-`evidence/offline-agc-provider-fix.json`. It has not run: deployment succeeded,
-but the next preflight found PPSA99008 active. Use the existing deployment only
-after a fresh idle check, with `results/run-provider-fixed-store.py`; do not rerun
-its deployment script, which expects the superseded image and log. No unrelated
-title may be closed. See `evidence/native-provider-fixed-no-run.json`.
+`evidence/offline-agc-provider-fix.json`. After an earlier busy-console no-run,
+it passed once in `results/provider-fixed-store-run-20261011T203845Z` (PID 362).
+See `evidence/native-provider-fixed-store.json`. The deployed corrected image and
+its successful result log now exist: preserve both before any later experiment.
+Do not reuse deployment/run scripts with stale image or log-absence assumptions.
 The current host-test
 cache selects that worktree's converted ELF for the artifact import check.
+
+The following vector-add case is ready offline at the same source `b8bc2b0`:
+`.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add-93752ddb9ec6`,
+image SHA `fb2ecdc7feded72005ef5c228b02511071de707ef87ac47c1728a7e49f55fb57`.
+Its full import map matches the corrected store, and device/helper/libc bytes
+are identical; only the vector-selected canary object changes among the nine
+application objects. FSELF, UFS2, extracted-file and local case/controller checks
+pass. The corrected store prerequisite has now passed once, with exact output,
+guards, clean teardown and healthy services, in
+`results/provider-fixed-store-run-20261011T203845Z`. Vector-add still requires a
+fresh idle/identity preflight; it has not run and full G2 remains open. Prepare a
+fixed two-dispatch vector profile to combine vector and queue-reuse coverage in
+the next console milestone, retaining this single-vector control. The store
+candidate remains unchanged. See `evidence/offline-provider-fixed-vector.json`.
 
 Do not rerun the failed candidate. It is revoked for new runs and preserved at source `15bfc35`, stage
 `gfx1013-indexed_store-3d295773d2fb`, image SHA
@@ -149,8 +172,9 @@ CPU image/log, recheck idle immediately before launch, observe for an absolute
 20 seconds and close only PPSA99014 once with a separate eight-second deadline.
 No automatic retry or guessed process termination. Read `docs/CONSOLE_WORKFLOW.md`,
 the shared runbook and `.local/ENVIRONMENT.md` before traffic. These single-case
-scripts have now run: the remote image is the failed GPU candidate, its result log
-exists, and the successful CPU image/log remain preserved. Do not reuse them as
+scripts have now run: the remote image is the provider-corrected GPU candidate,
+its successful result log exists, and the failed GPU and successful CPU evidence
+remain preserved. Do not reuse them as
 fresh-case scripts or erase that evidence.
 
 The CPU shell-managed lifecycle passed once on .30, FW 6.02, at source `3346166`,
@@ -203,8 +227,9 @@ Read only the active goal and relevant source slices. Raw logs stay in ignored
 versions, object hashes and instruction inventories without local user paths.
 `evidence/offline-native-canaries.json` records linked native candidates and their
 source/dependency hashes; it is not hardware qualification.
-`evidence/offline-native-packages.json` records all five `PPSA99012` package
-manifests, hashes, source commit and the pinned image tool's binary provenance.
+`evidence/offline-native-packages.json` preserves the five original `PPSA99012`
+packages and later `PPSA99014` manifests, hashes, source revisions and revocations,
+including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
@@ -218,3 +243,4 @@ manifests, hashes, source commit and the pinned image tool's binary provenance.
 
 - 2026-10-11 | G1 passed offline | LLVM18 + gfx1013 selected; isolated reproduction, TheRock comparison, 25 host tests | evidence/offline-g1-acceptance.json | next: bounded G2 store run
 - 2026-10-11 | G2 failed | 15bfc35 | FW6.02 PPSA99014 | CPU SIGSEGV/RIP0 after SUBMIT; title released, services reachable | evidence/native-indexed-store-first.json | next: offline fault mapping
+- 2026-10-11 | G2 progress | b8bc2b0 | FW6.02 PPSA99014 | one indexed-store GPU dispatch and clean teardown passed | evidence/native-provider-fixed-store.json | next: repeated vector dispatch
