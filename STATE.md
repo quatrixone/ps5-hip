@@ -201,6 +201,10 @@ Offline work ahead of G2/G3/G4:
   extracted-file and main catalog/controller verification; all 76 previous
   artifacts are unchanged. See `evidence/offline-vector-twice-package.json`.
   Image SHA `1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5`.
+  Ten parser/resource/launch/memory/submission/AGC sanitizer tests also pass from
+  this exact isolated source, separately from main's 27 tests. Source and all
+  114 existing native build/stage files remain unchanged; see
+  `evidence/offline-candidate-host-c37f0db.json`.
   Prepare preservation controls before deployment; this profile has not run.
 - Host CTests include registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,

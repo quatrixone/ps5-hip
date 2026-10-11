@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-11T20:53:47.699749+00:00",
+  "scope": "offline binding and AST-extracted/fake I/O checks only; no operational scripts executed",
+  "stage": ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792",
+  "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+    "bytes": 3571712
+  },
+  "kernel": "vector_add_twice",
+  "dispatches": 2,
+  "template_sha256_unchanged": {
+    "deploy-vector-twice.template.py": "cb10cada757a7168965d8d07ca90c140eb2c37bd74f78f12e933ca94e40680c8",
+    "run-vector-twice-cycle1.template.py": "e1e93fdf659cd061ed75c3bc81dcba571bc5224753a4f0686f01a264c46dd4f5",
+    "run-vector-twice-cycle2.template.py": "b734bd926f6716be592fb185d4d9e5fc96f7428975a2c76141c36e8b96774a5c"
+  },
+  "script_sha256": {
+    "results/bind-vector-twice-cycle1.py": "430b22fd4abbfa14bd4465333cdc148d11e6ca87c104075b033f0b7e5570f308",
+    "results/deploy-vector-twice.py": "9cbad5a763f0fd63960d62127c246823879b696c0a997be58916eb2abb96f8b2",
+    "results/run-vector-twice-cycle1.py": "26d50c49e6482899d832e9a867a81e14b93cd0586370d04080e923a53483a281",
+    "results/capture-vector-twice-operation.py": "cbf0f59ec8158ee9c93c53a972940bae61303d7dbb3631bbdcd8b4e509b0b304",
+    "results/check-vector-twice-bound.py": "5279260b9aade2a4db1cb7f2b7cade5d2c6936cf18d616eaf2c416b5e7b129ea",
+    "results/check-vector-twice-capture.py": "6899a0adaa3ef1bc4e3ff44e88cb011248aa47a797216df6fc2ab5d00395745c",
+    "results/check-vector-twice-bound-cycle1-deadlines.py": "d3f8199d9cbe304753810f7c0924ab413082b570287cef69ac9abaed750cf456",
+    "results/check-vector-twice-bound-cycle2-deadlines.py": "8c3f427681ee194d842708f07fd4ad1e32ef1c42ad204bc9962c9c4e43b9bec8"
+  },
+  "checks": {
+    "check-vector-twice-bound": {
+      "exit_code": 0,
+      "stdout_sha256": "17475fb1b86579d881cdd89cd9554d1f2235ed2414aaa5580125266c9cd4e1ee"
+    },
+    "check-vector-twice-capture": {
+      "exit_code": 0,
+      "stdout_sha256": "e1fad22404de7c6c44060e23690cf37699f9ad242a242ba951e0c5d92062db8b"
+    }
+  },
+  "local_verification_sha256": "eecbf8610806d6937fac40effdde94be93a5e322c4f9c21ee1adf865ac73152a",
+  "cycle2": "inert unconditional guard and unresolved first-cycle acceptance identities retained",
+  "capture": "mandatory explicit deploy OR cycle1 argument; script hash checked before output; durable stdout/stderr and started/final returncode receipt; no automatic chaining or retries",
+  "preservation": {
+    "successful_store_image_sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+    "successful_store_log_sha256": "38ce830f71a2db56bdad5366996d111b56732fab7a2bf5dcd2518e8b03e6eb4b",
+    "successful_store_log_bytes": 504,
+    "earlier_failed_and_cpu_artifacts": "fake FTP verifies unchanged"
+  },
+  "bounds": [
+    "run launch and observation share 20-second monotonic deadline",
+    "FTP observation SIGALRM bounds whole blocking phase and discards timeout-desynchronized stream",
+    "exact-title cleanup has separate 8-second deadline; service checks bounded separately"
+  ],
+  "limits": [
+    "No console idle state, remote bytes, native execution or teardown proven by preparation.",
+    "Deployment/preflight FTP socket and byte bounds are inherited; no overall transfer duration deadline.",
+    "No transaction rollback after a partial remote rename failure.",
+    "Capture final receipt cannot survive host/process termination before finally; partial stdout/stderr and started receipt remain.",
+    "Cycle2 requires reviewed cycle1 evidence and new binding before any execution."
+  ]
+}
