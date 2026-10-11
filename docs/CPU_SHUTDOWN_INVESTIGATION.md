@@ -102,3 +102,22 @@ an override, and unknown or ambiguous overrides must fail before packaging.
 
 Compact provenance and limitations: `evidence/offline-exit-reference.json`.
 Firmware files and bounded disassembly extracts remain local and ignored.
+
+The reference loader's entry trampoline also confirms the provenance of the
+second application-entry argument: initialization supplies a callback at 0x33cc0,
+and the trampoline passes it in RSI. That callback walks loaded-module records,
+invokes finalizers and returns. This supports the startup code's teardown-callback
+interpretation; it does not prove the callback completed in our 6.02 run.
+
+The converter integration suite now includes a fixture compiled against the
+actual pinned SystemService stub. It imports both `sceShellCoreUtilExitApp` and
+`sceSystemServiceHideSplashScreen`, then independently verifies two library IDs
+within a single needed module. This fixture is link-only, has no complete native
+startup, and is neither signed nor packaged. Five integration cases pass.
+
+Before a shell-managed lifecycle experiment, define which application-owned
+objects and exit callbacks are finalized and which platform resources remain
+alive to send the request. Calling the service before cleanup, or calling it
+after destroying its required runtime state, is not a justified solution. Keep
+ordinary C exit failure tracked separately even if a native self-close contract
+can be qualified for finite compute jobs.

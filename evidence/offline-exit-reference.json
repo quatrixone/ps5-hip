@@ -29,6 +29,13 @@
     "qualification": "Not called. Firmware 6.02 binding and behavior remain unverified."
   },
   "with_value_caution": "The reference sceShellCoreUtilExitAppWithValue reads its argument as a pointer and bounds a string copy; do not guess that it accepts an integer exit status.",
+  "loader_callback_reference": {
+    "entry_offset": "0x32cb4",
+    "initialization_offset": "0x32f60",
+    "callback_offset": "0x33cc0",
+    "observation": "Loader initialization writes the callback address through its second argument. The entry trampoline places this value in RSI before jumping to the application. The callback walks loaded-module records and invokes their finalizers, then returns.",
+    "limitation": "This supports treating the second native entry argument as a teardown callback in the 12.70 reference. It does not prove callback completion in the 6.02 run or explain kernel exit policy."
+  },
   "converter_constraint": {
     "revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
     "source": "tooling/native/elf_object.cpp and tooling/native/sce_module_writer.cpp",

@@ -87,10 +87,10 @@ class ImportLibraries(unittest.TestCase):
         cls.temporary.cleanup()
 
     @classmethod
-    def convert(cls, *bindings, tool=None, success=True):
+    def convert(cls, *bindings, tool=None, success=True, pie=None):
         path = cls.work / "output.elf"
         path.unlink(missing_ok=True)
-        command = [str(tool or BUILD / "ps5-native-tool"), "link", "--in", str(BUILD / "llvm-pie.elf"),
+        command = [str(tool or BUILD / "ps5-native-tool"), "link", "--in", str(pie or BUILD / "llvm-pie.elf"),
                    "--out", str(path), "--stub-dir", str(ROOT / ".deps/sdk/target/lib"),
                    "--stub", str(BUILD / "libSceAgc.so"), "--stub", str(BUILD / "libSceAgcDriver.so"),
                    "--file-name", "eboot.elf"]
@@ -140,6 +140,35 @@ class ImportLibraries(unittest.TestCase):
         for second in ("libX", "libY"):
             self.convert("libSceLibcInternal:exit:libX",
                          "libSceLibcInternal:exit:" + second, success=False)
+
+    def test_real_shell_service_import_uses_distinct_library(self):
+        # Link-only fixture: no runtime startup, signing, packaging or execution.
+        source = self.work / "shell-import.cpp"
+        source.write_text('extern "C" int sceShellCoreUtilExitApp();\n'
+                          'extern "C" int sceSystemServiceHideSplashScreen();\n'
+                          'volatile int status = 1;\n'
+                          'extern "C" void _start() {\n'
+                          ' status = sceSystemServiceHideSplashScreen();\n'
+                          ' status = sceShellCoreUtilExitApp();\n}\n')
+        obj, pie = self.work / "shell-import.o", self.work / "shell-import.elf"
+        lock = json.loads((ROOT / "dependencies.json").read_text())
+        native = ROOT / ".deps" / ("native-tools-" + lock["native_tools"]["revision"])
+        subprocess.run([str(ROOT / "tools/ps5-clangxx"), "-O2", "-fPIC", "-fvisibility=hidden",
+                        "-fno-stack-protector", "-c", str(source), "-o", str(obj)], check=True, capture_output=True)
+        subprocess.run(["ld.lld-18", "-pie", "-T", str(native / "ps5-pie.ld"), "-z", "max-page-size=0x4000",
+                        "--version-script", str(BUILD / "symbols.map"), "-e", "_start", "-o", str(pie),
+                        str(obj), str(ROOT / ".deps/sdk/target/lib/libSceSystemService.so")],
+                       check=True, capture_output=True)
+        data = self.convert("libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil", pie=pie)
+        path = self.work / "shell-native.elf"
+        path.write_bytes(data)
+        modules, libraries, symbols = read_imports(path)
+        self.assertEqual(symbols[nid("sceShellCoreUtilExitApp")],
+                         ("libSceSystemService", "libSceShellCoreUtil"))
+        self.assertEqual(symbols[nid("sceSystemServiceHideSplashScreen")],
+                         ("libSceSystemService", "libSceSystemService"))
+        self.assertEqual(list(modules.values()), ["libSceSystemService"])
+        self.assertCountEqual(libraries.values(), ["libSceSystemService", "libSceShellCoreUtil"])
 
 
 if __name__ == "__main__":
