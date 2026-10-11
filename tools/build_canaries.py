@@ -72,7 +72,9 @@ def main():
     require_tool_versions(versions, expected_version)
     args.output.mkdir(parents=True, exist_ok=True)
     source = ROOT / "kernels" / (args.fixture + ".hip")
-    report = {"hardware_validated": False, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+    report = {"hardware_validated": False,
+              "recipe_sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+              "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
               "tool_versions": {name: text.splitlines()[0] for name, text in versions.items()}, "profiles": []}
     for target in ("gfx1013", "gfx1030"):
         directory = args.output / target
@@ -115,6 +117,7 @@ def main():
                            for prefix in ("buffer_load_", "buffer_store_")):
                     raise RuntimeError(f"{name} did not exercise buffer scratch loads and stores")
         report["profiles"].append({"target": target, "compile_command": compile_args,
+                                    "driver_sha256": hashlib.sha256(trace.encode()).hexdigest(),
                                     "flat_scratch_setup_present": "HW_REG_FLAT_SCR" in disassembly,
                                     "kernel_inventory": sorted(actual),
                                     "isa_inventory": isa,

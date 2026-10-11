@@ -31,6 +31,8 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
     # Committed evidence is the authority; adjacent generated receipts alone are not.
     if {"manifest": manifest, "package": package} not in packages["candidates"]:
         raise ValueError("candidate does not match frozen package evidence")
+    if package["image"]["sha256"] in packages.get("revoked_images", {}):
+        raise ValueError("candidate revoked: " + packages["revoked_images"][package["image"]["sha256"]])
     if control != controller_evidence["controller_build"]:
         raise ValueError("controller receipt does not match frozen evidence")
     if any(item["title_id"] != title for item in (manifest, package, control)):

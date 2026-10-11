@@ -6,12 +6,38 @@ import json
 import pathlib
 import shutil
 import subprocess
+from build_canaries import require_device_linker, require_tool_versions
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def run(*args):
     subprocess.run([str(arg) for arg in args], check=True, cwd=ROOT)
+
+
+def verified_device_object(root, target, version):
+    directory = root / "build/canaries"
+    report = json.loads((directory / "build.json").read_text())
+    for field, path in (("recipe_sha256", root / "tools/build_canaries.py"),
+                        ("source_sha256", root / "kernels/canary.hip")):
+        if report.get(field) != hashlib.sha256(path.read_bytes()).hexdigest():
+            raise ValueError("device recipe or kernel changed; rebuild device objects")
+    require_tool_versions(report["tool_versions"], version)
+    profiles = [p for p in report["profiles"] if p["target"] == target]
+    if len(profiles) != 1:
+        raise ValueError("missing or duplicate device target")
+    profile = profiles[0]
+    data = (directory / target / "canary.hsaco").read_bytes()
+    trace = (directory / target / "driver.txt").read_bytes()
+    if (hashlib.sha256(data).hexdigest() != profile["code_sha256"] or
+            len(data) != profile["bytes"] or
+            hashlib.sha256(trace).hexdigest() != profile.get("driver_sha256")):
+        raise ValueError("device object or driver trace changed")
+    linker = shutil.which("ld.lld-18")
+    if not linker:
+        raise ValueError("pinned device linker unavailable")
+    require_device_linker(trace.decode(), linker)
+    return data, report
 
 
 def main():
@@ -29,6 +55,8 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
+    device_data, device_report = (verified_device_object(ROOT, args.target, version)
+                                  if args.kernel != "runtime" else (None, None))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
@@ -149,7 +177,7 @@ def main():
     shutil.copyfile(helper, candidate / "lapy.elf")
     artifacts = ["eboot.bin", "lapy.elf", "sce_module/libc.prx"]
     if args.kernel != "runtime":
-        shutil.copyfile(ROOT / "build/canaries" / args.target / "canary.hsaco", candidate / "canary.hsaco")
+        (candidate / "canary.hsaco").write_bytes(device_data)
         artifacts.append("canary.hsaco")
     receipt = {"hardware_validated": False, "target": args.target, "kernel": args.kernel,
                "shutdown_mode": "shell-request-probe" if args.shell_exit_probe else "platform-exit",
@@ -158,9 +186,12 @@ def main():
                                              for name in files},
                "llvm_version": version,
                "host_zlib": zlib_receipt, "elevation": elevation_receipt,
+               "device_build": device_report,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
+                                 [ROOT / "tools/build_canaries.py"] +
+                                 ([ROOT / "kernels/canary.hip"] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},

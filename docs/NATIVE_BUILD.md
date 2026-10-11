@@ -95,6 +95,13 @@ before returning zero. Command/marker cleanup failure throws even after completi
 unresolved GPU ownership parks without unwinding or requesting shell closure.
 Any nonzero main result also parks for the bounded exact-title controller.
 
+GPU builds verify the current device recipe, kernel source, object bytes and
+driver trace before doing native work. Their receipt embeds the device-build
+report and tracks the device recipe/kernel in staged source hashes. Old receipts
+without actual-linker provenance are rejected: rebuild both device fixtures first.
+Local experiment verification also rejects explicitly revoked frozen image hashes;
+their historical receipts and image files remain preserved.
+
 The candidate uses native title startup, the pinned SDK's static libc++, ABI and
 unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel
 and libSceLibcInternal. The SDK unwinder needs explicit start/end symbols for

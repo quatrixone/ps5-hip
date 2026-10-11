@@ -543,5 +543,8 @@
   "limitations": [
     "Filesystem check and extraction use the same pinned UFS2 implementation",
     "ShadowMount registration, startup, GPU behavior and console teardown remain unverified"
-  ]
+  ],
+  "revoked_images": {
+    "aaa74094c557be7234ed38f3c32da058bdf471601ac0acac2b257d164f9cd151": "Incorrect device linker provenance: LLD 21 selected despite intended LLVM 18 lock; preserved for history only."
+  }
 }

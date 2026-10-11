@@ -53,6 +53,12 @@ class CaseTests(unittest.TestCase):
         self.assertFalse(result["hardware_gate_passed"])
         self.assertEqual(result["shutdown_mode"], "platform-exit")
 
+    def test_revoked_frozen_image_is_rejected(self):
+        digest = self.packages["candidates"][0]["package"]["image"]["sha256"]
+        self.packages["revoked_images"] = {digest: "incorrect linker provenance"}
+        with self.assertRaisesRegex(ValueError, "candidate revoked"):
+            self.verify()
+
     def test_frozen_shutdown_mode_is_exposed_and_restricted(self):
         for mode, kernel, valid in (("shell-request-probe", "runtime", True),
                                      ("shell-request-probe", "vector_add", True),
