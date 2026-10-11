@@ -15,7 +15,9 @@ Updated: 2026-10-11, America/New_York.
 - The builder now reproduces the pinned, independently authored libc.prx loader
   companion. Its raw and signed hashes match the native template's known hashes;
   FSELF integrity passes. Staging rejects its absence. This corrected candidate
-  has not been run.
+  is packaged as `gfx1013-runtime-4a0334b256d6` at source `1b6f717`, with clean
+  filesystem/extraction and artifact checks. See `evidence/offline-loader-companion.json`.
+  It has not been run.
 - A PPSA99012 CPU image was uploaded and byte-verified on idle .40 (FW 12.70).
   ShadowMount mounted UFS2 but rejected registration because icon0.png was absent.
   No title was launched. The icon fix and staging regression test pass; the old
@@ -63,7 +65,6 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-Freeze the corrected PPSA99014 package with its clean-room loader companion.
 Establish complete teardown/idle state before another bounded CPU startup case;
 do not repeat the failed bytes or proceed to a GPU case.
 Continue offline preparation of title-specific deployment/log retrieval controls.
