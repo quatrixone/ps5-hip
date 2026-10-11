@@ -73,12 +73,17 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-The pinned TheRock compiler component is configured and its build has started.
+The pinned TheRock compiler component is still building. Its build-tree AMD
+Clang/LLD 24 tools compiled all four frozen fixtures; the current loader rejects
+their documented new target-ID spelling. Kernargs match, but resource-register
+settings and instruction encodings change. LLVM 18 remains selected. See
+`docs/THEROCK_BINARY_COMPARISON.md` and its preliminary evidence receipt.
 WSL task directory: `/tmp/ps5hip-therock-comparison`; build log: `build.log` there.
 The active exec session was `40611` at this checkpoint. Poll that handle and
 inspect the same build before restarting anything. Eight compile jobs, one LLVM
-link job and two Flang jobs are configured. No compiler binary comparison has
-passed. Exact source heads/options: `evidence/offline-therock-build-setup.json`.
+link job and two Flang jobs are configured. Full component completion and staged
+tool verification remain outstanding. Exact source heads/options:
+`evidence/offline-therock-build-setup.json`.
 The ignored `results/build-therock-compiler.py` contains the configure/build
 invocation. All changes and build outputs remain local; no console run or push.
 The LLVM subproject itself configured successfully and has begun its 8,739-step

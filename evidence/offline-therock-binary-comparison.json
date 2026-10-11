@@ -1,0 +1,3382 @@
+{
+  "schema": 1,
+  "classification": "preliminary-therock-buildtree-binary-comparison",
+  "observed_utc": "2026-10-11T19:31:00.435398+00:00",
+  "full_component_build_complete": false,
+  "hardware_validated": false,
+  "selected_route_changed": false,
+  "therock_revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+  "llvm_revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+  "comparison_receipt_sha256": "047b44a8f0b5ad40def16f48fd6e16a80533da2cbd681d96b45f6223d0a24f27",
+  "comparison_recipe_sha256": "41438fabd63a73f47a5fdb69774a81eaf36b040e42fede4dc78ba143c666119d",
+  "baseline_recipe_sha256": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+  "analysis_script_sha256": "1531d138fc29e238628c5f255d62afcdb427ce78c437c46565298140a5d8e8e5",
+  "tools": {
+    "clang++": {
+      "sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+      "version": "AMD clang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)",
+      "bytes": 198096,
+      "resolved_shared_libraries": [
+        {
+          "name": "libclang-cpp.so.24.0git",
+          "sha256": "2b67c42a80d783ac7c55844324648b24ac0bb249ca7c9a3660986bdf354e7b28",
+          "bytes": 88753640,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+          "bytes": 137405208,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+          "bytes": 2735712,
+          "origin": "host system"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+          "bytes": 2190608,
+          "origin": "host system"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+          "bytes": 1198376,
+          "origin": "host system"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+          "bytes": 187120,
+          "origin": "host system"
+        },
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+          "bytes": 254864,
+          "origin": "host system"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+          "bytes": 133744,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+          "bytes": 887384,
+          "origin": "TheRock build tree"
+        }
+      ]
+    },
+    "lld": {
+      "sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+      "version": "AMD LLD 24.0.0 (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525) (compatible with GNU linkers)",
+      "bytes": 8345568,
+      "resolved_shared_libraries": [
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+          "bytes": 133744,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+          "bytes": 887384,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+          "bytes": 137405208,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+          "bytes": 2735712,
+          "origin": "host system"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+          "bytes": 2190608,
+          "origin": "host system"
+        },
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+          "bytes": 254864,
+          "origin": "host system"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+          "bytes": 1198376,
+          "origin": "host system"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+          "bytes": 187120,
+          "origin": "host system"
+        }
+      ]
+    },
+    "llvm-readobj": {
+      "sha256": "dcd53f7ca7e8305819cd368a5dab2289ed56c07421da28d2f943eb6d11b820be",
+      "version": "AMD LLVM version 24.0.0git",
+      "bytes": 2472064,
+      "resolved_shared_libraries": [
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+          "bytes": 137405208,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+          "bytes": 2735712,
+          "origin": "host system"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+          "bytes": 187120,
+          "origin": "host system"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+          "bytes": 2190608,
+          "origin": "host system"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+          "bytes": 133744,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+          "bytes": 887384,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+          "bytes": 1198376,
+          "origin": "host system"
+        },
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+          "bytes": 254864,
+          "origin": "host system"
+        }
+      ]
+    },
+    "llvm-objdump": {
+      "sha256": "03918493b00227d071b1c523b391a5c3df43f285e4827bebd5a20469e5e954c1",
+      "version": "AMD LLVM version 24.0.0git",
+      "bytes": 1235104,
+      "resolved_shared_libraries": [
+        {
+          "name": "libLLVM.so.24.0git",
+          "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+          "bytes": 137405208,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+          "bytes": 2735712,
+          "origin": "host system"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+          "bytes": 1198376,
+          "origin": "host system"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+          "bytes": 2190608,
+          "origin": "host system"
+        },
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+          "bytes": 254864,
+          "origin": "host system"
+        },
+        {
+          "name": "librocm_sysdeps_z.so.1.3.2",
+          "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+          "bytes": 133744,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "librocm_sysdeps_zstd.so.1.5.7",
+          "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+          "bytes": 887384,
+          "origin": "TheRock build tree"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+          "bytes": 187120,
+          "origin": "host system"
+        }
+      ]
+    }
+  },
+  "source_references": [
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/docs/AMDGPUUsage.rst",
+      "sha256": "266527b7e07fccc825dde074a326ac76cffb82b685ffaeb114bb698f6c915f9d"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/Target/AMDGPU/AMDGPUHSAMetadataStreamer.cpp",
+      "sha256": "f12a300fe44f02b79d877a6bd7d4ca87f5477eb52137ce77182c8666b2504e41"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/TargetParser/AMDGPUTargetParser.cpp",
+      "sha256": "92679d4d0ea5de89cdbbab4763ef541102d1672fac73d210f425527383445e53"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/include/llvm/Support/AMDHSAKernelDescriptor.h",
+      "sha256": "867b8bfabc6d38e97fe83a4ea5bed76f2e29306ddfde5be9a42ffed6fa68081f"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/Target/AMDGPU/MCTargetDesc/AMDGPUMCCodeEmitter.cpp",
+      "sha256": "caef8ab101e97e9cc01f5c0b1b5a49aa10e3784445c5ddef7b8058e29289a9e4"
+    },
+    {
+      "url": "https://github.com/ROCm/llvm-project/blob/6da731510c233517c1eeb691d3446d80e9e32525/llvm/lib/Target/AMDGPU/VOPInstructions.td",
+      "sha256": "5c84fd9263381edc59a10f33b134d3df452d6c2d7d5450b8c0bb20210515ef17"
+    }
+  ],
+  "cases": [
+    {
+      "target": "gfx1013",
+      "fixture": "canary",
+      "source_sha256": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "baseline_object_sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+      "therock_object_sha256": "cab247dba49d41c45c33932e7477dd78f365ef6bfe15f51c5980ed74bb1d292d",
+      "baseline_bytes": 4096,
+      "therock_bytes": 4784,
+      "baseline_elf_flags": "0x142",
+      "therock_elf_flags": "0x142",
+      "baseline_abi_version": 3,
+      "therock_abi_version": 3,
+      "baseline_metadata_target": "amdgcn-amd-amdhsa--gfx1013",
+      "therock_metadata_target": "amdgpu10.13-amd-amdhsa-unknown-gfx1013",
+      "baseline_metadata_version": [
+        1,
+        2
+      ],
+      "therock_metadata_version": [
+        1,
+        2
+      ],
+      "driver_trace_sha256": "88ff068a222c59894e961a96b87be50045203c0b505003f0a6f256bede668a66",
+      "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metadata_report_sha256": "51990c60caa8ba297524baae0f8b47e2a0b67513fa71a2c4f469f30d9ce61c78",
+      "isa_report_sha256": "f6f06a0bd9682fc18c2f003cd145dcb555d0a4d550cdd903faad62e5374019bd",
+      "loader_rejection": "metadata target mismatch",
+      "kernels": [
+        {
+          "name": "indexed_store",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 8,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 12,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "indexed_store",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "indexed_store.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 3,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 8,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 12,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "indexed_store",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "indexed_store.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 3,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 1920,
+            "entry_va": 6144,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 12,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 88,
+            "entry_symbol_sha256": "eb05bf9233c3ba8f86eae35d0fed30c75da12a04a326e7df4220508b07a50a91"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 2048,
+            "entry_va": 6400,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 12,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 88,
+            "entry_symbol_sha256": "b931df66a49356328b1ee6e841578ebdf74b22964a1ab382ed0ad961028adfb0"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 2,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshlrev_b64": 1,
+              "v_xor_b32_e32": 1,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 42
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "8ff8fa2fec6a154f779f5e7081858f34a365cd1e3cab0ab53892fa1a9e4e7cd9",
+            "instruction_count_without_padding": 15,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x8",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 13",
+              "s_load_dwordx2 s[0:1], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 2,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshlrev_b64": 1,
+              "v_xor_b32_e32": 1,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 42
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "8ff8fa2fec6a154f779f5e7081858f34a365cd1e3cab0ab53892fa1a9e4e7cd9",
+            "instruction_count_without_padding": 15,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x8",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 13",
+              "s_load_dwordx2 s[0:1], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": true,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "vector_add",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 16,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 24,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 28,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "vector_add",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "vector_add.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 8,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 16,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 24,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 28,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "vector_add",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "vector_add.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 8,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 1984,
+            "entry_va": 6400,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 28,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 136,
+            "entry_symbol_sha256": "f5d9015f7600343833e3dca32e0ed5cb6e7ddc81ae5d740636a900076ea549e2"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 2112,
+            "entry_va": 6656,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 28,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 136,
+            "entry_symbol_sha256": "a8b641385b300202a6f47e50dd62957028348ce1978f80279dc5f61ccec9338a"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 3,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "s_load_dwordx2": 1,
+              "v_lshlrev_b64": 1,
+              "v_add_co_u32": 3,
+              "v_add_co_ci_u32_e32": 3,
+              "global_load_dword": 2,
+              "v_add_f32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_code_end": 62
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "c6bb91a32e72441056ada3368d252512493315306a9e5feb617bd2f6acf26e49",
+            "instruction_count_without_padding": 23,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x18",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 25",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 3,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "s_load_dwordx2": 1,
+              "v_lshlrev_b64": 1,
+              "v_add_co_u32": 3,
+              "v_add_co_ci_u32_e32": 3,
+              "global_load_dword": 2,
+              "v_add_f32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_code_end": 62
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "c6bb91a32e72441056ada3368d252512493315306a9e5feb617bd2f6acf26e49",
+            "instruction_count_without_padding": 23,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x18",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 25",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": true,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        }
+      ],
+      "actual_driver": {
+        "compiler_binary": "clang-24",
+        "compiler_sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "linker_binary": "lld",
+        "linker_sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "triple": "amdgpu10.13-amd-amdhsa",
+        "target_cpu": "gfx1013",
+        "code_object_version_option": "-mcode-object-version=5",
+        "linker_emulation": "elf64_amdgpu"
+      }
+    },
+    {
+      "target": "gfx1030",
+      "fixture": "canary",
+      "source_sha256": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "baseline_object_sha256": "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f",
+      "therock_object_sha256": "7d3ed37ed20859eb015890b9a1bee228a871e6cc5588ad54210ccd5e3151090a",
+      "baseline_bytes": 4096,
+      "therock_bytes": 4784,
+      "baseline_elf_flags": "0x36",
+      "therock_elf_flags": "0x36",
+      "baseline_abi_version": 3,
+      "therock_abi_version": 3,
+      "baseline_metadata_target": "amdgcn-amd-amdhsa--gfx1030",
+      "therock_metadata_target": "amdgpu10.30-amd-amdhsa-unknown-gfx1030",
+      "baseline_metadata_version": [
+        1,
+        2
+      ],
+      "therock_metadata_version": [
+        1,
+        2
+      ],
+      "driver_trace_sha256": "1c3850c9cc0850e66ca71260a61ec25409b02cb4db410760c6a63d316cd4f8a3",
+      "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metadata_report_sha256": "1d31f1f8d3c3a28bff43afb3e59689c8fc2ff6b80d93eb61e3c0346a97130d41",
+      "isa_report_sha256": "c98978ef60688a99df23dbd46cc9b2f48e636d6732867d219ffdb6d212d26939",
+      "loader_rejection": "metadata target mismatch",
+      "kernels": [
+        {
+          "name": "indexed_store",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 8,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 12,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "indexed_store",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "indexed_store.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 3,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 8,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 12,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "indexed_store",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "indexed_store.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 3,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 1920,
+            "entry_va": 6144,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 12,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 88,
+            "entry_symbol_sha256": "eb05bf9233c3ba8f86eae35d0fed30c75da12a04a326e7df4220508b07a50a91"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 2048,
+            "entry_va": 6400,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 12,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 92,
+            "entry_symbol_sha256": "650de69e814e93ec8c3633322c5ec4ecb046f6e2c870edfd3930a319970d5ab3"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 2,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshlrev_b64": 1,
+              "v_xor_b32_e32": 1,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 42
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "8ff8fa2fec6a154f779f5e7081858f34a365cd1e3cab0ab53892fa1a9e4e7cd9",
+            "instruction_count_without_padding": 15,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x8",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 13",
+              "s_load_dwordx2 s[0:1], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 2,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshlrev_b64": 1,
+              "v_xor_b32_e32": 1,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e64": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 41
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "0758e156edfd7f2ffb2424ae1cfcfd8ffe292ceee9b7bc07093ae978274c5774",
+            "instruction_count_without_padding": 15,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x8",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 14",
+              "s_load_dwordx2 s[0:1], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "vector_add",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 16,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 24,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 28,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "vector_add",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "vector_add.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 6,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 16,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".offset": 24,
+                ".size": 4,
+                ".value_kind": "by_value"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 28,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "vector_add",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "vector_add.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 6,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 1984,
+            "entry_va": 6400,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 28,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 136,
+            "entry_symbol_sha256": "34c514babd1aa3648b89032569b90347532c3fcf605e61c5aa6204ba106d2728"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 2112,
+            "entry_va": 6656,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 28,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 148,
+            "entry_symbol_sha256": "771af626822329e0535645210b73a4a682c5c29d20f644bb6a58d25ac9923083"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 3,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "s_load_dwordx2": 1,
+              "v_lshlrev_b64": 1,
+              "v_add_co_u32": 3,
+              "v_add_co_ci_u32_e32": 3,
+              "global_load_dword": 2,
+              "v_add_f32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_code_end": 62
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "9d042c6b613443927ec0fca6c8465bc1765eafbf0b67ed8448442d9acb3d8a6e",
+            "instruction_count_without_padding": 23,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x18",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 25",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dword": 1,
+              "v_lshl_add_u32": 1,
+              "s_waitcnt": 3,
+              "v_cmp_gt_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "s_load_dwordx2": 1,
+              "v_lshlrev_b64": 1,
+              "v_add_co_u32": 3,
+              "v_add_co_ci_u32_e64": 3,
+              "global_load_dword": 2,
+              "v_add_f32_e32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_code_end": 59
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "efefac93e22d18f1ddd14fa6e5436e2f95d1e3c5a47336a745ddc19d9296c08c",
+            "instruction_count_without_padding": 23,
+            "entry_instructions": [
+              "s_load_dword s0, s[4:5], 0x18",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_waitcnt lgkmcnt(0)",
+              "v_cmp_gt_u32_e32 vcc_lo, s0, v0",
+              "s_and_saveexec_b32 s0, vcc_lo",
+              "s_cbranch_execz 28",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v1, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        }
+      ],
+      "actual_driver": {
+        "compiler_binary": "clang-24",
+        "compiler_sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "linker_binary": "lld",
+        "linker_sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "triple": "amdgpu10.30-amd-amdhsa",
+        "target_cpu": "gfx1030",
+        "code_object_version_option": "-mcode-object-version=5",
+        "linker_emulation": "elf64_amdgpu"
+      }
+    },
+    {
+      "target": "gfx1013",
+      "fixture": "resources",
+      "source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "baseline_object_sha256": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+      "therock_object_sha256": "17d830a1edac28bfbc5745f9e5c2b893d454c5b827efa20c3263d702484cf5b5",
+      "baseline_bytes": 14720,
+      "therock_bytes": 14896,
+      "baseline_elf_flags": "0x142",
+      "therock_elf_flags": "0x142",
+      "baseline_abi_version": 3,
+      "therock_abi_version": 3,
+      "baseline_metadata_target": "amdgcn-amd-amdhsa--gfx1013",
+      "therock_metadata_target": "amdgpu10.13-amd-amdhsa-unknown-gfx1013",
+      "baseline_metadata_version": [
+        1,
+        2
+      ],
+      "therock_metadata_version": [
+        1,
+        2
+      ],
+      "driver_trace_sha256": "f7da7d339cd40416b2dba05ca29bfb3d11c2ee32cbce222d3601439ba5423c09",
+      "compile_log_sha256": "33b3317d27b9df576421e4084e64f11d707152da5f2cde7d6183a4da116e391d",
+      "metadata_report_sha256": "3a9b237bde5cacec41c2c9285f00123523da778500d72db8e66dd1f0058b65ff",
+      "isa_report_sha256": "8c49271d34bbc240a2e9fe7e8e596e0dbcfe7082e3e559d9d51787ebcbfd0766",
+      "loader_rejection": "metadata target mismatch",
+      "kernels": [
+        {
+          "name": "reduce_serial",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_serial",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_serial.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 21,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_serial",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_serial.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 21,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4096,
+            "entry_va": 8704,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0042",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 188,
+            "entry_symbol_sha256": "3da705d20d759a5daa8f250fd027780c443e63d539488985efe8f198830268fc"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4288,
+            "entry_va": 9216,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0002",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 188,
+            "entry_symbol_sha256": "b6c7baa78eaf3b7040d9a632fc71ee0dea90c14aea658dc2f1d40e94f63f5f40"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_lshl_add_u32": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshlrev_b32_e32": 1,
+              "v_lshlrev_b64": 2,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "s_clause": 1,
+              "global_load_dwordx4": 4,
+              "v_add_nc_u32_e32": 5,
+              "v_add3_u32": 5,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 17
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "9f965f9982a5814c02de4399889d8308401afc9be0976ce4e9606346ab6555b5",
+            "instruction_count_without_padding": 31,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshl_add_u32 v16, s6, 6, v0",
+              "v_mov_b32_e32 v18, 0",
+              "v_lshlrev_b32_e32 v17, 4, v16",
+              "v_lshlrev_b64 v[0:1], 2, v[17:18]",
+              "v_mov_b32_e32 v17, v18",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v19, vcc_lo, s0, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_lshl_add_u32": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshlrev_b32_e32": 1,
+              "v_lshlrev_b64": 2,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "s_clause": 1,
+              "global_load_dwordx4": 4,
+              "v_add_nc_u32_e32": 5,
+              "v_add3_u32": 5,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 17
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "7e9c557ec487ddce166d4ea4042f1f4cabf38603986dc8d9a180524b12dfd0ee",
+            "instruction_count_without_padding": 31,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshl_add_u32 v16, s6, 6, v0",
+              "v_mov_b32_e32 v18, 0",
+              "v_lshlrev_b32_e32 v17, 4, v16",
+              "v_lshlrev_b64 v[0:1], 2, v[17:18]",
+              "v_mov_b32_e32 v17, v18",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v19, vcc_lo, s0, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0042",
+              "therock": "0xe0af0002"
+            }
+          }
+        },
+        {
+          "name": "reduce_lds",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 256,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_lds",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 10,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_lds.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 4,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 256,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_lds",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 10,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_lds.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 4,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4160,
+            "entry_va": 8960,
+            "group_bytes": 256,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 456,
+            "entry_symbol_sha256": "5ceacd5f024c169ccaa6577865f54478a37bcf796cde00804420b05f02b25011"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4352,
+            "entry_va": 9472,
+            "group_bytes": 256,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 412,
+            "entry_symbol_sha256": "063899917517c55ce2a811f1069e19dd0e43d827eed932f503eb372090e32545"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 3,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 9,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "v_cmp_gt_u32_e32": 5,
+              "global_load_dword": 1,
+              "v_lshlrev_b32_e32": 1,
+              "ds_write_b32": 7,
+              "s_barrier": 7,
+              "s_and_saveexec_b32": 7,
+              "s_cbranch_execz": 7,
+              "ds_read2_b32": 1,
+              "v_add_nc_u32_e32": 6,
+              "s_waitcnt_depctr": 6,
+              "s_or_b32": 6,
+              "ds_read_b32": 11,
+              "v_cmp_eq_u32_e32": 1,
+              "s_mov_b32": 1,
+              "s_lshl_b64": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 14
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "45caae24d04830d583041af9d402f853e936bb35e7fbf95f611d3284d61ebf60",
+            "instruction_count_without_padding": 89,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v2, 0",
+              "v_lshl_add_u32 v1, s6, 6, v0",
+              "v_lshlrev_b64 v[1:2], 2, v[1:2]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "v_add_co_ci_u32_e32 v2, vcc_lo, s1, v2, vcc_lo",
+              "v_cmp_gt_u32_e32 vcc_lo, 32, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 9,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "v_cmp_gt_u32_e32": 5,
+              "global_load_dword": 1,
+              "v_lshlrev_b32_e32": 1,
+              "ds_write_b32": 7,
+              "s_barrier": 7,
+              "s_and_saveexec_b32": 7,
+              "s_cbranch_execz": 7,
+              "ds_read2_b32": 6,
+              "v_add_nc_u32_e32": 6,
+              "s_waitcnt_depctr": 6,
+              "s_or_b32": 6,
+              "v_cmp_eq_u32_e32": 1,
+              "s_mov_b32": 1,
+              "s_lshl_b64": 1,
+              "s_add_u32": 1,
+              "ds_read_b32": 1,
+              "s_addc_u32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 25
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "097d2d10f5791d4cf4302fb864cbbd8b69782fc2cb77d88b440c1122793e706e",
+            "instruction_count_without_padding": 83,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v2, 0",
+              "v_lshl_add_u32 v1, s6, 6, v0",
+              "v_lshlrev_b64 v[1:2], 2, v[1:2]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "v_add_co_ci_u32_e32 v2, vcc_lo, s1, v2, vcc_lo",
+              "v_cmp_gt_u32_e32 vcc_lo, 32, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "atomic_count",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 8,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "atomic_count",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 8,
+            ".sgpr_spill_count": 0,
+            ".symbol": "atomic_count.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 2,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 8,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "atomic_count",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 8,
+            ".sgpr_spill_count": 0,
+            ".symbol": "atomic_count.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 2,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4224,
+            "entry_va": 9472,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 8,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 60,
+            "entry_symbol_sha256": "9b67b82e4b91bba9d789398880797240cd77bdc0e37af12e76492ed3d125b424"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4416,
+            "entry_va": 9984,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 8,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 60,
+            "entry_symbol_sha256": "9776a58708eb7ace228efbea734a81676d8c188aef2d96d16289dcd5edf80ea5"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_mov_b32": 1,
+              "v_mbcnt_lo_u32_b32": 1,
+              "v_cmp_eq_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "s_bcnt1_i32_b32": 1,
+              "v_mov_b32_e32": 2,
+              "s_waitcnt": 1,
+              "global_atomic_add": 1,
+              "s_endpgm": 1,
+              "s_nop": 49
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "a3160e0068f45c939f8d2560f173868f3a03ee030db201df3da47cf45ead70c9",
+            "instruction_count_without_padding": 12,
+            "entry_instructions": [
+              "s_mov_b32 s0, exec_lo",
+              "v_mbcnt_lo_u32_b32 v0, s0, 0",
+              "v_cmp_eq_u32_e32 vcc_lo, 0, v0",
+              "s_and_saveexec_b32 s1, vcc_lo",
+              "s_cbranch_execz 8",
+              "s_load_dwordx2 s[2:3], s[4:5], null",
+              "s_bcnt1_i32_b32 s0, s0",
+              "v_mov_b32_e32 v0, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_mov_b32": 1,
+              "v_mbcnt_lo_u32_b32": 1,
+              "v_cmp_eq_u32_e32": 1,
+              "s_and_saveexec_b32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "s_bcnt1_i32_b32": 1,
+              "v_mov_b32_e32": 2,
+              "s_waitcnt": 1,
+              "global_atomic_add": 1,
+              "s_endpgm": 1,
+              "s_nop": 49
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "a3160e0068f45c939f8d2560f173868f3a03ee030db201df3da47cf45ead70c9",
+            "instruction_count_without_padding": 12,
+            "entry_instructions": [
+              "s_mov_b32 s0, exec_lo",
+              "v_mbcnt_lo_u32_b32 v0, s0, 0",
+              "v_cmp_eq_u32_e32 vcc_lo, 0, v0",
+              "s_and_saveexec_b32 s1, vcc_lo",
+              "s_cbranch_execz 8",
+              "s_load_dwordx2 s[2:3], s[4:5], null",
+              "s_bcnt1_i32_b32 s0, s0",
+              "v_mov_b32_e32 v0, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": true,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0000",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "private_array",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_array",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 42,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_array.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 53,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_array",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_array.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 9,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4288,
+            "entry_va": 9728,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0146",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 1720,
+            "entry_symbol_sha256": "11935a4d5b47280d8e929ba2662db1446ca33ac58d7170c3399ae45385bbd2af"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4480,
+            "entry_va": 10240,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0001",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 860,
+            "entry_symbol_sha256": "e20902038287fca7a31e3655387c9cbffc66441f03008ee7a4ea5170c261ea44"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_add_u32": 2,
+              "s_addc_u32": 2,
+              "s_setreg_b32": 2,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 3,
+              "v_lshl_add_u32": 2,
+              "v_or_b32_e64": 3,
+              "s_mov_b64": 1,
+              "s_movk_i32": 15,
+              "v_lshlrev_b64": 1,
+              "v_add_nc_u32_e64": 28,
+              "v_cmp_ne_u32_e64": 30,
+              "v_cndmask_b32_e64": 62,
+              "s_waitcnt": 4,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "v_cmp_ne_u32_e32": 2,
+              "global_load_dword": 2,
+              "v_cndmask_b32_e32": 2,
+              "flat_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "flat_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 18
+            },
+            "flat_scratch_setup": true,
+            "normalized_instruction_text_sha256": "f102a114779f8682818d0c0556673e8e29737e81c732aac77eff8de227d70ee9",
+            "instruction_count_without_padding": 265,
+            "entry_instructions": [
+              "s_add_u32 s6, s6, s9",
+              "s_addc_u32 s7, s7, 0",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7",
+              "s_load_dwordx4 s[36:39], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "v_or_b32_e64 v7, 16, 4"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_add_u32": 2,
+              "s_addc_u32": 2,
+              "s_setreg_b32": 2,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 32,
+              "v_lshl_add_u32": 2,
+              "s_mov_b64": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 4,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "s_movk_i32": 15,
+              "global_load_dword": 2,
+              "flat_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_or_b32_e64": 3,
+              "v_and_b32_e32": 1,
+              "flat_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 41
+            },
+            "flat_scratch_setup": true,
+            "normalized_instruction_text_sha256": "8d7b5cf0a45f16f34fc12149ae37f9f1a31421060308b5d1c76e9dcad598d87f",
+            "instruction_count_without_padding": 170,
+            "entry_instructions": [
+              "s_add_u32 s6, s6, s9",
+              "s_addc_u32 s7, s7, 0",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7",
+              "s_load_dwordx4 s[4:7], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "s_mov_b64 s[10:11], src_private_base"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0146",
+              "therock": "0xe0af0001"
+            }
+          }
+        },
+        {
+          "name": "private_explicit",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_explicit",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 12,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_explicit.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 34,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_explicit",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_explicit.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 34,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4352,
+            "entry_va": 11520,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0044",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 620,
+            "entry_symbol_sha256": "fd27c3c1aa0cefa6cb5b12be308644627248312b45b1e1e1024414967bb41c62"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4544,
+            "entry_va": 11264,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0004",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 620,
+            "entry_symbol_sha256": "b6257f36294c7ccc35f02429d2b67f31cc335e9b14389341d9c8ff7fc5aa2477"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshl_add_u32": 2,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "global_load_dword": 1,
+              "buffer_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "buffer_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 37
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "a7303207f1681352cdcacdf1751f979400d9c1b24928dc1ab82b4aa2dcf3d05f",
+            "instruction_count_without_padding": 114,
+            "entry_instructions": [
+              "s_load_dwordx4 s[4:7], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "s_add_u32 s0, s0, s9",
+              "s_addc_u32 s1, s1, 0",
+              "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v2, vcc_lo, s4, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshl_add_u32": 2,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "global_load_dword": 1,
+              "buffer_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "buffer_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 37
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "b7ff6af8fa93dceb9e2572bc4ac6d26d33f3cbd7054696914c7c823eff1f9496",
+            "instruction_count_without_padding": 114,
+            "entry_instructions": [
+              "s_load_dwordx4 s[8:11], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_add_u32 s0, s0, s7",
+              "s_addc_u32 s1, s1, 0",
+              "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v2, vcc_lo, s8, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0044",
+              "therock": "0xe0af0004"
+            },
+            "rsrc2": {
+              "baseline": "0x91",
+              "therock": "0x8d"
+            },
+            "properties": {
+              "baseline": "0x429",
+              "therock": "0x409"
+            }
+          }
+        },
+        {
+          "name": "register_spill",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "register_spill",
+            ".private_segment_fixed_size": 212,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "register_spill.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 16,
+            ".vgpr_spill_count": 52,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "register_spill",
+            ".private_segment_fixed_size": 212,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "register_spill.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 16,
+            ".vgpr_spill_count": 52,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4416,
+            "entry_va": 12288,
+            "group_bytes": 0,
+            "private_bytes": 212,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0041",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 4548,
+            "entry_symbol_sha256": "b61e0743d9893ee450c5cfbe1cd30dfbf991c1b218e939f2972ac455ee16da9d"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4608,
+            "entry_va": 12032,
+            "group_bytes": 0,
+            "private_bytes": 212,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0001",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 4548,
+            "entry_symbol_sha256": "d016132a6def5589f0f62df192b7a898a2abd4d0806b7794e842ae46c3ec2e30"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_mov_b64": 2,
+              "s_load_dwordx4": 1,
+              "v_lshlrev_b32_e32": 1,
+              "v_mov_b32_e32": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 118,
+              "v_add_co_u32": 128,
+              "v_add_co_ci_u32_e32": 128,
+              "flat_load_dword": 64,
+              "buffer_store_dword": 52,
+              "flat_store_dword": 64,
+              "s_waitcnt_vscnt": 64,
+              "buffer_load_dword": 52,
+              "s_endpgm": 1,
+              "s_code_end": 63
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "15fea9410be9c39913c4728ba720ef4f7bbc9b200c372a019288a938ad89453c",
+            "instruction_count_without_padding": 680,
+            "entry_instructions": [
+              "s_mov_b64 s[10:11], s[2:3]",
+              "s_mov_b64 s[8:9], s[0:1]",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshlrev_b32_e32 v0, 6, v0",
+              "v_mov_b32_e32 v1, 0",
+              "s_add_u32 s8, s8, s7",
+              "s_addc_u32 s9, s9, 0",
+              "v_lshl_add_u32 v0, s6, 12, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_mov_b64": 2,
+              "s_load_dwordx4": 1,
+              "v_lshlrev_b32_e32": 1,
+              "v_mov_b32_e32": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 118,
+              "v_add_co_u32": 128,
+              "v_add_co_ci_u32_e32": 128,
+              "flat_load_dword": 64,
+              "buffer_store_dword": 52,
+              "flat_store_dword": 64,
+              "s_waitcnt_vscnt": 64,
+              "buffer_load_dword": 52,
+              "s_endpgm": 1,
+              "s_code_end": 63
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "f19e2114217123efb1e0ce86f81c43a21d60554cc0ec63aaffc09b0b493f8ef9",
+            "instruction_count_without_padding": 680,
+            "entry_instructions": [
+              "s_mov_b64 s[10:11], s[2:3]",
+              "s_mov_b64 s[8:9], s[0:1]",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshlrev_b32_e32 v0, 6, v0",
+              "v_mov_b32_e32 v1, 0",
+              "s_add_u32 s8, s8, s7",
+              "s_addc_u32 s9, s9, 0",
+              "v_lshl_add_u32 v0, s6, 12, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0041",
+              "therock": "0xe0af0001"
+            }
+          }
+        }
+      ],
+      "actual_driver": {
+        "compiler_binary": "clang-24",
+        "compiler_sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "linker_binary": "lld",
+        "linker_sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "triple": "amdgpu10.13-amd-amdhsa",
+        "target_cpu": "gfx1013",
+        "code_object_version_option": "-mcode-object-version=5",
+        "linker_emulation": "elf64_amdgpu"
+      }
+    },
+    {
+      "target": "gfx1030",
+      "fixture": "resources",
+      "source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+      "baseline_object_sha256": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706",
+      "therock_object_sha256": "83ed56d464f7b77a3ebfb33b66030cf76f20ef36cbdb23ee42a00efd163cce2c",
+      "baseline_bytes": 12800,
+      "therock_bytes": 12976,
+      "baseline_elf_flags": "0x36",
+      "therock_elf_flags": "0x36",
+      "baseline_abi_version": 3,
+      "therock_abi_version": 3,
+      "baseline_metadata_target": "amdgcn-amd-amdhsa--gfx1030",
+      "therock_metadata_target": "amdgpu10.30-amd-amdhsa-unknown-gfx1030",
+      "baseline_metadata_version": [
+        1,
+        2
+      ],
+      "therock_metadata_version": [
+        1,
+        2
+      ],
+      "driver_trace_sha256": "ab8e1c52b4a6281bef9701825cf28b4edd5d043fa660a46a83f4a754ca423a7b",
+      "compile_log_sha256": "d78b2b49b255e64453c15ef1ce2831189263a956658c4c1893f5b5ea7691fd59",
+      "metadata_report_sha256": "1536ec5db04d566cc9514dab2b6b5c6397718419894c0e25f7b672bb8eef0fa0",
+      "isa_report_sha256": "235b9f8d8c0bb6006946818dfeb4df7c23889750ec4c7357a99fedfe523edc0d",
+      "loader_rejection": "metadata target mismatch",
+      "kernels": [
+        {
+          "name": "reduce_serial",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_serial",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_serial.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 19,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_serial",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 9,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_serial.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 19,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4096,
+            "entry_va": 8704,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0042",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 188,
+            "entry_symbol_sha256": "54240e0172f8624f86d4cd3b47571dfdf830d26ab10b44ca24b69569a261381a"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4288,
+            "entry_va": 9216,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0002",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 196,
+            "entry_symbol_sha256": "b024a5a8752a5d6df14eb09e2fe7a1453c6f8adaf9684464eeab2b76c1073d25"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_lshl_add_u32": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshlrev_b32_e32": 1,
+              "v_lshlrev_b64": 2,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "s_clause": 1,
+              "global_load_dwordx4": 4,
+              "v_add_nc_u32_e32": 5,
+              "v_add3_u32": 5,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 17
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "e19e258d5e5528173f15f945e13c15e8f5bf7fcb331c5e68304f14869ad20a2b",
+            "instruction_count_without_padding": 31,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshl_add_u32 v16, s6, 6, v0",
+              "v_mov_b32_e32 v18, 0",
+              "v_lshlrev_b32_e32 v17, 4, v16",
+              "v_lshlrev_b64 v[0:1], 2, v[17:18]",
+              "v_mov_b32_e32 v17, v18",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v12, vcc_lo, s0, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_lshl_add_u32": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshlrev_b32_e32": 1,
+              "v_lshlrev_b64": 2,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e64": 2,
+              "s_clause": 1,
+              "global_load_dwordx4": 4,
+              "v_add_nc_u32_e32": 5,
+              "v_add3_u32": 5,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 15
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "3fcb753ad9e61276c045fe7f44049abd3f2fa94046ed62a2c5c0f17d19c14f87",
+            "instruction_count_without_padding": 31,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshl_add_u32 v16, s6, 6, v0",
+              "v_mov_b32_e32 v18, 0",
+              "v_lshlrev_b32_e32 v17, 4, v16",
+              "v_lshlrev_b64 v[0:1], 2, v[17:18]",
+              "v_mov_b32_e32 v17, v18",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v12, vcc_lo, s0, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0042",
+              "therock": "0xe0af0002"
+            }
+          }
+        },
+        {
+          "name": "reduce_lds",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 256,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_lds",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 10,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_lds.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 4,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 256,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "reduce_lds",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 10,
+            ".sgpr_spill_count": 0,
+            ".symbol": "reduce_lds.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 4,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4160,
+            "entry_va": 8960,
+            "group_bytes": 256,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0040",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 432,
+            "entry_symbol_sha256": "f071673e93522c774e356023d53cc3bf9c6c1d8ca5cf0e8b22773472d2cab9f0"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4352,
+            "entry_va": 9472,
+            "group_bytes": 256,
+            "private_bytes": 0,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 392,
+            "entry_symbol_sha256": "9a5d5c2d367cbb9e8c3f9fdae14d4c00a0105bb788b268c27e87df80f2bbb712"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 3,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 9,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e32": 1,
+              "s_mov_b32": 6,
+              "global_load_dword": 1,
+              "v_lshlrev_b32_e32": 1,
+              "ds_write_b32": 7,
+              "s_barrier": 7,
+              "v_cmpx_gt_u32_e32": 5,
+              "s_cbranch_execz": 7,
+              "ds_read2_b32": 1,
+              "v_add_nc_u32_e32": 6,
+              "s_or_b32": 6,
+              "ds_read_b32": 11,
+              "v_cmp_eq_u32_e32": 1,
+              "s_and_saveexec_b32": 2,
+              "s_lshl_b64": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 20
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "58f1a06a02e197fb16bf27b30c562f28ff9f4e41155ae1005458687afa6260ce",
+            "instruction_count_without_padding": 83,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v2, 0",
+              "v_lshl_add_u32 v1, s6, 6, v0",
+              "v_lshlrev_b64 v[1:2], 2, v[1:2]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "v_add_co_ci_u32_e32 v2, vcc_lo, s1, v2, vcc_lo",
+              "s_mov_b32 s0, exec_lo"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 2,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 9,
+              "v_add_co_u32": 1,
+              "v_add_co_ci_u32_e64": 1,
+              "s_mov_b32": 6,
+              "global_load_dword": 1,
+              "v_lshlrev_b32_e32": 1,
+              "ds_write_b32": 7,
+              "s_barrier": 7,
+              "v_cmpx_gt_u32_e32": 5,
+              "s_cbranch_execz": 7,
+              "ds_read2_b32": 6,
+              "v_add_nc_u32_e32": 6,
+              "s_or_b32": 6,
+              "v_cmp_eq_u32_e32": 1,
+              "s_and_saveexec_b32": 2,
+              "s_lshl_b64": 1,
+              "s_add_u32": 1,
+              "ds_read_b32": 1,
+              "s_addc_u32": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 30
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "06464bded899a0d05fe159867f3d7bb3fa47084d48f22f3039805573fe0d0fc4",
+            "instruction_count_without_padding": 77,
+            "entry_instructions": [
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_mov_b32_e32 v2, 0",
+              "v_lshl_add_u32 v1, s6, 6, v0",
+              "v_lshlrev_b64 v[1:2], 2, v[1:2]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "v_add_co_ci_u32_e64 v2, null, s1, v2, vcc_lo",
+              "s_mov_b32 s0, exec_lo"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0040",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "atomic_count",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 8,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "atomic_count",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 6,
+            ".sgpr_spill_count": 0,
+            ".symbol": "atomic_count.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 2,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 8,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "atomic_count",
+            ".private_segment_fixed_size": 0,
+            ".sgpr_count": 6,
+            ".sgpr_spill_count": 0,
+            ".symbol": "atomic_count.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 2,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4224,
+            "entry_va": 9472,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 8,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 60,
+            "entry_symbol_sha256": "3984550874ab4b49caaecc3216e3550f6cd1b55d27f1e2999c210d5f2675328f"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4416,
+            "entry_va": 9984,
+            "group_bytes": 0,
+            "private_bytes": 0,
+            "kernarg_size": 8,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0000",
+            "rsrc2": "0x8c",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 60,
+            "entry_symbol_sha256": "c29027b452e16aa2522517978741f4df431737b4d211b3515bbe5d719fb1a1cf"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_mov_b32": 2,
+              "v_mbcnt_lo_u32_b32": 1,
+              "v_cmpx_eq_u32_e32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "s_bcnt1_i32_b32": 1,
+              "v_mov_b32_e32": 2,
+              "s_waitcnt": 1,
+              "global_atomic_add": 1,
+              "s_endpgm": 1,
+              "s_nop": 49
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "b7647de224ea6f845eecc6d0cdbb0e7d2046377e760b8467a07d61db9b3e28e0",
+            "instruction_count_without_padding": 12,
+            "entry_instructions": [
+              "s_mov_b32 s0, exec_lo",
+              "s_mov_b32 s1, exec_lo",
+              "v_mbcnt_lo_u32_b32 v0, s0, 0",
+              "v_cmpx_eq_u32_e32 0, v0",
+              "s_cbranch_execz 8",
+              "s_load_dwordx2 s[2:3], s[4:5], null",
+              "s_bcnt1_i32_b32 s0, s0",
+              "v_mov_b32_e32 v0, 0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_mov_b32": 2,
+              "v_mbcnt_lo_u32_b32": 1,
+              "v_cmpx_eq_u32_e32": 1,
+              "s_cbranch_execz": 1,
+              "s_load_dwordx2": 1,
+              "s_bcnt1_i32_b32": 1,
+              "v_mov_b32_e32": 2,
+              "s_waitcnt": 1,
+              "global_atomic_add": 1,
+              "s_endpgm": 1,
+              "s_nop": 49
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "b7647de224ea6f845eecc6d0cdbb0e7d2046377e760b8467a07d61db9b3e28e0",
+            "instruction_count_without_padding": 12,
+            "entry_instructions": [
+              "s_mov_b32 s0, exec_lo",
+              "s_mov_b32 s1, exec_lo",
+              "v_mbcnt_lo_u32_b32 v0, s0, 0",
+              "v_cmpx_eq_u32_e32 0, v0",
+              "s_cbranch_execz 8",
+              "s_load_dwordx2 s[2:3], s[4:5], null",
+              "s_bcnt1_i32_b32 s0, s0",
+              "v_mov_b32_e32 v0, 0"
+            ]
+          },
+          "normalized_instruction_text_equal": true,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0000",
+              "therock": "0xe0af0000"
+            }
+          }
+        },
+        {
+          "name": "private_array",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_array",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 38,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_array.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 60,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_array",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_array.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 9,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4288,
+            "entry_va": 9728,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0107",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 1712,
+            "entry_symbol_sha256": "dd4ad38e357dcd52d0f5cc7cd0c50b3f060ac7907f353f76ee902889d37c42a6"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4480,
+            "entry_va": 10240,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0001",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 868,
+            "entry_symbol_sha256": "1f8e46bb76933cffcda75fb123785c138ea354fdb3e7ebd147455b300321796a"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_add_u32": 2,
+              "s_addc_u32": 2,
+              "s_setreg_b32": 2,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 3,
+              "v_lshl_add_u32": 2,
+              "v_or_b32_e64": 3,
+              "s_mov_b64": 1,
+              "s_movk_i32": 15,
+              "v_lshlrev_b64": 1,
+              "v_add_nc_u32_e64": 28,
+              "v_cmp_ne_u32_e64": 29,
+              "v_cndmask_b32_e64": 61,
+              "s_waitcnt": 4,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "v_cmp_ne_u32_e32": 3,
+              "global_load_dword": 2,
+              "v_cndmask_b32_e32": 3,
+              "flat_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "flat_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 20
+            },
+            "flat_scratch_setup": true,
+            "normalized_instruction_text_sha256": "c1511180f2f57d112fb896f99e13a5f73db1453a7e0f84a1eecbb906ad95bd48",
+            "instruction_count_without_padding": 265,
+            "entry_instructions": [
+              "s_add_u32 s6, s6, s9",
+              "s_addc_u32 s7, s7, 0",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7",
+              "s_load_dwordx4 s[28:31], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "v_or_b32_e64 v7, 16, 4"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_add_u32": 2,
+              "s_addc_u32": 2,
+              "s_setreg_b32": 2,
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 32,
+              "v_lshl_add_u32": 2,
+              "s_mov_b64": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 4,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e64": 2,
+              "s_movk_i32": 15,
+              "global_load_dword": 2,
+              "flat_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_or_b32_e64": 3,
+              "v_and_b32_e32": 1,
+              "flat_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 39
+            },
+            "flat_scratch_setup": true,
+            "normalized_instruction_text_sha256": "9b2708a8742cc4f4e4c67335b86e34a727b60db08b19e98493b2527f09c71f54",
+            "instruction_count_without_padding": 170,
+            "entry_instructions": [
+              "s_add_u32 s6, s6, s9",
+              "s_addc_u32 s7, s7, 0",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_LO), s6",
+              "s_setreg_b32 hwreg(HW_REG_FLAT_SCR_HI), s7",
+              "s_load_dwordx4 s[4:7], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "s_mov_b64 s[10:11], src_private_base"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0107",
+              "therock": "0xe0af0001"
+            }
+          }
+        },
+        {
+          "name": "private_explicit",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_explicit",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 12,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_explicit.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 34,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "private_explicit",
+            ".private_segment_fixed_size": 144,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "private_explicit.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 34,
+            ".vgpr_spill_count": 0,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4352,
+            "entry_va": 11520,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0044",
+            "rsrc2": "0x91",
+            "properties": "0x429",
+            "preload": "0x0",
+            "entry_symbol_bytes": 620,
+            "entry_symbol_sha256": "fd27c3c1aa0cefa6cb5b12be308644627248312b45b1e1e1024414967bb41c62"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4544,
+            "entry_va": 11264,
+            "group_bytes": 0,
+            "private_bytes": 144,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0004",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 628,
+            "entry_symbol_sha256": "5b2c20b60fa1782294ea2ba564701cc93ab8b98cc840a3ea45b06217b857bfd2"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshl_add_u32": 2,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "global_load_dword": 1,
+              "buffer_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "buffer_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 37
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "a7303207f1681352cdcacdf1751f979400d9c1b24928dc1ab82b4aa2dcf3d05f",
+            "instruction_count_without_padding": 114,
+            "entry_instructions": [
+              "s_load_dwordx4 s[4:7], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s8, 6, v0",
+              "s_add_u32 s0, s0, s9",
+              "s_addc_u32 s1, s1, 0",
+              "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v2, vcc_lo, s4, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_load_dwordx4": 1,
+              "v_mov_b32_e32": 1,
+              "v_lshl_add_u32": 2,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 3,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e64": 2,
+              "global_load_dword": 1,
+              "buffer_store_dword": 32,
+              "s_waitcnt_vscnt": 32,
+              "v_add_nc_u32_e32": 31,
+              "v_and_b32_e32": 1,
+              "buffer_load_dword": 1,
+              "global_store_dword": 1,
+              "s_endpgm": 1,
+              "s_nop": 35
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "1b8a1977ada725c3105477507b29e0b7a07fb6649f8cfd18ecc21756b4370b43",
+            "instruction_count_without_padding": 114,
+            "entry_instructions": [
+              "s_load_dwordx4 s[8:11], s[4:5], null",
+              "v_mov_b32_e32 v1, 0",
+              "v_lshl_add_u32 v0, s6, 6, v0",
+              "s_add_u32 s0, s0, s7",
+              "s_addc_u32 s1, s1, 0",
+              "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "s_waitcnt lgkmcnt(0)",
+              "v_add_co_u32 v2, vcc_lo, s8, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0044",
+              "therock": "0xe0af0004"
+            },
+            "rsrc2": {
+              "baseline": "0x91",
+              "therock": "0x8d"
+            },
+            "properties": {
+              "baseline": "0x429",
+              "therock": "0x409"
+            }
+          }
+        },
+        {
+          "name": "register_spill",
+          "metadata_baseline": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "register_spill",
+            ".private_segment_fixed_size": 212,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "register_spill.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 16,
+            ".vgpr_spill_count": 52,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "metadata_therock": {
+            ".args": [
+              {
+                ".address_space": "global",
+                ".offset": 0,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              },
+              {
+                ".address_space": "global",
+                ".offset": 8,
+                ".size": 8,
+                ".value_kind": "global_buffer"
+              }
+            ],
+            ".group_segment_fixed_size": 0,
+            ".kernarg_segment_align": 8,
+            ".kernarg_segment_size": 16,
+            ".max_flat_workgroup_size": 1024,
+            ".name": "register_spill",
+            ".private_segment_fixed_size": 212,
+            ".sgpr_count": 14,
+            ".sgpr_spill_count": 0,
+            ".symbol": "register_spill.kd",
+            ".uniform_work_group_size": 1,
+            ".uses_dynamic_stack": false,
+            ".vgpr_count": 16,
+            ".vgpr_spill_count": 52,
+            ".wavefront_size": 32,
+            ".workgroup_processor_mode": 1
+          },
+          "descriptor_baseline": {
+            "descriptor_va": 4416,
+            "entry_va": 12288,
+            "group_bytes": 0,
+            "private_bytes": 212,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0x60af0041",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 2660,
+            "entry_symbol_sha256": "b02d70de9815326fe160e343686ad0a28f4e5e780616f39f06cf58c1f6afc086"
+          },
+          "descriptor_therock": {
+            "descriptor_va": 4608,
+            "entry_va": 12032,
+            "group_bytes": 0,
+            "private_bytes": 212,
+            "kernarg_size": 16,
+            "rsrc3": "0x0",
+            "rsrc1": "0xe0af0001",
+            "rsrc2": "0x8d",
+            "properties": "0x409",
+            "preload": "0x0",
+            "entry_symbol_bytes": 2668,
+            "entry_symbol_sha256": "fb92f18267850c2121b6b1def3b8293b64d5dd3a7d03268067dbc72bb75e8d84"
+          },
+          "isa_baseline": {
+            "opcodes": {
+              "s_mov_b64": 2,
+              "s_load_dwordx4": 1,
+              "v_lshlrev_b32_e32": 1,
+              "v_mov_b32_e32": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 118,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e32": 2,
+              "flat_load_dword": 64,
+              "buffer_store_dword": 52,
+              "buffer_load_dword": 52,
+              "flat_store_dword": 64,
+              "s_waitcnt_vscnt": 64,
+              "s_endpgm": 1,
+              "s_code_end": 55
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "f6bae89c35e7782600cd91a707e52ff0422a8bac8d30f0e6b2049adce2a051a1",
+            "instruction_count_without_padding": 428,
+            "entry_instructions": [
+              "s_mov_b64 s[10:11], s[2:3]",
+              "s_mov_b64 s[8:9], s[0:1]",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshlrev_b32_e32 v0, 6, v0",
+              "v_mov_b32_e32 v1, 0",
+              "s_add_u32 s8, s8, s7",
+              "s_addc_u32 s9, s9, 0",
+              "v_lshl_add_u32 v0, s6, 12, v0"
+            ]
+          },
+          "isa_therock": {
+            "opcodes": {
+              "s_mov_b64": 2,
+              "s_load_dwordx4": 1,
+              "v_lshlrev_b32_e32": 1,
+              "v_mov_b32_e32": 1,
+              "s_add_u32": 1,
+              "s_addc_u32": 1,
+              "v_lshl_add_u32": 1,
+              "v_lshlrev_b64": 1,
+              "s_waitcnt": 118,
+              "v_add_co_u32": 2,
+              "v_add_co_ci_u32_e64": 2,
+              "flat_load_dword": 64,
+              "buffer_store_dword": 52,
+              "buffer_load_dword": 52,
+              "flat_store_dword": 64,
+              "s_waitcnt_vscnt": 64,
+              "s_endpgm": 1,
+              "s_code_end": 53
+            },
+            "flat_scratch_setup": false,
+            "normalized_instruction_text_sha256": "5bf3609dee27ed0eaa22767fe258be1f2aaa1ec41d214c3e3b67789890a2e8be",
+            "instruction_count_without_padding": 428,
+            "entry_instructions": [
+              "s_mov_b64 s[10:11], s[2:3]",
+              "s_mov_b64 s[8:9], s[0:1]",
+              "s_load_dwordx4 s[0:3], s[4:5], null",
+              "v_lshlrev_b32_e32 v0, 6, v0",
+              "v_mov_b32_e32 v1, 0",
+              "s_add_u32 s8, s8, s7",
+              "s_addc_u32 s9, s9, 0",
+              "v_lshl_add_u32 v0, s6, 12, v0"
+            ]
+          },
+          "normalized_instruction_text_equal": false,
+          "kernarg_layout_equal": true,
+          "descriptor_changed_fields": {
+            "rsrc1": {
+              "baseline": "0x60af0041",
+              "therock": "0xe0af0001"
+            }
+          }
+        }
+      ],
+      "actual_driver": {
+        "compiler_binary": "clang-24",
+        "compiler_sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "linker_binary": "lld",
+        "linker_sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "triple": "amdgpu10.30-amd-amdhsa",
+        "target_cpu": "gfx1030",
+        "code_object_version_option": "-mcode-object-version=5",
+        "linker_emulation": "elf64_amdgpu"
+      }
+    }
+  ],
+  "limits": [
+    "Build-tree tools only; full component build and staged/install validation pending",
+    "Shared-library hashes observed during analysis, not captured at the original compile instant",
+    "Readobj/objdump success means readable output, not native loader or hardware acceptance",
+    "No loader validation bypass, descriptor edits or compiler route changes",
+    "Different code bytes require native qualification; same mnemonic text is not proof of execution equivalence"
+  ],
+  "same_disassembler_comparison": {
+    "tool": "TheRock llvm-objdump 24 recorded above",
+    "baseline_report_sha256": {
+      "gfx1013": "5952ae732fd03679a5737f3906bf6b5dfc687f97de32a2df6f4cd8ebf6fd3816",
+      "gfx1030": "bd2ec67f0ccff94be112e7d9b8e882c061e77418ea4d40429c6715a5edbd299a"
+    },
+    "gfx1013_results": [
+      {
+        "target": "gfx1013",
+        "kernel": "indexed_store",
+        "same_disassembler_instruction_text_equal": true,
+        "changed_instructions": [
+          {
+            "index": 8,
+            "baseline": {
+              "instruction": "v_lshlrev_b64 v[1:2], 2, v[0:1]",
+              "words": [
+                "D6FF0001",
+                "00020082"
+              ]
+            },
+            "therock": {
+              "instruction": "v_lshlrev_b64 v[1:2], 2, v[0:1]",
+              "words": [
+                "D6FF0001",
+                "02020082"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          },
+          {
+            "index": 11,
+            "baseline": {
+              "instruction": "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "words": [
+                "D70F6A01",
+                "00020200"
+              ]
+            },
+            "therock": {
+              "instruction": "v_add_co_u32 v1, vcc_lo, s0, v1",
+              "words": [
+                "D70F6A01",
+                "02020200"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          }
+        ]
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "vector_add",
+        "same_disassembler_instruction_text_equal": true,
+        "changed_instructions": [
+          {
+            "index": 9,
+            "baseline": {
+              "instruction": "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "words": [
+                "D6FF0000",
+                "00020082"
+              ]
+            },
+            "therock": {
+              "instruction": "v_lshlrev_b64 v[0:1], 2, v[0:1]",
+              "words": [
+                "D6FF0000",
+                "02020082"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          },
+          {
+            "index": 11,
+            "baseline": {
+              "instruction": "v_add_co_u32 v2, vcc_lo, s0, v0",
+              "words": [
+                "D70F6A02",
+                "00020000"
+              ]
+            },
+            "therock": {
+              "instruction": "v_add_co_u32 v2, vcc_lo, s0, v0",
+              "words": [
+                "D70F6A02",
+                "02020000"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          },
+          {
+            "index": 13,
+            "baseline": {
+              "instruction": "v_add_co_u32 v4, vcc_lo, s2, v0",
+              "words": [
+                "D70F6A04",
+                "00020002"
+              ]
+            },
+            "therock": {
+              "instruction": "v_add_co_u32 v4, vcc_lo, s2, v0",
+              "words": [
+                "D70F6A04",
+                "02020002"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          },
+          {
+            "index": 15,
+            "baseline": {
+              "instruction": "v_add_co_u32 v0, vcc_lo, s4, v0",
+              "words": [
+                "D70F6A00",
+                "00020004"
+              ]
+            },
+            "therock": {
+              "instruction": "v_add_co_u32 v0, vcc_lo, s4, v0",
+              "words": [
+                "D70F6A00",
+                "02020004"
+              ]
+            },
+            "xor_words": [
+              "0x0",
+              "0x2000000"
+            ]
+          }
+        ]
+      }
+    ],
+    "encoding_cause": "postEncodeVOP3 at AMDGPUMCCodeEmitter.cpp:763 sets unused source fields to inline immediate 0 (0x80) on GFX10+. Changed second-word bit25 is unused src2 bit7, instruction bit57."
+  },
+  "resource_field_interpretation": {
+    "canary_rsrc1_baseline": "0x60af0040",
+    "canary_rsrc1_therock": "0xe0af0000",
+    "changes": [
+      "GFX10 FWD_PROGRESS bit31: 0 to 1",
+      "GRANULATED_WAVEFRONT_SGPR_COUNT bits6..9: 1 to 0"
+    ],
+    "qualification": "Changed native resource-register configuration needs review and hardware qualification; no support inferred from host parsing."
+  },
+  "target_id_interpretation": {
+    "status": "documented new target-ID spelling matching requested GPU and ELF target",
+    "mapping": {
+      "gfx1013": "amdgpu10.13-amd-amdhsa-unknown-gfx1013",
+      "gfx1030": "amdgpu10.30-amd-amdhsa-unknown-gfx1030"
+    },
+    "source_basis": "AMDGPUUsage architecture table documents amdgcn legacy alias, amdgpu10.13=gfx1013 and amdgpu10.30=gfx1030; MetadataStreamer writes TargetID.toString; TargetID::print appends processor to target triple",
+    "loader_status": "Existing exact old-spelling check rejects all four objects; remaining loader checks have not been executed on these objects",
+    "future_validation_boundary": "Any future support must validate an explicit architecture/processor mapping, vendor/OS/environment and features against ELF flags. Do not strip arbitrary prefixes or accept suffix matches."
+  },
+  "baseline_selection": "Retain pinned LLVM18.1.8; no selected route change from this preliminary comparison.",
+  "analysis_compaction_script_sha256": "e70325c10a996b42daeb2b99a2df74bf6be93cc363b4c1a4aa83c9f5718dc04a"
+}

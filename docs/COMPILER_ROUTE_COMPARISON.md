@@ -18,10 +18,10 @@ similar command-line options are not proof of equivalent generated code.
 
 | Question | Standalone route here | Pinned TheRock route |
 | --- | --- | --- |
-| Device compiler | Installed Clang/LLD 18.1.8, exact version checked | Pinned AMD LLVM submodule, not built here |
+| Device compiler | Installed Clang/LLD 18.1.8, exact version checked | Pinned AMD Clang/LLD 24 build-tree tools; full component still building |
 | Target configuration | Both gfx1013/gfx1030 fixtures compile | gfx1030 declared; gfx1013 needs a custom declaration |
 | Component scope | Device-only HIP, without headers/device libraries | Compiler project plus bundled runtime/device-library components |
-| Artifact evidence | V5 objects, ISA inventories, metadata and host parser tests | Source/configuration evidence only so far |
+| Artifact evidence | V5 objects, ISA inventories, metadata and host parser tests | Four V5 fixtures compared; new target spelling rejected by current loader |
 | Native PS5 host code | Separate pinned PS5 SDK and native converter | Still requires a distinct PS5 port/integration |
 | GPU qualification | Pending | Pending |
 
@@ -57,14 +57,14 @@ before evaluation. It does not configure or compile the entire TheRock tree.
 
 ## Remaining comparison work
 
-Build the pinned TheRock compiler component in isolation, record its actual
-compiler/version/features, and compile the same frozen fixture sources with
-explicit V5 and wave32 settings. Compare descriptors, kernarg layouts, resource
-requirements and instruction inventories; investigate differences before changing
-the selected compiler. Run native qualification separately for any changed device
-code. A successful custom-target configuration is not a substitute for these steps.
+The pinned TheRock build-tree tools compiled the four frozen fixtures with
+explicit V5 and wave32 settings. The [binary comparison](THEROCK_BINARY_COMPARISON.md)
+records target spelling, descriptors, kernargs, resource use and instruction
+differences, including shared compiler-library identities. Keep LLVM 18 selected.
+Complete the component build and verify staged identities before finalizing this
+comparison. Run native qualification separately for any changed device code.
 
-G1 stays open pending the built-compiler comparison. The selected route now has
+G1 stays open pending component completion and final comparison verification. The selected route now has
 fresh isolated-userspace reproduction of all four objects, with networking and
 the development compiler filesystem excluded; it shares the WSL kernel and CPU.
 See `evidence/offline-isolated-compiler.json`. Source-notice identities are recorded
