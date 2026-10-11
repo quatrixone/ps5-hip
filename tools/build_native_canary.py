@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice"], required=True)
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
     lock = json.loads((ROOT / "dependencies.json").read_text())
@@ -114,6 +114,8 @@ def main():
         options = [f'-DPS5HIP_CANARY_TARGET="{args.target}"', "-DPS5HIP_WITH_ELEVATION=1", "-I", elevation / "client"]
         if args.kernel == "vector_add":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
+        if args.kernel == "vector_add_twice":
+            options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
         if args.kernel == "runtime":
             options.append("-DPS5HIP_RUNTIME_ONLY=1")
         if args.shell_exit_probe:
@@ -197,6 +199,8 @@ def main():
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
+    if args.kernel == "vector_add_twice":
+        receipt["dispatches"] = 2
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("Built unqualified native candidate:", candidate)
     print("No title metadata, installation or console execution performed.")
