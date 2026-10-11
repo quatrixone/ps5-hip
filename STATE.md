@@ -4,6 +4,10 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
+- First GPU-candidate run on .30, FW 6.02, failed with CPU SIGSEGV at RIP zero
+  after the pre-submit checkpoint. No GPU execution is proven. PPSA99014 PID 341
+  stopped, sandbox/runtime/image were released, and declared services remained
+  reachable. No retry or process kill was sent. See `evidence/native-indexed-store-first.json`.
 - Current development identity: **PPSA99014**, selected by the user after a
   pre-existing PPSA99012 installation was found on .30. Controllers and the
   elevation helper are rebuilt for the new exact title.
@@ -97,13 +101,20 @@ was running at this checkpoint. Inspect that build before restarting anything.
 Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
 `evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
 
-The next decisive experiment is one bounded indexed-store run on idle .30 using
-PPSA99014. The candidate remains frozen at source `15bfc35`, stage
+The next action is offline diagnosis of the CPU null control flow in the first
+indexed-store run. Do not rerun the failed candidate. It remains frozen at source `15bfc35`, stage
 `gfx1013-indexed_store-3d295773d2fb`, image SHA
 `fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
 Corrected device bytes, native imports/startup, FSELF, UFS2 and extracted-file hashes
 pass local verification. See `evidence/offline-diagnostic-gpu-package.json`.
-Later host/ABI work has not rebuilt or substituted this candidate.
+Later host/ABI work has not rebuilt or substituted this candidate. One run on .30
+passed CPU runtime checks, logged SUBMIT, then faulted with SIGSEGV/RIP zero.
+The checkpoint precedes actual submission; GPU execution is unproven. Frozen
+return addresses are `0x400c4e` and `0x40016a`; map them using the exact native ELF.
+Raw evidence: `results/indexed-store-run-20261011T201531Z`; compact receipt:
+`evidence/native-indexed-store-first.json`. System cleanup released the title,
+sandbox and image, and all declared services stayed reachable; this is not normal
+application teardown or a successful compute result.
 
 Prepared deployment/observation scripts and their generator are hashed in
 `evidence/offline-first-gpu-controls.json`. Offline idle-history, fake-socket and
@@ -111,7 +122,10 @@ real local timer checks pass. They coordinate both locks, verify/preserve the kn
 CPU image/log, recheck idle immediately before launch, observe for an absolute
 20 seconds and close only PPSA99014 once with a separate eight-second deadline.
 No automatic retry or guessed process termination. Read `docs/CONSOLE_WORKFLOW.md`,
-the shared runbook and `.local/ENVIRONMENT.md` before traffic. No GPU run yet.
+the shared runbook and `.local/ENVIRONMENT.md` before traffic. These single-case
+scripts have now run: the remote image is the failed GPU candidate, its result log
+exists, and the successful CPU image/log remain preserved. Do not reuse them as
+fresh-case scripts or erase that evidence.
 
 The CPU shell-managed lifecycle passed once on .30, FW 6.02, at source `3346166`,
 stage `gfx1013-runtime-9ac5d150b5db`, image SHA
@@ -177,3 +191,4 @@ manifests, hashes, source commit and the pinned image tool's binary provenance.
 - 2026-10-11 | CPU lifecycle milestone | 3346166 | PPSA99014 | one shell-managed startup/finalization/self-close passed on FW 6.02; 22 host cases pass | evidence/native-shell-exit.json | no G1-G12 gate passed
 
 - 2026-10-11 | G1 passed offline | LLVM18 + gfx1013 selected; isolated reproduction, TheRock comparison, 25 host tests | evidence/offline-g1-acceptance.json | next: bounded G2 store run
+- 2026-10-11 | G2 failed | 15bfc35 | FW6.02 PPSA99014 | CPU SIGSEGV/RIP0 after SUBMIT; title released, services reachable | evidence/native-indexed-store-first.json | next: offline fault mapping

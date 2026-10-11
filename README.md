@@ -9,6 +9,9 @@ ProsperoAI, and ultimately run native PyTorch inference and training.
 **Status: G1's reproducible compiler/platform contract passed offline; 25 host
 tests pass. One CPU startup/finalization/shell-close experiment passed on FW 6.02.
 No GPU execution or general HIP runtime is qualified yet.**
+The first GPU candidate reached its pre-submit checkpoint, then faulted on the CPU
+at RIP zero. The title was released and services remained reachable; offline
+diagnosis is in progress. See [the failed-run receipt](evidence/native-indexed-store-first.json).
 The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
 requirement, selected LLVM 18 route, TheRock comparison and remaining limits.
 The repository is private.

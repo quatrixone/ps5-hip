@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "classification": "failed",
+  "goal": "G2",
+  "experiment": "First native HIP-compiled indexed-store; one launch only",
+  "observed_utc": "2026-10-11T20:15:31Z",
+  "title": "PPSA99014",
+  "firmware": "6.02 (ShadowMount reported)",
+  "console": "authorized idle primary console",
+  "source_commit": "15bfc358f014b4231fcf9f84918b79b1b301008f",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+    "bytes": 3571712
+  },
+  "target": "gfx1013",
+  "kernel": "indexed_store",
+  "pid": 341,
+  "app_id": "0x0000e017",
+  "hardware_gate_passed": false,
+  "gpu_execution_proven": false,
+  "hypothesis": "LLVM18 AMDHSA V5 entry state and native submission produce 73 exact indexed XOR values with full guards and clean shell-managed teardown",
+  "highest_observed_stage": "CPU runtime checks and pre-submit application checkpoint",
+  "application": {
+    "application_result": "incomplete-or-unexpected",
+    "target": "gfx1013",
+    "kernel": "indexed_store",
+    "log_sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+    "bytes": 208,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "fault": {
+    "signal": "SIGSEGV",
+    "signal_number": 11,
+    "rip": "0x0",
+    "fault_address": "0x0",
+    "reason": "page fault (user read instruction, page not present)",
+    "backtrace": [
+      "0x400c4e",
+      "0x40016a",
+      "0x0"
+    ]
+  },
+  "interpretation": "SUBMIT is logged before submit_and_wait. It does not prove the driver accepted commands or any GPU instruction executed. RIP zero is a CPU control-flow failure; its exact origin requires frozen-artifact analysis.",
+  "observation": {
+    "title_stopped_before_host_close": true,
+    "observation_error": null,
+    "elapsed_seconds": 4.412502278002648
+  },
+  "lifecycle": {
+    "normal_completion": false,
+    "title_stopped_before_host_close": true,
+    "sandbox_removed": true,
+    "runtime_layers_released": true,
+    "image_unmounted": true,
+    "exact_title_close_sent_once": true,
+    "all_declared_services_reachable_afterward": true,
+    "automatic_retry": false,
+    "process_kill_sent": false
+  },
+  "preservation": {
+    "image": "/data/homebrew/PPSA99014.ffpkg.d9a9e95cfc3e.preserved",
+    "log": "/data/ps5-hip/results/ps5-hip-gfx1013-runtime.log",
+    "old_image_sha256": "d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0"
+  },
+  "raw_files": {
+    "results/indexed-store-deploy-20261011T201501Z/before.log": {
+      "sha256": "55e83ca0022ecf6fa11c89e513760c35c245f2039bd5698415154506a6fb725b",
+      "bytes": 291572
+    },
+    "results/indexed-store-deploy-20261011T201501Z/case.json": {
+      "sha256": "faa0ff588e169812c8cbdb33a84ff28838f893bfc417c60f654c4addbbfa6590",
+      "bytes": 947
+    },
+    "results/indexed-store-deploy-20261011T201501Z/deployment.json": {
+      "sha256": "9259284a23190f338d9a0357ebd8cdfb1b1c6d6763d299a8371fcaffd4700821",
+      "bytes": 338
+    },
+    "results/indexed-store-deploy-20261011T201501Z/preservation.json": {
+      "sha256": "9f08dd7713766525501379f193b60e89317f657d77a442beafd0ceceaa2e1da6",
+      "bytes": 222
+    },
+    "results/indexed-store-deploy-20261011T201501Z/preserved-application.log": {
+      "sha256": "84d1b89260e4dc214dc382ebbe75a7da3537d50d155d524ae8a5cc24976ffdf4",
+      "bytes": 372
+    },
+    "results/indexed-store-deploy-20261011T201501Z/registration.log": {
+      "sha256": "7da7073f97b38b9e872958c5b69b7040758cda7a197be94df3ea0c970513ae47",
+      "bytes": 292994
+    },
+    "results/indexed-store-run-20261011T201531Z/after.log": {
+      "sha256": "2641196aa0df4ed267026599a311123a0f044a63df91b59ad0bcff3ba4b16d06",
+      "bytes": 295962
+    },
+    "results/indexed-store-run-20261011T201531Z/application-check.json": {
+      "sha256": "6d540e5330ea74446cf35ebe389c00379eecf161ec655ce6f48ab33763414f74",
+      "bytes": 386
+    },
+    "results/indexed-store-run-20261011T201531Z/application.log": {
+      "sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+      "bytes": 208
+    },
+    "results/indexed-store-run-20261011T201531Z/before-close.json": {
+      "sha256": "a1099c69269eed3eccb52ac745e49ab866d42379b28ef8bef51889a52afa9b9f",
+      "bytes": 114
+    },
+    "results/indexed-store-run-20261011T201531Z/before-launch.log": {
+      "sha256": "dbc5fa465631eee115d3567accc7f304b22f451eeb79a9e419a1ee04fef08d69",
+      "bytes": 293286
+    },
+    "results/indexed-store-run-20261011T201531Z/before.log": {
+      "sha256": "dbc5fa465631eee115d3567accc7f304b22f451eeb79a9e419a1ee04fef08d69",
+      "bytes": 293286
+    },
+    "results/indexed-store-run-20261011T201531Z/case.json": {
+      "sha256": "faa0ff588e169812c8cbdb33a84ff28838f893bfc417c60f654c4addbbfa6590",
+      "bytes": 947
+    },
+    "results/indexed-store-run-20261011T201531Z/close-response.log": {
+      "sha256": "aa9ce57b52913a8c5e959a47d120a872aa98ee3f23644bdebb8cee6863bf30e9",
+      "bytes": 124
+    },
+    "results/indexed-store-run-20261011T201531Z/health.json": {
+      "sha256": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+      "bytes": 71
+    },
+    "results/indexed-store-run-20261011T201531Z/klog.log": {
+      "sha256": "06778dbb4ba612b1cef61ea04a325d81d4c79659b7f5df25b9a0f38a860729e4",
+      "bytes": 126523
+    },
+    "results/indexed-store-run-20261011T201531Z/launch-response.log": {
+      "sha256": "a43911f97101f6be583fd31b4f775ebbc8bfa8e5d7e7c52044cee673ebcba44d",
+      "bytes": 167
+    },
+    "results/indexed-store-run-20261011T201531Z/observed.log": {
+      "sha256": "1acd53a11281381dea85216375782120396b57e6bad89de7b4dc5ddac4fd7add",
+      "bytes": 295116
+    },
+    "results/indexed-store-run-20261011T201531Z/registration.json": {
+      "sha256": "4edcc0b3d3cbb499026f917b0a238d2a267cd6d008c4463dc04236167d71e5a4",
+      "bytes": 149
+    }
+  },
+  "next_decision": "Preserve the failed candidate and logs. Diagnose CPU null control flow offline using the exact frozen ELF; do not infer a shader/ISA failure or rerun automatically."
+}
