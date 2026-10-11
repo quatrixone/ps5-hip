@@ -66,3 +66,19 @@ code. A successful custom-target configuration is not a substitute for these ste
 
 G1 stays open: clean-machine reproduction and the built-compiler comparison are
 not established by the current same-host and source/configuration evidence.
+
+## Executable comparison
+
+`tools/compare_device_compiler.py --compiler-bin /path/to/compiler/bin --output
+/path/to/new-results` runs the exact current baseline argument profiles with the
+selected compiler and its verified device linker. It checks baseline source,
+recipe and object hashes first, preserves driver/compile/metadata/disassembly
+logs, and runs the current host loader against each result. Output must be a new
+directory. Compiler failures are reported per case; they do not become capability
+claims. A nonzero exit indicates at least one failed compile or inspection.
+
+The baseline self-check reproduces all four LLVM 18 objects exactly and accepts
+their metadata, ISA disassembly and loader structure. This validates the runner,
+not TheRock: see `evidence/offline-compiler-comparison-runner.json`. Different
+compiler outputs need instruction/resource comparison even if structural checks
+pass. No target is GPU-qualified by these checks.
