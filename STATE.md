@@ -196,8 +196,12 @@ Offline work ahead of G2/G3/G4:
   Its isolated native source is `c37f0db`, parent `b8bc2b0`, on
   `development/g2-vector-repeat` in the existing `.local/g2-agc-provider-fix`
   worktree. Only harness/build/stage profile changes enter that source; no later
-  hidden-geometry or wave implementation enters the experiment. Native packaging
-  and console qualification are separate.
+  hidden-geometry or wave implementation enters the experiment. Its package
+  `gfx1013-vector_add_twice-70a3e57c6792` passed imports/startup/FSELF/ISA/UFS2,
+  extracted-file and main catalog/controller verification; all 76 previous
+  artifacts are unchanged. See `evidence/offline-vector-twice-package.json`.
+  Image SHA `1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5`.
+  Prepare preservation controls before deployment; this profile has not run.
 - Host CTests include registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
   twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and

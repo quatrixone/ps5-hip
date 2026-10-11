@@ -1,0 +1,412 @@
+{
+  "schema": 1,
+  "classification": "provider-fixed-two-dispatch-vector-offline-ready",
+  "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "parent_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+  "target": "gfx1013",
+  "kernel": "vector_add_twice",
+  "dispatches": 2,
+  "title_id": "PPSA99014",
+  "hardware_validated": false,
+  "console_access": false,
+  "deployed": false,
+  "stage": ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792",
+  "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-vector_add_twice.log",
+  "build_receipt_sha256": "71d9d6ed1c5b7ac536f7b2cb5de4dd0b7b851456507877ea12c17affd325693b",
+  "manifest_sha256": "d93a5db79f38539182bc5df351425de721a7e0da2f0fda61b1bc5abad57dad5d",
+  "package_receipt_sha256": "07aca6a20d3c352a6bb2a8209136ebc5cc96a5f2a6d9c6c526debe96cb006d23",
+  "package": {
+    "schema": 1,
+    "hardware_validated": false,
+    "title_id": "PPSA99014",
+    "manifest_sha256": "d93a5db79f38539182bc5df351425de721a7e0da2f0fda61b1bc5abad57dad5d",
+    "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+    "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+      "bytes": 3571712
+    },
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "native_artifacts": {
+    "llvm-pie.elf": {
+      "sha256": "e111620c59738435b482c8a622f55132ea417cd9687d89e4dc04d4a49b653569",
+      "bytes": 1159768
+    },
+    "eboot.elf": {
+      "sha256": "b742ebc68d62e8a7cd68c44af91d84caad84c0eea963498acc48c7e2bf2321b1",
+      "bytes": 929924
+    },
+    "native_canary.o": {
+      "sha256": "acf5aa33f4a4e6222ebd453330ba7fa5425211db3664d0672a798e8f04120969",
+      "bytes": 49272
+    },
+    "candidate/eboot.bin": {
+      "sha256": "e4eb3ce98e3c6291cf71c409c553872a6bd9ea7de10a91c41b839f7720d390e8",
+      "bytes": 816738
+    },
+    "candidate/canary.hsaco": {
+      "sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+      "bytes": 4096
+    },
+    "candidate/lapy.elf": {
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+      "bytes": 155032
+    },
+    "candidate/sce_module/libc.prx": {
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+      "bytes": 1284674
+    }
+  },
+  "compiled_source_changes_from_single": [
+    "tools/build_native_canary.py",
+    "tools/native_canary.cpp"
+  ],
+  "source_sha256": {
+    "tools/native_canary.cpp": "67dcaeaa3d3c78e6af08197c67027d319f0fb4b934ae01ba38961c79eb882aff",
+    ".deps/elevation/client/elevation.cpp": "037e43b4b2db3d862af54377a5d25a14251ad6bba9c5199cb442bb99043ae79b",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "src/code_object.cpp": "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5",
+    "src/launch.cpp": "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02",
+    "include/ps5hip/launch.h": "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "kernels/canary.hip": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+    "tools/build_native_canary.py": "f6a9b265e9e9b854c510f7e0cbb6c3b24389647d93f5f2719d2fd721bd084f9c",
+    "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "elevation-inputs.json": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e",
+    ".deps/elevation/client/elevation.hpp": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+    ".deps/elevation/client/protocol.hpp": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+    ".deps/elevation/client/validate-helper.py": "770827f77c6bc1d856cdea54bb87842cd1f055523c1b24dd41b14a400d219c55",
+    ".deps/elevation/lapy/LICENSE": "5ef18e95f617c9d3a2674cc3256f5c0d6ec2f794a57e9e40f2185dd454c9f8da",
+    ".deps/elevation/lapy/tools/build_owned_daemon.py": "e435ad2b102f642c63c0d18900a672a77267993dd75a27deaa94327aa3fdf07f",
+    ".deps/elevation/lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    ".deps/elevation/lapy/source/donor_transaction.c": "6844275eca240aab25d5d61ae030f94b50b9538116452ccb6078f6518ba876d9",
+    ".deps/elevation/lapy/source/donor_transaction.h": "c976e43a298a3621b2ff0f83f92f1304dc5c177a00d5af14c5a78a9620d2ce5b",
+    ".deps/elevation/lapy/source/vnode_ref_probe.c": "ef49b83a80cdc980ea6b5cdb0477110b08b10feba7e7229cbb0c7db1bf0a87f0",
+    ".deps/elevation/lapy/source/vnode_ref_probe.h": "13e7f3b9ba77c696209f647e5a0fb60f50a6e8112991bb4bfc63da632a6a0153",
+    ".deps/elevation/lapy/source/lapy_elevation_protocol.h": "bb02c4aa814eaba7a7a423a31b29ff41f786212c2953678cf29434e85fa0f869",
+    ".deps/elevation/logging/ps5log.h": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "application_objects": {
+    "agc_backend.o": {
+      "previous": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1",
+      "new": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1"
+    },
+    "app_crt.o": {
+      "previous": "bb706662e362e1db2ce56a53a49cfb8db4b06b4f235dada55e8b43c78310bf7e",
+      "new": "bb706662e362e1db2ce56a53a49cfb8db4b06b4f235dada55e8b43c78310bf7e"
+    },
+    "code_object.o": {
+      "previous": "794069d9ec0212bb6c56fea9727d2e6e422cbab0c2b5da4807c13b95eddfdd0d",
+      "new": "794069d9ec0212bb6c56fea9727d2e6e422cbab0c2b5da4807c13b95eddfdd0d"
+    },
+    "elevation.o": {
+      "previous": "67176ed6db0cdfaa068414a983347c709e5c32f772d2447f3e64cbad86b15ad5",
+      "new": "67176ed6db0cdfaa068414a983347c709e5c32f772d2447f3e64cbad86b15ad5"
+    },
+    "launch.o": {
+      "previous": "02f624a90e29bd8b3ed7812295a467bf0fa67b367e45ff1ebf10c06532436691",
+      "new": "02f624a90e29bd8b3ed7812295a467bf0fa67b367e45ff1ebf10c06532436691"
+    },
+    "native_canary.o": {
+      "previous": "d5e93b5160c8468281fe6393b4f4752b94fcb57a90778847232bc9a6bd95e86e",
+      "new": "acf5aa33f4a4e6222ebd453330ba7fa5425211db3664d0672a798e8f04120969"
+    },
+    "native_memory.o": {
+      "previous": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c",
+      "new": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c"
+    },
+    "native_shell_exit_probe.o": {
+      "previous": "9abd6736f59251d6dda0f98efa026ab631c83d65306b0a49317fd92b114726ed",
+      "new": "9abd6736f59251d6dda0f98efa026ab631c83d65306b0a49317fd92b114726ed"
+    },
+    "submission.o": {
+      "previous": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6",
+      "new": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6"
+    }
+  },
+  "changed_application_objects": [
+    "native_canary.o"
+  ],
+  "byte_identical_to_single": [
+    "libc.raw.elf",
+    "candidate/sce_module/libc.prx",
+    "candidate/lapy.elf",
+    "candidate/canary.hsaco",
+    "ps5-native-tool",
+    "libc-builder"
+  ],
+  "device_build_record_identical": true,
+  "native_tool_source_identical": true,
+  "native_import_count": 116,
+  "entire_import_mapping_identical_to_single": true,
+  "agc_imports": {
+    "sceAgcInit": [
+      "libSceAgc",
+      "libSceAgc"
+    ],
+    "sceAgcDriverSubmitDcb": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ],
+    "sceAgcSuspendPoint": [
+      "libSceAgc",
+      "libSceAgc"
+    ]
+  },
+  "startup_order": "shell exit installer before init/main/catchReturnFromMain",
+  "fself_integrity": "eboot and libc valid",
+  "preserved_existing_artifact_files": 76,
+  "preserved_inventory_sha256": "e6ea21efcff1cd0460338fd8c7279b75e88235f4941512530c9954db85c82940",
+  "tracked_source_clean": true,
+  "local_verifier": {
+    "catalog_mode": "in-memory append only; tracked catalog unchanged",
+    "result": {
+      "local_artifacts_verified": true,
+      "hardware_gate_passed": false,
+      "title_id": "PPSA99014",
+      "target": "gfx1013",
+      "kernel": "vector_add_twice",
+      "shutdown_mode": "shell-request-probe",
+      "source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+      "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-vector_add_twice.log",
+      "image": {
+        "file": "PPSA99014.ffpkg",
+        "sha256": "1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5",
+        "bytes": 3571712
+      },
+      "controllers": {
+        "launch.elf": {
+          "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+          "bytes": 110544
+        },
+        "close.elf": {
+          "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+          "bytes": 110592
+        }
+      },
+      "unproven": [
+        "console idle state",
+        "remote bytes",
+        "registration",
+        "log freshness",
+        "native execution",
+        "clean teardown",
+        "service health"
+      ],
+      "dispatches": 2
+    }
+  },
+  "oracle": {
+    "dispatches": 2,
+    "queue_backend": "same instance for both",
+    "allocation_lifetime": "fresh code/kernarg/input/output plus command/marker allocations each dispatch; every allocation closes before next dispatch begins",
+    "values_per_dispatch": 73,
+    "total_exact_values": 146,
+    "groups": [
+      2,
+      1,
+      1
+    ],
+    "threads_per_group": [
+      64,
+      1,
+      1
+    ],
+    "input_a": "float(i)*0.5f",
+    "input_b": "-float(i)*0.25f+2.0f",
+    "expected_output": "float(i)*0.25f+2.0f",
+    "comparison": "exact IEEE754 binary32 bits, i=0..72; inputs immutable; prefix16words and all words after logical73values in all three rounded allocations remain 0xa5a5a5a5",
+    "output_initialization": "fresh poison for both dispatches; inactive invocations73..127 cannot modify guards",
+    "kernargs": "three pointers offsets0/8/16 and u32count73 offset24, total28bytes",
+    "timeout_ms_per_dispatch": 2000,
+    "failure": "no next dispatch after any error; unresolved submission ownership quarantines with no retry or local teardown",
+    "success": "two ordered pass checkpoints then aggregate146-value summary and finite shell finalization"
+  },
+  "limits": [
+    "Offline readiness only; no two-dispatch native execution claim",
+    "Fresh allocations; no persistent-buffer reuse or asynchronous overlap tested",
+    "Driver calls themselves are not bounded by the software poll timeout",
+    "No wave, hidden geometry, HIP host runtime or framework capability expansion"
+  ],
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "tools/build_native_canary.py",
+        "--native-source",
+        "<NATIVE_SOURCE>",
+        "--target",
+        "gfx1013",
+        "--kernel",
+        "vector_add_twice",
+        "--shell-exit-probe"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "build.log",
+      "sha256": "c24cc02c3302b850f773abf0330f4257f89df18f8b31b8894f4e2515f8c8b251"
+    },
+    {
+      "command": [
+        "python3",
+        "<ROOT>/tests/native_agc_imports_test.py",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/eboot.elf"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "agc-imports.log",
+      "sha256": "b45ffa402b091007d2a33a18680cd9fc48fa64e80bc2f272de6b224dfb568667"
+    },
+    {
+      "command": [
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/ps5-native-tool",
+        "self",
+        "--inspect",
+        "--file",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/candidate/eboot.bin"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "eboot-fself.log",
+      "sha256": "87808e6bb4811f5fdcc264efe8f836cc535479a7ab1da65d11a1321a0c7b4a95"
+    },
+    {
+      "command": [
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/ps5-native-tool",
+        "self",
+        "--inspect",
+        "--file",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/candidate/sce_module/libc.prx"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "libc-fself.log",
+      "sha256": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d"
+    },
+    {
+      "command": [
+        "<ROOT>/build/host/ps5hip-inspect",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/candidate/canary.hsaco"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "device-inspect.log",
+      "sha256": "b7fc4e3341e5673278fb1435ca30f4eee8aaa32572c5f941f964ac42408e43da"
+    },
+    {
+      "command": [
+        "llvm-objdump-18",
+        "-d",
+        "--mcpu=gfx1013",
+        "--disassemble-symbols=vector_add",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/candidate/canary.hsaco"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "vector-isa.log",
+      "sha256": "cfe0f5323b4991c6f0cb6ae3023af357a6152c418bea6f1e84dd00027a9c4e3f"
+    },
+    {
+      "command": [
+        "llvm-objdump-18",
+        "-d",
+        "--disassemble-symbols=_start",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-vector_add_twice/llvm-pie.elf"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "startup.log",
+      "sha256": "c63ddbf3418aab3e4adc0d700e305f61592908bd00877abb605ef9ec4644e8a8"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/stage_native_title.py",
+        "--target",
+        "gfx1013",
+        "--kernel",
+        "vector_add_twice",
+        "--results-dir",
+        "/data/ps5-hip/results"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "stage.log",
+      "sha256": "77bdc3bf5df27adbc31f4f41255eac9d79c5ef27d355deaad2f628c85700e64f"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/package_native_title.py",
+        "--stage",
+        "<ROOT>/.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792"
+      ],
+      "cwd": "<ROOT>/.local/g2-agc-provider-fix",
+      "returncode": 0,
+      "log": "package.log",
+      "sha256": "56e213982ca140fecc3c1e2eea998060fbea7c74ed2b0e3d349ac75a14e9b7d5"
+    },
+    {
+      "command": [
+        "python3",
+        "<ROOT>/tests/title_stage_test.py"
+      ],
+      "cwd": "<ROOT>",
+      "returncode": 0,
+      "log": "title_stage_test.py.log",
+      "sha256": "df7fee044e6ac8584b6c2108a270efd5c0e119590664137875cf47f388deb99e"
+    },
+    {
+      "command": [
+        "python3",
+        "<ROOT>/tests/native_case_test.py"
+      ],
+      "cwd": "<ROOT>",
+      "returncode": 0,
+      "log": "native_case_test.py.log",
+      "sha256": "77d39d232626e3e59e6a916819491f0ba13a87739af70ac3ae4468c1f8dea0c8"
+    },
+    {
+      "command": [
+        "python3",
+        "<ROOT>/tests/canary_log_test.py"
+      ],
+      "cwd": "<ROOT>",
+      "returncode": 0,
+      "log": "canary_log_test.py.log",
+      "sha256": "1a902fd4c537c33c9c15041b84a9ad5661cfe31a3f4d21f81c9f7ae7a631eec6"
+    }
+  ],
+  "raw_log_sha256": {
+    "agc-imports.log": "b45ffa402b091007d2a33a18680cd9fc48fa64e80bc2f272de6b224dfb568667",
+    "build.log": "c24cc02c3302b850f773abf0330f4257f89df18f8b31b8894f4e2515f8c8b251",
+    "canary_log_test.py.log": "1a902fd4c537c33c9c15041b84a9ad5661cfe31a3f4d21f81c9f7ae7a631eec6",
+    "device-inspect.log": "b7fc4e3341e5673278fb1435ca30f4eee8aaa32572c5f941f964ac42408e43da",
+    "eboot-fself.log": "87808e6bb4811f5fdcc264efe8f836cc535479a7ab1da65d11a1321a0c7b4a95",
+    "libc-fself.log": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+    "native_case_test.py.log": "77d39d232626e3e59e6a916819491f0ba13a87739af70ac3ae4468c1f8dea0c8",
+    "package.log": "56e213982ca140fecc3c1e2eea998060fbea7c74ed2b0e3d349ac75a14e9b7d5",
+    "stage.log": "77bdc3bf5df27adbc31f4f41255eac9d79c5ef27d355deaad2f628c85700e64f",
+    "startup.log": "c63ddbf3418aab3e4adc0d700e305f61592908bd00877abb605ef9ec4644e8a8",
+    "title_stage_test.py.log": "df7fee044e6ac8584b6c2108a270efd5c0e119590664137875cf47f388deb99e",
+    "vector-isa.log": "cfe0f5323b4991c6f0cb6ae3023af357a6152c418bea6f1e84dd00027a9c4e3f",
+    "verify-native-case.log": "eecbf8610806d6937fac40effdde94be93a5e322c4f9c21ee1adf865ac73152a"
+  },
+  "preparation_script_sha256": "00c6b3fae042ba65625b3b8aae300a4bdcd3977fa64bc06d40ed85cfddf315e0",
+  "raw_receipt_sha256": "d9fea9ff624b1f78ac5de815a5e7a340686b8de1891a3af2fbb3c137b4eacf0b"
+}

@@ -116,6 +116,37 @@ Both input buffers must remain unchanged and all three full allocation guards
 must pass. The same completion, external deadline, quarantine and teardown rules
 apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
+### Repeated vector candidate
+
+The next frozen experiment combines this vector oracle with two serialized
+dispatches through the same backend/queue, then two separately observed title
+cycles of the same image. Each dispatch allocates and poisons fresh guarded
+buffers; the second output cannot pass merely by retaining the first output.
+Hypothesis: the qualified pointer/entry contract supports exact vector loads,
+FP32 addition and stores, and completed queue ownership can be reused safely.
+
+Source `c37f0db` adds only the profile to the successful provider-corrected
+baseline. The stage is
+`.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-vector_add_twice-70a3e57c6792`,
+image SHA `1487a21ba6bdd65f61a67ad6739e25f8cbc9306f2fcda5602403a0f51fec67f5`.
+Only the canary application object differs; device bytes and all 116 imports are
+unchanged. See `evidence/offline-vector-twice-package.json`.
+
+Expected: ordered dispatch 1/2 and 2/2 records, 73 exact values and all input/guard
+checks per dispatch, allocation closure, a final 146-value summary, complete
+shell-managed shutdown, title/runtime/image release and healthy services. The
+in-title timeout remains two seconds per dispatch; the host launch/observation
+window is 20 seconds with separately bounded exact-title cleanup. These limits
+do not cancel GPU work or guarantee a driver call returns.
+
+Any failed, missing or contradictory criterion rejects the cycle and prevents
+cycle two. Preserve the store image/log before deployment. Preserve cycle one's
+exact log before cycle two, which requires a reviewed acceptance receipt and a
+fresh idle/identity check. No automatic retry or unrelated-title closure.
+If both cycles pass, audit the unchanged G2 requirements for the explicitly
+declared arithmetic launch set; hidden geometry, other workgroup shapes, waves,
+scratch and a public HIP host runtime remain separate qualifications.
+
 ## Offline freeze state and remaining work
 
 - Corrected-provider candidate: source `b8bc2b0`, stage
