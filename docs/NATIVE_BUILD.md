@@ -286,7 +286,11 @@ and shutdown contract. The partial case requires every inactive word to remain
 
 Host negative tests, real-object launch preparation and four PS5 harness
 translation-unit compilations pass; see `evidence/offline-wave-native-harness.json`.
-This is not a full native link, packaged candidate or GPU wave qualification.
+Both gfx1013 profiles also link natively at source `142d927`; their emitted
+AGC/ShellCoreUtil imports, startup barrier ordering and eboot/libc FSELF integrity
+checks pass. See `evidence/offline-wave-native-link.json`. The gfx1030 profiles
+remain translation-unit compile-only. Neither wave profile is packaged or
+GPU-qualified.
 
 ## Dependency provenance
 

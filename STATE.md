@@ -153,8 +153,11 @@ outputs and ISA inventories are retained in `evidence/offline-wave-probes.json`.
 Both now have guarded native harness profiles with 256-word oracles, strict log
 and staging support, verified O2 object provenance, and one-group launch checks.
 Nine focused host CTest cases and four PS5 harness translation-unit compilations
-pass; full linking and GPU behavior remain unverified. See
-`evidence/offline-wave-native-harness.json`. The frozen candidate is unchanged.
+pass; see `evidence/offline-wave-native-harness.json`. Both gfx1013 wave profiles
+now link at source `142d927`, with checked imports, startup ordering and FSELF
+integrity (`evidence/offline-wave-native-link.json`). The gfx1030 profiles remain
+compile-only; neither wave profile is packaged or GPU-qualified. The frozen
+indexed-store candidate is unchanged.
 The tested generic volatile private-address path remains a G3 compiler issue.
 An isolated contrast without `volatile` retains 144 private bytes but uses buffer
 scratch on both targets, with 33 private-address IR accesses and no flat-scratch

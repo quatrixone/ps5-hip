@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "classification": "offline-wave-native-link-pass",
+  "source_commit": "142d9276274a3faa2b1da82abd19e2a2aa025d84",
+  "hardware_validated": false,
+  "full_native_link": true,
+  "packaged": false,
+  "source_sha256": {
+    "tools/native_canary.cpp": "37aabc124e80041706b73cda5723df556f6b4923caed285f298e5114f03810f0",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "src/code_object.cpp": "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5",
+    "src/launch.cpp": "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02",
+    "include/ps5hip/launch.h": "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "tools/probe_wave_compiler.py": "737c610acdbbd6a4f67ab4fa0c24a0ec931ac878dea9fe9ed08e93120d3671a3",
+    "kernels/wave.hip": "07f2d2981e96369a08218ef2241e43ad2d14ea0f51edae35cf2494586728aea9",
+    "tools/build_native_canary.py": "f68b41af58bfe670c50df0efef3db9c2b1d72739628465a5ff547712a28ff4aa",
+    "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "elevation-inputs.json": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e"
+  },
+  "verified_imports": {
+    "sceShellCoreUtilExitApp": [
+      "libSceSystemService",
+      "libSceShellCoreUtil"
+    ],
+    "sceAgcInit": [
+      "libSceAgc",
+      "libSceAgc"
+    ],
+    "sceAgcDriverSubmitDcb": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ],
+    "sceAgcSuspendPoint": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ]
+  },
+  "candidates": [
+    {
+      "target": "gfx1013",
+      "kernel": "wave_full",
+      "shutdown_mode": "shell-request-probe",
+      "build_directory": "build/native/gfx1013-wave_full",
+      "build_receipt_sha256": "ca13cecd91f55600eaec2aa90f794fef02dd84cb9991552cf6cb454d14ff1e53",
+      "build_command": [
+        "python3",
+        "tools/build_native_canary.py",
+        "--native-source",
+        "<PS5_Vulkan>",
+        "--target",
+        "gfx1013",
+        "--kernel",
+        "wave_full",
+        "--wave-probes",
+        "results/wave-native-integration-20261012",
+        "--shell-exit-probe"
+      ],
+      "llvm_version": "18.1.8",
+      "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+      "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
+      "artifacts": {
+        "eboot.bin": {
+          "sha256": "9b40b00ffe359144bf8f1f86a10a3f2b6e719b43650d121f2daf7dd53fa64604",
+          "bytes": 814802
+        },
+        "lapy.elf": {
+          "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+          "bytes": 155032
+        },
+        "sce_module/libc.prx": {
+          "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+          "bytes": 1284674
+        },
+        "canary.hsaco": {
+          "sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a",
+          "bytes": 4088
+        }
+      },
+      "startup_barrier_before_initializers": true,
+      "fself_integrity": "valid for eboot and libc companion",
+      "device_profile": {
+        "target": "gfx1013",
+        "optimization": "-O2",
+        "code_sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a",
+        "driver_sha256": "e5067159ed401b705bf4d487b8d507b24ebf578cf8595d2b983f3c1bd4d695ab"
+      },
+      "raw_reports_sha256": {
+        "wave_full-build.log": "efa454f9f5769e1a50868c57f562aad116277ee55c3d8441e0cd23eb9e8b5134",
+        "wave_full-device-inspection.txt": "a4d76d2fa9ee63afa626e84c4e6273ae8e081cffa2f4d44592a70f5c0ed28792",
+        "wave_full-device-isa.txt": "351db9c1caefb5c257baa9bedc25796e677f6b359be6c743577b88f73165dd5c",
+        "wave_full-eboot-fself.txt": "bf280fe9c80f1b15cd4205f0f401e5330391f1b7b58e25c08a6c49b9e229c137",
+        "wave_full-libc-fself.txt": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+        "wave_full-startup.txt": "c0c2d3821bdbce7105f12f4dd93345e45cc22fdc0dea86f49f1cc5e1afd7c8c2"
+      }
+    },
+    {
+      "target": "gfx1013",
+      "kernel": "wave_partial",
+      "shutdown_mode": "shell-request-probe",
+      "build_directory": "build/native/gfx1013-wave_partial",
+      "build_receipt_sha256": "4d41551f6190ae80432cbaebf82452da681f216d5285576ec64805947faf9b7b",
+      "build_command": [
+        "python3",
+        "tools/build_native_canary.py",
+        "--native-source",
+        "<PS5_Vulkan>",
+        "--target",
+        "gfx1013",
+        "--kernel",
+        "wave_partial",
+        "--wave-probes",
+        "results/wave-native-integration-20261012",
+        "--shell-exit-probe"
+      ],
+      "llvm_version": "18.1.8",
+      "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+      "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
+      "artifacts": {
+        "eboot.bin": {
+          "sha256": "45c301acf78894ccf8dd3e736b86df2c5cad111aa5b77e0aaa8e4aa972239f70",
+          "bytes": 814818
+        },
+        "lapy.elf": {
+          "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+          "bytes": 155032
+        },
+        "sce_module/libc.prx": {
+          "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+          "bytes": 1284674
+        },
+        "canary.hsaco": {
+          "sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a",
+          "bytes": 4088
+        }
+      },
+      "startup_barrier_before_initializers": true,
+      "fself_integrity": "valid for eboot and libc companion",
+      "device_profile": {
+        "target": "gfx1013",
+        "optimization": "-O2",
+        "code_sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a",
+        "driver_sha256": "e5067159ed401b705bf4d487b8d507b24ebf578cf8595d2b983f3c1bd4d695ab"
+      },
+      "raw_reports_sha256": {
+        "wave_partial-build.log": "bcb54ba88cc99fbb3e7077ebe74028aec99b7d7b8907bee48475b44aa0e70fa8",
+        "wave_partial-device-inspection.txt": "a4d76d2fa9ee63afa626e84c4e6273ae8e081cffa2f4d44592a70f5c0ed28792",
+        "wave_partial-device-isa.txt": "a44baae90593b511ec6da12cff29778b612dba9fafcefd1dc56aac06e0d99486",
+        "wave_partial-eboot-fself.txt": "7926749edc567be6abedef0f1a7207ea15dd291b3686a79d079e5c629337adb9",
+        "wave_partial-libc-fself.txt": "9e07fe59e2a7555b02a6384b0e8a717362e53ff63dc4cbe25e0b711cdb23b64d",
+        "wave_partial-startup.txt": "b4fe38b3fac95001dc44150239e1e28dec9000a59f8f9b8a38e4127c0922b360"
+      }
+    }
+  ],
+  "limits": [
+    "No GPU execution or wave qualification",
+    "No staging or package generated",
+    "gfx1030 remains translation-unit compile-only",
+    "No console traffic or push"
+  ],
+  "inspection_script_sha256": "77cd0daeeb5a3aba9727d9e1d7aa5cba0185c78caf970de531261e0f13b68486"
+}
