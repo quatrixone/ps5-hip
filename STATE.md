@@ -27,6 +27,13 @@ Updated: 2026-10-11, America/New_York.
 - Identity is **PPSA99014**; PPSA99012 was occupied. Use the Eden client and the
   bundled exact-title Lapy helper with configurable ordinary results storage.
   The current staging choice is `/data/ps5-hip/results`, not a compiled path.
+- The combined `arithmetic_suite` is frozen and packaged at isolated source
+  `5b74ac8`; image `28262f78...` runs store then vector on the same queue with
+  fresh allocations and 146 exact values. Only the native harness object differs
+  from `c37f0db`; device/core/helper/libc/import identities match. Host routing,
+  corruption and second-dispatch quarantine checks pass, as do native package
+  checks. See `evidence/offline-arithmetic-suite-native-readiness.json` and
+  `docs/G2_ARITHMETIC_ACCEPTANCE.md`. It has not been deployed or run.
 - CPU constructors, heap, exceptions, TLS and clock checks pass under the finite
   shell-managed lifecycle. Ordinary C exit still faults with SIGSYS; threaded or
   framework teardown is unqualified. See `evidence/native-shell-exit.json` and
@@ -84,12 +91,12 @@ See `evidence/offline-therock-component-completion.json`. Full ROCm distribution
 artifact packaging and upstream tests remain separate work. The build and logs
 under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
-The next hardware candidate must combine indexed-store and vector-add in one
-frozen application, as G2 item 5 explicitly requires. Implement `arithmetic_suite`
-from the clean proven `c37f0db` source without changing loader, launch, memory,
-submission or device code; use two ordered dispatches and 146 exact values with
-fresh guarded allocations. Freeze/package it offline, then qualify two clean
-cycles when .30 is idle. This supersedes the planned vector-only cycle-two action;
+The next hardware candidate is the frozen `5b74ac8` combined arithmetic image,
+as G2 item 5 explicitly requires. Its offline readiness and host evidence are
+recorded, and the package catalog preserves all 19 earlier entries. Bind the
+reviewed controls to the committed catalog and exact candidate checker/verifier,
+then qualify two separately reviewed clean cycles when .30 is idle. This
+supersedes the planned vector-only cycle-two action;
 preserve that control and its first-cycle evidence, but do not spend console time
 on it as a G2-closing test. The installed vector image and log must still be
 verified and preserved before any replacement. No console polling is needed while
@@ -263,3 +270,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G2 progress | b8bc2b0 | FW6.02 PPSA99014 | one indexed-store GPU dispatch and clean teardown passed | evidence/native-provider-fixed-store.json | next: repeated vector dispatch
 - 2026-10-11 | G2 progress | c37f0db | FW6.02 | two vector dispatches and one clean cycle passed | evidence/native-vector-twice-cycle1.json | next: idle-gated second cycle
 - 2026-10-11 | G3 offline | 1e0428f | gfx1013 | forced-spill image packaged; no hardware run | evidence/offline-scratch-native-readiness.json | next: combined G2 acceptance candidate
+- 2026-10-11 | G2 offline | 5b74ac8 | gfx1013 | combined arithmetic image packaged | evidence/offline-arithmetic-suite-native-readiness.json | next: two idle-gated cycles

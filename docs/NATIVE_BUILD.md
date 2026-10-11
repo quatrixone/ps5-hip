@@ -351,6 +351,23 @@ packaged; O1 remains an offline comparison. This records no G3 completion,
 general scratch support or HIP runtime compatibility. The main log checker does
 not yet recognize this isolated scratch profile.
 
+## Combined G2 arithmetic candidate
+
+The isolated `development/g2-arithmetic-suite` source `5b74ac8` builds the
+`arithmetic_suite` profile: indexed store followed by vector addition on one
+queue. Both entries come from the unchanged proven LLVM 18 code object. Only
+`native_canary.o` differs among the nine native application objects versus
+`c37f0db`; all 116 imports, helper, libc and native tools match.
+
+The frozen gfx1013 package is cataloged with image hash `28262f78...`. Startup,
+FSELF, device ISA, UFS2 and full extraction checks pass; all 692 earlier dependency
+and artifact files were preserved. See
+[`offline-arithmetic-suite-native-readiness.json`](../evidence/offline-arithmetic-suite-native-readiness.json)
+and the [two-cycle acceptance procedure](G2_ARITHMETIC_ACCEPTANCE.md).
+Use the frozen candidate's checker/verifier with the main package catalog and
+controllers: main's tools do not recognize this isolated combined profile yet.
+No combined hardware run or G2 completion is recorded by this package evidence.
+
 ## Dependency provenance
 
 The SDK fork is `mihawk-99/PS5_PayloadSDK` at

@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "classification": "ordered-indexed-store-vector-add-offline-ready",
+  "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "parent_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "target": "gfx1013",
+  "kernel": "arithmetic_suite",
+  "dispatches": 2,
+  "dispatch_kernels": [
+    "indexed_store",
+    "vector_add"
+  ],
+  "title_id": "PPSA99014",
+  "hardware_validated": false,
+  "deployed": false,
+  "console_access": false,
+  "stage": ".local/g2-arithmetic-suite/dist/PPSA99014/gfx1013-arithmetic_suite-7e9a1c51094b",
+  "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log",
+  "build_receipt_sha256": "a8f75c6436f1f630edbd2294183fddec75f66f49478dd0f59340b8e589ff0691",
+  "manifest_sha256": "108f569a90dc5e3ba8d686668d69b640cf327b3fb089a51fc073d74b07ae0c0b",
+  "package_receipt_sha256": "166dc1584d06967b097a268ef3d35b523bae3b04f5ddd84d925e83b7d354f30f",
+  "package": {
+    "schema": 1,
+    "hardware_validated": false,
+    "title_id": "PPSA99014",
+    "manifest_sha256": "108f569a90dc5e3ba8d686668d69b640cf327b3fb089a51fc073d74b07ae0c0b",
+    "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+    "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+      "bytes": 3571712
+    },
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "native_artifacts": {
+    "llvm-pie.elf": {
+      "sha256": "fcdff2e5fa6160dbd37e7e977bc7d2eeed5229b51ac6c9245973b3ae7a051640",
+      "bytes": 1159768
+    },
+    "eboot.elf": {
+      "sha256": "35fdfbc82fc04a8cd81fc17f4c903d1b617bd209eb6ddaa5ff3274545a3d22f6",
+      "bytes": 929924
+    },
+    "native_canary.o": {
+      "sha256": "6f3ccab4731000962f68c9aac2abc991c5822bb79a2fe578b41199afb9d3f691",
+      "bytes": 53200
+    },
+    "candidate/eboot.bin": {
+      "sha256": "842d8957ee148d93594d59200846d59a582d7d907a731e3e0fd545baff93ff51",
+      "bytes": 818818
+    },
+    "candidate/canary.hsaco": {
+      "sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+      "bytes": 4096
+    },
+    "candidate/lapy.elf": {
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+      "bytes": 155032
+    },
+    "candidate/sce_module/libc.prx": {
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+      "bytes": 1284674
+    }
+  },
+  "toolchain": {
+    "llvm_version": "18.1.8",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08"
+  },
+  "control_tool_sha256": {
+    "verify_native_case.py": "0900da94ea40ad0807af7d15ff06f7dd450d0c7e9fb044534c61e948d2fe51ef",
+    "check_canary_log.py": "505e4d32eaf94ba9aaee6d29247aa5ad585f75bf309d7c42392fbc4585ab67b6",
+    "stage_native_title.py": "2856c16fb4de95b2a36b5826a6b267aab52583c551197cd45c1a49eaea135907",
+    "package_native_title.py": "04cb740227c9825de481e4586ea79949790161a824e07fc552845efd3ba6aef5"
+  },
+  "comparison_source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "compiled_source_changes": [
+    "tools/build_native_canary.py",
+    "tools/native_canary.cpp"
+  ],
+  "application_objects": {
+    "agc_backend.o": {
+      "sha256": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1",
+      "c37_sha256": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1"
+    },
+    "app_crt.o": {
+      "sha256": "bb706662e362e1db2ce56a53a49cfb8db4b06b4f235dada55e8b43c78310bf7e",
+      "c37_sha256": "bb706662e362e1db2ce56a53a49cfb8db4b06b4f235dada55e8b43c78310bf7e"
+    },
+    "code_object.o": {
+      "sha256": "794069d9ec0212bb6c56fea9727d2e6e422cbab0c2b5da4807c13b95eddfdd0d",
+      "c37_sha256": "794069d9ec0212bb6c56fea9727d2e6e422cbab0c2b5da4807c13b95eddfdd0d"
+    },
+    "elevation.o": {
+      "sha256": "67176ed6db0cdfaa068414a983347c709e5c32f772d2447f3e64cbad86b15ad5",
+      "c37_sha256": "67176ed6db0cdfaa068414a983347c709e5c32f772d2447f3e64cbad86b15ad5"
+    },
+    "launch.o": {
+      "sha256": "02f624a90e29bd8b3ed7812295a467bf0fa67b367e45ff1ebf10c06532436691",
+      "c37_sha256": "02f624a90e29bd8b3ed7812295a467bf0fa67b367e45ff1ebf10c06532436691"
+    },
+    "native_canary.o": {
+      "sha256": "6f3ccab4731000962f68c9aac2abc991c5822bb79a2fe578b41199afb9d3f691",
+      "c37_sha256": "acf5aa33f4a4e6222ebd453330ba7fa5425211db3664d0672a798e8f04120969"
+    },
+    "native_memory.o": {
+      "sha256": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c",
+      "c37_sha256": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c"
+    },
+    "native_shell_exit_probe.o": {
+      "sha256": "9abd6736f59251d6dda0f98efa026ab631c83d65306b0a49317fd92b114726ed",
+      "c37_sha256": "9abd6736f59251d6dda0f98efa026ab631c83d65306b0a49317fd92b114726ed"
+    },
+    "submission.o": {
+      "sha256": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6",
+      "c37_sha256": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6"
+    }
+  },
+  "changed_application_objects": [
+    "native_canary.o"
+  ],
+  "byte_identical_to_c37": [
+    "libc.raw.elf",
+    "candidate/sce_module/libc.prx",
+    "candidate/lapy.elf",
+    "candidate/canary.hsaco",
+    "ps5-native-tool",
+    "libc-builder"
+  ],
+  "device_build_record_identical": true,
+  "entire_116_import_mapping_identical": true,
+  "agc_imports": {
+    "sceAgcInit": [
+      "libSceAgc",
+      "libSceAgc"
+    ],
+    "sceAgcDriverSubmitDcb": [
+      "libSceAgcDriver",
+      "libSceAgcDriver"
+    ],
+    "sceAgcSuspendPoint": [
+      "libSceAgc",
+      "libSceAgc"
+    ]
+  },
+  "validation": {
+    "startup": "shell exit installer before init/main/catchReturnFromMain",
+    "fself": "eboot and libc integrity valid",
+    "device": "same complete code object and build recipe as c37; both selected ISAs inspected",
+    "package": "UFS2 filesystem check and complete byte-for-byte extraction pass",
+    "isolated_profile_tests": [
+      "title_stage_test.py",
+      "native_case_test.py",
+      "canary_log_test.py"
+    ],
+    "local_verifier": {
+      "catalog_mode": "in-memory append only; tracked catalog unchanged",
+      "result": {
+        "local_artifacts_verified": true,
+        "hardware_gate_passed": false,
+        "title_id": "PPSA99014",
+        "target": "gfx1013",
+        "kernel": "arithmetic_suite",
+        "shutdown_mode": "shell-request-probe",
+        "dispatches": 2,
+        "dispatch_kernels": [
+          "indexed_store",
+          "vector_add"
+        ],
+        "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+        "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+          "bytes": 3571712
+        },
+        "controllers": {
+          "launch.elf": {
+            "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+            "bytes": 110544
+          },
+          "close.elf": {
+            "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+            "bytes": 110592
+          }
+        },
+        "unproven": [
+          "console idle state",
+          "remote bytes",
+          "registration",
+          "log freshness",
+          "native execution",
+          "clean teardown",
+          "service health"
+        ]
+      }
+    },
+    "source_clean": true,
+    "preserved_files": 692,
+    "preserved_inventory_sha256": "55fade57ad65fe0daee7345688db4b56538a6f54ab9f4f658b5745aaa51ae195",
+    "catalog_baseline_sha256": "2165c401dcb01f04df97900c48975f54ce09596fdf61cb8bb96d24550ceea84d",
+    "isolated_profile_test_counts": {
+      "title_stage_test.py": 11,
+      "native_case_test.py": 8,
+      "canary_log_test.py": 9
+    }
+  },
+  "oracle": {
+    "dispatch_order": [
+      "indexed_store",
+      "vector_add"
+    ],
+    "queue_backend": "same instance, sequential completed dispatches",
+    "allocation_lifetime": "fresh per-dispatch allocations; closed before the next begins",
+    "values_per_dispatch": 73,
+    "total_exact_values": 146,
+    "groups": [
+      2,
+      1,
+      1
+    ],
+    "threads_per_group": [
+      64,
+      1,
+      1
+    ],
+    "indexed_store": "out[i]=i xor 0x5a17c9e3, exact uint32 values",
+    "vector_add": "a[i]=float(i)*0.5; b[i]=-float(i)*0.25+2; out[i]=float(i)*0.25+2, exact binary32 bits",
+    "guards": "prefix16words and full rounded suffix after73elements remain0xa5a5a5a5; vector inputs immutable; inactive invocations73..127 remain guarded",
+    "timeout_ms_per_dispatch": 2000,
+    "failure": "no next dispatch on error; uncertain submissions quarantine with retained resources and no retry/local teardown",
+    "success": "two ordered73-value pass checkpoints, aggregate146-value pass, finite shell finalization"
+  },
+  "limits": [
+    "Offline candidate only; no combined arithmetic GPU execution or G2 completion claim",
+    "Only existing gfx1013 wave32 explicit-argument arithmetic profiles; no new scratch/wave/hidden-argument capability",
+    "No persistent-buffer reuse, asynchronous overlap or general HIP runtime qualification",
+    "Driver calls are outside the software polling timeout"
+  ],
+  "receipt_correction": {
+    "reason": "Corrected a report-writer formula typo to match the unchanged kernel, host oracle and inspected ISA. No source, build or package bytes changed.",
+    "initial_receipt_sha256": "f0804932146ba045d3420b9492ef7d613dd10c259c6de06725c046e64a747ee0",
+    "correction_script_sha256": "73708c2acc2d696e7057d9ab0ef4db55d78874e0b09d389fa5ef9b31437ee385"
+  },
+  "raw_receipt": {
+    "path": "results/g2-arithmetic-suite-ready/offline-arithmetic-suite-readiness.json",
+    "sha256": "18574335cc66be7a3c783d1429ae8f004692601fa62be05f1788f47a78fac4fc"
+  },
+  "host_evidence": {
+    "path": "evidence/offline-arithmetic-suite-host.json",
+    "sha256": "2e09ccfcd19095f44acc2bb9445f712abc64ae418834731b450a268caeab46aa"
+  },
+  "catalog_registration": {
+    "prior_candidates_preserved": 19,
+    "total_candidates": 20,
+    "verification": {
+      "local_artifacts_verified": true,
+      "hardware_gate_passed": false,
+      "title_id": "PPSA99014",
+      "target": "gfx1013",
+      "kernel": "arithmetic_suite",
+      "shutdown_mode": "shell-request-probe",
+      "dispatches": 2,
+      "dispatch_kernels": [
+        "indexed_store",
+        "vector_add"
+      ],
+      "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+      "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log",
+      "image": {
+        "file": "PPSA99014.ffpkg",
+        "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+        "bytes": 3571712
+      },
+      "controllers": {
+        "launch.elf": {
+          "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+          "bytes": 110544
+        },
+        "close.elf": {
+          "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+          "bytes": 110592
+        }
+      },
+      "unproven": [
+        "console idle state",
+        "remote bytes",
+        "registration",
+        "log freshness",
+        "native execution",
+        "clean teardown",
+        "service health"
+      ]
+    },
+    "hardware_gate_passed": false
+  },
+  "parent_reverification": {
+    "source_files": 35,
+    "logs": 14,
+    "native_artifacts": 7,
+    "preserved_files": 692
+  }
+}

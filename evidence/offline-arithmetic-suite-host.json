@@ -1,0 +1,447 @@
+{
+  "schema": 1,
+  "scope": "Offline combined arithmetic harness and contracts; no native package or hardware qualification.",
+  "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "baseline_source_commit": "c37f0dbd93a13cb423b5458e6345aa4526c0b3c8",
+  "worktree": ".local/g2-arithmetic-suite",
+  "source_binding": "All ten final input files rehashed from disk and independently compared byte-for-byte with frozen Git blobs. Earlier uncommitted receipt status is historical; this receipt binds its final input identities to the frozen commit.",
+  "raw_receipts": {
+    "initial": {
+      "path": ".local/g2-arithmetic-suite/results/offline-arithmetic-suite.json",
+      "bytes": 15891,
+      "sha256": "3e9d523e910a2092400a58e926e574432bc8caa8fa50e0670737a67f75c07c77"
+    },
+    "final_quarantine_extension": {
+      "path": ".local/g2-arithmetic-suite/results/offline-arithmetic-suite-with-quarantine.json",
+      "bytes": 18528,
+      "sha256": "5181d8952b5d05e8af37a5ebde9588cd45f0d5552685031a0bd382510a914dcc"
+    }
+  },
+  "profile": {
+    "kernel": "arithmetic_suite",
+    "dispatches": 2,
+    "dispatch_kernels": [
+      "indexed_store",
+      "vector_add"
+    ],
+    "values_each": 73,
+    "exact_values_total": 146,
+    "groups_each": 2,
+    "threads_per_group": 64,
+    "timeout_ms_each": 2000,
+    "backend_and_queue": "one existing AgcBackend/SubmissionQueue per title entry",
+    "resources": "fresh guarded allocations, explicit close after each completed/validated dispatch"
+  },
+  "frozen_inputs": {
+    "CMakeLists.txt": {
+      "bytes": 7682,
+      "sha256": "b68a4205829f2921b74ae3367f12d4b5cf1910d5838cf0f12e55960b0489219a"
+    },
+    "tests/canary_log_test.py": {
+      "bytes": 8999,
+      "sha256": "c0fd5bc8bd10282de9e3c85e54fe2ce5ed46ce3c85458951fa1b3df0b387335f"
+    },
+    "tests/native_case_test.py": {
+      "bytes": 7612,
+      "sha256": "6c4de62ac7a2a936309a1c9d71e4ea6eca37188775d146e017ab074495bdb1f1"
+    },
+    "tests/title_stage_test.py": {
+      "bytes": 7866,
+      "sha256": "4fb8ea90c1db0bb2cdd6004cf4f40be17f783889b8629d2929503ee0599b5504"
+    },
+    "tools/build_native_canary.py": {
+      "bytes": 13316,
+      "sha256": "90832498a7d41c216674983081c58fbf3ae2de9601b586dfbb75a5fdac1812c8"
+    },
+    "tools/check_canary_log.py": {
+      "bytes": 3830,
+      "sha256": "505e4d32eaf94ba9aaee6d29247aa5ad585f75bf309d7c42392fbc4585ab67b6"
+    },
+    "tools/native_canary.cpp": {
+      "bytes": 8859,
+      "sha256": "e0bc32539ee3ea22e5cde7c078bf963200bc7c681a77db1034796559b8955eab"
+    },
+    "tools/stage_native_title.py": {
+      "bytes": 7381,
+      "sha256": "2856c16fb4de95b2a36b5826a6b267aab52583c551197cd45c1a49eaea135907"
+    },
+    "tools/verify_native_case.py": {
+      "bytes": 5103,
+      "sha256": "0900da94ea40ad0807af7d15ff06f7dd450d0c7e9fb044534c61e948d2fe51ef"
+    },
+    "tests/arithmetic_suite_test.cpp": {
+      "bytes": 12085,
+      "sha256": "0a369ec4431fbc023283add7780763485f0531f4fa4d91e315cb2b46cc29c71d"
+    }
+  },
+  "protected_files_unchanged_from_baseline": {
+    "controller-inputs.json": {
+      "bytes": 214,
+      "sha256": "ac759ce8af34589dfe5597ab102c9aa8436eff3daca546669ad6f009f147cc5c"
+    },
+    "dependencies.json": {
+      "bytes": 1538,
+      "sha256": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b"
+    },
+    "elevation-inputs.json": {
+      "bytes": 443,
+      "sha256": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676"
+    },
+    "include/ps5hip/agc_backend.h": {
+      "bytes": 724,
+      "sha256": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c"
+    },
+    "include/ps5hip/code_object.h": {
+      "bytes": 1676,
+      "sha256": "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02"
+    },
+    "include/ps5hip/launch.h": {
+      "bytes": 1443,
+      "sha256": "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b"
+    },
+    "include/ps5hip/native_memory.h": {
+      "bytes": 904,
+      "sha256": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009"
+    },
+    "include/ps5hip/submission.h": {
+      "bytes": 1948,
+      "sha256": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de"
+    },
+    "kernels/canary.hip": {
+      "bytes": 822,
+      "sha256": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c"
+    },
+    "kernels/resources.hip": {
+      "bytes": 2557,
+      "sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad"
+    },
+    "kernels/wave.hip": {
+      "bytes": 1246,
+      "sha256": "07f2d2981e96369a08218ef2241e43ad2d14ea0f51edae35cf2494586728aea9"
+    },
+    "patches/README.md": {
+      "bytes": 1056,
+      "sha256": "ddad7ffd26e89fa5a9179eb94749021329837a8b81f809e3d16b46de29e5345e"
+    },
+    "patches/native-import-libraries.patch": {
+      "bytes": 5652,
+      "sha256": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95"
+    },
+    "patches/native-shell-exit-probe.patch": {
+      "bytes": 575,
+      "sha256": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d"
+    },
+    "src/agc_backend.cpp": {
+      "bytes": 2506,
+      "sha256": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb"
+    },
+    "src/code_object.cpp": {
+      "bytes": 20252,
+      "sha256": "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5"
+    },
+    "src/launch.cpp": {
+      "bytes": 6560,
+      "sha256": "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba"
+    },
+    "src/native_memory.cpp": {
+      "bytes": 3145,
+      "sha256": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f"
+    },
+    "src/submission.cpp": {
+      "bytes": 3736,
+      "sha256": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969"
+    },
+    "title.json": {
+      "bytes": 69,
+      "sha256": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2"
+    },
+    "tools/build_canaries.py": {
+      "bytes": 7043,
+      "sha256": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1"
+    }
+  },
+  "device_fixtures": {
+    "gfx1013": {
+      "bytes": 4096,
+      "sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e"
+    },
+    "gfx1030": {
+      "bytes": 4096,
+      "sha256": "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f"
+    }
+  },
+  "test_chronology": [
+    {
+      "step": 1,
+      "scope": "Full ASan/UBSan24 CTest run after final production-source edits, before test-only quarantine extension.",
+      "command": "ctest --test-dir build/host --output-on-failure --output-log results/ctest-arithmetic-suite-final.log",
+      "passed": 24,
+      "failed": 0,
+      "raw_log": {
+        "path": ".local/g2-arithmetic-suite/results/ctest-arithmetic-suite-final.log",
+        "bytes": 2808,
+        "sha256": "e59ad9bc6908a4588bfb4b7e94435c0a4fdbbf60cbf5c2ae6a624053c64a217f"
+      },
+      "model_source_at_run": {
+        "bytes": 8789,
+        "sha256": "817a3db8ce911709ced581add8c67dca6ce25318ba01172f9a0fffa22948df8f"
+      },
+      "model_binary_at_run": {
+        "bytes": 3119136,
+        "sha256": "a83b35a01f32f4416c0321ba21747dd4643a0d03c49dcdd07854ea0f906435d5"
+      },
+      "historical_identity_limit": "Prior source and binary identities are preserved by the immutable initial receipt; original test source/binary were replaced by the extension and are not rehashed as current artifacts."
+    },
+    {
+      "step": 2,
+      "scope": "Only tests/arithmetic_suite_test.cpp changed; rebuilt only arithmetic_suite_test and reran both target cases, including pre-existing success/oracle tests and three new quarantine cases per target.",
+      "build_command": "cmake --build build/host --target arithmetic_suite_test -j 4",
+      "test_command": "ctest --test-dir build/host -R arithmetic_suite --output-on-failure --output-log results/ctest-arithmetic-suite-failure-extension.log",
+      "passed": 2,
+      "failed": 0,
+      "raw_log": {
+        "path": ".local/g2-arithmetic-suite/results/ctest-arithmetic-suite-failure-extension.log",
+        "bytes": 417,
+        "sha256": "ad8832bc477be7342643c1ee1f91fcbbc7813b5f958dde5fd942248eabfdc593"
+      },
+      "model_source": {
+        "bytes": 12085,
+        "sha256": "0a369ec4431fbc023283add7780763485f0531f4fa4d91e315cb2b46cc29c71d"
+      },
+      "model_binary": {
+        "bytes": 3150632,
+        "sha256": "54e0f42706c5bc1e7b558c17cf1d5263590a0c7f2dc37f083eb29f8fddb32c4f"
+      }
+    }
+  ],
+  "host_model": {
+    "scope": "Real fixture parser, image, launch encoder, harness fixed sequence, and same SubmissionQueue. Synthetic GPU ranges map to ASan-covered CPU storage; NativeMemory test double replaces platform allocation only in this test. Backend decodes commands and independently calculates store/vector results on CPU.",
+    "cases_per_target": {
+      "success": 1,
+      "store_output_tail_or_guard_corruption": 3,
+      "vector_output_input_or_guard_corruption": 7,
+      "second_dispatch_quarantine": 3
+    },
+    "normal_assertions": [
+      "store then vector entry/address and kernarg selection",
+      "two groups of 64, count73",
+      "fresh allocations/poisoned output each dispatch",
+      "all first-dispatch allocation IDs released before second submit",
+      "input data and guards unchanged",
+      "all resources closed after every retired successful or oracle-rejected dispatch",
+      "no second dispatch after first oracle failure",
+      "summary146 only after both successes"
+    ],
+    "quarantine_assertions": [
+      "actual harness quarantine reached on second dispatch after first PASS and resource cleanup",
+      "queue poisoned",
+      "all seven second-dispatch allocations live, each still holding one GPU ownership reference",
+      "first dispatch allocation IDs absent",
+      "no attempt to close GPU-owned allocations",
+      "exactly two submit entries, no third dispatch",
+      "no vector_add PASS or arithmetic_suite PASS",
+      "timeout takes exactly20000 simulated100us polls; submit/kick errors do not poll"
+    ],
+    "quarantine_boundary": "Forked test intercepts actual quarantine first sleep and checks retained ownership before _exit. It intentionally does not unwind or free unresolved GPU allocations and does not prove recovery/teardown of a real failed GPU dispatch."
+  },
+  "contract_checks": [
+    "strict ordered full log including optional finite shell-exit suffix",
+    "exact int dispatch count2 and exact ordered kernel list at staging and frozen verification",
+    "semantic mutation tests refresh frozen package hashes before rejection assertions"
+  ],
+  "ps5_compile_only": {
+    "scope": "Actual builder source-loop AST extracted, all macro routes compiled with native wrapper -O2 -Wall -Wextra -Werror and shell-exit flag. No builder main or native export/link/package executed.",
+    "compiler_version": "Ubuntu clang version 18.1.8 (20ubuntu8)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n",
+    "variants": [
+      {
+        "target": "gfx1013",
+        "kernel": "runtime",
+        "object": {
+          "bytes": 23312,
+          "sha256": "00a0c7eed410d57fea89db167071a22e2e8e94f21717b9650145c2b93acdca82"
+        },
+        "command_record": {
+          "bytes": 831,
+          "sha256": "cb79edae336ce630d4688cd86cea0d1fa73265ae6b1f2f09f8862969d4d7e4bb"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "indexed_store",
+        "object": {
+          "bytes": 42288,
+          "sha256": "e6a0f5034fc0795f4c35be4b79919e551bf7355262f5d10dfc90a6b9579619fc"
+        },
+        "command_record": {
+          "bytes": 808,
+          "sha256": "266468f162c9e4b63f7778c5cd7bb98382f2590d532840dc11718f307da88f22"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "vector_add",
+        "object": {
+          "bytes": 49416,
+          "sha256": "159246ba9ad4d6f45b4e4fa6d0b3933cf2154d1491e082336f5477e4e09475f9"
+        },
+        "command_record": {
+          "bytes": 839,
+          "sha256": "11ba892ba9885847c0a2553962e18df1af8dc743bf40ca2fe945d343b76a67c4"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "vector_add_twice",
+        "object": {
+          "bytes": 49496,
+          "sha256": "8a5063a75b40710abe3f2085a08a562a03471e9cc85dfb523647cb2119ca64e8"
+        },
+        "command_record": {
+          "bytes": 851,
+          "sha256": "51dd7451cdc729167b42a9bc3fd8b21436ba987b23b005f3c33c730f8b0f9d64"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1013",
+        "kernel": "arithmetic_suite",
+        "object": {
+          "bytes": 53200,
+          "sha256": "6f3ccab4731000962f68c9aac2abc991c5822bb79a2fe578b41199afb9d3f691"
+        },
+        "command_record": {
+          "bytes": 851,
+          "sha256": "04cbc5e8bb1372f21ecbd5349de039f3925518cbe3a51efce7d153651aac981d"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "runtime",
+        "object": {
+          "bytes": 23312,
+          "sha256": "f8faf4951794d62b9e305d2916812417f9d415eaac023078621ba25c19fee1f1"
+        },
+        "command_record": {
+          "bytes": 831,
+          "sha256": "094ab9856268c99761c37cb8ede550c6585adc64a0e9578e364a9685f1340efc"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "indexed_store",
+        "object": {
+          "bytes": 42288,
+          "sha256": "1cb86c692bd91af05ed3b2c5390eac61558d28d3d810139b455ba5fc1374af1b"
+        },
+        "command_record": {
+          "bytes": 808,
+          "sha256": "dc73e7423691727bec3ad4f63893de0cbc66232b838cae5d4778cd8377cb640f"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "vector_add",
+        "object": {
+          "bytes": 49416,
+          "sha256": "a1e86be3048a690dbc487336319b0ebd3fea8260095dc1af659ffcadb8744310"
+        },
+        "command_record": {
+          "bytes": 839,
+          "sha256": "13bcbf94850f2424006431db47a305218535c342fcb3399b3c846b25f9746589"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "vector_add_twice",
+        "object": {
+          "bytes": 49496,
+          "sha256": "9d5d42dae47f6883fba68c656c68b39b7501b91cf5ab61bf6836bbb695fcec97"
+        },
+        "command_record": {
+          "bytes": 851,
+          "sha256": "c1ffecb4c95220aa43db3fcbacd4faea57c1febd2f184f7c9b6367434de57d1e"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "target": "gfx1030",
+        "kernel": "arithmetic_suite",
+        "object": {
+          "bytes": 53200,
+          "sha256": "4a720ea79072df67bbd1f871d229ce34b9e64290e734a51496842f45595103c0"
+        },
+        "command_record": {
+          "bytes": 851,
+          "sha256": "6375e0f4b3af113ea4c678619de49696ebcf5c9fdc65d4c2e3754d073fcd685a"
+        },
+        "compiler_output": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ],
+    "commands_in_final_raw_receipt": true,
+    "initial_warning_and_fix": {
+      "path": "results/ps5-compile-only/initial-unused-helper-error.log",
+      "bytes": 294,
+      "sha256": "f65e9c5055ba482381b9d3012a56a22643fefe3c4116b4729a079d107c722e8e",
+      "resolution": "Mark bits(float) maybe_unused because store-only template specialization does not emit float helper."
+    }
+  },
+  "independent_revalidation": {
+    "passed": true,
+    "tests_repeated": false,
+    "checked": [
+      "both immutable receipt hashes",
+      "final ten inputs against disk and frozen commit",
+      "full24 and affected2 saved log hashes/results",
+      "both actual device fixtures",
+      "current final sanitizer model binary",
+      "all ten native compile-only objects and exact saved command records, empty compiler logs",
+      "unchanged core, kernels, headers, patches, dependency locks and title against baseline and frozen commit"
+    ],
+    "unsaved_parent_python_run": "Not counted as additional evidence; saved full CTest run already includes the three Python contract suites."
+  },
+  "limitations": [
+    "Host model does not execute shader ISA or contact a GPU.",
+    "Native allocator covered only by unchanged baseline native_memory_mock; new model uses test double.",
+    "Title entry/elevation/runtime-finalization not executed by routing model.",
+    "PS5 compile-only does not prove native link/package/host-loader/runtime.",
+    "No G2 hardware gate closure; frozen one-image repeated console cycles remain required.",
+    "Second-dispatch failure model verifies retained ownership at quarantine entry; it does not execute real AGC calls, simulate driver recovery or qualify console teardown after GPU failure."
+  ]
+}

@@ -1003,6 +1003,69 @@
         "filesystem_check": "passed",
         "extracted_files_match": true
       }
+    },
+    {
+      "manifest": {
+        "schema": 1,
+        "title_id": "PPSA99014",
+        "target": "gfx1013",
+        "kernel": "arithmetic_suite",
+        "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+        "build_receipt_sha256": "a8f75c6436f1f630edbd2294183fddec75f66f49478dd0f59340b8e589ff0691",
+        "stager_sha256": "2856c16fb4de95b2a36b5826a6b267aab52583c551197cd45c1a49eaea135907",
+        "hardware_validated": false,
+        "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log",
+        "files": {
+          "canary.hsaco": {
+            "sha256": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+            "bytes": 4096
+          },
+          "eboot.bin": {
+            "sha256": "842d8957ee148d93594d59200846d59a582d7d907a731e3e0fd545baff93ff51",
+            "bytes": 818818
+          },
+          "lapy.elf": {
+            "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+            "bytes": 155032
+          },
+          "sce_module/libc.prx": {
+            "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+            "bytes": 1284674
+          },
+          "sce_sys/param.json": {
+            "sha256": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+            "bytes": 733
+          },
+          "sce_sys/icon0.png": {
+            "sha256": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+            "bytes": 2199
+          },
+          "results-dir.txt": {
+            "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+            "bytes": 21
+          }
+        },
+        "dispatches": 2,
+        "dispatch_kernels": [
+          "indexed_store",
+          "vector_add"
+        ]
+      },
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "108f569a90dc5e3ba8d686668d69b640cf327b3fb089a51fc073d74b07ae0c0b",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+          "bytes": 3571712
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      }
     }
   ],
   "limitations": [
