@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "failed",
+  "highest_stage": "native process creation",
+  "title_id": "PPSA99014",
+  "reported_firmware": "12.70",
+  "source_commit": "03a7a72aeeb2ca87f72d7fb4f0449d473844f78a",
+  "package_sha256": "ac85beba81899ddf7ee2aa7eebc33fed6b7c6aa859c97e6cd33a8f3e3f4b28cc",
+  "stages": {
+    "remote_bytes_verified": true,
+    "ufs2_mounted": true,
+    "registered": true,
+    "launch_return": "0x00002018",
+    "pid": 204,
+    "application_checkpoint": false,
+    "gpu_submission": false,
+    "normal_status_zero_exit": false,
+    "clean_teardown_confirmed": false
+  },
+  "exception": {
+    "code": "0xa0020102",
+    "name": "PRX_SCE_MODULE_LOAD_ERROR",
+    "diagnostic": "Lack of a .prx file in /app0/sce_module is detected"
+  },
+  "close": {
+    "requested_exact_title": true,
+    "native_message": "killApp: LNC_ISOK::0x80aa0003",
+    "limitation": "No title-specific stop or runtime release observed in captured interval"
+  },
+  "service_health": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "evidence_sha256": {
+    "case.json": "6587acd295e4c2c48931b45ef09370ada2614a7ad3d5a73372ff123ffd8a5461",
+    "klog.log": "a298ec0ff67efa269f6c9d5f0f4f6a7bd39903d71be0bdac4cb116eb113ccaa6",
+    "before.log": "a515822506e482fd30dc080b8ed5987b251f213cf7e9f161db6be2686a6fa792",
+    "after.log": "f37d5c5173f570689485030d38241aba24c1485da27ee8271fd4a04cef7c1b61",
+    "launch-response.log": "34a710499863656b468e1080f8e9f57c29c109765482874f7075f684a7046386",
+    "close-response.log": "063a256626a1fc1fb9a677f0af61369a248833101f6d9c21295802441aa094c8",
+    "health.json": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543"
+  },
+  "next_decision": "Reproduce and include the pinned clean-room libc.prx loader companion; no automatic relaunch of the failed bytes. Re-establish idle state before any new candidate."
+}

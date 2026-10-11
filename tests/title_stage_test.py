@@ -24,10 +24,13 @@ class StageTests(unittest.TestCase):
         (self.root / "source.cpp").write_bytes(b"fixture source")
         (self.build / "candidate/eboot.bin").write_bytes(b"fixture container")
         (self.build / "candidate/lapy.elf").write_bytes(b"fixture helper")
+        (self.build / "candidate/sce_module").mkdir()
+        (self.build / "candidate/sce_module/libc.prx").write_bytes(b"fixture companion")
         self.receipt = {"target": "gfx1013", "kernel": "runtime", "hardware_validated": False,
                         "source_sha256": {"source.cpp": module.digest(b"fixture source")},
                         "artifacts": {"eboot.bin": module.digest(b"fixture container"),
-                                      "lapy.elf": module.digest(b"fixture helper")}}
+                                      "lapy.elf": module.digest(b"fixture helper"),
+                                      "sce_module/libc.prx": module.digest(b"fixture companion")}}
         self.identity = {"title_id": "PPSA99012", "title_name": "ps5-hip Compute Lab"}
 
     def run_stage(self):
@@ -99,6 +102,12 @@ class StageTests(unittest.TestCase):
         self.assertFalse(self.output.exists())
         icon.write_bytes(b"not png")
         with self.assertRaisesRegex(ValueError, "512x512 PNG"):
+            self.run_stage()
+        self.assertFalse(self.output.exists())
+
+    def test_missing_loader_companion_prevents_staging(self):
+        del self.receipt["artifacts"]["sce_module/libc.prx"]
+        with self.assertRaisesRegex(ValueError, "invalid offline candidate receipt"):
             self.run_stage()
         self.assertFalse(self.output.exists())
 

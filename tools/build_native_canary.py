@@ -52,9 +52,11 @@ def main():
     native.mkdir(parents=True, exist_ok=True)
     files = ["native_app_builder.cpp", "elf_object.cpp", "elf_object.hpp", "hash.hpp",
              "sce_module_writer.cpp", "sce_module_writer.hpp", "self_container.cpp",
-             "self_container.hpp", "app_crt.cpp", "ps5-pie.ld"]
+             "self_container.hpp", "app_crt.cpp", "ps5-pie.ld", "libc_builder.cpp",
+             "runtime/api-surface.txt", "runtime/imports.txt"]
     # Export exact blobs, never the reference checkout's uncommitted files.
     for name in files:
+        (native / name).parent.mkdir(parents=True, exist_ok=True)
         (native / name).write_bytes(subprocess.check_output(
             ["git", "-C", str(args.native_source), "show", f"{revision}:tooling/native/{name}"]))
     for name in ("LICENSE", "NOTICE.md"):
@@ -116,8 +118,23 @@ def main():
     candidate.mkdir(exist_ok=True)
     run(tool, "self", "--sign", "--in", elf, "--out", candidate / "eboot.bin")
     run(tool, "self", "--inspect", "--file", candidate / "eboot.bin")
+    # The native loader requires its libc companion even with a static C++ runtime.
+    # This emitter is independently authored; it is not a console/SDK runtime dump.
+    libc_builder = build / "libc-builder"
+    run("clang++-18", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Werror",
+        native / "libc_builder.cpp", "-o", libc_builder)
+    libc_raw = build / "libc.raw.elf"
+    run(libc_builder, native / "runtime/api-surface.txt", native / "runtime/imports.txt", libc_raw)
+    if hashlib.sha256(libc_raw.read_bytes()).hexdigest() != "8ee6e124993e1af26420cb455890fd002f5d6c7e78883c860ce45734e7d002bb":
+        raise ValueError("clean-room loader companion raw hash mismatch")
+    (candidate / "sce_module").mkdir(exist_ok=True)
+    companion = candidate / "sce_module/libc.prx"
+    run(tool, "self", "--sign", "--in", libc_raw, "--out", companion)
+    run(tool, "self", "--inspect", "--file", companion)
+    if hashlib.sha256(companion.read_bytes()).hexdigest() != "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036":
+        raise ValueError("clean-room loader companion signed hash mismatch")
     shutil.copyfile(helper, candidate / "lapy.elf")
-    artifacts = ["eboot.bin", "lapy.elf"]
+    artifacts = ["eboot.bin", "lapy.elf", "sce_module/libc.prx"]
     if args.kernel != "runtime":
         shutil.copyfile(ROOT / "build/canaries" / args.target / "canary.hsaco", candidate / "canary.hsaco")
         artifacts.append("canary.hsaco")

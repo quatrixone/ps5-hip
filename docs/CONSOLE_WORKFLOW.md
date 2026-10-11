@@ -1,7 +1,9 @@
 # Console workflow preparation
 
 Status: the original PPSA99012 image mounted but failed registration (missing icon).
-The user changed the development title to `PPSA99014`. No title has launched.
+The user changed the development title to `PPSA99014`. Its first launch failed
+with PRX_SCE_MODULE_LOAD_ERROR before application entry. The builder now includes
+the missing clean-room loader companion; the corrected package is unrun.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 

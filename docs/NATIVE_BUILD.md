@@ -66,6 +66,15 @@ and libSceLibcInternal. The SDK unwinder needs explicit start/end symbols for
 `.eh_frame` and `.eh_frame_hdr`; the build derives them from linked sections.
 Link-only AGC stubs are not packaged. No proprietary implementation is copied.
 
+The builder also reproduces `sce_module/libc.prx` from the same pinned tooling's
+independently authored emitter and API manifests. It verifies raw SHA-256
+`8ee6e124993e1af26420cb455890fd002f5d6c7e78883c860ce45734e7d002bb`
+and signed SHA-256 `e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036`.
+This loader companion is required even though application C++ runtime code is
+statically linked. It is a compatibility shim, not a general libc implementation;
+no new application capability is inferred from its broad export table. The first
+hardware CPU run failed before main when this companion was omitted.
+
 Output is under `build/native/<target>-<kernel>/`: an intermediate PIE, converted
 native ELF, a validated plaintext FSELF container in `candidate/eboot.bin`, the
 matching `canary.hsaco` for GPU cases, and a receipt with source/artifact hashes.

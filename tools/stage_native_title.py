@@ -33,7 +33,9 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     target, kernel = receipt["target"], receipt["kernel"]
     if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add"):
         raise ValueError("unsupported candidate profile")
-    expected = {"eboot.bin", "lapy.elf"} if kernel == "runtime" else {"eboot.bin", "lapy.elf", "canary.hsaco"}
+    expected = {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}
+    if kernel != "runtime":
+        expected.add("canary.hsaco")
     if set(receipt["artifacts"]) != expected or receipt.get("hardware_validated") is not False:
         raise ValueError("invalid offline candidate receipt")
     if not receipt["source_sha256"]:

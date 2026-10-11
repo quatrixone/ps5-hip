@@ -6,7 +6,16 @@ Updated: 2026-10-11, America/New_York.
 
 - Current development identity: **PPSA99014**, selected by the user after a
   pre-existing PPSA99012 installation was found on .30. Controllers and the
-  elevation helper are being rebuilt for the new exact title.
+  elevation helper are rebuilt for the new exact title.
+- First PPSA99014 run on .40 registered and created its native process, then failed
+  with PRX_SCE_MODULE_LOAD_ERROR before an application checkpoint. The kernel
+  reported a missing sce_module companion. All declared services stayed reachable;
+  exact-title close was sent, but normal exit/complete teardown is unproven.
+  No GPU work ran. See `evidence/first-native-cpu.json`.
+- The builder now reproduces the pinned, independently authored libc.prx loader
+  companion. Its raw and signed hashes match the native template's known hashes;
+  FSELF integrity passes. Staging rejects its absence. This corrected candidate
+  has not been run.
 - A PPSA99012 CPU image was uploaded and byte-verified on idle .40 (FW 12.70).
   ShadowMount mounted UFS2 but rejected registration because icon0.png was absent.
   No title was launched. The icon fix and staging regression test pass; the old
@@ -37,8 +46,8 @@ Updated: 2026-10-11, America/New_York.
   See `evidence/offline-elevation.json`. Its configured directory is
   `/data/ps5-hip/results`; this is a staging choice, not an executable constant.
   Nineteen host cases pass, including the exported Eden/Lapy wire contract.
-- Preflight contacted both authorized consoles; one unlaunched candidate was
-  deployed on .40. No title execution has occurred for this project.
+- Preflight contacted both authorized consoles; PPSA99012 and PPSA99014 images
+  were deployed on .40. Only PPSA99014 was launched, once, and failed in loading.
 - The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
   and UFS2 packaging tools pass: five packages have clean filesystem checks and
   exact extracted-file hashes. Nineteen host test cases pass (sixteen C++, three Python).
@@ -54,8 +63,9 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
-Finish freezing PPSA99014 with its required icon, then establish an idle authorized
-console for the CPU startup experiment.
+Freeze the corrected PPSA99014 package with its clean-room loader companion.
+Establish complete teardown/idle state before another bounded CPU startup case;
+do not repeat the failed bytes or proceed to a GPU case.
 Continue offline preparation of title-specific deployment/log retrieval controls.
 See [console workflow](docs/CONSOLE_WORKFLOW.md) for the remaining host integration.
 Generic private-address
