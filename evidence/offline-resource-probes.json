@@ -1,0 +1,328 @@
+{
+    "schema":  1,
+    "scope":  "Offline LLVM resource probes; G1 remains open",
+    "hardware_validated":  false,
+    "source":  "kernels/resources.hip",
+    "source_sha256":  "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+    "tools":  {
+                  "clang++-18":  "Ubuntu clang version 18.1.8 (20ubuntu8)",
+                  "ld.lld-18":  "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",
+                  "llvm-readobj-18":  "Ubuntu LLVM version 18.1.8",
+                  "llvm-objdump-18":  "Ubuntu LLVM version 18.1.8"
+              },
+    "profiles":  [
+                     {
+                         "target":  "gfx1013",
+                         "code_sha256":  "4fe62768bb853d767d1f521e358b96805177fc72efb2791192d76c1adec968f3",
+                         "bytes":  14720,
+                         "isa_inventory":  {
+                                               "reduce_serial":  {
+                                                                     "opcodes":  [
+                                                                                     "global_load_dwordx4",
+                                                                                     "global_store_dword",
+                                                                                     "s_clause",
+                                                                                     "s_endpgm",
+                                                                                     "s_load_dwordx4",
+                                                                                     "s_nop",
+                                                                                     "s_waitcnt",
+                                                                                     "v_add3_u32",
+                                                                                     "v_add_co_ci_u32_e32",
+                                                                                     "v_add_co_u32",
+                                                                                     "v_add_nc_u32_e32",
+                                                                                     "v_lshl_add_u32",
+                                                                                     "v_lshlrev_b32_e32",
+                                                                                     "v_lshlrev_b64",
+                                                                                     "v_mov_b32_e32"
+                                                                                 ],
+                                                                     "flat_scratch_setup":  false
+                                                                 },
+                                               "reduce_lds":  {
+                                                                  "opcodes":  [
+                                                                                  "ds_read2_b32",
+                                                                                  "ds_read_b32",
+                                                                                  "ds_write_b32",
+                                                                                  "global_load_dword",
+                                                                                  "global_store_dword",
+                                                                                  "s_add_u32",
+                                                                                  "s_addc_u32",
+                                                                                  "s_and_saveexec_b32",
+                                                                                  "s_barrier",
+                                                                                  "s_cbranch_execz",
+                                                                                  "s_endpgm",
+                                                                                  "s_load_dwordx4",
+                                                                                  "s_lshl_b64",
+                                                                                  "s_mov_b32",
+                                                                                  "s_nop",
+                                                                                  "s_or_b32",
+                                                                                  "s_waitcnt",
+                                                                                  "s_waitcnt_depctr",
+                                                                                  "v_add_co_ci_u32_e32",
+                                                                                  "v_add_co_u32",
+                                                                                  "v_add_nc_u32_e32",
+                                                                                  "v_cmp_eq_u32_e32",
+                                                                                  "v_cmp_gt_u32_e32",
+                                                                                  "v_lshl_add_u32",
+                                                                                  "v_lshlrev_b32_e32",
+                                                                                  "v_lshlrev_b64",
+                                                                                  "v_mov_b32_e32"
+                                                                              ],
+                                                                  "flat_scratch_setup":  false
+                                                              },
+                                               "atomic_count":  {
+                                                                    "opcodes":  [
+                                                                                    "global_atomic_add",
+                                                                                    "s_and_saveexec_b32",
+                                                                                    "s_bcnt1_i32_b32",
+                                                                                    "s_cbranch_execz",
+                                                                                    "s_endpgm",
+                                                                                    "s_load_dwordx2",
+                                                                                    "s_mov_b32",
+                                                                                    "s_nop",
+                                                                                    "s_waitcnt",
+                                                                                    "v_cmp_eq_u32_e32",
+                                                                                    "v_mbcnt_lo_u32_b32",
+                                                                                    "v_mov_b32_e32"
+                                                                                ],
+                                                                    "flat_scratch_setup":  false
+                                                                },
+                                               "private_array":  {
+                                                                     "opcodes":  [
+                                                                                     "flat_load_dword",
+                                                                                     "flat_store_dword",
+                                                                                     "global_load_dword",
+                                                                                     "global_store_dword",
+                                                                                     "s_add_u32",
+                                                                                     "s_addc_u32",
+                                                                                     "s_endpgm",
+                                                                                     "s_load_dwordx4",
+                                                                                     "s_mov_b64",
+                                                                                     "s_movk_i32",
+                                                                                     "s_nop",
+                                                                                     "s_setreg_b32",
+                                                                                     "s_waitcnt",
+                                                                                     "s_waitcnt_vscnt",
+                                                                                     "v_add_co_ci_u32_e32",
+                                                                                     "v_add_co_u32",
+                                                                                     "v_add_nc_u32_e32",
+                                                                                     "v_add_nc_u32_e64",
+                                                                                     "v_and_b32_e32",
+                                                                                     "v_cmp_ne_u32_e32",
+                                                                                     "v_cmp_ne_u32_e64",
+                                                                                     "v_cndmask_b32_e32",
+                                                                                     "v_cndmask_b32_e64",
+                                                                                     "v_lshl_add_u32",
+                                                                                     "v_lshlrev_b64",
+                                                                                     "v_mov_b32_e32",
+                                                                                     "v_or_b32_e64"
+                                                                                 ],
+                                                                     "flat_scratch_setup":  true
+                                                                 },
+                                               "private_explicit":  {
+                                                                        "opcodes":  [
+                                                                                        "buffer_load_dword",
+                                                                                        "buffer_store_dword",
+                                                                                        "global_load_dword",
+                                                                                        "global_store_dword",
+                                                                                        "s_add_u32",
+                                                                                        "s_addc_u32",
+                                                                                        "s_endpgm",
+                                                                                        "s_load_dwordx4",
+                                                                                        "s_nop",
+                                                                                        "s_waitcnt",
+                                                                                        "s_waitcnt_vscnt",
+                                                                                        "v_add_co_ci_u32_e32",
+                                                                                        "v_add_co_u32",
+                                                                                        "v_add_nc_u32_e32",
+                                                                                        "v_and_b32_e32",
+                                                                                        "v_lshl_add_u32",
+                                                                                        "v_lshlrev_b64",
+                                                                                        "v_mov_b32_e32"
+                                                                                    ],
+                                                                        "flat_scratch_setup":  false
+                                                                    },
+                                               "register_spill":  {
+                                                                      "opcodes":  [
+                                                                                      "buffer_load_dword",
+                                                                                      "buffer_store_dword",
+                                                                                      "flat_load_dword",
+                                                                                      "flat_store_dword",
+                                                                                      "s_add_u32",
+                                                                                      "s_addc_u32",
+                                                                                      "s_code_end",
+                                                                                      "s_endpgm",
+                                                                                      "s_load_dwordx4",
+                                                                                      "s_mov_b64",
+                                                                                      "s_waitcnt",
+                                                                                      "s_waitcnt_vscnt",
+                                                                                      "v_add_co_ci_u32_e32",
+                                                                                      "v_add_co_u32",
+                                                                                      "v_lshl_add_u32",
+                                                                                      "v_lshlrev_b32_e32",
+                                                                                      "v_lshlrev_b64",
+                                                                                      "v_mov_b32_e32"
+                                                                                  ],
+                                                                      "flat_scratch_setup":  false
+                                                                  }
+                                           }
+                     },
+                     {
+                         "target":  "gfx1030",
+                         "code_sha256":  "ec6c7c7e55af90d2f2cbf2ecc7ef2eb684dfa3ad535647bd4eb9b80d150797c3",
+                         "bytes":  12800,
+                         "isa_inventory":  {
+                                               "reduce_serial":  {
+                                                                     "opcodes":  [
+                                                                                     "global_load_dwordx4",
+                                                                                     "global_store_dword",
+                                                                                     "s_clause",
+                                                                                     "s_endpgm",
+                                                                                     "s_load_dwordx4",
+                                                                                     "s_nop",
+                                                                                     "s_waitcnt",
+                                                                                     "v_add3_u32",
+                                                                                     "v_add_co_ci_u32_e32",
+                                                                                     "v_add_co_u32",
+                                                                                     "v_add_nc_u32_e32",
+                                                                                     "v_lshl_add_u32",
+                                                                                     "v_lshlrev_b32_e32",
+                                                                                     "v_lshlrev_b64",
+                                                                                     "v_mov_b32_e32"
+                                                                                 ],
+                                                                     "flat_scratch_setup":  false
+                                                                 },
+                                               "reduce_lds":  {
+                                                                  "opcodes":  [
+                                                                                  "ds_read2_b32",
+                                                                                  "ds_read_b32",
+                                                                                  "ds_write_b32",
+                                                                                  "global_load_dword",
+                                                                                  "global_store_dword",
+                                                                                  "s_add_u32",
+                                                                                  "s_addc_u32",
+                                                                                  "s_and_saveexec_b32",
+                                                                                  "s_barrier",
+                                                                                  "s_cbranch_execz",
+                                                                                  "s_endpgm",
+                                                                                  "s_load_dwordx4",
+                                                                                  "s_lshl_b64",
+                                                                                  "s_mov_b32",
+                                                                                  "s_nop",
+                                                                                  "s_or_b32",
+                                                                                  "s_waitcnt",
+                                                                                  "v_add_co_ci_u32_e32",
+                                                                                  "v_add_co_u32",
+                                                                                  "v_add_nc_u32_e32",
+                                                                                  "v_cmp_eq_u32_e32",
+                                                                                  "v_cmpx_gt_u32_e32",
+                                                                                  "v_lshl_add_u32",
+                                                                                  "v_lshlrev_b32_e32",
+                                                                                  "v_lshlrev_b64",
+                                                                                  "v_mov_b32_e32"
+                                                                              ],
+                                                                  "flat_scratch_setup":  false
+                                                              },
+                                               "atomic_count":  {
+                                                                    "opcodes":  [
+                                                                                    "global_atomic_add",
+                                                                                    "s_bcnt1_i32_b32",
+                                                                                    "s_cbranch_execz",
+                                                                                    "s_endpgm",
+                                                                                    "s_load_dwordx2",
+                                                                                    "s_mov_b32",
+                                                                                    "s_nop",
+                                                                                    "s_waitcnt",
+                                                                                    "v_cmpx_eq_u32_e32",
+                                                                                    "v_mbcnt_lo_u32_b32",
+                                                                                    "v_mov_b32_e32"
+                                                                                ],
+                                                                    "flat_scratch_setup":  false
+                                                                },
+                                               "private_array":  {
+                                                                     "opcodes":  [
+                                                                                     "flat_load_dword",
+                                                                                     "flat_store_dword",
+                                                                                     "global_load_dword",
+                                                                                     "global_store_dword",
+                                                                                     "s_add_u32",
+                                                                                     "s_addc_u32",
+                                                                                     "s_endpgm",
+                                                                                     "s_load_dwordx4",
+                                                                                     "s_mov_b64",
+                                                                                     "s_movk_i32",
+                                                                                     "s_nop",
+                                                                                     "s_setreg_b32",
+                                                                                     "s_waitcnt",
+                                                                                     "s_waitcnt_vscnt",
+                                                                                     "v_add_co_ci_u32_e32",
+                                                                                     "v_add_co_u32",
+                                                                                     "v_add_nc_u32_e32",
+                                                                                     "v_add_nc_u32_e64",
+                                                                                     "v_and_b32_e32",
+                                                                                     "v_cmp_ne_u32_e32",
+                                                                                     "v_cmp_ne_u32_e64",
+                                                                                     "v_cndmask_b32_e32",
+                                                                                     "v_cndmask_b32_e64",
+                                                                                     "v_lshl_add_u32",
+                                                                                     "v_lshlrev_b64",
+                                                                                     "v_mov_b32_e32",
+                                                                                     "v_or_b32_e64"
+                                                                                 ],
+                                                                     "flat_scratch_setup":  true
+                                                                 },
+                                               "private_explicit":  {
+                                                                        "opcodes":  [
+                                                                                        "buffer_load_dword",
+                                                                                        "buffer_store_dword",
+                                                                                        "global_load_dword",
+                                                                                        "global_store_dword",
+                                                                                        "s_add_u32",
+                                                                                        "s_addc_u32",
+                                                                                        "s_endpgm",
+                                                                                        "s_load_dwordx4",
+                                                                                        "s_nop",
+                                                                                        "s_waitcnt",
+                                                                                        "s_waitcnt_vscnt",
+                                                                                        "v_add_co_ci_u32_e32",
+                                                                                        "v_add_co_u32",
+                                                                                        "v_add_nc_u32_e32",
+                                                                                        "v_and_b32_e32",
+                                                                                        "v_lshl_add_u32",
+                                                                                        "v_lshlrev_b64",
+                                                                                        "v_mov_b32_e32"
+                                                                                    ],
+                                                                        "flat_scratch_setup":  false
+                                                                    },
+                                               "register_spill":  {
+                                                                      "opcodes":  [
+                                                                                      "buffer_load_dword",
+                                                                                      "buffer_store_dword",
+                                                                                      "flat_load_dword",
+                                                                                      "flat_store_dword",
+                                                                                      "s_add_u32",
+                                                                                      "s_addc_u32",
+                                                                                      "s_code_end",
+                                                                                      "s_endpgm",
+                                                                                      "s_load_dwordx4",
+                                                                                      "s_mov_b64",
+                                                                                      "s_waitcnt",
+                                                                                      "s_waitcnt_vscnt",
+                                                                                      "v_add_co_ci_u32_e32",
+                                                                                      "v_add_co_u32",
+                                                                                      "v_lshl_add_u32",
+                                                                                      "v_lshlrev_b32_e32",
+                                                                                      "v_lshlrev_b64",
+                                                                                      "v_mov_b32_e32"
+                                                                                  ],
+                                                                      "flat_scratch_setup":  false
+                                                                  }
+                                           }
+                     }
+                 ],
+    "host_validation":  "Four CTest cases passed with AddressSanitizer and UndefinedBehaviorSanitizer; arithmetic fixtures include 5000 mutations each",
+    "limitations":  [
+                        "No PS5 execution",
+                        "No HIP host runtime",
+                        "Generic private accesses still emit flat-scratch setup",
+                        "Text disassembly audit is not a complete ISA verifier"
+                    ]
+}

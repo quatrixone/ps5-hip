@@ -6,8 +6,9 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: research and implementation plan only. No HIP runtime or console
-validation has been implemented in this repository.** The repository is private.
+**Status: offline compiler and code-object loader development. HIP resource probes
+and host validation exist; no native HIP runtime or console validation yet.**
+The repository is private.
 
 ## Start here
 
@@ -16,6 +17,7 @@ validation has been implemented in this repository.** The repository is private.
 - [Research baseline](docs/RESEARCH_BASELINE.md): source revisions, established
   findings, unresolved assumptions and external references.
 - [Current state](STATE.md): the next action and completed milestones.
+- [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like
@@ -62,7 +64,7 @@ This is independent homebrew research for owner-controlled, compatible consoles.
 No model weights, credentials, proprietary SDK components, firmware or system
 module dumps belong in this repository. Dependencies retain their licenses and
 will be pinned and attributed before incorporation. No project-wide code license
-has been selected at this documentation-only stage.
+has been selected yet.
 
 Repository creation and this plan do not authorize an automatic console launch.
 Hardware execution follows the owner's current environment authorization and the

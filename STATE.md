@@ -5,18 +5,21 @@ Updated: 2026-10-11, America/New_York.
 ## Actual status
 
 - Repository initialization and implementation planning are complete.
-- All implementation goals G1-G12 are planned, not passed.
-- No compiler, runtime, SDK, code-object loader or HIP library has been built here.
+- G1 is in progress; G2-G12 are planned. No goal has passed yet.
+- LLVM 18.1.8 builds real AMDHSA V5 device-only HIP canaries for gfx1013 and
+  gfx1030. A host code-object inspector/materializer and sanitizer tests pass.
+- No native launcher, HIP runtime or hardware-qualified SDK exists yet.
 - No console has been contacted or modified for this project.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Begin G1 with an offline inventory: inspect the pinned PS5 Mesa submission/memory
-interfaces and the host LLVM/HIP toolchain, identify reusable public components
-and their licenses, and select the first code-object format/compiler candidates.
-Produce a device-only canary and inspect its instructions and metadata before
-designing or executing a native launcher.
+Continue G1 offline: investigate generic private-address lowering, freeze the
+platform dependency and license selection, and translate the inspected descriptor
+contract into a tested native launch description. See
+[offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
+The first implementation changes remain local on `development/offline-bringup`;
+push only after a substantial coherent milestone, as requested.
 
 The first hardware goal is exact execution of a small HIP-compiled kernel through
 the native PS5 submission path. G3 then requires shared memory, atomics, wave
@@ -28,9 +31,12 @@ operations and deliberate spilling; vector addition alone does not qualify a run
 - [Research baseline](docs/RESEARCH_BASELINE.md)
 
 Read only the active goal and relevant source slices. Raw logs stay in ignored
-`results/`; compact, sanitized validation receipts will be committed under
-`evidence/` when experiments exist. That directory is not populated in this seed.
+`results/`; compact, sanitized validation receipts live under `evidence/`.
+`evidence/offline-resource-probes.json` records the current source hash, compiler
+versions, object hashes and instruction inventories without local user paths.
 
 ## Milestones
 
 - 2026-10-11 | planning | twelve measurable goals and pinned research references recorded | next: G1 offline inventory
+- 2026-10-11 | G1 progress | arithmetic and resource probes compiled for two targets; host parser checks pass; private-array flat-scratch incompatibility identified | not a completed gate
+- 2026-10-11 | G1 progress | unmodified compiler emits buffer scratch for explicit-private accesses and 52 real VGPR spills; generic private pointers remain unresolved | not hardware-qualified
