@@ -32,4 +32,29 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
 // compute drain/completion, bounded waiting and ownership. Never submit alone.
 std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch);
 
+struct BufferScratchPlan {
+    GpuRange storage;
+    uint32_t private_bytes, bytes_per_wave, ring_bytes, tmpring_size;
+    std::array<uint32_t, 4> descriptor;
+};
+
+// Offline GFX10 wave32 plan: fixed 1280-slot conservative Mesa-derived capacity,
+// 1 KiB wave stride granularity, 4 KiB base alignment. No allocation/submission.
+uint32_t buffer_scratch_ring_bytes(uint32_t private_bytes);
+BufferScratchPlan plan_buffer_scratch(uint32_t private_bytes, GpuRange storage);
+
+struct BufferScratchLaunch {
+    InitialLaunch dispatch;
+    BufferScratchPlan scratch;
+};
+
+// Experimental six-user-SGPR buffer-scratch contract, 64x1x1 threads.
+// Caller must retain storage in SubmissionQueue's resources until completion;
+// timeout/failure retains it in quarantine. These functions cannot prove ownership.
+BufferScratchLaunch prepare_buffer_scratch_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch);
+std::vector<uint32_t> encode_buffer_scratch_dispatch(const BufferScratchLaunch &launch);
+
 } // namespace ps5hip

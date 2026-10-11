@@ -96,6 +96,56 @@ class VersionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 builder.require_device_linker(trace, '/pinned/lld')
 
+    def test_native_resource_build_rejects_stale_or_ambiguous_provenance(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            files = {'tools/build_canaries.py': b'recipe', 'kernels/resources.hip': b'resource kernel',
+                     'build/canaries/gfx1013/resources/resources.hsaco': b'resource object',
+                     'build/canaries/gfx1013/resources/driver.txt': b'"/pinned/lld" "elf64_amdgpu" "--whole-archive"'}
+            for name, data in files.items():
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+            sha = lambda name: hashlib.sha256(files[name]).hexdigest()
+            profile = {'target': 'gfx1013', 'bytes': len(b'resource object'),
+                       'code_sha256': sha('build/canaries/gfx1013/resources/resources.hsaco'),
+                       'driver_sha256': sha('build/canaries/gfx1013/resources/driver.txt')}
+            report = {'recipe_sha256': sha('tools/build_canaries.py'),
+                      'source_sha256': sha('kernels/resources.hip'),
+                      'tool_versions': {'lld': 'LLD 18.1.8'}, 'profiles': [profile]}
+            path = root / 'build/canaries/resources-build.json'
+            path.write_text(json.dumps(report))
+            # A present canary receipt/object must never substitute for resources.
+            (root / 'build/canaries/build.json').write_text('{}')
+            (root / 'build/canaries/gfx1013/canary.hsaco').write_bytes(b'canary decoy')
+            verify = lambda: native.verified_device_object(root, 'gfx1013', '18.1.8', fixture='resources')
+            with patch.object(native.shutil, 'which', return_value='/pinned/lld'):
+                self.assertEqual(verify(), (b'resource object', report))
+                for name, data in files.items():
+                    (root / name).write_bytes(data + b'changed')
+                    with self.subTest(stale=name), self.assertRaises(ValueError):
+                        verify()
+                    (root / name).write_bytes(data)
+                for profiles in ([], [dict(profile, target='gfx1030')], [profile, profile],
+                                 [dict(profile, bytes=1)], [dict(profile, code_sha256='wrong')],
+                                 [{k: v for k, v in profile.items() if k != 'driver_sha256'}]):
+                    path.write_text(json.dumps(dict(report, profiles=profiles)))
+                    with self.subTest(profiles=profiles), self.assertRaises(ValueError):
+                        verify()
+                for field in ('recipe_sha256', 'source_sha256'):
+                    path.write_text(json.dumps({k: v for k, v in report.items() if k != field}))
+                    with self.subTest(missing=field), self.assertRaises(ValueError):
+                        verify()
+                path.write_text(json.dumps(dict(report, tool_versions={'lld': 'LLD 19.1.8'})))
+                with self.assertRaises(ValueError):
+                    verify()
+                path.write_text(json.dumps(report))
+                with patch.object(native.shutil, 'which', return_value='/other/lld'), self.assertRaises(ValueError):
+                    verify()
+            for fixture, wave in (('resources', root / 'wave'), ('../resources', None), ('unknown', None)):
+                with self.subTest(fixture=fixture), self.assertRaisesRegex(ValueError, 'fixture selection'):
+                    native.verified_device_object(root, 'gfx1013', '18.1.8', wave, fixture)
+
     def test_native_wave_build_rejects_stale_or_ambiguous_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = pathlib.Path(temporary)
@@ -134,7 +184,8 @@ class VersionTests(unittest.TestCase):
     def test_wave_probe_option_is_bound_to_wave_kernels(self):
         for kernel, extra in (('wave_full', []), ('wave_partial', []),
                               ('runtime', ['--wave-probes', '/unused']),
-                              ('indexed_store', ['--wave-probes', '/unused'])):
+                              ('indexed_store', ['--wave-probes', '/unused']),
+                              ('register_spill', ['--wave-probes', '/unused'])):
             argv = ['native', '--native-source', '/unused', '--target', 'gfx1013', '--kernel', kernel, *extra]
             with patch.object(sys, 'argv', argv), patch('sys.stderr'), self.assertRaises(SystemExit) as error:
                 native.main()

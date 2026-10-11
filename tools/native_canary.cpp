@@ -23,6 +23,9 @@ namespace {
 #ifndef PS5HIP_RUNTIME_ONLY
 #ifdef PS5HIP_CANARY_WAVE
 constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+constexpr uint32_t count = 64 * 64, guard_words = 16, poison = 0xa5a5a5a5;
+constexpr uint32_t scratch_private_bytes = 212, scratch_prefix_bytes = 65536;
 #else
 constexpr uint32_t count = 73, guard_words = 16, poison = 0xa5a5a5a5;
 #endif
@@ -50,6 +53,24 @@ void check_guards(const Memory &memory) {
         if ((i < guard_words || i >= guard_words + count) && words[i] != poison)
             throw ps5hip::ObjectError("canary guard modified");
 }
+#ifdef PS5HIP_CANARY_REGISTER_SPILL
+uint32_t spill_value(uint32_t index) { return (index * 0x9e3779b9u) ^ 0x6c8e9cf5u; }
+void check_scratch(const Memory &memory, ps5hip::GpuRange payload) {
+    if (payload.address != memory->range().address + scratch_prefix_bytes ||
+        payload.bytes != ps5hip::buffer_scratch_ring_bytes(scratch_private_bytes) ||
+        memory->range().bytes < scratch_prefix_bytes + payload.bytes + scratch_prefix_bytes)
+        throw ps5hip::ObjectError("invalid scratch guard layout");
+    const auto *words = static_cast<const uint32_t *>(memory->cpu());
+    const size_t begin = scratch_prefix_bytes / 4, end = begin + payload.bytes / 4;
+    bool touched = false;
+    for (size_t i = 0; i < memory->range().bytes / 4; ++i) {
+        if (i < begin || i >= end) {
+            if (words[i] != poison) throw ps5hip::ObjectError("scratch guard modified");
+        } else if (words[i] != poison) touched = true;
+    }
+    if (!touched) throw ps5hip::ObjectError("scratch payload untouched");
+}
+#endif
 #ifdef PS5HIP_CANARY_VECTOR_ADD
 uint32_t bits(float value) {
     uint32_t result;
@@ -67,6 +88,8 @@ uint32_t bits(float value) {
 void validate(const Memory &output
 #ifdef PS5HIP_CANARY_VECTOR_ADD
               , const Memory &a, const Memory &b
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+              , const Memory &input
 #endif
 ) {
     check_guards(output);
@@ -84,6 +107,9 @@ void validate(const Memory &output
                                       ballot, active * (2 * (base + first + 1) + active - 1) / 2};
             expected = values[i % 4];
         }
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+        const uint32_t expected = spill_value(i);
+        if (data(input)[i] != expected) throw ps5hip::ObjectError("read-only input modified");
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)
         const uint32_t expected = bits(float(i) * 0.25f + 2.0f);
         if (data(a)[i] != bits(float(i) * 0.5f) || data(b)[i] != bits(-float(i) * 0.25f + 2.0f))
@@ -99,6 +125,8 @@ void validate(const Memory &output
     }
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     check_guards(a); check_guards(b);
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+    check_guards(input);
 #endif
 }
 
@@ -115,6 +143,8 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     kernel = "wave_full";
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
     kernel = "wave_partial";
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+    kernel = "register_spill";
 #endif
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     kernel = "vector_add";
@@ -127,26 +157,46 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     arguments = {argument(a), argument(b), argument(output), {count}};
 #elif defined(PS5HIP_CANARY_WAVE)
     arguments = {argument(output)};
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+    auto input = buffer();
+    for (uint32_t i = 0; i < count; ++i) data(input)[i] = spill_value(i);
+    const auto scratch_bytes = ps5hip::buffer_scratch_ring_bytes(scratch_private_bytes);
+    auto scratch = std::make_shared<ps5hip::NativeMemory>(scratch_bytes + 2 * scratch_prefix_bytes, 65536, false);
+    std::memset(scratch->cpu(), 0xa5, scratch->range().bytes);
+    const ps5hip::GpuRange payload{scratch->range().address + scratch_prefix_bytes, scratch_bytes};
+    resources.push_back(input); resources.push_back(scratch);
+    arguments = {argument(input), argument(output)};
 #else
     arguments = {argument(output), {count}};
 #endif
-#ifdef PS5HIP_CANARY_WAVE
+#if defined(PS5HIP_CANARY_WAVE) || defined(PS5HIP_CANARY_REGISTER_SPILL)
     constexpr uint32_t groups = 1;
 #else
     constexpr uint32_t groups = 2;
 #endif
+#ifdef PS5HIP_CANARY_REGISTER_SPILL
+    const auto scratch_launch = ps5hip::prepare_buffer_scratch_launch(object, kernel, module->range(),
+        kernarg->range(), groups, arguments, ps5hip::plan_buffer_scratch(scratch_private_bytes, payload));
+    const auto &launch = scratch_launch.dispatch;
+    const auto commands = ps5hip::encode_buffer_scratch_dispatch(scratch_launch);
+#else
     const auto launch = ps5hip::prepare_initial_launch(object, kernel, module->range(),
                                                       kernarg->range(), groups, arguments);
+    const auto commands = ps5hip::encode_initial_dispatch(launch);
+#endif
     std::memcpy(kernarg->cpu(), launch.kernargs.data(), launch.kernargs.size());
 #ifdef PS5HIP_CANARY_WAVE
     std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=64 output_words=256 groups=1 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel);
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+    std::printf("PS5HIP SUBMIT target=%s kernel=register_spill invocations=64 output_words=4096 groups=1 private_bytes=212 scratch_bytes=%u timeout_ms=2000\n",
+                PS5HIP_CANARY_TARGET, scratch_bytes);
 #else
     std::printf("PS5HIP SUBMIT target=%s kernel=%s count=%u groups=2 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel, count);
 #endif
     std::fflush(nullptr);
-    const auto result = queue.submit_and_wait(ps5hip::encode_initial_dispatch(launch), resources, 2000);
+    const auto result = queue.submit_and_wait(commands, resources, 2000);
     if (result.status != ps5hip::SubmissionStatus::Complete) {
         std::fprintf(stderr, "PS5HIP submission status=%u driver=0x%08x\n",
                      unsigned(result.status), unsigned(result.driver_error));
@@ -154,6 +204,10 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     }
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     validate(output, a, b);
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+    validate(output, input);
+    check_scratch(scratch, payload);
+    std::printf("PS5HIP SCRATCH payload=modified guards=unchanged\n");
 #else
     validate(output);
 #endif
@@ -176,6 +230,8 @@ int main() {
         "wave_full";
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
         "wave_partial";
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+        "register_spill";
 #else
         "indexed_store";
 #endif

@@ -350,9 +350,12 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
     return image;
 }
 
-std::string initial_launch_rejection(const Kernel &k) {
+static std::string launch_rejection(const Kernel &k, bool scratch) {
     if (k.wave_size != 32) return "initial launch supports wave32 only";
-    if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
+    if (scratch) {
+        if (!k.private_bytes || k.properties != 0x409 || k.rsrc2 != 0x8d || !k.hidden_arguments.empty())
+            return "unsupported buffer-scratch entry contract";
+    } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
     if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
     if (k.preload || k.rsrc3) return "preload/resource3 requires additional launch support";
@@ -360,7 +363,7 @@ std::string initial_launch_rejection(const Kernel &k) {
         return "unsupported initial user-SGPR contract";
     const uint32_t user_sgprs = (k.rsrc2 >> 1) & 31;
     if (user_sgprs != ((k.properties & 1) ? 6u : 2u)) return "user-SGPR count mismatch";
-    if ((k.rsrc2 & ~0xbeu) || !(k.rsrc2 & 0x80)) return "unsupported system-SGPR/work-item contract";
+    if ((k.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80)) return "unsupported system-SGPR/work-item contract";
     if (k.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))) return "privileged/debug execution unsupported";
     uint64_t explicit_end = 0;
     for (size_t i = 0; i < k.arguments.size(); ++i) {
@@ -397,5 +400,8 @@ std::string initial_launch_rejection(const Kernel &k) {
     }
     return {};
 }
+
+std::string initial_launch_rejection(const Kernel &k) { return launch_rejection(k, false); }
+std::string buffer_scratch_launch_rejection(const Kernel &k) { return launch_rejection(k, true); }
 
 } // namespace ps5hip

@@ -16,14 +16,15 @@ bool overlaps(GpuRange a, GpuRange b) {
 }
 }
 
-InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string &name,
+static InitialLaunch prepare_launch(const CodeObject &object, const std::string &name,
                                     GpuRange module, GpuRange kernarg_storage,
-                                    uint32_t groups_x, const std::vector<LaunchArgument> &arguments) {
+                                    uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
+                                    const BufferScratchPlan *scratch) {
     const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
     const auto &k = *found;
-    const auto rejection = initial_launch_rejection(k);
+    const auto rejection = scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k);
     if (!rejection.empty()) throw ObjectError(rejection);
     require(k.max_workgroup_size >= 64, "kernel cannot support the initial 64-thread group");
     require(k.required_workgroup == std::array<uint32_t, 3>{} ||
@@ -41,6 +42,11 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
             kernarg_storage.bytes >= k.kernarg_size, "invalid kernarg allocation");
     require(!overlaps(module, kernarg_storage), "module and kernarg allocations overlap");
     require(arguments.size() == k.arguments.size(), "kernel argument count mismatch");
+    if (scratch) {
+        require(k.private_bytes == scratch->private_bytes, "scratch plan does not match kernel private storage");
+        require(!overlaps(scratch->storage, module) && !overlaps(scratch->storage, kernarg_storage),
+                "scratch aliases launch storage");
+    }
     InitialLaunch result{};
     result.entry_address = module.address + k.entry_address;
     require(result.entry_address % 256 == 0, "unaligned executable entry");
@@ -50,6 +56,7 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
     const unsigned kernarg_sgpr = (k.properties & 1) ? 4 : 0;
     result.user_sgprs[kernarg_sgpr] = uint32_t(kernarg_storage.address);
     result.user_sgprs[kernarg_sgpr + 1] = uint32_t(kernarg_storage.address >> 32);
+    if (scratch) std::copy(scratch->descriptor.begin(), scratch->descriptor.end(), result.user_sgprs.begin());
     result.kernargs.resize(k.kernarg_size, 0);
     if (!k.hidden_arguments.empty()) {
         const uint32_t base = k.kernarg_size - 256;
@@ -68,6 +75,7 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
         if (layout.kind == "global_buffer") {
             GpuRange buffer{arg.value, arg.buffer_bytes};
             check_range(buffer);
+            require(!scratch || !overlaps(buffer, scratch->storage), "argument buffer aliases scratch");
             require(!overlaps(buffer, module) && !overlaps(buffer, kernarg_storage),
                     "argument buffer aliases launch storage");
         } else {
@@ -80,14 +88,19 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
     return result;
 }
 
-std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
+static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch) {
     require(launch.entry_address >= window_begin && launch.entry_address < window_end &&
             launch.entry_address % 256 == 0, "invalid dispatch entry address");
     require(launch.threads == std::array<uint32_t, 3>{64, 1, 1} && launch.groups_x != 0 &&
             launch.groups_x <= UINT32_MAX / 64, "invalid dispatch shape");
     require(launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6, "invalid dispatch user-SGPR count");
-    require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~0xbeu) &&
+    require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
+    if (scratch) {
+        require(launch.rsrc2 == 0x8d && launch.user_sgpr_count == 6 &&
+                std::equal(scratch->descriptor.begin(), scratch->descriptor.end(), launch.user_sgprs.begin()),
+                "scratch dispatch entry state mismatch");
+    }
     require(!(launch.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))), "privileged dispatch unsupported");
     // GFX10 ACQUIRE_MEM: invalidate instruction, scalar, vector, L1 and L2;
     // CPU upload flushes precede submission and earlier submissions are retired.
@@ -103,6 +116,7 @@ std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
     const uint32_t destinations[] = {0xffffffffu, 0xffffffffu};
     const uint32_t zeros[] = {0, 0, 0, 0};
     registers(0xb858, destinations, 2);
+    if (scratch) registers(0xb860, &scratch->tmpring_size, 1);
     registers(0xb864, zeros, 2);
     registers(0xb890, zeros, 4);
     registers(0xb830, program, 2);
@@ -116,5 +130,54 @@ std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
     words.insert(words.end(), {0xc0031502u, launch.groups_x, 1, 1, 0x8005u});
     // Initiator: shader enable, force start at zero, wave32; initial in-order dispatch.
     return words;
+}
+
+InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string &name,
+                                    GpuRange module, GpuRange kernarg_storage,
+                                    uint32_t groups_x, const std::vector<LaunchArgument> &arguments) {
+    return prepare_launch(object, name, module, kernarg_storage, groups_x, arguments, nullptr);
+}
+std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch) {
+    return encode_dispatch(launch, nullptr);
+}
+
+uint32_t buffer_scratch_ring_bytes(uint32_t private_bytes) {
+    require(private_bytes != 0, "zero private storage does not require scratch");
+    const uint64_t per_wave = (uint64_t(private_bytes) * 32 + 1023) & ~uint64_t(1023);
+    // Mesa's provisional PS5 topology rounds 9 active CUs/SA to 10: 32*10*2*2.
+    const uint64_t bytes = per_wave * 1280;
+    require((per_wave >> 10) <= 0x1fff && bytes <= UINT32_MAX,
+            "scratch ring exceeds register capacity");
+    return uint32_t(bytes);
+}
+
+BufferScratchPlan plan_buffer_scratch(uint32_t private_bytes, GpuRange storage) {
+    check_range(storage);
+    const uint32_t bytes = buffer_scratch_ring_bytes(private_bytes);
+    const uint32_t per_wave = bytes / 1280;
+    require(storage.address % 4096 == 0 && bytes <= storage.bytes,
+            "scratch ring exceeds backing or base alignment");
+    // ROCr GFX10 V#, with CP's wave32 INDEX_STRIDE completed here (ACO uses 2).
+    return {storage, private_bytes, per_wave, bytes, 1280 | ((per_wave >> 10) << 12),
+            {uint32_t(storage.address), uint32_t(storage.address >> 32) | 0x80000000u,
+             bytes, 0x21c14facu}};
+}
+
+static void validate_scratch_plan(const BufferScratchPlan &scratch) {
+    const auto expected = plan_buffer_scratch(scratch.private_bytes, scratch.storage);
+    require(scratch.bytes_per_wave == expected.bytes_per_wave && scratch.ring_bytes == expected.ring_bytes &&
+            scratch.tmpring_size == expected.tmpring_size && scratch.descriptor == expected.descriptor,
+            "inconsistent scratch plan");
+}
+BufferScratchLaunch prepare_buffer_scratch_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch) {
+    validate_scratch_plan(scratch);
+    return {prepare_launch(object, name, module, kernarg_storage, groups_x, arguments, &scratch), scratch};
+}
+std::vector<uint32_t> encode_buffer_scratch_dispatch(const BufferScratchLaunch &launch) {
+    validate_scratch_plan(launch.scratch);
+    return encode_dispatch(launch.dispatch, &launch.scratch);
 }
 } // namespace ps5hip

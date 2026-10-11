@@ -1,0 +1,926 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-11T21:20:29.285352+00:00",
+  "classification": "LLVM18 O1 buffer-spill lowering and explicit host scratch planner profile pass; native hardware unqualified",
+  "hardware_validated": false,
+  "native_candidate_changed": false,
+  "source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+  "baseline_recipe_sha256": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+  "baseline_receipt_sha256": "2f8a74c518058ae28331396dafe58d26c311ca1fe2a8d52539eb89c83353b9e1",
+  "raw_receipt": {
+    "path": "results/register-spill-o1/raw-receipt.json",
+    "sha256": "34655a02485e7b3307af27374992cc27da43d3b74162510e71f8b1d28e98158f"
+  },
+  "probe_script_sha256": "b1ef837816619bdb0613e5dbafc4de15bdbf96a0ee5315a05836d3338d6060db",
+  "allowed_compile_changes": [
+    "Replace sole -O2 argument with -O1",
+    "Replace output destination with fresh ignored results path"
+  ],
+  "actual_source_path_preserved": true,
+  "tools": {
+    "clang++-18": {
+      "path": "/usr/lib/llvm-18/bin/clang",
+      "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4",
+      "version": "Ubuntu clang version 18.1.8 (20ubuntu8)",
+      "resolved_libraries_observed_after_compile": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "libclang-cpp.so.18.1",
+          "sha256": "5ad2aa56cdb24612047f3b87f77bf9e25ffac2c3dfdcc40af3a174a974753cf8"
+        },
+        {
+          "name": "libLLVM-18.so.1",
+          "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b"
+        },
+        {
+          "name": "libbsd.so.0.12.2",
+          "sha256": "c71b8a0d7e94c5e34f6c328c5dd1ba7f325d3300c97a54a7c69ef9a6c2caa8b3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libedit.so.2.0.76",
+          "sha256": "438090e1cd463d9f89c9259ce9e99f229eae56c857b5e525d581e338f61aa1ce"
+        },
+        {
+          "name": "libffi.so.8.2.0",
+          "sha256": "1a0dc86f787f73e025a6e521056360afcbe70f2a82cd808132fefc2b4ee95daa"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libmd.so.0.1.0",
+          "sha256": "f115fa619f586e47ddfbec21bfd50069fbe5d21f388f8d9a07a984cb075d7efa"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        },
+        {
+          "name": "libtinfo.so.6.6",
+          "sha256": "085dbbe5dc38619276bdd0af37ae588969b1308baded09a2990ce8824a602912"
+        },
+        {
+          "name": "libxml2.so.16.1.2",
+          "sha256": "302dfa1295c6f917758243ef0f118f7144026b51a5f5cd1610fba849c968f73b"
+        },
+        {
+          "name": "libz.so.1.3.1",
+          "sha256": "47b61967895b30e8c0c6818dd633ffeb87711cf637c688f981896f0dd84ce23b"
+        },
+        {
+          "name": "libzstd.so.1.5.7",
+          "sha256": "060eeb79531d435306665fd78329d8a9dd579f95876c5960bb67937825362a80"
+        }
+      ]
+    },
+    "ld.lld-18": {
+      "path": "/usr/lib/llvm-18/bin/lld",
+      "sha256": "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19",
+      "version": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",
+      "resolved_libraries_observed_after_compile": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "libLLVM-18.so.1",
+          "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b"
+        },
+        {
+          "name": "libbsd.so.0.12.2",
+          "sha256": "c71b8a0d7e94c5e34f6c328c5dd1ba7f325d3300c97a54a7c69ef9a6c2caa8b3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libedit.so.2.0.76",
+          "sha256": "438090e1cd463d9f89c9259ce9e99f229eae56c857b5e525d581e338f61aa1ce"
+        },
+        {
+          "name": "libffi.so.8.2.0",
+          "sha256": "1a0dc86f787f73e025a6e521056360afcbe70f2a82cd808132fefc2b4ee95daa"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libmd.so.0.1.0",
+          "sha256": "f115fa619f586e47ddfbec21bfd50069fbe5d21f388f8d9a07a984cb075d7efa"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        },
+        {
+          "name": "libtinfo.so.6.6",
+          "sha256": "085dbbe5dc38619276bdd0af37ae588969b1308baded09a2990ce8824a602912"
+        },
+        {
+          "name": "libxml2.so.16.1.2",
+          "sha256": "302dfa1295c6f917758243ef0f118f7144026b51a5f5cd1610fba849c968f73b"
+        },
+        {
+          "name": "libz.so.1.3.1",
+          "sha256": "47b61967895b30e8c0c6818dd633ffeb87711cf637c688f981896f0dd84ce23b"
+        },
+        {
+          "name": "libzstd.so.1.5.7",
+          "sha256": "060eeb79531d435306665fd78329d8a9dd579f95876c5960bb67937825362a80"
+        }
+      ]
+    },
+    "llvm-readobj-18": {
+      "path": "/usr/lib/llvm-18/bin/llvm-readobj",
+      "sha256": "3dad3c6cfdbf380edf0415299ce5c8e6a52381f296690f2362da63d2562a4f04",
+      "version": "Ubuntu LLVM version 18.1.8",
+      "resolved_libraries_observed_after_compile": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "libLLVM-18.so.1",
+          "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b"
+        },
+        {
+          "name": "libbsd.so.0.12.2",
+          "sha256": "c71b8a0d7e94c5e34f6c328c5dd1ba7f325d3300c97a54a7c69ef9a6c2caa8b3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libedit.so.2.0.76",
+          "sha256": "438090e1cd463d9f89c9259ce9e99f229eae56c857b5e525d581e338f61aa1ce"
+        },
+        {
+          "name": "libffi.so.8.2.0",
+          "sha256": "1a0dc86f787f73e025a6e521056360afcbe70f2a82cd808132fefc2b4ee95daa"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libmd.so.0.1.0",
+          "sha256": "f115fa619f586e47ddfbec21bfd50069fbe5d21f388f8d9a07a984cb075d7efa"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        },
+        {
+          "name": "libtinfo.so.6.6",
+          "sha256": "085dbbe5dc38619276bdd0af37ae588969b1308baded09a2990ce8824a602912"
+        },
+        {
+          "name": "libxml2.so.16.1.2",
+          "sha256": "302dfa1295c6f917758243ef0f118f7144026b51a5f5cd1610fba849c968f73b"
+        },
+        {
+          "name": "libz.so.1.3.1",
+          "sha256": "47b61967895b30e8c0c6818dd633ffeb87711cf637c688f981896f0dd84ce23b"
+        },
+        {
+          "name": "libzstd.so.1.5.7",
+          "sha256": "060eeb79531d435306665fd78329d8a9dd579f95876c5960bb67937825362a80"
+        }
+      ]
+    },
+    "llvm-objdump-18": {
+      "path": "/usr/lib/llvm-18/bin/llvm-objdump",
+      "sha256": "dae6cd5e22c931a4e24f0c892be3e621d0f7a856fbe00a2050e4d26d15c831a4",
+      "version": "Ubuntu LLVM version 18.1.8",
+      "resolved_libraries_observed_after_compile": [
+        {
+          "name": "ld-linux-x86-64.so.2",
+          "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14"
+        },
+        {
+          "name": "libLLVM-18.so.1",
+          "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b"
+        },
+        {
+          "name": "libbrotlicommon.so.1.2.0",
+          "sha256": "fb353cab2ea4ecd90814b46f872c21e1034c92bd86c3c677415748b4d16b5ad1"
+        },
+        {
+          "name": "libbrotlidec.so.1.2.0",
+          "sha256": "eb8768f85e9c367cd74772919b5668bbe0045cb71b65d75aafc32828e7acb1b7"
+        },
+        {
+          "name": "libbsd.so.0.12.2",
+          "sha256": "c71b8a0d7e94c5e34f6c328c5dd1ba7f325d3300c97a54a7c69ef9a6c2caa8b3"
+        },
+        {
+          "name": "libc.so.6",
+          "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7"
+        },
+        {
+          "name": "libcom_err.so.2.1",
+          "sha256": "6fb3115b11fe7e14c26f3e086c4dc1fb41061130869a66c976e0ea69fdb912d6"
+        },
+        {
+          "name": "libcrypto.so.3",
+          "sha256": "5385f0436ac2e284ba8c5fb1488874057c29c04be72dea32add832694f381e28"
+        },
+        {
+          "name": "libcurl.so.4.8.0",
+          "sha256": "c0a7d5d3ac2c93810d9af855dee4fdd0d8f210cda11b9c74e15ab6c33fa5efec"
+        },
+        {
+          "name": "libedit.so.2.0.76",
+          "sha256": "438090e1cd463d9f89c9259ce9e99f229eae56c857b5e525d581e338f61aa1ce"
+        },
+        {
+          "name": "libffi.so.8.2.0",
+          "sha256": "1a0dc86f787f73e025a6e521056360afcbe70f2a82cd808132fefc2b4ee95daa"
+        },
+        {
+          "name": "libgcc_s.so.1",
+          "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee"
+        },
+        {
+          "name": "libgmp.so.10.5.0",
+          "sha256": "fda9699eef15deda5f1c626e9140377a7f5d88c41516a54278ac02429cb20fa5"
+        },
+        {
+          "name": "libgnutls.so.30.41.1",
+          "sha256": "ebcc6a4dfae904dc956feb61cef5c36917cf36c19c5718d3c2be7e377ac65d27"
+        },
+        {
+          "name": "libgssapi_krb5.so.2.2",
+          "sha256": "18e2ba0b2f421b780e7265337e52996f382857df63d0f9e63f391a75a14cdbe7"
+        },
+        {
+          "name": "libhogweed.so.6.11",
+          "sha256": "67bdc12f1ffe643142d5e185a6a8f654fd38cd14e77bae68201cf9aa71b00b61"
+        },
+        {
+          "name": "libidn2.so.0.4.0",
+          "sha256": "cdb48484c43a795c3722e286c31eb6238b4b7c3780043895dd9fa6b6041f78da"
+        },
+        {
+          "name": "libk5crypto.so.3.1",
+          "sha256": "ee77156da39841edfaa7c5fcdca4cf98ae34d60323095617b484188a4d9965e3"
+        },
+        {
+          "name": "libkeyutils.so.1.10",
+          "sha256": "c0c8f8d5adec4abe76fa462d8ad7c010f50c61e2b67b9feaa6f44e462c12cf41"
+        },
+        {
+          "name": "libkrb5.so.3.3",
+          "sha256": "aca607790a4349c5053390fa22b24e717b2c5ea101d7b468ece6507140c6ff7b"
+        },
+        {
+          "name": "libkrb5support.so.0.1",
+          "sha256": "8cc61cecc016710e7134c1621b5a6537c55eea91d2a074f6f05fa6f6e36ec8d6"
+        },
+        {
+          "name": "liblber.so.2.0.200",
+          "sha256": "e2f9e23d75b37be7bdcdc39d2f74e2355a68f2ccd86e7f6534969ad8b359834b"
+        },
+        {
+          "name": "libldap.so.2.0.200",
+          "sha256": "0aa894b6d72690723015f6056bb6730a1cca41a2fac8224ef38cd7880c8e7860"
+        },
+        {
+          "name": "libm.so.6",
+          "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8"
+        },
+        {
+          "name": "libmd.so.0.1.0",
+          "sha256": "f115fa619f586e47ddfbec21bfd50069fbe5d21f388f8d9a07a984cb075d7efa"
+        },
+        {
+          "name": "libnettle.so.8.11",
+          "sha256": "68c2f760d329a85ce1aa5cfc5e48ffece235258159005726798ad14e6f96a789"
+        },
+        {
+          "name": "libnghttp2.so.14.29.2",
+          "sha256": "2655558fee787cb4724ad59c72ce75b20847efc92a1c52fc202aea1d812c9b20"
+        },
+        {
+          "name": "libp11-kit.so.0.4.8",
+          "sha256": "2611eeb039dbed48839d90afe3d9ad3e5bd9edca2989af05dc62a93c3ff41fed"
+        },
+        {
+          "name": "libpsl.so.5.3.4",
+          "sha256": "18d125c725a498d66f971ceb60bfc7cf660f6a0149b54e5caa3f4651c3d2b3c6"
+        },
+        {
+          "name": "libresolv.so.2",
+          "sha256": "6b99ecf94bcb81732ed1e81615084a5cfe7383eb89ce83106fa51077409ce609"
+        },
+        {
+          "name": "librtmp.so.1",
+          "sha256": "fceac319eac32ab0d6e9d6d641f0abf2f4aa097aa1a1355ea9e7419e81d45b62"
+        },
+        {
+          "name": "libsasl2.so.2.0.25",
+          "sha256": "25163eb0a23ffe7d4170f9e219886dfdb831bbb1031a2cfac2227284a7f51e02"
+        },
+        {
+          "name": "libssh2.so.1.0.1",
+          "sha256": "34287a1e8942e6fdf1c154e8c615a8dab7a69dc6a4e8d76913afb323fdc6fd6f"
+        },
+        {
+          "name": "libssl.so.3",
+          "sha256": "63b47f444efa588e291e9b650a5ba2ab02f856356f2d50f13a2e477db9119e09"
+        },
+        {
+          "name": "libstdc++.so.6.0.35",
+          "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3"
+        },
+        {
+          "name": "libtasn1.so.6.6.5",
+          "sha256": "1255353abfae7b9f52aedb0264876cd4c852f13c2acf3e2203ebd2aab79bce02"
+        },
+        {
+          "name": "libtinfo.so.6.6",
+          "sha256": "085dbbe5dc38619276bdd0af37ae588969b1308baded09a2990ce8824a602912"
+        },
+        {
+          "name": "libunistring.so.5.2.0",
+          "sha256": "c762a289c02f716a12549d544a811715126067b9a6377057671d3fad9453a1fc"
+        },
+        {
+          "name": "libxml2.so.16.1.2",
+          "sha256": "302dfa1295c6f917758243ef0f118f7144026b51a5f5cd1610fba849c968f73b"
+        },
+        {
+          "name": "libz.so.1.3.1",
+          "sha256": "47b61967895b30e8c0c6818dd633ffeb87711cf637c688f981896f0dd84ce23b"
+        },
+        {
+          "name": "libzstd.so.1.5.7",
+          "sha256": "060eeb79531d435306665fd78329d8a9dd579f95876c5960bb67937825362a80"
+        }
+      ]
+    }
+  },
+  "tool_executable_hashes_stable_before_after": true,
+  "shared_library_identity_boundary": "Resolved library hashes observed after compilation; not independently bracketed.",
+  "source_baseline_objects_unchanged": true,
+  "scratch_test": {
+    "path": "build/host-scratch/buffer_scratch_test",
+    "source_sha256": "627be881d4537fe69aed62a8851672226dc8d2c2cddba0305fd35005806eca32",
+    "before_tests_sha256": "36cdc3d826b22f1252e86684d361aa2041e492deae984fa5d1cab168bd9e81fc",
+    "after_tests_sha256": "36cdc3d826b22f1252e86684d361aa2041e492deae984fa5d1cab168bd9e81fc",
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "explicit_o1_flag": "--o1-profile",
+    "o1_expected": {
+      "private_bytes": 712,
+      "vgpr_spills": 177,
+      "wave_bytes": 23552,
+      "ring_bytes": 30146560,
+      "tmpring_size": "0x17500"
+    },
+    "default_o2_expected": {
+      "private_bytes": 212,
+      "vgpr_spills": 52,
+      "wave_bytes": 7168,
+      "ring_bytes": 9175040,
+      "tmpring_size": "0x7500"
+    },
+    "core_or_native_harness_changed": false,
+    "tests": [
+      {
+        "case": "model",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test"
+        ],
+        "exit_code": 0
+      },
+      {
+        "case": "gfx1013-O2",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/build/canaries/gfx1013/resources/resources.hsaco"
+        ],
+        "exit_code": 0
+      },
+      {
+        "case": "gfx1030-O2",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/build/canaries/gfx1030/resources/resources.hsaco"
+        ],
+        "exit_code": 0
+      },
+      {
+        "case": "gfx1013-O1",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco",
+          "--o1-profile"
+        ],
+        "exit_code": 0
+      },
+      {
+        "case": "gfx1030-O1",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1030-resources.hsaco",
+          "--o1-profile"
+        ],
+        "exit_code": 0
+      },
+      {
+        "case": "reject-O1-default",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco"
+        ],
+        "exit_code": 1,
+        "expected_failure": true
+      },
+      {
+        "case": "reject-O2-o1-profile",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/build/canaries/gfx1013/resources/resources.hsaco",
+          "--o1-profile"
+        ],
+        "exit_code": 1,
+        "expected_failure": true
+      },
+      {
+        "case": "reject-unknown-profile",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco",
+          "--other"
+        ],
+        "exit_code": 1,
+        "expected_failure": true
+      }
+    ],
+    "build_command": [
+      "cmake",
+      "--build",
+      "<scratch-checkout>/build/host-scratch",
+      "--target",
+      "buffer_scratch_test",
+      "--verbose"
+    ],
+    "build_exit_code": 0,
+    "raw_test_receipt_sha256": "66c8c0a45368a66809ce7857bb77987dbb88ec914678b937ae61e8e6427ee391"
+  },
+  "cases": [
+    {
+      "target": "gfx1013",
+      "changed_argument_indexes": [
+        11,
+        17
+      ],
+      "driver": {
+        "command": [
+          "/usr/bin/clang++-18",
+          "-x",
+          "hip",
+          "--cuda-device-only",
+          "--no-gpu-bundle-output",
+          "-B/usr/lib/llvm-18/bin",
+          "-nogpuinc",
+          "-nogpulib",
+          "--offload-arch=gfx1013",
+          "-mcode-object-version=5",
+          "-mno-wavefrontsize64",
+          "-O1",
+          "-std=c++17",
+          "-fno-fast-math",
+          "-c",
+          "<baseline-checkout>/kernels/resources.hip",
+          "-o",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco",
+          "-###"
+        ],
+        "exit_code": 0
+      },
+      "actual_pinned_device_linker_verified": true,
+      "compile": {
+        "command": [
+          "/usr/bin/clang++-18",
+          "-x",
+          "hip",
+          "--cuda-device-only",
+          "--no-gpu-bundle-output",
+          "-B/usr/lib/llvm-18/bin",
+          "-nogpuinc",
+          "-nogpulib",
+          "--offload-arch=gfx1013",
+          "-mcode-object-version=5",
+          "-mno-wavefrontsize64",
+          "-O1",
+          "-std=c++17",
+          "-fno-fast-math",
+          "-c",
+          "<baseline-checkout>/kernels/resources.hip",
+          "-o",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco"
+        ],
+        "exit_code": 0
+      },
+      "real_buffer_spills_and_reloads_without_flat_setup": true,
+      "scratch_contract_test": {
+        "case": "gfx1013-O1",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1013-resources.hsaco",
+          "--o1-profile"
+        ],
+        "exit_code": 0
+      },
+      "o1": {
+        "object_sha256": "acb86787cd4dbe7e296250d60f20f4ddcd6da7f6a28e419ba1df3465f66510db",
+        "bytes": 15744,
+        "descriptor": {
+          "group_bytes": 0,
+          "private_bytes": 712,
+          "kernarg_bytes": 16,
+          "rsrc3": "0x0",
+          "rsrc1": "0x60af0041",
+          "rsrc2": "0x8d",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6,
+          "flat_scratch_init_requested": false
+        },
+        "metadata": {
+          "vgpr_count": 16,
+          "sgpr_count": 14,
+          "vgpr_spill_count": 177,
+          "sgpr_spill_count": 0,
+          "wavefront_size": 32
+        },
+        "opcode_counts": {
+          "buffer_load_dword": 177,
+          "buffer_store_dword": 177,
+          "flat_load_dword": 64,
+          "flat_store_dword": 64,
+          "s_add_u32": 1,
+          "s_addc_u32": 1,
+          "s_clause": 57,
+          "s_code_end": 52,
+          "s_endpgm": 1,
+          "s_load_dwordx4": 1,
+          "s_lshl_b32": 1,
+          "s_mov_b64": 2,
+          "s_waitcnt": 247,
+          "s_waitcnt_vscnt": 64,
+          "v_add_co_ci_u32_e32": 128,
+          "v_add_co_u32": 128,
+          "v_add_lshl_u32": 1,
+          "v_lshlrev_b64": 64,
+          "v_mov_b32_e32": 63,
+          "v_or_b32_e32": 63
+        },
+        "buffer_load_count": 177,
+        "buffer_store_count": 177,
+        "no_flat_scratch_setup_or_scratch_opcodes": true,
+        "buffer_operand_examples": [
+          "buffer_store_dword v2, off, s[8:11], 0 offset:4",
+          "buffer_store_dword v3, off, s[8:11], 0 offset:8",
+          "buffer_load_dword v6, off, s[8:11], 0 offset:500",
+          "buffer_load_dword v4, off, s[8:11], 0 offset:540"
+        ]
+      },
+      "o2": {
+        "object_sha256": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+        "bytes": 14720,
+        "descriptor": {
+          "group_bytes": 0,
+          "private_bytes": 212,
+          "kernarg_bytes": 16,
+          "rsrc3": "0x0",
+          "rsrc1": "0x60af0041",
+          "rsrc2": "0x8d",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6,
+          "flat_scratch_init_requested": false
+        },
+        "metadata": {
+          "vgpr_count": 16,
+          "sgpr_count": 14,
+          "vgpr_spill_count": 52,
+          "sgpr_spill_count": 0,
+          "wavefront_size": 32
+        },
+        "opcode_counts": {
+          "buffer_load_dword": 52,
+          "buffer_store_dword": 52,
+          "flat_load_dword": 64,
+          "flat_store_dword": 64,
+          "s_add_u32": 1,
+          "s_addc_u32": 1,
+          "s_code_end": 63,
+          "s_endpgm": 1,
+          "s_load_dwordx4": 1,
+          "s_mov_b64": 2,
+          "s_waitcnt": 118,
+          "s_waitcnt_vscnt": 64,
+          "v_add_co_ci_u32_e32": 128,
+          "v_add_co_u32": 128,
+          "v_lshl_add_u32": 1,
+          "v_lshlrev_b32_e32": 1,
+          "v_lshlrev_b64": 1,
+          "v_mov_b32_e32": 1
+        },
+        "buffer_load_count": 52,
+        "buffer_store_count": 52,
+        "no_flat_scratch_setup_or_scratch_opcodes": true,
+        "buffer_operand_examples": [
+          "buffer_store_dword v14, off, s[8:11], 0 offset:208",
+          "buffer_store_dword v14, off, s[8:11], 0 offset:204",
+          "buffer_load_dword v5, off, s[8:11], 0 offset:12",
+          "buffer_load_dword v5, off, s[8:11], 0 offset:4"
+        ]
+      },
+      "descriptor_differences": {
+        "private_bytes": {
+          "o1": 712,
+          "o2": 212
+        }
+      },
+      "scratch_dataflow": "s[0:3] incoming private-buffer descriptor copied to s[8:11]; s7 private-wave offset added to descriptor address; buffer accesses use s[8:11]. The64 flat loads/stores each concern global input/output, not flat-scratch setup.",
+      "scratch_contract_test_initial": {
+        "not_run": "O1 does not fit existing exact private212/spills52/no-flat-init test contract; no relaxation"
+      }
+    },
+    {
+      "target": "gfx1030",
+      "changed_argument_indexes": [
+        11,
+        17
+      ],
+      "driver": {
+        "command": [
+          "/usr/bin/clang++-18",
+          "-x",
+          "hip",
+          "--cuda-device-only",
+          "--no-gpu-bundle-output",
+          "-B/usr/lib/llvm-18/bin",
+          "-nogpuinc",
+          "-nogpulib",
+          "--offload-arch=gfx1030",
+          "-mcode-object-version=5",
+          "-mno-wavefrontsize64",
+          "-O1",
+          "-std=c++17",
+          "-fno-fast-math",
+          "-c",
+          "<baseline-checkout>/kernels/resources.hip",
+          "-o",
+          "<scratch-checkout>/results/register-spill-o1/gfx1030-resources.hsaco",
+          "-###"
+        ],
+        "exit_code": 0
+      },
+      "actual_pinned_device_linker_verified": true,
+      "compile": {
+        "command": [
+          "/usr/bin/clang++-18",
+          "-x",
+          "hip",
+          "--cuda-device-only",
+          "--no-gpu-bundle-output",
+          "-B/usr/lib/llvm-18/bin",
+          "-nogpuinc",
+          "-nogpulib",
+          "--offload-arch=gfx1030",
+          "-mcode-object-version=5",
+          "-mno-wavefrontsize64",
+          "-O1",
+          "-std=c++17",
+          "-fno-fast-math",
+          "-c",
+          "<baseline-checkout>/kernels/resources.hip",
+          "-o",
+          "<scratch-checkout>/results/register-spill-o1/gfx1030-resources.hsaco"
+        ],
+        "exit_code": 0
+      },
+      "real_buffer_spills_and_reloads_without_flat_setup": true,
+      "scratch_contract_test": {
+        "case": "gfx1030-O1",
+        "command": [
+          "<scratch-checkout>/build/host-scratch/buffer_scratch_test",
+          "<scratch-checkout>/results/register-spill-o1/gfx1030-resources.hsaco",
+          "--o1-profile"
+        ],
+        "exit_code": 0
+      },
+      "o1": {
+        "object_sha256": "42321d6b10318af7460dcb959b93a60db3a8ea161d0a8d245034645093f96616",
+        "bytes": 16000,
+        "descriptor": {
+          "group_bytes": 0,
+          "private_bytes": 712,
+          "kernarg_bytes": 16,
+          "rsrc3": "0x0",
+          "rsrc1": "0x60af0041",
+          "rsrc2": "0x8d",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6,
+          "flat_scratch_init_requested": false
+        },
+        "metadata": {
+          "vgpr_count": 16,
+          "sgpr_count": 14,
+          "vgpr_spill_count": 177,
+          "sgpr_spill_count": 0,
+          "wavefront_size": 32
+        },
+        "opcode_counts": {
+          "buffer_load_dword": 177,
+          "buffer_store_dword": 177,
+          "flat_load_dword": 64,
+          "flat_store_dword": 64,
+          "s_add_u32": 1,
+          "s_addc_u32": 1,
+          "s_clause": 57,
+          "s_code_end": 52,
+          "s_endpgm": 1,
+          "s_load_dwordx4": 1,
+          "s_lshl_b32": 1,
+          "s_mov_b64": 2,
+          "s_waitcnt": 247,
+          "s_waitcnt_vscnt": 64,
+          "v_add_co_ci_u32_e32": 128,
+          "v_add_co_u32": 128,
+          "v_add_lshl_u32": 1,
+          "v_lshlrev_b64": 64,
+          "v_mov_b32_e32": 63,
+          "v_or_b32_e32": 63
+        },
+        "buffer_load_count": 177,
+        "buffer_store_count": 177,
+        "no_flat_scratch_setup_or_scratch_opcodes": true,
+        "buffer_operand_examples": [
+          "buffer_store_dword v2, off, s[8:11], 0 offset:4",
+          "buffer_store_dword v3, off, s[8:11], 0 offset:8",
+          "buffer_load_dword v6, off, s[8:11], 0 offset:500",
+          "buffer_load_dword v4, off, s[8:11], 0 offset:540"
+        ]
+      },
+      "o2": {
+        "object_sha256": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706",
+        "bytes": 12800,
+        "descriptor": {
+          "group_bytes": 0,
+          "private_bytes": 212,
+          "kernarg_bytes": 16,
+          "rsrc3": "0x0",
+          "rsrc1": "0x60af0041",
+          "rsrc2": "0x8d",
+          "properties": "0x409",
+          "preload": 0,
+          "user_sgprs": 6,
+          "flat_scratch_init_requested": false
+        },
+        "metadata": {
+          "vgpr_count": 16,
+          "sgpr_count": 14,
+          "vgpr_spill_count": 52,
+          "sgpr_spill_count": 0,
+          "wavefront_size": 32
+        },
+        "opcode_counts": {
+          "buffer_load_dword": 52,
+          "buffer_store_dword": 52,
+          "flat_load_dword": 64,
+          "flat_store_dword": 64,
+          "s_add_u32": 1,
+          "s_addc_u32": 1,
+          "s_code_end": 55,
+          "s_endpgm": 1,
+          "s_load_dwordx4": 1,
+          "s_mov_b64": 2,
+          "s_waitcnt": 118,
+          "s_waitcnt_vscnt": 64,
+          "v_add_co_ci_u32_e32": 2,
+          "v_add_co_u32": 2,
+          "v_lshl_add_u32": 1,
+          "v_lshlrev_b32_e32": 1,
+          "v_lshlrev_b64": 1,
+          "v_mov_b32_e32": 1
+        },
+        "buffer_load_count": 52,
+        "buffer_store_count": 52,
+        "no_flat_scratch_setup_or_scratch_opcodes": true,
+        "buffer_operand_examples": [
+          "buffer_store_dword v4, off, s[8:11], 0 offset:8",
+          "buffer_store_dword v4, off, s[8:11], 0 offset:4",
+          "buffer_load_dword v1, off, s[8:11], 0 offset:208",
+          "buffer_load_dword v1, off, s[8:11], 0 offset:204"
+        ]
+      },
+      "descriptor_differences": {
+        "private_bytes": {
+          "o1": 712,
+          "o2": 212
+        }
+      },
+      "scratch_dataflow": "s[0:3] incoming private-buffer descriptor copied to s[8:11]; s7 private-wave offset added to descriptor address; buffer accesses use s[8:11]. The64 flat loads/stores each concern global input/output, not flat-scratch setup.",
+      "scratch_contract_test_initial": {
+        "not_run": "O1 does not fit existing exact private212/spills52/no-flat-init test contract; no relaxation"
+      }
+    }
+  ],
+  "limits": [
+    "Real O1 buffer spills/reloads and host-side planner/packet/rejection checks pass; no GPU scratch use or correctness observed.",
+    "The O1 private allocation requirement differs from the frozen O2 native harness; current212-byte/9175040-byte candidate cannot be reused unchanged.",
+    "Whole resources object retains other kernels, including private_array flat scratch; claims are restricted to register_spill.",
+    "Generic flat global input/output instructions remain64 loads and64 stores; their presence does not mean flat scratch setup.",
+    "Only an explicit O1 test expectation profile was added; the compiler baseline, core runtime admission, native fixture and package remain unchanged."
+  ],
+  "raw_file_sha256": {
+    "gfx1013-O1-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O1-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "gfx1013-O1-isa.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O1-isa.stdout": "b879b89a1f2c54604483675cb9a44de35b60759a6c8c88954aca07956c4568c2",
+    "gfx1013-O1-readobj.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O1-readobj.stdout": "2335216c6015d92611e3d14b43f943fc69bd7b7ecf951178f61d80d93f9c8dbb",
+    "gfx1013-O2-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O2-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "gfx1013-O2-isa.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O2-isa.stdout": "6d95e5cd500010ad08d1b8fbceda3f8d12fa5cac74f6d50ee7f07130fd3ed4da",
+    "gfx1013-O2-readobj.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O2-readobj.stdout": "2537122647cd906a4b135c9f11c8508a36fb55969a62ae42be53c95a06f96f12",
+    "gfx1013-compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-driver.stderr": "4f186284356610d761c6e68f4690a8e701b91975a4e9e5c46c7bfd968a87c6b1",
+    "gfx1013-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-resources.hsaco": "acb86787cd4dbe7e296250d60f20f4ddcd6da7f6a28e419ba1df3465f66510db",
+    "gfx1030-O1-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O1-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "gfx1030-O1-isa.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O1-isa.stdout": "b040aa1c4e56ab07221b877052da9618a5e56250aaf10dd49b1bb9f87fce715f",
+    "gfx1030-O1-readobj.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O1-readobj.stdout": "092d10462f889f31f032d372c8c62659efb91c598b4d8ad39060a54afe5eeb63",
+    "gfx1030-O2-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O2-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "gfx1030-O2-isa.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O2-isa.stdout": "37542f150f4049d0ce1a5c28f0be1e73214c26fe6ec9a93a3378fc9a23aa9fb1",
+    "gfx1030-O2-readobj.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O2-readobj.stdout": "4b097eb70a9ef9498b34142bf07909c31401fe90a8217a3d8a6522d4955f7fb7",
+    "gfx1030-compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-driver.stderr": "9f3c80622d221c3d6da4b412aee1ef901226c8205f55cb9a2f6b9906563e7d6e",
+    "gfx1030-driver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-resources.hsaco": "42321d6b10318af7460dcb959b93a60db3a8ea161d0a8d245034645093f96616",
+    "model-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "model-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "pre-profile-extension-evidence.json": "1e46246cf2e0b6fc3a43e32f3263ad240b29f397fdaa5bf519dd07b7b1e3eda5",
+    "pre-profile-extension-raw-receipt.json": "34655a02485e7b3307af27374992cc27da43d3b74162510e71f8b1d28e98158f",
+    "profile-extension-tests.json": "66c8c0a45368a66809ce7857bb77987dbb88ec914678b937ae61e8e6427ee391",
+    "raw-receipt.json": "34655a02485e7b3307af27374992cc27da43d3b74162510e71f8b1d28e98158f",
+    "reject-O1-default.stderr": "ff556b5d181115079291c30b2427bfe80105cb324bf84646917127bc99417ff1",
+    "reject-O1-default.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reject-O2-o1-profile.stderr": "ff556b5d181115079291c30b2427bfe80105cb324bf84646917127bc99417ff1",
+    "reject-O2-o1-profile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reject-unknown-profile.stderr": "ff556b5d181115079291c30b2427bfe80105cb324bf84646917127bc99417ff1",
+    "reject-unknown-profile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-rebuild-dry-run.txt": "89b5c729f4861f2f41d1989706ded52d3d7c7fc76a15ffc81aeb998b9938bacf",
+    "test-rebuild.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-rebuild.stdout": "a5900c98ca295572343bce15da4c1ffbd0d823d986e295558a3bb245c4227364"
+  },
+  "updated_utc": "2026-10-11T21:22:49.958427+00:00",
+  "initial_test_profile_observation": {
+    "executed": false,
+    "reason": "O1 private712/spills177 did not fit original test expectation212/52; no compiler failure inferred.",
+    "preserved_evidence_sha256": "1e46246cf2e0b6fc3a43e32f3263ad240b29f397fdaa5bf519dd07b7b1e3eda5",
+    "preserved_raw_receipt_sha256": "34655a02485e7b3307af27374992cc27da43d3b74162510e71f8b1d28e98158f"
+  }
+}

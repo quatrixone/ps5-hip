@@ -126,6 +126,45 @@ class LogTests(unittest.TestCase):
             self.assertNotEqual(module.check_log(bad, "gfx1013", "runtime", shell_exit_probe=True)
                                 ["application_result"], "application-pass")
 
+    def test_register_spill_requires_modified_payload_full_guards_and_finite_exit(self):
+        suffix = (b"PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                  b"PS5HIP SHUTDOWN static-dtor=observed\n"
+                  b"PS5HIP SHELL_EXIT application-fini=completed\n"
+                  b"PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+        scratch = b"PS5HIP SCRATCH payload=modified guards=unchanged\n"
+        for target in ("gfx1013", "gfx1030"):
+            data = (f"PS5HIP START target={target} kernel=register_spill\n"
+                    "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n"
+                    f"PS5HIP SUBMIT target={target} kernel=register_spill invocations=64 output_words=4096 groups=1 private_bytes=212 scratch_bytes=9175040 timeout_ms=2000\n").encode()
+            data += scratch + b"PS5HIP PASS kernel=register_spill exact_values=4096 guards=unchanged allocations=closed\n"
+            self.assertEqual(module.check_log(data, target, "register_spill")["application_result"], "application-pass")
+            valid = data + suffix
+            result = module.check_log(valid, target, "register_spill", shell_exit_probe=True)
+            self.assertEqual(result["application_result"], "application-pass")
+            self.assertFalse(result["hardware_gate_passed"])
+            for before, after in ((b"invocations=64", b"invocations=32"),
+                                  (b"output_words=4096", b"output_words=256"),
+                                  (b"groups=1", b"groups=2"),
+                                  (b"private_bytes=212", b"private_bytes=0"),
+                                  (b"scratch_bytes=9175040", b"scratch_bytes=8192"),
+                                  (b"timeout_ms=2000", b"timeout_ms=0"),
+                                  (b"payload=modified", b"payload=unchanged"),
+                                  (b"guards=unchanged", b"guards=changed"),
+                                  (b"exact_values=4096", b"exact_values=4095"),
+                                  (b"allocations=closed", b"allocations=retained"),
+                                  (b"request-return=0", b"request-return=-1")):
+                with self.subTest(target=target, field=before):
+                    self.assertNotEqual(module.check_log(valid.replace(before, after), target, "register_spill", shell_exit_probe=True)
+                                        ["application_result"], "application-pass")
+            for bad in (data, valid[:-1], valid * 2, valid.replace(b"\n", b"\r\n"),
+                        valid.replace(scratch, b""), valid.replace(scratch, scratch * 2),
+                        valid.replace(scratch, b"") + scratch,
+                        valid.replace(target.encode(), b"gfx9999"),
+                        valid + b"PS5HIP FAIL: scratch corruption\n",
+                        valid + b"PS5HIP QUARANTINED: unresolved\n"):
+                self.assertNotEqual(module.check_log(bad, target, "register_spill", shell_exit_probe=True)
+                                    ["application_result"], "application-pass")
+
     def test_shutdown_probe_requires_all_checkpoints_but_never_certifies_exit(self):
         checkpoints = [b"PS5HIP SHUTDOWN main-return=0\n", b"PS5HIP SHUTDOWN atexit=observed\n",
                        b"PS5HIP SHUTDOWN static-dtor=observed\n"]

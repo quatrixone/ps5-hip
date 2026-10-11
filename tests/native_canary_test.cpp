@@ -76,6 +76,43 @@ int main() {
             data(b)[72] ^= 1; reject(verify); data(b)[72] ^= 1;
             data(a)[-1] ^= 1; reject(verify); data(a)[-1] ^= 1;
             data(b)[count] ^= 1; reject(verify); data(b)[count] ^= 1;
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+            auto input = buffer();
+            auto verify = [&] { validate(output, input); };
+            reject(verify);
+            for (uint32_t i = 0; i < count; ++i) {
+                // Independently evaluate the 32-bit permutation of each element index.
+                const auto expected = uint32_t(uint64_t(i) * 2654435769ULL) ^ 1821285621u;
+                data(input)[i] = expected; data(output)[i] = expected;
+            }
+            verify();
+            for (uint32_t i = 0; i < count; ++i) {
+                data(output)[i] ^= 1; reject(verify); data(output)[i] ^= 1;
+            }
+            for (uint32_t i : {0u, 31u, 32u, 63u, 64u, count - 1}) {
+                data(input)[i] ^= 1; reject(verify); data(input)[i] ^= 1;
+            }
+            std::swap(data(output)[0], data(output)[64]); reject(verify);
+            std::swap(data(output)[0], data(output)[64]);
+            data(input)[-1] ^= 1; reject(verify); data(input)[-1] ^= 1;
+            data(input)[count] ^= 1; reject(verify); data(input)[count] ^= 1;
+            const uint32_t bytes = ps5hip::buffer_scratch_ring_bytes(scratch_private_bytes);
+            require(bytes == 9175040);
+            auto scratch = std::make_shared<ps5hip::NativeMemory>(bytes + 2 * scratch_prefix_bytes, 65536, false);
+            std::memset(scratch->cpu(), 0xa5, scratch->range().bytes);
+            const ps5hip::GpuRange payload{scratch->range().address + scratch_prefix_bytes, bytes};
+            auto scratch_verify = [&] { check_scratch(scratch, payload); };
+            reject(scratch_verify);
+            auto *scratch_words = static_cast<uint32_t *>(scratch->cpu());
+            const size_t first = scratch_prefix_bytes / 4, end = first + bytes / 4;
+            scratch_words[first] ^= 1; scratch_words[end - 1] ^= 1;
+            scratch_verify();
+            for (size_t i : {size_t(0), first - 1, end, scratch->range().bytes / 4 - 1}) {
+                scratch_words[i] ^= 1; reject(scratch_verify); scratch_words[i] ^= 1;
+            }
+            reject([&] { check_scratch(scratch, {payload.address + 4, payload.bytes}); });
+            reject([&] { check_scratch(scratch, {payload.address, payload.bytes - 4}); });
+            scratch_verify();
 #elif defined(PS5HIP_CANARY_WAVE)
             auto verify = [&] { validate(output); };
             reject(verify);

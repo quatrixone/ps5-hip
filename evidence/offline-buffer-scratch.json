@@ -1,0 +1,519 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-10-11T21:23:35.339498+00:00",
+  "scope": "Offline bounded buffer-scratch launch; G3 remains incomplete",
+  "source_base": "45164384cf88ee4f4b6c8858f4336b361c0f04c6",
+  "source_state": "coordinated uncommitted inputs identified by hashes; parent owns final commit",
+  "contract": {
+    "wave_size": 32,
+    "threads": [
+      64,
+      1,
+      1
+    ],
+    "user_sgprs": 6,
+    "private_bytes_per_item": 212,
+    "scratch_wave_bytes": 7168,
+    "scratch_waves": 1280,
+    "scratch_payload_bytes": 9175040,
+    "tmpring_size": "0x7500",
+    "descriptor_word3": "0x21c14fac",
+    "capacity_status": "conservative pinned Mesa provisional topology; not hardware measurement",
+    "bounds_status": "OOB_SELECT=2 does not bound accesses against ring extent"
+  },
+  "validation": {
+    "host_ctest": {
+      "registered": 30,
+      "passed": 30,
+      "asan": true,
+      "ubsan": true,
+      "log": "results/scratch-host/ctest-final.log",
+      "chronology": "All 30 passed before the scratch-test-only O1 extension; not repeated after that extension.",
+      "scratch_test_source_sha256": "ab858763303e7a1fc4f6dcc23c57552c76fd28d9ee4335c22b5a93ced74f5fa5"
+    },
+    "affected_python": {
+      "passed": 39,
+      "receipt": "results/register-spill-python-integration/receipt.json"
+    },
+    "ps5_host_objects": {
+      "compiled": 6,
+      "sources": [
+        "tools/native_canary.cpp",
+        "src/code_object.cpp",
+        "src/launch.cpp"
+      ],
+      "target_macros": [
+        "gfx1013",
+        "gfx1030"
+      ],
+      "actual_sdk_and_elevation_headers": true,
+      "linked": false,
+      "source_unchanged_after_test_extension": true
+    },
+    "scratch_test_extension": {
+      "chronology": "Final test-only extension, after the full 30-test run; core/native source and objects unchanged",
+      "passed_cases": [
+        "model",
+        "gfx1013-O2",
+        "gfx1030-O2",
+        "gfx1013-O1",
+        "gfx1030-O1"
+      ],
+      "expected_rejections": [
+        "O1 without explicit profile",
+        "O2 with O1 profile",
+        "unknown profile flag"
+      ],
+      "asan": true,
+      "ubsan": true,
+      "test_source_sha256": "627be881d4537fe69aed62a8851672226dc8d2c2cddba0305fd35005806eca32",
+      "binary_sha256": "36cdc3d826b22f1252e86684d361aa2041e492deae984fa5d1cab168bd9e81fc",
+      "details": "results/register-spill-o1/profile-extension-tests.json",
+      "commands": {
+        "build_command": [
+          "cmake",
+          "--build",
+          "<ROOT>/build/host-scratch",
+          "--target",
+          "buffer_scratch_test",
+          "--verbose"
+        ],
+        "build_exit_code": 0,
+        "sanitizers": [
+          "address",
+          "undefined"
+        ],
+        "test_source_sha256": "627be881d4537fe69aed62a8851672226dc8d2c2cddba0305fd35005806eca32",
+        "binary_before_tests_sha256": "36cdc3d826b22f1252e86684d361aa2041e492deae984fa5d1cab168bd9e81fc",
+        "binary_after_tests_sha256": "36cdc3d826b22f1252e86684d361aa2041e492deae984fa5d1cab168bd9e81fc",
+        "tests": [
+          {
+            "case": "model",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test"
+            ],
+            "exit_code": 0
+          },
+          {
+            "case": "gfx1013-O2",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/build/canaries/gfx1013/resources/resources.hsaco"
+            ],
+            "exit_code": 0
+          },
+          {
+            "case": "gfx1030-O2",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/build/canaries/gfx1030/resources/resources.hsaco"
+            ],
+            "exit_code": 0
+          },
+          {
+            "case": "gfx1013-O1",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/results/register-spill-o1/gfx1013-resources.hsaco",
+              "--o1-profile"
+            ],
+            "exit_code": 0
+          },
+          {
+            "case": "gfx1030-O1",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/results/register-spill-o1/gfx1030-resources.hsaco",
+              "--o1-profile"
+            ],
+            "exit_code": 0
+          },
+          {
+            "case": "reject-O1-default",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/results/register-spill-o1/gfx1013-resources.hsaco"
+            ],
+            "exit_code": 1,
+            "expected_failure": true
+          },
+          {
+            "case": "reject-O2-o1-profile",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/build/canaries/gfx1013/resources/resources.hsaco",
+              "--o1-profile"
+            ],
+            "exit_code": 1,
+            "expected_failure": true
+          },
+          {
+            "case": "reject-unknown-profile",
+            "command": [
+              "<ROOT>/build/host-scratch/buffer_scratch_test",
+              "<ROOT>/results/register-spill-o1/gfx1013-resources.hsaco",
+              "--other"
+            ],
+            "exit_code": 1,
+            "expected_failure": true
+          }
+        ],
+        "original_mismatch_preserved": "pre-profile-extension-evidence.json"
+      }
+    }
+  },
+  "versions": {
+    "clang++-18": "Ubuntu clang version 18.1.8 (20ubuntu8)",
+    "cmake": "cmake version 4.2.3",
+    "ninja": "1.13.2",
+    "python3": "Python 3.14.4"
+  },
+  "source_hashes": {
+    "CMakeLists.txt": "b9ed6d2af0e7739615ef8092e44069d35a10b333793bc8b26ce9edd9d677fdd0",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "docs/BUFFER_SCRATCH_PLAN.md": "0c18e98f68b00544ce985c9cc1b2f6b85e1508161bced3126faea311f0aa241b",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "575980923e4542c6c52757ae899fce48250579286500bdb0efb455115d5ec409",
+    "include/ps5hip/launch.h": "818083797278e6f4e803a0736484d04e319efe444edc32ef0d1ef1e88db49cbb",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "src/code_object.cpp": "d22921e0509af43ba342a2894cd2c5776f27b95ccb904a1b30715b07c2d81c2a",
+    "src/launch.cpp": "5e951bbc147a07519e4f7e33f3802e235586b2813507a47c2c03c9045af88ef6",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "tests/agc_backend_test.cpp": "18fb417347fb889d7109684c37eee0257fae51a44aab8ac1bfd93e1ca8b8c352",
+    "tests/buffer_scratch_test.cpp": "627be881d4537fe69aed62a8851672226dc8d2c2cddba0305fd35005806eca32",
+    "tests/canary_log_test.py": "941f43158c9813e814719a15f2f78c885e7f4da1ae4197aba46172ed6ed83c9f",
+    "tests/compiler_version_test.py": "3929206ecb39132903f9bd91dc0ac9dab3a43308ca22dde08a2921167047d636",
+    "tests/controller_test.cpp": "a46c970cb5e8fc1b865837f6c81942d4b5a833610006902e0d2194bdfb9bf0d6",
+    "tests/elevation_protocol_test.cpp": "c061e569db17e25d64594bfd6ecd8065e6789923b46c05b2a70b43019b353471",
+    "tests/first_failure_close_test.c": "82d1a9821bdd4e82a80e504a7057c07a342ab591c1d2adde192acdeb6a728638",
+    "tests/hidden_geometry_test.cpp": "206544627992d6d76ddb2e364e6ddae51c21c93a326de930c39e9ad966e2ce3f",
+    "tests/launch_test.cpp": "eca2a646f24ffeab0f0aac3ed5baa6719d6bc2a45d191749c3902899868c520c",
+    "tests/native_agc_imports_test.py": "1ed2bd17dbd7b9ef3734c809d9171cd5ce3c070205984f25136b828c9873fd8d",
+    "tests/native_canary_test.cpp": "ef4788ce22e9395ce06aeffc4537c96d9595a704f48678a0ed2a7e64355c7bc6",
+    "tests/native_case_test.py": "e31218a853f4838e593c6087cedd5440d030285712dbb1127a3bcc71ea64fe40",
+    "tests/native_import_libraries_test.py": "f8e9a2e810091061fae96f7cd2f4f1d6d4177d3bd9807e58e337cdacb0dc8ff9",
+    "tests/native_memory_test.cpp": "23f6c5f5e92fd2eca59e2250fe44411ae93476e4e4297c986ac44c9658a02bde",
+    "tests/native_runtime_test.cpp": "21b39a24b75e8cbac42292f114fb319fce7d594f09fe8a862e2ad4b9ed791c7e",
+    "tests/native_shell_exit_test.cpp": "c18c1587b10d2193db64979fda5067015a07f27b6059f9189acf04b34928f619",
+    "tests/native_shutdown_test.cpp": "2170939923c0931b6c39b40c77849acba037a38a1f4a4002be4115db173ee38a",
+    "tests/object_test.cpp": "1e107c2dd436a07b3286a356b0ee6ebf6355b3be0cd12d2d466d987d2ae512b7",
+    "tests/resource_test.cpp": "980d64437bf7b4954fdf8c3f1309ea34db4b80d75a64b484265c19a75a0075b1",
+    "tests/submission_test.cpp": "4e2d573e866e5d16e23ec7d96261218c54b53ec1be7b9441edc0923a1ab1949c",
+    "tests/title_stage_test.py": "438260656b498406b51a745a6b74a447a6fee8a1c94d85c96bc9ad2ef4bc6061",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "tools/build_controllers.py": "68d562761f71872f6b7786299eee8d54f651342f767c20d3216b9130bafd4473",
+    "tools/build_native_canary.py": "67e898cd2b204db8bda4f350144dd705f9913e900fc6c174ede5abe226a58e26",
+    "tools/check_canary_log.py": "76073334506efe6d5567148afb6fb1a40e2ebb6f86115230118901560a41f751",
+    "tools/compare_device_compiler.py": "18c147e58b4ae16787c5abeefa41724c42dd902a6ba8ff782deb2d35f904e35a",
+    "tools/inspect.cpp": "e3cb44c8aa90714be714c07700ef38d1afc1ec83619ae33c13cfc931ddcc82ea",
+    "tools/native_canary.cpp": "7b2a6d748599ebfc57755d83cc4a14bdac7b1b7d4dfcb96b4dc4a16e7ef09ade",
+    "tools/native_memory_smoke.cpp": "1d142950fa17aa17eeacd5ae69830713b987dc6f119456addb3b9752c2780bf2",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "tools/native_shutdown_probe.cpp": "23d1ff8c19dc939f3d102d5669c0824399e10552a24b9479085c37821a317ee7",
+    "tools/package_native_title.py": "04cb740227c9825de481e4586ea79949790161a824e07fc552845efd3ba6aef5",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e",
+    "tools/prepare_host_zlib.py": "c0ba58ce9546018921580598cad4d3411e76c699fd7d7beba660722bf2211157",
+    "tools/prepare_sdk.py": "51f95b4db452b298e6721e9ffdaa79ee9c28dad80ce94aa8881e75e57a04b2e5",
+    "tools/prepare_ufs2tool.py": "1e1abf17d92c9f3673bdd90ef6605264424a311fa3b22800890b33c7baabbc24",
+    "tools/probe_therock_targets.py": "80f941077a4220861b434351bca2490c67b630e1c1de3f8378e8f6f404a8e5ae",
+    "tools/probe_wave_compiler.py": "737c610acdbbd6a4f67ab4fa0c24a0ec931ac878dea9fe9ed08e93120d3671a3",
+    "tools/ps5-clangxx": "6d2ffb092e76be69e687477c6177ff57385f9242df9d1d4a3df679c31bae9131",
+    "tools/reproduce_isolated_canaries.py": "76f4d4cb9c010b230351c5da4dc4589df5151d7486f05308d244055ffe7df85f",
+    "tools/stage_native_title.py": "55fa5172279ae864f23df418ad7daecb99e71bca4fd2269336df9f5c04b1dbfa",
+    "tools/verify_native_case.py": "170388d1bc00263ed4bec71c897521a7a3400577d9f99ca1cddab0d3bef1f848"
+  },
+  "fixture_hashes": {
+    "build/canaries/gfx1013/canary.hsaco": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "build/canaries/gfx1013/resources/resources.hsaco": "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+    "build/canaries/gfx1030/canary.hsaco": "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f",
+    "build/canaries/gfx1030/resources/resources.hsaco": "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706",
+    "results/register-spill-o1/gfx1013-resources.hsaco": "acb86787cd4dbe7e296250d60f20f4ddcd6da7f6a28e419ba1df3465f66510db",
+    "results/register-spill-o1/gfx1030-resources.hsaco": "42321d6b10318af7460dcb959b93a60db3a8ea161d0a8d245034645093f96616"
+  },
+  "object_hashes": {
+    "results/scratch-native-compile/gfx1013-code_object.o": "40354697b4b12bce0030f10f0117f139c89f83ae2b21bddffac7b9de4158ef81",
+    "results/scratch-native-compile/gfx1013-launch.o": "5388d949043f6dfa13f17c9cb081098c5ac601efb5cb43942a80d94529cd0801",
+    "results/scratch-native-compile/gfx1013-native_canary.o": "302cfc035a9b65bc1ef1f2a496816b4f752960c7dfaec9c15608f846e59a31bb",
+    "results/scratch-native-compile/gfx1030-code_object.o": "40354697b4b12bce0030f10f0117f139c89f83ae2b21bddffac7b9de4158ef81",
+    "results/scratch-native-compile/gfx1030-launch.o": "5388d949043f6dfa13f17c9cb081098c5ac601efb5cb43942a80d94529cd0801",
+    "results/scratch-native-compile/gfx1030-native_canary.o": "64d03b10866d1688b12b9503acce8862cfff550040e92cf755bd59ce9c943f0e"
+  },
+  "raw_hashes": {
+    "results/scratch-host/0.log": "7fdd19859909457643cb7827bc9b481150a75e5a8e5c5a843d5cd8d124069a71",
+    "results/scratch-host/1.log": "5e4553270d5181c5f8607e208310306bd896e212cbd596aad3330d5b7a4faffd",
+    "results/scratch-host/ctest.log": "c07d875db25299645ef54c8144b9fd83c2d74f5c5e146b015d1d43491afaee1c",
+    "results/scratch-host/ctest-final.log": "5246156b95fa71d98a5ce4a15cb2d0ff5401d27d4df26ec7c2d66497b5bcb30c",
+    "results/scratch-host/provenance.json": "d22dd1b593e0f9441cf9bf6fbe7a64b6750c1d0f1b845e6b4a7a1f3f470fb21c",
+    "results/scratch-native-compile/commands.json": "72dc6d2d33a503e42617b075eb0720bbc63a9925efec6124ac8db8f807657253",
+    "results/register-spill-python-integration/receipt.json": "3049e851b856850159643453cbbd529b1fefa88634229cd2d5e0d2fb657fd408",
+    "results/scratch-host/provenance-o1-extension.json": "4b9701dadbc476ed025cc38e409ac6ccb5940668bb447b9a874378613128792f",
+    "results/scratch-host/provenance-initial.json": "d22dd1b593e0f9441cf9bf6fbe7a64b6750c1d0f1b845e6b4a7a1f3f470fb21c",
+    "results/register-spill-o1/profile-extension-tests.json": "66c8c0a45368a66809ce7857bb77987dbb88ec914678b937ae61e8e6427ee391",
+    "results/register-spill-o1/gfx1013-O1-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/register-spill-o1/gfx1013-O1-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "results/register-spill-o1/gfx1013-O2-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/register-spill-o1/gfx1013-O2-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "results/register-spill-o1/gfx1030-O1-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/register-spill-o1/gfx1030-O1-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "results/register-spill-o1/gfx1030-O2-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/register-spill-o1/gfx1030-O2-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "results/register-spill-o1/model-final-test.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/register-spill-o1/model-final-test.stdout": "ec03e7ab162f61f380ecbf2dd6fdb7a1ff22c1c501eeab438044afae04e147d1",
+    "results/register-spill-o1/test-rebuild.stdout": "a5900c98ca295572343bce15da4c1ffbd0d823d986e295558a3bb245c4227364",
+    "results/register-spill-o1/test-rebuild.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tools": {
+    "clang++-18": {
+      "path": "/usr/lib/llvm-18/bin/clang",
+      "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4"
+    },
+    "llvm-config-18": {
+      "path": "/usr/lib/llvm-18/bin/llvm-config",
+      "sha256": "d990de2c4592ed899d4e3bb0d66ea7808080b5c88c5e1839da18d364975a24ea"
+    },
+    "cmake": {
+      "path": "/usr/bin/cmake",
+      "sha256": "6e1dccda39845415d68eabb934c598998949c99ec4668625d571aee1827b05c7"
+    },
+    "ninja": {
+      "path": "/usr/bin/ninja",
+      "sha256": "91e9548850cda2799facfdaa7abe33f9e978832f85e98212255708a7bbe437f2"
+    },
+    "python3": {
+      "path": "/usr/bin/python3.14",
+      "sha256": "52e0a13e60a981d8c4b6478be2ba5176f69da07948a056bf49cf6f077e30cb41"
+    }
+  },
+  "wrapper_hashes": {
+    "tools/ps5-clangxx": "6d2ffb092e76be69e687477c6177ff57385f9242df9d1d4a3df679c31bae9131",
+    ".deps/sdk/bin/prospero-clang++": "270370c5765306a5a6741c15fa84d617c40c42bf1d4000c4c6bca51b8296ab0f",
+    ".deps/sdk/bin/clang++": "a9bbe80b48adbaeed0511ab08af1362a33798cea03969865264bc90ad879d4af",
+    ".deps/sdk/bin/prospero-llvm-config": "f7ce74547fc5ee1d81f3bb688090851b4e53fd5a6ebc523728839bffbc345279"
+  },
+  "commands": [
+    [
+      "cmake",
+      "-S",
+      "<ROOT>",
+      "-B",
+      "<ROOT>/build/host-scratch",
+      "-G",
+      "Ninja",
+      "-DCMAKE_CXX_COMPILER=clang++-18",
+      "-DPS5HIP_SANITIZE=ON"
+    ],
+    [
+      "cmake",
+      "--build",
+      "<ROOT>/build/host-scratch",
+      "-j",
+      "4"
+    ],
+    [
+      "ctest",
+      "--test-dir",
+      "<ROOT>/build/host-scratch",
+      "--output-on-failure",
+      "-j",
+      "4"
+    ]
+  ],
+  "native_object_commands": [
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1013\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/tools/native_canary.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1013-native_canary.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "7b2a6d748599ebfc57755d83cc4a14bdac7b1b7d4dfcb96b4dc4a16e7ef09ade",
+      "output_sha256": "302cfc035a9b65bc1ef1f2a496816b4f752960c7dfaec9c15608f846e59a31bb",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1013\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/src/code_object.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1013-code_object.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "d22921e0509af43ba342a2894cd2c5776f27b95ccb904a1b30715b07c2d81c2a",
+      "output_sha256": "40354697b4b12bce0030f10f0117f139c89f83ae2b21bddffac7b9de4158ef81",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1013\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/src/launch.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1013-launch.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "5e951bbc147a07519e4f7e33f3802e235586b2813507a47c2c03c9045af88ef6",
+      "output_sha256": "5388d949043f6dfa13f17c9cb081098c5ac601efb5cb43942a80d94529cd0801",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1030\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/tools/native_canary.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1030-native_canary.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "7b2a6d748599ebfc57755d83cc4a14bdac7b1b7d4dfcb96b4dc4a16e7ef09ade",
+      "output_sha256": "64d03b10866d1688b12b9503acce8862cfff550040e92cf755bd59ce9c943f0e",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1030\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/src/code_object.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1030-code_object.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "d22921e0509af43ba342a2894cd2c5776f27b95ccb904a1b30715b07c2d81c2a",
+      "output_sha256": "40354697b4b12bce0030f10f0117f139c89f83ae2b21bddffac7b9de4158ef81",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<ROOT>/tools/ps5-clangxx",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-fvisibility=hidden",
+        "-I",
+        "<ROOT>/include",
+        "-DPS5HIP_CANARY_TARGET=\"gfx1030\"",
+        "-DPS5HIP_WITH_ELEVATION=1",
+        "-DPS5HIP_CANARY_REGISTER_SPILL=1",
+        "-I",
+        "<ROOT>/.deps/elevation/client",
+        "-c",
+        "<ROOT>/src/launch.cpp",
+        "-o",
+        "<ROOT>/results/scratch-native-compile/gfx1030-launch.o"
+      ],
+      "returncode": 0,
+      "source_sha256": "5e951bbc147a07519e4f7e33f3802e235586b2813507a47c2c03c9045af88ef6",
+      "output_sha256": "5388d949043f6dfa13f17c9cb081098c5ac601efb5cb43942a80d94529cd0801",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limits": [
+    "No PS5 GPU execution, AGC ring/SPI-offset qualification or scratch cache proof",
+    "No new native link/import-provider verification, SELF conversion or package",
+    "Host mocks do not emulate hardware scratch addressing",
+    "Unrestricted unittest discovery not qualified: absent unrelated native-runtime artifact; affected suite and CTests passed",
+    "Forced spill is one G3 slice; arrays/address-taken locals/nested calls/generic addresses remain required"
+  ],
+  "optimization_profiles": {
+    "O2_native_fixture": {
+      "private_bytes": 212,
+      "vgpr_spills": 52,
+      "wave_bytes": 7168,
+      "ring_bytes": 9175040,
+      "tmpring_size": "0x7500"
+    },
+    "O1_offline_only": {
+      "private_bytes": 712,
+      "vgpr_spills": 177,
+      "wave_bytes": 23552,
+      "ring_bytes": 30146560,
+      "tmpring_size": "0x17500",
+      "evidence": "evidence/offline-buffer-scratch-o1.json",
+      "evidence_sha256": "6675957b552d68ef98a7a8aac68fd295486cb0c529972cb4a7ecc5f15be32082"
+    }
+  },
+  "preserved_initial_receipt": {
+    "path": "results/scratch-host/offline-buffer-scratch-initial.json",
+    "sha256": "ba0e69f47a9afcfffca1e9321b120dfe27e67c9b43b523fef24b0796b796805e"
+  }
+}

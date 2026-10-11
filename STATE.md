@@ -4,6 +4,12 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
+- This isolated branch implements experimental buffer scratch and a guarded
+  `register_spill` native profile offline. Thirty sanitizer CTests passed; the
+  subsequent test-only O1 extension also passes both targets at O1/O2. Six PS5
+  host objects compile. See `evidence/offline-buffer-scratch.json` and
+  `evidence/offline-buffer-scratch-o1.json`. Native packaging and scratch hardware
+  qualification remain pending; G2 and G3 are not closed by these checks.
 - G1 passed offline; G2 remains in progress. G3-G12 are not complete. There is
   no general HIP runtime, framework port or hardware-qualified SDK yet.
 - Three native HIP-compiled dispatches have passed on .30, firmware 6.02:

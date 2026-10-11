@@ -15,11 +15,14 @@ def run(*args):
     subprocess.run([str(arg) for arg in args], check=True, cwd=ROOT)
 
 
-def verified_device_object(root, target, version, wave_directory=None):
+def verified_device_object(root, target, version, wave_directory=None, fixture="canary"):
+    if fixture not in ("canary", "resources") or (wave_directory is not None and fixture != "canary"):
+        raise ValueError("unsupported device fixture selection")
     directory = wave_directory if wave_directory is not None else root / "build/canaries"
-    report = json.loads((directory / ("comparison.json" if wave_directory is not None else "build.json")).read_text())
+    report_name = "build.json" if fixture == "canary" else "resources-build.json"
+    report = json.loads((directory / ("comparison.json" if wave_directory is not None else report_name)).read_text())
     inputs = [("recipe_sha256", root / "tools/build_canaries.py"),
-              ("source_sha256", root / "kernels/canary.hip")]
+              ("source_sha256", root / "kernels" / (fixture + ".hip"))]
     if wave_directory is not None:
         inputs = [("recipe_sha256", root / "tools/probe_wave_compiler.py"),
                   ("shared_recipe_sha256", root / "tools/build_canaries.py"),
@@ -34,7 +37,9 @@ def verified_device_object(root, target, version, wave_directory=None):
         raise ValueError("missing or duplicate device target")
     profile = profiles[0]
     profile_directory = directory / (target + "-O2" if wave_directory is not None else target)
-    data = (profile_directory / ("wave.hsaco" if wave_directory is not None else "canary.hsaco")).read_bytes()
+    if fixture == "resources":
+        profile_directory /= fixture
+    data = (profile_directory / ("wave.hsaco" if wave_directory is not None else fixture + ".hsaco")).read_bytes()
     trace = (profile_directory / "driver.txt").read_bytes()
     if (hashlib.sha256(data).hexdigest() != profile["code_sha256"] or
             len(data) != profile["bytes"] or
@@ -51,7 +56,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill"], required=True)
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
@@ -66,7 +71,8 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
-    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes)
+    fixture = "resources" if args.kernel == "register_spill" else "canary"
+    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes, fixture)
                                   if args.kernel != "runtime" else (None, None))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
@@ -129,6 +135,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
         if wave:
             options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
+        if args.kernel == "register_spill":
+            options.append("-DPS5HIP_CANARY_REGISTER_SPILL=1")
         if args.kernel == "runtime":
             options.append("-DPS5HIP_RUNTIME_ONLY=1")
         if args.shell_exit_probe:
@@ -207,7 +215,7 @@ def main():
                                  ([shell_patch] if args.shell_exit_probe else []) +
                                  [ROOT / "tools/build_canaries.py"] +
                                  ([ROOT / "tools/probe_wave_compiler.py"] if wave else []) +
-                                 ([ROOT / ("kernels/wave.hip" if wave else "kernels/canary.hip")] if args.kernel != "runtime" else []) +
+                                 ([ROOT / "kernels" / ("wave.hip" if wave else fixture + ".hip")] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},

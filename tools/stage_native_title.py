@@ -31,7 +31,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     receipt_bytes = (build / "receipt.json").read_bytes()
     receipt = json.loads(receipt_bytes)
     target, kernel = receipt["target"], receipt["kernel"]
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill"):
         raise ValueError("unsupported candidate profile")
     if kernel == "vector_add_twice" and (type(receipt.get("dispatches")) is not int or receipt["dispatches"] != 2):
         raise ValueError("vector_add_twice requires exactly two dispatches")
@@ -97,7 +97,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill"], required=True)
     parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())

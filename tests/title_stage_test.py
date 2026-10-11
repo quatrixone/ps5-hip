@@ -64,8 +64,8 @@ class StageTests(unittest.TestCase):
         self.run_stage()
         self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"fixture shader")
 
-    def test_wave_requires_verified_shader(self):
-        for kernel in ("wave_full", "wave_partial"):
+    def test_wave_and_spill_require_verified_shader(self):
+        for kernel in ("wave_full", "wave_partial", "register_spill"):
             self.receipt["kernel"] = kernel
             self.output = self.root / kernel
             self.receipt["artifacts"].pop("canary.hsaco", None)

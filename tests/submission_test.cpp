@@ -23,11 +23,13 @@ struct Model : ps5hip::SubmissionBackend {
     bool throw_kick = false, throw_clock = false, throw_sleep = false;
     unsigned flushes = 0, fail_flush_at = 0;
     volatile uint32_t *marker = nullptr;
+    ps5hip::NativeMemory *watched_scratch = nullptr;
     void flush(void *, size_t) override {
         if (++flushes == fail_flush_at || throw_flush) throw ps5hip::ObjectError("injected flush failure");
     }
     int32_t submit(uint32_t *words, uint32_t count) override {
         ++submits;
+        if (watched_scratch) check(!watched_scratch->close());
         if (throw_submit) throw ps5hip::ObjectError("injected driver exception");
         check(count >= 11);
         const auto *end = words + count - 8;
@@ -104,7 +106,10 @@ int main() {
         }
         {
             Model model; SubmissionQueue queue(model);
-            auto resource = std::make_shared<NativeMemory>(64, 64, false);
+            auto resource = std::make_shared<NativeMemory>(buffer_scratch_ring_bytes(212), 4096, false);
+            const auto scratch = plan_buffer_scratch(212, resource->range());
+            check(scratch.ring_bytes == 9175040);
+            model.watched_scratch = resource.get();
             for (unsigned round = 0; round < 2; ++round) {
                 *static_cast<uint32_t *>(resource->cpu()) = 0x12340000u + round;
                 const auto before = released;
@@ -122,7 +127,9 @@ int main() {
             auto first = std::make_shared<NativeMemory>(64, 64, false);
             check(queue.submit_and_wait(commands, {first}, 10).status == SubmissionStatus::Complete);
             check(first->close() && allocations.empty());
-            auto second = std::make_shared<NativeMemory>(64, 64, false);
+            auto second = std::make_shared<NativeMemory>(buffer_scratch_ring_bytes(212), 4096, false);
+            check(plan_buffer_scratch(212, second->range()).ring_bytes == 9175040);
+            model.watched_scratch = second.get();
             model.writes_after = 10000;
             if (failure == 0) model.submit_error = -10;
             if (failure == 1) model.kick_error = -20;
