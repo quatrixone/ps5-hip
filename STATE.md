@@ -80,8 +80,8 @@ actual device-link command before compiling. All four corrected objects match
 byte-for-byte in a freshly extracted Ubuntu userspace with networking disabled;
 22 host tests pass. See `evidence/offline-isolated-compiler.json` and
 `docs/OFFLINE_BRINGUP.md`. This shares the WSL kernel, not its compiler filesystem.
-The frozen indexed-store image below is superseded: do not deploy it. Rebuild
-and freeze with corrected device objects before considering any console test.
+The earlier `63b6e0402149` indexed-store image is superseded and explicitly
+revoked by local verification. The corrected candidate below replaces it.
 TheRock binary comparison and dependency license review remain outstanding.
 
 The opt-in CPU shell-managed lifecycle passed its single declared experiment on
@@ -102,17 +102,17 @@ Command/marker teardown is checked before reporting submission success, with
 injected unmap/release failure tests. Do not rerun the failed diagnostics.
 The failed .40 process must have recovery established before another run there.
 
-The finite-GPU indexed-store package is frozen at source `64d1de3`, stage
-`gfx1013-indexed_store-63b6e0402149`, image SHA
-`aaa74094c557be7234ed38f3c32da058bdf471601ac0acac2b257d164f9cd151`.
+The finite-GPU indexed-store package is frozen at source `5eb664d`, stage
+`gfx1013-indexed_store-1288205d1a2a`, image SHA
+`61e81d5e7103ff120f7b2b8f7bbcaeecc4eb72106ab639932e27bbe7ae0cf5f3`.
 Startup ordering and emitted AGC/ShellCoreUtil imports were independently inspected;
-the unchanged device object was disassembled and inspected. UFS2 filesystem,
+the corrected device object was disassembled and inspected. UFS2 filesystem,
 full extracted-file hashes and local candidate/controller verification pass.
-See `evidence/offline-finite-gpu-package.json`. No GPU run or push followed.
-Continue the remaining G1 offline compiler reproduction/comparison work before
-using the console. The existing WSL host has no Docker, Podman or debootstrap
-on PATH; choose an isolated build route rather than claiming a second directory
-is a clean host. Current artifact creation alone does not close G1.
+See `evidence/offline-corrected-gpu-package.json`. No GPU run or push followed.
+Native GPU builds now reject stale source/recipe/object/driver hashes and embed
+the verified device report. Continue the remaining G1 compiler comparison and
+license review before using the console. Isolated userspace reproduction passes;
+a separate physical host has not been tested. This alone does not close G1.
 The first hardware compute goal remains exact execution of a small HIP-compiled
 kernel through the native submission path. G3 additionally requires shared memory,
 atomics, wave operations and deliberate spilling; vector addition is insufficient.
