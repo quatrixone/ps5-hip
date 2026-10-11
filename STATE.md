@@ -4,6 +4,10 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
+- The provider-corrected image is deployed and byte-verified on .30, but its run
+  was blocked before launch when unrelated PPSA99008 PID 355 became active.
+  No controller was sent; both owned locks were released. The failed GPU image/log
+  remain preserved. See `evidence/native-provider-fixed-no-run.json`.
 - First GPU-candidate run on .30, FW 6.02, failed with CPU SIGSEGV at RIP zero
   after the pre-submit checkpoint. No GPU execution is proven. PPSA99014 PID 341
   stopped, sandbox/runtime/image were released, and declared services remained
@@ -116,7 +120,12 @@ The new stage is `.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_stor
 image SHA `679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442`.
 FSELF, UFS2, extracted files and local controller/candidate verification pass;
 26 CTests pass, including the actual native import provider regression. See
-`evidence/offline-agc-provider-fix.json`. It has not run. The current host-test
+`evidence/offline-agc-provider-fix.json`. It has not run: deployment succeeded,
+but the next preflight found PPSA99008 active. Use the existing deployment only
+after a fresh idle check, with `results/run-provider-fixed-store.py`; do not rerun
+its deployment script, which expects the superseded image and log. No unrelated
+title may be closed. See `evidence/native-provider-fixed-no-run.json`.
+The current host-test
 cache selects that worktree's converted ELF for the artifact import check.
 
 Do not rerun the failed candidate. It is revoked for new runs and preserved at source `15bfc35`, stage

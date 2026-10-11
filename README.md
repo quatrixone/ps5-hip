@@ -11,7 +11,7 @@ tests pass. One CPU startup/finalization/shell-close experiment passed on FW 6.0
 No GPU execution or general HIP runtime is qualified yet.**
 The first GPU candidate reached its pre-submit checkpoint, then faulted on the CPU
 at RIP zero. Offline diagnosis found and corrected a wrong AGC import provider;
-the isolated replacement is packaged but unrun. See
+the isolated replacement is deployed but unrun because the console became busy. See
 [the fault analysis](docs/FIRST_GPU_FAULT.md).
 The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
 requirement, selected LLVM 18 route, TheRock comparison and remaining limits.

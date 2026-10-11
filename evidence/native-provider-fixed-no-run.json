@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "goal": "G2",
+  "source_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+  "title": "PPSA99014",
+  "target": "gfx1013",
+  "kernel": "indexed_store",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+    "bytes": 3571712
+  },
+  "remote_deployment": "byte-verified and registration established while idle",
+  "launch_attempted": false,
+  "close_sent": false,
+  "hardware_gate_passed": false,
+  "reason": "Unrelated PPSA99008 PID355 started after deployment and before the separate run preflight; idle guard rejected the run before any controller transfer",
+  "locks": "Owned locks released by both phases",
+  "preserved_failed_artifacts": {
+    "image": "/data/homebrew/PPSA99014.ffpkg.fb634e34a1a6.preserved",
+    "log": "/data/ps5-hip/results/ps5-hip-gfx1013-indexed_store.log.0b232070e344.preserved",
+    "old_image_sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+    "old_image_bytes": 3571712,
+    "old_log_sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+    "old_log_bytes": 208
+  },
+  "raw_files": {
+    "results/provider-fixed-store-deploy-20261011T203059Z/before.log": {
+      "sha256": "7121ea302e8eb52e9313ee551f55aa9ded44f4c2670cfb6cf72df486f6a9c6bb",
+      "bytes": 304089
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/case.json": {
+      "sha256": "ca195c1a84ccdcf1465842461b4d39e2e182bc47a04fca5dfc650ed5905d08d4",
+      "bytes": 947
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/deployment.json": {
+      "sha256": "be01b3b26b359e1f45673a4801539f29b5d7a22a12c82f1344371e9550057380",
+      "bytes": 338
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/preservation.json": {
+      "sha256": "4fd5794226c83715900e053cd01dfd015144a880227de559a4b57e84b830ce7a",
+      "bytes": 393
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/preserved-application.log": {
+      "sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934",
+      "bytes": 208
+    },
+    "results/provider-fixed-store-deploy-20261011T203059Z/registration.log": {
+      "sha256": "f5a4f459de31a7c70168dd36981c8587f14105f7f89ee0d9e27a82743db4dfd1",
+      "bytes": 305451
+    },
+    "results/provider-fixed-store-run-20261011T203122Z/before.log": {
+      "sha256": "be974a34d8ccfe34d9871f0783bc45dbcc3d475be1fbf8711644b842f962ce3b",
+      "bytes": 306155
+    },
+    "results/provider-fixed-store-run-20261011T203122Z/case.json": {
+      "sha256": "ca195c1a84ccdcf1465842461b4d39e2e182bc47a04fca5dfc650ed5905d08d4",
+      "bytes": 947
+    }
+  },
+  "next_action": "Use the existing corrected deployment only when the console is idle; reverify before launch. Do not rerun deployment expecting the previous image, close the unrelated title, or erase preserved evidence."
+}

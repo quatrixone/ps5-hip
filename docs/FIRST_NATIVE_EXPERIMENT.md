@@ -118,8 +118,11 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
   Its nine application objects, LLVM PIE and device/helper/libc bytes match the
   failed candidate. The only semantic change is the `sceAgcSuspendPoint` import
   provider, corrected to `libSceAgc`. Offline package checks and 26 host tests pass;
-  it has not run. See `evidence/offline-agc-provider-fix.json`. Preserve the failed
-  image and indexed-store log before any separately bounded new case.
+  it has not run. See `evidence/offline-agc-provider-fix.json`. Deployment verified
+  and preserved the failed image/log, but PPSA99008 became active before launch;
+  the idle guard blocked execution. See `evidence/native-provider-fixed-no-run.json`.
+  Reuse the verified deployment only after a new idle preflight; do not redeploy
+  with stale previous-image assumptions or close the unrelated application.
 
 - Failed first GPU candidate: `PPSA99014/gfx1013-indexed_store-3d295773d2fb`,
   source `15bfc358f014b4231fcf9f84918b79b1b301008f`, shell-managed shutdown,
