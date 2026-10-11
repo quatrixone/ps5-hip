@@ -64,6 +64,24 @@ class StageTests(unittest.TestCase):
         self.run_stage()
         self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"fixture shader")
 
+    def test_arithmetic_suite_requires_exact_sequence_before_staging(self):
+        self.receipt.update(kernel="arithmetic_suite", dispatches=2, dispatch_kernels=["indexed_store", "vector_add"])
+        self.receipt["artifacts"]["canary.hsaco"] = module.digest(b"fixture shader")
+        (self.build / "candidate/canary.hsaco").write_bytes(b"fixture shader")
+        for field, bad in [("dispatches", value) for value in (None, True, 2.0, "2", 1, 3)] + [
+                ("dispatch_kernels", value) for value in (None, [], ["vector_add", "indexed_store"],
+                                                        ["vector_add", "vector_add"], ["indexed_store"])]:
+            original = self.receipt[field]
+            self.receipt[field] = bad
+            with self.assertRaises(ValueError):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+            self.receipt[field] = original
+        manifest = self.run_stage()
+        self.assertEqual(manifest["dispatches"], 2)
+        self.assertEqual(manifest["dispatch_kernels"], ["indexed_store", "vector_add"])
+        self.assertEqual(manifest["kernel"], "arithmetic_suite")
+
     def test_package_inventory(self):
         manifest = self.run_stage()
         app = self.output / "app"

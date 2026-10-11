@@ -41,7 +41,19 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         raise ValueError("manifest bytes changed")
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
-    shutdown_mode = read_json(stage / "build-receipt.json").get("shutdown_mode", "platform-exit")
+    build = read_json(stage / "build-receipt.json")
+    repeat = {}
+    if any(item.get("kernel") in ("vector_add_twice", "arithmetic_suite") for item in (manifest, build)):
+        if (manifest.get("kernel"), manifest.get("target")) != (build.get("kernel"), build.get("target")):
+            raise ValueError("repeated profile build/manifest mismatch")
+        if any(type(item.get("dispatches")) is not int or item["dispatches"] != 2 for item in (manifest, build)):
+            raise ValueError("repeated profile requires exactly two dispatches")
+        repeat["dispatches"] = 2
+        if manifest["kernel"] == "arithmetic_suite":
+            if any(item.get("dispatch_kernels") != ["indexed_store", "vector_add"] for item in (manifest, build)):
+                raise ValueError("arithmetic_suite requires ordered indexed_store then vector_add")
+            repeat["dispatch_kernels"] = ["indexed_store", "vector_add"]
+    shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
     actual = {}
@@ -64,7 +76,7 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
             raise ValueError(f"controller bytes changed: {name}")
     return {"local_artifacts_verified": True, "hardware_gate_passed": False,
             "title_id": title, "target": manifest["target"], "kernel": manifest["kernel"],
-            "shutdown_mode": shutdown_mode,
+            "shutdown_mode": shutdown_mode, **repeat,
             "source_commit": manifest["source_commit"], "expected_log": manifest["expected_log"],
             "image": image, "controllers": control["artifacts"],
             "unproven": ["console idle state", "remote bytes", "registration", "log freshness",

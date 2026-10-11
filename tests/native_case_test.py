@@ -77,6 +77,31 @@ class CaseTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "shutdown mode"):
                     self.verify()
 
+    def test_frozen_suite_requires_matching_exact_two_dispatch_sequence(self):
+        candidate = self.packages["candidates"][0]
+        original = dict(candidate["manifest"], kernel="arithmetic_suite", dispatches=2,
+                        dispatch_kernels=["indexed_store", "vector_add"])
+        build = {key: original[key] for key in ("kernel", "target", "dispatches", "dispatch_kernels")}
+        def freeze(manifest, receipt):
+            self.write(self.stage / "build-receipt.json", receipt)
+            manifest["build_receipt_sha256"] = module.fingerprint(self.stage / "build-receipt.json")["sha256"]
+            candidate["manifest"] = manifest
+            self.write(self.stage / "manifest.json", manifest)
+            candidate["package"]["manifest_sha256"] = module.fingerprint(self.stage / "manifest.json")["sha256"]
+            self.write(self.stage / "package-receipt.json", candidate["package"])
+        freeze(copy.deepcopy(original), build)
+        self.assertEqual(self.verify()["dispatch_kernels"], ["indexed_store", "vector_add"])
+        self.assertEqual(self.verify()["dispatches"], 2)
+        for location in ("manifest", "build"):
+            for key, bad in [("dispatches", v) for v in (None, True, 2.0, "2", 1, 3)] + [
+                    ("dispatch_kernels", v) for v in (None, [], ["vector_add", "indexed_store"], ["vector_add"])] + [
+                    ("kernel", "vector_add"), ("target", "gfx1030")]:
+                manifest, receipt = copy.deepcopy(original), copy.deepcopy(build)
+                (manifest if location == "manifest" else receipt)[key] = bad
+                freeze(manifest, receipt)
+                with self.subTest(location=location, key=key, bad=bad), self.assertRaises(ValueError):
+                    self.verify()
+
     def test_changed_artifacts_and_receipts_are_rejected(self):
         for path in (self.stage / "app/eboot.bin", self.stage / (self.title + ".ffpkg"),
                      self.stage / "build-receipt.json", self.controllers / "launch.elf",

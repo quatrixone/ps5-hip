@@ -38,13 +38,11 @@ void check_guards(const Memory &memory) {
         if ((i < guard_words || i >= guard_words + count) && words[i] != poison)
             throw ps5hip::ObjectError("canary guard modified");
 }
-#ifdef PS5HIP_CANARY_VECTOR_ADD
-uint32_t bits(float value) {
+[[maybe_unused]] uint32_t bits(float value) {
     uint32_t result;
     std::memcpy(&result, &value, sizeof(result));
     return result;
 }
-#endif
 [[noreturn]] void quarantine(const char *reason = nullptr) {
     if (reason) std::fprintf(stderr, "PS5HIP FAIL: submission exception: %s\n", reason);
     std::fprintf(stderr, "PS5HIP QUARANTINED: GPU ownership unresolved; no retry or local teardown\n");
@@ -52,31 +50,33 @@ uint32_t bits(float value) {
     for (;;) ::sleep(1);
 }
 
-void validate(const Memory &output
 #ifdef PS5HIP_CANARY_VECTOR_ADD
-              , const Memory &a, const Memory &b
+constexpr bool vector_profile = true;
+#else
+constexpr bool vector_profile = false;
 #endif
-) {
+template<bool VectorAdd = vector_profile>
+void validate(const Memory &output, const Memory &a = {}, const Memory &b = {}) {
     check_guards(output);
     for (uint32_t i = 0; i < count; ++i) {
-#ifdef PS5HIP_CANARY_VECTOR_ADD
-        const uint32_t expected = bits(float(i) * 0.25f + 2.0f);
-        if (data(a)[i] != bits(float(i) * 0.5f) || data(b)[i] != bits(-float(i) * 0.25f + 2.0f))
-            throw ps5hip::ObjectError("read-only input modified");
-#else
-        const uint32_t expected = i ^ 0x5a17c9e3u;
-#endif
+        uint32_t expected;
+        if constexpr (VectorAdd) {
+            expected = bits(float(i) * 0.25f + 2.0f);
+            if (data(a)[i] != bits(float(i) * 0.5f) || data(b)[i] != bits(-float(i) * 0.25f + 2.0f))
+                throw ps5hip::ObjectError("read-only input modified");
+        } else {
+            expected = i ^ 0x5a17c9e3u;
+        }
         if (data(output)[i] != expected) {
             std::fprintf(stderr, "PS5HIP mismatch index=%u expected=0x%08x actual=0x%08x\n",
                          i, expected, data(output)[i]);
             throw ps5hip::ObjectError("canary output mismatch");
         }
     }
-#ifdef PS5HIP_CANARY_VECTOR_ADD
-    check_guards(a); check_guards(b);
-#endif
+    if constexpr (VectorAdd) { check_guards(a); check_guards(b); }
 }
 
+template<bool VectorAdd = vector_profile>
 void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
          const std::vector<uint8_t> &image) {
     auto module = std::make_shared<ps5hip::NativeMemory>(image.size(), 65536, true);
@@ -86,18 +86,19 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     std::vector<Memory> resources{module, kernarg, output};
     std::vector<ps5hip::LaunchArgument> arguments;
     const char *kernel = "indexed_store";
-#ifdef PS5HIP_CANARY_VECTOR_ADD
-    kernel = "vector_add";
-    auto a = buffer(), b = buffer();
-    for (uint32_t i = 0; i < count; ++i) {
-        data(a)[i] = bits(float(i) * 0.5f);
-        data(b)[i] = bits(-float(i) * 0.25f + 2.0f);
+    Memory a, b;
+    if constexpr (VectorAdd) {
+        kernel = "vector_add";
+        a = buffer(); b = buffer();
+        for (uint32_t i = 0; i < count; ++i) {
+            data(a)[i] = bits(float(i) * 0.5f);
+            data(b)[i] = bits(-float(i) * 0.25f + 2.0f);
+        }
+        resources.push_back(a); resources.push_back(b);
+        arguments = {argument(a), argument(b), argument(output), {count}};
+    } else {
+        arguments = {argument(output), {count}};
     }
-    resources.push_back(a); resources.push_back(b);
-    arguments = {argument(a), argument(b), argument(output), {count}};
-#else
-    arguments = {argument(output), {count}};
-#endif
     const auto launch = ps5hip::prepare_initial_launch(object, kernel, module->range(),
                                                       kernarg->range(), 2, arguments);
     std::memcpy(kernarg->cpu(), launch.kernargs.data(), launch.kernargs.size());
@@ -110,14 +111,29 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
                      unsigned(result.status), unsigned(result.driver_error));
         quarantine();
     }
-#ifdef PS5HIP_CANARY_VECTOR_ADD
-    validate(output, a, b);
-#else
-    validate(output);
-#endif
+    validate<VectorAdd>(output, a, b);
     for (auto &memory : resources)
         if (!memory->close()) throw ps5hip::ObjectError("canary allocation teardown failed");
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
+}
+
+void run_experiment(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
+                    const std::vector<uint8_t> &image) {
+#ifdef PS5HIP_CANARY_ARITHMETIC_SUITE
+    std::printf("PS5HIP DISPATCH index=1/2 kernel=indexed_store\n");
+    run<false>(queue, object, image);
+    std::printf("PS5HIP DISPATCH index=2/2 kernel=vector_add\n");
+    run<true>(queue, object, image);
+    std::printf("PS5HIP PASS kernel=arithmetic_suite dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
+#elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
+    for (unsigned dispatch = 1; dispatch <= 2; ++dispatch) {
+        std::printf("PS5HIP DISPATCH index=%u/2 kernel=vector_add\n", dispatch);
+        run(queue, object, image);
+    }
+    std::printf("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
+#else
+    run(queue, object, image);
+#endif
 }
 #endif
 } // namespace
@@ -126,6 +142,8 @@ int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_ARITHMETIC_SUITE)
+        "arithmetic_suite";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
         "vector_add_twice";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)
@@ -172,15 +190,7 @@ int main() {
         ps5hip::AgcBackend backend;
         ps5hip::SubmissionQueue queue(backend);
         try {
-#ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
-            for (unsigned dispatch = 1; dispatch <= 2; ++dispatch) {
-                std::printf("PS5HIP DISPATCH index=%u/2 kernel=vector_add\n", dispatch);
-                run(queue, object, image);
-            }
-            std::printf("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
-#else
-            run(queue, object, image);
-#endif
+            run_experiment(queue, object, image);
         }
         catch (const std::exception &error) {
             if (queue.poisoned()) quarantine(error.what());

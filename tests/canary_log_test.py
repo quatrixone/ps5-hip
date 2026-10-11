@@ -61,6 +61,35 @@ class LogTests(unittest.TestCase):
                     self.assertNotEqual(module.check_log(bad, target, kernel, shell_exit_probe=True)
                                         ["application_result"], "application-pass")
 
+    def test_fixed_two_dispatch_order_and_summary(self):
+        suffix = ("PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                  "PS5HIP SHUTDOWN static-dtor=observed\nPS5HIP SHELL_EXIT application-fini=completed\n"
+                  "PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+        for target in ("gfx1013", "gfx1030"):
+            for profile, first in (("arithmetic_suite", "indexed_store"), ("vector_add_twice", "vector_add")):
+                start = f"PS5HIP START target={target} kernel={profile}\n" + self.runtime.decode().splitlines()[1] + "\n"
+                dispatches = [f"PS5HIP DISPATCH index={i}/2 kernel={kernel}\n"
+                              f"PS5HIP SUBMIT target={target} kernel={kernel} count=73 groups=2 timeout_ms=2000\n"
+                              f"PS5HIP PASS kernel={kernel} exact_values=73 guards=unchanged allocations=closed\n"
+                              for i, kernel in enumerate((first, "vector_add"), 1)]
+                summary = f"PS5HIP PASS kernel={profile} dispatches=2 exact_values=146 guards=unchanged allocations=closed\n"
+                good = start + "".join(dispatches) + summary
+                for shell in (False, True):
+                    complete = good + (suffix if shell else "")
+                    result = module.check_log(complete.encode(), target, profile, shell_exit_probe=shell)
+                    self.assertEqual(result["application_result"], "application-pass")
+                    self.assertFalse(result["hardware_gate_passed"])
+                    for bad in (complete.replace("exact_values=146", "exact_values=219"),
+                                complete.replace("index=2/2", "index=1/2"),
+                                complete.replace(dispatches[0], ""), complete.replace(dispatches[1], ""),
+                                complete.replace("guards=unchanged", "guards=modified"),
+                                complete.replace("allocations=closed", "allocations=retained"),
+                                complete.replace("".join(dispatches), "".join(reversed(dispatches))),
+                                complete + "PS5HIP FAIL: cleanup\n", complete + "PS5HIP QUARANTINED: ownership\n",
+                                complete.replace("request-return=0", "request-return=-1") if shell else complete[:-1]):
+                        self.assertNotEqual(module.check_log(bad.encode(), target, profile, shell_exit_probe=shell)
+                                            ["application_result"], "application-pass")
+
     def test_input_bounds(self):
         with self.assertRaises(ValueError):
             module.check_log(b"x" * 65537, "gfx1013", "runtime")
