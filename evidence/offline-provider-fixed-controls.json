@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "offline_only": true,
+  "operational_scripts_executed": false,
+  "network_calls": 0,
+  "source_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+  "new_image_sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+  "previous_image_sha256": "fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb",
+  "previous_log": {
+    "bytes": 208,
+    "sha256": "0b232070e344b52bdb18d3c4a7905a17e6eb22bea262d1fb6ba960d9c2637934"
+  },
+  "checks": [
+    "successful preservation of both failed artifacts; CPU artifacts unchanged",
+    "rejected before rename: wrong old image",
+    "rejected before rename: wrong old log",
+    "rejected before rename: oversized old log",
+    "rejected before rename: existing image backup",
+    "rejected before rename: existing log backup",
+    "rejected before rename: old image changed during upload",
+    "rejected before rename: old log changed during upload",
+    "rejected before rename: new image backup conflict",
+    "rejected before rename: new log backup conflict",
+    "rejected before rename: new installation conflict",
+    "run script differs only in stage, image hash and result prefix",
+    "all deployment/run function bodies and final cleanup byte-identical",
+    "deployment registration loop byte-identical",
+    "reused AST deadline, idle and timeout-to-cleanup checks passed"
+  ],
+  "files": {
+    "deploy-indexed-store.py": "87a39587ce9b0625b768923fd64547c067f098e4228a693f9ce1731653ba8465",
+    "run-indexed-store.py": "fef4e2dfba8dab9f5568746e0d2f1acf5997e7dc898d0a4cd61241083993429a",
+    "deploy-provider-fixed-store.py": "0e7b7582c9f203f82527ee18378f53d098d8db82ec312efe8915b58afefc1095",
+    "run-provider-fixed-store.py": "74345a2ab9b5b9e25f9b4b727d9e277eaa16617f014705b116a0efd06c4b804f",
+    "prepare-provider-fixed-store.py": "fd71d957f2d85f64c87dc5de8022aff3df24d6144aa9d1f33492e24e6e5d627d",
+    "check-provider-fixed-store-deadlines.py": "5ab48e81b0cd6edc711fb9c4b4b8ff0143263e07266d2994575d08f33eadf130",
+    "check-provider-fixed-store-preparation.py": "d1c2da81b2e57e9cc932870d990f0914b45e2339ebd290c233b80c2efe468722"
+  }
+}

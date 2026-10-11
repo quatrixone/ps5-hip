@@ -112,7 +112,16 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Offline freeze state and remaining work
 
-- Current next GPU candidate: `PPSA99014/gfx1013-indexed_store-3d295773d2fb`,
+- Corrected-provider candidate: source `b8bc2b0`, stage
+  `.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_store-fb47201d65dc`,
+  image SHA `679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442`.
+  Its nine application objects, LLVM PIE and device/helper/libc bytes match the
+  failed candidate. The only semantic change is the `sceAgcSuspendPoint` import
+  provider, corrected to `libSceAgc`. Offline package checks and 26 host tests pass;
+  it has not run. See `evidence/offline-agc-provider-fix.json`. Preserve the failed
+  image and indexed-store log before any separately bounded new case.
+
+- Failed first GPU candidate: `PPSA99014/gfx1013-indexed_store-3d295773d2fb`,
   source `15bfc358f014b4231fcf9f84918b79b1b301008f`, shell-managed shutdown,
   image SHA-256 `fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
   It adds exception-reason logging before quarantine without changing ownership

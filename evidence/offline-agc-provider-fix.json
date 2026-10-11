@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "classification": "isolated-provider-only-artifact-comparison-pass",
+  "old_source_commit": "15bfc358f014b4231fcf9f84918b79b1b301008f",
+  "new_source_commit": "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+  "all_nine_application_objects_byte_identical": true,
+  "whole_llvm_pie_byte_identical": true,
+  "input_path_string_changes": false,
+  "identical_artifacts": {
+    "agc_backend.o": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1",
+    "app_crt.o": "bb706662e362e1db2ce56a53a49cfb8db4b06b4f235dada55e8b43c78310bf7e",
+    "code_object.o": "794069d9ec0212bb6c56fea9727d2e6e422cbab0c2b5da4807c13b95eddfdd0d",
+    "elevation.o": "67176ed6db0cdfaa068414a983347c709e5c32f772d2447f3e64cbad86b15ad5",
+    "launch.o": "02f624a90e29bd8b3ed7812295a467bf0fa67b367e45ff1ebf10c06532436691",
+    "native_canary.o": "f344b94afe6ffb8bfb8c61fdf129582e6c29d4553d9d845486d7f6ea92f87432",
+    "native_memory.o": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c",
+    "native_shell_exit_probe.o": "9abd6736f59251d6dda0f98efa026ab631c83d65306b0a49317fd92b114726ed",
+    "submission.o": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6",
+    "llvm-pie.elf": "a0c26648e3748a13900444ab06933a10011112cc678835f588c5e2fac25e4bce",
+    "libc.raw.elf": "8ee6e124993e1af26420cb455890fd002f5d6c7e78883c860ce45734e7d002bb",
+    "ps5-native-tool": "9b84a3d3462756c545ba1da7067c2047e777d42829ecc31f273f2edfacc45408",
+    "libc-builder": "e7cc1516e2ccd380e1efc155bc12ce540873c47425d4edf74c4cadfbee4b30a5",
+    "symbols.map": "21bbb9087302c3bca288a1d94fe0cd2b188d05c68e7d8325e4daac83f098e2bb",
+    "candidate/canary.hsaco": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "candidate/lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+    "candidate/sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "native_import_inventory_count": 116,
+  "module_library_inventories_identical": true,
+  "sole_native_import_change": {
+    "h9z6+0hEydk": {
+      "old": [
+        "libSceAgcDriver",
+        "libSceAgcDriver"
+      ],
+      "new": [
+        "libSceAgc",
+        "libSceAgc"
+      ]
+    }
+  },
+  "native_elf_byte_differences": {
+    "count": 28,
+    "provider_identifier_bytes": [
+      "0xce1f3",
+      "0xce1f5"
+    ],
+    "provider_qualified_sysv_hash_bytes": [
+      "0xe2940",
+      "0xe29b0"
+    ],
+    "derived_sha1_note_ranges": [
+      [
+        "0xe2bd0",
+        16
+      ],
+      [
+        "0xe307c",
+        8
+      ]
+    ],
+    "note_hashes_independently_recomputed": true,
+    "all_other_native_elf_bytes_identical": true
+  },
+  "new_native_elf_sha256": "d60826dcbb696b017c89da6c3f4f4b82b6d1568e8d47893a9666e8ebb3e414df",
+  "new_eboot_sha256": "6a9d819cded0df27b7f0a2e05c71beaaf38b6e4c8c55e41ef176931a97898ade",
+  "signed_integrity": "valid",
+  "signed_extracted_LOAD_segments_equal_native_elf": true,
+  "staged_manifest_and_all_file_hashes_verified": true,
+  "new_stage": ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_store-fb47201d65dc",
+  "receipt_changes": [
+    "source_sha256/tools/build_native_canary.py",
+    "artifacts/eboot.bin"
+  ],
+  "other_changed_files": [
+    "libSceAgc.cpp",
+    "libSceAgc.o",
+    "libSceAgc.so",
+    "libSceAgcDriver.cpp",
+    "libSceAgcDriver.o",
+    "libSceAgcDriver.so",
+    "eboot.elf",
+    "candidate/eboot.bin",
+    "receipt.json"
+  ],
+  "file_comparison_sha256": "eba8299ef542b85b534a857d2416335c43e93aba5a7d1ce58759580bac8de1cf",
+  "commands": [
+    {
+      "command": [
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-indexed_store/ps5-native-tool",
+        "self",
+        "--inspect",
+        "--file",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-indexed_store/candidate/eboot.bin"
+      ],
+      "returncode": 0,
+      "log": "provider-fixed-fself.log",
+      "sha256": "c4faa6a5564cd47ba0bfad6c366468e4a7542e4e24cc6fca3176d6bb34b3f90e"
+    },
+    {
+      "command": [
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-indexed_store/ps5-native-tool",
+        "self",
+        "--extract",
+        "--file",
+        "<ROOT>/.local/g2-agc-provider-fix/build/native/gfx1013-indexed_store/candidate/eboot.bin",
+        "--out",
+        "<ROOT>/results/first-gpu-provider-fix/provider-fixed-extracted.elf"
+      ],
+      "returncode": 0,
+      "log": "provider-fixed-extract.log",
+      "sha256": "11a8eee73ce7bd8fcb60557bd94e5771c5a2f564d376dbce63aaeec5f2c642e1"
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "<ROOT>/.local/g2-agc-provider-fix",
+        "diff",
+        "15bfc358f014b4231fcf9f84918b79b1b301008f",
+        "b8bc2b0e51df7498105baa5c9d3e8a7494c1d971",
+        "--",
+        "tools/build_native_canary.py"
+      ],
+      "returncode": 0,
+      "log": "source-provider-diff.patch",
+      "sha256": "0f0f4e427b4c4ed159a719c174f2ffec08c1485a15ba0c3ae716b27b7bac8694"
+    }
+  ],
+  "limits": [
+    "Offline identity and binding validation only; no runtime resolution or GPU execution claim",
+    "No rebuild or console access performed by this comparison"
+  ],
+  "hardware_gate_passed": false,
+  "raw_comparison_receipt_sha256": "9924016adc09baa9a8a0a502bbd2ce734f09e4ff36bdf3ef7189dff401eb90f3",
+  "fault_mapping_receipt_sha256": "74b208c22ada983788bf82df893056fed8c0151619f85f14b2eab9b6559d7dda",
+  "failed_build_preservation_receipt_sha256": "8cd96593be57ff395256daeedb009d349c41caa2c3e26fe32f538a996bbf9447",
+  "stage": ".local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_store-fb47201d65dc",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442",
+    "bytes": 3571712
+  },
+  "filesystem_check": "passed",
+  "extracted_files_match": true,
+  "host_tests": {
+    "passed": 26,
+    "failed": 0,
+    "log_sha256": "0a0e5a3f4c84e43516d75bfbca2d69bc4f712de2ae84b2f68fd2d9b298ec09b7",
+    "test_sha256": "1ed2bd17dbd7b9ef3734c809d9171cd5ce3c070205984f25136b828c9873fd8d",
+    "cmake_sha256": "90c74d3487ebe218336d63ca9af15e489bb4726a48e7d7f01f2e0d201d65e007",
+    "regression": "Frozen failed ELF rejects only SuspendPoint provider; corrected actual ELF accepts all three independently expected providers"
+  },
+  "candidate_scope": "Frozen application source plus only import-provider correction; no later hidden-geometry or wave implementation changes",
+  "decision": "Ready for one separately prepared bounded corrected-provider experiment; no runtime resolution or GPU pass yet"
+}

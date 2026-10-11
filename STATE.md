@@ -101,8 +101,25 @@ was running at this checkpoint. Inspect that build before restarting anything.
 Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
 `evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
 
-The next action is offline diagnosis of the CPU null control flow in the first
-indexed-store run. Do not rerun the failed candidate. It remains frozen at source `15bfc35`, stage
+The next action is one separately prepared, bounded corrected-provider experiment.
+Offline analysis confirmed that `sceAgcSuspendPoint` was imported from the wrong
+provider (`libSceAgcDriver` instead of the pinned reference's `libSceAgc`). Its null
+tail-import fits the captured registers; runtime GOT contents were not captured.
+See `docs/FIRST_GPU_FAULT.md`.
+
+The correction is isolated at source `b8bc2b0`, parent `15bfc35`, in local worktree
+`.local/g2-agc-provider-fix` on `development/g2-agc-provider-fix`. All nine native
+application objects, the entire LLVM PIE, device code, helper and libc are identical
+to the failed build. Only one of 116 native import bindings changes. The converted
+ELF differs in 28 provider/hash/build-ID bytes, with no code or path-string changes.
+The new stage is `.local/g2-agc-provider-fix/dist/PPSA99014/gfx1013-indexed_store-fb47201d65dc`,
+image SHA `679fa7efaf0f4b7cc7889353d0ab2d565e72a8573055684cab256b46e6f0c442`.
+FSELF, UFS2, extracted files and local controller/candidate verification pass;
+26 CTests pass, including the actual native import provider regression. See
+`evidence/offline-agc-provider-fix.json`. It has not run. The current host-test
+cache selects that worktree's converted ELF for the artifact import check.
+
+Do not rerun the failed candidate. It is revoked for new runs and preserved at source `15bfc35`, stage
 `gfx1013-indexed_store-3d295773d2fb`, image SHA
 `fb634e34a1a6420fbd257e3929a3fbd37b5be8f6121db1eb6ee43362015febbb`.
 Corrected device bytes, native imports/startup, FSELF, UFS2 and extracted-file hashes
@@ -138,7 +155,7 @@ The failed .40 PID 204 teardown remains unresolved; establish recovery before re
 
 Offline work ahead of G2/G3/G4:
 
-- All 25 host CTests pass, including registered hidden-geometry regression coverage.
+- All 26 host CTests pass, including registered hidden-geometry and native import coverage.
   Eight real ROCm 6.2.4 header-derived vector/dimension ELFs pass launch preparation,
   twelve inspector checks pass, and PS5 native libraries cross-build. Explicit and
   thirteen hidden arguments are separated; checked uniform 64x1x1 geometry is
