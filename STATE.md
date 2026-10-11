@@ -136,7 +136,11 @@ a separate physical host has not been tested. This alone does not close G1.
 The first hardware compute goal remains exact execution of a small HIP-compiled
 kernel through the native submission path. G3 additionally requires shared memory,
 atomics, wave operations and deliberate spilling; vector addition is insufficient.
-Generic private-address lowering remains an unresolved G3 compiler issue.
+The tested generic volatile private-address path remains a G3 compiler issue.
+An isolated contrast without `volatile` retains 144 private bytes but uses buffer
+scratch on both targets, with 33 private-address IR accesses and no flat-scratch
+setup. See `evidence/offline-private-inference.json`. This does not qualify
+arbitrary pointers or native scratch execution and is not a volatile-semantics fix.
 
 G1 is still open. The pinned TheRock configuration accepts gfx1030, rejects gfx1013
 by default, and accepts gfx1013 through its custom-target hook. This is target

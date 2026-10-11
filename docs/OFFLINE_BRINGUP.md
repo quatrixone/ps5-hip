@@ -101,10 +101,21 @@ presence and absence of flat-scratch setup in the explicit-private and spill
 fixtures. It records per-kernel opcodes and displays compiler diagnostics.
 This text-based audit is a regression check, not a complete binary verifier.
 
-Ordinary generic-pointer private-memory support remains unresolved. The explicit
-address-space cast is a diagnostic probe, not a requirement we intend to impose
-on normal HIP source. Buffer-scratch allocation, descriptor setup, per-wave offsets
-and actual spill correctness also remain unimplemented/unverified.
+The generic volatile private-memory path remains unresolved. An isolated contrast
+experiment removed only `volatile` from the same array declaration: both targets
+then retained 144 private bytes and emitted buffer loads/stores without flat-scratch
+setup. Optimized IR contains 32 stores and one load in private address space 5;
+the volatile variant retains those accesses through generic pointers. Thus this
+ordinary fixed-size array does not require an explicit source address-space cast.
+LLVM 18's `InferAddressSpaces` pass only rewrites volatile accesses when target TTI
+permits the volatile variant; see the pinned source reference and reproducible
+source/arguments in `evidence/offline-private-inference.json`.
+
+Removing `volatile` is a contrast experiment, not a valid fix for a program that
+requires volatile semantics. Arbitrary generic private pointers are not qualified.
+The explicit address-space cast remains a diagnostic, not a public source
+requirement. Buffer-scratch allocation, descriptor setup, per-wave offsets and
+actual spill correctness also remain unimplemented/unverified.
 
 Native launch-state construction, cross-build and packaging now exist; see
 `STATE.md` for their separate CPU lifecycle results and limitations. Remaining

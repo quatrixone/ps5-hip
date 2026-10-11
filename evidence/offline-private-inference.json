@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "classification": "offline-private-address-inference",
+  "hardware_validated": false,
+  "compiler": "LLVM 18.1.8",
+  "baseline_resources_source_sha256": "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad",
+  "source": "using u32 = unsigned int;\nextern \"C\" __attribute__((global)) void private_array(const u32 *input, u32 *output) {\n    const u32 i = __builtin_amdgcn_workgroup_id_x() * 64u + __builtin_amdgcn_workitem_id_x();\n    volatile u32 values[32];\n    for (u32 j = 0; j < 32; ++j) values[j] = input[i] + j;\n    output[i] = values[input[i] & 31u];\n}\n\n",
+  "ordinary_transformation": {
+    "replace": "volatile u32 values",
+    "with": "u32 values"
+  },
+  "compile_arguments": [
+    "-x",
+    "hip",
+    "--cuda-device-only",
+    "--no-gpu-bundle-output",
+    "-B<LLVM18_BIN>",
+    "-nogpuinc",
+    "-nogpulib",
+    "--offload-arch=<TARGET>",
+    "-mcode-object-version=5",
+    "-mno-wavefrontsize64",
+    "-O2",
+    "-std=c++17",
+    "-fno-fast-math",
+    "-c",
+    "<SOURCE>",
+    "-o",
+    "<OUTPUT>"
+  ],
+  "ir_arguments": "same arguments, adding -emit-llvm -S and a separate output",
+  "tools": {
+    "clang++": {
+      "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4"
+    },
+    "lld": {
+      "sha256": "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19"
+    },
+    "llvm-readobj": {
+      "sha256": "3dad3c6cfdbf380edf0415299ce5c8e6a52381f296690f2362da63d2562a4f04"
+    },
+    "llvm-objdump": {
+      "sha256": "dae6cd5e22c931a4e24f0c892be3e621d0f7a856fbe00a2050e4d26d15c831a4"
+    }
+  },
+  "upstream_reference": {
+    "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Transforms/Scalar/InferAddressSpaces.cpp#L1004",
+    "sha256": "d4be3b95b5674022310ec3c2f9ef0bebfeac6819c62786877400846e6f693c40",
+    "observation": "Volatile accesses change address space only if target TTI permits the volatile variant."
+  },
+  "cases": [
+    {
+      "variant": "volatile",
+      "target": "gfx1013",
+      "source_sha256": "da26a477c54d66a7b818519583c19d3156b489dc2b049253642d04d32420df40",
+      "code_sha256": "12a6ec138f733f79d7f66526b2ac27f44a1a8b79dc8ab3bd32dce3bf2d9a7608",
+      "flat_scratch_setup": true,
+      "buffer_load": false,
+      "buffer_store": false,
+      "private_bytes": 144,
+      "vgpr_spills": 0,
+      "ir_private_accesses": 0,
+      "ir_generic_volatile_accesses": 33,
+      "ir_sha256": "59d4d1c8f5fa93f3ea73f3b8f9251c061225450df301e29ea948917a189a68f3",
+      "isa_sha256": "71a4e43b61b2a9931ef92c6680d1b4cab68c304ac7a94014027ac13dfbc57853",
+      "metadata_sha256": "6c7b04de395ee392d3365ccd8885b59abbdba8678a01fbd8a707473f523f1ab4"
+    },
+    {
+      "variant": "volatile",
+      "target": "gfx1030",
+      "source_sha256": "da26a477c54d66a7b818519583c19d3156b489dc2b049253642d04d32420df40",
+      "code_sha256": "76d7a9c12b9ced9a92c02ec291681a125cd09b2088642827b6a3c96c34c1f500",
+      "flat_scratch_setup": true,
+      "buffer_load": false,
+      "buffer_store": false,
+      "private_bytes": 144,
+      "vgpr_spills": 0,
+      "ir_private_accesses": 0,
+      "ir_generic_volatile_accesses": 33,
+      "ir_sha256": "2bd1614af1b7c84a0803a041462b461274e505d05b674a0c498847bd698b7558",
+      "isa_sha256": "a290c1b2ecc3b4e208a5ae8b33707526f7d57e5fa89478b0828fb208d7f81b93",
+      "metadata_sha256": "7c585a4c3819a2df46c4f6b5f522c04e9b5a7dec1c815e7583cededdf3e35532"
+    },
+    {
+      "variant": "ordinary",
+      "target": "gfx1013",
+      "source_sha256": "92dcaf6af4b705e17c4dfc99a5c9cb85bf229fe9bf729d99bc042f57193381d6",
+      "code_sha256": "fa7e550aa47ba361454714aefb9c92e8d7baffa238d82abc687cd4205be87ffb",
+      "flat_scratch_setup": false,
+      "buffer_load": true,
+      "buffer_store": true,
+      "private_bytes": 144,
+      "vgpr_spills": 0,
+      "ir_private_accesses": 33,
+      "ir_generic_volatile_accesses": 0,
+      "ir_sha256": "2d310d437868bd8a567d4a9410609a94b80de3a377fcf8e08bf9b07e8fd54305",
+      "isa_sha256": "87a9db9be6c26fcde66372bce5a742c848073c5f93984d70c352ec44fac268b2",
+      "metadata_sha256": "47785d4b44bd42131b182cc373057479f7b6d935a85432d7a0b3dec5f5cb02af"
+    },
+    {
+      "variant": "ordinary",
+      "target": "gfx1030",
+      "source_sha256": "92dcaf6af4b705e17c4dfc99a5c9cb85bf229fe9bf729d99bc042f57193381d6",
+      "code_sha256": "6e2cebfeb69798a5ba0e5236457eb76fa4afe71bc16212f2fdcb15d47572d2aa",
+      "flat_scratch_setup": false,
+      "buffer_load": true,
+      "buffer_store": true,
+      "private_bytes": 144,
+      "vgpr_spills": 0,
+      "ir_private_accesses": 33,
+      "ir_generic_volatile_accesses": 0,
+      "ir_sha256": "6e5a6b7283872cfa0495ec1a08366aba8c89fb7ad776d960315e8ebf51e3d4f3",
+      "isa_sha256": "d594a5d508d0464566f6b18305227ce9c5049d8a8714e15ef1da515732bdfd35",
+      "metadata_sha256": "c4cb4902433fa7452551422459787c99b330e786f87e8ee16bdf76a11a92828e"
+    }
+  ],
+  "limits": [
+    "Source transformation is a contrast experiment, not a semantics-preserving volatile fix.",
+    "Only this fixed-size array was tested; arbitrary generic private pointers are not qualified.",
+    "Native scratch allocation, descriptor setup and execution remain unimplemented/unverified."
+  ]
+}
