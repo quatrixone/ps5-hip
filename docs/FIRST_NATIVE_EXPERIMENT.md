@@ -1,7 +1,7 @@
 # First native experiment sequence
 
-Status: offline preparation only. No console run has occurred. Title identity,
-firmware, service endpoints, lock ownership and package hashes must be recorded
+Status: offline preparation only. No console run has occurred. The user selected
+title `PPSA99012`. Firmware, service endpoints, lock ownership and package hashes must be recorded
 in the local experiment receipt before execution. Use the shared-console runbook
 referenced by AGENTS.md; no old project's environment or lock waiver applies.
 
@@ -87,7 +87,7 @@ apply. A pass still does not qualify general HIP, LDS, atomics or scratch.
 
 ## Freeze checklist still to complete offline
 
-- Assign a separate development title and produce its metadata/package.
+- Stage `PPSA99012` and verify its metadata/package using the native build tools.
 - Commit source and record the selected build receipt, compiler/runtime inputs,
   executable, code object, title metadata and package SHA-256 values and sizes.
 - Prepare title-specific deployment verification, log retrieval and close control.

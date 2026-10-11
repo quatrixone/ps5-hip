@@ -15,6 +15,12 @@
     "sha256": "bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16",
     "license": "Zlib"
   },
+  "ufs2tool": {
+    "source_url": "https://github.com/SvenGDK/UFS2Tool",
+    "revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "dotnet_sdk": "10.0.112",
+    "license": "BSD-2-Clause"
+  },
   "native_tools": {
     "source_url": "https://github.com/mihawk-99/PS5_Vulkan",
     "revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",

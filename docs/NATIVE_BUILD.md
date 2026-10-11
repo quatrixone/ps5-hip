@@ -71,7 +71,44 @@ matching `canary.hsaco` for GPU cases, and a receipt with source/artifact hashes
 The runtime control needs no GPU code object. The converted
 ELF uses type `0xfe10`, FreeBSD OSABI 9/ABI 2 and 16 KiB load alignment. Native
 imports and container integrity are offline structural checks, not loader proof.
-No title ID, title metadata or deployment is generated yet.
+The separate staging tool assigns the user-selected `PPSA99012` identity and
+generates title metadata. No tool described here deploys anything.
+
+### Stage and package
+
+`title.json` records the selected development identity. Commit the compiled
+sources, identity and staging tool before running:
+
+```sh
+python3 tools/stage_native_title.py --target gfx1013 --kernel runtime
+python3 tools/prepare_ufs2tool.py --source /path/to/cached/UFS2Tool
+python3 tools/package_native_title.py --stage dist/PPSA99012/<candidate-directory>
+```
+
+Staging validates the build receipt against current source and candidate bytes,
+then writes a new `app/` folder, matching `sce_sys/param.json`, the build receipt
+and a manifest containing every file's size/hash. The candidate directory key
+includes build provenance, title identity and staging-tool bytes. Existing stages
+are refused. Each kernel/target is a separate candidate for the same title, never
+a request to install several titles or run a sequence automatically.
+
+The image tool is pinned to UFS2Tool commit
+`b5307a60d5b4e3a68ba680e0e33cfadf05017c77` (BSD-2-Clause), built with .NET SDK
+10.0.112. Preparation exports committed source and restores only from already
+cached NuGet packages, using an empty local feed and disabled NuGet network audit.
+It records and later verifies the resulting tool DLL/configuration hashes. .NET
+runtime roll-forward is enabled for this host-only tool.
+
+Packaging checks the complete staged inventory, builds a UFS2 `.ffpkg`, runs a
+read-only forced filesystem check, extracts the image, and compares every file's
+size and SHA-256 against the manifest. It publishes the image only after these
+checks and records a separate package receipt. Existing images are not overwritten.
+Temporary files are confined to a newly created directory inside that stage.
+
+These checks establish package contents, not ShadowMount registration or native
+execution. Shell artwork is not included in the minimal diagnostic title yet;
+title discovery/presentation still needs validation. A title-specific deployment,
+retrieval and close controller remains separate work before console use.
 
 The GPU harness reads `/app0/canary.hsaco`, checks its target, performs the runtime
 self-check before AGC initialization, and submits two 64-thread groups for 73
@@ -166,8 +203,9 @@ submit and kick errors, driver exceptions, pre-submit flush failure, frozen and
 backward clocks, late completion and refusal to replace a queue. AGC boundary
 models verify version 8 initialization, the 16-byte submit ABI with a zero flag,
 argument rejection, initialization failure and native error propagation. CPU cache
-instructions are cross-compiled but not exercised by these mock tests. Thirteen host
-CTest cases pass with the sanitizer build; none constitutes GPU evidence.
+instructions are cross-compiled but not exercised by these mock tests. Thirteen
+C++ CTest cases pass with sanitizers; a fourteenth Python case covers seven staging
+and package-inventory scenarios. None constitutes GPU evidence.
 
 ## Dependency provenance
 

@@ -23,12 +23,15 @@ Updated: 2026-10-11, America/New_York.
   hash-verified static zlib built offline from pinned source.
 - No HIP runtime or hardware-qualified SDK exists yet.
 - No console has been contacted or modified for this project.
+- The user selected `PPSA99012` as the dedicated test title. Hash-verified staging
+  and UFS2 packaging tools are implemented; fourteen host test cases pass.
 - No hardware throughput, compatibility or stability claim belongs to this repository yet.
 
 ## Next action
 
-Continue G1/G2 offline: establish dedicated-title packaging and freeze the
-first bounded experiment. Generic private-address
+Continue G1/G2 offline: validate the first UFS2 package, prepare title-specific
+deployment/log retrieval/close control and freeze the first bounded experiment.
+Generic private-address
 lowering remains a G3 compiler issue. See
 [offline bring-up](docs/OFFLINE_BRINGUP.md) for reproducible host checks and limits.
 The first implementation changes remain local on `development/offline-bringup`;
