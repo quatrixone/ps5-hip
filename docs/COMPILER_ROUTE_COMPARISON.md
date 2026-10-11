@@ -18,12 +18,12 @@ similar command-line options are not proof of equivalent generated code.
 
 | Question | Standalone route here | Pinned TheRock route |
 | --- | --- | --- |
-| Device compiler | Installed Clang/LLD 18.1.8, exact version checked | Pinned AMD Clang/LLD 24 build-tree tools; full component still building |
+| Device compiler | Installed Clang/LLD 18.1.8, exact version checked | Pinned AMD Clang/LLD 24; configured compiler component built, staged and assembled |
 | Target configuration | Both gfx1013/gfx1030 fixtures compile | gfx1030 declared; gfx1013 needs a custom declaration |
 | Component scope | Device-only HIP, without headers/device libraries | Compiler project plus bundled runtime/device-library components |
 | Artifact evidence | V5 objects, ISA inventories, metadata and host parser tests | Four V5 fixtures compared; new target spelling rejected by current loader |
 | Native PS5 host code | Separate pinned PS5 SDK and native converter | Still requires a distinct PS5 port/integration |
-| GPU qualification | Pending | Pending |
+| GPU qualification | Named gfx1013 store/vector fixtures passed; broader capabilities unqualified | Pending |
 
 The [compiler pre-hook](https://github.com/ROCm/TheRock/blob/4d1b9e560fa23ea2340fcf17b423bb281ab29aae/compiler/pre_hook_amd-llvm.cmake)
 configures AMDGPU, Native and SPIRV backends. Its non-Windows path enables a wider
@@ -68,9 +68,10 @@ descriptor and metadata sections match the first comparison exactly. Whole-objec
 equality is explicitly false; the additional fixed-ID diagnostic did not establish it.
 
 Keep LLVM 18 selected. Comparing the relevant built compiler tools satisfies the
-compiler-selection comparison; the entire `amd-llvm` target and staged installation
-remain separate, incomplete build work. G1 does not require every bundled compiler
-runtime or Flang component to finish. Any changed device code needs native qualification.
+compiler-selection comparison. The configured `amd-llvm` target and staged/component
+dist installation subsequently completed, including Flang; see
+`evidence/offline-therock-component-completion.json`. Full ROCm artifact packaging
+and upstream tests remain separate. Any changed device code needs native qualification.
 
 The selected route has
 fresh isolated-userspace reproduction of all four objects, with networking and

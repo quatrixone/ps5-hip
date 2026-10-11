@@ -1,0 +1,1136 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-11T21:05:40.417431+00:00",
+  "scope": "Configured amd-llvm component build, CMake stage install and component dist validation only",
+  "source": {
+    "therock": {
+      "revision": "4d1b9e560fa23ea2340fcf17b423bb281ab29aae",
+      "tracked_changes": ""
+    },
+    "llvm": {
+      "revision": "6da731510c233517c1eeb691d3446d80e9e32525",
+      "tracked_changes": ""
+    }
+  },
+  "prior_comparison_receipt_sha256": "29d603720af8f6b637045817ff0d924bcef54cc5462b3d3c881771bddee7d3dd",
+  "logs": {
+    "build.log": {
+      "sha256": "eeffb15e888fb234930786ede0cb4fdfd26fc7d625a2bc5e1e6a9b962aa29be4",
+      "bytes": 8303577,
+      "last_lines": "[amd-llvm] [8739/8739] Completed 'runtimes'\n[amd-llvm SUCCEEDED in 9676 seconds]\n[69/70] Stage installing sub-project amd-llvm"
+    },
+    "build/logs/amd-llvm_build.log": {
+      "sha256": "888d0968eced058da357f1bf558770faccee745d9c8a233eedcc1e15fc303068",
+      "bytes": 8069691,
+      "last_lines": "9675.7\t[8737/8739] No install step for 'runtimes'\n9675.8\t[8739/8739] Completed 'runtimes'\nEND\t1791752477.758611\t9675.82186961174\t0"
+    },
+    "build/logs/amd-llvm_install.log": {
+      "sha256": "a71ce2e4aeaed0f654def730ed593e4d6417e7e6e5ca0eedd1ee70f996a2429c",
+      "bytes": 1467791,
+      "last_lines": "15.5\t-- Created symlink: <therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/lib/libLLVMOffload.so -> x86_64-unknown-linux-gnu/libLLVMOffload.so\n15.5\t-- Created symlink: <therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/lib/libunwind.so -> x86_64-unknown-linux-gnu/libunwind.so\nEND\t1791752493.4291549\t15.500020503997803\t0"
+    },
+    "configure-command.json": {
+      "sha256": "60b691e43c326159e5dee6c4a869c10ed9cd9c45883dc7bc31649e29602093e9",
+      "bytes": 611,
+      "last_lines": "  \"-DFLANG_PARALLEL_COMPILE_JOBS=2\",\n  \"-DPython3_EXECUTABLE=<therock-workspace>/venv/bin/python\"\n]"
+    }
+  },
+  "stamps": {
+    "stage.stamp": {
+      "bytes": 0,
+      "modified_utc": "2026-10-11T21:01:33.857907+00:00"
+    },
+    "build.stamp": {
+      "bytes": 0,
+      "modified_utc": "2026-10-11T21:01:17.861910+00:00"
+    },
+    "configure.stamp": {
+      "bytes": 0,
+      "modified_utc": "2026-10-11T18:20:01.872398+00:00"
+    }
+  },
+  "target_definition": "build compiler/amd-llvm: phony compiler/amd-llvm+build compiler/amd-llvm+configure compiler/amd-llvm+stage",
+  "stage_command": "COMMAND = cd <therock-workspace>/build/compiler/amd-llvm/build && <therock-workspace>/venv/bin/python <therock-workspace>/therock/build_tools/teatime.py --log-timestamps --label amd-llvm\\ install --no-interactive <therock-workspace>/build/logs/amd-llvm_install.log -- /usr/bin/cmake --install <therock-workspace>/build/compiler/amd-llvm/build && <therock-workspace>/venv/bin/python <therock-workspace>/therock/build_tools/fileset_tool.py copy <therock-workspace>/build/compiler/amd-llvm/dist <therock-workspace>/build/compiler/amd-llvm/stage <therock-workspace>/build/third-party/sysdeps/linux/zlib/build/stage <therock-workspace>/build/third-party/sysdeps/linux/zstd/build/stage <therock-workspace>/build/third-party/sysdeps/linux/numactl/build/stage <therock-workspace>/build/third-party/sysdeps/linux/bzip2/build/stage <therock-workspace>/build/third-party/sysdeps/linux/liblzma/build/stage <therock-workspace>/build/third-party/sysdeps/linux/elfutils/build/stage <therock-workspace>/build/third-party/sysdeps/linux/libdrm/build/stage && /usr/bin/cmake -E touch <therock-workspace>/build/compiler/amd-llvm/stamp/stage.stamp",
+  "parent_session_observation": {
+    "session_id": 40611,
+    "exit_code": 0,
+    "provenance": "Parent reported its write_stdin tool returned exit_code0, walltime0 and no remaining stdout. No separate raw session transcript fabricated."
+  },
+  "tools": {
+    "build": {
+      "clang++": {
+        "filename": "clang-24",
+        "sha256": "7406168e22e03992a46a281c11c94aa7431e416399be2a8051db04afa9689836",
+        "bytes": 198096,
+        "text_section_sha256": "81905b04685c02ac56703d5873d3839de5e4225d5205b01b81593de86ed4dfac",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD clang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: <therock-workspace>/build/compiler/amd-llvm/build/bin\n",
+          "stderr": ""
+        },
+        "version_invocation": "clang++ --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [<therock-workspace>/build/compiler/amd-llvm/build/lib::]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "2b67c42a80d783ac7c55844324648b24ac0bb249ca7c9a3660986bdf354e7b28",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "lld": {
+        "filename": "lld",
+        "sha256": "f5756de0a52aae5b743e4f2acbe3c728ef0ee67b497e6f93b1d545157f939ddb",
+        "bytes": 8345568,
+        "text_section_sha256": "fa99f7db14f26fa22ba9348a60631bb7996ebb4a264eeb7c0b3f330b84816887",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLD 24.0.0 (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525) (compatible with GNU linkers)\n",
+          "stderr": ""
+        },
+        "version_invocation": "ld.lld --version (same resolved lld executable)",
+        "generic_driver_probe": {
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "lld is a generic driver.\nInvoke ld.lld (Unix), ld64.lld (macOS), lld-link (Windows), wasm-ld (WebAssembly) instead\n"
+        },
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [<therock-workspace>/build/third-party/sysdeps/linux/zlib/build/dist/lib/rocm_sysdeps/lib:<therock-workspace>/build/third-party/sysdeps/linux/zstd/build/dist/lib/rocm_sysdeps/lib:<therock-workspace>/build/compiler/amd-llvm/build/lib:]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-readobj": {
+        "filename": "llvm-readobj",
+        "sha256": "dcd53f7ca7e8305819cd368a5dab2289ed56c07421da28d2f943eb6d11b820be",
+        "bytes": 2472064,
+        "text_section_sha256": "3accff1d6f1b3f1a50583375dfe7be3acc6595f49d469e68f9004905e4579cdd",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLVM version 24.0.0git\n  Optimized build.\n",
+          "stderr": ""
+        },
+        "version_invocation": "llvm-readobj --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [<therock-workspace>/build/compiler/amd-llvm/build/lib::]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-objdump": {
+        "filename": "llvm-objdump",
+        "sha256": "03918493b00227d071b1c523b391a5c3df43f285e4827bebd5a20469e5e954c1",
+        "bytes": 1235104,
+        "text_section_sha256": "dbd0733d147103c5cc7a991e7e4e911ef88cb1a12a0e52ffba194b32aed037fd",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLVM version 24.0.0git\n  Optimized build.\n\n\n  Registered Targets:\n    amdgcn  - legacy name for amdgpu\n    amdgpu  - AMDGPU gfx6+\n    r600    - AMD GPUs HD2XXX-HD6XXX\n    spirv   - SPIR-V Logical\n    spirv32 - SPIR-V 32-bit\n    spirv64 - SPIR-V 64-bit\n    x86     - 32-bit X86: Pentium-Pro and above\n    x86-64  - 64-bit X86: EM64T and AMD64\n",
+          "stderr": ""
+        },
+        "version_invocation": "llvm-objdump --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [<therock-workspace>/build/compiler/amd-llvm/build/lib::]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "flang": {
+        "filename": "flang-24",
+        "sha256": "3e832b5238450ac9edbd71289e28815027a5b36cbd3c7a203b33484e7595cdad",
+        "bytes": 88520464,
+        "text_section_sha256": "981272070128999af741719a173dfa42ce926ffa113a385f2ce8a54ac2618544",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD flang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: <therock-workspace>/build/compiler/amd-llvm/build/bin\n",
+          "stderr": ""
+        },
+        "version_invocation": "flang --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [<therock-workspace>/build/compiler/amd-llvm/build/./lib:<therock-workspace>/build/compiler/amd-llvm/build/lib:]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "8bb10ad35d6faea29f0e235ae1a6e025144d7ba2e967f21b4d4257f9dc13230a",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libMLIR.so.24.0git",
+            "sha256": "86834fbf10e9f7463732f8737f3681e130350d88b5375b998b29c37686952777",
+            "bytes": 175454088,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "2b67c42a80d783ac7c55844324648b24ac0bb249ca7c9a3660986bdf354e7b28",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libquadmath.so.0.0.0",
+            "sha256": "d84683d5b7f14caad12058c852597beae23ef578d8a7853280524ed69d758d11",
+            "bytes": 297840,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      }
+    },
+    "stage": {
+      "clang++": {
+        "filename": "clang-24",
+        "sha256": "92025a2357d2339401ea7290199ba58b58cc1652a434edae889b8f93603ece75",
+        "bytes": 198096,
+        "text_section_sha256": "81905b04685c02ac56703d5873d3839de5e4225d5205b01b81593de86ed4dfac",
+        "version": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/clang++: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "version_invocation": "clang++ --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1"
+        ],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "lld": {
+        "filename": "lld",
+        "sha256": "2ee95f9f5357a6dde399555515d8f1dec632d7ccdfcbcaffe641595b1de3a356",
+        "bytes": 8345568,
+        "text_section_sha256": "fa99f7db14f26fa22ba9348a60631bb7996ebb4a264eeb7c0b3f330b84816887",
+        "version": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/ld.lld: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "version_invocation": "ld.lld --version (same resolved lld executable)",
+        "generic_driver_probe": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/lld: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1",
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1"
+        ],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-readobj": {
+        "filename": "llvm-readobj",
+        "sha256": "c7d6a9b8571582a1f67cb7532d232c0589a00b0e2e9864d1b784508508b8e4a4",
+        "bytes": 2472064,
+        "text_section_sha256": "3accff1d6f1b3f1a50583375dfe7be3acc6595f49d469e68f9004905e4579cdd",
+        "version": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/llvm-readobj: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "version_invocation": "llvm-readobj --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1"
+        ],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-objdump": {
+        "filename": "llvm-objdump",
+        "sha256": "c100a642f91d4a2cf6ba86fcf18b07be5e7c7e979243e0ee84e83e42354c2fd8",
+        "bytes": 1235104,
+        "text_section_sha256": "dbd0733d147103c5cc7a991e7e4e911ef88cb1a12a0e52ffba194b32aed037fd",
+        "version": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/llvm-objdump: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "version_invocation": "llvm-objdump --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1"
+        ],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "flang": {
+        "filename": "flang-24",
+        "sha256": "f9bc399892b5455ab9ac7fa6ffa0d3a90bec09660a3d9f8441bc29cda9bfbce1",
+        "bytes": 88520464,
+        "text_section_sha256": "981272070128999af741719a173dfa42ce926ffa113a385f2ce8a54ac2618544",
+        "version": {
+          "exit_code": 127,
+          "stdout": "",
+          "stderr": "<therock-workspace>/build/compiler/amd-llvm/stage/lib/llvm/bin/flang: error while loading shared libraries: librocm_sysdeps_z.so.1: cannot open shared object file: No such file or directory\n"
+        },
+        "version_invocation": "flang --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [
+          "librocm_sysdeps_z.so.1",
+          "librocm_sysdeps_zstd.so.1"
+        ],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libMLIR.so.24.0git",
+            "sha256": "8154e36684f041b0ed3a29a212b5c3a8c513de5dcd78329396acb8711060fbe0",
+            "bytes": 175454088,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libquadmath.so.0.0.0",
+            "sha256": "d84683d5b7f14caad12058c852597beae23ef578d8a7853280524ed69d758d11",
+            "bytes": 297840,
+            "origin": "host system"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      }
+    },
+    "component_dist": {
+      "clang++": {
+        "filename": "clang-24",
+        "sha256": "92025a2357d2339401ea7290199ba58b58cc1652a434edae889b8f93603ece75",
+        "bytes": 198096,
+        "text_section_sha256": "81905b04685c02ac56703d5873d3839de5e4225d5205b01b81593de86ed4dfac",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD clang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: <therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/bin\n",
+          "stderr": ""
+        },
+        "version_invocation": "clang++ --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "lld": {
+        "filename": "lld",
+        "sha256": "2ee95f9f5357a6dde399555515d8f1dec632d7ccdfcbcaffe641595b1de3a356",
+        "bytes": 8345568,
+        "text_section_sha256": "fa99f7db14f26fa22ba9348a60631bb7996ebb4a264eeb7c0b3f330b84816887",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLD 24.0.0 (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525) (compatible with GNU linkers)\n",
+          "stderr": ""
+        },
+        "version_invocation": "ld.lld --version (same resolved lld executable)",
+        "generic_driver_probe": {
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "lld is a generic driver.\nInvoke ld.lld (Unix), ld64.lld (macOS), lld-link (Windows), wasm-ld (WebAssembly) instead\n"
+        },
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-readobj": {
+        "filename": "llvm-readobj",
+        "sha256": "c7d6a9b8571582a1f67cb7532d232c0589a00b0e2e9864d1b784508508b8e4a4",
+        "bytes": 2472064,
+        "text_section_sha256": "3accff1d6f1b3f1a50583375dfe7be3acc6595f49d469e68f9004905e4579cdd",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLVM version 24.0.0git\n  Optimized build.\n",
+          "stderr": ""
+        },
+        "version_invocation": "llvm-readobj --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "llvm-objdump": {
+        "filename": "llvm-objdump",
+        "sha256": "c100a642f91d4a2cf6ba86fcf18b07be5e7c7e979243e0ee84e83e42354c2fd8",
+        "bytes": 1235104,
+        "text_section_sha256": "dbd0733d147103c5cc7a991e7e4e911ef88cb1a12a0e52ffba194b32aed037fd",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD LLVM version 24.0.0git\n  Optimized build.\n\n\n  Registered Targets:\n    amdgcn  - legacy name for amdgpu\n    amdgpu  - AMDGPU gfx6+\n    r600    - AMD GPUs HD2XXX-HD6XXX\n    spirv   - SPIR-V Logical\n    spirv32 - SPIR-V 32-bit\n    spirv64 - SPIR-V 64-bit\n    x86     - 32-bit X86: Pentium-Pro and above\n    x86-64  - 64-bit X86: EM64T and AMD64\n",
+          "stderr": ""
+        },
+        "version_invocation": "llvm-objdump --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      },
+      "flang": {
+        "filename": "flang-24",
+        "sha256": "f9bc399892b5455ab9ac7fa6ffa0d3a90bec09660a3d9f8441bc29cda9bfbce1",
+        "bytes": 88520464,
+        "text_section_sha256": "981272070128999af741719a173dfa42ce926ffa113a385f2ce8a54ac2618544",
+        "version": {
+          "exit_code": 0,
+          "stdout": "AMD flang version 24.0.0git (https://github.com/ROCm/llvm-project.git 6da731510c233517c1eeb691d3446d80e9e32525)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: <therock-workspace>/build/compiler/amd-llvm/dist/lib/llvm/bin\n",
+          "stderr": ""
+        },
+        "version_invocation": "flang --version",
+        "rpath_runpath": [
+          "0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib:$ORIGIN/../../../lib:$ORIGIN/../../rocm_sysdeps/lib]"
+        ],
+        "missing_libraries": [],
+        "resolved_shared_libraries": [
+          {
+            "name": "ld-linux-x86-64.so.2",
+            "sha256": "bda779ea9e9ad234f60315477d7cfd0bdde861cd8ddd9df8cdaf62f18c4cec14",
+            "bytes": 254864,
+            "origin": "host system"
+          },
+          {
+            "name": "libLLVM.so.24.0git",
+            "sha256": "df52759f1c744890138cef5016754618bd25c1a8dfdfada6ba08e3a5df944781",
+            "bytes": 137405208,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libMLIR.so.24.0git",
+            "sha256": "8154e36684f041b0ed3a29a212b5c3a8c513de5dcd78329396acb8711060fbe0",
+            "bytes": 175454088,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libc.so.6",
+            "sha256": "85e64f97e348786a8fb4d9f3d52fec289e2fb86bba20f0731dfe61990525e0f7",
+            "bytes": 2190608,
+            "origin": "host system"
+          },
+          {
+            "name": "libclang-cpp.so.24.0git",
+            "sha256": "54c94fb51f4396559f9cdab8f1792e9dc882a1e45af938e4c9018826313db1c3",
+            "bytes": 88753640,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libgcc_s.so.1",
+            "sha256": "9d339ecb409578d6a5d587e6c537a8f9589b8a13fefba30d167433a4b5758bee",
+            "bytes": 187120,
+            "origin": "host system"
+          },
+          {
+            "name": "libm.so.6",
+            "sha256": "1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8",
+            "bytes": 1198376,
+            "origin": "host system"
+          },
+          {
+            "name": "libquadmath.so.0.0.0",
+            "sha256": "d84683d5b7f14caad12058c852597beae23ef578d8a7853280524ed69d758d11",
+            "bytes": 297840,
+            "origin": "host system"
+          },
+          {
+            "name": "librocm_sysdeps_z.so.1.3.2",
+            "sha256": "1beaafb32fad6a1847a0ba30d79fbab066d5e3044f8093456d4e499930c4ed12",
+            "bytes": 133744,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "librocm_sysdeps_zstd.so.1.5.7",
+            "sha256": "60b3fd83e3bdc75020fa20636b15d1b630c463f368963d4364ffad526e8f3986",
+            "bytes": 887384,
+            "origin": "TheRock workspace"
+          },
+          {
+            "name": "libstdc++.so.6.0.35",
+            "sha256": "5bb0d21308f123b6ad46c6f35b42cedfcb8d6d439a53aa3dae04d880aaffdde3",
+            "bytes": 2735712,
+            "origin": "host system"
+          }
+        ]
+      }
+    }
+  },
+  "build_tree_vs_previous_comparison": {
+    "clang++": {
+      "executable_matches": true,
+      "resolved_libraries_match": true
+    },
+    "lld": {
+      "executable_matches": true,
+      "resolved_libraries_match": true
+    },
+    "llvm-readobj": {
+      "executable_matches": true,
+      "resolved_libraries_match": true
+    },
+    "llvm-objdump": {
+      "executable_matches": true,
+      "resolved_libraries_match": true
+    }
+  },
+  "stage_vs_component_dist_executables_equal": true,
+  "build_vs_installed_text_sections_equal": true,
+  "completion": {
+    "amd_llvm_build": true,
+    "cmake_stage_install": true,
+    "component_dist_assembly": true,
+    "component_dist_tools_version_commands_succeed": true,
+    "bare_stage_is_standalone": false,
+    "top_level_rocm_dist_exists": false,
+    "compiler_artifact_manifests": []
+  },
+  "limits": [
+    "Bare stage omits dependency projects; its version commands cannot resolve rocm_sysdeps z/zstd. Component dist includes them and resolves normally.",
+    "Install changes ELF identities/RPATH; exact installed hashes recorded. Equal .text hashes do not assert whole-file equivalence.",
+    "No complete ROCm distribution, artifact packaging, tests, PS5 compatibility or use as selected baseline is implied.",
+    "No new compiler comparison or native run performed; Ubuntu LLVM18 remains selected."
+  ]
+}

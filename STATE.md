@@ -4,96 +4,44 @@ Updated: 2026-10-11, America/New_York.
 
 ## Actual status
 
-- The two-dispatch vector candidate `c37f0db` passed one complete cycle on .30,
-  FW 6.02: both 73-element results exact (146 total), inputs/guards unchanged,
-  allocations closed, title self-stop before cleanup and sandbox/runtime/image
-  released. All declared services remained reachable. See
-  `evidence/native-vector-twice-cycle1.json`. The separately prepared second
-  cycle was blocked before launch/log preservation by unrelated PPSA99930 PID394;
-  both locks released. See `evidence/native-vector-twice-cycle2-no-run.json`.
-  The successful vector image and original first-cycle log remain installed.
-- The provider-corrected indexed-store passed once on idle .30, FW 6.02: 73 exact
-  values, unchanged full guards, explicit allocation closure, complete application
-  finalization and title self-stop before host cleanup. Sandbox/runtime/image
-  released and all declared services stayed reachable. This proves one native
-  HIP-compiled GPU dispatch; full G2 remains open. See
-  `evidence/native-provider-fixed-store.json`. The earlier busy-console no-run
-  and failed image/log remain preserved.
-- The provider-fixed vector-add candidate is packaged and locally verified at
-  the same isolated source `b8bc2b0`. It has not been deployed or run and remains
-  conditional on fresh idle/identity checks. Corrected indexed-store has now
-  passed once, including exact output, guards and clean teardown; full G2 remains
-  open. See `evidence/offline-provider-fixed-vector.json`.
-- First GPU-candidate run on .30, FW 6.02, failed with CPU SIGSEGV at RIP zero
-  after the pre-submit checkpoint. No GPU execution is proven. PPSA99014 PID 341
-  stopped, sandbox/runtime/image were released, and declared services remained
-  reachable. No retry or process kill was sent. See `evidence/native-indexed-store-first.json`.
-- Current development identity: **PPSA99014**, selected by the user after a
-  pre-existing PPSA99012 installation was found on .30. Controllers and the
-  elevation helper are rebuilt for the new exact title.
-- First PPSA99014 run on .40 registered and created its native process, then failed
-  with PRX_SCE_MODULE_LOAD_ERROR before an application checkpoint. The kernel
-  reported a missing sce_module companion. All declared services stayed reachable;
-  exact-title close was sent, but normal exit/complete teardown is unproven.
-  No GPU work ran. See `evidence/first-native-cpu.json`.
-- The builder now reproduces the pinned, independently authored libc.prx loader
-  companion. Its raw and signed hashes match the native template's known hashes;
-  FSELF integrity passes. Staging rejects its absence. This corrected candidate
-  is packaged as `gfx1013-runtime-4a0334b256d6` at source `1b6f717`, with clean
-  filesystem/extraction and artifact checks. See `evidence/offline-loader-companion.json`.
-  On .30 (FW 6.02), this candidate passed constructors, heap, exception unwinding,
-  TLS and clock checks with zero GPU API calls, then exited abnormally with SIGSYS
-  in libkernel after logging exit_value=0. Title stop, sandbox removal and image
-  unmount were observed; services remained reachable. The CPU startup/exit gate
-  still fails. See `evidence/native-cpu-shutdown.json`.
-- On .40, PID 204 from the earlier loader failure remained present after one
-  identity-guarded SIGKILL. No repeated termination or relaunch was attempted;
-  complete teardown remains unproven. Do not use .40 for another experiment
-  without establishing recovery. See the first-run evidence's cleanup followup.
-- A PPSA99012 CPU image was uploaded and byte-verified on idle .40 (FW 12.70).
-  ShadowMount mounted UFS2 but rejected registration because icon0.png was absent.
-  No title was launched. The icon fix and staging regression test pass; the old
-  uploaded image remains preserved. Evidence: `results/cpu-deploy-20261011T170003Z/`.
+- G1 passed offline; G2 remains in progress. G3-G12 are not complete. There is
+  no general HIP runtime, framework port or hardware-qualified SDK yet.
+- Three native HIP-compiled dispatches have passed on .30, firmware 6.02:
+  one indexed-store at source `b8bc2b0`, then two vector additions in one title
+  cycle at `c37f0db`. Each checked 73 exact values, full guards and allocation
+  closure. Both titles finalized and self-stopped before host cleanup, released
+  sandbox/runtime/image layers, and left all declared services reachable.
+  See `evidence/native-provider-fixed-store.json` and
+  `evidence/native-vector-twice-cycle1.json`. These observations cover only the
+  declared gfx1013, wave32, explicit-argument 64x1x1-thread arithmetic fixtures;
+  no general ISA, coherence, throughput or stability claim follows.
+- The same vector image still needs a second independently observed title cycle.
+  Its prepared control was blocked before launch or log preservation by unrelated
+  PPSA99930 PID394. Both locks were released. See
+  `evidence/native-vector-twice-cycle2-no-run.json`. The successful vector image
+  and original first-cycle log remain installed; preserve them before replacement.
+- Identity is **PPSA99014**; PPSA99012 was occupied. Use the Eden client and the
+  bundled exact-title Lapy helper with configurable ordinary results storage.
+  The current staging choice is `/data/ps5-hip/results`, not a compiled path.
+- CPU constructors, heap, exceptions, TLS and clock checks pass under the finite
+  shell-managed lifecycle. Ordinary C exit still faults with SIGSYS; threaded or
+  framework teardown is unqualified. See `evidence/native-shell-exit.json` and
+  `evidence/native-cpu-shutdown.json`. Do not repeat the failed exit diagnostics.
+- **Do not use .40 until recovery is established.** Its original loader-failure
+  PID204 had unresolved teardown after one identity-guarded termination. No
+  retry, guessed kill, reboot or settings change is authorized by this evidence.
+  See `evidence/first-native-cpu.json`.
+- Main has 27 passing host CTests. The exact frozen vector source also passes
+  ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
+  see `evidence/offline-vector-repeat-host.json` and
+  `evidence/offline-candidate-host-c37f0db.json`. Host checks are not GPU evidence.
 
-- Repository initialization and implementation planning are complete.
-- G1 passed offline; G2 is in progress. G3-G12 remain planned; no GPU gate has passed.
-- LLVM 18.1.8 builds real AMDHSA V5 device-only HIP canaries for gfx1013 and
-  gfx1030. A host code-object inspector/materializer and sanitizer tests pass.
-- Initial launch preparation and compute packet fragments pass six host test
-  cases across the two targets; no fragment is submitted or GPU-qualified.
-- Pinned SDK preparation and LLVM 18 PS5 cross-build succeed. The native memory
-  library and CPU-only smoke executable link. Submission lifecycle and AGC adapter
-  cross-compile; fifteen C++ host sanitizer tests pass, including timeout quarantine,
-  driver failure injection, AGC ABI models, guarded canary oracles and log capture.
-- Initial cache/state commands and compute-drain/completion packets are encoded.
-  Indexed-store and vector-add native candidates for both targets link with real
-  AGC module imports and convert to integrity-checked FSELF containers.
-  Packaging/runtime/GPU behavior is unverified.
-- A CPU-only startup control checks constructors, heap, exception cleanup, TLS and
-  the clock. All candidates use exclusive persistent logs. Native conversion uses
-  hash-verified static zlib built offline from pinned source.
-- No HIP runtime or hardware-qualified SDK exists yet.
-- User-directed storage revision: Eden's elevation client plus an exact-title
-  Lapy owned-root helper; configurable ordinary results directory, no download0
-  dependency. CPU and indexed-store native builds pass. The revised CPU package
-  is frozen at source 955c989; filesystem and full extraction/hash checks pass.
-  See `evidence/offline-elevation.json`. Its configured directory is
-  `/data/ps5-hip/results`; this is a staging choice, not an executable constant.
-  Nineteen host cases pass, including the exported Eden/Lapy wire contract.
-- Preflight contacted both authorized consoles; PPSA99012 and PPSA99014 images
-  were deployed on .40. Only PPSA99014 was launched, once, and failed in loading.
-- The original `PPSA99012` staging identity is historical; use `PPSA99014`. Hash-verified staging
-  and UFS2 packaging tools pass: five packages have clean filesystem checks and
-  exact extracted-file hashes. Nineteen host test cases pass (sixteen C++, three Python).
-- Pinned title-aware launch/close controllers cross-compile. Host mocks and a
-  bounded application-log checker are implemented; neither sends console traffic.
-- The user authorized 192.168.4.30 or 192.168.4.40 only when idle. Preflight under
-  the protocol's workspace `lock.txt` found FTP, klog and elfldr reachable on both.
-  The later preflight established shell focus after PPSA99008 stopped on both;
-  .30 became busy again before title inspection. Locks were released after every
-  bounded phase. Reported firmware: .30 = 6.02, .40 = 12.70. Both the protocol
-  default lock and Eden's PS5-Claude lock are now coordinated.
-- No hardware throughput, compatibility or stability claim belongs to this repository yet.
+Historical failures and superseded packages remain preserved. The first GPU
+image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
+then passed. See `docs/FIRST_GPU_FAULT.md`. Its revoked image and the earlier
+unintended-LLD21 image must not be rerun. The package catalog retains their
+identities, original PPSA99012 candidates and all later PPSA99014 packages.
+No prior raw logs or artifacts were removed when this status was consolidated.
 
 ## Next action
 
@@ -114,12 +62,15 @@ New target-ID spelling is rejected by our loader; resource registers and instruc
 encodings also differ from LLVM 18. Keep LLVM 18 selected. See
 `docs/THEROCK_BINARY_COMPARISON.md` and `evidence/offline-therock-verified-comparison.json`.
 
-Full TheRock `amd-llvm` target completion and staged installation remain unverified.
-That broader build is separate from G1's comparison of relevant compiler tools.
-The existing build is under `/tmp/ps5hip-therock-comparison`; exec session `40611`
-was running at this checkpoint. Inspect that build before restarting anything.
-Detailed output: `build/logs/amd-llvm_build.log`; options/pins:
-`evidence/offline-therock-build-setup.json`. Do not overwrite its existing logs.
+The configured TheRock `amd-llvm` build, stage installation and component `dist`
+assembly have completed. Both component logs end in exit zero; original session
+`40611` also returned zero. The four compiler/inspection tools and resolved
+libraries match the prior comparison exactly. Installed executable code matches
+the build tree, with recorded RPATH changes. The composed component `dist` runs
+Clang/LLD/readobj/objdump/Flang; the bare stage needs its composed dependencies.
+See `evidence/offline-therock-component-completion.json`. Full ROCm distribution,
+artifact packaging and upstream tests remain separate work. The build and logs
+under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
 The next hardware action is the separately prepared second cycle of the frozen
 two-dispatch vector image, only when .30 is idle. Cycle one passed; cycle two's
@@ -132,7 +83,8 @@ remains open pending this repeated lifecycle check and final acceptance audit.
 Offline work can now prepare the existing full/partial wave32 probes with the
 corrected AGC import provider and explicit capability boundaries. Preserve their
 older build receipts; do not deploy their older, incorrectly bound binaries.
-The full TheRock build can also be inspected for completion without restarting it.
+Matching TheRock compiler/HIP-header compilation can now be tested offline using
+the completed component; keep the hardware-qualified LLVM18 route unchanged.
 Offline analysis confirmed that `sceAgcSuspendPoint` was imported from the wrong
 provider (`libSceAgcDriver` instead of the pinned reference's `libSceAgc`). Its null
 tail-import fits the captured registers; runtime GOT contents were not captured.

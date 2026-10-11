@@ -1,7 +1,7 @@
 # TheRock compiler comparison
 
-Status: **build-tree compiler binaries only; full component completion and staged
-installation remain pending.** The four frozen arithmetic/resource fixtures
+Status: **configured compiler component build, stage and component dist complete;
+no TheRock GPU qualification.** The four frozen arithmetic/resource fixtures
 compile with AMD Clang/LLD 24 from pinned LLVM revision `6da731510c233517c1eeb691d3446d80e9e32525`.
 All four fail the current native loader's metadata target-string check. Retain
 the selected LLVM 18.1.8 route; no compiler recipe, loader or frozen title changed.
@@ -14,6 +14,14 @@ compiler. Library hashes were observed during analysis, not captured at the
 original compile instant. Raw outputs and analysis scripts are in
 `results/therock-buildtree-comparison`. Tool output readability is not native
 loader acceptance or hardware compatibility.
+
+The later component completion receipt is
+`evidence/offline-therock-component-completion.json`. Build and install logs end
+in exit zero, and the original process completed successfully. Compiler/tool and
+resolved-library identities match this comparison. Stage/dist executable code
+matches the build tree, with recorded installation RPATH changes; the component
+dist includes the dependencies missing from a bare stage. This does not establish
+a complete ROCm distribution, artifact packaging or upstream test-suite pass.
 
 ## Target identity: new spelling, matching processor
 
@@ -111,9 +119,9 @@ hardware validation described in `VOLATILE_PRIVATE_LOWERING.md`.
 
 Keep LLVM 18 for initial execution. Future compatibility work includes explicit
 new target-ID validation, changed register settings/encodings, and independent
-G3 private-memory implementation. The full `amd-llvm` component build and staged
-installation remain unverified; this comparison qualifies neither that installation
-nor PS5 execution.
+G3 private-memory implementation. The configured `amd-llvm` build and installation
+are now separately verified by the component-completion receipt. Neither that
+installation nor this comparison qualifies PS5 execution.
 
 ## Identity-verified replay
 
