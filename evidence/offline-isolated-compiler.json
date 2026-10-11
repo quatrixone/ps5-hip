@@ -1,0 +1,38 @@
+{
+    "schema":  1,
+    "classification":  "isolated-userspace-reproduction-pass",
+    "hardware_validated":  false,
+    "network_disabled_during_build":  true,
+    "sources":  {
+                    "tools/build_canaries.py":  "992afabd0e0ab057872715e4f84922ee14ce06234b9439f9fb171acbcf32a43a",
+                    "dependencies.json":  "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+                    "kernels/canary.hip":  "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+                    "kernels/resources.hip":  "80af0ae901e75aa382c52370ae35e6fd4410702512ade382d77351550d82c2ad"
+                },
+    "objects":  {
+                    "gfx1013/canary.hsaco":  "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+                    "gfx1013/resources/resources.hsaco":  "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575",
+                    "gfx1030/canary.hsaco":  "f6be00c373c4523a89bb23dd30e556610915efec2a74086b18c3ee5ad590aa5f",
+                    "gfx1030/resources/resources.hsaco":  "01b90c8c43a24cf79d631fed5b659f15d2b0165cdb6f7cc2df14585fe8f12706"
+                },
+    "package_root_os_release":  "PRETTY_NAME=\"Ubuntu 26.04 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04 (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\n",
+    "limits":  [
+                   "Shared host kernel and CPU; not a second physical machine",
+                   "Root provenance must be recorded separately",
+                   "No native title or GPU execution qualification"
+               ],
+    "recipe_sha256":  "0aa0f1867ee957349e1ea4c02f60c02df0c1f027b355f672d28915e40f40ba10",
+    "bootstrap":  {
+                      "tool":  "mmdebstrap 1.5.7-3",
+                      "mode":  "chrootless/extract",
+                      "mirror":  "http://archive.ubuntu.com/ubuntu",
+                      "suite":  "resolute",
+                      "components":  "main,universe",
+                      "llvm_package_version":  "1:18.1.8-20ubuntu8",
+                      "package_authentication":  "Ubuntu archive keyring; default apt signature verification",
+                      "mmdebstrap_deb_sha256":  "d4acfd32c9761ef219383630eb665523617ccc3c87309140a23beffdcc6b5b82",
+                      "keyring_sha256":  "80a36b0a6de2f69f49d2df75ef473ccde121e9e190b9ea01d20a4f63778d5c31",
+                      "clang_sha256":  "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4",
+                      "lld_sha256":  "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19"
+                  }
+}

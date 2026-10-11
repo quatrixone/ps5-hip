@@ -73,6 +73,17 @@ Updated: 2026-10-11, America/New_York.
 
 ## Next action
 
+Isolated-userspace reproduction exposed and fixed a linker-selection bug:
+Clang 18's HIP driver ignored `-fuse-ld` and invoked host `lld` 21.1.8.
+The recipe now supplies the pinned program-search directory and verifies the
+actual device-link command before compiling. All four corrected objects match
+byte-for-byte in a freshly extracted Ubuntu userspace with networking disabled;
+22 host tests pass. See `evidence/offline-isolated-compiler.json` and
+`docs/OFFLINE_BRINGUP.md`. This shares the WSL kernel, not its compiler filesystem.
+The frozen indexed-store image below is superseded: do not deploy it. Rebuild
+and freeze with corrected device objects before considering any console test.
+TheRock binary comparison and dependency license review remain outstanding.
+
 The opt-in CPU shell-managed lifecycle passed its single declared experiment on
 .30, firmware 6.02, using PPSA99014. Source `3346166` and frozen image
 `gfx1013-runtime-9ac5d150b5db` (SHA `d9a9e95cfc3e10b0fd8b547e54da3d2898291700537a27ecd9da3d63a6cc9cb0`)

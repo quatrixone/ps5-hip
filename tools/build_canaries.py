@@ -10,6 +10,7 @@ import hashlib
 import json
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -50,6 +51,13 @@ def require_tool_versions(versions, expected):
             raise ValueError(f"{name} does not match pinned LLVM {expected}: {text.splitlines()[0] if text else 'no version'}")
 
 
+def require_device_linker(trace, expected):
+    commands = [shlex.split(line) for line in trace.splitlines() if line.lstrip().startswith('"')]
+    linkers = [command[0] for command in commands if 'elf64_amdgpu' in command and '--whole-archive' in command]
+    if len(linkers) != 1 or pathlib.Path(linkers[0]).resolve() != pathlib.Path(expected).resolve():
+        raise ValueError(f"HIP device linker differs from pinned executable: {linkers}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=pathlib.Path, default=ROOT / "build/canaries")
@@ -73,10 +81,13 @@ def main():
         directory.mkdir(parents=True, exist_ok=True)
         code = directory / (args.fixture + ".hsaco")
         compile_args = [commands["clang++-18"], "-x", "hip", "--cuda-device-only",
-                        "--no-gpu-bundle-output", "-fuse-ld=" + commands["ld.lld-18"],
+                        "--no-gpu-bundle-output", "-B" + str(pathlib.Path(commands["ld.lld-18"]).resolve().parent),
                         "-nogpuinc", "-nogpulib", "--offload-arch=" + target,
                         "-mcode-object-version=5", "-mno-wavefrontsize64", "-O2",
                         "-std=c++17", "-fno-fast-math", "-c", str(source), "-o", str(code)]
+        trace = subprocess.run(compile_args + ['-###'], text=True, capture_output=True, check=True).stderr
+        require_device_linker(trace, commands["ld.lld-18"])
+        (directory / "driver.txt").write_text(trace)
         run(compile_args)
         inspection = run([commands["llvm-readobj-18"],
             "--file-headers", "--program-headers", "--sections", "--symbols", "--relocations",

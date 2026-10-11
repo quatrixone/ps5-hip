@@ -113,3 +113,38 @@ review and the explicit toolchain-route comparison. Generic private-address
 lowering remains a G3 issue. G1 remains open; these updates do not certify native
 execution. Scratch, LDS, atomics, synchronization and spill behavior require dedicated
 G3 coverage; the arithmetic canaries cannot qualify them.
+
+## Isolated compiler reproduction and linker correction
+
+The first fresh-userspace run found that Clang 18's HIP device driver ignored
+`-fuse-ld` and selected `/usr/bin/lld` (21.1.8 on the development host). The earlier
+version check tested an executable the driver did not use. Earlier same-host
+receipts remain historical evidence, but do not establish an all-LLVM-18 build.
+The corrected recipe uses `-B` with the resolved pinned linker's directory and
+rejects a `-###` device-link command selecting any other executable. The driver
+trace is retained beside every generated object. Regression checks reject absent,
+wrong and duplicated device-link commands.
+
+A fresh Ubuntu package root reproduced all four corrected device objects exactly.
+The run shares the WSL kernel and CPU, but its compiler, libraries and Python came
+from authenticated Ubuntu packages. Only four selected project source files enter
+the build directory; bubblewrap hides the development filesystem and disables
+networking. No physical second-machine result is claimed.
+
+To prepare a disposable root (mmdebstrap may itself be extracted from its package):
+
+```sh
+mmdebstrap --mode=chrootless --variant=extract --components=main,universe \
+  --include=clang-18=1:18.1.8-20ubuntu8,lld-18=1:18.1.8-20ubuntu8,llvm-18=1:18.1.8-20ubuntu8,python3,coreutils,bash \
+  --keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg \
+  resolute /tmp/ps5hip-fresh-root http://archive.ubuntu.com/ubuntu
+mkdir /tmp/ps5hip-fresh-root/work
+python3 tools/reproduce_isolated_canaries.py \
+  --rootfs /tmp/ps5hip-fresh-root --output /tmp/ps5hip-fresh-build
+```
+
+The script rejects an existing output and checks all four complete object hashes;
+it does not normalize away linker differences. Evidence is in
+`evidence/offline-isolated-compiler.json`. Rebuild native candidates embedding old
+objects; preserve their frozen images as superseded history. TheRock's built
+compiler comparison remains outstanding.

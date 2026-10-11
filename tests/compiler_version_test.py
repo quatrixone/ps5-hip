@@ -8,6 +8,13 @@ spec.loader.exec_module(builder)
 
 
 class VersionTests(unittest.TestCase):
+    def test_actual_device_linker_must_match(self):
+        command = ' "/pinned/lld" "-flavor" "gnu" "-m" "elf64_amdgpu" "--whole-archive" "input.o"'
+        builder.require_device_linker(command, '/pinned/lld')
+        for trace in ('', command.replace('/pinned/lld', '/other/lld'), command + '\n' + command):
+            with self.assertRaises(ValueError):
+                builder.require_device_linker(trace, '/pinned/lld')
+
     def test_pinned_compiler_linker_and_inspectors(self):
         builder.require_tool_versions({"clang": "Ubuntu clang version 18.1.8 (20ubuntu8)",
                                        "lld": "Ubuntu LLD 18.1.8 (compatible with GNU linkers)",
