@@ -66,8 +66,10 @@ including static/dynamic/mixed output and guard oracles. Four LLVM 18 objects
 (O1/O2, gfx1013/gfx1030) and all three PS5 harness object compiles pass;
 independent review checked uniform barriers and separate mixed static/dynamic
 addresses. See `evidence/offline-lds-integrated.json` and the isolated branch's
-`docs/LDS_LAUNCH_PLAN.md`. Native linking/package verification is the next offline
-step. No LDS hardware execution or G3 qualification follows from these checks.
+`docs/LDS_LAUNCH_PLAN.md`. All three native packages now pass startup/import/FSELF/device-ISA/UFS
+checks and complete extraction comparison; all 730 prior artifacts remain unchanged.
+See `evidence/offline-lds-native-readiness.json`. They are cataloged as unrun
+candidates. No LDS hardware execution or G3 qualification follows from these checks.
 
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
