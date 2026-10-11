@@ -6,6 +6,7 @@ import json
 import pathlib
 import re
 import subprocess
+import struct
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -62,6 +63,11 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         "sdkVersion": "0x0000000000000000", "titleId": title_id, "versionFileUri": "",
     }
     files["sce_sys/param.json"] = (json.dumps(metadata, indent=2) + "\n").encode()
+    icon = (source_root / "assets/icon0.png").read_bytes()
+    if (len(icon) < 33 or icon[:16] != b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" or
+            struct.unpack_from(">II", icon, 16) != (512, 512)):
+        raise ValueError("title icon must be a 512x512 PNG")
+    files["sce_sys/icon0.png"] = icon
     files["results-dir.txt"] = results_directory.encode("ascii")
     manifest = {
         "schema": 1, "title_id": title_id, "target": target, "kernel": kernel,
@@ -95,13 +101,14 @@ def main():
         parser.error("build receipt profile mismatch")
     source_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     changes = subprocess.check_output(["git", "status", "--porcelain", "--", *receipt["source_sha256"],
-                                       "title.json", "tools/stage_native_title.py"], cwd=ROOT, text=True)
+                                       "title.json", "tools/stage_native_title.py", "assets/icon0.png"], cwd=ROOT, text=True)
     if changes:
         parser.error("commit compiled sources, title identity and staging tool before staging")
     # Every input that can change staged bytes contributes to the candidate key.
     validate_results_directory(args.results_dir)
     key = digest((build / "receipt.json").read_bytes() + json.dumps(identity, sort_keys=True).encode() +
-                 pathlib.Path(__file__).read_bytes() + args.results_dir.encode("ascii"))[:12]
+                 pathlib.Path(__file__).read_bytes() + args.results_dir.encode("ascii") +
+                 (ROOT / "assets/icon0.png").read_bytes())[:12]
     output = ROOT / "dist" / identity["title_id"] / f"{args.target}-{args.kernel}-{key}"
     if not output.resolve().is_relative_to(ROOT.resolve()):
         parser.error("staging output resolves outside this repository")

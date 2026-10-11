@@ -18,6 +18,8 @@ class StageTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = pathlib.Path(self.temp.name)
         self.build, self.output = self.root / "build", self.root / "out"
+        (self.root / "assets").mkdir()
+        (self.root / "assets/icon0.png").write_bytes((module.ROOT / "assets/icon0.png").read_bytes())
         (self.build / "candidate").mkdir(parents=True)
         (self.root / "source.cpp").write_bytes(b"fixture source")
         (self.build / "candidate/eboot.bin").write_bytes(b"fixture container")
@@ -41,6 +43,8 @@ class StageTests(unittest.TestCase):
         self.assertEqual(manifest["expected_log"], "/chosen/results/ps5-hip-gfx1013-runtime.log")
         self.assertEqual((self.output / "app/results-dir.txt").read_bytes(), b"/chosen/results")
         self.assertEqual(metadata["downloadDataSize"], 0)
+        self.assertEqual((self.output / "app/sce_sys/icon0.png").read_bytes(),
+                         (self.root / "assets/icon0.png").read_bytes())
         self.assertFalse((self.output / "app/canary.hsaco").exists())
         for name, entry in manifest["files"].items():
             data = (self.output / "app" / name).read_bytes()
@@ -84,6 +88,17 @@ class StageTests(unittest.TestCase):
     def test_invalid_identity(self):
         self.identity["title_id"] = "../PPSA99012"
         with self.assertRaisesRegex(ValueError, "identity"):
+            self.run_stage()
+        self.assertFalse(self.output.exists())
+
+    def test_missing_or_invalid_icon_prevents_staging(self):
+        icon = self.root / "assets/icon0.png"
+        icon.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.run_stage()
+        self.assertFalse(self.output.exists())
+        icon.write_bytes(b"not png")
+        with self.assertRaisesRegex(ValueError, "512x512 PNG"):
             self.run_stage()
         self.assertFalse(self.output.exists())
 
