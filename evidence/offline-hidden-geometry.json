@@ -1,0 +1,420 @@
+{
+  "schema_version": 1,
+  "scope": "Offline COv5 hidden geometry parsing/admission/packing for uniform 1D64x1x1 launches; no native title, HIP runtime or GPU execution",
+  "source_base_revision": "262605c6a5edb200ded14862754e351f4b6b8d90",
+  "source_state": "Uncommitted implementation identified by working-tree file hashes; frozen G1/native artifacts unchanged",
+  "implementation": {
+    "CMakeLists.txt": "04cd231fbdffecda1c2729a463460bd45f137afa23b5c0c7601542c589353340",
+    "include/ps5hip/code_object.h": "b45a86a7f2890f775afc2904b42c5e4781b24af6ce805ad730b093c423825c18",
+    "include/ps5hip/launch.h": "81644d74d7d3cef4632f9018c79292cffb55718a9d8b1fe5ba36edd855906916",
+    "src/code_object.cpp": "db0044253f5d19278c0df6ecc2991c0790d57fc04a245a12669591b2da6f2505",
+    "src/launch.cpp": "31d9d22ea5243a72a13d4e3662aba1549bb07745867448f793fd555885950b7f",
+    "tools/inspect.cpp": "e3cb44c8aa90714be714c07700ef38d1afc1ec83619ae33c13cfc931ddcc82ea",
+    "tests/object_test.cpp": "1e107c2dd436a07b3286a356b0ee6ebf6355b3be0cd12d2d466d987d2ae512b7",
+    "tests/resource_test.cpp": "980d64437bf7b4954fdf8c3f1309ea34db4b80d75a64b484265c19a75a0075b1",
+    "tests/hidden_geometry_test.cpp": "206544627992d6d76ddb2e364e6ddae51c21c93a326de930c39e9ad966e2ce3f"
+  },
+  "profile": {
+    "hidden_fields": 13,
+    "implicit_alignment": 8,
+    "implicit_bytes": 256,
+    "implicit_base": "align_up(max explicit argument end,8)",
+    "block_counts": [
+      "groups_x",
+      1,
+      1
+    ],
+    "group_sizes": [
+      64,
+      1,
+      1
+    ],
+    "remainders": [
+      0,
+      0,
+      0
+    ],
+    "global_offsets": [
+      0,
+      0,
+      0
+    ],
+    "grid_dims": 1,
+    "max_groups_x": 67108863,
+    "explicit_only_size": "max explicit argument end; supported4/8-byte argument types already satisfy LLVM final4-byte rounding",
+    "reserved_bytes": "All explicit padding and unassigned implicit bytes are zero"
+  },
+  "abi_source": {
+    "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/AMDGPUSubtarget.cpp",
+    "source": {
+      "path": "results/hidden-geometry-20261012/AMDGPUSubtarget-18.1.8.cpp",
+      "sha256": "6a57a6f81140ce082089ed905a00a88ad9bae400958c9661f52fe307fc69ab96"
+    },
+    "functions": [
+      "getExplicitKernArgSize",
+      "getImplicitArgNumBytes",
+      "getKernArgSegmentSize"
+    ],
+    "geometry_field_source": "13field metadata and linked workitem.cl recorded in prior fixture evidence"
+  },
+  "fixture_provenance": {
+    "prior_evidence": {
+      "path": "evidence/offline-compatible-hip-headers.json",
+      "sha256": "f57b92fb086ea09197138380f0b0fb188d2d871aef821333e7241734689408b3"
+    },
+    "sources": [
+      {
+        "path": "results/hip-host-abi-spike/rocm-6.2.4/vector-add.hip",
+        "sha256": "ab11d1e1abd4f313b764436a90ca4a5c55bce48a7276bf305cb0218886c15bba"
+      },
+      {
+        "path": "results/hip-host-abi-spike/rocm-6.2.4/dimensions.hip",
+        "sha256": "84dc81053727f8b10565bdf4efafd1951bf3be1813f08fcb16648b62a04a529f"
+      }
+    ],
+    "recipes": [
+      {
+        "path": "results/hip-host-abi-spike/rocm-6.2.4/device-wchar4-attempts.json",
+        "sha256": "d06d43058c7b2e1e1b8352c937b4740122b6fb84d342d039482621df9e27d0cb"
+      },
+      {
+        "path": "results/hip-host-abi-spike/rocm-6.2.4/with-routed-workitem-slice-attempts.json",
+        "sha256": "892f248bcb2df515a8905260cd6d2d9ac49a8661a7517250182525c56f6aa888"
+      }
+    ],
+    "compiler": "Clang18.1.8; ROCm6.2.4 actual HIP/CLR headers and workitem-only bitcode; see prior evidence for exact full commands and input hashes",
+    "recipe_hash_encoding": "SHA256 of sorted compact JSON compile-entry, original paths; case names select entries in raw recipe files"
+  },
+  "fixtures": [
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1013-with-routed-workitem-slice.hsaco",
+      "sha256": "29032d2b84070eee099cb83a43a1795d1f3cb63a6ec218ddbf56a618e32f838e",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/linux-vector-add-gfx1013-with-routed-workitem-slice.log",
+      "log_sha256": "bb5c0e756168aba9f559dc5c5e2dbf0e6b08a87e2cfd56249756c75168882f24",
+      "compile_recipe_case": "linux-vector-add-gfx1013-with-routed-workitem-slice",
+      "compile_recipe_sha256": "519f8e3db116a284067100fd464f4004a47f749f9bec05217510dbca075dda0a",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1013-with-routed-workitem-slice.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1030-with-routed-workitem-slice.hsaco",
+      "sha256": "ff63fb9785e06e47a2be6b6d863181b3a1880a81cabefbf4e352d7fe2f69a813",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/linux-vector-add-gfx1030-with-routed-workitem-slice.log",
+      "log_sha256": "41a87d6a3963d5e6ac44b4583f6c80f263771255bed05f76e4e8a2cc4dda1d24",
+      "compile_recipe_case": "linux-vector-add-gfx1030-with-routed-workitem-slice",
+      "compile_recipe_sha256": "a6377ef87e46ca2fa90aa6bcfb9ce8248f4a788688b14d1fe84480b6bf3147c5",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1030-with-routed-workitem-slice.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1013-with-routed-workitem-slice.hsaco",
+      "sha256": "be4543c79119dab8f4e1411b180224b8695d9fe090e190423a4bce68d375cdd6",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/linux-dimensions-gfx1013-with-routed-workitem-slice.log",
+      "log_sha256": "85ec15d7af3f5d3e48c8d869b81e21775e8c9b89dff38ef0ab47de450ae44a0f",
+      "compile_recipe_case": "linux-dimensions-gfx1013-with-routed-workitem-slice",
+      "compile_recipe_sha256": "3794ca31182db4518761cf0c88fb84fd03a2af33108b6b5abb0c9f565d8b31f8",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1013-with-routed-workitem-slice.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1030-with-routed-workitem-slice.hsaco",
+      "sha256": "ff2304bd2e52040aa5c45948901c95caf16fda984f8c1f16f0a4a6a5c0bc4c17",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/linux-dimensions-gfx1030-with-routed-workitem-slice.log",
+      "log_sha256": "695a69b46a82287895f7553eb3aa8fe8a805338ea10c96ae66820cb1748712fa",
+      "compile_recipe_case": "linux-dimensions-gfx1030-with-routed-workitem-slice",
+      "compile_recipe_sha256": "ca843dea3605b23102c49f94a98fec896a118f837749113b613cd4bd0e4e943f",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1030-with-routed-workitem-slice.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1013-device-wchar4.hsaco",
+      "sha256": "a6ab8bf13688777e6ca9af7048263147550b163bd365f263fb7abd2f3d2fb88b",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/ps5-vector-add-gfx1013-device-wchar4.log",
+      "log_sha256": "bb5c0e756168aba9f559dc5c5e2dbf0e6b08a87e2cfd56249756c75168882f24",
+      "compile_recipe_case": "ps5-vector-add-gfx1013-device-wchar4",
+      "compile_recipe_sha256": "b44168a4132b00ffcd4bfa59ccf4c72153840cc24e704d374dd32b66a4cd28d2",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1013-device-wchar4.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1030-device-wchar4.hsaco",
+      "sha256": "2cfe4b5cc56db82c3044bf65424036a72740cc994e3790129bf1f5efd3c14212",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/ps5-vector-add-gfx1030-device-wchar4.log",
+      "log_sha256": "41a87d6a3963d5e6ac44b4583f6c80f263771255bed05f76e4e8a2cc4dda1d24",
+      "compile_recipe_case": "ps5-vector-add-gfx1030-device-wchar4",
+      "compile_recipe_sha256": "7c06af1d895ea9e93c1e334dcc228f634a225c976e05e88cd62decc5e301a7da",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1030-device-wchar4.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1013-device-wchar4.hsaco",
+      "sha256": "de1a9f3f1e8f423d93ef9b6b0f86cf2729b822baf1f018a409ce0919907bff59",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/ps5-dimensions-gfx1013-device-wchar4.log",
+      "log_sha256": "85ec15d7af3f5d3e48c8d869b81e21775e8c9b89dff38ef0ab47de450ae44a0f",
+      "compile_recipe_case": "ps5-dimensions-gfx1013-device-wchar4",
+      "compile_recipe_sha256": "e1044eb94529dfd4fdcc552edc4da8d2f69480ca9dc2b36e3e1112be666c5887",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1013-device-wchar4.hsaco"
+      ]
+    },
+    {
+      "fixture": "results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1030-device-wchar4.hsaco",
+      "sha256": "ce44ac5355df29b793d0c41a0e75c36f299ad7550bb4a07b2d528a73e180d4c7",
+      "returncode": 0,
+      "log": "results/hidden-geometry-20261012/ps5-dimensions-gfx1030-device-wchar4.log",
+      "log_sha256": "695a69b46a82287895f7553eb3aa8fe8a805338ea10c96ae66820cb1748712fa",
+      "compile_recipe_case": "ps5-dimensions-gfx1030-device-wchar4",
+      "compile_recipe_sha256": "d41e184960cc3c65a077b51172caa57eeaa239fe3ee0c2143d6f1dba593b632d",
+      "test_command": [
+        "build/host/hidden_geometry_test",
+        "results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1030-device-wchar4.hsaco"
+      ]
+    }
+  ],
+  "validation": {
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "host_ctest": "25/25 pass including fixture-independent vector/dimensions geometry packing/admission and 10000 parser mutation attempts across baseline targets",
+    "real_hidden_fixtures": "8/8pass; independent oracle compares every output byte incl256-byte implicit area",
+    "negative_cases": [
+      "each hidden offset/size/kind changed",
+      "missing one/all fields incl altered total size",
+      "duplicate hidden kind and overlap",
+      "explicit/hidden overlap",
+      "size/alignment mismatch",
+      "zero/overflowing groups and conflicting workgroup shape",
+      "missing/extra explicit args",
+      "pointer extent missing",
+      "scalar32-bit overflow and unexpected pointer extent",
+      "real ELF metadata unknown/duplicate kind",
+      "explicit-only trailing storage1/255/256/257bytes"
+    ],
+    "commands": [
+      {
+        "command": [
+          "cmake",
+          "--build",
+          "build/host",
+          "--parallel",
+          "2"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/host-build.log",
+        "log_sha256": "0c06f8f4f394c1ed2023583eccab01192d0b547b7ad7d7ab52a0fa1757080d75"
+      },
+      {
+        "command": [
+          "ctest",
+          "--test-dir",
+          "build/host",
+          "--output-on-failure"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/host-ctest-registered.log",
+        "log_sha256": "151c37fdbde477c94d5d729edc14e66e5b8cf8aac9f9857215a2db3c51df2e99"
+      },
+      {
+        "command": [
+          "cmake",
+          "--build",
+          "build/ps5",
+          "--target",
+          "ps5hip_object",
+          "ps5hip_native_memory",
+          "--parallel",
+          "2"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-build-final.log",
+        "log_sha256": "0771150975960fb35127f46377ab2aac6e3c73c889f10a6ffa1a5b6d24ccdcdf"
+      },
+      {
+        "command": [
+          "build/host/launch_test",
+          "results/wave-native-integration-20261012/gfx1013-O2/wave.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/gfx1013-wave-launch.log",
+        "log_sha256": "b0014a338416542b55e9c7036adebd4797993772f14a0155f32dd55f2b01649d"
+      },
+      {
+        "command": [
+          "build/host/launch_test",
+          "results/wave-native-integration-20261012/gfx1030-O2/wave.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/gfx1030-wave-launch.log",
+        "log_sha256": "5efa1a3fd6a9338113c0653bf1477037f8e858f1fe0964a53ed72005d17e0108"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1013-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-vector-add-gfx1013-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "229a750b3da0a4508f4b344a363d806dd7b1473f81cd343fc19d5adce7dd4f3b"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-vector-add-gfx1030-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-vector-add-gfx1030-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "b0f2048254ce3524a671c3033c8bdfaba30d39d8b109477065170682d14bb40f"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1013-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-dimensions-gfx1013-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "096074f585d96c58d92d1e5dc4d05de05f89e36e7e5cdb7eb32a4e055994b120"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-dimensions-gfx1030-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-dimensions-gfx1030-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "c5c811584df1462beae9ca605f6d21c931c98a9544496a04f96ba6ab7fad4c20"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1013-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-vector-add-gfx1013-device-wchar4-inspect.log",
+        "log_sha256": "229a750b3da0a4508f4b344a363d806dd7b1473f81cd343fc19d5adce7dd4f3b"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-vector-add-gfx1030-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-vector-add-gfx1030-device-wchar4-inspect.log",
+        "log_sha256": "b0f2048254ce3524a671c3033c8bdfaba30d39d8b109477065170682d14bb40f"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1013-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-dimensions-gfx1013-device-wchar4-inspect.log",
+        "log_sha256": "096074f585d96c58d92d1e5dc4d05de05f89e36e7e5cdb7eb32a4e055994b120"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-dimensions-gfx1030-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-dimensions-gfx1030-device-wchar4-inspect.log",
+        "log_sha256": "c5c811584df1462beae9ca605f6d21c931c98a9544496a04f96ba6ab7fad4c20"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-launch-gfx1013-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-launch-gfx1013-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "5d3be920c54eb353e3c88a7f4cce4f6f657bf7217ad7423617848fc630a97c47"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/linux-launch-gfx1030-with-routed-workitem-slice.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/linux-launch-gfx1030-with-routed-workitem-slice-inspect.log",
+        "log_sha256": "99d5b8a7ff311cac3c2f91751fc8af73a7c21cf1284b966a30c954bacb1a1f2a"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-launch-gfx1013-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-launch-gfx1013-device-wchar4-inspect.log",
+        "log_sha256": "5d3be920c54eb353e3c88a7f4cce4f6f657bf7217ad7423617848fc630a97c47"
+      },
+      {
+        "command": [
+          "build/host/ps5hip-inspect",
+          "<ROOT>/results/hip-host-abi-spike/rocm-6.2.4/ps5-launch-gfx1030-device-wchar4.hsaco"
+        ],
+        "returncode": 0,
+        "log": "results/hidden-geometry-20261012/ps5-launch-gfx1030-device-wchar4-inspect.log",
+        "log_sha256": "99d5b8a7ff311cac3c2f91751fc8af73a7c21cf1284b966a30c954bacb1a1f2a"
+      },
+      {
+        "command": [
+          "cmake",
+          "--build",
+          "build/host",
+          "--parallel",
+          "2"
+        ],
+        "returncode": 0,
+        "result": "Reconfigured CMake and rebuilt hidden_geometry_test only after CTest registration; production library unchanged"
+      }
+    ],
+    "ps5_outputs": [
+      {
+        "path": "build/ps5/libps5hip_object.a",
+        "sha256": "5ccde4f67ba8c3dd51d0e23046f82405ab9c3abb577e7dd0608695189fa0e210"
+      },
+      {
+        "path": "build/ps5/libps5hip_native_memory.a",
+        "sha256": "0b146f2d116947f34758f03b96fa92ec1f193d740f8e172feca80820e0d1bd24"
+      }
+    ],
+    "test_binary": {
+      "path": "build/host/hidden_geometry_test",
+      "sha256": "0ca7de9586ad2d4bd23d33953135bfacb552222cc422579e2435f4379c8c0340"
+    },
+    "inspector_binary": {
+      "path": "build/host/ps5hip-inspect",
+      "sha256": "b2f8d3253e005939da0f6bdd75f42b2ecc9d7cd3d3197a097022102c593e0bc3"
+    }
+  },
+  "limits": [
+    "Metadata validation does not verify arbitrary ISA obeys metadata",
+    "No general HIP launch/runtime implementation",
+    "No nonuniform groups, nonzero global offsets, multidimensional launches, other hidden kinds, scratch or LDS support",
+    "Existing frozen arithmetic/wave harnesses do not exercise these larger kernarg fixtures"
+  ],
+  "raw_results_directory": "results/hidden-geometry-20261012",
+  "path_tokens": {
+    "<ROOT>": "local ps5-hip checkout"
+  }
+}

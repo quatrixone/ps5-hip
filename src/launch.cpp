@@ -51,6 +51,15 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
     result.user_sgprs[kernarg_sgpr] = uint32_t(kernarg_storage.address);
     result.user_sgprs[kernarg_sgpr + 1] = uint32_t(kernarg_storage.address >> 32);
     result.kernargs.resize(k.kernarg_size, 0);
+    if (!k.hidden_arguments.empty()) {
+        const uint32_t base = k.kernarg_size - 256;
+        const std::array<uint64_t, 13> values{{groups_x, 1, 1, 64, 1, 1, 0, 0, 0, 0, 0, 0, 1}};
+        for (size_t i = 0; i < detail::cov5_geometry.size(); ++i) {
+            const auto &field = detail::cov5_geometry[i];
+            for (unsigned byte = 0; byte < field.size; ++byte)
+                result.kernargs[base + field.offset + byte] = uint8_t(values[i] >> (byte * 8));
+        }
+    }
     for (size_t i = 0; i < arguments.size(); ++i) {
         const auto &arg = arguments[i];
         const auto &layout = k.arguments[i];

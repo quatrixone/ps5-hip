@@ -34,6 +34,11 @@ int main(int argc, char **argv) {
             check(!ps5hip::initial_launch_rejection(bad).empty());
             bad = k; bad.arguments[0].kind = "hidden_global_offset_x";
             check(!ps5hip::initial_launch_rejection(bad).empty());
+            check(k.hidden_arguments.empty());
+            for (unsigned trailing : {1u, 255u, 256u, 257u}) {
+                bad = k; bad.kernarg_size += trailing;
+                check(!ps5hip::initial_launch_rejection(bad).empty());
+            }
         }
         const auto image = ps5hip::materialize_code_object(original.data(), original.size());
         Data expected(image.size(), 0);

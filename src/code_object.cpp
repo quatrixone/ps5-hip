@@ -330,10 +330,12 @@ CodeObject inspect_code_object(const uint8_t *data, size_t size) {
             KernelArgument a{arg.field(".offset").integer(), arg.field(".size").integer(),
                              arg.field(".value_kind").text()};
             require(a.size > 0 && contains(0, k.kernarg_size, a.offset, a.size), "argument outside kernarg storage");
-            for (const auto &prior : k.arguments)
-                require(uint64_t(a.offset) >= uint64_t(prior.offset) + prior.size ||
-                        uint64_t(prior.offset) >= uint64_t(a.offset) + a.size, "overlapping kernel arguments");
-            k.arguments.push_back(std::move(a));
+            for (const auto *inventory : {&k.arguments, &k.hidden_arguments})
+                for (const auto &prior : *inventory)
+                    require(uint64_t(a.offset) >= uint64_t(prior.offset) + prior.size ||
+                            uint64_t(prior.offset) >= uint64_t(a.offset) + a.size, "overlapping kernel arguments");
+            auto &inventory = a.kind.compare(0, 7, "hidden_") == 0 ? k.hidden_arguments : k.arguments;
+            inventory.push_back(std::move(a));
         }
         result.kernels.push_back(std::move(k));
     }
@@ -360,10 +362,39 @@ std::string initial_launch_rejection(const Kernel &k) {
     if (user_sgprs != ((k.properties & 1) ? 6u : 2u)) return "user-SGPR count mismatch";
     if ((k.rsrc2 & ~0xbeu) || !(k.rsrc2 & 0x80)) return "unsupported system-SGPR/work-item contract";
     if (k.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))) return "privileged/debug execution unsupported";
-    for (const auto &arg : k.arguments)
+    uint64_t explicit_end = 0;
+    for (size_t i = 0; i < k.arguments.size(); ++i) {
+        const auto &arg = k.arguments[i];
         if (!((arg.kind == "global_buffer" && arg.size == 8 && arg.offset % 8 == 0) ||
               (arg.kind == "by_value" && (arg.size == 4 || arg.size == 8) && arg.offset % arg.size == 0)))
             return "unsupported initial argument kind or layout";
+        if (!contains(0, k.kernarg_size, arg.offset, arg.size)) return "argument outside kernarg storage";
+        for (size_t j = 0; j < i; ++j)
+            if (uint64_t(arg.offset) < uint64_t(k.arguments[j].offset) + k.arguments[j].size &&
+                uint64_t(k.arguments[j].offset) < uint64_t(arg.offset) + arg.size)
+                return "overlapping kernel arguments";
+        explicit_end = std::max(explicit_end, uint64_t(arg.offset) + arg.size);
+    }
+    const uint64_t base = (explicit_end + 7) & ~uint64_t(7);
+    // LLVM rounds explicit-only storage to four bytes; supported arguments already end there.
+    if (k.hidden_arguments.empty() && k.kernarg_size != explicit_end)
+        return "unaccounted initial kernarg storage";
+    if (!k.hidden_arguments.empty()) {
+        if (k.hidden_arguments.size() != detail::cov5_geometry.size() ||
+            k.kernarg_size != base + 256 || k.kernarg_size > 65536 ||
+            !power2(k.kernarg_alignment) || k.kernarg_alignment < 8 || k.kernarg_alignment > 4096)
+            return "unsupported COv5 implicit geometry storage";
+        std::array<bool, 13> seen{};
+        for (const auto &arg : k.hidden_arguments) {
+            const auto field = std::find_if(detail::cov5_geometry.begin(), detail::cov5_geometry.end(),
+                                           [&](const auto &item) { return arg.kind == item.kind; });
+            if (field == detail::cov5_geometry.end()) return "unsupported hidden argument kind";
+            const size_t index = size_t(field - detail::cov5_geometry.begin());
+            if (seen[index] || arg.offset != base + field->offset || arg.size != field->size)
+                return "invalid COv5 hidden geometry layout";
+            seen[index] = true;
+        }
+    }
     return {};
 }
 

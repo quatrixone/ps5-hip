@@ -56,6 +56,19 @@ another but may not alias either launch allocation. Scalar values are raw bits;
 32-bit scalar overflow is rejected. Argument storage is zero-filled, then packed
 at metadata offsets in little-endian order.
 
+The caller supplies only explicit arguments. The host preparation also supports
+the complete 13-field COv5 geometry profile emitted by the tested LLVM 18.1.8
+HIP-header fixtures: block counts `(groups_x,1,1)`, group sizes `(64,1,1)`, zero
+remainders and global offsets, and grid dimensions `1`. Its implicit area starts
+at the next eight-byte boundary after the last explicit argument and reserves
+exactly 256 bytes. Every reserved/padding byte starts at zero. Unknown, missing,
+duplicate, overlapping or incorrectly sized/placed hidden fields are rejected.
+Explicit-only storage must end with the last supported 4/8-byte argument; extra
+unaccounted storage is outside this bounded profile. This is structural layout
+validation, not proof that arbitrary ISA obeys its metadata. See the
+[ABI source and fixture evidence](HIP_HOST_ABI_SPIKE.md#implemented-offline-geometry-packing).
+The existing frozen arithmetic/wave titles do not exercise this extension.
+
 The native allocator must supply true live extents. These host checks do not
 prove mapping ownership or that a kernel's computed accesses fit its buffers.
 The canary harness must independently size buffers from count and element width.

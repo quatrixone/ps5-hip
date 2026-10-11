@@ -248,15 +248,46 @@ optimized fixtures, but their metadata cannot be accepted as arbitrary user
 arguments or ignored silently.
 
 This differs from `kernels/canary.hip:8-20`, which hard-codes block width 64 and
-therefore avoids the implicit workgroup-size record. The current
-`src/code_object.cpp:346-369` admission rule accepts only `global_buffer` and
-4/8-byte `by_value` arguments; it correctly rejects these hidden kinds.
-`src/launch.cpp:50-69` allocates the reported size but packs caller-supplied
-arguments in metadata order. G4 therefore needs a deliberate split between
-explicit arguments and supported runtime-generated hidden arguments, correct
-2-byte field handling, checked launch geometry, and initialization of the
-entire required kernarg storage. Reusing the six-SGPR descriptor contract alone
-would leave block size zero and produce wrong indexing.
+therefore avoids the implicit workgroup-size record. Reusing the six-SGPR
+descriptor contract without initializing the hidden fields would leave block
+size zero and produce wrong indexing.
+
+### Implemented offline geometry packing
+
+`Kernel.arguments` now contains only explicit arguments, while
+`Kernel.hidden_arguments` retains the hidden metadata. The inspector displays
+their separate counts and every hidden field. Admission requires all 13 fields
+above, with their exact ABI offsets and widths, in an eight-byte-aligned
+256-byte implicit area. Unknown kinds, missing/duplicate fields, overlap,
+wrong storage size or alignment are rejected. The caller cannot supply hidden
+values as additional scalar/pointer arguments.
+
+`prepare_initial_launch` checks the existing one-dimensional 64x1x1 shape and
+nonzero group count (at most `UINT32_MAX / 64`) before generating block counts
+`(groups_x,1,1)`, group sizes `(64,1,1)`, zero remainders/global offsets and grid
+dimensions `1`. The complete explicit, alignment-padding and implicit storage
+is zero-initialized before little-endian packing, including two-byte fields.
+
+The size rule follows LLVM 18.1.8's
+[`AMDGPUSubtarget::getKernArgSegmentSize`](https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/llvm/lib/Target/AMDGPU/AMDGPUSubtarget.cpp):
+explicit storage follows argument alignment, implicit storage starts on its
+required boundary, and the total rounds to four bytes. Our supported explicit
+4/8-byte arguments already end on that boundary, so explicit-only profiles
+reject any unaccounted trailing storage. This limits admitted layouts; it does
+not verify that arbitrary instructions match metadata. Existing arithmetic,
+resource, wave and full-header store fixtures retain their sizes and behavior.
+
+The normal sanitizer CTest suite includes `hidden_geometry_model`, using
+synthetic vector/dimensions objects with the same byte oracle and admission
+checks; all 25 registered tests pass without needing hidden-geometry ELF files.
+Additional host sanitizer checks consume eight real linked device ELFs through the
+`hidden_geometry_test <fixture.hsaco>` command: vector/dimensions kernels for
+both host triples and GPU targets. They compare every kernarg byte, exercise
+count/shape limits, pointer/scalar validation and malformed layouts. The PS5
+libraries also cross-build. Evidence is
+[`offline-hidden-geometry.json`](../evidence/offline-hidden-geometry.json).
+No native title or HIP runtime uses these fixtures yet; this closes a bounded
+host-packing gap, with no GPU execution or new native capability claim.
 
 The upstream source basis is `ockl/src/workitem.cl`: ABI >= 500 reads the
 implicit argument record; its older-ABI branch reads a dispatch packet.

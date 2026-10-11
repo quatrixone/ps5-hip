@@ -27,6 +27,10 @@ int main(int argc, char **argv) {
                       << " preload=0x" << k.preload << std::dec
                       << " kernarg_alignment=" << k.kernarg_alignment
                       << " max_workgroup=" << k.max_workgroup_size << '\n';
+            std::cout << "  explicit_arguments=" << k.arguments.size()
+                      << " hidden_arguments=" << k.hidden_arguments.size() << '\n';
+            for (const auto &arg : k.hidden_arguments)
+                std::cout << "    " << arg.kind << " offset=" << arg.offset << " size=" << arg.size << '\n';
         }
     } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }
 }

@@ -14,6 +14,10 @@ int main(int argc, char **argv) {
         check(object.kernels.size() == 6);
         for (const auto &k : object.kernels) {
             check(k.wave_size == 32);
+            uint64_t explicit_end = 0;
+            for (const auto &arg : k.arguments)
+                if (uint64_t(arg.offset) + arg.size > explicit_end) explicit_end = uint64_t(arg.offset) + arg.size;
+            check(k.hidden_arguments.empty() && k.kernarg_size == explicit_end);
             if (k.name == "reduce_serial") {
                 check(k.kernarg_size == 16 && k.group_bytes == 0 && k.private_bytes == 0);
                 check(ps5hip::initial_launch_rejection(k).empty());

@@ -24,8 +24,21 @@ struct Kernel {
     uint32_t sgpr_spills, vgpr_spills;
     uint16_t properties, preload;
     std::array<uint32_t, 3> required_workgroup{};
-    std::vector<KernelArgument> arguments;
+    std::vector<KernelArgument> arguments; // Explicit caller arguments, in metadata order.
+    std::vector<KernelArgument> hidden_arguments;
 };
+
+namespace detail {
+// COv5 offsets relative to the 8-byte-aligned start of the 256-byte implicit area.
+struct GeometryField { const char *kind; uint32_t offset, size; };
+inline constexpr std::array<GeometryField, 13> cov5_geometry{{
+    {"hidden_block_count_x", 0, 4}, {"hidden_block_count_y", 4, 4}, {"hidden_block_count_z", 8, 4},
+    {"hidden_group_size_x", 12, 2}, {"hidden_group_size_y", 14, 2}, {"hidden_group_size_z", 16, 2},
+    {"hidden_remainder_x", 18, 2}, {"hidden_remainder_y", 20, 2}, {"hidden_remainder_z", 22, 2},
+    {"hidden_global_offset_x", 40, 8}, {"hidden_global_offset_y", 48, 8}, {"hidden_global_offset_z", 56, 8},
+    {"hidden_grid_dims", 64, 2}
+}};
+}
 
 struct LoadSegment {
     uint64_t file_offset, address, file_size, memory_size, alignment;

@@ -21,6 +21,7 @@ struct InitialLaunch {
 
 // Pure host preparation for the 64x1x1, wave32, scratch/LDS-free launch profile.
 // Object must come from inspect_code_object; ranges must be live GPU allocations.
+// Arguments are explicit only; supported COv5 geometry fields are runtime-generated.
 // This neither maps memory nor submits work, and cannot verify mapping ownership.
 InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string &name,
                                     GpuRange module, GpuRange kernarg_storage,
