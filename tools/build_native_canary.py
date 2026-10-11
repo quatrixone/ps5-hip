@@ -62,6 +62,8 @@ def main():
     for name in ("LICENSE", "NOTICE.md"):
         (native / name).write_bytes(subprocess.check_output(
             ["git", "-C", str(args.native_source), "show", f"{revision}:{name}"]))
+    import_patch = ROOT / "patches/native-import-libraries.patch"
+    run("patch", "--batch", "--fuzz=0", "-p1", "-d", native, "-i", import_patch)
     build = ROOT / "build/native" / f"{args.target}-{args.kernel}"
     build.mkdir(parents=True, exist_ok=True)
     tool = build / "ps5-native-tool"
@@ -142,11 +144,13 @@ def main():
         artifacts.append("canary.hsaco")
     receipt = {"hardware_validated": False, "target": args.target, "kernel": args.kernel,
                "native_tools_revision": revision, "sdk_revision": lock["sdk"]["revision"],
+               "native_tool_source_sha256": {name: hashlib.sha256((native / name).read_bytes()).hexdigest()
+                                             for name in files},
                "llvm_version": version,
                "host_zlib": zlib_receipt, "elevation": elevation_receipt,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
-                                 [pathlib.Path(__file__).resolve(), ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
+                                 [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()

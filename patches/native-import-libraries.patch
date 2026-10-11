@@ -1,0 +1,120 @@
+--- a/sce_module_writer.hpp
++++ b/sce_module_writer.hpp
+@@ -26,6 +26,8 @@
+     std::uint32_t module_sdk = 0x02000009;
+     std::uint32_t companion_sdk = 0x08050001;
+     std::vector<std::string> version_components;
++    // Explicit MODULE:SYMBOL:LIBRARY bindings; module names omit .prx.
++    std::vector<std::string> import_libraries;
+ };
+ 
+ [[nodiscard]] elf::Bytes write_executable(const elf::Image &image, std::span<const elf::Stub> stubs,
+--- a/native_app_builder.cpp
++++ b/native_app_builder.cpp
+@@ -267,6 +267,9 @@
+     for (std::string_view value : options(args, "--component"))
+         link_options.version_components.emplace_back(value);
+ 
++    for (std::string_view value : options(args, "--import-library"))
++        link_options.import_libraries.emplace_back(value);
++
+     const Bytes output = ps5::module::write_executable(image, stubs, link_options);
+     const auto path = std::filesystem::absolute(std::filesystem::path{std::string{*output_name}});
+     write_file(path, output);
+@@ -282,7 +285,8 @@
+               << "  ps5-native-tool self --extract --file <fself> --out <elf>\n"
+               << "  ps5-native-tool self --inspect --file <module>\n"
+               << "  ps5-native-tool link --in <llvm-pie> --out <ps5-elf>"
+-                 " (--stub <sdk-so>... | --stub-dir <sdk-lib>)\n";
++                 " (--stub <sdk-so>... | --stub-dir <sdk-lib>)"
++                 " [--import-library MODULE:SYMBOL:LIBRARY]...\n";
+ }
+ 
+ } // namespace
+--- a/sce_module_writer.cpp
++++ b/sce_module_writer.cpp
+@@ -684,6 +684,28 @@
+     const std::uint64_t relro_end = blocks_address + blocks.data.size();
+     require(relro_end <= data_start, "LLVM layout leaves no room for PS5 process parameters");
+ 
++    std::map<std::string, std::pair<std::string, std::string>> bindings;
++    const auto valid_name = [](std::string_view name) {
++        return !name.empty() && name.size() <= 128 &&
++            std::all_of(name.begin(), name.end(), [](unsigned char c) {
++                return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
++                       (c >= '0' && c <= '9') || c == '_';
++            });
++    };
++    for (const std::string &binding : options.import_libraries)
++    {
++        const auto first = binding.find(':');
++        const auto last = binding.rfind(':');
++        require(first != std::string::npos && last != first,
++                "import-library requires MODULE:SYMBOL:LIBRARY");
++        const auto module = binding.substr(0, first);
++        const auto symbol = binding.substr(first + 1, last - first - 1);
++        const auto library = binding.substr(last + 1);
++        require(valid_name(module) && valid_name(symbol) && valid_name(library),
++                "invalid import-library name");
++        require(bindings.emplace(symbol, std::pair{module, library}).second,
++                "duplicate import-library symbol " + symbol);
++    }
+     std::vector<Import> imports;
+     std::vector<const Stub *> module_order;
+     for (const std::string &needed : image.needed)
+@@ -698,19 +720,31 @@
+         const elf::Symbol &symbol = image.dynamic_symbols[i];
+         require(symbol.undefined(), "native converter does not yet publish application exports");
+         const Stub *provider = nullptr;
++        const auto binding = bindings.find(symbol.name);
+         for (const Stub *candidate : module_order)
+         {
++            if (binding != bindings.end() && candidate->module_name != binding->second.first)
++                continue;
+             if (std::find(candidate->exports.begin(), candidate->exports.end(), symbol.name) !=
+                 candidate->exports.end())
+             {
++                require(provider == nullptr, "ambiguous import-library provider " + symbol.name);
+                 provider = candidate;
+-                break;
++                if (binding == bindings.end())
++                    break;
+             }
+         }
+         require(provider != nullptr, "no public SDK stub exports required symbol " + symbol.name);
+         imports.push_back({symbol.name, provider, 0, 0, static_cast<std::uint32_t>(i), {}});
+     }
+ 
++    for (const auto &[symbol, binding] : bindings)
++    {
++        (void)binding;
++        require(std::any_of(imports.begin(), imports.end(), [&](const Import &item) {
++                    return item.plain == symbol;
++                }), "unused import-library symbol " + symbol);
++    }
+     std::vector<ModuleRecord> modules;
+     std::vector<LibraryRecord> libraries;
+     StringTable strings;
+@@ -729,6 +763,22 @@
+         const int index = static_cast<int>(module - module_order.begin());
+         import.module_id = index + 1;
+         import.library_id = index;
++        if (const auto binding = bindings.find(import.plain); binding != bindings.end())
++        {
++            const auto name = strings.add(binding->second.second);
++            const auto existing = std::find_if(libraries.begin(), libraries.end(),
++                [&](const LibraryRecord &library) {
++                    return library.module_id == import.module_id && library.name == name;
++                });
++            if (existing != libraries.end())
++                import.library_id = existing->id;
++            else
++            {
++                require(libraries.size() < 65536, "too many import libraries");
++                import.library_id = static_cast<int>(libraries.size());
++                libraries.push_back({import.library_id, import.module_id, name});
++            }
++        }
+         import.mangled = nid(import.plain) + "#" + encode_id(import.library_id) + "#" +
+                          encode_id(import.module_id);
+     }

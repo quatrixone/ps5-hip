@@ -75,10 +75,14 @@ Updated: 2026-10-11, America/New_York.
 
 Offline reference analysis now points to syscall 1 as a plausible final exit
 boundary, with an explicit cross-firmware caveat. Before a different lifecycle
-experiment, implement/test explicit import-library mapping in the native
-converter: shell-managed exit is exported by `libSceShellCoreUtil` within module
-`libSceSystemService`, which its current one-library-per-module model cannot
-express. See `evidence/offline-exit-reference.json`. No platform exit API has been
+experiment, explicit import-library mapping is now implemented and host-tested
+as a pinned converter patch: shell-managed exit is exported by `libSceShellCoreUtil` within module
+`libSceSystemService`, which the original converter could not express. Four
+integration cases pass, including byte-identical default output against a freshly
+built unpatched converter. Existing CPU executable bytes remain unchanged.
+See `evidence/offline-exit-reference.json` and `docs/NATIVE_BUILD.md`.
+Next, design the separate shell-managed lifecycle probe without claiming it fixes
+C `exit` or skipping required runtime cleanup. No platform exit API has been
 substituted, and no additional console was contacted for this analysis.
 
 The CPU-only build now contains a shutdown observer using the startup's existing

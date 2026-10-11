@@ -60,6 +60,29 @@ or building it, retains the source license, and records installed library/header
 hashes. The candidate builder verifies those hashes before linking. Neither step
 downloads anything or uses the reference checkout's local modifications.
 
+The builder then applies `patches/native-import-libraries.patch` with zero fuzz.
+The patch extends the pinned converter with repeatable
+`--import-library MODULE:SYMBOL:LIBRARY` options. Module names omit `.prx`.
+It supports several import libraries within one module, preserving default
+bindings for other symbols. Duplicate symbol overrides, unknown imports, invalid
+names and providers that do not match the specified module fail before output.
+An explicit library name is caller-supplied evidence, not verified against console
+exports by the host tool. A successful conversion does not establish its ABI.
+
+Without overrides the output remains byte-identical to the original converter.
+The patch digest and patched dependency source digests are recorded in build
+receipts. Run its integration checks after building the CPU runtime candidate:
+
+```sh
+python3 tests/native_import_libraries_test.py
+```
+
+This test rebuilds the unpatched converter in a temporary directory, compares
+actual ELF bytes, and independently reads emitted symbol/library/module tables.
+It checks mixed libraries, shared-library reuse, unchanged defaults and rejected
+inputs. No firmware dump or console is needed. These slower converter tests are
+explicit rather than part of every host CTest run.
+
 The candidate uses native title startup, the pinned SDK's static libc++, ABI and
 unwind libraries, and direct imports from libSceAgc, libSceAgcDriver, libkernel
 and libSceLibcInternal. The SDK unwinder needs explicit start/end symbols for
