@@ -1,5 +1,8 @@
 # Initial native launch contract
 
+The [initial capability matrix](INITIAL_CAPABILITY_MATRIX.md) separates observed
+compiler state, implemented host controls and untested hardware requirements.
+
 Status: host preparation and packet-fragment tests pass; native memory code
 cross-builds with mocked cleanup tests. Submission ownership and the AGC adapter
 also cross-compile with model tests. Initial cache/state commands and a dedicated

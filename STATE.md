@@ -89,6 +89,9 @@ inventory is in `docs/DEPENDENCY_PROVENANCE.md`. The logging header exactly matc
 ps5-agc-gears `1ae1f918`, whose NOTICE explicitly licenses it GPL-3.0-or-later;
 `evidence/offline-logging-provenance.json` records source and notice identities.
 Linked-member accounting and binary-distribution requirements remain unresolved.
+`docs/INITIAL_CAPABILITY_MATRIX.md` now records the initial entry-state contract,
+exact resource fields, inspected first-kernel instructions and hardware unknowns.
+The object inspector prints raw descriptor resource fields for compiler comparison.
 
 Isolated-userspace reproduction exposed and fixed a linker-selection bug:
 Clang 18's HIP driver ignored `-fuse-ld` and invoked host `lld` 21.1.8.

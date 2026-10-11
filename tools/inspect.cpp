@@ -22,6 +22,11 @@ int main(int argc, char **argv) {
                       << " private=" << k.private_bytes << " vgpr_spills=" << k.vgpr_spills
                       << " sgpr_spills=" << k.sgpr_spills << " initial_profile="
                       << (rejection.empty() ? "eligible" : rejection) << '\n';
+            std::cout << "  rsrc1=0x" << std::hex << k.rsrc1 << " rsrc2=0x" << k.rsrc2
+                      << " rsrc3=0x" << k.rsrc3 << " properties=0x" << k.properties
+                      << " preload=0x" << k.preload << std::dec
+                      << " kernarg_alignment=" << k.kernarg_alignment
+                      << " max_workgroup=" << k.max_workgroup_size << '\n';
         }
     } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }
 }
