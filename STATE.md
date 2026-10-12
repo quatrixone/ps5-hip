@@ -86,9 +86,15 @@ structure. See `evidence/offline-atomic-contention-probe.json`. A six-dispatch
 macro-only native harness is now frozen at `06956e4`, with 28 sanitizer CTests
 and two SDK object compiles. Its actual-harness models cover reordered modular
 tickets, full 64-bit CAS tokens, rounded guards, immutable offsets and quarantine
-at every dispatch. See `evidence/offline-atomic-native-harness.json`. Native
-linking/packaging, GPU execution and memory-scope qualification remain pending;
-these results do not advertise atomic support.
+at every dispatch. See `evidence/offline-atomic-native-harness.json`. The connected
+suite is now frozen at `2b863a7` and packaged: 29 sanitizer tests, four real
+compiler profiles, startup/import/FSELF/UFS checks and extracted-object host
+checks pass. Independent review verified all 5,771 protected files unchanged.
+See `evidence/offline-atomic-native-readiness.json`. GPU execution and
+memory-scope qualification remain pending; these results do not advertise atomic
+support. The package catalog now has 26 entries. Earlier console controls pin
+the 25-entry catalog and intentionally reject this change; prepare and review
+versioned controls before the next console operation.
 
 Retained private-memory calls now have an isolated offline launch implementation
 at `6f7d9a1` (`development/g3-flat-calls`). It supplies eight user words with the
@@ -421,3 +427,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | compiler milestone | guarded revision 4 passes selected paired IPRA-off controls and eight linked ordinary graphs; generic/volatile fallback retained | evidence/offline-private-backend-ipra-off-controls.json | next: fresh portable reproduction and isolated304-byte native harness
 - 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified; .40 deployment no-run while another title active | evidence/offline-private-buffer-native-readiness.json; evidence/native-private-buffer-console-no-run.json | next: arithmetic control then private candidate when idle
 - 2026-10-12 | G4 preparation | 89c0644 | bounded fat-binary reader and inspector consume12 real HIP objects; sanitizer and SDK checks pass | evidence/offline-fat-binary-reader.json | next: bounded constructor registration; no runtime or hardware qualification
+- 2026-10-12 | G3 offline | 2b863a7 | six atomic kernels packaged and independently verified | evidence/offline-atomic-native-readiness.json | GPU qualification pending

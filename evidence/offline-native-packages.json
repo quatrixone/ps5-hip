@@ -1414,6 +1414,94 @@
         "filesystem_check": "passed",
         "extracted_files_match": true
       }
+    },
+    {
+      "manifest": {
+        "schema": 1,
+        "title_id": "PPSA99014",
+        "target": "gfx1013",
+        "kernel": "atomic_suite",
+        "source_commit": "2b863a7843b2bf5031d1276a48b0f42856abf6b6",
+        "build_receipt_sha256": "578e4efc78f86ecae383b2fd14cb78bd60b8ebef29e945e606c43536490d59da",
+        "stager_sha256": "d37b1a95d86cd89a7f9adee0d38970e5d77dbf9ef681a66a71f41dbedbc7f4bd",
+        "hardware_validated": false,
+        "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-atomic_suite.log",
+        "files": {
+          "canary.hsaco": {
+            "sha256": "fb8c32a84c62755f37157bf60435f2d86ade4f8d093bc3d5b2a9f6c9c7186bc1",
+            "bytes": 8272
+          },
+          "eboot.bin": {
+            "sha256": "4c54a98425795382df430e7cb0ebe0f9c5d873be8cb945a265dfb13ce266fc1f",
+            "bytes": 820786
+          },
+          "lapy.elf": {
+            "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+            "bytes": 155032
+          },
+          "sce_module/libc.prx": {
+            "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+            "bytes": 1284674
+          },
+          "sce_sys/param.json": {
+            "sha256": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+            "bytes": 733
+          },
+          "sce_sys/icon0.png": {
+            "sha256": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+            "bytes": 2199
+          },
+          "results-dir.txt": {
+            "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+            "bytes": 21
+          }
+        },
+        "dispatches": 6,
+        "dispatch_kernels": [
+          "atomic_ticket32",
+          "atomic_ticket64",
+          "atomic_cas32",
+          "atomic_cas64",
+          "atomic_indirect32",
+          "atomic_indirect64"
+        ],
+        "atomic": {
+          "groups": 257,
+          "threads": 64,
+          "invocations": 16448,
+          "timeout_ms": 2000,
+          "initial_wrap_distance": 4096,
+          "cas64_token_base": "0x13579bdf00000000",
+          "exact_values_per_dispatch": 16449,
+          "exact_values": 98694
+        },
+        "atomic_compiler": {
+          "kind": "fixed-atomic-contention-probe",
+          "target": "gfx1013",
+          "optimization": "O2",
+          "source_sha256": "42bc699fb32a445ffbb8ad31cc87c21d9f124ec257ad811bcff8402c4fda403b",
+          "probe_evidence_sha256": "05d2d666eac562ab956d6635db8f041f484d1f8f5170290f6d5ad5fe4534cdfa",
+          "code_sha256": "fb8c32a84c62755f37157bf60435f2d86ade4f8d093bc3d5b2a9f6c9c7186bc1",
+          "bytes": 8272,
+          "driver_sha256": "3088135cbc499ce90fa2e781906491f6c2330fca8b1ee70a51742461543652f8",
+          "llvm_version": "18.1.8"
+        }
+      },
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "de4dab4fd386dd73283a94ce9be4bd5e8ff197b417d3c025acd980aec92c3948",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "2696bbfdbd1510161dbb05625c1870c0e1b625ca3f94008b5f659ef78f1cb845",
+          "bytes": 3637248
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      }
     }
   ],
   "limitations": [
