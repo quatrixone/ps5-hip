@@ -49,15 +49,20 @@ it does not execute shader ISA, title startup, or recovery after a real GPU faul
 
 ## Preservation and console boundary
 
-Use PPSA99014 on the authorized idle primary console, firmware 6.02 as previously
-reported. Read the current runbook and local environment before contact. Acquire
-both shared locks with exclusive creation; never hold them during offline work.
-The secondary console remains excluded while its earlier teardown is unresolved.
+Use PPSA99014 on the user's currently selected console, .40 (firmware 12.70).
+The October 12 status control established that the earlier failure PID204 was
+absent; the later deployment stopped before mutation because another title was
+active. See `evidence/native-private-buffer-console-no-run.json`. Read the current
+runbook and local environment before contact. Acquire both shared locks with
+exclusive creation and refresh idle/recovery checks before each operation; never
+hold locks during offline work.
 
-Before replacing anything, verify the installed successful vector image
+On .30, before replacing anything, verify the installed successful vector image
 `1487a21b...`, its 854-byte application log `a0f414a2...`, the title metadata and
 mount link. The full identities and independently reviewed first-cycle acceptance
-are retained locally and in the existing evidence. Verify and preserve the image
+are retained locally and in the existing evidence. On .40, preserve its existing
+title image and applicable result bytes under the current reviewed deployment
+control's identities. Verify and preserve the image
 and log under hash-suffixed names; refuse conflicting backups or changed bytes.
 Earlier store, CPU and failed-image backups remain untouched. An incomplete
 promotion leaves its phase/evidence for offline review; never delete backups or
@@ -93,8 +98,9 @@ Busy/ambiguous idle state, identity mismatch or backup conflict means **no-run**
 Wrong output, modified guards, failed lifecycle or service failure means **failed**.
 Missing or contaminated evidence after execution means **inconclusive**, not pass.
 Any failure or inconclusive execution returns to offline analysis. Service checks
-prove reachability only. The inherited deployment FTP path has socket timeouts but
-no absolute whole-operation deadline; do not describe it as a bounded 20-second run.
+prove reachability only. The current deployment control bounds individual FTP
+operations with absolute deadlines; deployment and registration have separate
+bounds and are not part of the 20-second launch observation.
 
 Only two independently reviewed clean cycles of this combined image, together
 with the existing parser/entry-state/rejection evidence, can close G2. Map the
