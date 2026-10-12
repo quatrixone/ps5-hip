@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "classification": "offline single-TU metadata registration, Linux lifecycle control, PS5 link/conversion only",
+  "source_commit": "08a5f525144df9dee2e62d0c836f9e5c1a5e4574",
+  "base_commit": "89c06444fc3bd0968abadca50c410712e5bf8209",
+  "source_clean": true,
+  "source_sha256": {
+    "CMakeLists.txt": "09a4a61782f57a76e15e47aa98a8c11cc88d4455c6d50bcc4104ac3ea6bfc621",
+    "include/ps5hip/host_registration.h": "0b608b9c74fce028c77fb4e80c13934976858c08bb0695de8ea5a2c877b0cc39",
+    "src/host_registration.cpp": "e766c17a5e64cd5f3b7caaef60adaec47f8dc988fd39edc35ddba5ac1351686c",
+    "tests/host_registration_test.cpp": "1707420ca3e662ad385e86260d264c1fa0ad3fe1936e23a75b232d76118f10a6",
+    "tools/hip_registration_control.cpp": "3c55a6bdc761ada5da3a07153c6828203dc856e636d33cf4f13c63ce3044045b",
+    "tools/probe_host_registration.py": "14bb238a614a1c8fb0a8c1f052a691ab99024ffe357fb0e2f0139bf278a88ccf",
+    "docs/HIP_HOST_REGISTRATION_CONTROL.md": "65c766ac3fd8ed1bb4701d677e9a644093797becd7e4a51632f278e810c0c0dc"
+  },
+  "protected_files_unchanged": 242,
+  "protected_inventory_sha256": "9ce2500f7c2c6b5a0be447527d7e92b68a103cff3cc4d328c9f83c7372bca043",
+  "raw_receipt": "results/host-registration-v6/receipt.json",
+  "raw_references": {
+    ".local/g4-host-registration/results/host-registration-v6/receipt.json": "1fc9813ba444349368912789ed421e086baf8f902f945be46e12dee6199460b3",
+    ".local/g4-host-registration/results/host-registration-v6/native-import-names.json": "fe5e4a43a1ad954c201ca4b3a59fb03436e30692c03543df8246283b4a443ce4",
+    ".local/g4-host-registration/results/host-registration-v4/native-convert.stderr": "e30cc24830a584c141d44f2c11c3723cc88ee95196c4116d3aefed53e18c4218",
+    ".local/g4-host-registration/results/cmake-registration-v1/0.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".local/g4-host-registration/results/cmake-registration-v1/0.stdout": "4a84aa36e0ed718aa99e3d22da3d8fef1cc046ad155bf3869d2e26667cda3c63",
+    ".local/g4-host-registration/results/cmake-registration-v1/1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".local/g4-host-registration/results/cmake-registration-v1/1.stdout": "57f69e6161a6f96bc168647480387d7590696f6dccaa65beb01aca93e45e62b5",
+    ".local/g4-host-registration/results/cmake-registration-v1/2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".local/g4-host-registration/results/cmake-registration-v1/2.stdout": "526e75c18dba4cc0e264a3dd9aed4e9ec2171e9c8486ea198e0376a685327e03",
+    ".local/g4-host-registration/results/cmake-registration-v1/commands.json": "094dee49c09483732377a15ad7025786391a454d42502ea247685e98f70d412d",
+    ".local/g4-host-registration/results/host-registration-readiness/receipt.json": "5ce6b2a51067689c33f02e8747dcb7e754dc896d648b9459b97c85c48616a662",
+    ".local/g4-host-registration/results/host-registration-readiness/protected-files.json": "9af3373e7ebef3c6e565e39d7e21cb300cb0b31e57683319b47c92d985b2de56",
+    "results/g4-registration-integration-v1/receipt.json": "4dfc4a050efb134e9ccead7a53a789031bc4d89cd5bd4ad0f74d5c7fa8b25bde"
+  },
+  "checks": {
+    "wrapper_registry_model": "ASan/UBSan pass",
+    "actual_compiler_linux_normal": "ctor, host-token binding, unsupported launch, genuine atexit unregister, State final audit pass",
+    "actual_compiler_linux_partial_failure": "owned bytes released before main; genuine compiler dtor and final audit pass",
+    "cmake_host_registration_model": "1/1 pass, bundle identical to final v6",
+    "ps5_sdk_objects": 5,
+    "ps5_raw_pie_and_converted_eboot": "exact wrapper/bundle, constructor and relative relocation, load and converted RELRO checks pass",
+    "native_imports": 59,
+    "commands_succeeded": 16
+  },
+  "review": {
+    "parent": "approved source freeze",
+    "portable_reproduction": "independent source, real object/disassembly, exact artifact and lifecycle review passed"
+  },
+  "limits": [
+    "No native executable run, package, console or GPU submission.",
+    "Single-TU, one active module and serialized control; no public HIP runtime.",
+    "Real thread_local destructor import __cxa_thread_atexit_impl unavailable in measured SDK; v4 failure preserved.",
+    "Ordinary native exit remains unqualified; Linux teardown is not PS5 lifecycle proof.",
+    "The launch control always returns hipErrorNotSupported; no successful kernel execution is fabricated."
+  ],
+  "hardware_validated": false,
+  "console_access": false,
+  "pushed": false,
+  "source_branch": "development/g4-host-registration",
+  "integrated_source_commit": "ccf20f4dbb70ac813077e9ca798c9a3f623788dc",
+  "integrated_sanitizer_ctests": {
+    "passed": 31,
+    "failed": 0
+  },
+  "integrated_checkout_cmake_sha256": "1bc2c0d465880f3b7f4cbb41b536e4a359db4a3bde80e201ce910a71bb1a55bd",
+  "checkout_note": "Git blobs match frozen source exactly; Windows CMakeLists.txt checkout uses CRLF, checked against canonical LF bytes.",
+  "protected_inventory_digest_format": "SHA256 of json.dumps(mapping, sort_keys=True) encoded as UTF8; raw file hash recorded separately below.",
+  "native_audits": {
+    "raw_pie": {
+      "bundle": [
+        344064,
+        352200
+      ],
+      "wrapper": [
+        375688,
+        375712
+      ],
+      "init_array": [
+        376328,
+        376336
+      ],
+      "ctor": 352,
+      "wrapper_relative_addend": 344064,
+      "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+      "relro_contract": "linker-designated .data.rel.ro RW load",
+      "native_executed": false
+    },
+    "converted_eboot": {
+      "bundle": [
+        344064,
+        352200
+      ],
+      "wrapper": [
+        375688,
+        375712
+      ],
+      "init_array": [
+        376328,
+        376336
+      ],
+      "ctor": 352,
+      "wrapper_relative_addend": 344064,
+      "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+      "relro_contract": "PT_GNU_RELRO",
+      "native_executed": false
+    }
+  },
+  "artifact_hashes": {
+    "llvm-pie.elf": "9c92c6fcbc741ea9332d3015355f885681a860ee58a5a0ca3cfb49c666dbfc3f",
+    "eboot.elf": "b2e420986604ec39987f6db0e0a6c1695dcf7412df477d52a9b2265fee81e786",
+    "linux-normal": "ca6da3838339b5feabf187a97d395dc7565b79292907187ef5ed4386c65f783e",
+    "linux-partial": "0c0ae6bb0414dc936c11a1cc83a781ad82f74afcc6d3f1da6128ff0837e7a274"
+  },
+  "independent_review": "Source, genuine compiler Linux lifecycle, all68 output identities, PS5 exact wrapper/bundle/relocations/RELRO and59 imports reviewed; no remaining findings."
+}

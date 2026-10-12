@@ -62,9 +62,9 @@ Updated: 2026-10-12, America/New_York.
   not proof of a leak, but does not satisfy the declared release prerequisite.
   Hold the second arithmetic cycle and private304 launch while resolving that
   evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
-- The current host suite passes 30 sanitizer CTests with the real HIP bundle
-  fixtures enabled; the final bundle/inspector changes pass all three affected
-  cases. The exact frozen vector source also passes
+- The current host suite passes 31 sanitizer CTests with real HIP bundle
+  fixtures and the checked registration model enabled. The earlier bundle/inspector
+  changes also passed all three affected cases. The exact frozen vector source passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
   `evidence/offline-candidate-host-c37f0db.json`. Host checks are not GPU evidence.
@@ -198,8 +198,20 @@ truncation, malformed directories, ambiguous targets and 2,000 mutation trials
 pass sanitizer checks. The reader cross-compiles with the pinned PS5 SDK.
 See `evidence/offline-fat-binary-reader.json` and
 `docs/HIP_FAT_BINARY_BOUNDARY.md`. No HIP registration exports, normal host launch
-or new native execution is implemented by this unit. The next G4 preparation is
-a single-TU linker-bounded wrapper/bundle and actual constructor registration.
+or new native execution is implemented by this unit.
+
+The single-TU registration control is frozen at `08a5f52` and integrated into the
+development branch. Actual ROCm6.2.4 compiler constructors register an owned
+module and host-token binding on Linux, with normal and partial-failure teardown
+checked through genuine compiler callbacks. Launch returns `hipErrorNotSupported`
+and submits no work. PS5 compilation, raw PIE linking and conversion preserve the
+bounded wrapper/bundle, relocations, constructor entry and converted RELRO.
+Independent review verified 68 outputs, 59 imports and 242 untouched baseline
+files; all 31 integrated sanitizer tests pass. See
+`evidence/offline-host-registration-control.json` and
+`docs/HIP_HOST_REGISTRATION_CONTROL.md`. The measured SDK lacks the destructor-bearing
+TLS import; this serialized control does not qualify threads, native exit, GPU
+launch or G4 acceptance.
 
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
@@ -237,24 +249,23 @@ See `evidence/offline-therock-component-completion.json`. Full ROCm distribution
 artifact packaging and upstream tests remain separate work. The build and logs
 under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
-The next hardware candidate is the frozen `5b74ac8` combined arithmetic image,
-as G2 item 5 explicitly requires. Its offline readiness and host evidence are
-recorded, and the package catalog preserves all 19 earlier entries. Reviewed
-controls are bound to committed catalog `2ad6d9b` and the exact candidate tools;
-their first deployment invocation stopped at the busy-console idle guard.
-The portable private-call compiler reproduction and exact 304-byte native package are
-now ready offline. Check user-selected .40 once, with both coordination locks,
-declared services, foreground idle and the frozen read-only PID204 status probe.
-Require recovery evidence separately from foreground idle. If available, run the
-unchanged arithmetic control before the experimental buffer-call image. Qualify
-two separately reviewed clean arithmetic cycles for G2; a private-call pass is a
-separate G3 observation. This
-supersedes the planned vector-only cycle-two action;
-preserve that control and its first-cycle evidence, but do not spend console time
-on it as a G2-closing test. The installed vector image and log must still be
-verified and preserved before any replacement. No console polling is needed while
-offline work can advance. Full G2 remains open for the combined-candidate proof,
-repeated lifecycle check and final acceptance audit.
+Resolve the .40 older-loader layer-release evidence gap offline before another
+launch. Its first combined arithmetic cycle passed compute checks but remains
+partial-pass under the unchanged release criterion. Do not infer a leak solely
+from its retained registered image, substitute newer local source for deployed
+identity, change settings or automatically repeat the run. Preserve its installed
+arithmetic image and successful result. The original CPU image was saved under a
+unique verified backup name before replacement.
+
+The portable compiler reproduction and exact304 native package remain ready
+offline. Once the control's lifecycle prerequisite is established, test private304
+once with fresh idle/recovery checks under both locks. Two separately accepted
+clean arithmetic cycles and final mapping to the written requirements are still
+needed for G2; private-call execution is a separate G3 observation. Current version2
+controls bind the 26-entry catalog. Never reuse consumed receipts, reset their
+markers or apply old log-absence assumptions. Continue offline work without
+console polling; the next G4 work should address the actual client's narrow
+runtime requirements and architecture comparison, not add success-returning stubs.
 Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
 corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
 checks, native startup/import/ISA and package extraction checks pass. Both measured
@@ -440,3 +451,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G4 preparation | 89c0644 | bounded fat-binary reader and inspector consume12 real HIP objects; sanitizer and SDK checks pass | evidence/offline-fat-binary-reader.json | next: bounded constructor registration; no runtime or hardware qualification
 - 2026-10-12 | G3 offline | 2b863a7 | six atomic kernels packaged and independently verified | evidence/offline-atomic-native-readiness.json | GPU qualification pending
 - 2026-10-12 | G2 partial-pass | 5b74ac8 | FW12.70 arithmetic146 passed; layer release unproven | evidence/native-arithmetic-fw1270-cycle1.json | hold launches
+- 2026-10-12 | G4 offline | 08a5f52 | genuine compiler registration controls, PS5 link checks and31 sanitizer tests pass | evidence/offline-host-registration-control.json | native launch unsupported
