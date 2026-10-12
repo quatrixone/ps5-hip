@@ -85,12 +85,21 @@ template<class Record> int compare(const void* left, const void* right) {
     if (!order && a.f_type != b.f_type) order = a.f_type < b.f_type ? -1 : 1;
     return order;
 }
+struct QueryTrace {
+    bool attempted = false;
+    size_t capacity_records = 0;
+    long capacity_bytes = 0;
+    int returned = 0;
+    int error = 0;
+};
 template<class Record> struct Snapshot {
     Record* rows = nullptr;
     size_t count = 0;
     size_t matching = 0;
     int query_errno = 0;
     Result result = Result::query_error;
+    QueryTrace initial;
+    QueryTrace fills[3];
     ~Snapshot() { free(rows); }
     Snapshot() = default;
     Snapshot(const Snapshot&) = delete;
@@ -101,9 +110,12 @@ template<class Record, class Query>
 void collect(Snapshot<Record>& out, uint32_t version, Query query,
              void* (*allocate)(size_t, size_t) = calloc) {
     if (out.rows) { out.result = Result::malformed; return; }
+    out.initial.attempted = true;
     errno = 0;
     const int size = query(nullptr, 0);
     out.query_errno = errno;
+    out.initial.returned = size;
+    out.initial.error = out.query_errno;
     if (size < 0) return;
     if (static_cast<size_t>(size) > max_records - 16 ||
         sizeof(Record) > static_cast<size_t>(LONG_MAX) / max_records) {
@@ -113,9 +125,15 @@ void collect(Snapshot<Record>& out, uint32_t version, Query query,
     for (int attempt = 0; attempt != 3; ++attempt) {
         auto* rows = static_cast<Record*>(allocate(capacity, sizeof(Record)));
         if (!rows) { out.result = Result::allocation_error; return; }
+        auto& trace = out.fills[attempt];
+        trace.attempted = true;
+        trace.capacity_records = capacity;
+        trace.capacity_bytes = static_cast<long>(capacity * sizeof(Record));
         errno = 0;
         const int count = query(rows, static_cast<long>(capacity * sizeof(Record)));
         out.query_errno = errno;
+        trace.returned = count;
+        trace.error = out.query_errno;
         if (count < 0) { free(rows); return; }
         if (static_cast<size_t>(count) >= capacity) {
             free(rows);

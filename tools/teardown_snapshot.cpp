@@ -28,6 +28,17 @@ static void hex(const void* pointer, size_t size) {
 static void print_snapshot(unsigned index, const teardown::Snapshot<struct statfs>& snapshot) {
     printf("PS5HIP TEARDOWN SNAPSHOT index=%u result=%s count=%zu matching=%zu errno=%d\n",
                 index, teardown::name(snapshot.result), snapshot.count, snapshot.matching, snapshot.query_errno);
+    const auto& initial = snapshot.initial;
+    printf("PS5HIP TEARDOWN INITIAL snapshot=%u attempted=%u return_signed=%d return_hex=0x%08x errno=%d\n",
+                index, static_cast<unsigned>(initial.attempted), initial.returned,
+                static_cast<unsigned>(initial.returned), initial.error);
+    for (unsigned attempt = 0; attempt != 3; ++attempt) {
+        const auto& trace = snapshot.fills[attempt];
+        printf("PS5HIP TEARDOWN FILL snapshot=%u attempt=%u attempted=%u capacity_records=%zu capacity_bytes=%ld return_signed=%d return_hex=0x%08x errno=%d\n",
+                    index, attempt + 1, static_cast<unsigned>(trace.attempted),
+                    trace.capacity_records, trace.capacity_bytes, trace.returned,
+                    static_cast<unsigned>(trace.returned), trace.error);
+    }
     if (snapshot.result != teardown::Result::complete) return;
     for (size_t i = 0; i != snapshot.count; ++i) {
         const auto& row = snapshot.rows[i];
@@ -43,11 +54,12 @@ static void print_snapshot(unsigned index, const teardown::Snapshot<struct statf
     }
 }
 int main() {
+    static_assert(sizeof(int) == 4 && sizeof(unsigned) == 4);
     // Two *128 bounded relevant records; SDK path lengths keep output below256KiB.
     static_assert(sizeof(((struct statfs*)nullptr)->f_mntonname) <= 88);
     static_assert(sizeof(((struct statfs*)nullptr)->f_mntfromname) <= 88);
     static_assert(sizeof(((struct statfs*)nullptr)->f_fstypename) <= 16);
-    printf("PS5HIP TEARDOWN BEGIN title=PPSA99014 observed_pid=134 version=1 uid=%u euid=%u statfs_size=%zu statfs_version=0x%x namespace=unqualified\n",
+    printf("PS5HIP TEARDOWN BEGIN title=PPSA99014 observed_pid=134 version=2 uid=%u euid=%u statfs_size=%zu statfs_version=0x%x namespace=unqualified\n",
                 static_cast<unsigned>(getuid()), static_cast<unsigned>(geteuid()), sizeof(struct statfs), STATFS_VERSION);
     const auto before = status();
     teardown::Snapshot<struct statfs> first, second;
