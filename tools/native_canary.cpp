@@ -14,6 +14,9 @@
 #if defined(PS5HIP_CANARY_LDS_STATIC) || defined(PS5HIP_CANARY_LDS_DYNAMIC) || defined(PS5HIP_CANARY_LDS_MIXED)
 #define PS5HIP_CANARY_LDS 1
 #endif
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+#define PS5HIP_CANARY_PRIVATE_CALLS 1
+#endif
 #if defined(PS5HIP_CANARY_REGISTER_SPILL) || defined(PS5HIP_CANARY_PRIVATE_CALLS)
 #define PS5HIP_CANARY_SCRATCH 1
 #endif
@@ -32,7 +35,11 @@ namespace {
 constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
 #elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
 constexpr uint32_t count = 257 * 64, guard_words = 16, poison = 0xa5a5a5a5;
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+constexpr uint32_t scratch_private_bytes = 304, scratch_prefix_bytes = 65536;
+#else
 constexpr uint32_t scratch_private_bytes = 288, scratch_prefix_bytes = 65536;
+#endif
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
 constexpr uint32_t count = 64 * 64, guard_words = 16, poison = 0xa5a5a5a5;
 constexpr uint32_t scratch_private_bytes = 212, scratch_prefix_bytes = 65536;
@@ -222,12 +229,15 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     const auto commands = ps5hip::encode_initial_dispatch(launch);
 #endif
     std::memcpy(kernarg->cpu(), launch.kernargs.data(), launch.kernargs.size());
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+    kernel = "private_calls_buffer"; // Shader entry remains nested_private.
+#endif
 #ifdef PS5HIP_CANARY_WAVE
     std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=64 output_words=256 groups=1 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel);
 #elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
-    std::printf("PS5HIP SUBMIT target=%s kernel=nested_private invocations=16448 groups=257 user_sgprs=8 private_bytes=288 scratch_bytes=%u timeout_ms=2000\n",
-                PS5HIP_CANARY_TARGET, scratch_bytes);
+    std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=16448 groups=257 user_sgprs=8 private_bytes=%u scratch_bytes=%u timeout_ms=2000\n",
+                PS5HIP_CANARY_TARGET, kernel, scratch_private_bytes, scratch_bytes);
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
     std::printf("PS5HIP SUBMIT target=%s kernel=register_spill invocations=64 output_words=4096 groups=1 private_bytes=212 scratch_bytes=%u timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, scratch_bytes);
@@ -256,6 +266,28 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
 }
 #endif
+void run_guarded_experiment(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
+                            const std::vector<uint8_t> &image) {
+    try {
+#ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
+        for (unsigned dispatch = 1; dispatch <= 2; ++dispatch) {
+            std::printf("PS5HIP DISPATCH index=%u/2 kernel=vector_add\n", dispatch);
+            run(queue, object, image);
+        }
+        std::printf("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
+#else
+        run(queue, object, image);
+#endif
+    }
+    catch (const std::exception &error) {
+        if (queue.poisoned()) quarantine(error.what());
+        throw;
+    }
+    catch (...) {
+        if (queue.poisoned()) quarantine("unknown exception");
+        throw;
+    }
+}
 #endif
 } // namespace
 
@@ -273,6 +305,8 @@ int main() {
         "wave_full";
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
         "wave_partial";
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS_BUFFER)
+        "private_calls_buffer";
 #elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
         "nested_private";
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
@@ -318,25 +352,7 @@ int main() {
         const auto image = ps5hip::materialize_code_object(bytes.data(), bytes.size());
         ps5hip::AgcBackend backend;
         ps5hip::SubmissionQueue queue(backend);
-        try {
-#ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
-            for (unsigned dispatch = 1; dispatch <= 2; ++dispatch) {
-                std::printf("PS5HIP DISPATCH index=%u/2 kernel=vector_add\n", dispatch);
-                run(queue, object, image);
-            }
-            std::printf("PS5HIP PASS kernel=vector_add_twice dispatches=2 exact_values=146 guards=unchanged allocations=closed\n");
-#else
-            run(queue, object, image);
-#endif
-        }
-        catch (const std::exception &error) {
-            if (queue.poisoned()) quarantine(error.what());
-            throw;
-        }
-        catch (...) {
-            if (queue.poisoned()) quarantine("unknown exception");
-            throw;
-        }
+        run_guarded_experiment(queue, object, image);
 #endif
         return ps5hip_canary::sync_log() ? 0 : 3;
     } catch (const std::exception &error) {

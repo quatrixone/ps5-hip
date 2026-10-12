@@ -14,6 +14,15 @@ extern "C" unsigned mock_quarantine_sleep(unsigned);
 #include <sys/wait.h>
 
 namespace {
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+constexpr uint32_t model_private = 304, model_stride = 10240, model_ring = 13107200,
+                   model_tmpring = 0xa500, model_outer = 16, model_inner = 160;
+constexpr const char *model_profile = "private_calls_buffer";
+#else
+constexpr uint32_t model_private = 288, model_stride = 9216, model_ring = 11796480,
+                   model_tmpring = 0x9500, model_outer = 0, model_inner = 144;
+constexpr const char *model_profile = "nested_private";
+#endif
 struct Allocation { void *cpu; uint64_t bytes, gpu; unsigned holds = 0; };
 std::map<int64_t, Allocation> allocations;
 int64_t next_id = 1;
@@ -73,12 +82,12 @@ struct Model : ps5hip::SubmissionBackend {
         require(regs.at(0xb81c) == 64 && regs.at(0xb820) == 1 && regs.at(0xb824) == 1);
         const auto kernel = std::find_if(object.kernels.begin(), object.kernels.end(),
                                         [](const auto &k) { return k.name == "nested_private"; });
-        require(kernel != object.kernels.end() && kernel->private_bytes == 288 && kernel->properties == 0x429);
+        require(kernel != object.kernels.end() && kernel->private_bytes == model_private && kernel->properties == 0x429);
         const uint64_t entry = uint64_t(regs.at(0xb830)) << 8 | uint64_t(regs.at(0xb834)) << 40;
         require(entry >= kernel->entry_address);
         const uint64_t module = entry - kernel->entry_address;
         require(std::memcmp(translate(module, image.size()), image.data(), image.size()) == 0);
-        require(regs.at(0xb848) == kernel->rsrc1 && regs.at(0xb84c) == 0x91 && regs.at(0xb860) == 0x9500);
+        require(regs.at(0xb848) == kernel->rsrc1 && regs.at(0xb84c) == 0x91 && regs.at(0xb860) == model_tmpring);
         const uint64_t arg_address = regs.at(0xb910) | uint64_t(regs.at(0xb914)) << 32;
         const auto *args = static_cast<const uint8_t *>(translate(arg_address, 16));
         uint64_t input_address = 0, output_address = 0;
@@ -89,31 +98,42 @@ struct Model : ps5hip::SubmissionBackend {
         const uint64_t scratch_base = regs.at(0xb918) | uint64_t(regs.at(0xb91c)) << 32;
         require(regs.at(0xb900) == uint32_t(scratch_base) &&
                 regs.at(0xb904) == (uint32_t(scratch_base >> 32) | 0x80000000u) &&
-                regs.at(0xb908) == 11796480 && regs.at(0xb90c) == 0x21c14fac);
+                regs.at(0xb908) == model_ring && regs.at(0xb90c) == 0x21c14fac);
         require(scratch_base == containing(scratch_base).gpu + 65536);
-        auto *scratch = static_cast<uint32_t *>(translate(scratch_base, 11796480));
+        auto *scratch = static_cast<uint32_t *>(translate(scratch_base, model_ring));
         if (failure == 1) return -10;
+        if (failure == 4) throw ps5hip::ObjectError("injected submit exception");
+        if (failure == 5) throw 7;
         for (uint32_t i = 0; i < count; ++i) {
             require(input[i] == uint32_t(uint64_t(i) * 4099 + 17) && output[i] == poison);
             const uint32_t x = input[i], lane = i % 32, wave = i / 32;
-            const uint32_t frame = 144, cumulative = frame + 144; // Zero-byte leaf frame.
-            require(cumulative * 32 == 9216 && (wave + 1) * 9216 <= 11796480);
+            const uint32_t cumulative = model_private; // Zero-byte leaf frame.
+            require(cumulative * 32 <= model_stride && (wave + 1) * model_stride <= model_ring);
             auto private_word = [&](uint32_t byte) -> uint32_t & {
                 require(byte % 4 == 0 && byte < cumulative);
-                const uint32_t offset = wave * 9216 + (byte / 4) * 128 + lane * 4;
-                require(offset + 4 <= 11796480);
+                const uint32_t offset = wave * model_stride + (byte / 4) * 128 + lane * 4;
+                require(offset + 4 <= model_ring);
                 return scratch[offset / 4];
             };
             if (corruption == 14) { output[i] = source_result(x); calls += 2; continue; }
-            for (unsigned j = 0; j < 32; ++j) private_word(j * 4) = x + j;
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+            // ABI/WWM sentinels verify source-array writes do not alias measured save slots.
+            private_word(144) = x ^ 0x12345678; private_word(148) = x ^ 0x87654321;
+            private_word(288) = x ^ 0x31415926;
+#endif
+            for (unsigned j = 0; j < 32; ++j) private_word(model_outer + j * 4) = x + j;
             ++calls; // Retained middle call's source behavior, not ISA emulation.
-            for (unsigned j = 0; j < 32; ++j) private_word(frame + j * 4) = private_word(j * 4) + j;
+            for (unsigned j = 0; j < 32; ++j) private_word(model_inner + j * 4) = private_word(model_outer + j * 4) + j;
             ++calls;
-            const uint32_t updated = private_word(frame + (x & 31u) * 4) + 3u;
-            if (corruption != 15) private_word(frame + (x & 31u) * 4) = updated;
-            const uint32_t leaf = updated + private_word(frame + ((x + 7u) & 31u) * 4);
-            output[i] = leaf + private_word(frame + (x & 31u) * 4) + private_word((x & 31u) * 4);
+            const uint32_t updated = private_word(model_inner + (x & 31u) * 4) + 3u;
+            if (corruption != 15) private_word(model_inner + (x & 31u) * 4) = updated;
+            const uint32_t leaf = updated + private_word(model_inner + ((x + 7u) & 31u) * 4);
+            output[i] = leaf + private_word(model_inner + (x & 31u) * 4) + private_word(model_outer + (x & 31u) * 4);
             require(output[i] == source_result(x, corruption == 15));
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+            require(private_word(144) == (x ^ 0x12345678) && private_word(148) == (x ^ 0x87654321) &&
+                    private_word(288) == (x ^ 0x31415926));
+#endif
         }
         require(calls == 2 * count);
         auto &out_alloc = containing(output_address); auto &in_alloc = containing(input_address);
@@ -129,7 +149,7 @@ struct Model : ps5hip::SubmissionBackend {
         if (corruption == 9) static_cast<uint32_t *>(in_alloc.cpu)[in_alloc.bytes / 4 - 1] ^= 1;
         if (corruption == 10) static_cast<uint32_t *>(scratch_alloc.cpu)[0] ^= 1;
         if (corruption == 11) scratch[-1] ^= 1;
-        if (corruption == 12) scratch[11796480 / 4] ^= 1;
+        if (corruption == 12) scratch[model_ring / 4] ^= 1;
         if (corruption == 13) static_cast<uint32_t *>(scratch_alloc.cpu)[scratch_alloc.bytes / 4 - 1] ^= 1;
         if (corruption == 16) std::swap(output[0], output[count - 1]);
         const auto *end = words + length - 8;
@@ -181,7 +201,17 @@ int main(int argc, char **argv) {
         const std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)), {});
         const auto object = ps5hip::inspect_code_object(bytes.data(), bytes.size());
         const auto image = ps5hip::materialize_code_object(bytes.data(), bytes.size());
-        require(object.target == PS5HIP_CANARY_TARGET && count == 16448 && scratch_private_bytes == 288);
+        require(object.target == PS5HIP_CANARY_TARGET && count == 16448 && scratch_private_bytes == model_private);
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS_BUFFER
+        // The historical 288-byte metadata cannot silently select this fixed profile.
+        auto historical = object;
+        for (auto &kernel : historical.kernels) if (kernel.name == "nested_private") kernel.private_bytes = 288;
+        Model old_model(historical, image, 0); ps5hip::SubmissionQueue old_queue(old_model);
+        bool old_rejected = false;
+        try { run_guarded_experiment(old_queue, historical, image); }
+        catch (const ps5hip::ObjectError &) { old_rejected = true; }
+        require(old_rejected && !old_queue.poisoned() && old_model.submits == 0 && allocations.empty() && owned_close == 0);
+#endif
         for (uint32_t base : {0u, UINT32_MAX - 63u, 0x7fffffe0u})
             for (unsigned j = 0; j < 32; ++j) {
                 const uint32_t x = base + j;
@@ -197,30 +227,34 @@ int main(int argc, char **argv) {
             const int saved_out = ::dup(STDOUT_FILENO), saved_err = ::dup(STDERR_FILENO);
             require(saved_out >= 0 && saved_err >= 0 && ::dup2(::fileno(log), STDOUT_FILENO) >= 0 && ::dup2(::fileno(log), STDERR_FILENO) >= 0);
             bool rejected = false;
-            try { run(queue, object, image); } catch (const ps5hip::ObjectError &) { rejected = true; }
+            try { run_guarded_experiment(queue, object, image); } catch (const ps5hip::ObjectError &) { rejected = true; }
             std::fflush(nullptr); require(::dup2(saved_out, STDOUT_FILENO) >= 0 && ::dup2(saved_err, STDERR_FILENO) >= 0);
             ::close(saved_out); ::close(saved_err); std::rewind(log);
             char text[2048]{}; const auto n = std::fread(text, 1, sizeof(text), log); std::fclose(log);
             const std::string logged(text, n);
+            require(logged.find(std::string("SUBMIT target=") + PS5HIP_CANARY_TARGET + " kernel=" + model_profile +
+                    " invocations=16448 groups=257 user_sgprs=8 private_bytes=" + std::to_string(model_private) +
+                    " scratch_bytes=" + std::to_string(model_ring) + " timeout_ms=2000") != std::string::npos);
             require(rejected == (corruption != 0) && !queue.poisoned() && allocations.empty() && owned_close == 0);
             require(model.submits == 1 && model.calls == 2 * count && model.polls == 0);
             require(explicit_closed == (rejected ? 2u : 7u) && destructor_closed == (rejected ? 5u : 0u));
-            require((logged.find("PASS kernel=nested_private exact_values=16448 guards=unchanged allocations=closed") != std::string::npos) == !rejected);
-            if (!rejected) require(logged.find("SCRATCH payload=modified guards=unchanged") < logged.find("PASS kernel=nested_private"));
+            require((logged.find(std::string("PASS kernel=") + model_profile + " exact_values=16448 guards=unchanged allocations=closed") != std::string::npos) == !rejected);
+            if (!rejected) require(logged.find("SCRATCH payload=modified guards=unchanged") < logged.find(std::string("PASS kernel=") + model_profile));
         }
-        for (unsigned failure = 1; failure <= 3; ++failure) {
+        for (unsigned failure = 1; failure <= 5; ++failure) {
             FILE *log = std::tmpfile(); require(log); std::fflush(nullptr);
             const auto child = ::fork();
             if (!child) {
                 explicit_closed = destructor_closed = 0;
                 if (::dup2(::fileno(log), STDOUT_FILENO) < 0 || ::dup2(::fileno(log), STDERR_FILENO) < 0) ::_exit(2);
                 Model model(object, image, 0, failure); ps5hip::SubmissionQueue queue(model);
-                quarantined_model = &model; quarantined_queue = &queue; run(queue, object, image); ::_exit(3);
+                quarantined_model = &model; quarantined_queue = &queue; run_guarded_experiment(queue, object, image); ::_exit(3);
             }
             int status = 0; require(child > 0 && ::waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
             std::rewind(log); char text[2048]{}; const auto n = std::fread(text, 1, sizeof(text), log); std::fclose(log);
             const std::string logged(text, n);
-            require(logged.find("PS5HIP submission status=" + std::to_string(failure)) != std::string::npos &&
+            require((failure <= 3 ? logged.find("PS5HIP submission status=" + std::to_string(failure)) != std::string::npos :
+                     logged.find(failure == 4 ? "injected submit exception" : "unknown exception") != std::string::npos) &&
                     logged.find("PS5HIP QUARANTINED: GPU ownership unresolved") != std::string::npos &&
                     logged.find("PS5HIP PASS") == std::string::npos && allocations.empty());
         }
