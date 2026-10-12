@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "classification": "Owned native data and pinned full-header HIP memory ABI validated offline",
+  "source_commit": "b4ab3cffd9f4099b7085dfb1e736d00ba6df730e",
+  "source_tree": "8fc849bf35ff39e892b61ca0914a886efce8b3cd",
+  "source_directory": ".local/g4-native-data-registry",
+  "source_sha256": {
+    "CMakeLists.txt": "da203796c9cf8f21bb9b42c0644d63980138ed761ce528b860d23cfc613c812b",
+    "docs/NATIVE_DATA_REGISTRY.md": "624d2cb272006e5fb33e5003265f78370458605ed3eaab80e1764d589fe00c71",
+    "include/ps5hip/native_data.h": "0c12740989cc12fd8f9ab5dd4a6edf2cc1d7ece3d460d1527eaddc5bd597dbc9",
+    "include/ps5hip/native_memory.h": "c0bf7151e9785e6d37fa6f6125fbdb9da33699709e261ace5b00e5df15dbc474",
+    "src/native_data.cpp": "797dbe1c8e04096b804c1fdad79d06ee9f0e402d1e6b9608872930e87ec8ca44",
+    "src/native_memory.cpp": "ced75f4ab77aacd34de517e21c37a32e83e7aa1a2f65796ca86a71a717f1f8f1",
+    "tests/hip_memory_client.cpp": "e458a2ee7e385cc8d35208f07c07636f826166a9a5f6725629b65d9ee78378fc",
+    "tests/hip_memory_syscalls.cpp": "858c8211c26d7a014683aa689b73b346807e9f99a9b4858c06e63b9099bb06a0",
+    "tests/native_data_test.cpp": "214f56eb902fd8a936a3ca2ed788325a533e827fc3883ab524230cdde757b2aa",
+    "tests/submission_test.cpp": "abb1d015fabdbe3ebef026f7ad518f056bb7bcc05e95f4f9c672d1406bcfad1b",
+    "tools/hip_memory_control.cpp": "5ccc439d9f36b88e5038dd0bd893fdb44598aaa559eec6649c162e3efe2a97a1",
+    "tools/probe_hip_memory.py": "1fe83bb9c37707436d8ad27e3e2621505c9e6dc5817844a700dd24c12c872c1a"
+  },
+  "isolated_sanitizer_tests_passed": 37,
+  "integrated_host_suite": {
+    "source_commit": "ef8abaf48497df05f38f397ad9db6217cbcca2ba",
+    "source_tree": "7cde9b667366f19a5edb200b668b55f62313ccbc",
+    "sanitizers": "ASan/UBSan",
+    "tests_passed": 46,
+    "source_unchanged": true,
+    "receipt": "results/native-math-memory-integration-v1/receipt.json",
+    "receipt_sha256": "a4b0d69311e1e0317b1b946448abe38496d96e546e2f3369a6a98b06e32d19d8",
+    "fixture_scope": [
+      "Real pinned HIP objects and constructor/capture bundle",
+      "Native AGC import control",
+      "Four frozen OCML objects and full source provenance",
+      "MPFR directed certificates",
+      "Native memory/data/queue ownership and math guard models"
+    ]
+  },
+  "freeze": ".local/g4-native-data-registry/results/host-qualification-v1/freeze-binding.json",
+  "freeze_sha256": "bf36dccd90fcea03da6e9a7af28f75790023bfa7d8d1067cf138dca5bc0f9dbd",
+  "probe_receipt": ".local/g4-native-data-registry/results/hip-memory-v2/receipt.json",
+  "probe_receipt_sha256": "0fd625b97b0a0c86db9342bf809b62708fef08b2eb8fe7a6f0c88fdd0b544b1e",
+  "independent_review": "results/native-data-independent-review-v1.json",
+  "independent_review_sha256": "a163c24008a8b6a586b43186f69f4b60e8f3b52bf9f27be67b5c14a2f5da4162",
+  "probe_artifacts_verified": 57,
+  "protected_files_unchanged": 3102,
+  "authentic_header_files": 68,
+  "abi_definitions": [
+    "hipMalloc",
+    "hipFree",
+    "hipMemcpy",
+    "hipGetLastError",
+    "hipPeekAtLastError",
+    "hipGetErrorString",
+    "hipLaunchKernel"
+  ],
+  "native_elf_sha256": "1b401fcea8153fc093c249d31e8c6ef496b197bc3c64e9533f036da0fedc14b9",
+  "native_memory_imports": [
+    "sceKernelGetDirectMemorySize",
+    "sceKernelAllocateDirectMemory",
+    "sceKernelMapDirectMemory",
+    "sceKernelMunmap",
+    "sceKernelReleaseDirectMemory"
+  ],
+  "native_hip_imports": 0,
+  "native_agc_imports": 0,
+  "checks": [
+    "Logical extents exclude 16KiB rounded padding; checked interior pointers",
+    "H2D/D2H reject invalid extents and all registered backing aliases",
+    "Exact-base free refuses GPU ownership; completed queue use allows free",
+    "Previously closed shared hold rejects resubmission",
+    "Clean native setup failures unwind and preserve existing allocations",
+    "Retained cleanup poisons registry; supported zero-size ABI operations also reject poison",
+    "C++ exceptions remain within C ABI; opaque native failure maps to Unknown"
+  ],
+  "registration_control_changed": false,
+  "launch_capture_control_changed": false,
+  "console_access": false,
+  "native_executed": false,
+  "gpu_calls": 0,
+  "hardware_validated": false,
+  "limits": [
+    "Serialized single host caller; no per-thread error qualification",
+    "Trusted valid host/output storage",
+    "No cache/GPU visibility qualification",
+    "No GPU/native execution",
+    "Installed compiler resource headers/static archives not hermetically inventoried",
+    "Distinct memory-only control; genuine compiler launch is not connected yet",
+    "Raw pointer address reuse cannot prove allocation identity; serialized ownership required"
+  ]
+}

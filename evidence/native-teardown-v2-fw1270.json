@@ -1,0 +1,91 @@
+{
+  "classification": "inconclusive",
+  "started_utc": "2026-10-12T15:36:14.474865+00:00",
+  "finished_utc": "2026-10-12T15:36:16.243241+00:00",
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "source_commit": "0bf7fb9944e0017ef4ba8530adbf34ab9c664cf1",
+  "elf_sha256": "26b9e178e32dd066115d46ac6525e8b3351b086632729973c4596ddbfdf8638a",
+  "payload_attempted": true,
+  "title_launched": false,
+  "gpu_calls": 0,
+  "release": "unknown",
+  "accepted": false,
+  "hardware_gate_passed": false,
+  "observation_complete": true,
+  "idle_after": true,
+  "owned_locks_released": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "schema": 1,
+  "runner_sha256": "0fd1bbd49e19584bb82fd3ba94e063e7270b1204eef2acf8d534c504fc834b49",
+  "manifest_sha256": "0fe7a6a254ce333db81a69edb4f86c72cc0c4d2ffae281e7c7524c42a3542a5d",
+  "raw_directory": "results/teardown-console-control-v2/observation-20261012T153614.474865Z",
+  "raw_receipt_sha256": "e7adc4c6efae0d4d6b2bc5cbcf6ad55200accf29a9460192d9417ca56fa3e51e",
+  "raw_sha256": {
+    "after.log": "8eb02fb60efa0ba71229d3073fb0234c82b1b58185eb5b4cd934b97190c898e2",
+    "before.log": "8eb02fb60efa0ba71229d3073fb0234c82b1b58185eb5b4cd934b97190c898e2",
+    "immediately-before.log": "8eb02fb60efa0ba71229d3073fb0234c82b1b58185eb5b4cd934b97190c898e2",
+    "klog-after-send.log": "24f090249b15daf387d560827f4941f7bfa4895b160f1304d504f8588ccf9382",
+    "klog-before-send.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "klog.log": "24f090249b15daf387d560827f4941f7bfa4895b160f1304d504f8588ccf9382",
+    "snapshot.log": "afe540d8b5938db3dad4706a1864b3878979ba4078cb7fdcb092c16aefca9681"
+  },
+  "independent_review": "results/teardown-v2-observation-independent-review-v1/review.json",
+  "independent_review_sha256": "ccd4b6604e9a6e5f3381d52bc710628f412b9de932ca602f89f577b643ee9a5c",
+  "consumed_marker": "results/teardown-console-control-v2/consumed.json",
+  "consumed_marker_sha256": "c701aeaca1e9885b976fe7a4523d2ea1f6b81e4af030e083c84325bb43dc06a1",
+  "initial_queries": [
+    {
+      "return_signed": 1110,
+      "return_hex": "0x00000456",
+      "errno": 0
+    },
+    {
+      "return_signed": 1110,
+      "return_hex": "0x00000456",
+      "errno": 0
+    }
+  ],
+  "mount_record_ceiling": 1024,
+  "snapshot_results": [
+    "count_bound",
+    "count_bound"
+  ],
+  "fill_queries_attempted": 0,
+  "mount_rows_collected": 0,
+  "usable_baseline": false,
+  "initialized_zero_counts_are_empty_mount_table": false,
+  "bracketed_status": "PID134 signal-zero ESRCH and both application-ID queries absent before/after",
+  "shadowmount_history_continuity": {
+    "before": true,
+    "immediately-before": true,
+    "after": true
+  },
+  "payload_exit": {
+    "pid": 197,
+    "exit_value": 2
+  },
+  "warning_comparison": {
+    "prior_v1_warning_lines": [
+      "[KERNEL] WARNING: called fdescfree(), but remain BUDGET_FD_FILE (ret=461)"
+    ],
+    "capture_before_send_warning_lines": [],
+    "capture_after_send_warning_lines": [
+      "[KERNEL] WARNING: called fdescfree(), but remain BUDGET_FD_FILE (ret=461)"
+    ],
+    "causal_attribution": false,
+    "limit": "Host capture-byte boundary, not a kernel event timestamp or complete warning history; missing text is not absence proof."
+  },
+  "private304_executed": false,
+  "math_candidate_executed": false,
+  "next_action": "Offline reassessment of provider/return/layout and a bounded enumeration budget informed by1110; no automatic third observation or GPU launch. Preserve both consumed markers and installed arithmetic evidence."
+}

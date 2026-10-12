@@ -1,8 +1,32 @@
 # Read-only teardown snapshot diagnostic
 
-This is an offline-built diagnostic, not a release certificate. No console
-execution is recorded. It cannot satisfy or waive the existing G2/private304
+This is a bounded read-only diagnostic, not a release certificate. Its two .40
+observations remain inconclusive. It cannot satisfy or waive the existing G2/private304
 release prerequisite. Source is isolated from all native compute candidates.
+
+Version 2 executed once on idle .40 at 15:36 UTC on October 12. Both initial
+queries returned 1110 (`0x456`) with errno 0, above the fixed 1024-record ceiling.
+Neither snapshot allocated or issued a fill query. The complete transcript,
+process/application absence, healthy services and owned-lock release are preserved
+in [the observation](../evidence/native-teardown-v2-fw1270.json). No mount rows or
+usable baseline were obtained. The same FD-budget warning recurred without an
+established cause. Both diagnostic one-use markers are consumed.
+
+After these two inconclusive observations, reassess the provider, record-layout
+and enumeration contract offline. A revised budget may use the measured return
+as evidence, but it needs a separately frozen and reviewed candidate. Neither
+the raw return nor a larger buffer establishes namespace completeness or release.
+
+The [offline reassessment](../evidence/offline-teardown-count1110-design.json)
+proposes a fixed 2048-record ceiling with the same provider, layout and call
+sequence. Under the SDK count contract, 1110 plus 16 spare slots requires 1126
+records / 531,472 bytes; two tables require at most 1,933,312 bytes, excluding
+allocator overhead. No
+revised collector is implemented or run. The pinned FreeBSD 9 reference confirms
+record-count returns and byte-sized buffers, but can skip busy or hidden mounts
+and redact identities. A non-full validated returned buffer does not prove a
+complete global namespace. Any revised case must retain unknown release status
+and reject missing known registration anchors; it cannot itself qualify G2/304.
 
 Version 2 adds query telemetry only. The version 1 observation returned
 `count_bound` twice before allocating or filling a mount table. Its printed

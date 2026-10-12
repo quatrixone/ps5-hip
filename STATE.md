@@ -62,8 +62,9 @@ Updated: 2026-10-12, America/New_York.
   not proof of a leak, but does not satisfy the declared release prerequisite.
   Hold the second arithmetic cycle and private304 launch while resolving that
   evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
-- The current host suite passes 36 sanitizer CTests with real HIP bundle
-  fixtures, registration/capture models, OCML artifacts and telemetry v2 enabled. The earlier bundle/inspector
+- The current host suite passes 46 sanitizer CTests with real HIP bundle
+  fixtures, registration/capture models, OCML objects, directed MPFR certificates,
+  owned native data and telemetry v2 enabled. The earlier bundle/inspector
   changes also passed all three affected cases. The exact frozen vector source passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
@@ -238,6 +239,19 @@ All32 isolated and34 integrated sanitizer tests pass; parent verification checke
 147 probe artifacts and3,728 untouched baseline files. See
 `evidence/offline-host-launch-capture.json` and `docs/HIP_HOST_LAUNCH_CAPTURE.md`.
 
+Owned native data and the separate full-header HIP memory control are frozen at
+`b4ab3cf` and integrated. Logical extents exclude rounded backing padding; checked
+interior pointers, H2D/D2H copies and exact-base free use actual NativeMemory.
+Clean setup failures preserve existing buffers; retained cleanup poisons the
+registry, including supported zero-size ABI calls. GPU-owned free/copy reject,
+completed queue ownership permits free, and closed holds cannot be resubmitted.
+All 37 isolated sanitizer tests pass; the ordinary typed HIP client also passes
+ASan/UBSan and PS5 compile/link/conversion checks with five direct-memory imports
+and no HIP/AGC imports. Independent review verified 57 artifacts; 3102 protected
+files stayed unchanged. Registration/capture controls remain separate and launch
+still returns unsupported. See `evidence/offline-native-data-memory.json` and
+`docs/NATIVE_DATA_REGISTRY.md`. Native execution/cache visibility remain unqualified.
+
 The exact public ShadowMount1.6beta16 source is now verified at `8566c02`:
 normal exit deliberately retains valid registration images and title nullfs
 mappings. The earlier all-layer-disappearance expectation conflicts with that
@@ -256,6 +270,19 @@ tests pass, with actual artifact mutations. No GPU, numerical-accuracy, complete
 device-library or hermetic-toolchain qualification follows. See
 `docs/OCML_MATH_PROBE.md` and `evidence/offline-ocml-math-probe.json`.
 
+The guarded math candidate is now frozen at `ef9f296`, packaged as image
+`55ce66ac...` and appended as unrun catalog entry 27. Its 257 immutable inputs yield
+1542 results, with full rounded guards and 378 inactive output words checked.
+An independent MPFR 4.2.2 oracle fixes exact FMA/sqrt results, declared 4/3/3/5
+engineering ULP envelopes for sin/exp/log/tanh, special values and subnormal
+requirements before any hardware result. Five numerical tests, 45 isolated and 46
+integrated sanitizer CTests pass, including all 280 kernarg bytes of four actual
+objects. Native startup, 116 imports, FSELF, UFS and retained extraction checks pass;
+5783 prior files are unchanged. Loader/launch objects postdate the proven G2
+candidate, so this is not a harness-only difference. See
+`evidence/offline-native-math-readiness.json` and `docs/NATIVE_MATH_PROFILE.md`.
+No math GPU execution, all-domain accuracy or G3 completion follows.
+
 The read-only diagnostic is frozen at `05b1723`; two focused sanitizer checks,
 SDK compilation and a16-import audit pass. Its one idle .40 observation at14:33UTC
 confirmed historical PID134 ESRCH and empty application-ID queries, but both
@@ -265,8 +292,8 @@ reachable and locks were released; the kernel also emitted an FD-budget warning
 whose cause is unestablished. This is inconclusive and does not supply a usable
 registration baseline or permit another GPU launch. Preserve the one-use marker.
 See `evidence/offline-teardown-snapshot.json` and
-`evidence/native-teardown-snapshot-fw1270.json`. Expose raw initial query values
-offline before considering another observation; do not blindly raise the cap.
+`evidence/native-teardown-snapshot-fw1270.json`. This motivated the separate
+raw-return telemetry candidate; the original marker remains consumed.
 
 Telemetry v2 is frozen at `0bf7fb9` with the same provider, record limits and
 query sequence. It stores exact signed/hex returns and errno for the initial
@@ -277,8 +304,26 @@ the final 36-test integrated sanitizer suite pass. See
 fresh one-use controller. Its 14:52 UTC .40 preflight returned no-run because
 unrelated PPSA99008 PID177 was active. No diagnostic send, title action or remote
 mutation followed; services were reachable and both locks released. The v2
-marker remains absent and the v1 marker consumed. See
+marker then remained absent and the v1 marker consumed. See
 `evidence/native-teardown-v2-no-run.json`; do not poll for availability.
+
+At 15:36 UTC, after the memory/math offline milestone, idle .40 executed the frozen
+telemetry v2 once. Both initial queries returned 1110/errno 0, exceeding its 1024
+record ceiling; no allocation or fill query occurred. PID134 was ESRCH and both
+app-ID queries absent before/after; declared services stayed reachable and both
+locks released. The FD-budget warning recurred without an established cause.
+This remains inconclusive with release unknown; the v2 marker is now consumed.
+See `evidence/native-teardown-v2-fw1270.json`. Reassess the collector offline
+using the measured 1110 return and SDK contract; no automatic third observation
+or GPU launch is authorized by these results.
+
+Offline reassessment proposes a separate 2048-record collector ceiling using
+the measured return and pinned SDK contract, with unchanged provider/layout/calls
+and bounded memory/output. FreeBSD reference source confirms count/byte units but
+also skipped busy/hidden mounts and possible identity redaction; no firmware ABI
+or global completeness follows. No revised collector exists yet. See
+`evidence/offline-teardown-count1110-design.json`; keep release unknown and require
+fresh source freeze, tests/import audit and independent review before any new case.
 
 ## Next action
 
@@ -312,10 +357,11 @@ under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 The exact older-loader source explains persistent registration, and the future
 lifecycle criterion is explicitly corrected in `docs/G2_ARITHMETIC_ACCEPTANCE.md`.
 The original first combined arithmetic cycle remains partial-pass. The read-only
-mount observation hit its count bound. Raw-query instrumentation v2 is now frozen,
-tested and reviewed, but its one preflight found .40 busy before any payload.
-Use the frozen diagnostic at a later useful idle milestone and review a usable
-baseline before another launch. Do not infer an empty table from
+mount observation hit its count bound. Raw-query instrumentation v2 was later
+executed once while idle and measured 1110 twice, still above the 1024 ceiling.
+Both diagnostic one-use markers are consumed. Reassess the finite record budget,
+provider contract and layout offline, then freeze and review any revised case;
+a usable baseline is still required before another launch. Do not infer an empty table from
 initialized fields, a leak from registration persistence, or deployed identity
 from the banner. Preserve the installed arithmetic image, successful result and
 earlier unique CPU backup. No setting change or automatic repeat is authorized
@@ -325,11 +371,15 @@ The portable compiler reproduction and exact304 native package remain ready
 offline. Once the control's lifecycle prerequisite is established, test private304
 once with fresh idle/recovery checks under both locks. Two separately accepted
 clean arithmetic cycles and final mapping to the written requirements are still
-needed for G2; private-call execution is a separate G3 observation. Current version2
-controls bind the 26-entry catalog. Never reuse consumed receipts, reset their
+needed for G2; private-call execution is a separate G3 observation. Existing version2
+GPU controls bind the previous 26-entry catalog; the current 27-entry catalog needs
+fresh reviewed controls before deployment. Never reuse consumed receipts, reset their
 markers or apply old log-absence assumptions. Continue offline work without
-console polling; the next G4 work should address the actual client's narrow
-runtime requirements and architecture comparison, not add success-returning stubs.
+console polling. The next coherent G4 unit should connect the genuine compiler
+vector stub to owned native data/code/kernargs and the existing blocking queue,
+with lazy AGC initialization, exact results, failed-submit retention and genuine
+unregister. Preserve the separate registration/capture/memory controls; no async
+stream or hardware launch claim follows from their offline checks.
 Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
 corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
 checks, native startup/import/ISA and package extraction checks pass. Both measured
@@ -521,3 +571,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G3 offline | 3730f16 | four OCML math objects reproduce exactly;36 integrated sanitizer tests pass | evidence/offline-ocml-math-probe.json | numerical/GPU checks pending
 - 2026-10-12 | diagnostic | 0bf7fb9 | telemetry v2 built/reviewed; .40 busy at14:52UTC, no payload sent | evidence/native-teardown-v2-no-run.json | await useful idle milestone
 - 2026-10-12 | read-only .40 | 05b1723 | historical PID134 absent;mount count bound prevents baseline;services healthy | evidence/native-teardown-snapshot-fw1270.json | inspect raw query offline
+- 2026-10-12 | G4 offline | b4ab3cf | owned native data and full-header memory ABI pass;37 isolated tests | evidence/offline-native-data-memory.json | connect genuine vector launch
+- 2026-10-12 | G3 offline | ef9f296 | math image/oracle verified;46 integrated tests | evidence/offline-native-math-readiness.json | GPU qualification pending
+- 2026-10-12 | diagnostic | 0bf7fb9 | idle .40 returned1110 twice;1024 cap prevents baseline | evidence/native-teardown-v2-fw1270.json | offline reassessment

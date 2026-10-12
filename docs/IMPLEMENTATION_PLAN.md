@@ -346,6 +346,11 @@ Linux normal and partial-failure teardown pass; PS5 linking and conversion prese
 the checked extents and relocations. Dispatch explicitly returns unsupported.
 This is offline preparation, not working native HIP launch syntax or G4 acceptance.
 
+The separate [owned native data and memory ABI control](NATIVE_DATA_REGISTRY.md)
+now checks real allocation owners, logical copy extents, free, GPU-use refusal and
+terminal poison against pinned full HIP headers. Host models and PS5 linking pass;
+the genuine compiler launch is not connected to that ownership path yet.
+
 The [argument capture control](HIP_HOST_LAUNCH_CAPTURE.md) additionally copies the
 real stub's argument values into owned storage, resolves synthetic live-data
 extents and calls the existing hidden-geometry planner/packet encoder. All34

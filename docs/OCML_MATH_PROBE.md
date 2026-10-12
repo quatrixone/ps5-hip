@@ -84,7 +84,8 @@ failure remain historical evidence in the reference checkout. The isolated
 recipe's first build likewise preserves its `clang++` invocation-name failure.
 None is relabeled as a successful full-library build.
 
-The next numerical step needs a separately frozen native harness, chosen input
-domain and special-value policy, independent reference values/tolerances, full
-output/input/guard checks, and console qualification. This probe supplies compiler
-artifacts for that work; it does not provide those missing acceptance results.
+The separately frozen [native math profile](NATIVE_MATH_PROFILE.md) now supplies
+a fixed257-input corpus, independent directed MPFR reference, special-value policy
+and full output/input/guard checks. Its offline package and numerical checks are
+recorded separately. Console qualification remains missing; this compiler recipe
+does not establish device accuracy or execution.

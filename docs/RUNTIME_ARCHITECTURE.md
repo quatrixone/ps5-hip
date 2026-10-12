@@ -43,6 +43,12 @@ Reopen the decision **before** adding a general asynchronous scheduler, cross-st
 
 ## Immediate complete implementation unit
 
+The owned allocation/copy/free boundary and a distinct full-header memory ABI
+control are now implemented and validated offline; see
+[native data ownership](NATIVE_DATA_REGISTRY.md). Registration and capture controls
+remain unchanged. The next unit must connect these measured boundaries to actual
+native launch ownership; separate successful controls do not prove that connection.
+
 Build a distinct experimental **single-TU, one-device, serialized default-stream vector example runtime** over the current registration core. Retain the old no-dispatch registration control. Scope the next offline milestone to an actual ordinary HIP compiler host stub flowing through registration, allocation registry, argument snapshot, checked planner, retained submission resources, blocking D2H observation, free and genuine compiler unregister. Use the measured 6.2.4/LLVM18 full-header vector fixture (73 outputs, 2 groups of 64, four explicit args, 288-byte kernarg including runtime geometry). Do not confuse its 288-byte kernarg extent with private-call scratch metadata from unrelated experiments.
 
 Implement real `hipMalloc`/`hipFree`, H2D/D2H `hipMemcpy`, `hipGetLastError`/error text and explicit synchronize for that control; route `hipLaunchKernel` from the genuine push/pop configuration ABI into the existing checked loader/planner/backend. Keep unsupported streams, shapes, dynamic LDS, scratch, globals and unknown argument types explicit errors. Metadata gives argument count/offset/size: copy each caller-provided argument value before the stub returns, generate hidden fields internally, and resolve device-pointer ranges through owned allocation records (including interior offsets, overflow and use-after-free rejection). Loader/driver initialization belongs outside constructors. Unregister/free must drain known work or retain uncertain backing; never clear poisoned ownership to make teardown appear successful.

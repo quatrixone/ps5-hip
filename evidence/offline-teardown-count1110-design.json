@@ -1,0 +1,83 @@
+{
+    "schema":  1,
+    "classification":  "Offline reassessment only; no revised diagnostic implemented",
+    "source_commit":  "0bf7fb9944e0017ef4ba8530adbf34ab9c664cf1",
+    "raw_design":  "results/teardown-count1110-design-v1/design.json",
+    "raw_design_sha256":  "5e2f5d4ea31de85fca8915f61860bd95664d12ad51b79af75e08e66953d8f887",
+    "observed_receipt_sha256":  "e7adc4c6efae0d4d6b2bc5cbcf6ad55200accf29a9460192d9417ca56fa3e51e",
+    "primary_sources":  [
+                            {
+                                "url":  "https://raw.githubusercontent.com/freebsd/freebsd-src/release/9.0.0/lib/libc/sys/getfsstat.2",
+                                "version":  "FreeBSD release/9.0.0",
+                                "source_bytes":  3514,
+                                "source_sha256":  "8c5183c36255c35a17d4f4beeb10d46d0c3ac988bdffb4e8e9427c1c695e0712",
+                                "saved_sha256":  "8c5183c36255c35a17d4f4beeb10d46d0c3ac988bdffb4e8e9427c1c695e0712",
+                                "saved_bytes":  3514,
+                                "status":  "saved"
+                            },
+                            {
+                                "url":  "https://raw.githubusercontent.com/freebsd/freebsd-src/release/9.0.0/sys/kern/vfs_syscalls.c",
+                                "version":  "FreeBSD release/9.0.0",
+                                "source_bytes":  102225,
+                                "source_sha256":  "c28f91dd51e7b33fc58a0a9cef0a871ba819af9da53d612b21d82053a3cdc14c",
+                                "first_line":  439,
+                                "last_line":  557,
+                                "saved_sha256":  "222ee337b67deef77b4661ee79f47581d6336a52c591a437f657afdd810e5efd",
+                                "saved_bytes":  2885,
+                                "status":  "saved"
+                            }
+                        ],
+    "source_sha256":  {
+                          ".local/teardown-snapshot-v2/tools/teardown_snapshot.h":  "c90237b16f8d1735fc6ba75c209addc46ed281df9d4134147c5cb188d42e0758",
+                          ".local/teardown-snapshot-v2/tools/teardown_snapshot.cpp":  "f1e7cc42ef6b9b3d47a281f10d77e6fa31561eeabd1e6d26bc92965a1ed43b88",
+                          ".local/teardown-snapshot-v2/build/teardown-qualified-v2/teardown-snapshot.elf":  "26b9e178e32dd066115d46ac6525e8b3351b086632729973c4596ddbfdf8638a",
+                          ".deps/sdk/target/include/sys/mount.h":  "7f2755dfe2daf1de67370b0850190469e66ab2bdc1f8168c80ff4311b60b12dc",
+                          ".deps/sdk-source-95c08f27386fc698f6bbe21dde3030140a41d10b/libc/getmntinfo.c":  "dcd8509f9282d200844413ade1db7a2f54a2f7664b42c1d762327ccb0d432b92",
+                          ".deps/sdk-source-95c08f27386fc698f6bbe21dde3030140a41d10b/sce_stubs/libkernel_sys.c":  "bf48b2a70948abbdd01bd8976586c75501836a08943db4f13c2b0ab728b824fa",
+                          "results/teardown-console-control-v2/run.py":  "0fd1bbd49e19584bb82fd3ba94e063e7270b1204eef2acf8d534c504fc834b49",
+                          "results/teardown-console-control-v2/manifest.json":  "0fe7a6a254ce333db81a69edb4f86c72cc0c4d2ffae281e7c7524c42a3542a5d"
+                      },
+    "proposed_budget":  {
+                            "record_size_sdk":  472,
+                            "observed_initial_return_each":  1110,
+                            "proposed_max_records":  2048,
+                            "initial_spare_records":  16,
+                            "expected_initial_capacity_records":  1126,
+                            "expected_initial_capacity_bytes":  531472,
+                            "maximum_table_bytes":  966656,
+                            "maximum_two_retained_tables_bytes":  1933312,
+                            "maximum_initial_accepted_count":  2032,
+                            "maximum_complete_returned_count":  2047,
+                            "maximum_getfsstat_calls":  8,
+                            "matching_rows_per_snapshot":  128,
+                            "maximum_own_mount_row_bytes":  530,
+                            "maximum_own_mount_rows_total_bytes":  135680,
+                            "extra_own_transcript_reserve_bytes":  8192,
+                            "host_output_cap_bytes":  262144,
+                            "host_exchange_absolute_seconds":  8
+                        },
+    "unchanged_requirements":  [
+                                   "libkernel_sys getfsstat provider",
+                                   "SDK statfs stride472/version0x20030518",
+                                   "MNT_NOWAIT",
+                                   "two snapshots and three fill attempts each",
+                                   "128 matching-row limit and all-row validation",
+                                   "duplicate-preserving sorted identity comparison",
+                                   "signal0 historical PID134 and application queries only",
+                                   "dual locks/idle/history/servicehealth/one-shot marker/no automatic retry",
+                                   "namespace unqualified/release unknown/accepted false"
+                               ],
+    "interpretation_limits":  [
+                                  "1110 is consistent with the documented record-count contract; record layout remains untested until actual fill",
+                                  "No count-to-byte reinterpretation, raw syscall fallback or provider switch",
+                                  "FreeBSD9 reference is not PS5 firmware12.70 source or ABI proof",
+                                  "FreeBSD reference can omit prison/MAC-hidden and busy mounts, redact identity and return stale cached stats",
+                                  "count below capacity plus valid records establishes only non-full returned buffer; not global namespace completeness",
+                                  "Known registered image/title mapping anchors are required for relevance; absence of matches is not clean teardown proof",
+                                  "Snapshot cannot certify G2/304, GPU release, detached process absence or no retained references"
+                              ],
+    "implementation_performed":  false,
+    "console_access":  false,
+    "hardware_gate_passed":  false,
+    "next_action":  "Implement and qualify a separate measured-budget collector offline; retain all visibility limits and unknown classification. No automatic console run or acceptance change."
+}

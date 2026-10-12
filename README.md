@@ -35,6 +35,12 @@ The repository is private.
   hidden geometry and packet preparation through a genuine stub; no GPU submission.
 - [Pinned OCML math probe](docs/OCML_MATH_PROBE.md): reproducible partial library
   build and four device objects; numerical accuracy and GPU execution remain unqualified.
+- [Native math candidate](docs/NATIVE_MATH_PROFILE.md): packaged fixed-corpus
+  harness with an independent MPFR oracle, full guards and 280-byte argument checks;
+  [offline evidence](evidence/offline-native-math-readiness.json), no GPU run.
+- [Owned native data](docs/NATIVE_DATA_REGISTRY.md): checked logical allocations,
+  copies and free, plus a separate full-header HIP memory control;
+  [offline evidence](evidence/offline-native-data-memory.json), no integrated HIP dispatch.
 - [Read-only teardown diagnostic](docs/TEARDOWN_SNAPSHOT.md): bounded observations
   with explicit visibility limits; the first .40 mount query remains inconclusive.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
