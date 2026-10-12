@@ -59,7 +59,7 @@ int main() {
     static_assert(sizeof(((struct statfs*)nullptr)->f_mntonname) <= 88);
     static_assert(sizeof(((struct statfs*)nullptr)->f_mntfromname) <= 88);
     static_assert(sizeof(((struct statfs*)nullptr)->f_fstypename) <= 16);
-    printf("PS5HIP TEARDOWN BEGIN title=PPSA99014 observed_pid=134 version=2 uid=%u euid=%u statfs_size=%zu statfs_version=0x%x namespace=unqualified\n",
+    printf("PS5HIP TEARDOWN BEGIN title=PPSA99014 observed_pid=134 version=3 uid=%u euid=%u statfs_size=%zu statfs_version=0x%x namespace=unqualified\n",
                 static_cast<unsigned>(getuid()), static_cast<unsigned>(geteuid()), sizeof(struct statfs), STATFS_VERSION);
     const auto before = status();
     teardown::Snapshot<struct statfs> first, second;
