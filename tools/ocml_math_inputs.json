@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "llvm_version": "18.1.8",
+  "device_libraries_commit": "1e2c94795ee0d6ab8e2ff3035965a6b74e11b475",
+  "device_libraries_subtree": "773cdc752dbe3099317134dcd2b8ec5d4b086473",
+  "HIP_commit": "d3b75fbb82113374e2d6103baa96a9c61425da48",
+  "CLR_commit": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "reference_files": {
+    "device-libs-sources.json": "a4c794124d0e6cb59450168d1f667f08eec602a06cebf6132c839f58cf479dd8",
+    "ockl-workitem-only.bc": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+    "workitem-build.json": "77e7fe1bbe279ede009098f628b3cfdcf3f2a1551e7bcb63c9b7f268bc2c0da7"
+  },
+  "package_stage": {
+    "files": 71,
+    "inventory_sha256": "955ff9c61410459827bcf7b14239f9b172465c5d751752a416a8992e97ba7551"
+  },
+  "fixture_sha256": "31bfd82b70cd2a55d1b0579d9e1e2c70c2d11b91cf60d892fe36d79c771fbe54"
+}
