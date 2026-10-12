@@ -34,6 +34,11 @@ The repository is private.
 - [HIP fat-binary boundary](docs/HIP_FAT_BINARY_BOUNDARY.md): bounded bundle reader,
   inspector support and the next normal-launch registration step;
   [offline validation](evidence/offline-fat-binary-reader.json) covers 12 real objects.
+- [HIP registration control](docs/HIP_HOST_REGISTRATION_CONTROL.md): genuine
+  compiler constructors, owned module/token registration and explicit unsupported
+  launch errors; Linux execution and PS5 link/conversion checks only.
+- [Atomic native package](evidence/offline-atomic-native-readiness.json): six
+  contended integer kernels and exact host oracles, packaged but unrun.
 - [Experimental private-call compiler](tools/experimental/private-calls/README.md):
   reproduced bounded compiler recipe and its limits; the separate 304-byte native
   candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).

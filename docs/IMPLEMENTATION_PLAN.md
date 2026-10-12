@@ -329,6 +329,13 @@ now pass host tests; the native fixtures remain unrun. Preserve the PS5 host ABI
 while routing device ABI flags separately. The complete device-library build
 remains unresolved; the successful workitem-only fixture is not a library port.
 
+The [single-TU registration control](HIP_HOST_REGISTRATION_CONTROL.md) now consumes
+one actual combined object through its genuine compiler constructors and launch
+stub, with linker-bounded wrapper/bundle spans and owned module/token bindings.
+Linux normal and partial-failure teardown pass; PS5 linking and conversion preserve
+the checked extents and relocations. Dispatch explicitly returns unsupported.
+This is offline preparation, not working native HIP launch syntax or G4 acceptance.
+
 Implement the first coherent API slice:
 
 - Initialization, device count/selection, honest device properties and errors.
