@@ -33,6 +33,8 @@ The repository is private.
   selected native HIP approach and the threshold for reconsidering upstream CLR.
 - [Compiler launch capture](docs/HIP_HOST_LAUNCH_CAPTURE.md): owned arguments,
   hidden geometry and packet preparation through a genuine stub; no GPU submission.
+- [Pinned OCML math probe](docs/OCML_MATH_PROBE.md): reproducible partial library
+  build and four device objects; numerical accuracy and GPU execution remain unqualified.
 - [Read-only teardown diagnostic](docs/TEARDOWN_SNAPSHOT.md): bounded observations
   with explicit visibility limits; the first .40 mount query remains inconclusive.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.

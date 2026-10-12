@@ -248,6 +248,14 @@ loader identity remain unqualified. See `docs/SHADOWMOUNT_16_LIFECYCLE.md` and
 `evidence/offline-shadowmount16-lifecycle.json`. Review fresh before/after controls
 before another arithmetic/private launch; do not force unmounts or change settings.
 
+The pinned OCML-only recipe is frozen at `3730f16` and integrated. It builds
+authentic OCML plus conservative configuration constants without the blocked
+full OCKL build. Four gfx1013/gfx1030 O1/O2 objects exactly reproduce the earlier
+independent outputs; prelink IR proves direct sin/log/tanh OCML calls. Two focused
+tests pass, with actual artifact mutations. No GPU, numerical-accuracy, complete
+device-library or hermetic-toolchain qualification follows. See
+`docs/OCML_MATH_PROBE.md` and `evidence/offline-ocml-math-probe.json`.
+
 The read-only diagnostic is frozen at `05b1723`; two focused sanitizer checks,
 SDK compilation and a16-import audit pass. Its one idle .40 observation at14:33UTC
 confirmed historical PID134 ESRCH and empty application-ID queries, but both

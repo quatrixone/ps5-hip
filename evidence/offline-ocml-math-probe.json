@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "classification": "pinned OCML compile/link slice reproduced offline",
+  "source_commit": "3730f163e8b2658e19bfa495f92985d247798be8",
+  "source_sha256": {
+    "CMakeLists.txt": "b01ae3cbd1d7fcba9858fde456462b74013e5fd71ccca75f512b24d5e13d6171",
+    "kernels/ocml_math.hip": "31bfd82b70cd2a55d1b0579d9e1e2c70c2d11b91cf60d892fe36d79c771fbe54",
+    "tools/probe_ocml_math.py": "383d76e4ce0d3ae08eecb5e0d2dc25f61033e68569f204658ac8ba108e124a74",
+    "tools/ocml_math_inputs.json": "fcf283f4656454240e3c118a65790c41f023b99e76e378c9f3fab522f78ea018",
+    "tests/ocml_math_probe_test.py": "230d351b156d94dfc538b43433c99bee9d8e9391aceb01a1f48817374747bf26",
+    "docs/OCML_MATH_PROBE.md": "27001bc01a9ef4230ff63a0ddca386c1959f481abab565ef8b7143b3fcb3b74b"
+  },
+  "source_directory": ".local/g3-ocml-math",
+  "integration_note": "Root CMake also registers other reviewed units; other source files match frozen Git blobs after LF normalization.",
+  "raw_freeze": ".local/g3-ocml-math/results/ocml-recipe-validation-v1/freeze.json",
+  "raw_freeze_sha256": "6e489de595a04bf18f825365f011d2777f0f852c32a8b41d6c98ad64f9551582",
+  "recipe_receipt": ".local/g3-ocml-math/build/ocml-math-v2/receipt.json",
+  "recipe_receipt_sha256": "999f73c9e8333806503aaf598640d1787700c0d0799b89338a954f3c6d3edaaf",
+  "commands_passed": 42,
+  "top_level_artifacts_verified": 93,
+  "bitcodes_verified": 10,
+  "libraries": {
+    "ockl-workitem-only.bc": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+    "oclc_abi_version_500.bc": "d097461b741b52519bb713b82e64f90af8aa741527d5a911d978b5aec2a86bbb",
+    "oclc_correctly_rounded_sqrt_on.bc": "a73a84adebd64b73ca1bc7740c87086efdc29b8739944d0128c10a3f89e8765a",
+    "oclc_daz_opt_off.bc": "5815bec8f022052efbb484a51113d38fc4a6e9cd47f1849aadd095b010d57ba3",
+    "oclc_finite_only_off.bc": "66a32e969632a7bbffffcf037e7b3eaac120b64f365b0bffd0a129af30196819",
+    "oclc_isa_version_1013.bc": "19576c2b782919ebbaab0ed5bd98dcfb3df19565576e3f3311ba3c4b772e8d2b",
+    "oclc_isa_version_1030.bc": "76c3423eb8486f4e5aed2e3a7e7f0a954c5a9c33cd8e457fcd28aa38fba1bc9a",
+    "oclc_unsafe_math_off.bc": "58d1e3aa427105caf6d074a80c5276aa44f88630efb6d43bcf97d39a77c6d743",
+    "oclc_wavefrontsize64_off.bc": "99b3b6fecb9046eb07194c04a9d5f521b4c308e15a959db2931e11b697124c50",
+    "ocml.bc": "16d01f8cdc09678919addaa01dd2045110e934c4cb71336a140e2f485e551829"
+  },
+  "profiles": [
+    {
+      "target": "gfx1013",
+      "optimization": "O1",
+      "code_sha256": "5a05c69d740e6aad30e0f21780183b5dbfe7c1239be599a03d438c87c9436383",
+      "bytes": 5232,
+      "caller_sha256": "2e1d4ef376a00847dd23541506d01233902ab0616fd8b2a4dfb59a87b739c100"
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "code_sha256": "ed3b1b6b3d82f6775a20f3f0781c31c2ffc7e48a8dc813b23bc0617558114ced",
+      "bytes": 5168,
+      "caller_sha256": "8d12c07eef451c6a9acfd19e77ff52c4a9a590b422290901687be78dcc5767fe"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O1",
+      "code_sha256": "69f5276503e20b2c901440de07ff555dd25ad26af12d0cf0f21d348c88011040",
+      "bytes": 5232,
+      "caller_sha256": "4d1539090779d8f579a8eb2e5c063540f13e93564d007ae8a6e07f58299469bc"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O2",
+      "code_sha256": "5df632cbe219b637c3eb62e3246b56422cfd90614f5060281dd2fdcad96e59e6",
+      "bytes": 5168,
+      "caller_sha256": "94eab7e1b372d2524b775570022729ef2971a02f6eabbcd735a87ae98ac95cd6"
+    }
+  ],
+  "direct_ocml_calls": [
+    "__ocml_sin_f32",
+    "__ocml_log_f32",
+    "__ocml_tanh_f32"
+  ],
+  "compiler_builtins_not_claimed_as_additional_ocml_bodies": [
+    "fma",
+    "sqrt",
+    "exp"
+  ],
+  "focused_ctests_passed": 2,
+  "preserved_failure": {
+    "path": "build/ocml-math-v1/receipt.json",
+    "sha256": "e415d8c15247621faab9993c78b054d98febcca6854836eb2bbc8e7f30be883c",
+    "reason": "Resolving clang++ to clang changed host C++ link behavior; fixed driver invocation name in fresh v2."
+  },
+  "protected_reference_files_verified_by_isolated_audit": 2464,
+  "hardware_validated": false,
+  "numeric_accuracy_qualified": false,
+  "full_ockl": false,
+  "hermetic_toolchain_packaging": false,
+  "limits": [
+    "No native host compile, GPU execution or numerical accuracy validation",
+    "Partial OCML+constants build uses preexisting unmodified OCKL workitem source slice; not full OCKL",
+    "No full LLVM build, runtime API, native profile or package change",
+    "Installed LLVM SDK resources, headers and static host archives are not completely inventoried"
+  ]
+}
