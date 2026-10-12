@@ -52,7 +52,9 @@ Updated: 2026-10-12, America/New_York.
   `evidence/native-private-buffer-console-no-run.json`. Before a later launch,
   recheck idle state and recovery under both locks. Do not close another title,
   kill a guessed PID, reboot or change settings.
-- Main has 27 passing host CTests. The exact frozen vector source also passes
+- The current host suite passes 30 sanitizer CTests with the real HIP bundle
+  fixtures enabled; the final bundle/inspector changes pass all three affected
+  cases. The exact frozen vector source also passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
   `evidence/offline-candidate-host-c37f0db.json`. Host checks are not GPU evidence.
@@ -170,6 +172,17 @@ All 1,012 preservation files remain unchanged; the catalog appends this as its
 24th candidate. See `evidence/offline-private-aperture-native-readiness.json`.
 No console execution has occurred. Even plausible observations
 would not establish flat addressing or private-memory support.
+
+The bounded HIP offload-bundle reader and inspector are frozen at `89c0644`.
+They select exact `hipv4` gfx1013/gfx1030 payloads, check the complete directory
+and copy the selected linked V5 ELF into owned storage before inspection.
+Twelve real LLVM18/ROCm6.2.4 Linux/PS5 host objects select and materialize unchanged;
+truncation, malformed directories, ambiguous targets and 2,000 mutation trials
+pass sanitizer checks. The reader cross-compiles with the pinned PS5 SDK.
+See `evidence/offline-fat-binary-reader.json` and
+`docs/HIP_FAT_BINARY_BOUNDARY.md`. No HIP registration exports, normal host launch
+or new native execution is implemented by this unit. The next G4 preparation is
+a single-TU linker-bounded wrapper/bundle and actual constructor registration.
 
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
@@ -407,3 +420,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | compiler research | source-built LLVM comparisons exposed call-mask and IPRA ordering issues; guarded revision 4 compiled | evidence/offline-private-backend-source-builds.json | full paired acceptance pending
 - 2026-10-11 | compiler milestone | guarded revision 4 passes selected paired IPRA-off controls and eight linked ordinary graphs; generic/volatile fallback retained | evidence/offline-private-backend-ipra-off-controls.json | next: fresh portable reproduction and isolated304-byte native harness
 - 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified; .40 deployment no-run while another title active | evidence/offline-private-buffer-native-readiness.json; evidence/native-private-buffer-console-no-run.json | next: arithmetic control then private candidate when idle
+- 2026-10-12 | G4 preparation | 89c0644 | bounded fat-binary reader and inspector consume12 real HIP objects; sanitizer and SDK checks pass | evidence/offline-fat-binary-reader.json | next: bounded constructor registration; no runtime or hardware qualification

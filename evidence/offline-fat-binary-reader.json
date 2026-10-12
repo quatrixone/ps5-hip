@@ -1,0 +1,538 @@
+{
+  "schema": 1,
+  "classification": "offline bounded HIP offload-bundle consumption",
+  "source_commit": "89c06444fc3bd0968abadca50c410712e5bf8209",
+  "source_frozen_clean": true,
+  "branch": "development/offline-bringup",
+  "sources": {
+    "CMakeLists.txt": {
+      "sha256": "5bee8baec8ed089be719c29b15fd6661dc5c7d5a058a8fea9793c4648a07f450",
+      "bytes": 9035
+    },
+    "include/ps5hip/fat_binary.h": {
+      "sha256": "c60fd59842c43556a8522caf7d3ca174d10575a4a3e9430168014287a7bd8a5c",
+      "bytes": 644
+    },
+    "src/fat_binary.cpp": {
+      "sha256": "6920d4f8afc3ac35e9ffed152a495a58ec7f8916d3cd3f68625a3aabbd977631",
+      "bytes": 3173
+    },
+    "tools/inspect.cpp": {
+      "sha256": "3250b7f79d25bd876517a55f80d078a735abb296d42fa695012aecae21c5c450",
+      "bytes": 2520
+    },
+    "tests/fat_binary_test.cpp": {
+      "sha256": "976c8442cf4e79bafbeb9dfd9dfba658f0ac9daa96aaa8d52f82510e682cfd1a",
+      "bytes": 7282
+    },
+    "tests/fat_binary_fixture_test.py": {
+      "sha256": "7c3a5752d365e11ed3477dfa3af789533be79ead1e0a296f71419547f224d744",
+      "bytes": 5758
+    },
+    "docs/HIP_FAT_BINARY_BOUNDARY.md": {
+      "sha256": "1f71783294212dcebe2210e810ea29ecfbccee8422b8aad718a57bdaa0098b99",
+      "bytes": 10189
+    },
+    "src/code_object.cpp": {
+      "sha256": "db0044253f5d19278c0df6ecc2991c0790d57fc04a245a12669591b2da6f2505",
+      "bytes": 22297
+    },
+    "src/launch.cpp": {
+      "sha256": "31d9d22ea5243a72a13d4e3662aba1549bb07745867448f793fd555885950b7f",
+      "bytes": 7048
+    },
+    "tools/ps5-clangxx": {
+      "sha256": "6d2ffb092e76be69e687477c6177ff57385f9242df9d1d4a3df679c31bae9131",
+      "bytes": 192
+    },
+    "dependencies.json": {
+      "sha256": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+      "bytes": 1538
+    }
+  },
+  "contract": {
+    "max_input_bytes": 67108864,
+    "max_entries": 64,
+    "max_identifier_bytes": 256,
+    "container": "uncompressed __CLANG_OFFLOAD_BUNDLE__",
+    "targets": [
+      "hipv4-amdgcn-amd-amdhsa--gfx1013",
+      "hipv4-amdgcn-amd-amdhsa--gfx1030"
+    ],
+    "selected_elf": "owned copy, inspected linked AMDHSA V5; descriptor target must agree",
+    "caller_obligation": "Provide a genuinely readable input span and keep it immutable during the call"
+  },
+  "validation": {
+    "sanitizer_suite": {
+      "passed": 30,
+      "total": 30
+    },
+    "final_boundary_and_inspector_tests": {
+      "passed": 3,
+      "total": 3
+    },
+    "mutation_trials_per_target": 1000,
+    "targets_tested": 2,
+    "all_synthetic_fixture_truncations_rejected": true,
+    "real_compiler_objects": [
+      {
+        "case": "linux-dimensions-gfx1013-with-routed-workitem-slice",
+        "host_sha256": "cde306e7e4a8244835fd0087d8e9a80254b470ae207214ab96825991998716b2",
+        "bundle_sha256": "7115fa5398f5d00687d1d60bad688e128b8680a9cbacaf7056131602860b1bea",
+        "device_sha256": "be4543c79119dab8f4e1411b180224b8695d9fe090e190423a4bce68d375cdd6",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "linux-dimensions-gfx1030-with-routed-workitem-slice",
+        "host_sha256": "22aca4bcab87793452c8195711c581907bca4773eaa7a3bfbeb298a7e4f6d8c1",
+        "bundle_sha256": "b924a4d156bed7ba7d7a3a7f9edb6f3bc345daa16e72819038298c81c284f6f6",
+        "device_sha256": "ff2304bd2e52040aa5c45948901c95caf16fda984f8c1f16f0a4a6a5c0bc4c17",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "linux-launch-gfx1013-with-routed-workitem-slice",
+        "host_sha256": "8ae0acb9d79d742d69dc7af653d8477b0abf4d8ee60b4537fbe18903dd69d8a7",
+        "bundle_sha256": "949b07f0e02734e42b970aaaf1d5be9bb2c7d6f85f26b2cb6b23fa3a219cbcbd",
+        "device_sha256": "85c514dde4b5e4e82c15a3a09516e3a27ecd7e65dd50784475aca33666be71f3",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "linux-launch-gfx1030-with-routed-workitem-slice",
+        "host_sha256": "5a86c6233380a75118b5b9c56207e6d882eee27eb386445ed610b463711ae12e",
+        "bundle_sha256": "fe9b5773cf50fb731498ff44c71288aba713f8f854953d483c6b05de9ddfd0b0",
+        "device_sha256": "66ed334effd15a9f58dd3260c0a5c9da89dcee03e8dd81cc9f9709ecc954f0ad",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "linux-vector-add-gfx1013-with-routed-workitem-slice",
+        "host_sha256": "841f2b892a7bd09090af664d788ffd16254aa99cb0817e3edaac8a61a4ac7280",
+        "bundle_sha256": "c62c867fabdb8efd0576961d8beac82bccb58c8ea5005f7d8f2289bede983df3",
+        "device_sha256": "29032d2b84070eee099cb83a43a1795d1f3cb63a6ec218ddbf56a618e32f838e",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "linux-vector-add-gfx1030-with-routed-workitem-slice",
+        "host_sha256": "0f91be6ce6c4b742708b0d82d9bbbc43c405fb0e10beadf64835521cf6b7aadc",
+        "bundle_sha256": "d6fae06afa0c3c8b87c59574c89d8e960e5949dd5d47cc973b62b62375a51f29",
+        "device_sha256": "ff63fb9785e06e47a2be6b6d863181b3a1880a81cabefbf4e352d7fe2f69a813",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-dimensions-gfx1013-device-wchar4",
+        "host_sha256": "eec95506891910998406c6769595a07625118fe96a3ae5ba0e3d37663115e1b1",
+        "bundle_sha256": "8f761951564e51248d4b13d4d221d57b8cbfba96271b34fb03a7664fa0252590",
+        "device_sha256": "de1a9f3f1e8f423d93ef9b6b0f86cf2729b822baf1f018a409ce0919907bff59",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-dimensions-gfx1030-device-wchar4",
+        "host_sha256": "cf6754e4e5232359a7931d3d371fa231bc86fd64ae00425b3e39b637de1a2cb3",
+        "bundle_sha256": "94433db0266b857573050134408d129efea5fe0a92d1966bcc653161d62a4df7",
+        "device_sha256": "ce44ac5355df29b793d0c41a0e75c36f299ad7550bb4a07b2d528a73e180d4c7",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-launch-gfx1013-device-wchar4",
+        "host_sha256": "e00c4ca545ee8e86e1d81a274349d9e816232bfaa5beb02d20f1bd5451f4c08f",
+        "bundle_sha256": "02642400c8d61212dc67f0096f1b2379b8464c5be8be00b12bffa2425926b7b8",
+        "device_sha256": "c6d08e93a34772fc90873bf7e3db914718516de7d6550424720f4a7ae5dea1d8",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-launch-gfx1030-device-wchar4",
+        "host_sha256": "94bae4a4a70e86af10fb12a6ca14701afd2048ece5551bf4ca2a294965132eb8",
+        "bundle_sha256": "f572579b73ebddb0dc98a3725c212730038fb849bec07fec587895ba11b599bd",
+        "device_sha256": "f66ef038fac51e4e0751f20283cac40aec26938af41e541db87e8cb6935edc6e",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-vector-add-gfx1013-device-wchar4",
+        "host_sha256": "b0c2518f45e63787221655374a0d678c02527eaf72c66a64b96fe3378333ddf0",
+        "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+        "device_sha256": "a6ab8bf13688777e6ca9af7048263147550b163bd365f263fb7abd2f3d2fb88b",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      },
+      {
+        "case": "ps5-vector-add-gfx1030-device-wchar4",
+        "host_sha256": "1c09b42977a78aa4dc3983d18e430da65e803dc13722ab47e6c77e244f55e56b",
+        "bundle_sha256": "c857036439419c3302d118be40b8d8db11dfad8a5b46bd7ffb40bcdbfb70c8e9",
+        "device_sha256": "2cfe4b5cc56db82c3044bf65424036a72740cc994e3790129bf1f5efd3c14212",
+        "exit_code": 0,
+        "inspector_exit_code": 0
+      }
+    ],
+    "real_objects_selected_and_materialized_unchanged": 12,
+    "inspector_real_bundle_checks": 12,
+    "inspector_missing_and_unsupported_target_rejections": 2,
+    "independent_review": "No actionable findings in final source, exact12 compiler fixtures and scope"
+  },
+  "ps5_cross_compile": {
+    "command": [
+      "sh",
+      "<ROOT>/tools/ps5-clangxx",
+      "-std=c++17",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-I<ROOT>/include",
+      "-c",
+      "<ROOT>/src/fat_binary.cpp",
+      "-o",
+      "<ROOT>/build/fat-binary-host/fat_binary.ps5.o"
+    ],
+    "exit_code": 0,
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "object": {
+      "sha256": "12f2ef5cc3e4ede58c21cbcb8217bff2baa69930def08191f41b8ed7c0324dd0",
+      "bytes": 19192
+    },
+    "linked_native_title": false
+  },
+  "reproduction_commands": [
+    [
+      "cmake",
+      "-S",
+      "<ROOT>",
+      "-B",
+      "<ROOT>/build/fat-binary-host",
+      "-DCMAKE_BUILD_TYPE=Debug",
+      "-DPS5HIP_SANITIZE=ON",
+      "-DCMAKE_CXX_COMPILER=clang++-18",
+      "-DPS5HIP_HIP_ABI_FIXTURE_DIR=<ROOT>/results/hip-host-abi-spike/rocm-6.2.4",
+      "-DPS5HIP_NATIVE_AGC_ELF=<ROOT>/.local/g2-arithmetic-suite/build/native/gfx1013-arithmetic_suite/eboot.elf"
+    ],
+    [
+      "cmake",
+      "--build",
+      "<ROOT>/build/fat-binary-host",
+      "--parallel",
+      "4"
+    ],
+    [
+      "ctest",
+      "--test-dir",
+      "<ROOT>/build/fat-binary-host",
+      "--output-on-failure"
+    ]
+  ],
+  "preserved_initial_failure": {
+    "test": "native_agc_import_providers",
+    "reason": "The default historical indexed-store image retains its known incorrect sceAgcSuspendPoint provider.",
+    "resolution": "Configure the existing test with the unchanged verified arithmetic-control ELF; all30 tests then pass. Historical image/log preserved.",
+    "artifact_was_repaired_or_rebuilt": false
+  },
+  "raw_files": {
+    "results/fat-binary-host-ctest-v2.log": {
+      "sha256": "d0cfc4964cb71031490221531836faa331e34f2047a397a74534e6053c50a9e3",
+      "bytes": 3456
+    },
+    "results/fat-binary-host-ctest-v3-affected.log": {
+      "sha256": "e090dae7a979d26d3240c15c72985f9ced5ef09bf6bd7edd434319b23352a141",
+      "bytes": 489
+    },
+    "results/fat-binary-host-ctest-v1.log": {
+      "sha256": "77ef775150556b94e8111b0c7921af71ba6df9dc8aa1fe580d219087ab69f3ae",
+      "bytes": 3825
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/receipt.json": {
+      "sha256": "cc4e57202de3e64c3c6af3ca840cd77e06dad655f71cc46eaf3c21a76de873b5",
+      "bytes": 5188
+    },
+    "build/fat-binary-host/fat_binary_test": {
+      "sha256": "36a99c91eb564a59a6e591abc2983d817230f3d39d0b8483435323724e6f30ba",
+      "bytes": 3536752
+    },
+    "build/fat-binary-host/ps5hip-inspect": {
+      "sha256": "0a97fea405a58a93f149f7b9fcddf3564ef3c2d55a78a68ab14939a7a33f5c25",
+      "bytes": 3091416
+    },
+    "build/fat-binary-host/fat_binary.ps5.o": {
+      "sha256": "12f2ef5cc3e4ede58c21cbcb8217bff2baa69930def08191f41b8ed7c0324dd0",
+      "bytes": 19192
+    },
+    "build/fat-binary-host/CMakeCache.txt": {
+      "sha256": "ac3d08a7e19aaf8416181d3db47342a62e549184975a14e0c42ace9dfda23613",
+      "bytes": 16296
+    },
+    "build/fat-binary-host/CMakeFiles/ps5hip_object.dir/flags.make": {
+      "sha256": "afca6e383b8de055874c7264f85bf8a21bc01a885dcee2d72156238960257cb0",
+      "bytes": 350
+    },
+    "results/hip-host-abi-spike/rocm-6.2.4/compatible-emitted-abi.json": {
+      "sha256": "7b73e15c990b1839c752e5f270763f8f01a980346adf801caf6a6c057a2c4c80",
+      "bytes": 14255
+    },
+    "evidence/offline-compatible-hip-headers.json": {
+      "sha256": "f57b92fb086ea09197138380f0b0fb188d2d871aef821333e7241734689408b3",
+      "bytes": 144041
+    },
+    "results/record-fat-binary-reader-v1.py": {
+      "sha256": "e1271568be1055cda3ea7585f0c6b353acd24525ce028e24dbd62d1942c8f18c",
+      "bytes": 7196
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1013-with-routed-workitem-slice.bundle": {
+      "sha256": "7115fa5398f5d00687d1d60bad688e128b8680a9cbacaf7056131602860b1bea",
+      "bytes": 7800
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1013-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1013-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "096074f585d96c58d92d1e5dc4d05de05f89e36e7e5cdb7eb32a4e055994b120",
+      "bytes": 857
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1013-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1013-with-routed-workitem-slice.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1030-with-routed-workitem-slice.bundle": {
+      "sha256": "b924a4d156bed7ba7d7a3a7f9edb6f3bc345daa16e72819038298c81c284f6f6",
+      "bytes": 7800
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1030-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1030-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "c5c811584df1462beae9ca605f6d21c931c98a9544496a04f96ba6ab7fad4c20",
+      "bytes": 857
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1030-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-dimensions-gfx1030-with-routed-workitem-slice.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1013-with-routed-workitem-slice.bundle": {
+      "sha256": "949b07f0e02734e42b970aaaf1d5be9bb2c7d6f85f26b2cb6b23fa3a219cbcbd",
+      "bytes": 7224
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1013-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1013-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "5d3be920c54eb353e3c88a7f4cce4f6f657bf7217ad7423617848fc630a97c47",
+      "bytes": 314
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1013-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1013-with-routed-workitem-slice.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1030-with-routed-workitem-slice.bundle": {
+      "sha256": "fe9b5773cf50fb731498ff44c71288aba713f8f854953d483c6b05de9ddfd0b0",
+      "bytes": 7224
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1030-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1030-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "99d5b8a7ff311cac3c2f91751fc8af73a7c21cf1284b966a30c954bacb1a1f2a",
+      "bytes": 314
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1030-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-launch-gfx1030-with-routed-workitem-slice.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1013-with-routed-workitem-slice.bundle": {
+      "sha256": "c62c867fabdb8efd0576961d8beac82bccb58c8ea5005f7d8f2289bede983df3",
+      "bytes": 8136
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1013-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1013-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "229a750b3da0a4508f4b344a363d806dd7b1473f81cd343fc19d5adce7dd4f3b",
+      "bytes": 865
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1013-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1013-with-routed-workitem-slice.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1030-with-routed-workitem-slice.bundle": {
+      "sha256": "d6fae06afa0c3c8b87c59574c89d8e960e5949dd5d47cc973b62b62375a51f29",
+      "bytes": 8136
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1030-with-routed-workitem-slice.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1030-with-routed-workitem-slice.inspect.stdout": {
+      "sha256": "b0f2048254ce3524a671c3033c8bdfaba30d39d8b109477065170682d14bb40f",
+      "bytes": 865
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1030-with-routed-workitem-slice.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/linux-vector-add-gfx1030-with-routed-workitem-slice.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1013-device-wchar4.bundle": {
+      "sha256": "8f761951564e51248d4b13d4d221d57b8cbfba96271b34fb03a7664fa0252590",
+      "bytes": 7800
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1013-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1013-device-wchar4.inspect.stdout": {
+      "sha256": "096074f585d96c58d92d1e5dc4d05de05f89e36e7e5cdb7eb32a4e055994b120",
+      "bytes": 857
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1013-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1013-device-wchar4.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1030-device-wchar4.bundle": {
+      "sha256": "94433db0266b857573050134408d129efea5fe0a92d1966bcc653161d62a4df7",
+      "bytes": 7800
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1030-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1030-device-wchar4.inspect.stdout": {
+      "sha256": "c5c811584df1462beae9ca605f6d21c931c98a9544496a04f96ba6ab7fad4c20",
+      "bytes": 857
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1030-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-dimensions-gfx1030-device-wchar4.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1013-device-wchar4.bundle": {
+      "sha256": "02642400c8d61212dc67f0096f1b2379b8464c5be8be00b12bffa2425926b7b8",
+      "bytes": 7224
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1013-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1013-device-wchar4.inspect.stdout": {
+      "sha256": "5d3be920c54eb353e3c88a7f4cce4f6f657bf7217ad7423617848fc630a97c47",
+      "bytes": 314
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1013-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1013-device-wchar4.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1030-device-wchar4.bundle": {
+      "sha256": "f572579b73ebddb0dc98a3725c212730038fb849bec07fec587895ba11b599bd",
+      "bytes": 7224
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1030-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1030-device-wchar4.inspect.stdout": {
+      "sha256": "99d5b8a7ff311cac3c2f91751fc8af73a7c21cf1284b966a30c954bacb1a1f2a",
+      "bytes": 314
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1030-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-launch-gfx1030-device-wchar4.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1013-device-wchar4.bundle": {
+      "sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+      "bytes": 8136
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1013-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1013-device-wchar4.inspect.stdout": {
+      "sha256": "229a750b3da0a4508f4b344a363d806dd7b1473f81cd343fc19d5adce7dd4f3b",
+      "bytes": 865
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1013-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1013-device-wchar4.stdout": {
+      "sha256": "1fede3f460f198a887136aff7cd0cf6bd9728b1a885b8cad2441f7184d0768a3",
+      "bytes": 80
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1030-device-wchar4.bundle": {
+      "sha256": "c857036439419c3302d118be40b8d8db11dfad8a5b46bd7ffb40bcdbfb70c8e9",
+      "bytes": 8136
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1030-device-wchar4.inspect.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1030-device-wchar4.inspect.stdout": {
+      "sha256": "b0f2048254ce3524a671c3033c8bdfaba30d39d8b109477065170682d14bb40f",
+      "bytes": 865
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1030-device-wchar4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "build/fat-binary-host/fat-binary-real-fixtures-20261012T132558.287703Z/ps5-vector-add-gfx1030-device-wchar4.stdout": {
+      "sha256": "08812c16902d4b815ddd485578034628c273f2c0b5e8f22d474118c10dec49dd",
+      "bytes": 80
+    }
+  },
+  "console_access": false,
+  "hardware_validated": false,
+  "hip_registration_exports": false,
+  "limits": [
+    "No host-stub registration, HIP allocation/copy/launch API or stream semantics",
+    "No native executable link or GPU run",
+    "No compressed/newer-format/feature-alias target support",
+    "Unselected payloads are range-checked, not device-code inspected",
+    "No arbitrary ISA qualification; G2/G3/G4 remain incomplete"
+  ],
+  "next_action": "Prove a single-TU linked wrapper/bundle extent and constructor-time metadata registration before exporting the raw-pointer HIP registration ABI; see docs/HIP_FAT_BINARY_BOUNDARY.md."
+}

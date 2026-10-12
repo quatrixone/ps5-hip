@@ -14,7 +14,7 @@ The first GPU candidate faulted on a CPU import boundary. Changing only the
 [the execution receipt](evidence/native-provider-fixed-store.json) and
 [the fault analysis](docs/FIRST_GPU_FAULT.md). A later title cycle passed two
 vector dispatches through one queue: [vector evidence](evidence/native-vector-twice-cycle1.json).
-The 27 host tests and ten exact-candidate sanitizer checks pass. A strict audit
+Host tests and ten exact-candidate sanitizer checks pass. A strict audit
 identified the remaining G2 requirement: one frozen application must run both
 indexed-store and vector-add, then pass repeated clean title cycles. The existing
 separate profile images do not establish that combined-candidate proof.
@@ -31,6 +31,9 @@ The repository is private.
 - [Current state](STATE.md): the next action and completed milestones.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
 - [Native build](docs/NATIVE_BUILD.md): pinned SDK, native candidates and remaining runtime work.
+- [HIP fat-binary boundary](docs/HIP_FAT_BINARY_BOUNDARY.md): bounded bundle reader,
+  inspector support and the next normal-launch registration step;
+  [offline validation](evidence/offline-fat-binary-reader.json) covers 12 real objects.
 - [Experimental private-call compiler](tools/experimental/private-calls/README.md):
   reproduced bounded compiler recipe and its limits; the separate 304-byte native
   candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).
