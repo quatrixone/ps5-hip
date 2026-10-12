@@ -7,6 +7,7 @@ import pathlib
 import re
 import subprocess
 import struct
+from atomic_fixture import CONTRACT as ATOMIC_CONTRACT, KERNELS as ATOMIC_KERNELS, validate_build as validate_atomic_build
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -31,12 +32,13 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     receipt_bytes = (build / "receipt.json").read_bytes()
     receipt = json.loads(receipt_bytes)
     target, kernel = receipt["target"], receipt["kernel"]
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite", "atomic_suite"):
         raise ValueError("unsupported candidate profile")
     if kernel in ("vector_add_twice", "arithmetic_suite") and (type(receipt.get("dispatches")) is not int or receipt["dispatches"] != 2):
         raise ValueError("repeated profile requires exactly two dispatches")
     if kernel == "arithmetic_suite" and receipt.get("dispatch_kernels") != ["indexed_store", "vector_add"]:
         raise ValueError("arithmetic_suite requires ordered indexed_store then vector_add")
+    atomic_binding = validate_atomic_build(receipt) if kernel == "atomic_suite" else None
     expected = {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}
     if kernel != "runtime":
         expected.add("canary.hsaco")
@@ -87,6 +89,9 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         manifest["dispatches"] = 2
     if kernel == "arithmetic_suite":
         manifest["dispatch_kernels"] = ["indexed_store", "vector_add"]
+    if kernel == "atomic_suite":
+        manifest.update(dispatches=6, dispatch_kernels=ATOMIC_KERNELS, atomic=ATOMIC_CONTRACT,
+                        atomic_compiler=atomic_binding)
     # Validate everything before creating output. A failure never replaces a prior candidate.
     output.mkdir(parents=True, exist_ok=False)
     for name, data in files.items():
@@ -101,7 +106,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite", "atomic_suite"], required=True)
     parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())

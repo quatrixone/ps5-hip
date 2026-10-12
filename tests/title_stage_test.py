@@ -3,6 +3,8 @@ import json
 import pathlib
 import tempfile
 import unittest
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 
 spec = importlib.util.spec_from_file_location("stage_native_title", pathlib.Path(__file__).resolve().parents[1] / "tools/stage_native_title.py")
 module = importlib.util.module_from_spec(spec)

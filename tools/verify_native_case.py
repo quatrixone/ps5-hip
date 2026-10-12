@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+from atomic_fixture import validate_contract as validate_atomic_contract, validate_build as validate_atomic_build
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -53,6 +54,16 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
             if any(item.get("dispatch_kernels") != ["indexed_store", "vector_add"] for item in (manifest, build)):
                 raise ValueError("arithmetic_suite requires ordered indexed_store then vector_add")
             repeat["dispatch_kernels"] = ["indexed_store", "vector_add"]
+    if "atomic_suite" in (manifest.get("kernel"), build.get("kernel")):
+        binding = validate_atomic_build(build)
+        validate_atomic_contract(manifest, build["target"])
+        if (manifest.get("atomic_compiler") != binding or manifest.get("files", {}).get("canary.hsaco") !=
+                {"sha256": binding["code_sha256"], "bytes": binding["bytes"]} or
+                type(manifest["atomic_compiler"].get("bytes")) is not int or
+                type(manifest["files"]["canary.hsaco"].get("bytes")) is not int):
+            raise ValueError("atomic suite manifest/compiler provenance mismatch")
+        repeat.update(dispatches=6, dispatch_kernels=manifest["dispatch_kernels"], atomic=manifest["atomic"],
+                      atomic_compiler=binding)
     shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")

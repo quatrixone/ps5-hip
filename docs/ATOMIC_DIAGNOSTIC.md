@@ -3,8 +3,9 @@
 This isolated branch adds a macro-selected native harness and offline tests for
 the existing six-entry atomic compiler probe. It does not add HIP APIs, change
 the launch core or device kernels, or qualify GPU atomics. The native builder,
-stager and log checker do not yet accept this profile. No native image was linked
-or packaged and no console was contacted.
+stager, frozen-case verifier and strict log checker accept `atomic_suite` with
+the exact six-dispatch contract. No native image has been linked or packaged and
+no console was contacted.
 
 `PS5HIP_CANARY_ATOMIC_SUITE=1` selects six dispatches on one submission queue:
 `atomic_ticket32`, `atomic_ticket64`, `atomic_cas32`, `atomic_cas64`,
@@ -46,6 +47,23 @@ from `build/atomic-probes`, bound to the main repository's
 `evidence/offline-atomic-contention-probe.json`. No device recompilation or
 source-level atomic substitute is used by the harness.
 
+`tools/atomic_fixture.py` pins all four source/object/driver identities from that
+evidence. `kernels/atomic_probe.hip` preserves the original source byte for byte
+(SHA-256 `42bc699f...`). The native builder consumes only the exact O2 object for
+the selected target and checks its original driver linker. It does not recompile
+or silently substitute the ordinary arithmetic canary. Build, stage and frozen
+case receipts retain the selected compiler fixture, resource/oracle contract,
+six-entry order and native helper/header source provenance. Existing arithmetic
+and runtime profiles keep their original behavior.
+
+The profile test independently disassembles all four pinned real objects and
+checks returning 32/64-bit atomic opcodes, indirect per-lane address loads,
+six wave32 entries, zero LDS/private storage and absence of flat/scratch/call
+instructions. Synthetic staging/verifier mutations reject changed order,
+counts, resources, compiler profiles and missing source bindings. Strict log
+mutations cover every dispatch position, guards, immutable offsets, allocation
+closure, summaries and quarantined failures. These remain offline checks.
+
 The host model executes the actual harness, parser, materializer, packet encoder
 and submission queue. A synthetic callback independently supplies legal and
 corrupt observations; it is not an instruction emulator. Synthetic GPU addresses
@@ -69,3 +87,8 @@ as errors. Those relocatable objects do not prove native linking, startup,
 submission, atomic execution or teardown. Raw commands, logs and a source-bound
 receipt live under ignored `results/atomic-host`, `results/atomic-sdk` and
 `results/atomic-readiness`.
+
+After tooling integration the same sanitizer host suite passes all 29 CTests,
+including the new atomic profile contract test and the four actual-object
+ownership/oracle models. No new native compilation, linking or packaging was
+performed for this integration.

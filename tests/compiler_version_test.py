@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 
 spec = importlib.util.spec_from_file_location("builder", pathlib.Path(__file__).resolve().parents[1] / "tools/build_canaries.py")
 builder = importlib.util.module_from_spec(spec)
