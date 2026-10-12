@@ -102,6 +102,33 @@ class CaseTests(unittest.TestCase):
                 with self.subTest(location=location, key=key, bad=bad), self.assertRaises(ValueError):
                     self.verify()
 
+    def test_aperture_manifest_and_build_require_identical_fixed_layout(self):
+        layout = {"groups": 1, "threads": 64, "wave_size": 32,
+                  "words_per_lane": 6, "output_words": 384, "observation_only": True}
+        candidate = self.packages["candidates"][0]
+        original = dict(candidate["manifest"], kernel="private_aperture", aperture_layout=layout)
+        build = {key: original[key] for key in ("kernel", "target", "aperture_layout")}
+        def freeze(manifest, receipt):
+            self.write(self.stage / "build-receipt.json", receipt)
+            manifest["build_receipt_sha256"] = module.fingerprint(self.stage / "build-receipt.json")["sha256"]
+            candidate["manifest"] = manifest
+            self.write(self.stage / "manifest.json", manifest)
+            candidate["package"]["manifest_sha256"] = module.fingerprint(self.stage / "manifest.json")["sha256"]
+            self.write(self.stage / "package-receipt.json", candidate["package"])
+        freeze(copy.deepcopy(original), copy.deepcopy(build))
+        self.assertEqual(self.verify()["aperture_layout"], layout)
+        for location in ("manifest", "build"):
+            for key, bad in [("aperture_layout", value) for value in
+                             (None, {}, dict(layout, groups=True), dict(layout, output_words=384.0),
+                              dict(layout, wave_size=64), dict(layout, observation_only=1),
+                              dict(layout, observation_only=False), dict(layout, extra=0))] + [
+                                  ("kernel", "indexed_store"), ("target", "gfx1030")]:
+                manifest, receipt = copy.deepcopy(original), copy.deepcopy(build)
+                (manifest if location == "manifest" else receipt)[key] = bad
+                freeze(manifest, receipt)
+                with self.subTest(location=location, key=key), self.assertRaises(ValueError):
+                    self.verify()
+
     def test_changed_artifacts_and_receipts_are_rejected(self):
         for path in (self.stage / "app/eboot.bin", self.stage / (self.title + ".ffpkg"),
                      self.stage / "build-receipt.json", self.controllers / "launch.elf",

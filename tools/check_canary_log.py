@@ -4,18 +4,35 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
+
+
+def aperture_records(lines):
+    records = []
+    for lane, line in enumerate(lines):
+        match = re.fullmatch(r"PS5HIP APERTURE lane=(\d+) base=(0x[0-9a-f]{16}) limit=(0x[0-9a-f]{16}) sentinel=0x([0-9a-f]{8})", line)
+        if not match or match[1] != str(lane) or int(match[4], 16) != (lane ^ 0x6b18d3a5):
+            return None
+        records.append({"lane": lane, "base": match[2], "limit": match[3]})
+    if len(records) != 64:
+        return None
+    pairs = [(r["base"], r["limit"]) for r in records]
+    if any(pairs[i] != pairs[i // 32 * 32] for i in range(64)):
+        return None
+    return records, "equal" if pairs[0] == pairs[32] else "different"
 
 
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite", "private_aperture"):
         raise ValueError("unsupported canary profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
     lines = data.decode("utf-8", errors="strict").splitlines()
     expected = [f"PS5HIP START target={target} kernel={kernel}",
                 "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass"]
+    aperture = None
     if kernel == "runtime":
         expected.append("PS5HIP PASS kernel=runtime gpu_api_calls=0")
     elif kernel in ("vector_add_twice", "arithmetic_suite"):
@@ -25,6 +42,12 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                          f"PS5HIP SUBMIT target={target} kernel={dispatched} count=73 groups=2 timeout_ms=2000",
                          f"PS5HIP PASS kernel={dispatched} exact_values=73 guards=unchanged allocations=closed"]
         expected.append(f"PS5HIP PASS kernel={kernel} dispatches=2 exact_values=146 guards=unchanged allocations=closed")
+    elif kernel == "private_aperture":
+        aperture = aperture_records(lines[3:67])
+        expected.append(f"PS5HIP SUBMIT target={target} kernel=private_aperture count=64 groups=1 timeout_ms=2000")
+        if aperture:
+            expected += lines[3:67] + [f"PS5HIP APERTURE waves=2 within_wave=consistent across_waves={aperture[1]} interpretation=raw-only"]
+        expected.append("PS5HIP PASS kernel=private_aperture exact_values=128 raw_words=256 guards=unchanged allocations=closed")
     else:
         expected += [f"PS5HIP SUBMIT target={target} kernel={kernel} count=73 groups=2 timeout_ms=2000",
                      f"PS5HIP PASS kernel={kernel} exact_values=73 guards=unchanged allocations=closed"]
@@ -38,22 +61,27 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
         result = "quarantined"
     elif any("PS5HIP FAIL" in line or "PS5HIP mismatch" in line for line in lines):
         result = "failed"
-    elif data == ("\n".join(expected) + "\n").encode("utf-8"):
+    elif (kernel != "private_aperture" or aperture is not None) and data == ("\n".join(expected) + "\n").encode("utf-8"):
         result = "application-pass"
     else:
         result = "incomplete-or-unexpected"
-    return {"application_result": result, "target": target, "kernel": kernel,
+    observation = ({"aperture_observation_only": True,
+                    "aperture_records": aperture[0] if result == "application-pass" else []}
+                   if kernel == "private_aperture" else {})
+    return {"application_result": result, "target": target, "kernel": kernel, **observation,
             "log_sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
             "hardware_gate_passed": False,
             "unproven": ["log freshness", "remote artifact identity", "native process status",
-                         "title teardown", "service health"]}
+                         "title teardown", "service health"] +
+                        (["private aperture routing", "flat scratch initialization", "private-memory execution"]
+                         if kernel == "private_aperture" else [])}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite", "private_aperture"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

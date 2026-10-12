@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "arithmetic_suite", "private_aperture"], required=True)
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
     lock = json.loads((ROOT / "dependencies.json").read_text())
@@ -55,7 +55,11 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
-    device_data, device_report = (verified_device_object(ROOT, args.target, version)
+    device_loader = verified_device_object
+    if args.kernel == "private_aperture":
+        from probe_aperture import verified_aperture_object
+        device_loader = verified_aperture_object
+    device_data, device_report = (device_loader(ROOT, args.target, version)
                                   if args.kernel != "runtime" else (None, None))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
@@ -118,6 +122,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
         if args.kernel == "arithmetic_suite":
             options += ["-DPS5HIP_CANARY_ARITHMETIC_SUITE=1"]
+        if args.kernel == "private_aperture":
+            options.append("-DPS5HIP_CANARY_PRIVATE_APERTURE=1")
         if args.kernel == "runtime":
             options.append("-DPS5HIP_RUNTIME_ONLY=1")
         if args.shell_exit_probe:
@@ -195,7 +201,9 @@ def main():
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
                                  [ROOT / "tools/build_canaries.py"] +
-                                 ([ROOT / "kernels/canary.hip"] if args.kernel != "runtime" else []) +
+                                 ([ROOT / "kernels/private_aperture.hip", ROOT / "tools/probe_aperture.py", ROOT / "tools/native_aperture.h"]
+                                  if args.kernel == "private_aperture" else
+                                  [ROOT / "kernels/canary.hip"] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
@@ -205,6 +213,9 @@ def main():
         receipt["dispatches"] = 2
     if args.kernel == "arithmetic_suite":
         receipt["dispatch_kernels"] = ["indexed_store", "vector_add"]
+    if args.kernel == "private_aperture":
+        receipt["aperture_layout"] = {"groups": 1, "threads": 64, "wave_size": 32,
+                                      "words_per_lane": 6, "output_words": 384, "observation_only": True}
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("Built unqualified native candidate:", candidate)
     print("No title metadata, installation or console execution performed.")

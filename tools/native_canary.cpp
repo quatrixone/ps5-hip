@@ -21,7 +21,7 @@ namespace {
 constexpr uint32_t count = 73, guard_words = 16, poison = 0xa5a5a5a5;
 using Memory = std::shared_ptr<ps5hip::NativeMemory>;
 
-Memory buffer() {
+[[maybe_unused]] Memory buffer() {
     auto memory = std::make_shared<ps5hip::NativeMemory>((count + 2 * guard_words) * 4, 256, false);
     std::memset(memory->cpu(), 0xa5, memory->range().bytes);
     return memory;
@@ -29,10 +29,10 @@ Memory buffer() {
 uint32_t *data(const Memory &memory) {
     return static_cast<uint32_t *>(memory->cpu()) + guard_words;
 }
-ps5hip::LaunchArgument argument(const Memory &memory) {
+[[maybe_unused]] ps5hip::LaunchArgument argument(const Memory &memory) {
     return {memory->range().address + guard_words * 4, count * 4};
 }
-void check_guards(const Memory &memory) {
+[[maybe_unused]] void check_guards(const Memory &memory) {
     const auto *words = static_cast<const uint32_t *>(memory->cpu());
     for (size_t i = 0; i < memory->range().bytes / 4; ++i)
         if ((i < guard_words || i >= guard_words + count) && words[i] != poison)
@@ -117,9 +117,15 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
 }
 
+#ifdef PS5HIP_CANARY_PRIVATE_APERTURE
+#include "native_aperture.h"
+#endif
+
 void run_experiment(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
                     const std::vector<uint8_t> &image) {
-#ifdef PS5HIP_CANARY_ARITHMETIC_SUITE
+#ifdef PS5HIP_CANARY_PRIVATE_APERTURE
+    aperture::run(queue, object, image);
+#elif defined(PS5HIP_CANARY_ARITHMETIC_SUITE)
     std::printf("PS5HIP DISPATCH index=1/2 kernel=indexed_store\n");
     run<false>(queue, object, image);
     std::printf("PS5HIP DISPATCH index=2/2 kernel=vector_add\n");
@@ -135,6 +141,18 @@ void run_experiment(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &ob
     run(queue, object, image);
 #endif
 }
+void run_guarded_experiment(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
+                            const std::vector<uint8_t> &image) {
+    try { run_experiment(queue, object, image); }
+    catch (const std::exception &error) {
+        if (queue.poisoned()) quarantine(error.what());
+        throw;
+    }
+    catch (...) {
+        if (queue.poisoned()) quarantine("unknown exception");
+        throw;
+    }
+}
 #endif
 } // namespace
 
@@ -142,6 +160,8 @@ int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_PRIVATE_APERTURE)
+        "private_aperture";
 #elif defined(PS5HIP_CANARY_ARITHMETIC_SUITE)
         "arithmetic_suite";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
@@ -189,17 +209,7 @@ int main() {
         const auto image = ps5hip::materialize_code_object(bytes.data(), bytes.size());
         ps5hip::AgcBackend backend;
         ps5hip::SubmissionQueue queue(backend);
-        try {
-            run_experiment(queue, object, image);
-        }
-        catch (const std::exception &error) {
-            if (queue.poisoned()) quarantine(error.what());
-            throw;
-        }
-        catch (...) {
-            if (queue.poisoned()) quarantine("unknown exception");
-            throw;
-        }
+        run_guarded_experiment(queue, object, image);
 #endif
         return ps5hip_canary::sync_log() ? 0 : 3;
     } catch (const std::exception &error) {

@@ -82,6 +82,22 @@ class StageTests(unittest.TestCase):
         self.assertEqual(manifest["dispatch_kernels"], ["indexed_store", "vector_add"])
         self.assertEqual(manifest["kernel"], "arithmetic_suite")
 
+    def test_aperture_layout_is_fixed_and_observational(self):
+        layout = {"groups": 1, "threads": 64, "wave_size": 32,
+                  "words_per_lane": 6, "output_words": 384, "observation_only": True}
+        self.receipt.update(kernel="private_aperture", aperture_layout=layout)
+        (self.build / "candidate/canary.hsaco").write_bytes(b"fixture device")
+        self.receipt["artifacts"]["canary.hsaco"] = module.digest(b"fixture device")
+        for bad in (None, {}, dict(layout, threads=32), dict(layout, groups=True),
+                    dict(layout, output_words=384.0), dict(layout, observation_only=1),
+                    dict(layout, observation_only=False), dict(layout, extra=0)):
+            self.receipt["aperture_layout"] = bad
+            with self.assertRaises(ValueError):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+        self.receipt["aperture_layout"] = layout
+        self.assertEqual(self.run_stage()["aperture_layout"], layout)
+
     def test_package_inventory(self):
         manifest = self.run_stage()
         app = self.output / "app"

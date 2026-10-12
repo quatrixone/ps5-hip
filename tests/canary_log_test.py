@@ -90,6 +90,48 @@ class LogTests(unittest.TestCase):
                         self.assertNotEqual(module.check_log(bad.encode(), target, profile, shell_exit_probe=shell)
                                             ["application_result"], "application-pass")
 
+    def test_private_aperture_observations_and_corruption(self):
+        for target in ("gfx1013", "gfx1030"):
+            for across in ("equal", "different"):
+                # Zero and descending/wrapped values remain raw observations.
+                records = [f"PS5HIP APERTURE lane={i} base=0x{(0 if across == 'equal' or i < 32 else 0xffffffffffffffff):016x} "
+                           f"limit=0x0000000000000000 sentinel=0x{i ^ 0x6b18d3a5:08x}" for i in range(64)]
+                lines = [f"PS5HIP START target={target} kernel=private_aperture",
+                         self.runtime.decode().splitlines()[1],
+                         f"PS5HIP SUBMIT target={target} kernel=private_aperture count=64 groups=1 timeout_ms=2000",
+                         *records,
+                         f"PS5HIP APERTURE waves=2 within_wave=consistent across_waves={across} interpretation=raw-only",
+                         "PS5HIP PASS kernel=private_aperture exact_values=128 raw_words=256 guards=unchanged allocations=closed"]
+                good = "\n".join(lines) + "\n"
+                result = module.check_log(good.encode(), target, "private_aperture")
+                self.assertEqual(result["application_result"], "application-pass")
+                self.assertTrue(result["aperture_observation_only"])
+                self.assertEqual(len(result["aperture_records"]), 64)
+                self.assertFalse(result["hardware_gate_passed"])
+                self.assertIn("private aperture routing", result["unproven"])
+                bad_logs = [good[:-1], good + records[0] + "\n", good.replace(records[1] + "\n", ""),
+                            good.replace(records[1], records[0]), good.replace("exact_values=128", "exact_values=384"),
+                            good.replace("raw_words=256", "raw_words=128"), good.replace("guards=unchanged", "guards=modified"),
+                            good.replace("allocations=closed", "allocations=retained"),
+                            good.replace("interpretation=raw-only", "interpretation=valid"),
+                            good.replace("across_waves=" + across, "across_waves=" + ("different" if across == "equal" else "equal")),
+                            good.replace(records[1], records[1].replace("base=0x0000000000000000", "base=0x0000000000000001")),
+                            good.replace("sentinel=0x6b18d3a5", "sentinel=0x00000000"),
+                            good.replace("base=0x0000000000000000", "base=0x0"), good.replace("\n", "\r\n"),
+                            good.replace("count=64", "count=384"), good + "PS5HIP FAIL: cleanup\n",
+                            good + "PS5HIP QUARANTINED: ownership\n"]
+                for bad in bad_logs:
+                    failed = module.check_log(bad.encode(), target, "private_aperture")
+                    self.assertNotEqual(failed["application_result"], "application-pass")
+                    self.assertEqual(failed["aperture_records"], [])
+                suffix = ("PS5HIP SHUTDOWN main-return=0\nPS5HIP SHUTDOWN atexit=observed\n"
+                          "PS5HIP SHUTDOWN static-dtor=observed\nPS5HIP SHELL_EXIT application-fini=completed\n"
+                          "PS5HIP SHELL_EXIT request=begin\nPS5HIP SHELL_EXIT request-return=0\n")
+                self.assertEqual(module.check_log((good + suffix).encode(), target, "private_aperture", shell_exit_probe=True)
+                                 ["application_result"], "application-pass")
+                self.assertNotEqual(module.check_log(good.encode(), target, "private_aperture", shell_exit_probe=True)
+                                    ["application_result"], "application-pass")
+
     def test_input_bounds(self):
         with self.assertRaises(ValueError):
             module.check_log(b"x" * 65537, "gfx1013", "runtime")

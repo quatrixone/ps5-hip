@@ -43,6 +43,16 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         raise ValueError("build receipt bytes changed")
     build = read_json(stage / "build-receipt.json")
     repeat = {}
+    if any(item.get("kernel") == "private_aperture" for item in (manifest, build)):
+        if (manifest.get("kernel"), manifest.get("target")) != (build.get("kernel"), build.get("target")):
+            raise ValueError("private_aperture build/manifest mismatch")
+        layout = {"groups": 1, "threads": 64, "wave_size": 32,
+                  "words_per_lane": 6, "output_words": 384, "observation_only": True}
+        for item in (manifest, build):
+            actual = item.get("aperture_layout")
+            if actual != layout or any(type(actual[key]) is not type(value) for key, value in layout.items()):
+                raise ValueError("private_aperture requires fixed read-only observation layout")
+        repeat["aperture_layout"] = layout
     if any(item.get("kernel") in ("vector_add_twice", "arithmetic_suite") for item in (manifest, build)):
         if (manifest.get("kernel"), manifest.get("target")) != (build.get("kernel"), build.get("target")):
             raise ValueError("repeated profile build/manifest mismatch")
