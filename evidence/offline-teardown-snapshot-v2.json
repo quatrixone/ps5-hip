@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "classification": "offline telemetry-only diagnostic v2; no additional queries or changed bounds",
+  "source_commit": "0bf7fb9944e0017ef4ba8530adbf34ab9c664cf1",
+  "source_directory": ".local/teardown-snapshot-v2",
+  "source_sha256": {
+    "tools/teardown_snapshot.h": "c90237b16f8d1735fc6ba75c209addc46ed281df9d4134147c5cb188d42e0758",
+    "tools/teardown_snapshot.cpp": "f1e7cc42ef6b9b3d47a281f10d77e6fa31561eeabd1e6d26bc92965a1ed43b88",
+    "tests/teardown_snapshot_test.cpp": "df01569c66212bd95cd5136f1c29812638fcc0545b658f0ccd6bfcc4f58dd5b7",
+    "docs/TEARDOWN_SNAPSHOT.md": "7f6aab89eaa9b161ae3cb746572be3502e93cad85a188c6f52c3c43735c41af0"
+  },
+  "freeze_receipt": ".local/teardown-snapshot-v2/results/teardown-v2-offline/freeze.json",
+  "freeze_sha256": "e0acf31343aa828bd518571f4500baa94bc1caa2306407a7c540e0b50ebe4851",
+  "readiness_sha256": "45e54eb642c9b0f8f737bf3afb2c6c970ea69b3b3f79453dc817cfe6bf019dd8",
+  "native_receipt_sha256": "79f3e6c4e02f3ba42437e33027cbb9805cb19ede76132f65e0c8ba4876176c61",
+  "artifact": {
+    "file": "teardown-snapshot.elf",
+    "bytes": 110904,
+    "sha256": "26b9e178e32dd066115d46ac6525e8b3351b086632729973c4596ddbfdf8638a"
+  },
+  "import_audit": {
+    "needed_libraries": [
+      "libSceLibcInternal.sprx",
+      "libSceNet.sprx",
+      "libSceSystemService.sprx",
+      "libkernel_sys.sprx"
+    ],
+    "imports": [
+      "__error",
+      "calloc",
+      "free",
+      "geteuid",
+      "getfsstat",
+      "getuid",
+      "kill",
+      "memchr",
+      "printf",
+      "putchar",
+      "qsort",
+      "sceLncUtilGetAppIdOfRunningBigApp",
+      "sceSystemServiceGetAppId",
+      "strcmp",
+      "strlen",
+      "strncmp"
+    ],
+    "getfsstat_provider": "libkernel_sys.sprx",
+    "release_certification": false
+  },
+  "source_equivalence": true,
+  "native_query_sites": 4,
+  "record_cap": 1024,
+  "fill_attempt_cap": 3,
+  "matching_row_cap": 128,
+  "host_tests_passed": 2,
+  "compiler_included_files_verified": 52,
+  "equivalence_audit_sha256": "3f30d1367e4837f00e2cc49368ab43f1556cfd9864622f6c85a3cb348c2d722f",
+  "hardware_validated": false,
+  "console_access": false,
+  "release": "unknown",
+  "accepted": false,
+  "independent_reviews": {
+    "source": {
+      "path": "results/teardown-telemetry-v2-independent-review/review.json",
+      "sha256": "899951a7c2fe01622fc272c7e3ae35f117c33702ff15a18745a2db8e2c62f0f6",
+      "findings": []
+    },
+    "runner": {
+      "path": "results/teardown-telemetry-v2-independent-review/runner-review.json",
+      "sha256": "45339d90c9524a128b53858e9e2c6a90d1bdac13e75ccca7094e8841034b9d09",
+      "findings": []
+    }
+  },
+  "root_integration": {
+    "source_commit": "5ae1b4115d95898afd5e441ec925830ca1ac92de",
+    "receipt": "results/ocml-telemetry-integration-v2/receipt.json",
+    "receipt_sha256": "187a278db4afdd8272690aa246558c036e9b395a98f6ab9fe93ea4b8f86f9884",
+    "sanitizer_ctests_passed": 36
+  }
+}

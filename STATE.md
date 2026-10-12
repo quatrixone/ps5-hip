@@ -62,8 +62,8 @@ Updated: 2026-10-12, America/New_York.
   not proof of a leak, but does not satisfy the declared release prerequisite.
   Hold the second arithmetic cycle and private304 launch while resolving that
   evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
-- The current host suite passes 34 sanitizer CTests with real HIP bundle
-  fixtures, registration/capture models and the teardown diagnostic enabled. The earlier bundle/inspector
+- The current host suite passes 36 sanitizer CTests with real HIP bundle
+  fixtures, registration/capture models, OCML artifacts and telemetry v2 enabled. The earlier bundle/inspector
   changes also passed all three affected cases. The exact frozen vector source passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
@@ -268,6 +268,18 @@ See `evidence/offline-teardown-snapshot.json` and
 `evidence/native-teardown-snapshot-fw1270.json`. Expose raw initial query values
 offline before considering another observation; do not blindly raise the cap.
 
+Telemetry v2 is frozen at `0bf7fb9` with the same provider, record limits and
+query sequence. It stores exact signed/hex returns and errno for the initial
+query and three bounded fill slots. Source reconstruction recovers v1 after
+removing telemetry, and native imports/call sites match. Two focused tests and
+the final 36-test integrated sanitizer suite pass. See
+`evidence/offline-teardown-snapshot-v2.json`. Independent review cleared the
+fresh one-use controller. Its 14:52 UTC .40 preflight returned no-run because
+unrelated PPSA99008 PID177 was active. No diagnostic send, title action or remote
+mutation followed; services were reachable and both locks released. The v2
+marker remains absent and the v1 marker consumed. See
+`evidence/native-teardown-v2-no-run.json`; do not poll for availability.
+
 ## Next action
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
@@ -300,8 +312,10 @@ under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 The exact older-loader source explains persistent registration, and the future
 lifecycle criterion is explicitly corrected in `docs/G2_ARITHMETIC_ACCEPTANCE.md`.
 The original first combined arithmetic cycle remains partial-pass. The read-only
-mount observation hit its count bound, so finish raw-query instrumentation and
-review a usable baseline before another launch. Do not infer an empty table from
+mount observation hit its count bound. Raw-query instrumentation v2 is now frozen,
+tested and reviewed, but its one preflight found .40 busy before any payload.
+Use the frozen diagnostic at a later useful idle milestone and review a usable
+baseline before another launch. Do not infer an empty table from
 initialized fields, a leak from registration persistence, or deployed identity
 from the banner. Preserve the installed arithmetic image, successful result and
 earlier unique CPU backup. No setting change or automatic repeat is authorized
@@ -504,4 +518,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G4 offline | 08a5f52 | genuine compiler registration controls, PS5 link checks and31 sanitizer tests pass | evidence/offline-host-registration-control.json | native launch unsupported
 - 2026-10-12 | G4 architecture | pinned CLR/HIP6.2.4 comparison selects one small native runtime with explicit reassessment threshold | evidence/offline-runtime-architecture.json | implementation and hardware qualification pending
 - 2026-10-12 | G4 offline | 0edd623 | compiler arguments copied, packed and encoded;34 integrated sanitizer tests pass | evidence/offline-host-launch-capture.json | no GPU submission
+- 2026-10-12 | G3 offline | 3730f16 | four OCML math objects reproduce exactly;36 integrated sanitizer tests pass | evidence/offline-ocml-math-probe.json | numerical/GPU checks pending
+- 2026-10-12 | diagnostic | 0bf7fb9 | telemetry v2 built/reviewed; .40 busy at14:52UTC, no payload sent | evidence/native-teardown-v2-no-run.json | await useful idle milestone
 - 2026-10-12 | read-only .40 | 05b1723 | historical PID134 absent;mount count bound prevents baseline;services healthy | evidence/native-teardown-snapshot-fw1270.json | inspect raw query offline

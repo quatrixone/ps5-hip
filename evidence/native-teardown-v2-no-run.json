@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "started_utc": "2026-10-12T14:52:26.007202+00:00",
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "source_commit": "0bf7fb9944e0017ef4ba8530adbf34ab9c664cf1",
+  "elf_sha256": "26b9e178e32dd066115d46ac6525e8b3351b086632729973c4596ddbfdf8638a",
+  "runner_sha256": "0fd1bbd49e19584bb82fd3ba94e063e7270b1204eef2acf8d534c504fc834b49",
+  "manifest_sha256": "0fe7a6a254ce333db81a69edb4f86c72cc0c4d2ffae281e7c7524c42a3542a5d",
+  "raw_directory": "results/teardown-console-control-v2/observation-20261012T145226.007202Z",
+  "raw_receipt_sha256": "9f18e32e343f99da465aa75122bfd4a73ab2c24cb52f8f8f89fa3c1dadf9ff25",
+  "raw_sha256": {
+    "before.log": "b0649f203a1b25af9fea5f4f0a311172c19cdcc8b6989ea470cfafa0173b6f21",
+    "klog.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "reason": "Fresh ShadowMount history shows unrelated PPSA99008 PID177 app_id0x00006018 started with no later stop; idle check rejected before diagnostic send.",
+  "payload_attempted": false,
+  "title_launched": false,
+  "gpu_calls": 0,
+  "remote_mutation_performed": false,
+  "services_reachable_before": true,
+  "owned_locks_released": true,
+  "diagnostic_one_use_marker_created": false,
+  "release": "unknown",
+  "accepted": false,
+  "hardware_gate_passed": false,
+  "private304_executed": false,
+  "next_action": "Do not poll or close another title. Retain frozen telemetry candidate for a later useful idle milestone; usable mount baseline remains required before arithmetic/private304."
+}

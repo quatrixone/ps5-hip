@@ -87,5 +87,16 @@
     "Partial OCML+constants build uses preexisting unmodified OCKL workitem source slice; not full OCKL",
     "No full LLVM build, runtime API, native profile or package change",
     "Installed LLVM SDK resources, headers and static host archives are not completely inventoried"
-  ]
+  ],
+  "independent_review": {
+    "path": ".local/g3-ocml-math/results/ocml-recipe-validation-v1/independent-review.json",
+    "sha256": "df0c2f321602bb6a45655b9a3b4c31287d974faaeecdc59f4c48d5958fe11bae",
+    "findings": []
+  },
+  "root_integration": {
+    "source_commit": "5ae1b4115d95898afd5e441ec925830ca1ac92de",
+    "receipt": "results/ocml-telemetry-integration-v2/receipt.json",
+    "receipt_sha256": "187a278db4afdd8272690aa246558c036e9b395a98f6ab9fe93ea4b8f86f9884",
+    "sanitizer_ctests_passed": 36
+  }
 }
