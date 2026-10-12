@@ -3,6 +3,7 @@ import pathlib
 import hashlib
 import json
 import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 import subprocess
 import tempfile
 import unittest

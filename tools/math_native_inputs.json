@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "device_receipt_sha256": "999f73c9e8333806503aaf598640d1787700c0d0799b89338a954f3c6d3edaaf",
+  "device_report_sha256": "3bf648818ef4ef6814b8c1856b7b03cd2d4476c97eb49ea5c8db6c7eb45e4415",
+  "oracle_sources": {
+    "tools/generate_math_oracle.py": "0535a75c6f8b1b51171ee308ea9af10eedaf9d00b85404e2dd725faddf4350dc",
+    "tools/math_oracle_mpfr.c": "73350119ab3a1d2087e83eca6d3ba48b573eaf0e0d274f25195c4cbe1c30c0e8",
+    "tools/math_oracle.h": "d0db0e6aaa517e302b47eb2f2131683b92c6e927010d13c4bf8d6079af70c351",
+    "tools/math_oracle_contract.json": "373c94b8ad8dac7326401ad54a1299d750298a5922c1a226d0d4816c854430b8"
+  },
+  "profiles": [
+    {
+      "target": "gfx1013",
+      "optimization": "O1",
+      "code_sha256": "5a05c69d740e6aad30e0f21780183b5dbfe7c1239be599a03d438c87c9436383",
+      "bytes": 5232
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "code_sha256": "ed3b1b6b3d82f6775a20f3f0781c31c2ffc7e48a8dc813b23bc0617558114ced",
+      "bytes": 5168
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O1",
+      "code_sha256": "69f5276503e20b2c901440de07ff555dd25ad26af12d0cf0f21d348c88011040",
+      "bytes": 5232
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O2",
+      "code_sha256": "5df632cbe219b637c3eb62e3246b56422cfd90614f5060281dd2fdcad96e59e6",
+      "bytes": 5168
+    }
+  ]
+}

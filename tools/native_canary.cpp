@@ -5,6 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
+#ifdef PS5HIP_CANARY_FP32_MATH
+#include "math_oracle.h"
+#endif
 #ifdef PS5HIP_CANARY_VECTOR_ADD_TWICE
 #define PS5HIP_CANARY_VECTOR_ADD 1
 #endif
@@ -21,15 +24,19 @@
 
 namespace {
 #ifndef PS5HIP_RUNTIME_ONLY
-#ifdef PS5HIP_CANARY_WAVE
+#ifdef PS5HIP_CANARY_FP32_MATH
+constexpr uint32_t count = ps5hip_math::output_words, guard_words = 16, poison = 0xa5a5a5a5;
+static_assert(ps5hip_math::input_count == 257 && count == 1542 && ps5hip_math::groups == 5 &&
+              ps5hip_math::threads == 64 && ps5hip_math::allocation_output_words == 1920);
+#elif defined(PS5HIP_CANARY_WAVE)
 constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
 #else
 constexpr uint32_t count = 73, guard_words = 16, poison = 0xa5a5a5a5;
 #endif
 using Memory = std::shared_ptr<ps5hip::NativeMemory>;
 
-Memory buffer() {
-    auto memory = std::make_shared<ps5hip::NativeMemory>((count + 2 * guard_words) * 4, 256, false);
+Memory buffer(uint32_t word_count = count) {
+    auto memory = std::make_shared<ps5hip::NativeMemory>((word_count + 2 * guard_words) * 4, 256, false);
 #ifdef PS5HIP_CANARY_WAVE
     auto *words = static_cast<uint32_t *>(memory->cpu());
     for (size_t i = 0; i < memory->range().bytes / 4; ++i) words[i] = poison;
@@ -41,13 +48,13 @@ Memory buffer() {
 uint32_t *data(const Memory &memory) {
     return static_cast<uint32_t *>(memory->cpu()) + guard_words;
 }
-ps5hip::LaunchArgument argument(const Memory &memory) {
-    return {memory->range().address + guard_words * 4, count * 4};
+ps5hip::LaunchArgument argument(const Memory &memory, uint32_t word_count = count) {
+    return {memory->range().address + guard_words * 4, word_count * 4};
 }
-void check_guards(const Memory &memory) {
+void check_guards(const Memory &memory, uint32_t word_count = count) {
     const auto *words = static_cast<const uint32_t *>(memory->cpu());
     for (size_t i = 0; i < memory->range().bytes / 4; ++i)
-        if ((i < guard_words || i >= guard_words + count) && words[i] != poison)
+        if ((i < guard_words || i >= guard_words + word_count) && words[i] != poison)
             throw ps5hip::ObjectError("canary guard modified");
 }
 #ifdef PS5HIP_CANARY_VECTOR_ADD
@@ -65,11 +72,26 @@ uint32_t bits(float value) {
 }
 
 void validate(const Memory &output
+#ifdef PS5HIP_CANARY_FP32_MATH
+              , const Memory &input
+#endif
 #ifdef PS5HIP_CANARY_VECTOR_ADD
               , const Memory &a, const Memory &b
 #endif
 ) {
     check_guards(output);
+#ifdef PS5HIP_CANARY_FP32_MATH
+    check_guards(input, ps5hip_math::input_count);
+    for (uint32_t i = 0; i < ps5hip_math::input_count; ++i)
+        if (data(input)[i] != ps5hip_math::input_bits[i])
+            throw ps5hip::ObjectError("read-only math input modified");
+    for (uint32_t i = 0; i < count; ++i) {
+        if (data(output)[i] == ps5hip_math::poison_bits(i) || !ps5hip_math::check_output(i, data(output)[i])) {
+            std::fprintf(stderr, "PS5HIP mismatch math index=%u actual=0x%08x\n", i, data(output)[i]);
+            throw ps5hip::ObjectError("math numerical contract mismatch");
+        }
+    }
+#else
     for (uint32_t i = 0; i < count; ++i) {
 #ifdef PS5HIP_CANARY_WAVE
         const uint32_t invocation = i / 4, lane = invocation % 32, base = invocation - lane;
@@ -100,13 +122,22 @@ void validate(const Memory &output
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     check_guards(a); check_guards(b);
 #endif
+#endif
 }
 
 void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
          const std::vector<uint8_t> &image) {
     auto module = std::make_shared<ps5hip::NativeMemory>(image.size(), 65536, true);
+#ifdef PS5HIP_CANARY_FP32_MATH
+    auto kernarg = std::make_shared<ps5hip::NativeMemory>(280, 256, false);
+#else
     auto kernarg = std::make_shared<ps5hip::NativeMemory>(64, 256, false);
+#endif
+#ifdef PS5HIP_CANARY_FP32_MATH
+    auto output = buffer(ps5hip_math::allocation_output_words);
+#else
     auto output = buffer();
+#endif
     std::memcpy(module->cpu(), image.data(), image.size());
     std::vector<Memory> resources{module, kernarg, output};
     std::vector<ps5hip::LaunchArgument> arguments;
@@ -116,7 +147,14 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
     kernel = "wave_partial";
 #endif
-#ifdef PS5HIP_CANARY_VECTOR_ADD
+#ifdef PS5HIP_CANARY_FP32_MATH
+    kernel = "fp32_math";
+    auto math_input = buffer(ps5hip_math::input_count);
+    for (uint32_t i = 0; i < ps5hip_math::input_count; ++i) data(math_input)[i] = ps5hip_math::input_bits[i];
+    for (uint32_t i = 0; i < count; ++i) data(output)[i] = ps5hip_math::poison_bits(i);
+    resources.push_back(math_input);
+    arguments = {argument(output), argument(math_input, ps5hip_math::input_count), {ps5hip_math::input_count}};
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
     kernel = "vector_add";
     auto a = buffer(), b = buffer();
     for (uint32_t i = 0; i < count; ++i) {
@@ -130,7 +168,9 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
 #else
     arguments = {argument(output), {count}};
 #endif
-#ifdef PS5HIP_CANARY_WAVE
+#ifdef PS5HIP_CANARY_FP32_MATH
+    constexpr uint32_t groups = ps5hip_math::groups;
+#elif defined(PS5HIP_CANARY_WAVE)
     constexpr uint32_t groups = 1;
 #else
     constexpr uint32_t groups = 2;
@@ -138,7 +178,9 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     const auto launch = ps5hip::prepare_initial_launch(object, kernel, module->range(),
                                                       kernarg->range(), groups, arguments);
     std::memcpy(kernarg->cpu(), launch.kernargs.data(), launch.kernargs.size());
-#ifdef PS5HIP_CANARY_WAVE
+#ifdef PS5HIP_CANARY_FP32_MATH
+    std::printf("PS5HIP SUBMIT target=%s kernel=fp32_math inputs=257 output_words=1542 groups=5 kernarg_bytes=280 timeout_ms=2000\n", PS5HIP_CANARY_TARGET);
+#elif defined(PS5HIP_CANARY_WAVE)
     std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=64 output_words=256 groups=1 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel);
 #else
@@ -152,14 +194,20 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
                      unsigned(result.status), unsigned(result.driver_error));
         quarantine();
     }
-#ifdef PS5HIP_CANARY_VECTOR_ADD
+#ifdef PS5HIP_CANARY_FP32_MATH
+    validate(output, math_input);
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
     validate(output, a, b);
 #else
     validate(output);
 #endif
     for (auto &memory : resources)
         if (!memory->close()) throw ps5hip::ObjectError("canary allocation teardown failed");
+#ifdef PS5HIP_CANARY_FP32_MATH
+    std::printf("PS5HIP PASS kernel=fp32_math numeric_values=1542 contract=%s inputs=unchanged guards=unchanged allocations=closed\n", ps5hip_math::contract_sha256);
+#else
     std::printf("PS5HIP PASS kernel=%s exact_values=%u guards=unchanged allocations=closed\n", kernel, count);
+#endif
 }
 #endif
 } // namespace
@@ -168,6 +216,8 @@ int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_FP32_MATH)
+        "fp32_math";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
         "vector_add_twice";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD)

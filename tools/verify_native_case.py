@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import math_native_fixture as math_fixture
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -46,6 +47,11 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         if (build.get("kernel") != manifest["kernel"] or build.get("target") != manifest["target"] or
                 any(type(item.get("dispatches")) is not int or item["dispatches"] != 2 for item in (manifest, build))):
             raise ValueError("vector_add_twice requires matching two-dispatch provenance")
+    if "fp32_math" in (manifest["kernel"], build.get("kernel")):
+        if (manifest["kernel"] != build.get("kernel") or manifest["target"] != build.get("target") or
+                manifest.get("math_profile") != build.get("math_profile")):
+            raise ValueError("math manifest/build profile mismatch")
+        math_fixture.validate_build(build, (stage / "app/canary.hsaco").read_bytes(), ROOT)
     shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
