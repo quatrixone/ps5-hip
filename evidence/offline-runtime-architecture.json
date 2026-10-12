@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "classification": "offline-runtime-architecture-decision; no runtime or GPU qualification",
+  "selected": "small native HIP compatibility runtime over existing checked substrate",
+  "reconsider_before": [
+    "general asynchronous scheduler",
+    "cross-stream event dependencies",
+    "host callback worker",
+    "deferred shared memory pool",
+    "graph capture",
+    "VMM"
+  ],
+  "source_commit": "743c8215ebefbe4be5804219e08a55550ae03aa8",
+  "CLR_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "HIP_revision": "d3b75fbb82113374e2d6103baa96a9c61425da48",
+  "compile_scope": "Unchanged isolated translation units, authentic headers and generated HIP version, lean backend-neutral non-profiling profile; not whole CLR target",
+  "final_compile_results": [
+    {
+      "host": "linux",
+      "unit": "ndrange",
+      "returncode": 0,
+      "raw_prefix": "linux-ndrange",
+      "first_error": [],
+      "object_sha256": "98ec5e2093f3be3c922c15d72756588e60ae3c57379a390e8237eb9b15356252"
+    },
+    {
+      "host": "linux",
+      "unit": "os_posix",
+      "returncode": 0,
+      "raw_prefix": "linux-os_posix",
+      "first_error": [],
+      "object_sha256": "4750990eef652b046e77ea34920ee0a437b88d3c809d3f5b39c248f07d41f6a5"
+    },
+    {
+      "host": "linux",
+      "unit": "monitor",
+      "returncode": 0,
+      "raw_prefix": "linux-monitor",
+      "first_error": [],
+      "object_sha256": "f8ea8b400348f802497894aec91f8a663aad576d213e7352f6f4c834ceac713b"
+    },
+    {
+      "host": "linux",
+      "unit": "hip_error",
+      "returncode": 0,
+      "raw_prefix": "correct-includes-linux-hip_error",
+      "first_error": [],
+      "object_sha256": "2fbd498ebb6085d5e88a4c955d7b2546737d10fe8733638a576410df56710adc"
+    },
+    {
+      "host": "linux",
+      "unit": "hip_platform",
+      "returncode": 0,
+      "raw_prefix": "correct-includes-linux-hip_platform",
+      "first_error": [],
+      "object_sha256": "0995eb3be010e2f4f73d2a92ea22555e5960c56138de252225f8bbebd66872eb"
+    },
+    {
+      "host": "ps5",
+      "unit": "ndrange",
+      "returncode": 0,
+      "raw_prefix": "ps5-ndrange",
+      "first_error": [],
+      "object_sha256": "7cac0a5031d26b373858dc87c5de8acd5fba69aa01df8cc9dd0cf5b70b739b30"
+    },
+    {
+      "host": "ps5",
+      "unit": "os_posix",
+      "returncode": 1,
+      "raw_prefix": "ps5-os_posix",
+      "first_error": [
+        "<ROOT>/results/g4-runtime-architecture-v1/sources/clr-65d174c3e35423bf25c9c369513780c9d9ca760c/rocclr/os/os.hpp:106:12: error: cannot initialize return object of type 'FileDesc' (aka 'int') with an rvalue of type 'void *'"
+      ],
+      "object_sha256": null
+    },
+    {
+      "host": "ps5",
+      "unit": "monitor",
+      "returncode": 1,
+      "raw_prefix": "ps5-monitor",
+      "first_error": [
+        "<ROOT>/results/g4-runtime-architecture-v1/sources/clr-65d174c3e35423bf25c9c369513780c9d9ca760c/rocclr/thread/semaphore.hpp:52:3: error: unknown type name 'sem_t'"
+      ],
+      "object_sha256": null
+    },
+    {
+      "host": "ps5",
+      "unit": "hip_error",
+      "returncode": 1,
+      "raw_prefix": "correct-includes-ps5-hip_error",
+      "first_error": [
+        "<ROOT>/results/g4-runtime-architecture-v1/sources/clr-65d174c3e35423bf25c9c369513780c9d9ca760c/rocclr/thread/semaphore.hpp:52:3: error: unknown type name 'sem_t'"
+      ],
+      "object_sha256": null
+    },
+    {
+      "host": "ps5",
+      "unit": "hip_platform",
+      "returncode": 1,
+      "raw_prefix": "correct-includes-ps5-hip_platform",
+      "first_error": [
+        "<ROOT>/results/g4-runtime-architecture-v1/sources/clr-65d174c3e35423bf25c9c369513780c9d9ca760c/rocclr/thread/semaphore.hpp:52:3: error: unknown type name 'sem_t'"
+      ],
+      "object_sha256": null
+    }
+  ],
+  "configure_results": {
+    "upstream-default": "missing amd_comgr>=2.8; unsupported standalone configuration",
+    "no-existing-device": "same missing dependency plus upstream no-runtime diagnostic"
+  },
+  "setup_correction": "Original two Linux HIP unit probes omitted authentic OpenCL parent include; corrected expansion then compiled both. Raw initial results retained, not treated as platform failures.",
+  "raw_directory": "results/g4-runtime-architecture-v1",
+  "raw_receipt_sha256": "0feb93aa96d44b380bf86a5865af33e4b4c906bad8ee7fbd7b07ef575969499c",
+  "raw_source_inventory_sha256": "04345aac2a73c1a8bfd619689d9a6a0cf19575399cf3e230ffc374e02f4a1036",
+  "report_sha256": "4f44fe6dabd02bb719ce65d807f6bb2bb77ffd66ab820f9d5e18f55bc6c38bfc",
+  "verified_raw_artifacts": 71,
+  "verified_upstream_source_files": 24,
+  "verified_raw_artifact_hashes": {
+    "clang++-18-version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clang++-18-version.stdout": "2f2f9918b8673fe34510b66bf4ba3a1b9832efeef334d4c615dc7e4064422088",
+    "commands.json": "eea0931b80eb484597544e31591a4db33417a7fe41bfa82f060c8a8405530cad",
+    "compile-receipt.json": "a8064fc62018a347820b90d55ac83d191022c3a5d50025a5c94b2bdc38c3bc3c",
+    "configure-no-existing-device.stderr": "9d4e7ec488c2f04408f9f181165421ef1e0897016ea60eaf3c51f9f504765a6c",
+    "configure-no-existing-device.stdout": "b5e6cf8c2125f9b452ab3cf33f84dccdd3326946f9e08c3ca35348370777499a",
+    "configure-upstream-default.stderr": "c3c3ba5791d04c4021da769d5f8cb2ffaa2d193c91609db0143d89eaa61238c5",
+    "configure-upstream-default.stdout": "b5e6cf8c2125f9b452ab3cf33f84dccdd3326946f9e08c3ca35348370777499a",
+    "correct-includes-linux-hip_error-undefined.txt": "058054421f933a01f9124a233b92ac9133eeed9ac05f2cdb9fd9a5d04372e9df",
+    "correct-includes-linux-hip_error.d": "6bc99a32191006b42bfba38557aa48e7ad22d4b80d4e730b6be892dd6c3be247",
+    "correct-includes-linux-hip_error.o": "2fbd498ebb6085d5e88a4c955d7b2546737d10fe8733638a576410df56710adc",
+    "correct-includes-linux-hip_error.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes-linux-hip_error.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes-linux-hip_platform-undefined.txt": "86933c3364189f68a409572d434cca1055f7c07eb23e3243c860e95c6228515f",
+    "correct-includes-linux-hip_platform.d": "8710455ed21942174f9fba9459ef82b8b7da60ccb1cbfc997c76d5c60da354ca",
+    "correct-includes-linux-hip_platform.o": "0995eb3be010e2f4f73d2a92ea22555e5960c56138de252225f8bbebd66872eb",
+    "correct-includes-linux-hip_platform.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes-linux-hip_platform.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes-ps5-hip_error.d": "96a85c89c66e016a7fdd63a158c33da8c2b59c63e0e0ba110ca6bd365db94b2e",
+    "correct-includes-ps5-hip_error.stderr": "3b113194668939dec88a4401549e06051174ad5339dcd87f8e4aadec315b7f3e",
+    "correct-includes-ps5-hip_error.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes-ps5-hip_platform.d": "6938943facc1defad2b9ff135a541fff2722c5ba84b153e26d24bb4301960f46",
+    "correct-includes-ps5-hip_platform.stderr": "b1d0437258ba0e7ad949c463dbcc788ccb0492fa341131a4633bfbc7beeb13c3",
+    "correct-includes-ps5-hip_platform.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correct-includes.json": "47c6fbac36dc997242215ec0db4894d0b125172b193240dfec4356c3796bbd44",
+    "ld.lld-18-version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ld.lld-18-version.stdout": "43f0375139119bf6b77398bd8db4f88558762457ee6c1b9513c2ce014aaa9fc6",
+    "linux-hip_error.stderr": "72227a17eb6997adbac6d116e848935bfa60ad90817c9bce40337554718dbb66",
+    "linux-hip_error.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-hip_platform.stderr": "3d4c4d680a6673a512b7ab547b6e6986b6c3b7103895fdfc771e82b34d43937e",
+    "linux-hip_platform.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-monitor-undefined.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-monitor-undefined.stdout": "9e18ea74135516f319bf303197afffcaa455183fcc4f3e48ff37dd47ed40a5b5",
+    "linux-monitor.d": "340cebb5daebbff9592acffdea0998490486f109d3be33fb6ac9a181ee252517",
+    "linux-monitor.o": "f8ea8b400348f802497894aec91f8a663aad576d213e7352f6f4c834ceac713b",
+    "linux-monitor.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-monitor.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-ndrange-undefined.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-ndrange-undefined.stdout": "b3edff0be2e08532337718baa279b2428d216f9da2b728a15eb791de35208793",
+    "linux-ndrange.d": "7f691993187086f9b79a0ca344c4b2d8b4c5cd38a8ef7bd2a3e5f8501301f916",
+    "linux-ndrange.o": "98ec5e2093f3be3c922c15d72756588e60ae3c57379a390e8237eb9b15356252",
+    "linux-ndrange.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-ndrange.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-os_posix-undefined.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-os_posix-undefined.stdout": "0c0f482fe90d92b243a6599aef8a57e7c92c7fadedeab0dc486affdef176f875",
+    "linux-os_posix.d": "fb7e707284ade4611f871c9f1bb6c41b9106078991dc9523ab91f2ea3a3bb6c9",
+    "linux-os_posix.o": "4750990eef652b046e77ea34920ee0a437b88d3c809d3f5b39c248f07d41f6a5",
+    "linux-os_posix.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux-os_posix.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "llvm-nm-18-version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "llvm-nm-18-version.stdout": "3f61227ee3405222050d51e2d5cde3a097871d89b5e5c075a74346ea6f40be54",
+    "ps5-hip_error.stderr": "3b113194668939dec88a4401549e06051174ad5339dcd87f8e4aadec315b7f3e",
+    "ps5-hip_error.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-hip_platform.stderr": "b1d0437258ba0e7ad949c463dbcc788ccb0492fa341131a4633bfbc7beeb13c3",
+    "ps5-hip_platform.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-monitor.d": "0769b087fa73f3b2de386b75b53625ad244628ae1bbe4aa1f0b315e54b3d2399",
+    "ps5-monitor.stderr": "cbc06172b0efb2ad05252f28da14ad687d45860926bc73da6c513ee5e385fec0",
+    "ps5-monitor.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-ndrange-undefined.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-ndrange-undefined.stdout": "53ef75328aa0d087f7c1bc5e231b9d269a5dcb04840901300244d15cb38536f9",
+    "ps5-ndrange.d": "9d31030894b7941417d081edb12909daffc47caf48f113e5badd482f5c8a59cf",
+    "ps5-ndrange.o": "7cac0a5031d26b373858dc87c5de8acd5fba69aa01df8cc9dd0cf5b70b739b30",
+    "ps5-ndrange.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-ndrange.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ps5-os_posix.stderr": "d258c225bff1c94178e60dabf73e33ff0052046df5d36b31cef029d4234bc393",
+    "ps5-os_posix.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "README.md": "4f44fe6dabd02bb719ce65d807f6bb2bb77ffd66ab820f9d5e18f55bc6c38bfc",
+    "source-inventory.json": "04345aac2a73c1a8bfd619689d9a6a0cf19575399cf3e230ffc374e02f4a1036",
+    "spike.py": "847e699c8ed501291f3d501e07a92539a8855b89b3d62b21657fa2f2167a04d5",
+    "configure-no-existing-device/CMakeCache.txt": "5f7002af3d211404e1383e01b196ee7fc2c7c3311c4bc5481c4d0556a91c3d6b",
+    "configure-upstream-default/CMakeCache.txt": "fcb3fbd48a325fb2e0c0c552ea75f5f1b201f13a5b1caa743583d5a9d9cfb494"
+  },
+  "native_execution": false,
+  "full_CLR_build": false,
+  "full_HIP_runtime": false,
+  "console_access": false,
+  "network_access": false
+}

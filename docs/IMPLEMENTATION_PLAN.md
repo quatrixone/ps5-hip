@@ -150,6 +150,16 @@ as an independent diagnostic control. Do not build three production runtimes.
 If the narrow runtime starts reimplementing substantial upstream scheduling and
 memory management, reassess the CLR route before accumulating incompatible APIs.
 
+The [bounded ROCm6.2.4 comparison](RUNTIME_ARCHITECTURE.md) selects one small
+native HIP compatibility runtime for the first serialized examples. Five unchanged
+CLR units compile on Linux; only the small NDRange unit compiles with the PS5 SDK
+under the measured backend-neutral profile. OS/thread dependencies and the actual
+Device/Program/VirtualDevice boundary remain substantial porting work. Configure
+failures identify missing local COMGR dependencies, not platform impossibility.
+Reassess CLR before general asynchronous scheduling, cross-stream event dependencies,
+callback workers, deferred shared pools, graph capture or VMM. This decision does
+not qualify G2/G3, HIP API behavior, device libraries or the ggml client.
+
 An HSA adaptation may translate bounded dispatch/signal operations into native
 commands. It must not claim hardware AQL support unless that support is proved.
 Using Vulkan as a translation fallback is a distinct architecture with different

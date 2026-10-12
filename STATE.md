@@ -220,6 +220,15 @@ unintended-LLD21 image must not be rerun. The package catalog retains their
 identities, original PPSA99012 candidates and all later PPSA99014 packages.
 No prior raw logs or artifacts were removed when this status was consolidated.
 
+The G4 architecture comparison now selects one small native HIP compatibility
+runtime for the first serialized examples. All five unchanged pinned CLR units
+compile on Linux; the PS5 SDK compiles NDRange, with concrete OS/semaphore branch
+failures elsewhere. Parent verification checked71 raw artifacts and24 upstream
+source files. Reassess CLR before substantial asynchronous scheduling or deferred
+memory management; no production CLR/HSA implementation is being started. See
+`docs/RUNTIME_ARCHITECTURE.md` and `evidence/offline-runtime-architecture.json`.
+No runtime link, native execution or additional gate acceptance follows.
+
 ## Next action
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
@@ -452,3 +461,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G3 offline | 2b863a7 | six atomic kernels packaged and independently verified | evidence/offline-atomic-native-readiness.json | GPU qualification pending
 - 2026-10-12 | G2 partial-pass | 5b74ac8 | FW12.70 arithmetic146 passed; layer release unproven | evidence/native-arithmetic-fw1270-cycle1.json | hold launches
 - 2026-10-12 | G4 offline | 08a5f52 | genuine compiler registration controls, PS5 link checks and31 sanitizer tests pass | evidence/offline-host-registration-control.json | native launch unsupported
+- 2026-10-12 | G4 architecture | pinned CLR/HIP6.2.4 comparison selects one small native runtime with explicit reassessment threshold | evidence/offline-runtime-architecture.json | implementation and hardware qualification pending
