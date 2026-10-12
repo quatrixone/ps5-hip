@@ -64,7 +64,28 @@ int main() {
             auto output = buffer();
             require(argument(output).value == output->range().address + 64);
             require(argument(output).buffer_bytes == count * 4);
-#ifdef PS5HIP_CANARY_VECTOR_ADD
+#ifdef PS5HIP_CANARY_FP32_MATH
+            auto input = buffer(ps5hip_math::input_count);
+            require(argument(input, ps5hip_math::input_count).buffer_bytes == 257 * 4);
+            for (uint32_t i = 0; i < 257; ++i) data(input)[i] = ps5hip_math::input_bits[i];
+            for (uint32_t i = 0; i < count; ++i) data(output)[i] = ps5hip_math::poison_bits(i);
+            auto verify = [&] { validate(output, input); };
+            reject(verify);
+            for (uint32_t i = 0; i < count; ++i) data(output)[i] = ps5hip_math::reference_bits(i);
+            verify();
+            for (uint32_t i = 0; i < count; ++i) {
+                const auto saved = data(output)[i];
+                data(output)[i] = ps5hip_math::poison_bits(i); reject(verify); data(output)[i] = saved;
+            }
+            for (uint32_t i = 0; i < 257; ++i) {
+                data(input)[i] ^= 1; reject(verify); data(input)[i] ^= 1;
+            }
+            auto *input_words = static_cast<uint32_t *>(input->cpu());
+            for (size_t i = 0; i < input->range().bytes / 4; ++i) {
+                if (i >= guard_words && i < guard_words + 257) continue;
+                input_words[i] ^= 1; reject(verify); input_words[i] ^= 1;
+            }
+#elif defined(PS5HIP_CANARY_VECTOR_ADD)
             auto a = buffer(), b = buffer();
             for (uint32_t i = 0; i < count; ++i) {
                 data(a)[i] = bits(float(i) / 2);
@@ -109,13 +130,20 @@ int main() {
             for (uint32_t i = 0; i < count; ++i) data(output)[i] = i ^ 0x5a17c9e3u;
 #endif
             verify();
+#ifndef PS5HIP_CANARY_FP32_MATH
             for (uint32_t i : {0u, 63u, 64u, 72u}) {
                 data(output)[i] ^= 1; reject(verify); data(output)[i] ^= 1;
             }
+#endif
             auto *words = static_cast<uint32_t *>(output->cpu());
             for (size_t i : {size_t(0), size_t(15), size_t(guard_words + count), size_t(output->range().bytes / 4 - 1)}) {
                 words[i] ^= 1; reject(verify); words[i] ^= 1;
             }
+#ifdef PS5HIP_CANARY_FP32_MATH
+            for (size_t i = guard_words + count; i < output->range().bytes / 4; ++i) {
+                words[i] ^= 1; reject(verify); words[i] ^= 1;
+            }
+#endif
             verify();
         }
         require(allocations.empty());

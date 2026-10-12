@@ -7,6 +7,7 @@ import pathlib
 import shutil
 import subprocess
 from build_canaries import require_device_linker, require_tool_versions
+import math_native_fixture as math_fixture
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -51,10 +52,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math"], required=True)
+    parser.add_argument("--ocml-probes", type=pathlib.Path, help="Frozen OCML recipe output; only fp32_math O2")
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
+    math = args.kernel == "fp32_math"
+    if math != (args.ocml_probes is not None):
+        parser.error("--ocml-probes is required only for fp32_math")
     wave = args.kernel in ("wave_full", "wave_partial")
     if wave != (args.wave_probes is not None):
         parser.error("--wave-probes is required only for wave kernels")
@@ -66,8 +71,8 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
-    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes)
-                                  if args.kernel != "runtime" else (None, None))
+    device_data, device_report = (math_fixture.verified_device_object(ROOT, args.ocml_probes, args.target, version) if math else (verified_device_object(ROOT, args.target, version, args.wave_probes)
+                                  if args.kernel != "runtime" else (None, None)))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
@@ -127,6 +132,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
         if args.kernel == "vector_add_twice":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
+        if math:
+            options.append("-DPS5HIP_CANARY_FP32_MATH=1")
         if wave:
             options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
         if args.kernel == "runtime":
@@ -194,6 +201,9 @@ def main():
     if args.kernel != "runtime":
         (candidate / "canary.hsaco").write_bytes(device_data)
         artifacts.append("canary.hsaco")
+    math_sources = ([ROOT / name for name in math_fixture.lock(ROOT)["oracle_sources"]] +
+                    [ROOT / name for name in device_report["sources"]] +
+                    [ROOT / "tools/math_native_fixture.py", ROOT / "tools/math_native_inputs.json"] if math else [])
     receipt = {"hardware_validated": False, "target": args.target, "kernel": args.kernel,
                "shutdown_mode": "shell-request-probe" if args.shell_exit_probe else "platform-exit",
                "native_tools_revision": revision, "sdk_revision": lock["sdk"]["revision"],
@@ -203,16 +213,19 @@ def main():
                "host_zlib": zlib_receipt, "elevation": elevation_receipt,
                "device_build": device_report,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
-                                 for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
+                                 for path in math_sources + sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
                                  [ROOT / "tools/build_canaries.py"] +
                                  ([ROOT / "tools/probe_wave_compiler.py"] if wave else []) +
-                                 ([ROOT / ("kernels/wave.hip" if wave else "kernels/canary.hip")] if args.kernel != "runtime" else []) +
+                                 ([ROOT / ("kernels/ocml_math.hip" if math else "kernels/wave.hip" if wave else "kernels/canary.hip")] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
+    if math:
+        receipt["math_profile"] = math_fixture.profile(args.target, ROOT)
+        math_fixture.validate_build(receipt, device_data, ROOT)
     if args.kernel == "vector_add_twice":
         receipt["dispatches"] = 2
     (build / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

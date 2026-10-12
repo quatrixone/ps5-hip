@@ -1,5 +1,7 @@
 import importlib.util
 import pathlib
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 import unittest
 
 spec = importlib.util.spec_from_file_location("check_canary_log", pathlib.Path(__file__).resolve().parents[1] / "tools/check_canary_log.py")
