@@ -119,13 +119,23 @@ complete. Actual enabled testing found two issues: conservative call-mask
 clobbers kept flat initialization despite a proven graph, and the module barrier
 disrupted IPRA's callee-first register-usage collection. Both failed revisions,
 binaries and strict comparison evidence remain preserved. Revision 4 keeps real
-register uses protected and rejects proof use unless IPRA is explicitly disabled;
-14 guard configurations pass. The clean compiler with IPRA disabled measures a
-304-byte cumulative frame for the first O1 ordinary fixture, rather than the
-older 288-byte contract. All profile frame contracts and full paired acceptance
-are being re-established. See `evidence/offline-private-backend-source-builds.json`.
-The candidate is unaccepted; no production compiler or hardware capability has
-changed.
+register uses protected and rejects proof use unless IPRA is explicitly disabled.
+Its selected paired baseline/default-off/enabled controls now pass: 24 matrix
+cases per mode, negative/stress/reload/ineligible cases, ten valid MIR controls,
+four real flat-register controls and 14 guard configurations. Eight independently
+measured ordinary/volatile profiles require 304 nested private bytes (144 + 160 +
+0); mixed volatile remains 144. All eight ordinary linked graphs preserve calls,
+stores/reloads, ABI saves, descriptors and resources while removing only the four
+flat-initializer instructions plus a separately proved frame-MOV scheduling change.
+The extended audit checks 48 cases; 42 rejected cases remain byte-identical.
+Six positive controls and six linked alias objects pass narrowly bounded scheduling
+and actual-byte/call-target checks. Parent verification rehashed 1,409 artifact
+references. See `evidence/offline-private-backend-ipra-off-controls.json`; earlier
+failed research remains in `evidence/offline-private-backend-source-builds.json`.
+Fresh portable reproduction and a separately identified 304-byte native harness
+remain pending. The original 288-byte native control is preserved; generic and
+volatile private-call support, the production compiler and hardware capabilities
+remain unchanged.
 
 A separate read-only aperture diagnostic is frozen at `669d4fc` on
 `development/g3-aperture`. It uses the existing six-user-SGPR launch path and
@@ -371,3 +381,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G3 offline | 716c8eb / 669d4fc | retained-private-call harness modeled; read-only aperture package verified | evidence/offline-private-calls-native-harness.json; evidence/offline-private-aperture-native-readiness.json | no new hardware qualification
 - 2026-10-11 | G3 offline | 06956e4 | six-dispatch atomic harness modeled; both SDK objects compiled | evidence/offline-atomic-native-harness.json | no package or hardware qualification
 - 2026-10-11 | compiler research | source-built LLVM comparisons exposed call-mask and IPRA ordering issues; guarded revision 4 compiled | evidence/offline-private-backend-source-builds.json | full paired acceptance pending
+- 2026-10-11 | compiler milestone | guarded revision 4 passes selected paired IPRA-off controls and eight linked ordinary graphs; generic/volatile fallback retained | evidence/offline-private-backend-ipra-off-controls.json | next: fresh portable reproduction and isolated304-byte native harness

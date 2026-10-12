@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "classification": "Selected experimental LLVM18 private-call compiler controls passed offline",
+  "llvm_commit": "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff",
+  "backend_revision": 4,
+  "patch_sha256": "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+  "compiler_sha256": {
+    "baseline": "fbfea56d543c6bcca9535f34ea3d38229e9d9a79e9766554aa9a67944c90fb96",
+    "patched": "881acfaaf52d08d04bf90e7f74bbb764e0c261c6e01cc1f930f7b81b63497d42"
+  },
+  "configuration": [
+    "-enable-ipra=false",
+    "-verify-machineinstrs",
+    "-amdgpu-experimental-prove-buffer-calls"
+  ],
+  "feature_default_off": true,
+  "selected_paired_compiler_controls_passed": true,
+  "portable_recipe_accepted": false,
+  "native_candidate_selectable": false,
+  "production_compiler_changed": false,
+  "hardware_validated": false,
+  "counts": {
+    "matrix_cases_per_mode": 24,
+    "successful_negative_suite_compiles_per_mode": 18,
+    "unsupported_dynamic_allocation_cases_per_mode": 2,
+    "stress_cases_per_mode": 4,
+    "conservative_mir_reload_cases_per_mode": 2,
+    "ineligible_target_cases_per_mode": 1,
+    "valid_mir_cases_per_mode": 10,
+    "paired_modes": 3,
+    "ordinary_linked_graphs": 8,
+    "extension_comparisons": 48,
+    "byte_identical_rejected_extensions": 42,
+    "positive_extension_controls": 6,
+    "linked_alias_objects": 6,
+    "actual_flat_register_controls": 4,
+    "guard_configurations": 14,
+    "extension_assembly_and_linked_mutations_rejected": 70,
+    "rehash_references": 1409
+  },
+  "ordinary_contract": {
+    "targets": [
+      "gfx1013",
+      "gfx1030"
+    ],
+    "optimization": [
+      "O1",
+      "O2"
+    ],
+    "function_order": [
+      "original",
+      "reverse"
+    ],
+    "retained_calls": 2,
+    "root_frame_bytes": 144,
+    "middle_frame_bytes": 160,
+    "leaf_frame_bytes": 0,
+    "total_private_bytes": 304,
+    "hardware_flat_initialization_instructions": 0,
+    "postcall_target_loads": 2,
+    "postcall_abi_restore_loads": 2,
+    "postcall_wait_vmcnt": 2
+  },
+  "findings": [
+    "Disabled experimental output matches the clean paired baseline; both builds share pinned source and configuration except patch and paths.",
+    "Enabled ordinary reachable graphs retain calls, private stores/reloads, ABI/WWM saves, descriptors and resources. Only the exact four flat-initializer instructions are removed, with an independently checked immediate frame-MOV scheduling change.",
+    "The alias positive control permits only two literal commuting blocks; separate actual linked-byte and signed-relocation checks confirm the target remains safe.",
+    "Generic/volatile roots and rejected controls retain conservative initialization and byte-identical code. Unsupported dynamic allocations fail before the proof and count separately."
+  ],
+  "remaining": [
+    "Fresh portable preparation/measurement and complete three-mode reproduction",
+    "Separately identified304-byte native harness and verified package",
+    "Hardware scratch/call/visibility/ownership qualification; generic and volatile private-call support"
+  ],
+  "raw_evidence_sha256": {
+    "results/g3-private-backend-design/paired-ipra-off-v1-verification.json": "9bc07ee0a5d75288ecae9cf070287822781b7e3701b66a552ce6d62fada893d6",
+    "results/g3-private-backend-design/selected-controls-v1-record.json": "c4e18651ab9795a179d4cc62c0bf5c45c0ee54e777991eeb65323de36a845a0d",
+    "results/g3-private-backend-validation/alias-linked-ipra-off-v1/result.json": "b685f9f5950d27c2dcee08f3af17d30ea22046a2890cd90fcc2f700f317b5fe9",
+    "results/g3-private-backend-validation/extensions-ipra-off-v2.json": "fa98438d520fb5c6a73c787e4bf163c7addbe2cfc99fa10eafb81ece44b1d267",
+    "results/g3-private-backend-validation/extensions-ipra-off-v1-strict.json": "d0b4c96da115fc2c78ba0bade819415a86bd9bcdd674f0a82f546c149c299605",
+    "results/g3-private-backend-validation/post-audit-extensions-v2-tests.json": "0a6c51ad25a757099cedd93dbfcb9afc42c6a1345480a6ae8e79008d5d4478ca",
+    "results/g3-private-backend-validation/alias-linked-v1-mutation-tests.json": "de085a1c101908bd4583a066e78e9c942c7ddffbf78c84d5777b9fe46774f98f"
+  },
+  "preserved_prior_research_evidence_sha256": "969d9042a425965f40b70cb05af95ce3fc9972273e494abcfc2a7afc28262597"
+}
