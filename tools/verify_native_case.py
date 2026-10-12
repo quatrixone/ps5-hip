@@ -57,6 +57,16 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
                 any(item.get("lds") != contract or any(type(value) is not int for value in item["lds"].values())
                     for item in (manifest, build))):
             raise ValueError("LDS requires matching resource provenance")
+    if "private_calls_buffer" in (manifest["kernel"], build.get("kernel")):
+        from private_buffer_fixture import validate_build_binding, CONTRACT
+        binding = validate_build_binding(ROOT, build)
+        if (manifest["kernel"] != build["kernel"] or manifest["target"] != build["target"] or
+                manifest.get("private_buffer") != CONTRACT or
+                any(type(manifest["private_buffer"][k]) is not type(v) for k, v in CONTRACT.items()) or
+                manifest.get("private_buffer_compiler") != binding or
+                manifest.get("files", {}).get("canary.hsaco") !=
+                {"sha256": binding["selected_profile"]["code_sha256"], "bytes": binding["selected_profile"]["bytes"]}):
+            raise ValueError("private buffer manifest/compiler provenance mismatch")
     shutdown_mode = build.get("shutdown_mode", "platform-exit")
     if shutdown_mode not in ("platform-exit", "shell-request-probe"):
         raise ValueError("unsupported shutdown mode")
@@ -89,6 +99,9 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
         result["dispatches"] = 2
     if manifest["kernel"] in lds_profiles:
         result["lds"] = manifest["lds"]
+    if manifest["kernel"] == "private_calls_buffer":
+        result["private_buffer"] = manifest["private_buffer"]
+        result["private_buffer_compiler"] = manifest["private_buffer_compiler"]
     return result
 
 

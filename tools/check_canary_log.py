@@ -9,7 +9,7 @@ import pathlib
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed", "private_calls_buffer"):
         raise ValueError("unsupported canary profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
@@ -32,6 +32,10 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
         dynamic, allocated, stride = (0, 1024, 0) if kernel == "lds_static" else (1280, 2048, 5)
         expected += [f"PS5HIP SUBMIT target={target} kernel={kernel} invocations=16448 output_words=257 groups=257 static_lds_bytes={static} dynamic_lds_bytes={dynamic} allocated_lds_bytes={allocated} stride={stride} timeout_ms=2000",
                      f"PS5HIP PASS kernel={kernel} exact_values=257 inputs=unchanged guards=unchanged allocations=closed"]
+    elif kernel == "private_calls_buffer":
+        expected += [f"PS5HIP SUBMIT target={target} kernel=private_calls_buffer invocations=16448 groups=257 user_sgprs=8 private_bytes=304 scratch_bytes=13107200 timeout_ms=2000",
+                     "PS5HIP SCRATCH payload=modified guards=unchanged",
+                     "PS5HIP PASS kernel=private_calls_buffer exact_values=16448 guards=unchanged allocations=closed"]
     elif kernel == "register_spill":
         expected += [f"PS5HIP SUBMIT target={target} kernel=register_spill invocations=64 output_words=4096 groups=1 private_bytes=212 scratch_bytes=9175040 timeout_ms=2000",
                      "PS5HIP SCRATCH payload=modified guards=unchanged",
@@ -64,7 +68,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed", "private_calls_buffer"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

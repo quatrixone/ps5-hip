@@ -67,9 +67,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed", "private_calls_buffer"], required=True)
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
     parser.add_argument("--lds-probes", type=pathlib.Path, help="Verified probe_lds_compiler.py output; selects O2")
+    parser.add_argument("--private-buffer-compiler", type=pathlib.Path, help="Exact portable compiler reproduction output; copies pinned O2 object")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
     wave = args.kernel in ("wave_full", "wave_partial")
@@ -78,6 +79,9 @@ def main():
     lds = args.kernel in ("lds_static", "lds_dynamic", "lds_mixed")
     if lds != (args.lds_probes is not None):
         parser.error("--lds-probes is required only for LDS kernels")
+    private_buffer = args.kernel == "private_calls_buffer"
+    if private_buffer != (args.private_buffer_compiler is not None):
+        parser.error("--private-buffer-compiler is required only for private_calls_buffer")
     lock = json.loads((ROOT / "dependencies.json").read_text())
     revision = lock["native_tools"]["revision"]
     sdk = ROOT / ".deps/sdk"
@@ -87,8 +91,12 @@ def main():
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
     fixture = "resources" if args.kernel == "register_spill" else "canary"
-    device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes, fixture, args.lds_probes)
-                                  if args.kernel != "runtime" else (None, None))
+    if private_buffer:
+        from private_buffer_fixture import verified_private_buffer_object, CONTRACT
+        device_data, device_report = verified_private_buffer_object(ROOT, args.private_buffer_compiler, args.target)
+    else:
+        device_data, device_report = (verified_device_object(ROOT, args.target, version, args.wave_probes, fixture, args.lds_probes)
+                                      if args.kernel != "runtime" else (None, None))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
@@ -150,6 +158,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
         if wave or lds:
             options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
+        if private_buffer:
+            options.append("-DPS5HIP_CANARY_PRIVATE_CALLS_BUFFER=1")
         if args.kernel == "register_spill":
             options.append("-DPS5HIP_CANARY_REGISTER_SPILL=1")
         if args.kernel == "runtime":
@@ -228,15 +238,18 @@ def main():
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
-                                 [ROOT / "tools/build_canaries.py"] +
+                                 ([ROOT / "tools/build_canaries.py"] if not private_buffer else
+                                  [ROOT / "tools/private_buffer_fixture.py", ROOT / "experimental/private-buffer-profile.json"]) +
                                  ([ROOT / "tools" / ("probe_" + ("lds" if lds else "wave") + "_compiler.py")] if wave or lds else []) +
                                  ([ROOT / "tools/native_lds.h"] if lds else []) +
-                                 ([ROOT / "kernels" / ("lds.hip" if lds else "wave.hip" if wave else fixture + ".hip")] if args.kernel != "runtime" else []) +
+                                 ([ROOT / "kernels" / ("lds.hip" if lds else "wave.hip" if wave else fixture + ".hip")] if args.kernel != "runtime" and not private_buffer else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
+    if private_buffer:
+        receipt["private_buffer"] = CONTRACT
     if args.kernel == "vector_add_twice":
         receipt["dispatches"] = 2
     if lds:

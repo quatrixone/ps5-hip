@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "profile": "private_calls_buffer",
+  "reproduction_receipt_sha256": "1112c2d13c90d78ec55f36c14c5d84491f70082345db3746b4ea3b893d61291d",
+  "selected_profiles": [
+    {
+      "target": "gfx1013",
+      "optimization": "O1",
+      "input_sha256": "4dac7254b918a7df1ccec5b87ebd862798ae8e6fa7690d48e52286913f573a41",
+      "code_sha256": "42a675988ca9ad6fd8cd80cac37c582e62014f487660458bc187208e544ea9da",
+      "bytes": 10536,
+      "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O1-original/output.hsaco"
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "input_sha256": "9881c724a933e2102e32369c55d5da3742bf6935bb5773e5790c7e313c6c2328",
+      "code_sha256": "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+      "bytes": 15848,
+      "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O2-original/output.hsaco"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O1",
+      "input_sha256": "9ab394bd0ab2cdcb058eaea4d0efa41882ff289a16be7ef789cbaf6db138d0fb",
+      "code_sha256": "3c9d303511e602e49a73848fa9952a1857f25fca80e74ea940c2f1949867a801",
+      "bytes": 10536,
+      "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1030-O1-original/output.hsaco"
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O2",
+      "input_sha256": "274bc1182af17ac2fc5188b1b12e13d4fd0bf90987457e122b2a046a83082d9f",
+      "code_sha256": "73d0283ff5221d1c8b5b6aa52a0042adb0cf5fb9e6509109cc3da06edb835fd1",
+      "bytes": 15848,
+      "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1030-O2-original/output.hsaco"
+    }
+  ]
+}

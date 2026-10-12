@@ -31,7 +31,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     receipt_bytes = (build / "receipt.json").read_bytes()
     receipt = json.loads(receipt_bytes)
     target, kernel = receipt["target"], receipt["kernel"]
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed", "private_calls_buffer"):
         raise ValueError("unsupported candidate profile")
     if kernel == "vector_add_twice" and (type(receipt.get("dispatches")) is not int or receipt["dispatches"] != 2):
         raise ValueError("vector_add_twice requires exactly two dispatches")
@@ -43,6 +43,9 @@ def stage(source_root, build, output, identity, source_commit, results_directory
                     "stride": 0 if kernel == "lds_static" else 5}
         if (receipt.get("lds") != contract or any(type(value) is not int for value in receipt["lds"].values())):
             raise ValueError("LDS resource contract mismatch")
+    if kernel == "private_calls_buffer":
+        from private_buffer_fixture import validate_build_binding
+        validate_build_binding(source_root, receipt)
     expected = {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}
     if kernel != "runtime":
         expected.add("canary.hsaco")
@@ -93,6 +96,9 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         manifest["dispatches"] = 2
     if lds:
         manifest["lds"] = receipt["lds"]
+    if kernel == "private_calls_buffer":
+        manifest["private_buffer"] = receipt["private_buffer"]
+        manifest["private_buffer_compiler"] = receipt["device_build"]
     # Validate everything before creating output. A failure never replaces a prior candidate.
     output.mkdir(parents=True, exist_ok=False)
     for name, data in files.items():
@@ -107,7 +113,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "register_spill", "lds_static", "lds_dynamic", "lds_mixed", "private_calls_buffer"], required=True)
     parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())
