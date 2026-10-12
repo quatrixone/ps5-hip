@@ -2,6 +2,9 @@
 #define __HIP_PLATFORM_AMD__ 1
 #include <hip/hip_runtime_api.h>
 #include "ps5hip/host_registration.h"
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+#include "ps5hip/host_launch.h"
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -40,6 +43,13 @@ struct State {
     bool main_finished = false;
     hipError_t last_error = hipSuccess;
     std::vector<Configuration> configurations; // Serialized control only, not HIP thread semantics.
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+    std::vector<ps5hip::LaunchArgument> captured;
+    ps5hip::InitialLaunch prepared{};
+    std::vector<uint32_t> packets;
+    // Synthetic addresses only: these are not allocated, mapped or submitted.
+    const std::vector<ps5hip::GpuRange> live_buffers{{0x4000008000, 512}, {0x400000c000, 512}, {0x4000010000, 512}};
+#endif
     ~State() {
         const bool valid = main_finished && registered == 1 && removed == 1 &&
             functions == (fail_symbol ? 0u : 1u) && failures == (fail_symbol ? 1u : 0u) &&
@@ -106,11 +116,41 @@ extern "C" hipError_t hipLaunchKernel(const void *host, dim3 grid, dim3 block, v
     try {
         const auto &kernel = s.registry.lookup(host);
         unsigned n = 0;
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+        if (!args || kernel.arguments.size() != 4 || !ps5hip::initial_launch_rejection(kernel).empty())
+            throw ps5hip::ObjectError("unexpected compiler argument layout");
+#else
         if (!args || !args[3]) throw ps5hip::ObjectError("missing compiler arguments");
         std::memcpy(&n, args[3], sizeof(n));
+#endif
         if (kernel.name != "_Z10vector_addPKfS0_Pfj" || grid.x != 2 || grid.y != 1 || grid.z != 1 ||
-            block.x != 64 || block.y != 1 || block.z != 1 || shared || stream || n != 73)
+            block.x != 64 || block.y != 1 || block.z != 1 || shared || stream)
             throw ps5hip::ObjectError("unexpected compiler launch arguments");
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+        const ps5hip::GpuRange module{0x200040000, 0x4000}, kernarg{0x4000000000, 0x4000};
+        // The inventory is permitted data storage only, including each whole allocation.
+        for (const auto range : s.live_buffers)
+            for (const auto reserved : {module, kernarg})
+                if (range.address < reserved.address + reserved.bytes && reserved.address < range.address + range.bytes)
+                    throw ps5hip::ObjectError("data inventory aliases launch storage");
+        std::vector<ps5hip::ReadableSpan> slots;
+        for (size_t i = 0; i < kernel.arguments.size(); ++i)
+            slots.push_back({reinterpret_cast<const uint8_t *>(args[i]), kernel.arguments[i].size});
+        // Readability of the exact array and slots is trusted only for this pinned compiler stub.
+        s.captured = ps5hip::capture_initial_arguments(kernel,
+            {reinterpret_cast<const uint8_t *>(args), kernel.arguments.size() * sizeof(void *)}, slots, s.live_buffers);
+        n = static_cast<unsigned>(s.captured.at(3).value);
+        if (n != 73) throw ps5hip::ObjectError("unexpected vector element count");
+        for (size_t i = 0; i < 3; ++i)
+            if (s.captured[i].buffer_bytes < uint64_t(n) * sizeof(float))
+                throw ps5hip::ObjectError("vector extent is shorter than its element count");
+        s.prepared = ps5hip::prepare_initial_launch(s.registry.module(s.handle).object, kernel.name,
+                                                  module, kernarg, grid.x, s.captured);
+        s.packets = ps5hip::encode_initial_dispatch(s.prepared);
+        std::printf("COMPILER_CAPTURE arguments=4 kernarg_bytes=%zu packet_words=%zu synthetic_gpu_addresses=true gpu_calls=0\n",
+                    s.prepared.kernargs.size(), s.packets.size());
+#endif
+        if (n != 73) throw ps5hip::ObjectError("unexpected vector element count");
         ++s.launches;
         std::printf("COMPILER_LAUNCH unsupported=true groups=2 block=64 n=73 gpu_calls=0\n");
         return s.last_error = hipErrorNotSupported;
@@ -123,9 +163,29 @@ int main() {
     if (fail_symbol) {
         if (s.registry.active_modules() || s.last_error != hipErrorInvalidDeviceFunction) return 2;
     } else {
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+        const float *a = reinterpret_cast<const float *>(uintptr_t(0x4000008010));
+        const float *b = reinterpret_cast<const float *>(uintptr_t(0x400000c020));
+        float *out = reinterpret_cast<float *>(uintptr_t(0x4000010030));
+        unsigned n = 73;
+        launch_vector_add(a, b, out, n);
+        a = nullptr; b = nullptr; out = nullptr; n = 0;
+        if (a || b || out || n || s.captured.size() != 4 || s.captured[0].value != 0x4000008010 ||
+            s.captured[1].value != 0x400000c020 || s.captured[2].value != 0x4000010030 ||
+            s.captured[3].value != 73 || s.captured[0].buffer_bytes != 496 ||
+            s.captured[1].buffer_bytes != 480 || s.captured[2].buffer_bytes != 464 ||
+            s.prepared.kernargs.size() != 288 || s.prepared.kernargs.at(24) != 73 ||
+            s.prepared.kernargs.at(32) != 2 || s.packets.empty()) return 4;
+        std::printf("CAPTURE_OWNED after_stub_return=true caller_values_changed=true synthetic_model=true\n");
+#else
         launch_vector_add(nullptr, nullptr, nullptr, 73);
+#endif
         if (s.last_error != hipErrorNotSupported || s.launches != 1 || !s.configurations.empty()) return 3;
     }
     s.main_finished = true;
+#ifdef PS5HIP_ARGUMENT_CAPTURE_CONTROL
+    std::printf("MAIN_PASS partial_failure=%u launch_preparation_only=true hardware_validated=false\n", unsigned(fail_symbol));
+#else
     std::printf("MAIN_PASS partial_failure=%u registration_only=true hardware_validated=false\n", unsigned(fail_symbol));
+#endif
 }

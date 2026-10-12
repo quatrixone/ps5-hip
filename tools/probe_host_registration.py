@@ -93,6 +93,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--reference-root', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--capture-launch', action='store_true', help='Synthetic-address argument capture and packet preparation control only')
     args = parser.parse_args()
     ref, out = args.reference_root.resolve(), args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -144,7 +145,11 @@ def main():
     require('18.1.8' in compiler_version, 'unexpected host compiler version')
     includes = [item for directory in [ROOT/'include', *include_dirs] for item in ('-I', directory)]
     core = [ROOT/'src'/name for name in ('code_object.cpp', 'fat_binary.cpp', 'host_registration.cpp')]
+    if args.capture_launch:
+        core += [ROOT/'src/host_launch.cpp', ROOT/'src/launch.cpp']
     common = ['-std=c++17', '-O1', '-g', '-Wall', '-Wextra', '-Werror', *includes]
+    if args.capture_launch:
+        common.append('-DPS5HIP_ARGUMENT_CAPTURE_CONTROL=1')
     linux_script = out/'linux.ld'
     linux_script.write_text('''SECTIONS {
  .hip_fatbin ALIGN(4096) : { HIDDEN(__ps5hip_bundle_begin = .); KEEP(*(.hip_fatbin)) HIDDEN(__ps5hip_bundle_end = .); }
@@ -160,6 +165,9 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
     sanitizers = ['-fsanitize=address,undefined', '-fno-omit-frame-pointer']
     run('model-build', 'clang++-18', *common, *sanitizers, *core, ROOT/'tests/host_registration_test.cpp', '-o', out/'model')
     run('model-run', out/'model', out/'linux.bundle', 'gfx1013')
+    if args.capture_launch:
+        run('capture-model-build', 'clang++-18', *common, *sanitizers, *core, ROOT/'tests/host_launch_test.cpp', '-o', out/'capture-model')
+        run('capture-model-run', out/'capture-model', out/'linux.bundle', 'gfx1013')
     for failure in (False, True):
         label = 'linux-partial' if failure else 'linux-normal'
         run(label+'-build', 'clang++-18', *common, *sanitizers, '-fPIE', '-pie', '-fuse-ld=lld-18',
@@ -169,6 +177,10 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
         require('MAIN_PASS partial_failure='+str(int(failure)) in log and
                 log.index('MAIN_PASS') < log.index('COMPILER_UNREGISTER') < log.index('REGISTRY_FINAL') and
                 'valid=1 hardware_validated=false' in log, 'genuine destructor lifecycle not observed')
+        if args.capture_launch and not failure:
+            require('COMPILER_CAPTURE arguments=4 kernarg_bytes=288' in log and
+                    'CAPTURE_OWNED after_stub_return=true caller_values_changed=true synthetic_model=true' in log,
+                    'genuine compiler argument capture not observed')
     # Native source copies are private to this fresh output; no cached export is edited.
     lock = json.loads((ROOT/'dependencies.json').read_text())
     native_source = ref/'.deps'/('native-tools-'+lock['native_tools']['revision'])
@@ -239,11 +251,13 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
     named_imports = {parts[1]: imports[nid(parts[1])] for line in symbol_lines
                      if len(parts := line.split()) == 2 and parts[0] == 'U' and nid(parts[1]) in imports}
     require(len(named_imports) == len(imports), 'unresolved native import identity')
+    require(not any('Agc' in name for name in named_imports), 'registration control unexpectedly imports GPU operations')
     (out/'native-import-names.json').write_text(json.dumps({'eboot_sha256': sha(elf),
         'native_executed': False, 'imports': named_imports}, indent=2)+'\n')
     after = {str(p.relative_to(native_source)): sha(p) for p in native_source.rglob('*') if p.is_file()}
     require(before == after, 'shared native inputs changed')
-    receipt = {'schema': 1, 'classification': 'Linux constructor control and offline PS5 link/conversion only',
+    receipt = {'schema': 1, 'classification': 'Linux compiler control and offline PS5 link/conversion only',
+               'capture_launch': args.capture_launch, 'synthetic_gpu_addresses': args.capture_launch,
                'fixture_manifest_sha256': sha(manifest), 'selected_host_objects': {k: sha(v) for k,v in selected.items()},
                'header_hashes': header_hashes, 'generated_version_sha256': sha(generated),
                'native_source_revision': lock['native_tools']['revision'], 'native_inputs_before_after': before,
@@ -256,7 +270,8 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
                'audits': audits, 'gpu_calls': 0, 'native_executed': False, 'hardware_validated': False,
                'artifacts': {str(p.relative_to(out)): sha(p) for p in out.rglob('*') if p.is_file()},
                'source_hashes': {str(p.relative_to(ROOT)): sha(p) for p in
-                   [*core, ROOT/'tools/hip_registration_control.cpp', Path(__file__), ROOT/'tests/host_registration_test.cpp', ROOT/'include/ps5hip/host_registration.h']}}
+                   [*core, ROOT/'tools/hip_registration_control.cpp', Path(__file__), ROOT/'tests/host_registration_test.cpp', ROOT/'include/ps5hip/host_registration.h'] +
+                   ([ROOT/'tests/host_launch_test.cpp', ROOT/'include/ps5hip/host_launch.h'] if args.capture_launch else [])}}
     (out/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
     print(json.dumps({'output': str(out), 'native_executed': False, 'gpu_calls': 0}))
 
