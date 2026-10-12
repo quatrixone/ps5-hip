@@ -79,6 +79,20 @@ structure. See `evidence/offline-atomic-contention-probe.json`. Native harness,
 GPU execution and memory-scope qualification remain pending; these results do
 not advertise atomic support.
 
+Retained private-memory calls now have an isolated offline launch implementation
+at `6f7d9a1` (`development/g3-flat-calls`). It supplies eight user words with the
+raw flat base separate from descriptor flags, preserves existing routes, and uses
+the actual cumulative 288-byte fixed frame requirement. All 47 sanitizer tests
+passed; final compiler-audit operand/dataflow fixes and all four rebuilt fixtures
+passed focused checks, and both changed core files compile with the PS5 SDK.
+The strengthened source reloads a mutated private element after a retained call;
+16,448 outputs and 96 boundary cases distinguish a lost store from register
+forwarding. See `evidence/offline-private-call-launch.json`. No native flat-call
+harness is packaged. Private-aperture and flat-register support remain unproven;
+prior graphics flat-scratch faults remain adverse evidence. A separate read-only
+aperture probe compiles offline, but has not run on hardware. Continue compiler
+specialization/backend research before considering the platform diagnostic.
+
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
 then passed. See `docs/FIRST_GPU_FAULT.md`. Its revoked image and the earlier

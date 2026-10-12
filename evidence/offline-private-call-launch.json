@@ -1,0 +1,904 @@
+{
+  "schema": 1,
+  "classification": "offline-retained-private-call-launch-and-fixtures",
+  "source_commit": "6f7d9a1c59efc1657d6b73f7dd7d8f62ec673db0",
+  "hardware_validated": false,
+  "native_harness_available": false,
+  "native_packaged": false,
+  "source_files": {
+    "CMakeLists.txt": "26310874a23f56606632f47b5c2ef87da14c86afd503b28b13f8b83d2e46bfba",
+    "docs/PRIVATE_CALLS_PLAN.md": "5d60a6287506dfb75c0f8a4257f99a312dd7c097a8eeda8c8a295e66d3f34405",
+    "include/ps5hip/code_object.h": "2996cd2a5278dc2da125cf1f0e829ce307900394fbc9829a0f48f44a65627210",
+    "include/ps5hip/launch.h": "66566a2316fe1515e347dc0d4481a07cb9e57c22efd6e8fc57b5fe5df70df175",
+    "kernels/private_calls.hip": "fe09b550914ac6d3a0f6087ebdc24a60c08621defb8369ade08cd9a40b0ed8be",
+    "src/code_object.cpp": "eb82e23133e5805d9c500ccb009aea4ceb41c359330bc0bedfe75f277b43b09c",
+    "src/launch.cpp": "c097652a9010eb4314b3203bceab62029c68aa2168fcf370e0cd972a4a05355b",
+    "tests/flat_call_test.cpp": "cf4babf0c9fee3340b464e4ebc90e22bca1e4e19e7c1f41ddddf56af7f52f389",
+    "tests/private_calls_probe_test.py": "d36e2a048873e364e5aea91dd80916c394bab09b087a729b9ff8ba27e0656db9",
+    "tools/probe_private_calls.py": "b75a079428b346501faae30107662a56c33ca84d6a7cd96a0841d87a7367cec4"
+  },
+  "validation": {
+    "full_sanitizer_ctests": 47,
+    "full_run_scope": "Final C++ core and original compiler-audit Python version; recipe/test-only operand checks strengthened afterward",
+    "final_followup": "Final recipe compiled all4profiles; strengthened audit passed52 actual-artifact mutations and96 numeric edges; ASan/UBSan flat_call_test passed all4 final objects",
+    "native_sdk_compile": "launch.cpp and code_object.cpp compile with O2 Wall Wextra Werror; no native link",
+    "independent_review": "Core no findings. Compiler audit register/carry/dataflow findings fixed and original reproducers now rejected.",
+    "raw_research_hashes_reverified": 92
+  },
+  "runtime_inputs": {
+    "descriptor_properties": "0x429",
+    "descriptor_rsrc2": "0x91",
+    "wave_size": 32,
+    "threads": [
+      64,
+      1,
+      1
+    ],
+    "user_sgprs": {
+      "s0:s3": "full wave32 HSA private-segment V# for whole backing ring, with swizzle/add_tid as existing buffer planner",
+      "s4:s5": "kernarg GPU address",
+      "s6:s7": "64-bit absolute GPU address B of same scratch ring payload, raw address high bits WITHOUT V# swizzle/control bits"
+    },
+    "system_sgprs": {
+      "s8": "SPI workgroup X",
+      "s9": "SPI per-wave scratch BYTE offset W assigned using TMPRING; not host user data and not guessed from local wave index"
+    },
+    "v0": "SPI local X",
+    "additional_state": [
+      "SCRATCH_EN stays set; user count8 and groupX/wave-offset requests preserved",
+      "COMPUTE_TMPRING_SIZE initialized using fixed wave32 stride and conservative1280-wave backing",
+      "Valid private aperture and src_private_base/limit supplied by platform; no current PS5 proof or authorized generic user-mode register-programming recipe",
+      "Keep compiler RSRC1, mode and full linked code mapping; direct PC-relative calls must reach same uploaded text with no unresolved relocations"
+    ],
+    "no_extra_private_size_sgpr": true,
+    "not_legacy_encoding": "gfx1013/gfx1030 use absolute flat scratch; s7 is address high32, NOT per-lane byte size; no right shift by8. GFX7/8 offset/size ABI does not apply."
+  },
+  "compiler_owned": {
+    "entry": [
+      "add W to s6:s7 with carry, write HW_REG_FLAT_SCR_LO id20 and HI id21 using width32 s_setreg",
+      "independently add same W to scratch V# base s0:s1",
+      "s_movk_i32 s32,0x1200 initializes unswizzled SP past144-byte entry frame times32 lanes",
+      "read private aperture using64-bit src_private_base and use upper32 bits for generic private pointers"
+    ],
+    "callee": [
+      "call_middle saves incoming FP, makes s33=s32, reserves144 lane bytes by s32+=0x1200, restores s32-=0x1200 and prior FP before return",
+      "generic inner pointer uses s33>>5 low32 and src_private_base high32",
+      "s30:s31 return addresses; middle saves/restores them in VGPR lanes and preserves callee-saved VGPR with scratch",
+      "call_leaf retains real generic flat loads/store and returns by s_setpc_b64; zero local frame"
+    ],
+    "host_must_not": "Do not initialize s32/s33 as user SGPRs, rewrite return addresses, add caller frame twice, replace calls with inlining, drop volatile operations, or forge flat-init descriptor bits."
+  },
+  "fixed_storage": {
+    "entry_frame_bytes_per_lane": 144,
+    "middle_frame_bytes_per_lane": 144,
+    "leaf_frame_bytes_per_lane": 0,
+    "transitive_fixed_bytes_per_lane": 288,
+    "metadata_already_cumulative": true,
+    "source_basis": "LLVM18 AMDGPUResourceUsageAnalysis starts with own FrameInfo stack size, takes maximum cumulative direct-callee size, then adds it; indirect/recursive/dynamic paths require separate treatment. Actual assembly agrees in all4 profiles.",
+    "wave_stride_bytes": 9216,
+    "wave_stride_formula": "align_up(288*32,1024)",
+    "wave_capacity_policy": 1280,
+    "payload_bytes": 11796480,
+    "tmpring": "0x9500",
+    "backing_alignment_policy": 4096,
+    "maximum_active_stack_pointer_bytes": 9216,
+    "limits": "1280 is inherited provisional PS5 Mesa conservative policy, not measured occupancy; total ring stays resident and cannot resize/reuse while owned. No dynamic stack, recursion or indirect call admission."
+  },
+  "platform_adverse_evidence": {
+    "reference": "PS5 Vulkan3f3ee... HARDWARE_FINDINGS3454-3465 plus Mesa0b2d6d1 winsys309-313",
+    "observation": "Prior RADV graphics scratch_* path faulted in all271 waves after shader s_setreg flat initialization; buffer addressing ran and has_flat_scratch was disabled.",
+    "boundary": "Not a ps5-hip compute observation; does not identify whether register behavior, aperture, privilege or another platform convention caused it. This is a concrete qualification blocker, not proof all native nested calls are impossible.",
+    "separate_aperture_risk": "Even correct absolute backing base does not establish generic private aperture translation. Actual probes use flat_load/store and src_private_base, unlike merely scratch_* instructions."
+  },
+  "oracle": {
+    "groups": 257,
+    "threads_per_group": 64,
+    "values": 16448,
+    "input_formula": "x=(group*64+lane)*4099+17",
+    "expected_formula": "(4*x + 5*(x&31) + 2*((x+7)&31) + 6) mod2^32",
+    "independent_array_model": "outer[j]=u32(x+j); inner[j]=u32(outer[j]+j); leaf mutates inner[k]+=3, returns inner[k]+inner[q]; middle after call reads inner[k] and outer[k].",
+    "distinct_inputs": 16448,
+    "distinct_outputs": 16448,
+    "store_loss_rejected": 16448,
+    "store_loss_model": "Leaf updated register still contributes to return, but memory store is suppressed; caller reload makes output differ by3.",
+    "whole_mutation_loss_rejected": 16448,
+    "whole_mutation_loss_difference": 6,
+    "additional_boundary_inputs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      4294967232,
+      4294967233,
+      4294967234,
+      4294967235,
+      4294967236,
+      4294967237,
+      4294967238,
+      4294967239,
+      4294967240,
+      4294967241,
+      4294967242,
+      4294967243,
+      4294967244,
+      4294967245,
+      4294967246,
+      4294967247,
+      4294967248,
+      4294967249,
+      4294967250,
+      4294967251,
+      4294967252,
+      4294967253,
+      4294967254,
+      4294967255,
+      4294967256,
+      4294967257,
+      4294967258,
+      4294967259,
+      4294967260,
+      4294967261,
+      4294967262,
+      4294967263,
+      4294967264,
+      4294967265,
+      4294967266,
+      4294967267,
+      4294967268,
+      4294967269,
+      4294967270,
+      4294967271,
+      4294967272,
+      4294967273,
+      4294967274,
+      4294967275,
+      4294967276,
+      4294967277,
+      4294967278,
+      4294967279,
+      4294967280,
+      4294967281,
+      4294967282,
+      4294967283,
+      4294967284,
+      4294967285,
+      4294967286,
+      4294967287,
+      4294967288,
+      4294967289,
+      4294967290,
+      4294967291,
+      4294967292,
+      4294967293,
+      4294967294,
+      4294967295
+    ],
+    "files": {
+      "input.bin": {
+        "bytes": 65792,
+        "sha256": "e77806b134c8cab34011537aef5dcb1dd58714ec18e504347aa4404063a1f15e"
+      },
+      "expected.bin": {
+        "bytes": 65792,
+        "sha256": "daf2d6dcb036e77a2fb87200a3e32b4953336b0b2e63112217ddf433fbf8f3f2"
+      },
+      "store-lost.bin": {
+        "bytes": 65792,
+        "sha256": "b328f151aa43ee3212cc87427b44eff393479f56d93ff1b4ac044fe869a0a33e"
+      },
+      "mutation-lost.bin": {
+        "bytes": 65792,
+        "sha256": "319bdfbf59df83978e1e5b9cb84c6a268ad6bfd1cb42e15b4eb77f954199ecfd"
+      }
+    }
+  },
+  "source_references": [
+    {
+      "repository": "mihawk-mesa-review",
+      "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+      "path": "src/amd/vulkan/radv_queue.c",
+      "saved": "src__amd__vulkan__radv_queue.c",
+      "sha256": "de7e48165aedd6ad8a0f1a2266f2e626ed278a903ab7c1fff39f6545dfb4bd37"
+    },
+    {
+      "repository": "mihawk-mesa-review",
+      "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+      "path": "src/amd/common/ac_shader_util.c",
+      "saved": "src__amd__common__ac_shader_util.c",
+      "sha256": "91b28d0dc39b95b8fa737ab2a3bd3732518c0641481cb8168af908289e8dcc64"
+    },
+    {
+      "repository": "mihawk-mesa-review",
+      "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+      "path": "src/amd/compiler/aco_ir.cpp",
+      "saved": "src__amd__compiler__aco_ir.cpp",
+      "sha256": "e0933633a57dc1b922c41bd187c8ef423750a6637c2fb09878c14849cd9c7687"
+    },
+    {
+      "repository": "mihawk-mesa-review",
+      "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+      "path": "src/amd/vulkan/winsys/ps5/radv_ps5_winsys.c",
+      "saved": "src__amd__vulkan__winsys__ps5__radv_ps5_winsys.c",
+      "sha256": "8031f8d40f72f084bb74ae949d2599be270dc9ce409cce68371a11f203559633"
+    },
+    {
+      "repository": "mihawk-mesa-review",
+      "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",
+      "path": "src/amd/registers/gfx10.json",
+      "saved": "src__amd__registers__gfx10.json",
+      "sha256": "f3435695c47c3c3b1d8329a96b098452d5909944ca2c99995520c22614617d48"
+    },
+    {
+      "repository": "mihawk-vulkan-review",
+      "revision": "3f3ee69607013b345d2baa6d6a37c86745649a08",
+      "path": "docs/HARDWARE_FINDINGS.md",
+      "saved": "docs__HARDWARE_FINDINGS.md",
+      "sha256": "164e24931f94ef31cfdb0dbd735eb2e3d0ef05e919eb1bf7184c3125c1c8743c"
+    },
+    {
+      "path": "results/volatile-private-research/abi/AMDGPUUsage.rst",
+      "bytes": 1014680,
+      "sha256": "4222ab6cb3f1c73f5cdbdaedf8690a638528a9f6ba6ea3cca35ed325b8242c4c",
+      "repository": "llvm/llvm-project",
+      "revision": "llvmorg-18.1.8",
+      "upstream_path": "llvm/docs/AMDGPUUsage.rst",
+      "lines": [
+        415,
+        424,
+        4270,
+        5185,
+        5411,
+        5490,
+        14050,
+        14347
+      ]
+    },
+    {
+      "path": "results/volatile-private-research/abi/SIFrameLowering.cpp",
+      "bytes": 75309,
+      "sha256": "5366188cacab9edfe90e7e811eb707e8a32d84cc05063933793f2b21750908ba",
+      "repository": "llvm/llvm-project",
+      "revision": "llvmorg-18.1.8",
+      "upstream_path": "llvm/lib/Target/AMDGPU/SIFrameLowering.cpp",
+      "lines": [
+        469,
+        700
+      ]
+    },
+    {
+      "path": "results/volatile-private-research/SIISelLowering.cpp",
+      "bytes": 616350,
+      "sha256": "9a16b3108f662ea900c5aaa12ebaf64d75fa7b2637c33b93b72e913e5a58d239",
+      "repository": "llvm/llvm-project",
+      "revision": "llvmorg-18.1.8",
+      "upstream_path": "llvm/lib/Target/AMDGPU/SIISelLowering.cpp",
+      "lines": [
+        6550,
+        6669
+      ]
+    },
+    {
+      "path": "results/g3-flat-call-readiness/AMDGPUResourceUsageAnalysis.cpp",
+      "bytes": 22579,
+      "sha256": "f1b1e3c6d6db123a2142028c4e8e771e22598201f190cebad4cde0fb11c47851",
+      "repository": "llvm/llvm-project",
+      "revision": "llvmorg-18.1.8",
+      "upstream_path": "llvm/lib/Target/AMDGPU/AMDGPUResourceUsageAnalysis.cpp",
+      "lines": [
+        195,
+        509,
+        566,
+        581
+      ]
+    }
+  ],
+  "aperture_probe": {
+    "receipt_sha256": "84f08e4c923992e14fb96b692d7c4438cb8b0247af71f6d56744cf0243e25d0c",
+    "proposal": {
+      "groups": [
+        1,
+        1,
+        1
+      ],
+      "threads": [
+        64,
+        1,
+        1
+      ],
+      "output_words": 384,
+      "arguments": "one global output pointer; no input pointer or hidden arguments",
+      "per_lane_output": [
+        "base.low32",
+        "base.high32",
+        "limit.low32",
+        "limit.high32",
+        "lane",
+        "lane xor 0x6b18d3a5"
+      ],
+      "validation": "fresh poisoned guarded output; exact lane and xor witnesses for all64 lanes; all prefix and full rounded suffix unchanged; report raw aperture words per lane and flag any disagreement within/across the two waves; do not hardcode aperture addresses"
+    },
+    "compiled_cases": 4,
+    "limitation": "Only64-bit SRC_PRIVATE reads and global outputs. Plausible values do not establish translation, flatregisters or private calls."
+  },
+  "raw_files": [
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/build.log",
+      "sha256": "a413c610495e009ca28c1c8bc59f0cd06eaa3d4847405c5f6edb922d2b9ffa4b",
+      "bytes": 6792
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/commands.json",
+      "sha256": "bd6d8ee59722984a03e107de34f390f11341341c1e621545c22fa25e4c027b90",
+      "bytes": 1312
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/compiler-commands.log",
+      "sha256": "f2cc50ec8c8738d53bb834c4133c86bd82be6e1ec8902ade599f61f6017cbf93",
+      "bytes": 1856
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/configure.log",
+      "sha256": "61eef141f78a75bd7b522de720590e41066739909967f685529929e7b86732b6",
+      "bytes": 546
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/ctest.log",
+      "sha256": "d6bf9ee1219dbe38729fb685733335c79e11eee04fd8d710510b308b0f0d9270",
+      "bytes": 5351
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-host/receipt.json",
+      "sha256": "34213ba148ded2a06fdf20793d5c7671466c4c5b463c2007d329c4d7511de589",
+      "bytes": 2151
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/audit.log",
+      "sha256": "61bb7a48a2c5c68848789ad31300432420e0c0cfe93182a832de3b8de819f386",
+      "bytes": 100
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/commands.json",
+      "sha256": "1934abb62b69d85ac318a6eb5dcf0add0b122144b70b7322c22af7107c16c716",
+      "bytes": 2549
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/compiler.log",
+      "sha256": "eb0ba5d6d51bc88ae98448ac2380d5c8b21fe7369d6752207aa1b60998b99257",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/gfx1013-O1.log",
+      "sha256": "b3191d2ab45bcba21f9b2edcc09789d1b4fa30d3ba8af961a3ebc49c4de5850d",
+      "bytes": 111
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/gfx1013-O2.log",
+      "sha256": "b3191d2ab45bcba21f9b2edcc09789d1b4fa30d3ba8af961a3ebc49c4de5850d",
+      "bytes": 111
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/gfx1030-O1.log",
+      "sha256": "b3191d2ab45bcba21f9b2edcc09789d1b4fa30d3ba8af961a3ebc49c4de5850d",
+      "bytes": 111
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-final/gfx1030-O2.log",
+      "sha256": "b3191d2ab45bcba21f9b2edcc09789d1b4fa30d3ba8af961a3ebc49c4de5850d",
+      "bytes": 111
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-native-compile/code_object.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-native-compile/code_object.o",
+      "sha256": "e114503b41f6131fc3ff11b434043f711a4b0cb217b37ee54a5109b30304df27",
+      "bytes": 81520
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-native-compile/commands.json",
+      "sha256": "844cc53fd2e05002e170d4998662e4189c86dbfb8fcdf257375cca1c0259f88d",
+      "bytes": 1401
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-native-compile/launch.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/results/flat-call-native-compile/launch.o",
+      "sha256": "c1f38d51c3436a4d08d1d7031efb96cac0821a86cb4ce5b2507fbcea8be49bf5",
+      "bytes": 35200
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/comparison.json",
+      "sha256": "8c4d3c1884c18c484f1ddeeb130eadb64416a3edf2d339c6b72c1e7743290a69",
+      "bytes": 17750
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/expected.bin",
+      "sha256": "daf2d6dcb036e77a2fb87200a3e32b4953336b0b2e63112217ddf433fbf8f3f2",
+      "bytes": 65792
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/assembly.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/commands.json",
+      "sha256": "b73e425c8d9af8d04653cf9321022cecf08a9227dd2ea85a963d1a6bbd4f6121",
+      "bytes": 2032
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/driver.txt",
+      "sha256": "fcf9e665c91e6b81c38ecedbf37267b1002863a00d0f8941a5f38e3079962900",
+      "bytes": 3612
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/ir.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/isa.txt",
+      "sha256": "3d6db19afad2f905af25dbfac1f78e527ff60da2990fb02b4cdd0973fdb17e45",
+      "bytes": 52053
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/linked.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/metadata.txt",
+      "sha256": "f405f940ef9707d6463f4f47049b4ab7cf423ef467e240d12903744154128469",
+      "bytes": 9695
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/private_calls.hsaco",
+      "sha256": "db097a833eb8a387c5fcec67aa3f482d2516765d841b2b2cb6d490cad623c935",
+      "bytes": 10584
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/private_calls.ll",
+      "sha256": "154ffdb170f8455038babf212cd20760d1dc06d783d4c7d960e8731112f4e591",
+      "bytes": 19366
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O1/private_calls.s",
+      "sha256": "a7f8da5b184af894958a8ffaaebcdd206d82f73959844eb780348c8eccd38fdd",
+      "bytes": 37104
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/assembly.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/commands.json",
+      "sha256": "dac8e20184cb518b2abb6aab3a83b6bc8245519d1356c265a72378c4a4b7119d",
+      "bytes": 2032
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/driver.txt",
+      "sha256": "aa061f4b4b559c610dac95c2ad74b9c919c2f8c40395db05bd23762f4006707e",
+      "bytes": 3648
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/ir.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/isa.txt",
+      "sha256": "3264676eff87f998f22495aa3973c80b57dd7f90065e124f525ed41bdb95b8bc",
+      "bytes": 138026
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/linked.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/metadata.txt",
+      "sha256": "cc8e15a550e4469e303c24e1d241aa05b48511fce4a846d238e0889bfca81d65",
+      "bytes": 9702
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/private_calls.hsaco",
+      "sha256": "178386ecfac60e1ae333dff91649a96dd63d877576b74e2003db4dfacbdad0ae",
+      "bytes": 16472
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/private_calls.ll",
+      "sha256": "5c0c60f36d48ba5a39891bf7fb496aa76ab8cde74b78d583048985404eba984a",
+      "bytes": 59776
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1013-O2/private_calls.s",
+      "sha256": "dbc765889e88074fc14071232fbb65a961cafdabb77cd75141551ba1a5743305",
+      "bytes": 66154
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/assembly.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/commands.json",
+      "sha256": "5118e2bb4a2b4cd91b69b9a15f17b55c50514b456609280e47ac9feb0789a40a",
+      "bytes": 2032
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/driver.txt",
+      "sha256": "f61b220766e2426d8f3f1171a33e82784e8dfadb5757411a9e9161715fd18a46",
+      "bytes": 3612
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/ir.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/isa.txt",
+      "sha256": "684bd92c4b5e766dcbc8ec1a3a21170772e63b68a78894a1d8289b5d556d0de6",
+      "bytes": 52053
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/linked.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/metadata.txt",
+      "sha256": "855c614d0bc7f397e8680d418280594eed4c234382d77f435ed701a218abaa96",
+      "bytes": 9695
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/private_calls.hsaco",
+      "sha256": "fa5f29489336cf7a160efe67a64caf596fc9b1f881cdfb7ccade0a0099c6dc7e",
+      "bytes": 10584
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/private_calls.ll",
+      "sha256": "17017d6c428811683bf04e9fee3e8837546446a87c79f7f7579daf3b4f30c9a2",
+      "bytes": 19982
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O1/private_calls.s",
+      "sha256": "ea871973451b1b2895cd15820222274537629a08ad5658b9dcf9b00480d74f20",
+      "bytes": 36837
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/assembly.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/commands.json",
+      "sha256": "e3f4da6b0eb89f7a63364ea66b7f92bd53599c09b3adf25f99d658746f5e00f4",
+      "bytes": 2032
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/driver.txt",
+      "sha256": "5bcdbe2dd094f1df98e48828456e913a45b1cac1937f6819f12073e935bc4db3",
+      "bytes": 3648
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/ir.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/isa.txt",
+      "sha256": "04c24a89deb38de0eeca7cac5f40adc8a0b6e1d39eaf6b0e2c11b5b7d6b2f640",
+      "bytes": 127212
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/linked.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/metadata.txt",
+      "sha256": "cc563c9d0dfcfff9fba1ea7c731a4d5349da6af493a12d903ac0b357c6255434",
+      "bytes": 9701
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/private_calls.hsaco",
+      "sha256": "f707a6da82a348ad7c4e4d4597422ffecb86ac2078741f060bffc906bf9aeedc",
+      "bytes": 15704
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/private_calls.ll",
+      "sha256": "ca5d8f07352972a15d54cff4bf15354134c27e0fdc5d1a2f671bdfa6f4c5e88a",
+      "bytes": 60304
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/gfx1030-O2/private_calls.s",
+      "sha256": "889ad75df83d0ac213420b13e75d000959191e5b9c72644f71737f44e2f532a0",
+      "bytes": 61741
+    },
+    {
+      "path": ".local/g3-flat-calls/build/private-calls-final/input.bin",
+      "sha256": "e77806b134c8cab34011537aef5dcb1dd58714ec18e504347aa4404063a1f15e",
+      "bytes": 65792
+    },
+    {
+      "path": "results/g3-private-aperture-probe/aperture-probe-receipt.json",
+      "sha256": "84f08e4c923992e14fb96b692d7c4438cb8b0247af71f6d56744cf0243e25d0c",
+      "bytes": 15961
+    },
+    {
+      "path": "results/g3-private-aperture-probe/aperture.hip",
+      "sha256": "d877d87c872c3ebf16f77a37c45364554abc8ef8246da01f552924d77a3b9b41",
+      "bytes": 586
+    },
+    {
+      "path": "results/g3-private-aperture-probe/check_new_audit.py",
+      "sha256": "b7c318d4671c7d66c087d02aa0bc0e3645153f39e3aa1119eae0ef0cbc00345a",
+      "bytes": 859
+    },
+    {
+      "path": "results/g3-private-aperture-probe/compile.py",
+      "sha256": "8c62acd65c36d1274396528b89625da2a5461592fa25287c64328688c07bd7ae",
+      "bytes": 5653
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.hsaco",
+      "sha256": "7609c0489cdb936ac8ad8d3014484b5e811fc5a7b5c4cd5a44cb6048dbdc68f9",
+      "bytes": 2936
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.hsaco.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.ll",
+      "sha256": "e43a091047f376c9f14c710e5e06bb0538bdbaef683e5fbfedc2d60feadf859c",
+      "bytes": 3109
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.ll.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.s",
+      "sha256": "747db2e88a75e0f6e8fecd7daf6e3a10dca7e94ae1ccba74bcfb3907e353f0e3",
+      "bytes": 3987
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/aperture.s.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/commands.json",
+      "sha256": "4cf1e4a535167f9646482d7487c70feff757ea9e11652785dafe914efac8e1b1",
+      "bytes": 2162
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/driver.txt",
+      "sha256": "33f64ecf09d3708a27002db13125f2d5a6055ca7cf3209553bedb7af73f30fd9",
+      "bytes": 3561
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/isa.txt",
+      "sha256": "a2d4d98eb584bf5b153ec8b004cda5ec2f1b1904135c8e687b85d9bd2254a922",
+      "bytes": 6706
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O1/metadata.txt",
+      "sha256": "445668d1acba6e37564eb2bea9e83010b233fe0c05047961219d48f28394671a",
+      "bytes": 1871
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.hsaco",
+      "sha256": "f19b812a253c387d89d2136c90907b3f2ce46fe08b147d46ca104dde9ffeb4cb",
+      "bytes": 2936
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.hsaco.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.ll",
+      "sha256": "e43a091047f376c9f14c710e5e06bb0538bdbaef683e5fbfedc2d60feadf859c",
+      "bytes": 3109
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.ll.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.s",
+      "sha256": "8f145509771d3a61a096c70e2ccc9c71e82a89b3bf46401f80496ac12f92987d",
+      "bytes": 3913
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/aperture.s.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/commands.json",
+      "sha256": "806456d7b8b9b05d2a1bb3745591afebbe880f1a6db86cfc20a51e8f5cc19986",
+      "bytes": 2162
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/driver.txt",
+      "sha256": "868f10796d90ec911a1aed45f1c0eb405227fe29425f7c49ea28e38a65a7be1c",
+      "bytes": 3597
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/isa.txt",
+      "sha256": "69ed46b56f6a9de839a4f1eb84f57a930180f64212d56a636b7cfb1198402679",
+      "bytes": 6783
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1013-O2/metadata.txt",
+      "sha256": "36dea425add0344a98b4743104032f7415d66aff8572889bd41d4c993ed7842f",
+      "bytes": 1871
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.hsaco",
+      "sha256": "ff01e786b4fb4eb061d95f59accfa0f53746be1a74525af183f4a93d5e11ab43",
+      "bytes": 2936
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.hsaco.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.ll",
+      "sha256": "0f42eab820a70275c037f2754982b9475098abbe8abbf4995afd77a91fde955d",
+      "bytes": 3197
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.ll.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.s",
+      "sha256": "3703d9e37f473c323536e28d66fd49604ccccfda300e4e3f29ea337175ac447e",
+      "bytes": 3956
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/aperture.s.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/commands.json",
+      "sha256": "d1346e5e78c29cae6a4d6ae1d0a3d5216df341f5c8c84a02db986764089a0974",
+      "bytes": 2162
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/driver.txt",
+      "sha256": "77014c278afb793b9cf5a25384fb713b414944fde093dff885377d790f4537e4",
+      "bytes": 3561
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/isa.txt",
+      "sha256": "ac3e0c3d7e7159175ee7f8313476c6bda5b806ab66ba80fa9c814691074361e4",
+      "bytes": 6706
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O1/metadata.txt",
+      "sha256": "5f43375eee8895c9fc7d60b899a28d88e7ef11fbe9deb297d4c99de029cac380",
+      "bytes": 1871
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.hsaco",
+      "sha256": "af8feca98a3ece38340a9532953b8da3a21cd9fa419f0ffe0d426ade0d28d833",
+      "bytes": 2936
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.hsaco.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.ll",
+      "sha256": "0f42eab820a70275c037f2754982b9475098abbe8abbf4995afd77a91fde955d",
+      "bytes": 3197
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.ll.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.s",
+      "sha256": "7a70bab01f22978f75c1082f2146439f1e3e8b3cd7a5814258e468da8dc3ae73",
+      "bytes": 3882
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/aperture.s.log",
+      "sha256": "0b7c16aba64a34a28c306aa36e9c96e0dc9045a9dc8e00f95c7326166d97cb2c",
+      "bytes": 95
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/commands.json",
+      "sha256": "672071c09bad6ef1a88c34af8e76058b6a8c30431810d82085535b88ec8a2c94",
+      "bytes": 2162
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/driver.txt",
+      "sha256": "b63b7176b695b469d3bf40212dfd9e68fde70137761cc5a2f3524e53708a28b9",
+      "bytes": 3597
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/isa.txt",
+      "sha256": "e2c8caf8ab2c9ed4fab07d9f248ba178a0844d6c12154f23f1b48b9adc72e198",
+      "bytes": 6783
+    },
+    {
+      "path": "results/g3-private-aperture-probe/gfx1030-O2/metadata.txt",
+      "sha256": "41c53026fb358a29dad4e150161e9209a886e9fdb585735d9a56b3954a631433",
+      "bytes": 1871
+    },
+    {
+      "path": "results/g3-private-aperture-probe/independent-review.json",
+      "sha256": "f83645a19b4997feb98577f4e7bfd1fffd7e5da363d6947113db0e8046226b4a",
+      "bytes": 16210
+    },
+    {
+      "path": "results/g3-private-aperture-probe/review.py",
+      "sha256": "2e6c83e79d56c313807edb338ce0d72d94263c524a330936830b92924f491d3b",
+      "bytes": 5571
+    },
+    {
+      "path": "results/g3-private-aperture-probe/tools-after.json",
+      "sha256": "52eb072c80970b60a7d6c9c646711dd20cdde9dbaa73afde6b2dc4fe4a7fd715",
+      "bytes": 1093
+    },
+    {
+      "path": "results/g3-private-aperture-probe/tools-before.json",
+      "sha256": "f7aebb11e7562c412c2d1a2a969911486181afb25a81bd7b4b960ed924a3ba54",
+      "bytes": 3154
+    }
+  ],
+  "limits": [
+    "Structural metadata/packets do not certify shader/callgraph safety or platform support",
+    "No native flat-call execution, private aperture setup, volatile adaptation or general G3 qualification",
+    "Compiler specialization spike remains separate from this launch branch and is not integrated",
+    "Old initial/buffer/LDS routes preserve rejection; explicit experimental route only"
+  ]
+}
