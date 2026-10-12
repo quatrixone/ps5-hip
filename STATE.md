@@ -33,7 +33,7 @@ Updated: 2026-10-12, America/New_York.
   from `c37f0db`; device/core/helper/libc/import identities match. Host routing,
   corruption and second-dispatch quarantine checks pass, as do native package
   checks. See `evidence/offline-arithmetic-suite-native-readiness.json` and
-  `docs/G2_ARITHMETIC_ACCEPTANCE.md`. It has not been deployed or run.
+  `docs/G2_ARITHMETIC_ACCEPTANCE.md`. Its first .40 run is recorded below.
 - Its deployment preflight at 22:00 UTC returned **no-run**: unrelated
   PPSA99008 PID404 was active on .30. No remote artifact read/upload/rename,
   launch or close followed; both locks were released. See
@@ -52,6 +52,16 @@ Updated: 2026-10-12, America/New_York.
   `evidence/native-private-buffer-console-no-run.json`. Before a later launch,
   recheck idle state and recovery under both locks. Do not close another title,
   kill a guessed PID, reboot or change settings.
+- At 13:47 UTC the unchanged combined arithmetic image ran on idle .40, firmware
+  12.70: both dispatches checked 146 exact values, full guards, allocation closure
+  and all finalization checkpoints. PID134 self-stopped before host cleanup;
+  process exit, title sandbox ProcessTerm and OS EndAppMount completion were
+  observed, services stayed reachable and both locks were released. Independent
+  review classified this **partial-pass**: ShadowMount v1.6beta16 retained its
+  registered UFS image and emitted no explicit layer-release records. This is
+  not proof of a leak, but does not satisfy the declared release prerequisite.
+  Hold the second arithmetic cycle and private304 launch while resolving that
+  evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
 - The current host suite passes 30 sanitizer CTests with the real HIP bundle
   fixtures enabled; the final bundle/inspector changes pass all three affected
   cases. The exact frozen vector source also passes
@@ -93,8 +103,9 @@ checks pass. Independent review verified all 5,771 protected files unchanged.
 See `evidence/offline-atomic-native-readiness.json`. GPU execution and
 memory-scope qualification remain pending; these results do not advertise atomic
 support. The package catalog now has 26 entries. Earlier console controls pin
-the 25-entry catalog and intentionally reject this change; prepare and review
-versioned controls before the next console operation.
+the 25-entry catalog and intentionally reject this change. Version2 controls
+were independently reviewed, verified against both frozen profiles and used
+for the .40 arithmetic observation; original scripts and receipts are unchanged.
 
 Retained private-memory calls now have an isolated offline launch implementation
 at `6f7d9a1` (`development/g3-flat-calls`). It supplies eight user words with the
@@ -428,3 +439,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified; .40 deployment no-run while another title active | evidence/offline-private-buffer-native-readiness.json; evidence/native-private-buffer-console-no-run.json | next: arithmetic control then private candidate when idle
 - 2026-10-12 | G4 preparation | 89c0644 | bounded fat-binary reader and inspector consume12 real HIP objects; sanitizer and SDK checks pass | evidence/offline-fat-binary-reader.json | next: bounded constructor registration; no runtime or hardware qualification
 - 2026-10-12 | G3 offline | 2b863a7 | six atomic kernels packaged and independently verified | evidence/offline-atomic-native-readiness.json | GPU qualification pending
+- 2026-10-12 | G2 partial-pass | 5b74ac8 | FW12.70 arithmetic146 passed; layer release unproven | evidence/native-arithmetic-fw1270-cycle1.json | hold launches

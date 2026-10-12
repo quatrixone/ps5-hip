@@ -12,6 +12,13 @@ loader-failure PID204 was confirmed absent with ESRCH by a read-only check on
 October 12. A subsequent .40 deployment was blocked before upload by another
 title; see `evidence/native-private-buffer-console-no-run.json`. Recheck current
 recovery and idle state under both locks before reuse.
+The later combined arithmetic control on .40 passed its exact compute and
+finalization checks. It is a partial-pass: the OS recorded process termination
+and EndAppMount completion, while ShadowMount v1.6beta16 retained its registered
+image without explicit layer-release records. See
+`evidence/native-arithmetic-fw1270-cycle1.json`. Hold further launches while
+resolving that evidence gap; the newer local loader source does not identify the
+older deployed build's release policy.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 

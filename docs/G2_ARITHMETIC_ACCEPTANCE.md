@@ -1,6 +1,12 @@
 # Combined G2 arithmetic experiment
 
-Status: offline preparation. No combined-image hardware result exists.
+Status: first combined-image observation on .40 is partial-pass. Both arithmetic
+dispatches, all 146 values, guards, allocation closure and application finalization
+passed. OS process termination and EndAppMount completion were observed, but the
+older deployed loader retained its registered image and emitted no explicit
+layer-release records. See
+[`native-arithmetic-fw1270-cycle1.json`](../evidence/native-arithmetic-fw1270-cycle1.json).
+The release criterion and second accepted cycle remain outstanding.
 
 G2 item 5 requires one frozen application to execute indexed-write followed by
 vector-add. The successful store and vector images establish useful controls,

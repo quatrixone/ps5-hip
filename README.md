@@ -38,7 +38,10 @@ The repository is private.
   reproduced bounded compiler recipe and its limits; the separate 304-byte native
   candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).
   Its .40 deployment was [blocked before upload](evidence/native-private-buffer-console-no-run.json)
-  because another title was running; the candidate has not executed on hardware.
+  because another title was running. A later arithmetic control
+  [passed its compute checks on .40](evidence/native-arithmetic-fw1270-cycle1.json),
+  but left explicit loader-layer release unproven; the private-call candidate
+  remains unrun pending that prerequisite.
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like

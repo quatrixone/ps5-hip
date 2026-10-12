@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "classification": "partial-pass",
+  "scope": "Independent first combined arithmetic cycle on .40; functional, self-stop and OS teardown observations verified; strict layer-release gate incomplete.",
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "pid": 134,
+  "app_id": "0x0000a018",
+  "kernel": "arithmetic_suite",
+  "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "image_sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+  "application_log_sha256": "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+  "application_log_bytes": 863,
+  "strict_application_pass": true,
+  "exact_values": 146,
+  "title_self_stopped": true,
+  "self_stop_observed_seconds": 5.553831484008697,
+  "services_healthy": true,
+  "owned_locks_released": true,
+  "fresh_recovery_checked": true,
+  "one_use_marker_verified": true,
+  "sandbox_process_termination_observed": true,
+  "os_application_mount_end_observed": true,
+  "sandbox_released": null,
+  "runtime_released": null,
+  "image_unmounted": null,
+  "strict_g2_cycle_accepted": false,
+  "private_candidate_prerequisite_accepted": false,
+  "klog_teardown_line_numbers": {
+    "EVFILT_PROC NOTE_EXIT received : pid=0x86": [
+      568
+    ],
+    "All processes exited": [
+      572
+    ],
+    "ProcessTerm() big/mini app title_id = [PPSA99014]": [
+      607
+    ],
+    "EndAppMount(0x0000a018) returned (34 msec)": [
+      627
+    ]
+  },
+  "klog_explicit_fault_signatures": [],
+  "klog_ambiguous_labels": [
+    {
+      "line": 548,
+      "text": "<118>[ResArbitrator][TestId   ]lncEventCallback        [187dd](100)  : CRASH KILL_END event->appId[0xa018] event->pid[0xffffffff] "
+    }
+  ],
+  "ambiguous_label_assessment": "Generic CRASH KILL_END callback names app0xa018 but pidffffffff in shell suspend/stop sequence; no accompanying fault/trap/register dump. It is not independently treated as a crash.",
+  "missing_evidence": [
+    "No explicit ShadowMount sandbox/runtime/image layer release records (layer_records empty).",
+    "Persistent registered UFS image remains listed in slot1 after stop; per-application EndAppMount completion does not itself prove that registered image was unmounted."
+  ],
+  "registered_mount_assessment": "Exact registered UFS mount existed while idle before launch and remains listed during post-stop cleanup. Retention alone is not proof of leakage; saved evidence does not show its release. No source-based policy claim made.",
+  "decision": "Do not bind strict G2 cycle2 acceptance or pass private304 prerequisite from this receipt until parent resolves missing release criterion using offline source/evidence; do not weaken gate silently.",
+  "raw_file_sha256": {
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/after.log": "265ec7bd67ae2ddb323e738edc6332b3beb75761d6eea0c83f00ec901db1c288",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/application-check.json": "ae3def2e0eea0697fc0fd2ac3094f8d7db77eebac65bde2c18dd8208ba9e9c53",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/application.log": "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/before-close.json": "2cd0a1dace6e01c923474b7ebc82e49dbdcd5e58a80a453e44fb5d77dde89337",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/before-launch.log": "d5c8d8e95e3096a2c16b6f084cca8fb82fb29ff0cb3d3d146dfd8fe02b26d5cc",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/before.log": "d5c8d8e95e3096a2c16b6f084cca8fb82fb29ff0cb3d3d146dfd8fe02b26d5cc",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/case.json": "ec97f80ce8fd1a947b48ba54247c9d8ef904438627ba1fd6f34e774e5ceabc35",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/deployment-receipt.json": "08702f9a48edfc2887b7af68a2fc123f0ab5c68a36d2b35676e4af1af843c8e2",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/health.json": "f3131c84c3262bb1477fed8dfba8d6ebac8dd04d1b099e332c03bd74b1bf8543",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/klog.log": "1b6099a748999da60e3e37bc1e65bf41e436ceb4d764eb1a98c0a88487c0b8e4",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/launch-response.log": "ed7e4897f0931640c4c7c7ff6863ede516f0078178ba6aab297805bbd7464d38",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/lifecycle-delta.log": "1cba35af0b824407fffaeba2e196935a9903e879af68002b195da924acc586a9",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/lifecycle-observation.json": "6b1082d18bfccc9e6d624c5f0d6f53b3d242b557cdcc57defc13ee1220c3733e",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/observed.log": "d7c81b15b86609fd1487e4da8900cfe8c81e1bfb2d00c895bffe2cdc398b4b22",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/registration.json": "4edcc0b3d3cbb499026f917b0a238d2a267cd6d008c4463dc04236167d71e5a4",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/results-list.txt": "a25cbf6343e83c956a8b0156661c409c540a29d504cf93ab4a4194bf4950e9f3",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/status-response.log": "d3e656f7a9f6f35a47922c258632f0b397d042a262c4b1aede085775c221aecd",
+    "results/private-buffer-capture-run-arithmetic_suite-20261012T134721.448629Z/stdout.log": "503d84bb0f2847d4206e47824c31974d248e7c024be2abf44ec38c201598fa6c",
+    "results/private-buffer-capture-run-arithmetic_suite-20261012T134721.448629Z/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/private-buffer-milestone-arithmetic_suite-20261012T134721.542681Z/operation-receipt.json": "0c2d2e049cc95fa57b601dcd80f3a470fd8693d839e60af7b1a6952374018b0c",
+    "results/private-buffer-capture-run-arithmetic_suite-20261012T134721.448629Z/operation.json": "31410184368a13e564efbbdad078abb5f5dab4cb95abc21a4d78ab8c9860b18a",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/deployment.json": "08702f9a48edfc2887b7af68a2fc123f0ab5c68a36d2b35676e4af1af843c8e2",
+    "results/private-buffer-run-consumption/08702f9a48edfc2887b7af68a2fc123f0ab5c68a36d2b35676e4af1af843c8e2.json": "66d283cfcd1e41b1ac0e9e3503e4431268ae1dcd584c6ba4ed430b7ad427d7f0",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/before-promotion-status.log": "d3e656f7a9f6f35a47922c258632f0b397d042a262c4b1aede085775c221aecd",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/before-promotion.log": "feeff36c0da7b4bfddb0af456c3a71eece0fd75f4782bbed29e9e1a249161668",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/before-status.log": "d3e656f7a9f6f35a47922c258632f0b397d042a262c4b1aede085775c221aecd",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/before.log": "15ded65656b4d7c4fe37b9085775b5747620454d9d1c7517716930289a324bb7",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/case.json": "37e89febc1f15c4abff1ca5d17247319cafc5b6a3058c4bf2946076182187f3e",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-001.txt": "dea046739de31fbf7cdacc83215a72f0e718dc1e9f067a50e1cc617bb2c0512c",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-002.txt": "483cb4c875daf035305372e852144ea1289bd310c0bfe3289489823d38495ed9",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-003.txt": "2b5d72a81bbdd7c8d81af400431f4f0c6dee390414b47778988cdd74c80b7764",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-004.txt": "01b5b3ac239a1fc0d887936b7283f236f04578f2a35e385b375dd4f32075d42a",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-005.txt": "05c127eeae98beaa4c3cc339c5e8568d2e444c47368b0238be55b095a0c414fd",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-006.txt": "01b5b3ac239a1fc0d887936b7283f236f04578f2a35e385b375dd4f32075d42a",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/list-007.txt": "700a653bf66660364fbfc4f0b81799bffcba4d4a2ba278dff99f565a5033458a",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/preserved-package.ffpkg": "ac85beba81899ddf7ee2aa7eebc33fed6b7c6aa859c97e6cd33a8f3e3f4b28cc",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/registration-001.log": "f447419805ef74871450f94865c885b6456ba4c2681aac26fd0589364b155ef4",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/registration-002.log": "f447419805ef74871450f94865c885b6456ba4c2681aac26fd0589364b155ef4",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/registration-003.log": "f447419805ef74871450f94865c885b6456ba4c2681aac26fd0589364b155ef4",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/registration-004.log": "29d6a5e134b62588f8109db6c3a2a91c2fd53d049d04d1048f064036c261ea64",
+    "results/arithmetic_suite-deploy-20261012T134632.254116Z/registration-005.log": "ead4eb627373c4a9771f565008494ce23ffa6e854f5ada123318011510e7ca08",
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T134631.869058Z/stdout.log": "5eeb075f8dbb231356420a3c44207431fd968d9a0ae9b6af69d6d8e2392ef28c",
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T134631.869058Z/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T134631.869058Z/operation.json": "d1623369d264a043364326019f074b9536580751add1aa0cbe76ccebc813572e",
+    "results/deploy-private-buffer-milestone-v2.py": "84749602456ade3cd82c1ba7954343fcf8f6256b6a4022874f4ddb8291c8d5cf",
+    "results/run-private-buffer-milestone-v2.py": "a1e3e97d7c148e3c9635b9360afcbc108a0dc8c61c24ad692c81309988ce5f3f",
+    "results/capture-private-buffer-milestone-v2.py": "42f2e61efaa217f29b108cfd0d5470e308a740ec6c31dd0e5984b9ea8595db82",
+    "results/test-deploy-private-buffer-milestone-v2.py": "fa93ce1895af84619b913f50b67dc2271e7596a065cb85cc46b8568954120d29",
+    "results/check-private-buffer-milestone-v2.py": "76bbd30ff2d26a96bd258fd7947ccf246095ad42c833967484f8df259a177178",
+    "results/private-buffer-controls-v2/receipt.json": "7404898738c3008e4b11a4547fee2ef148e184db2fba72b6531f7f16a440d094",
+    "results/arithmetic-suite-cycle1-independent-review-v1.json": "53552579e56c88fa937fe7156635611b52683db90ddaf157b808b51952e0ae0a"
+  },
+  "reviewer_console_access": false,
+  "operational_scripts_invoked_by_reviewer": false,
+  "goal": "G2",
+  "cycle": 1,
+  "hardware_gate_passed": false,
+  "gpu_execution_proven": true,
+  "private_candidate_launched": false,
+  "loader": {
+    "version": "ShadowMount+ v1.6beta16",
+    "build": "Jun 28 2026 14:01:11"
+  },
+  "deployed": true,
+  "remotely_verified": true,
+  "registered": true,
+  "previous_package_preserved": {
+    "sha256": "ac85beba81899ddf7ee2aa7eebc33fed6b7c6aa859c97e6cd33a8f3e3f4b28cc",
+    "bytes": 1835008
+  },
+  "parent_decision": "Preserve functional success on FW12.70 as partial-pass. Hold cycle2 and private304 while the declared layer-release prerequisite remains unproven. No console settings, loader update, forced unmount or further launch performed.",
+  "limits": [
+    "This is one combined arithmetic cycle, not completed G2.",
+    "The retained registered image is not itself evidence of a leak.",
+    "The deployed older ShadowMount build is not identified with a local source revision; newer local source cannot establish its release policy.",
+    "Service reachability does not establish exhaustive health."
+  ]
+}
