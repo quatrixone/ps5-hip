@@ -4,6 +4,23 @@ This is an offline-built diagnostic, not a release certificate. No console
 execution is recorded. It cannot satisfy or waive the existing G2/private304
 release prerequisite. Source is isolated from all native compute candidates.
 
+Version 2 adds query telemetry only. The version 1 observation returned
+`count_bound` twice before allocating or filling a mount table. Its printed
+`count=0 matching=0` were untouched result fields, not an empty enumeration.
+Frozen machine code establishes that both initial imported return values were
+nonnegative integers at least 1009, but did not retain their exact values.
+
+Each version 2 snapshot prints an `INITIAL` record with an attempted flag,
+signed and hexadecimal raw return, and captured errno. Exactly three `FILL`
+records report attempted flags, requested record/byte capacity and signed/hex
+returns with errno. Unattempted slots remain zero and must not be interpreted
+as successful empty queries. These records are printed even after rejection.
+The existing provider, 1024-record cap, 128-matching-row cap, three fill attempts,
+query arguments and control flow are unchanged; no extra query is introduced.
+The pinned SDK treats the initial result as a record count, but this source
+contract alone does not qualify the deployed provider or firmware ABI. No raw
+syscall replacement, byte-count reinterpretation or cap increase is made.
+
 The first combined arithmetic cycle on .40 checked 146 exact values and finalized,
 self-stopped and completed OS process/application-mount teardown. Its saved logs
 do not establish the release of ShadowMount runtime or registered-image mounts.

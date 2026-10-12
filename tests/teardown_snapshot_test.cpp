@@ -41,7 +41,24 @@ struct Query {
     }
 };
 void collect(teardown::Snapshot<Row>& result, Query& query) {
-    teardown::collect(result, 7, [&query](Row* output, long bytes) { return query(output, bytes); });
+    std::vector<teardown::QueryTrace> expected;
+    teardown::collect(result, 7, [&](Row* output, long bytes) {
+        const int returned = query(output, bytes);
+        const int error = errno;
+        expected.push_back({true, output ? static_cast<size_t>(bytes) / sizeof(Row) : 0,
+                            bytes, returned, error});
+        errno = error;
+        return returned;
+    });
+    check(!expected.empty() && expected.size() <= 4);
+    const auto compare_trace = [](const teardown::QueryTrace& actual, const teardown::QueryTrace& wanted) {
+        check(actual.attempted == wanted.attempted && actual.capacity_records == wanted.capacity_records &&
+              actual.capacity_bytes == wanted.capacity_bytes && actual.returned == wanted.returned &&
+              actual.error == wanted.error);
+    };
+    compare_trace(result.initial, expected.front());
+    for (size_t i = 0; i != 3; ++i)
+        compare_trace(result.fills[i], i + 1 < expected.size() ? expected[i + 1] : teardown::QueryTrace{});
 }
 int main() {
     using teardown::Kind;
@@ -65,8 +82,12 @@ int main() {
         [&q](Row* rows, long bytes) { return q(rows, bytes); },
         +[](std::size_t, std::size_t) -> void* { return nullptr; });
     check(allocation_failure.result == Result::allocation_error && !allocation_failure.rows);
+    check(allocation_failure.initial.attempted && allocation_failure.initial.returned == 0);
+    for (const auto& fill : allocation_failure.fills) check(!fill.attempted);
     teardown::Snapshot<Row> empty1, empty2; collect(empty1, q); collect(empty2, q);
     check(empty1.result == Result::complete && empty1.count == 0 && teardown::same(empty1, empty2));
+    check(empty1.initial.attempted && empty1.initial.returned == 0 && empty1.fills[0].attempted &&
+          empty1.fills[0].returned == 0 && empty1.fills[0].capacity_records == 16);
     q.rows = {row(teardown::runtime, teardown::image), row(teardown::image, "/dev/lvd2"),
               row("/mnt/sandbox/PPSA99014_000/app0"), row("/other")};
     teardown::Snapshot<Row> first; collect(first, q);
@@ -106,21 +127,35 @@ int main() {
         Query error; error.error_on = phase;
         teardown::Snapshot<Row> result; collect(result, error);
         check(result.result == Result::query_error && result.query_errno == EACCES && !result.rows);
+        const auto& failed = phase == 1 ? result.initial : result.fills[0];
+        check(failed.attempted && failed.returned == -1 && static_cast<unsigned>(failed.returned) == UINT32_MAX &&
+              failed.error == EACCES && error.calls == phase);
+        if (phase == 1) for (const auto& fill : result.fills) check(!fill.attempted);
     }
     for (int count : {1009, 1024, INT_MAX}) {
         Query large; large.size_override = count;
         teardown::Snapshot<Row> result; collect(result, large);
         check(result.result == Result::count_bound && large.calls == 1);
+        check(result.initial.attempted && result.initial.returned == count && result.initial.error == 0 &&
+              !result.rows && result.count == 0 && !teardown::same(result, empty1));
+        for (const auto& fill : result.fills) check(!fill.attempted && fill.capacity_bytes == 0);
     }
     Query growth; growth.full_calls = 2;
     teardown::Snapshot<Row> grown; collect(grown, growth);
     check(grown.result == Result::complete && growth.calls == 4);
+    for (size_t i = 0; i != 3; ++i) {
+        check(grown.fills[i].attempted && grown.fills[i].capacity_records == (size_t(16) << i) &&
+              grown.fills[i].capacity_bytes == static_cast<long>((size_t(16) << i) * sizeof(Row)));
+        check(grown.fills[i].returned == (i == 2 ? 0 : int(16 << i)));
+    }
     Query endless; endless.full_calls = 3;
     teardown::Snapshot<Row> unstable; collect(unstable, endless);
     check(unstable.result == Result::unstable_capacity && endless.calls == 4);
     Query maximum; maximum.size_override = 1008; maximum.full_calls = 1;
     teardown::Snapshot<Row> capped; collect(capped, maximum);
     check(capped.result == Result::unstable_capacity && maximum.calls == 2);
+    check(capped.initial.returned == 1008 && capped.fills[0].capacity_records == 1024 &&
+          capped.fills[0].returned == 1024 && !capped.fills[1].attempted);
     Query output; output.rows.assign(129, row(teardown::runtime));
     teardown::Snapshot<Row> too_many; collect(too_many, output);
     check(too_many.result == Result::output_bound && !teardown::same(too_many, too_many));
