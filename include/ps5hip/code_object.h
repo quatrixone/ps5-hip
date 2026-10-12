@@ -72,4 +72,8 @@ std::string buffer_scratch_launch_rejection(const Kernel &kernel);
 // remain zero, with no scratch or implicit/dynamic-pointer entry state.
 std::string lds_launch_rejection(const Kernel &kernel);
 
+// Experimental structural eight-slot flat-call entry only. Metadata cannot prove
+// a bounded call graph, valid private aperture, or safe hardware execution.
+std::string flat_call_launch_rejection(const Kernel &kernel);
+
 } // namespace ps5hip

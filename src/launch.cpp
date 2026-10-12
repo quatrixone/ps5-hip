@@ -19,12 +19,12 @@ bool overlaps(GpuRange a, GpuRange b) {
 static InitialLaunch prepare_launch(const CodeObject &object, const std::string &name,
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
-                                    const BufferScratchPlan *scratch, bool lds = false) {
+                                    const BufferScratchPlan *scratch, bool lds = false, bool flat_call = false) {
     const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
     const auto &k = *found;
-    const auto rejection = lds ? lds_launch_rejection(k) :
+    const auto rejection = flat_call ? flat_call_launch_rejection(k) : lds ? lds_launch_rejection(k) :
         (scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k));
     if (!rejection.empty()) throw ObjectError(rejection);
     require(k.max_workgroup_size >= 64, "kernel cannot support the initial 64-thread group");
@@ -89,18 +89,25 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
     return result;
 }
 
-static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch, const LdsPlan *lds = nullptr) {
+static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch, const LdsPlan *lds = nullptr,
+                                             const std::array<uint32_t, 2> *flat_init = nullptr) {
     require(launch.entry_address >= window_begin && launch.entry_address < window_end &&
             launch.entry_address % 256 == 0, "invalid dispatch entry address");
     require(launch.threads == std::array<uint32_t, 3>{64, 1, 1} && launch.groups_x != 0 &&
             launch.groups_x <= UINT32_MAX / 64, "invalid dispatch shape");
-    require(launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6, "invalid dispatch user-SGPR count");
+    require(flat_init ? launch.user_sgpr_count == 8 :
+            (launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6), "invalid dispatch user-SGPR count");
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count && !(launch.rsrc2 & ~((scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u))) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     if (scratch) {
-        require(launch.rsrc2 == 0x8d && launch.user_sgpr_count == 6 &&
+        require(launch.rsrc2 == (flat_init ? 0x91u : 0x8du) && launch.user_sgpr_count == (flat_init ? 8u : 6u) &&
                 std::equal(scratch->descriptor.begin(), scratch->descriptor.end(), launch.user_sgprs.begin()),
                 "scratch dispatch entry state mismatch");
+    }
+    if (flat_init) {
+        require(scratch && (*flat_init)[0] == uint32_t(scratch->storage.address) &&
+                (*flat_init)[1] == uint32_t(scratch->storage.address >> 32),
+                "flat initialization must contain the raw scratch base");
     }
     if (lds) {
         require(launch.rsrc2 == (0x8c | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
@@ -132,7 +139,12 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     const uint32_t limits = 0;
     registers(0xb854, &limits, 1);
     registers(0xb81c, launch.threads.data(), 3);
-    registers(0xb900, launch.user_sgprs.data(), launch.user_sgpr_count);
+    if (flat_init) {
+        std::array<uint32_t, 8> words{};
+        std::copy(launch.user_sgprs.begin(), launch.user_sgprs.end(), words.begin());
+        std::copy(flat_init->begin(), flat_init->end(), words.begin() + 6);
+        registers(0xb900, words.data(), unsigned(words.size()));
+    } else registers(0xb900, launch.user_sgprs.data(), launch.user_sgpr_count);
     words.insert(words.end(), {0xc0031502u, launch.groups_x, 1, 1, 0x8005u});
     // Initiator: shader enable, force start at zero, wave32; initial in-order dispatch.
     return words;
@@ -212,6 +224,19 @@ std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch) {
     require(expected.allocated_bytes != 0 && launch.lds.allocated_bytes == expected.allocated_bytes &&
             launch.lds.rsrc2_lds == expected.rsrc2_lds, "inconsistent LDS plan");
     return encode_dispatch(launch.dispatch, nullptr, &launch.lds);
+}
+
+FlatCallLaunch prepare_flat_call_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch) {
+    validate_scratch_plan(scratch);
+    return {prepare_launch(object, name, module, kernarg_storage, groups_x, arguments, &scratch, false, true),
+            scratch, {uint32_t(scratch.storage.address), uint32_t(scratch.storage.address >> 32)}};
+}
+std::vector<uint32_t> encode_flat_call_dispatch(const FlatCallLaunch &launch) {
+    validate_scratch_plan(launch.scratch);
+    return encode_dispatch(launch.dispatch, &launch.scratch, nullptr, &launch.flat_init);
 }
 
 } // namespace ps5hip

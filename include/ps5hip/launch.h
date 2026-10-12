@@ -77,4 +77,20 @@ LdsLaunch prepare_lds_launch(
     const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes = 0);
 std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch);
 
+struct FlatCallLaunch {
+    InitialLaunch dispatch; // First six user words; the selected route requires count eight.
+    BufferScratchPlan scratch;
+    std::array<uint32_t, 2> flat_init;
+};
+
+// OFFLINE experimental absolute-flat-scratch entry, 64x1x1 wave32. Reuses the
+// cumulative private-size ring plan; raw base words follow the six-word prefix.
+// Structural checks do not certify shader/call-graph bounds or private aperture.
+// Native harness unavailable: no ownership, aperture setup or execution is supplied.
+FlatCallLaunch prepare_flat_call_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch);
+std::vector<uint32_t> encode_flat_call_dispatch(const FlatCallLaunch &launch);
+
 } // namespace ps5hip
