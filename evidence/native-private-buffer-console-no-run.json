@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "classification": "no-run",
+  "operation": "arithmetic control deployment preflight",
+  "observed_utc": "2026-10-12T13:07:58.071170+00:00",
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "arithmetic_suite",
+  "target": "gfx1013",
+  "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+    "bytes": 3571712
+  },
+  "reason": "Unrelated PPSA99008 PID117 active with foreground application ID0x6018; fresh idle guard stopped before any remote artifact mutation or title control.",
+  "active_title": "PPSA99008",
+  "active_pid": 117,
+  "foreground_application_id": "0x6018",
+  "artifact_deployment_attempted": false,
+  "remote_artifact_identity_reverified": false,
+  "remote_files_uploaded": false,
+  "remote_files_renamed": false,
+  "remote_directories_created": false,
+  "launch_attempted": false,
+  "close_sent": false,
+  "owned_locks_released": true,
+  "hardware_gate_passed": false,
+  "private_candidate_launched": false,
+  "private_candidate_image_sha256": "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+  "earlier_read_only_recovery": {
+    "observed_utc": "2026-10-12T12:54:56.344946+00:00",
+    "pid204_absent_ESRCH": true,
+    "running_application_absent": true,
+    "PPSA99014_application_absent": true,
+    "status_payload_sha256": "fe1f9d2e9b8c225b2cd439179840cf63ffbf4fc61fd31dc1aec5e1a1d90c7434",
+    "services_reachable": {
+      "2121": "reachable",
+      "3232": "reachable",
+      "9021": "reachable"
+    },
+    "owned_locks_released": true,
+    "limit": "Historical recovery observation; current idle state must be rechecked under both locks before any later operation."
+  },
+  "controls": {
+    "deployment_source_sha256": "2e6987844821e2eac0c2948438906ebd102fe803e31f52d4b0c22a16f537b3f5",
+    "outer_capture_source_sha256": "567ed58d6e477559a8ba971d046320440414b7891dfe3a0ac0e7654aa54a33be",
+    "outer_exit_code": 1,
+    "deployment_source_unchanged": true,
+    "runner_source_sha256": "57de37ad68c64328eba3ed1232860257b75e45b43a09d35a3f205538a486eda4",
+    "runner_offline_tests_passed": true,
+    "runner_operationally_invoked": false,
+    "independent_review": "Deployment, capture, runner and saved no-run evidence reviewed; layer teardown still requires independent review after any later launch."
+  },
+  "raw_files": {
+    "results/arithmetic_suite-deploy-20261012T130758.071170Z/before.log": {
+      "sha256": "da6749ecfbd4dc43f084cf50668c95f39b85e49d90753739f5daa385b06e8cf9",
+      "bytes": 74709
+    },
+    "results/arithmetic_suite-deploy-20261012T130758.071170Z/case.json": {
+      "sha256": "37e89febc1f15c4abff1ca5d17247319cafc5b6a3058c4bf2946076182187f3e",
+      "bytes": 1040
+    },
+    "results/arithmetic_suite-deploy-20261012T130758.071170Z/deployment.json": {
+      "sha256": "7bcc88974c8dc87f8d8ebe335f2ccafd5671d63070aaaff27a13cbf199b4c7a4",
+      "bytes": 1113
+    },
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T130757.727817Z/operation.json": {
+      "sha256": "9f16a06dae9f7d3ea4390b9221f101f497f545a6976602b0034d842d3fdb7bb4",
+      "bytes": 758
+    },
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T130757.727817Z/stderr.log": {
+      "sha256": "a5c9b371f6094eac346fb70e8f9d471944d8bfee0486861aaf0262269316a8e0",
+      "bytes": 830
+    },
+    "results/private-buffer-capture-deploy-arithmetic_suite-20261012T130757.727817Z/stdout.log": {
+      "sha256": "105a4d614eca1eee543b6c5e62ef379b3060938216e8274eb193caa95698f359",
+      "bytes": 270
+    },
+    "results/private-buffer-preflight-20261012T125456.344946Z/homebrew-list.txt": {
+      "sha256": "fb4712a9d426a637790f6b1b58b4c994b90e7609bb31e81531d159cdf12b3aac",
+      "bytes": 1404
+    },
+    "results/private-buffer-preflight-20261012T125456.344946Z/receipt.json": {
+      "sha256": "c0745dc7e2f2568a695855e1d8d4ebfa8881f6b5b7872e95fee27ea2029b6507",
+      "bytes": 1278
+    },
+    "results/private-buffer-preflight-20261012T125456.344946Z/shadowmount.log": {
+      "sha256": "028e842a546b77c1df04c3e00468e580c5821a8903acd58c88326595ddd29bcc",
+      "bytes": 53888
+    },
+    "results/private-buffer-preflight-20261012T125456.344946Z/status-response.log": {
+      "sha256": "d3e656f7a9f6f35a47922c258632f0b397d042a262c4b1aede085775c221aecd",
+      "bytes": 239
+    },
+    "results/deploy-private-buffer-milestone-v1.py": {
+      "sha256": "2e6987844821e2eac0c2948438906ebd102fe803e31f52d4b0c22a16f537b3f5",
+      "bytes": 18933
+    },
+    "results/capture-private-buffer-milestone-v1.py": {
+      "sha256": "567ed58d6e477559a8ba971d046320440414b7891dfe3a0ac0e7654aa54a33be",
+      "bytes": 2582
+    },
+    "results/private-buffer-preflight-v1.py": {
+      "sha256": "375ded1fdb081159f50b84fe5bf4ed1b4f450f0e61f81e6c893f6e1e85cd603a",
+      "bytes": 7280
+    },
+    "results/record-private-buffer-console-no-run.py": {
+      "sha256": "b355a56abb8d7de65bc3d139e02f14141384e1f7522de5ca2de0ea5b6d196d46",
+      "bytes": 6519
+    },
+    "results/deploy-private-buffer-milestone-v1-offline-tests.json": {
+      "sha256": "c3ccced2fe9c590b7cacd214313dd7646b5da80efdb93af929d280f08108bdd4",
+      "bytes": 1109
+    },
+    "results/test-deploy-private-buffer-milestone-v1.py": {
+      "sha256": "e70a82a285d3a99538f7526f57a8a7c8bd38ad163327534137c8e603c9acc831",
+      "bytes": 6057
+    },
+    "results/run-private-buffer-milestone-v1.py": {
+      "sha256": "57de37ad68c64328eba3ed1232860257b75e45b43a09d35a3f205538a486eda4",
+      "bytes": 25765
+    },
+    "results/check-private-buffer-milestone-v1.py": {
+      "sha256": "b9b73fa62102fb0ca9c2a67cf31720b1355e8409326c372a947332271192ed72",
+      "bytes": 17820
+    },
+    "results/private-buffer-run-preparation-v1/receipt.json": {
+      "sha256": "429cf6b1ab5b8bbf2a676c03ceca8a8c70cc50f82050b9326ea38757a78025f0",
+      "bytes": 2716
+    },
+    "results/private-buffer-run-preparation-v1/offline-tests-exact-stop.log": {
+      "sha256": "011717273e52334a5b0db22ca603eb9eaee3ee7d424c0ec1bdf4d6819e0ff78b",
+      "bytes": 253
+    }
+  },
+  "next_action": "At a separately selected useful console milestone, verify the unchanged frozen controls and current idle state. Qualify the arithmetic control first; only after independent clean-lifecycle review attempt the304-byte private candidate once. Do not close another title or poll while offline work can advance.",
+  "limits": [
+    "No new GPU execution",
+    "G2 incomplete",
+    "G3 incomplete",
+    "Generic/volatile private pointers and general HIP runtime unqualified"
+  ]
+}

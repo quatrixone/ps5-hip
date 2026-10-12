@@ -8,7 +8,10 @@ CPU SIGSEGV/RIP zero after the pre-submit checkpoint. Its isolated import-provid
 correction then passed one indexed-store GPU dispatch and clean lifecycle; see
 `evidence/native-provider-fixed-store.json`. Preserve both runs; do not rerun the
 failed case in `evidence/native-indexed-store-first.json`. The .40
-loader-failure process had unresolved teardown; establish recovery before reuse.
+loader-failure PID204 was confirmed absent with ESRCH by a read-only check on
+October 12. A subsequent .40 deployment was blocked before upload by another
+title; see `evidence/native-private-buffer-console-no-run.json`. Recheck current
+recovery and idle state under both locks before reuse.
 The shared-console runbook in AGENTS.md
 remains authoritative for locking, declared services, bounded runs and teardown.
 

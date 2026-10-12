@@ -43,11 +43,15 @@ Updated: 2026-10-12, America/New_York.
   shell-managed lifecycle. Ordinary C exit still faults with SIGSYS; threaded or
   framework teardown is unqualified. See `evidence/native-shell-exit.json` and
   `evidence/native-cpu-shutdown.json`. Do not repeat the failed exit diagnostics.
-- The user now selects **.40 for useful milestone tests**. Before any launch,
-  establish that its earlier loader-failure PID204 has cleared and that the
-  console is idle. Its prior teardown remained unresolved; no automatic retry,
-  guessed kill, reboot or settings change follows from this authorization.
-  See `evidence/first-native-cpu.json`.
+- The user now selects **.40 for useful milestone tests**. A read-only status
+  check at 12:54 UTC on October 12 established that its earlier loader-failure
+  PID204 was absent with ESRCH and both running/title application IDs were absent.
+  The subsequent arithmetic deployment preflight at 13:07 UTC returned **no-run**:
+  unrelated PPSA99008 PID117 was active. No upload, rename, directory creation,
+  launch or close followed; both locks were released. See
+  `evidence/native-private-buffer-console-no-run.json`. Before a later launch,
+  recheck idle state and recovery under both locks. Do not close another title,
+  kill a guessed PID, reboot or change settings.
 - Main has 27 passing host CTests. The exact frozen vector source also passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
@@ -305,7 +309,9 @@ Runtime checks, callbacks, destructor/fini observation, shell-request return zer
 self-stop before host cleanup, sandbox/image release and service health passed.
 See `evidence/native-shell-exit.json`. Ordinary C exit still faults with SIGSYS;
 do not repeat the failed diagnostics. Threaded/framework cleanup is unqualified.
-The failed .40 PID 204 teardown remains unresolved; establish recovery before reuse.
+The October 12 read-only check established that the failed .40 PID204 was absent;
+the later deployment was blocked by another title. Recheck current recovery and
+idle state before reuse; no new GPU qualification follows.
 
 Offline work ahead of G2/G3/G4:
 
@@ -400,4 +406,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G3 offline | 06956e4 | six-dispatch atomic harness modeled; both SDK objects compiled | evidence/offline-atomic-native-harness.json | no package or hardware qualification
 - 2026-10-11 | compiler research | source-built LLVM comparisons exposed call-mask and IPRA ordering issues; guarded revision 4 compiled | evidence/offline-private-backend-source-builds.json | full paired acceptance pending
 - 2026-10-11 | compiler milestone | guarded revision 4 passes selected paired IPRA-off controls and eight linked ordinary graphs; generic/volatile fallback retained | evidence/offline-private-backend-ipra-off-controls.json | next: fresh portable reproduction and isolated304-byte native harness
-- 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified | evidence/offline-private-buffer-native-readiness.json | next: .40 idle/recovery
+- 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified; .40 deployment no-run while another title active | evidence/offline-private-buffer-native-readiness.json; evidence/native-private-buffer-console-no-run.json | next: arithmetic control then private candidate when idle

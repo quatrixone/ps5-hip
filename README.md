@@ -34,6 +34,8 @@ The repository is private.
 - [Experimental private-call compiler](tools/experimental/private-calls/README.md):
   reproduced bounded compiler recipe and its limits; the separate 304-byte native
   candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).
+  Its .40 deployment was [blocked before upload](evidence/native-private-buffer-console-no-run.json)
+  because another title was running; the candidate has not executed on hardware.
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like
