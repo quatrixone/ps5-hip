@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "classification": "offline genuine compiler argument capture and launch preparation; no GPU dispatch",
+  "source_commit": "0edd6232428e42226da3a48381204849b1496e7a",
+  "source_directory": ".local/g4-host-launch-capture",
+  "source_sha256": {
+    "CMakeLists.txt": "ad7719e7eed309121e55075144a62a02e359a3f5851e64806014453fb63f61a9",
+    "include/ps5hip/host_launch.h": "42b64d454fce3416f5e4c7e311d2f9b82b935b2f13045595c86f5bd08ebd4f52",
+    "src/host_launch.cpp": "ee887b6a5b0a770371884cf744b8adf27d1a076f7fbe77e1fb9dc0a9e330177d",
+    "tests/host_launch_test.cpp": "8b710a566d65f9cd5d26793bdcb4467ae2b4f4e18b313812608cf3d79ba94899",
+    "tools/hip_registration_control.cpp": "55aaa6ff602ca973d9c8b2c68aeb1a20058ead9346cf0e623a5e7bef834b4000",
+    "tools/probe_host_registration.py": "e4af2d96da5278f97fcb215a46a970195d369ad799af97b206aa7bf662ced647",
+    "docs/HIP_HOST_LAUNCH_CAPTURE.md": "41c2b7a5e3a2bca3c338ccfc6f5e3153687eb12260431e40018369684247abab"
+  },
+  "root_CMakeLists_sha256": "c920f55fc4c7496e9cd5223518c6c378c092b8be7556766732ff4153d06c33c2",
+  "integration_note": "Root CMake additionally registers the independently reviewed teardown diagnostic; all other changed source files match frozen source.",
+  "freeze_receipt": ".local/g4-host-launch-capture/results/launch-capture-readiness-v1/freeze-binding.json",
+  "freeze_receipt_sha256": "38b7e6697c50f64edeb41570b7f3258a3f6c84f242cc9312fceba3380c4cf408",
+  "readiness_receipt_sha256": "d9888ea71e0cd14c99b1e80918d920217a077b67ce79f9d0244a7d5d9ef22594",
+  "probes": {
+    "host-launch-capture-v2": {
+      "receipt_sha256": "3b1a36a37bf579be14c4b850545575d844c035e64c21340bfed99383e7875f96",
+      "artifacts_verified": 79,
+      "audits": {
+        "raw_pie": {
+          "bundle": [
+            348160,
+            356296
+          ],
+          "wrapper": [
+            375688,
+            375712
+          ],
+          "init_array": [
+            376328,
+            376336
+          ],
+          "ctor": 352,
+          "wrapper_relative_addend": 348160,
+          "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+          "relro_contract": "linker-designated .data.rel.ro RW load",
+          "native_executed": false
+        },
+        "converted_eboot": {
+          "bundle": [
+            348160,
+            356296
+          ],
+          "wrapper": [
+            375688,
+            375712
+          ],
+          "init_array": [
+            376328,
+            376336
+          ],
+          "ctor": 352,
+          "wrapper_relative_addend": 348160,
+          "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+          "relro_contract": "PT_GNU_RELRO",
+          "native_executed": false
+        }
+      },
+      "capture_launch": true
+    },
+    "registration-default-v1": {
+      "receipt_sha256": "84dd150b50087bb5e4a28c401e7c36c83c2cd96788b6076536ff09b09ba7f54c",
+      "artifacts_verified": 68,
+      "audits": {
+        "raw_pie": {
+          "bundle": [
+            344064,
+            352200
+          ],
+          "wrapper": [
+            375688,
+            375712
+          ],
+          "init_array": [
+            376328,
+            376336
+          ],
+          "ctor": 352,
+          "wrapper_relative_addend": 344064,
+          "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+          "relro_contract": "linker-designated .data.rel.ro RW load",
+          "native_executed": false
+        },
+        "converted_eboot": {
+          "bundle": [
+            344064,
+            352200
+          ],
+          "wrapper": [
+            375688,
+            375712
+          ],
+          "init_array": [
+            376328,
+            376336
+          ],
+          "ctor": 352,
+          "wrapper_relative_addend": 344064,
+          "bundle_sha256": "a1a2909290d23a8e774f2e4ba5cabdc5bca683700d976aec2c5e2e6831055964",
+          "relro_contract": "PT_GNU_RELRO",
+          "native_executed": false
+        }
+      },
+      "capture_launch": false
+    }
+  },
+  "protected_files_verified": 3728,
+  "protected_inventory_sha256": "12f10edc078acbfa28a0a90cc61ccb95215362f747fc19fe8fb8012e672a1d94",
+  "isolated_tests_passed": 32,
+  "integrated_tests_passed": 34,
+  "integration_source_commit": "1ba82924990f48da127cf94eb2ab5630b5152ed8",
+  "integration_receipt": "results/g4-capture-integration-v1/receipt.json",
+  "integration_receipt_sha256": "af9826118a84f11e062a8db91cc0540d6cfff2c270bffb276e6b65f73cd201fe",
+  "captured_arguments": 4,
+  "kernarg_bytes": 288,
+  "packet_words": 56,
+  "synthetic_gpu_addresses": true,
+  "dispatch_result": "hipErrorNotSupported",
+  "gpu_calls": 0,
+  "native_executed": false,
+  "hardware_validated": false,
+  "limits": [
+    "Caller certifies the exact compiler array/value spans are live readable memory; no arbitrary-pointer safety claim.",
+    "Current permitted data inventory is trusted; no native mapping, physical allocation, async lifetime or address-reuse detection.",
+    "Genuine stub still receives hipErrorNotSupported; encoded words are never submitted.",
+    "The separately selected native runtime architecture is not implemented by this pure capture/control unit."
+  ]
+}

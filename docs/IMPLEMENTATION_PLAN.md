@@ -346,6 +346,12 @@ Linux normal and partial-failure teardown pass; PS5 linking and conversion prese
 the checked extents and relocations. Dispatch explicitly returns unsupported.
 This is offline preparation, not working native HIP launch syntax or G4 acceptance.
 
+The [argument capture control](HIP_HOST_LAUNCH_CAPTURE.md) additionally copies the
+real stub's argument values into owned storage, resolves synthetic live-data
+extents and calls the existing hidden-geometry planner/packet encoder. All34
+integrated sanitizer checks pass. Dispatch still returns unsupported; no native
+mapping, allocation lifetime, submission or normal-launch hardware claim follows.
+
 Implement the first coherent API slice:
 
 - Initialization, device count/selection, honest device properties and errors.

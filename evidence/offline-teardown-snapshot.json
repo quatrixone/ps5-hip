@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "classification": "offline diagnostic built and reviewed; no console observation",
+  "source_commit": "05b1723f95521ebabcf09313d8235f514080b027",
+  "integrated_source_files": {
+    "CMakeLists.txt": "1c50a0777456c4bdfd7709d5fc1abcabba1899c1ea597deb729fcc9d500f5ebb",
+    "docs/TEARDOWN_SNAPSHOT.md": "16e5b4194fb9330cc3e4e7747292fcbf4aa299191da1f8acd41de72a3d088490",
+    "tests/teardown_snapshot_recipe_test.py": "43aad77f00d445dc1ce27fcbc0fb6b61e1084f228a282b2d10bacc080dbad4a0",
+    "tests/teardown_snapshot_test.cpp": "a067b5e2b383edc2f17c35e0fa7e5ed17eb9d700bfbe07b6993b0085d8afcd24",
+    "tools/build_teardown_snapshot.py": "b495e748cbc60838ba149365918680c7c355217256f2fec55f5d2da88f123256",
+    "tools/teardown_snapshot.cpp": "0da436916b90a2df77e98a594f76b38c526fa3bbbb20cfff40baec6915765f84",
+    "tools/teardown_snapshot.h": "2d5741db32233d2025426fbc5f41385aeef26b3fd218ffe2dc471bf64ed65771"
+  },
+  "checkout_comparison": "LF-normalized root source equals exact committed isolated source; raw isolated digests retained",
+  "source_directory": ".local/teardown-snapshot",
+  "raw_freeze": ".local/teardown-snapshot/results/teardown-offline-v1/freeze.json",
+  "raw_freeze_sha256": "d90e6ca46547025b9fa3391bcb523fbd609920ddb998459be3909b1d31e3a540",
+  "readiness_sha256": "5a217211a8f04e89decae9c47c59582424e38eb646a75b0cec7b37447a2002bd",
+  "native_receipt": {
+    "path": "build/teardown-qualified-v2/receipt.json",
+    "sha256": "f33f3b88319d0b93f2305799debba9d1595e230587913e9d55a3621926106806"
+  },
+  "artifact": {
+    "file": "teardown-snapshot.elf",
+    "bytes": 110904,
+    "sha256": "d4f737710b68ad8ae0416de97c5a7a478269891d5415d2530c203a2e18e6ff4a"
+  },
+  "imports": {
+    "needed_libraries": [
+      "libSceLibcInternal.sprx",
+      "libSceNet.sprx",
+      "libSceSystemService.sprx",
+      "libkernel_sys.sprx"
+    ],
+    "imports": [
+      "__error",
+      "calloc",
+      "free",
+      "geteuid",
+      "getfsstat",
+      "getuid",
+      "kill",
+      "memchr",
+      "printf",
+      "putchar",
+      "qsort",
+      "sceLncUtilGetAppIdOfRunningBigApp",
+      "sceSystemServiceGetAppId",
+      "strcmp",
+      "strlen",
+      "strncmp"
+    ],
+    "getfsstat_provider": "libkernel_sys.sprx",
+    "release_certification": false
+  },
+  "focused_tests_passed": 2,
+  "compiler_included_files_verified": 52,
+  "untouched_tracked_base_files_verified": 252,
+  "release_certification": false,
+  "console_access": false,
+  "limits": [
+    "Firmware statfs ABI and namespace remain unqualified.",
+    "PID 134 reuse and detached descendants not resolved.",
+    "runtime_layer identifies a path; exact upstream 1.6beta16 can retain it as registration.",
+    "No intrinsic syscall deadline; a separately reviewed host runner must bound observation.",
+    "Payload always returns 2 with release=unknown accepted=false; strict gate unchanged."
+  ],
+  "preserved_failures": [
+    "Initial SDK compile failed on C++ standard headers and explicit -x c++; corrected and retained.",
+    "One final CTest invocation used the wrong build directory; no test ran; corrected invocation passed."
+  ]
+}

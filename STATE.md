@@ -62,8 +62,8 @@ Updated: 2026-10-12, America/New_York.
   not proof of a leak, but does not satisfy the declared release prerequisite.
   Hold the second arithmetic cycle and private304 launch while resolving that
   evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
-- The current host suite passes 31 sanitizer CTests with real HIP bundle
-  fixtures and the checked registration model enabled. The earlier bundle/inspector
+- The current host suite passes 34 sanitizer CTests with real HIP bundle
+  fixtures, registration/capture models and the teardown diagnostic enabled. The earlier bundle/inspector
   changes also passed all three affected cases. The exact frozen vector source passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
   see `evidence/offline-vector-repeat-host.json` and
@@ -229,6 +229,15 @@ memory management; no production CLR/HSA implementation is being started. See
 `docs/RUNTIME_ARCHITECTURE.md` and `evidence/offline-runtime-architecture.json`.
 No runtime link, native execution or additional gate acceptance follows.
 
+Compiler argument capture is frozen at `0edd623` and integrated: actual compiler
+stack values are copied into owned scalar/pointer arguments, interior pointer
+extents are resolved through the permitted live-data inventory, and the existing
+planner packs all288 kernarg bytes and56 packet words. The genuine stub still
+returns `hipErrorNotSupported`, with synthetic addresses and no GPU calls.
+All32 isolated and34 integrated sanitizer tests pass; parent verification checked
+147 probe artifacts and3,728 untouched baseline files. See
+`evidence/offline-host-launch-capture.json` and `docs/HIP_HOST_LAUNCH_CAPTURE.md`.
+
 The exact public ShadowMount1.6beta16 source is now verified at `8566c02`:
 normal exit deliberately retains valid registration images and title nullfs
 mappings. The earlier all-layer-disappearance expectation conflicts with that
@@ -238,6 +247,18 @@ the historical partial-pass remains unchanged. Snapshot visibility and deployed
 loader identity remain unqualified. See `docs/SHADOWMOUNT_16_LIFECYCLE.md` and
 `evidence/offline-shadowmount16-lifecycle.json`. Review fresh before/after controls
 before another arithmetic/private launch; do not force unmounts or change settings.
+
+The read-only diagnostic is frozen at `05b1723`; two focused sanitizer checks,
+SDK compilation and a16-import audit pass. Its one idle .40 observation at14:33UTC
+confirmed historical PID134 ESRCH and empty application-ID queries, but both
+mount collectors returned `count_bound` before any rows. Initialized count0 is
+not an empty mount table. The framed transcript completed, services stayed
+reachable and locks were released; the kernel also emitted an FD-budget warning
+whose cause is unestablished. This is inconclusive and does not supply a usable
+registration baseline or permit another GPU launch. Preserve the one-use marker.
+See `evidence/offline-teardown-snapshot.json` and
+`evidence/native-teardown-snapshot-fw1270.json`. Expose raw initial query values
+offline before considering another observation; do not blindly raise the cap.
 
 ## Next action
 
@@ -268,13 +289,15 @@ See `evidence/offline-therock-component-completion.json`. Full ROCm distribution
 artifact packaging and upstream tests remain separate work. The build and logs
 under `/tmp/ps5hip-therock-comparison` must not be overwritten or restarted.
 
-Resolve the .40 older-loader layer-release evidence gap offline before another
-launch. Its first combined arithmetic cycle passed compute checks but remains
-partial-pass under the unchanged release criterion. Do not infer a leak solely
-from its retained registered image, substitute newer local source for deployed
-identity, change settings or automatically repeat the run. Preserve its installed
-arithmetic image and successful result. The original CPU image was saved under a
-unique verified backup name before replacement.
+The exact older-loader source explains persistent registration, and the future
+lifecycle criterion is explicitly corrected in `docs/G2_ARITHMETIC_ACCEPTANCE.md`.
+The original first combined arithmetic cycle remains partial-pass. The read-only
+mount observation hit its count bound, so finish raw-query instrumentation and
+review a usable baseline before another launch. Do not infer an empty table from
+initialized fields, a leak from registration persistence, or deployed identity
+from the banner. Preserve the installed arithmetic image, successful result and
+earlier unique CPU backup. No setting change or automatic repeat is authorized
+by these inconclusive observations.
 
 The portable compiler reproduction and exact304 native package remain ready
 offline. Once the control's lifecycle prerequisite is established, test private304
@@ -472,3 +495,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G2 partial-pass | 5b74ac8 | FW12.70 arithmetic146 passed; layer release unproven | evidence/native-arithmetic-fw1270-cycle1.json | hold launches
 - 2026-10-12 | G4 offline | 08a5f52 | genuine compiler registration controls, PS5 link checks and31 sanitizer tests pass | evidence/offline-host-registration-control.json | native launch unsupported
 - 2026-10-12 | G4 architecture | pinned CLR/HIP6.2.4 comparison selects one small native runtime with explicit reassessment threshold | evidence/offline-runtime-architecture.json | implementation and hardware qualification pending
+- 2026-10-12 | G4 offline | 0edd623 | compiler arguments copied, packed and encoded;34 integrated sanitizer tests pass | evidence/offline-host-launch-capture.json | no GPU submission
+- 2026-10-12 | read-only .40 | 05b1723 | historical PID134 absent;mount count bound prevents baseline;services healthy | evidence/native-teardown-snapshot-fw1270.json | inspect raw query offline

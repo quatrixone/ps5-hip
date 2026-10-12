@@ -49,6 +49,17 @@ results, scripts and one-use markers. No loader update, setting change or forced
 unmount is part of this correction. Two independently reviewed clean cycles of
 the same combined image remain required for G2.
 
+The first read-only snapshot on .40 returned `count_bound` for both mount
+observations. It supplied no rows or usable baseline, while confirming only the
+historical PID134/application-ID queries and service health. See
+[`native-teardown-snapshot-fw1270.json`](../evidence/native-teardown-snapshot-fw1270.json).
+Future arithmetic/private controls remain held while the raw query is investigated
+offline. The diagnostic's initialized zero counters must never be treated as
+mount absence or successful release.
+
+The sections below retain the original frozen experiment contract. The explicit
+prospective correction above governs newly prepared .40 controls.
+
 G2 item 5 requires one frozen application to execute indexed-write followed by
 vector-add. The successful store and vector images establish useful controls,
 but their separate lifecycles do not satisfy that requirement. See

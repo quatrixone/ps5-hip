@@ -31,6 +31,10 @@ The repository is private.
 - [Current state](STATE.md): the next action and completed milestones.
 - [Runtime architecture](docs/RUNTIME_ARCHITECTURE.md): measured CLR comparison,
   selected native HIP approach and the threshold for reconsidering upstream CLR.
+- [Compiler launch capture](docs/HIP_HOST_LAUNCH_CAPTURE.md): owned arguments,
+  hidden geometry and packet preparation through a genuine stub; no GPU submission.
+- [Read-only teardown diagnostic](docs/TEARDOWN_SNAPSHOT.md): bounded observations
+  with explicit visibility limits; the first .40 mount query remains inconclusive.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
 - [Native build](docs/NATIVE_BUILD.md): pinned SDK, native candidates and remaining runtime work.
 - [HIP fat-binary boundary](docs/HIP_FAT_BINARY_BOUNDARY.md): bounded bundle reader,

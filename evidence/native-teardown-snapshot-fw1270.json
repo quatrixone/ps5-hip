@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "classification": "inconclusive",
+  "observed_utc": "2026-10-12T14:33:54.152523+00:00",
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title": "PPSA99014",
+  "source_commit": "05b1723f95521ebabcf09313d8235f514080b027",
+  "elf_sha256": "d4f737710b68ad8ae0416de97c5a7a478269891d5415d2530c203a2e18e6ff4a",
+  "raw_directory": "results/teardown-console-control-v1/observation-20261012T143354.152523Z",
+  "raw_receipt_sha256": "1d3805855ad64203b9a8aaa7c5a0d9f52777c0795ef3d1f9e7ea156b4d304c5f",
+  "raw_sha256": {
+    "after.log": "79d6ce608cd21dfae4598e5b9afe8fb5626733cc7020af58cb9eca5203dc1a66",
+    "before.log": "79d6ce608cd21dfae4598e5b9afe8fb5626733cc7020af58cb9eca5203dc1a66",
+    "immediately-before.log": "79d6ce608cd21dfae4598e5b9afe8fb5626733cc7020af58cb9eca5203dc1a66",
+    "klog.log": "5dce55ba0c77c8de3250c396be18323f3e02a4a64b41d2ef2cca4803f2a2d4b1",
+    "snapshot.log": "5eee24479b423b61277cf05f418337f435ac2d93e9a2e28edc8cbb8f0ad8eb8b"
+  },
+  "runner_sha256": "e889b7148390dbcd9a6b79f893315060a04f69bd893a65974159fd2d7d9fea0b",
+  "manifest_sha256": "8186d96afb38ba5dc77a22b1ae20989e5ec3ded7d782bc1fcfed3b77f9b4a533",
+  "observations": {
+    "pid134_esrch_before_after": true,
+    "running_and_title_app_queries_absent_before_after": true,
+    "reported_uid": 1,
+    "reported_euid": 0,
+    "reported_compile_time_statfs_size": 472,
+    "reported_compile_time_statfs_version": "0x20030518",
+    "mount_snapshot_results": [
+      "count_bound",
+      "count_bound"
+    ],
+    "mount_rows_returned": false,
+    "raw_initial_query_returns_logged": false,
+    "payload_exit_value": 2,
+    "kernel_warning": "WARNING: called fdescfree(), but remain BUDGET_FD_FILE (ret=461)",
+    "kernel_warning_cause_established": false,
+    "services_reachable_before_after": true,
+    "owned_locks_released": true,
+    "title_launched": false,
+    "gpu_calls": 0
+  },
+  "interpretation": "The collection rejected its count bound before returning rows. Zero count/matching fields are initialized output, not measured absence. Exact initial return values/units and firmware ABI remain unknown.",
+  "release": "unknown",
+  "hardware_gate_passed": false,
+  "private304_allowed_by_this_receipt": false,
+  "next_action": "Inspect initial query bounds/semantics offline and expose raw values in a separately reviewed diagnostic; preserve original one-use marker, never blindly raise limits or infer release."
+}
