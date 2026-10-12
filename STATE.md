@@ -93,6 +93,17 @@ prior graphics flat-scratch faults remain adverse evidence. A separate read-only
 aperture probe compiles offline, but has not run on hardware. Continue compiler
 specialization/backend research before considering the platform diagnostic.
 
+Private-call compiler research now includes a bounded specialization pass:
+64 new clones per invocation and eight descendants per original function, with
+ABI-attribute and tail-call fixes, conservative fallback and deterministic budget
+tests. A separate volatile fixture preserves nested calls, post-store reloads and
+both valid global/private branches; all four compiler profiles and independent
+CPU oracles pass. Its accesses remain flat and are not eligible for the current
+specialization. See `evidence/offline-private-call-compiler-research.json`.
+A default-off LLVM18 backend proof has been drafted; the isolated clean baseline
+build is underway. The patch is not yet compiled or accepted, and no production
+compiler or hardware capability has changed.
+
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix
 then passed. See `docs/FIRST_GPU_FAULT.md`. Its revoked image and the earlier

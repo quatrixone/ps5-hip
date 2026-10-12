@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "classification": "offline-private-call-compiler-research",
+  "hardware_validated": false,
+  "accepted_compiler": false,
+  "production_toolchain_changed": false,
+  "console_access": false,
+  "specialization": {
+    "revision": 3,
+    "limits_per_pass_invocation": {
+      "new_clones_per_module": 64,
+      "descendants_per_original_function": 8
+    },
+    "fallback": "Budget exhaustion preserves the current call; existing clones remain reusable. Generic fallback is not hardware-qualified.",
+    "validation": {
+      "attribute_and_tail_cases": 29,
+      "unchanged_parameter_abi_cases": 7,
+      "budget_cases": 3,
+      "budget_reruns_byte_identical": true,
+      "ordinary_IR_identical_to_v2": true,
+      "prior_v1_v2_files_preserved": 139,
+      "independent_review": "No actionable findings; 134 file identities, 237 call roots/arguments/types and 217 load-to-formal mappings checked. No independent compiler rerun."
+    },
+    "limits": "Conservative direct private-to-generic pointer call subset. No volatile adaptation, arbitrary pointer flow, complete semantic equivalence or device-execution claim."
+  },
+  "volatile_fixture": {
+    "profiles": [
+      "gfx1013-O1",
+      "gfx1013-O2",
+      "gfx1030-O1",
+      "gfx1030-O2"
+    ],
+    "actual_nested_calls": 2,
+    "mixed_global_private_call": true,
+    "leaf_static_flat_loads": 3,
+    "leaf_static_flat_stores": 1,
+    "private_bytes": {
+      "nested": 288,
+      "mixed": 144
+    },
+    "oracle_cases_per_variant": 16544,
+    "oracle_variants": [
+      "nested",
+      "mixed-global",
+      "mixed-private"
+    ],
+    "mutation_checks": [
+      "lost store changes result by six",
+      "stale caller read changes result by three"
+    ],
+    "mixed_global_words": 526336,
+    "qualification": "Compiler output and independent CPU oracles only. Actual flat access/aperture reads remain; missing nocapture must not be invented."
+  },
+  "backend_draft": {
+    "source": "llvmorg-18.1.8",
+    "commit": "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff",
+    "status_at_receipt": "Draft applies cleanly but is uncompiled. Separate clean baseline build in progress.",
+    "design": "Default-off machine call-graph proof after register allocation, before frame lowering; compiler-owned field suppresses only conservative hasCalls flat initialization, preserving real flat-register-use checks and eight-slot ABI.",
+    "required": "Compile, verify pipeline ordering and reachable graph, compare default-off against same-config clean baseline, run negatives and inspect linked objects before using outputs.",
+    "host_build_adjustment": "Identical CXX-only -include cstdint planned for clean and patched builds; original missing-header build failure preserved. No baseline source edit."
+  },
+  "raw_evidence_sha256": {
+    "results/g3-private-specialization-v3/v3-receipt.json": "1b145fefafbbed56eef0e693d39c7a8f28a98ffb3aa54265365d93ee1a63596d",
+    "results/g3-volatile-call-observable/volatile-call-receipt.json": "618fcaee9b6e54041a9e9a953a7a9d21e911bdfab194bb3e65ea4253a5a909ed",
+    "results/g3-private-backend-design/backend-design-receipt.json": "d64082da1e61dfe0554dbb7ce869fc24080b9317f322e6dd6441adf135c57622",
+    "results/g3-private-backend-design/buffer-call-proof-draft.patch": "7fd42c2bbe26bd37661b224b85278780bfc19e4b0442b8818c8e2f5c44480862",
+    "results/g3-private-specialization-v3/PrivateSpecialize.cpp": "37385c7108503176180e3e4bbb6ebde518f14dadedc797ae1b39dcec779eb627",
+    "results/g3-private-specialization-v3/PrivateSpecialize.so": "121288ec1eeaefcfb8b3e7b2a54e89d59e76fcf42d07ef481cef846ef351c319",
+    "results/g3-private-specialization-v3-review/review-receipt.json": "b4bd3ceef2cf46c478f4869571a698282d5dfab3ec7d2ba95f9452b26f4d0943"
+  },
+  "remaining": [
+    "Complete backend build and fail-closed acceptance matrix.",
+    "Resolve volatile/generic private-memory route separately.",
+    "Native private-call harness and PS5 scratch/aperture behavior remain unqualified.",
+    "G2 requires two clean cycles of frozen combined arithmetic image; G3 remains experimental."
+  ]
+}
