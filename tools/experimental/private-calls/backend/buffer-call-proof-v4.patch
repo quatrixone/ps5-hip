@@ -1,0 +1,200 @@
+--- a/llvm/lib/Target/AMDGPU/AMDGPU.h
++++ b/llvm/lib/Target/AMDGPU/AMDGPU.h
+@@ -29,6 +29,8 @@
+ void initializeAMDGPURegBankCombinerPass(PassRegistry &);
+ 
+ void initializeAMDGPURegBankSelectPass(PassRegistry &);
++
++ModulePass *createAMDGPUProveBufferCallsPass();
+ 
+ // SI Passes
+ FunctionPass *createGCNDPPCombinePass();
+--- /dev/null
++++ b/llvm/lib/Target/AMDGPU/AMDGPUProveBufferCalls.cpp
+@@ -0,0 +1,117 @@
++// DRAFT, NOT COMPILED: llvmorg-18.1.8 bounded experimental proof.
++#include "AMDGPU.h"
++#include "GCNSubtarget.h"
++#include "SIMachineFunctionInfo.h"
++#include "SIRegisterInfo.h"
++#include "llvm/Support/Debug.h"
++#include "llvm/ADT/DenseMap.h"
++#include "llvm/CodeGen/MachineFrameInfo.h"
++#include "llvm/CodeGen/MachineModuleInfo.h"
++#include "llvm/CodeGen/MachineRegisterInfo.h"
++#include "llvm/IR/Module.h"
++#include "llvm/Pass.h"
++using namespace llvm;
++#define DEBUG_TYPE "amdgpu-prove-buffer-calls"
++namespace {
++class AMDGPUProveBufferCalls final : public ModulePass {
++  enum State { Visiting = 1, Rejected, Proven };
++  DenseMap<const Function *, State> States;
++  MachineModuleInfo *MMI = nullptr;
++
++  bool prove(const Function &F) {
++    auto It = States.find(&F);
++    if (It != States.end()) return It->second == Proven;
++    States[&F] = Visiting; // A cycle is unknown, including falsely annotated recursion.
++    bool OK = inspect(F);
++    States[&F] = OK ? Proven : Rejected;
++    return OK;
++  }
++  bool inspect(const Function &F) {
++    MachineFunction *MF = MMI->getMachineFunction(F);
++    if (!MF || F.isDeclaration() || F.hasAddressTaken()) return false;
++    const GCNSubtarget &ST = MF->getSubtarget<GCNSubtarget>();
++    if (ST.getGeneration() != AMDGPUSubtarget::GFX10 || ST.enableFlatScratch() ||
++        MF->getFrameInfo().hasVarSizedObjects() ||
++        ST.getRegisterInfo()->hasStackRealignment(*MF)) return false;
++    const SIInstrInfo *TII = ST.getInstrInfo();
++    const TargetRegisterInfo *TRI = ST.getRegisterInfo();
++    for (const MachineBasicBlock &BB : *MF) for (const MachineInstr &MI : BB) {
++      if (MI.isBundledWithPred() || MI.isBundledWithSucc()) return false;
++      if (MI.isDebugInstr()) continue;
++      if (MI.isInlineAsm()) return false;
++      // GLOBAL_* encodings cannot address private memory; FLAT_* and SCRATCH_*
++      // remain rejected regardless of any IR annotation or source provenance.
++      if (TII->isFLAT(MI) && !TII->isFLATGlobal(MI)) return false;
++      StringRef Name = TII->getName(MI.getOpcode());
++      // HW_REG reads/writes can access scratch/aperture state through immediates.
++      if (Name.starts_with("S_SETREG") || Name.starts_with("S_GETREG")) return false;
++      // Bound the late-expansion proof: do not infer safety of arbitrary target
++      // pseudos. These retain calls, adjust scalar offsets, copy registers or
++      // spill SGPRs to VGPRs; none can introduce private FLAT addressing.
++      bool KnownPseudo = Name == "COPY" || Name == "KILL" ||
++          Name == "IMPLICIT_DEF" || Name == "ADJCALLSTACKDOWN" ||
++          Name == "ADJCALLSTACKUP" || Name == "SI_CALL" ||
++          Name == "SI_RETURN" || Name == "SI_PC_ADD_REL_OFFSET" ||
++          Name == "SI_SPILL_S32_TO_VGPR" || Name == "SI_RESTORE_S32_FROM_VGPR";
++      // AMDGPU ordinary arithmetic/memory instructions are also marked pseudo
++      // before final encoding selection. Accept only a concrete non-pseudo MC
++      // mapping for this exact subtarget, or the explicitly audited expansions.
++      int MCOpcode = TII->pseudoToMCOpcode(MI.getOpcode());
++      bool EncodingPseudo = MCOpcode >= 0 && !TII->get(MCOpcode).isPseudo();
++      if (MI.getDesc().isPseudo() && !KnownPseudo && !EncodingPseudo) return false;
++      for (const MachineOperand &MO : MI.operands()) {
++        if (!MO.isReg() || !MO.getReg()) continue;
++        if (!MO.getReg().isPhysical()) return false; // Must be post-RA.
++        for (MCRegister Forbidden : {AMDGPU::FLAT_SCR, AMDGPU::SRC_PRIVATE_BASE,
++                                     AMDGPU::SRC_PRIVATE_LIMIT})
++          if (TRI->regsOverlap(MO.getReg(), Forbidden)) return false;
++      }
++      if (MI.isCall()) {
++        // Do not guess from assembly text, symbol names, or indirect registers.
++        if (MI.getOpcode() != AMDGPU::SI_CALL) return false;
++        const MachineOperand *Op = TII->getNamedOperand(MI, AMDGPU::OpName::callee);
++        if (!Op || !Op->isGlobal()) return false;
++        const Function *Callee = dyn_cast<Function>(Op->getGlobal());
++        if (!Callee || !Callee->hasLocalLinkage() || !prove(*Callee)) return false;
++      } else if (MI.hasUnmodeledSideEffects() && !MI.isReturn() && !KnownPseudo) {
++        return false;
++      }
++    }
++    return true;
++  }
++public:
++  static char ID;
++  AMDGPUProveBufferCalls() : ModulePass(ID) {}
++  void getAnalysisUsage(AnalysisUsage &AU) const override {
++    AU.addRequired<MachineModuleInfoWrapperPass>();
++    AU.setPreservesAll();
++  }
++  bool runOnModule(Module &M) override {
++    States.clear();
++    MMI = &getAnalysis<MachineModuleInfoWrapperPass>().getMMI();
++    // No externally supplied IR attribute or MIR YAML field carries this proof.
++    for (Function &F : M) {
++      MachineFunction *MF = MMI->getMachineFunction(F);
++      LLVM_DEBUG(dbgs() << "buffer-call-proof inventory " << F.getName() << " "
++                        << (MF ? "present" : "missing") << "\n");
++      if (MF) MF->getInfo<SIMachineFunctionInfo>()->setProvenBufferOnlyCallGraph(false);
++    }
++    if (M.getTargetTriple() != "amdgcn-amd-amdhsa") return false;
++    for (Function &F : M)
++      if (MachineFunction *MF = MMI->getMachineFunction(F)) {
++        bool OK = prove(F);
++        LLVM_DEBUG(dbgs() << "buffer-call-proof register-use " << F.getName()
++                          << " explicit " << MF->getRegInfo().isPhysRegUsed(AMDGPU::FLAT_SCR, true)
++                          << " with-mask " << MF->getRegInfo().isPhysRegUsed(AMDGPU::FLAT_SCR) << "\n");
++        MF->getInfo<SIMachineFunctionInfo>()->setProvenBufferOnlyCallGraph(OK);
++        LLVM_DEBUG(dbgs() << "buffer-call-proof result " << F.getName() << " "
++                          << (OK ? "proven" : "rejected") << "\n");
++      }
++    return false; // The IR and MIR instructions are unchanged; only private MFI state changes.
++  }
++};
++char AMDGPUProveBufferCalls::ID = 0;
++}
++ModulePass *llvm::createAMDGPUProveBufferCallsPass() {
++  return new AMDGPUProveBufferCalls();
++}
+--- a/llvm/lib/Target/AMDGPU/AMDGPUTargetMachine.cpp
++++ b/llvm/lib/Target/AMDGPU/AMDGPUTargetMachine.cpp
+@@ -1430,11 +1430,21 @@
+   return true;
+ }
+ 
++static cl::opt<bool> ProveBufferCalls(
++    "amdgpu-experimental-prove-buffer-calls", cl::Hidden, cl::init(false));
++
+ void GCNPassConfig::addPostRegAlloc() {
++  // The module barrier would bypass callee-first IPRA usage collection.
++  if (ProveBufferCalls && TM->Options.EnableIPRA)
++    report_fatal_error("experimental buffer-call proof requires -enable-ipra=false");
+   addPass(&SIFixVGPRCopiesID);
+   if (getOptLevel() > CodeGenOptLevel::None)
+     addPass(&SIOptimizeExecMaskingID);
+   TargetPassConfig::addPostRegAlloc();
++  // A ModulePass barrier completes the prior function pipeline for ALL MFs.
++  // Missing bodies remain unknown; ordinary per-function ordering is insufficient.
++  if (ProveBufferCalls)
++    addPass(createAMDGPUProveBufferCallsPass());
+ }
+ 
+ void GCNPassConfig::addPreSched2() {
+--- a/llvm/lib/Target/AMDGPU/CMakeLists.txt
++++ b/llvm/lib/Target/AMDGPU/CMakeLists.txt
+@@ -54,6 +54,7 @@
+   AMDGPUCombinerHelper.cpp
+   AMDGPUCtorDtorLowering.cpp
+   AMDGPUExportClustering.cpp
++  AMDGPUProveBufferCalls.cpp
+   AMDGPUFrameLowering.cpp
+   AMDGPUGlobalISelDivergenceLowering.cpp
+   AMDGPUGlobalISelUtils.cpp
+--- a/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp
++++ b/llvm/lib/Target/AMDGPU/SIFrameLowering.cpp
+@@ -699,7 +699,10 @@
+ 
+   bool NeedsFlatScratchInit =
+       MFI->getUserSGPRInfo().hasFlatScratchInit() &&
+-      (MRI.isPhysRegUsed(AMDGPU::FLAT_SCR) || FrameInfo.hasCalls() ||
++      // Proven callees cannot use flat scratch; ignore call-mask clobbers only.
++      (MRI.isPhysRegUsed(AMDGPU::FLAT_SCR,
++                         MFI->hasProvenBufferOnlyCallGraph()) ||
++       (FrameInfo.hasCalls() && !MFI->hasProvenBufferOnlyCallGraph()) ||
+        (!allStackObjectsAreDead(FrameInfo) && ST.enableFlatScratch()));
+ 
+   if ((NeedsFlatScratchInit || ScratchRsrcReg) &&
+--- a/llvm/lib/Target/AMDGPU/SIMachineFunctionInfo.h
++++ b/llvm/lib/Target/AMDGPU/SIMachineFunctionInfo.h
+@@ -427,6 +427,8 @@
+   const AMDGPUGWSResourcePseudoSourceValue GWSResourcePSV;
+ 
+ private:
++  // Compiler-owned, recomputed after RA; deliberately absent from MIR YAML.
++  bool ProvenBufferOnlyCallGraph = false;
+   unsigned NumUserSGPRs = 0;
+   unsigned NumSystemSGPRs = 0;
+ 
+@@ -563,6 +565,9 @@
+   bool isCalleeSavedReg(const MCPhysReg *CSRegs, MCPhysReg Reg) const;
+ 
+ public:
++  bool hasProvenBufferOnlyCallGraph() const { return ProvenBufferOnlyCallGraph; }
++  void setProvenBufferOnlyCallGraph(bool Value) { ProvenBufferOnlyCallGraph = Value; }
++
+   SIMachineFunctionInfo(const SIMachineFunctionInfo &MFI) = default;
+   SIMachineFunctionInfo(const Function &F, const GCNSubtarget *STI);
+ 

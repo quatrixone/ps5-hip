@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "llvm": {
+    "version": "18.1.8",
+    "repository": "https://github.com/llvm/llvm-project.git",
+    "tag": "llvmorg-18.1.8",
+    "commit": "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff"
+  },
+  "package_base_commit": "fa3ec6daab082d59053c1b27e8775f8494c8c979",
+  "specialization_revision": "bounded v3",
+  "backend_revision": "v4: rejects proof with IPRA enabled; unaccepted pending paired no-IPRA resource audit",
+  "source_files": {
+    "specialization/PrivateSpecialize.cpp": {
+      "original_path": "results/g3-private-specialization-v3/PrivateSpecialize.cpp",
+      "original_sha256": "37385c7108503176180e3e4bbb6ebde518f14dadedc797ae1b39dcec779eb627",
+      "sha256": "37385c7108503176180e3e4bbb6ebde518f14dadedc797ae1b39dcec779eb627",
+      "adaptations": []
+    },
+    "specialization/cases.ll": {
+      "original_path": "results/g3-private-specialization-v3/cases.ll",
+      "original_sha256": "24b9703bbd5e24b2ab3babdc9a04536da290e5a1925f36d3633b31e711ffa1ee",
+      "sha256": "24b9703bbd5e24b2ab3babdc9a04536da290e5a1925f36d3633b31e711ffa1ee",
+      "adaptations": []
+    },
+    "fixtures/probes-observable.hip": {
+      "original_path": "results/g3-flat-call-observable/probes-observable.hip",
+      "original_sha256": "fe09b550914ac6d3a0f6087ebdc24a60c08621defb8369ade08cd9a40b0ed8be",
+      "sha256": "fe09b550914ac6d3a0f6087ebdc24a60c08621defb8369ade08cd9a40b0ed8be",
+      "adaptations": []
+    },
+    "fixtures/volatile_calls.hip": {
+      "original_path": "results/g3-volatile-call-observable/volatile_calls.hip",
+      "original_sha256": "aa9e4acaa0b4c511f3d3abbc6af51e6f068e735b4e0c38625bbc6ac1f4ac9ba9",
+      "sha256": "aa9e4acaa0b4c511f3d3abbc6af51e6f068e735b4e0c38625bbc6ac1f4ac9ba9",
+      "adaptations": []
+    },
+    "specialization/check_attributes.py": {
+      "original_path": "results/g3-private-specialization-v3/check_attributes.py",
+      "original_sha256": "1552b1506184783d3247aadbddbe3ed0a028a7c531a666e421a238d6cadd9327",
+      "sha256": "1552b1506184783d3247aadbddbe3ed0a028a7c531a666e421a238d6cadd9327",
+      "adaptations": []
+    },
+    "specialization/check_negatives.py": {
+      "original_path": "results/g3-private-specialization-v3/check_negatives.py",
+      "original_sha256": "1c5ecc714f2992903a9067ac31e37b4ad540f309967ae9bf60d20cf35849cec7",
+      "sha256": "fd6efb9c65270a7afdab791ba21cd2e2051046f30009a6793c5e878d1d9f8906",
+      "adaptations": [
+        "Remove historical cross-directory v1 byte comparison; explicitly mark it not retested. All semantic/negative checks unchanged."
+      ]
+    },
+    "specialization/check_adversarial.py": {
+      "original_path": "results/g3-private-specialization-v3/check_adversarial.py",
+      "original_sha256": "acff9565cb1e1fff61660d676e68102cd28e95a3497c36b633f15665d82c4e78",
+      "sha256": "acff9565cb1e1fff61660d676e68102cd28e95a3497c36b633f15665d82c4e78",
+      "adaptations": []
+    },
+    "specialization/check_unchanged_attrs.py": {
+      "original_path": "results/g3-private-specialization-v3/check_unchanged_attrs.py",
+      "original_sha256": "bea3a51dba80a4650f7e34bff34d01b0af886679ea56f55c7d5ecb8455f2858f",
+      "sha256": "bea3a51dba80a4650f7e34bff34d01b0af886679ea56f55c7d5ecb8455f2858f",
+      "adaptations": []
+    },
+    "specialization/check_budgets.py": {
+      "original_path": "results/g3-private-specialization-v3/check_budgets.py",
+      "original_sha256": "56a6b4dbe1309f034895b33f97049f0d0978c559c07a48e9900a0b49fec759c9",
+      "sha256": "56a6b4dbe1309f034895b33f97049f0d0978c559c07a48e9900a0b49fec759c9",
+      "adaptations": []
+    },
+    "validation/prepare.py": {
+      "original_path": "results/g3-private-backend-validation/prepare.py",
+      "original_sha256": "535b25c77397b0e379d4f25824fdcf09905fef3670f47245a08c52f428372e11",
+      "sha256": "dbb9df9fd408849349839cb81b4831c49da8a4b2e4e65dfbb702f4066b531ef2",
+      "adaptations": [
+        "Bind newly built plugin identity from preparation instead of historical binary; identify exact v4 patch, not original draft."
+      ]
+    },
+    "validation/prepare_negatives.py": {
+      "original_path": "results/g3-private-backend-validation/prepare_negatives.py",
+      "original_sha256": "33fc7f15a36e428c2d01ed56545241d3b6fd2ec2b1817d16feb1fb1cfca036b4",
+      "sha256": "33fc7f15a36e428c2d01ed56545241d3b6fd2ec2b1817d16feb1fb1cfca036b4",
+      "adaptations": []
+    },
+    "validation/prepare_stress.py": {
+      "original_path": "results/g3-private-backend-validation/prepare_stress.py",
+      "original_sha256": "b207666ab582414ee2f7844dca6bfe6ae6f2c0975adceed0e01932275b082b33",
+      "sha256": "b207666ab582414ee2f7844dca6bfe6ae6f2c0975adceed0e01932275b082b33",
+      "adaptations": []
+    },
+    "validation/prepare_unbounded.py": {
+      "original_path": "results/g3-private-backend-validation/prepare_unbounded.py",
+      "original_sha256": "8602703e05e3f216541954d26e37814f61dddd8f74cd8284923530212bd51b5d",
+      "sha256": "8602703e05e3f216541954d26e37814f61dddd8f74cd8284923530212bd51b5d",
+      "adaptations": []
+    },
+    "validation/diagnostics.py": {
+      "original_path": "results/g3-private-backend-validation/diagnostics.py",
+      "original_sha256": "f6124ff377df03436dec5371bdf3d56436f008d5cb9414f86d00fb2fbade2648",
+      "sha256": "f6124ff377df03436dec5371bdf3d56436f008d5cb9414f86d00fb2fbade2648",
+      "adaptations": []
+    },
+    "validation/test_diagnostics.py": {
+      "original_path": "results/g3-private-backend-validation/test_diagnostics.py",
+      "original_sha256": "41d602c062b54cc6df7cbb70ce1f71a23472fd1b17e2489e588e8571d77d9aa5",
+      "sha256": "41d602c062b54cc6df7cbb70ce1f71a23472fd1b17e2489e588e8571d77d9aa5",
+      "adaptations": []
+    },
+    "validation/run_all.py": {
+      "original_path": "results/g3-private-backend-validation/run_all.py",
+      "original_sha256": "2977147ad18e19c33f760cad4aeb59421f703e01c7543b07dd7e9cfd5b2129a3",
+      "sha256": "046745512f6ff974ac9d01a7af5a55a7ee2b42317d31ce859febceacc4b8095a",
+      "adaptations": [
+        "Select separately versioned strict linked-function inventory runner v2; all other mode scripts unchanged."
+      ]
+    },
+    "validation/run_matrix.py": {
+      "original_path": "results/g3-private-backend-validation/run_matrix.py",
+      "original_sha256": "355756526e552a1d99ab8f425314f4a889a39bc6e077cb69f583be0e9395e9c8",
+      "sha256": "355756526e552a1d99ab8f425314f4a889a39bc6e077cb69f583be0e9395e9c8",
+      "adaptations": []
+    },
+    "validation/run_negatives.py": {
+      "original_path": "results/g3-private-backend-validation/run_negatives.py",
+      "original_sha256": "89b311be41d3d2fd175df0954aaa0505666e7ce1f9affb92d971b42b0d0cf939",
+      "sha256": "89b311be41d3d2fd175df0954aaa0505666e7ce1f9affb92d971b42b0d0cf939",
+      "adaptations": []
+    },
+    "validation/run_stress.py": {
+      "original_path": "results/g3-private-backend-validation/run_stress.py",
+      "original_sha256": "1ace1a53892e38a5a28b9302d3193a9e59124e70ed71d5b07a1fdc188247894c",
+      "sha256": "1ace1a53892e38a5a28b9302d3193a9e59124e70ed71d5b07a1fdc188247894c",
+      "adaptations": []
+    },
+    "validation/run_reload.py": {
+      "original_path": "results/g3-private-backend-validation/run_reload.py",
+      "original_sha256": "bf9c104302183c5fbce9c8bf5dca2b1e10b76c7a50b7b760df2ab3750737eba6",
+      "sha256": "bf9c104302183c5fbce9c8bf5dca2b1e10b76c7a50b7b760df2ab3750737eba6",
+      "adaptations": []
+    },
+    "validation/run_ineligible.py": {
+      "original_path": "results/g3-private-backend-validation/run_ineligible.py",
+      "original_sha256": "a7332edfe0b8ccceda956fcb6eecd207fd35ccade3b705ef3d7ff8b456fe7279",
+      "sha256": "a7332edfe0b8ccceda956fcb6eecd207fd35ccade3b705ef3d7ff8b456fe7279",
+      "adaptations": []
+    },
+    "validation/post_audit_v1.py": {
+      "original_path": "results/g3-private-backend-validation/post_audit_v1.py",
+      "original_sha256": "08d1aaafb5727030d6a267a661454562cb4893b826c34daa2866f1e7f5f452a9",
+      "sha256": "08d1aaafb5727030d6a267a661454562cb4893b826c34daa2866f1e7f5f452a9",
+      "adaptations": []
+    },
+    "mir/prepare.py": {
+      "original_path": "results/g3-private-backend-mir-controls/prepare.py",
+      "original_sha256": "8054828755e428f38212b6c0d9aca4f0d5af57768c8719d8d48e59a15be8f57c",
+      "sha256": "8bd3d9163ff68d5e8baa0c160e0061bc14c0276352ccef1060b3b15a83f11e36",
+      "adaptations": [
+        "Use explicitly pinned source checkout and newly generated same-build baseline MIR, not historical host paths/installed controls."
+      ]
+    },
+    "mir/run_v2.py": {
+      "original_path": "results/g3-private-backend-mir-controls/run_v2.py",
+      "original_sha256": "2d37dba25ed39861084da25d5fe0136353237539bcdc30a04c0cddc404b411b6",
+      "sha256": "2d37dba25ed39861084da25d5fe0136353237539bcdc30a04c0cddc404b411b6",
+      "adaptations": []
+    },
+    "mir/test_run_v2.py": {
+      "original_path": "results/g3-private-backend-mir-controls/test_run_v2.py",
+      "original_sha256": "f936ca37019c0adbcbd39810c64a2052b60f4b235f20178fe48265c1f67d7eea",
+      "sha256": "f936ca37019c0adbcbd39810c64a2052b60f4b235f20178fe48265c1f67d7eea",
+      "adaptations": []
+    },
+    "register/run_v1.py": {
+      "original_path": "results/g3-private-backend-register-controls/run_v1.py",
+      "original_sha256": "df0e350c0e78fa6b197985201b40646f8a65e4df05fd4527310f3c7485f5bb0d",
+      "sha256": "b2cc8c0710d1f452db1a5d29a75b8ed125927b0986cc8ae10f6cd2e68ac653f1",
+      "adaptations": [
+        "Replace host-specific compiler paths with explicit CLI arguments; bind both executable hashes to completed recipe-mode receipts instead of one historical hash. Proof and byte-equality checks unchanged."
+      ]
+    },
+    "validation/post_audit_extensions_v1.py": {
+      "original_path": "results/g3-private-backend-validation/post_audit_extensions_v1.py",
+      "original_sha256": "b1cfc0bf2102df04a20c68ab234016b94ff3902286c7960c5ddc37e6d1e85a54",
+      "sha256": "b1cfc0bf2102df04a20c68ab234016b94ff3902286c7960c5ddc37e6d1e85a54",
+      "adaptations": []
+    },
+    "validation/test_post_audit_extensions_v1.py": {
+      "original_path": "results/g3-private-backend-validation/test_post_audit_extensions_v1.py",
+      "original_sha256": "e4d24548256a1d4b70330e0d5cd79a2f06c92f39377a3a8972511e6875a66a61",
+      "sha256": "e4d24548256a1d4b70330e0d5cd79a2f06c92f39377a3a8972511e6875a66a61",
+      "adaptations": []
+    },
+    "validation/test_post_audit_v1.py": {
+      "original_path": "results/g3-private-backend-validation/test_post_audit_v1.py",
+      "original_sha256": "a42f35a179dcbd05abe385b766a2745db700d407b35ea3a00ed04748401642b7",
+      "sha256": "5a279dd33deb85fd7bec4f9f91a8f62a12be4ea8f531070fd637defbe264cda7",
+      "adaptations": [
+        "Use clean pinned LLVM source from preparation rather than historical extracted source path; assertions unchanged."
+      ]
+    },
+    "validation/diagnostics_v2.py": {
+      "original_path": "results/g3-private-backend-validation-v3/diagnostics_v2.py",
+      "original_sha256": "598955f640f276f734101b719bf635d2c59a6b149985641fd97f91092225d95f",
+      "sha256": "598955f640f276f734101b719bf635d2c59a6b149985641fd97f91092225d95f",
+      "adaptations": []
+    },
+    "validation/run_matrix_v2.py": {
+      "original_path": "results/g3-private-backend-validation-v3/run_matrix_v2.py",
+      "original_sha256": "1a0b1dd4dc92718bc6437729a7effa04530946cc2b4679a6a56ec49ecd5f7379",
+      "sha256": "1a0b1dd4dc92718bc6437729a7effa04530946cc2b4679a6a56ec49ecd5f7379",
+      "adaptations": []
+    },
+    "validation/test_diagnostics_v2.py": {
+      "original_path": "results/g3-private-backend-validation-v3/test_diagnostics_v2.py",
+      "original_sha256": "aad4853f46039866f8c84fb04d253dfe747d37720bfddd9a0b124f68956ab03d",
+      "sha256": "aad4853f46039866f8c84fb04d253dfe747d37720bfddd9a0b124f68956ab03d",
+      "adaptations": []
+    },
+    "backend/buffer-call-proof-v4.patch": {
+      "original_path": "results/g3-private-backend-design/buffer-call-proof-v4.patch",
+      "original_sha256": "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+      "sha256": "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+      "adaptations": []
+    }
+  },
+  "original_receipts": {
+    "plugin_v3": "1b145fefafbbed56eef0e693d39c7a8f28a98ffb3aa54265365d93ee1a63596d",
+    "backend_object_validation": "e1fabf41ff5198bc743980033df010cd49c9570407d5d521d290d832d5bab9b6"
+  },
+  "accepted_compiler": false,
+  "hardware_validated": false,
+  "historical_failed_backend": {
+    "revision": "v2",
+    "patch_sha256": "5dbf08defb943974de039f61f78de4c2e7cd1efd7f9d94aebdd4f52e614f539e",
+    "failure": "Actual enabled proof reported positive functions proven but two entry flat-scratch initialization writes remained; register mask clobbers counted by MRI.isPhysRegUsed."
+  },
+  "historical_failed_backend_v3": {
+    "patch_sha256": "efd2107152e315441780d53014694915620ab92d00d8116041b70ba492418e8b",
+    "failure": "Actual enabled matrix changed root descriptor resources against default-IPRA baseline; module barrier changes IPRA ordering."
+  },
+  "validation_configuration": {
+    "required_paired_llc_arguments": [
+      "-enable-ipra=false"
+    ],
+    "snapshot_status": "Resource-aware acceptance script update pending; do not prepare or validate this unfrozen revision.",
+    "first_baseline_observation": {
+      "case": "ordinary gfx1013 O1",
+      "private_bytes": 304,
+      "frames": [
+        144,
+        160,
+        0
+      ],
+      "stock_ipra_on_comparison_private_bytes": 288
+    },
+    "hardware_validated": false
+  }
+}
