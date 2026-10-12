@@ -2,6 +2,12 @@
 #include "ps5hip/launch.h"
 
 namespace ps5hip {
+// Setup may fail after direct-memory acquisition; callers need the cleanup
+// outcome without interpreting diagnostic strings. Existing ObjectError catches work.
+struct NativeMemorySetupError : ObjectError {
+    NativeMemorySetupError(const char *message, bool retained) : ObjectError(message), retained_backing(retained) {}
+    const bool retained_backing;
+};
 
 // One CPU/GPU shared direct-memory allocation. Native submission owns a GPU
 // reference until completion; timeout must retain that reference and poison the queue.
@@ -14,6 +20,7 @@ public:
     NativeMemory &operator=(const NativeMemory &) = delete;
     GpuRange range() const;
     void *cpu() const { return cpu_; }
+    bool gpu_in_use() const { return gpu_uses_ != 0; }
     void acquire_gpu_use();
     void complete_gpu_use();
     bool close();
