@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "classification": "Offline source-built experimental LLVM backend progress; acceptance incomplete",
+  "llvm_source_commit": "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff",
+  "baseline_source_clean": true,
+  "build_configurations_identical_except_paths": true,
+  "host_cxx_flags": "-include cstdint",
+  "builds": [
+    {
+      "revision": 0,
+      "llc_sha256": "fbfea56d543c6bcca9535f34ea3d38229e9d9a79e9766554aa9a67944c90fb96",
+      "log_sha256": "f8c052d33be3a55ad4e5ca276b7d181cadac310f0a4a5696086e04ea774e1ab8",
+      "receipt": "results/g3-private-backend-design/baseline-portable-build-result.json",
+      "receipt_sha256": "d09c32f470810bc088cbf2f820e56ce840cfad6f9bdd72eef59fc7bf9a3b215e",
+      "exit_code": 0,
+      "preserved_binary_verified": true
+    },
+    {
+      "revision": 2,
+      "llc_sha256": "725537707ae95b640f2778f99528321584caae137d5d80a6b4ec5cb38e9cb09f",
+      "log_sha256": "d9536fa28b6564db06fc1e5639fdba2de839a51cabbc27983c77c77de3c3d9cf",
+      "receipt": "results/g3-private-backend-design/patched-full-build-result.json",
+      "receipt_sha256": "bf4be5b9474244c1fa367c9671f805e569fe136496dbdaf38fd1ae7f752e53a9",
+      "exit_code": 0,
+      "preserved_binary_verified": true
+    },
+    {
+      "revision": 3,
+      "llc_sha256": "24df6c2a97a1b1f434ebef8941977762d55bdb70d79fcb299cea7d8aa9892359",
+      "log_sha256": "e4184abed1522e79f229f9ce2f24d6811c30023f4a1576a4e3b8c93ae06db5b3",
+      "receipt": "results/g3-private-backend-design/patched-v3-build-result.json",
+      "receipt_sha256": "3101d0c8fd62f53c23277f59d77e3c1403f1d12e172f5299db6e0ec30b60804b",
+      "exit_code": 0,
+      "preserved_binary_verified": true
+    },
+    {
+      "revision": 4,
+      "llc_sha256": "881acfaaf52d08d04bf90e7f74bbb764e0c261c6e01cc1f930f7b81b63497d42",
+      "log_sha256": "34382c28d5375bb5ed1f4f3e442dc9d9b10af5df9bd548da84c66fb6dca94bea",
+      "receipt": "results/g3-private-backend-design/patched-v4-build-result.json",
+      "receipt_sha256": "20b3c914daf26419935aaebf557a88ffff2d4f95c8856883fa0ff1d64c7cfffc",
+      "exit_code": 0,
+      "preserved_binary_verified": true
+    }
+  ],
+  "current_patch_revision": 4,
+  "current_patch_sha256": "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+  "production_compiler_changed": false,
+  "accepted_compiler": false,
+  "hardware_validated": false,
+  "completed_controls": {
+    "baseline_and_v2_disabled_rehashed_artifacts_each": 393,
+    "matrix_cases_each": 24,
+    "successful_negative_compiles_each": 18,
+    "unsupported_dynamic_ir_each": 2,
+    "stress_cases_each": 4,
+    "mir_reload_cases_each": 2,
+    "ineligible_cases_each": 1,
+    "valid_mir_cases_each": 10,
+    "v3_explicit_implicit_alias_register_controls": 4,
+    "dead_definition_diagnostic_mutations": 82,
+    "paired_ipra_disabled_comparisons": 3,
+    "v4_ipra_disabled_mir_baseline_cases": 10,
+    "v4_guard_configurations": 14
+  },
+  "findings": [
+    "V2 proves the ordinary graph but retains initialization: the original register-use query includes conservative call-mask clobbers.",
+    "V3 ignores only mask-only flat-register usage after proof; real register operands and aliases still reject. Actual positive output removes initialization.",
+    "Backend dead-code elimination removes exactly two unused original generic helpers; strict versioned diagnostics bind the surviving machine inventory to baseline and current linked function inventories.",
+    "The module barrier disrupts callee-first IPRA usage collection. Default-IPRA enabled output changes spill/resource decisions and fails strict acceptance.",
+    "V4 rejects experimental proof use while effective IPRA is enabled. Its paired validation configuration requires explicit -enable-ipra=false.",
+    "The clean compiler with IPRA disabled measures304 cumulative private bytes for the first O1 ordinary fixture, rather than the older288-byte IPRA-enabled contract. All profile contracts and full acceptance must be re-established."
+  ],
+  "remaining": [
+    "Full paired baseline/default-off/enabled matrices for the current configuration",
+    "All-profile independently measured frame contracts and strict full-call-graph comparisons",
+    "Current guarded revision reproduction and native scratch/call integration",
+    "Generic/volatile private behavior and all hardware qualification"
+  ],
+  "raw_evidence_sha256": {
+    "results/g3-private-backend-validation/baseline-source-built-controls.json": "3ccf263745f459157baf05929e007728b490e13447fd7585b62801bba9a7595e",
+    "results/g3-private-backend-validation/patched-off-source-built-controls.json": "f0c87e81f72ac2cee436b83c5c63874c203f37bfde517c5ea1b80b008f758bf8",
+    "results/g3-private-backend-validation/runs/patched-on/failure.json": "ba75aeb6d03228c6a7993eee1af7a16348b0c51dbdf9e5bb12f1deb3cbb58d9d",
+    "results/g3-private-backend-mir-controls/runs-v2/patched-on/failure.json": "7e90573ca38cb3806953744f3db0a55e4f170ad3c79ba035ec98589cc30522ea",
+    "results/g3-private-backend-validation-v3/runs/patched-on/failure.json": "a2fe97a36f1b79afbc4b8194e0ae73bafb4db5240c7f2ab97679d9592dd1873f",
+    "results/g3-private-backend-validation-v3/runs/patched-on-v2/failure.json": "40376795ce49c9953fa0d8a3e47a336d43967e26dcb8fcfab1427881fa2d778e",
+    "results/g3-private-backend-validation-v3/diagnostic-parser-v2-tests.json": "0beaafc4ae5a9ed18e380a2cc03a43c78cd0d9e74fb0a7561fa872856101fdce",
+    "results/g3-private-backend-register-controls/runs-v1/result.json": "b4fdfbc07140ca556580fe1f39339bf4e7582ee3e7fadb0e03f94ccdc2ccdeeb",
+    "results/g3-private-backend-ipra-controls/paired-ipra-off-audit.json": "98988603900dedd4b577b7925ae5744d1017ef381225d69cb2487753b454e2ba",
+    "results/g3-private-backend-validation/available-v3-strict-delta.json": "b7f97711ee02d6b54d9047ea2ad1b1fb199d3176c7848839eb8bd0cb4cdba76e",
+    "results/g3-private-backend-validation-v4/runs/baseline/failure.json": "36b82ee92d335f9f0e8e2d37e3a368eb3caf0292678d25324f695d229a912b1e",
+    "results/g3-private-backend-validation-v4/runs/baseline/ordinary-gfx1013-O1-original/output.s": "7b401b43a1de807f2e05b87c5c305f28cf47620f13e3cb25fd2f8ec4a43586ad",
+    "results/g3-private-backend-mir-controls-v4/runs-v2/baseline/result.json": "5732e54a70c1afd149325edaccb35292f8818105232fa2d041617eb26774fb94",
+    "results/g3-private-backend-design/prepare-v3-receipt.json": "d2d161cb6c81f2f49a5def06dd49de5c79afc7ba9326627574008341c5f5b75b",
+    "results/g3-private-backend-design/prepare-v4-receipt.json": "5a765544bb42bb3efbd3b8ad89d16f80b52f74236d54ab3e7683fdba11627f1b",
+    "results/g3-private-backend-design/buffer-call-proof-v4.patch": "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+    "results/g3-private-backend-guard-v4/runs-v1/result.json": "b612efac73bc474af29a6279a9704ab19934f1f796cd2d10a515e44e68a5ce35",
+    "results/g3-private-backend-design/source-build-progress-before-guard.json": "a8ca721281a09a62d944862cba7604161bbddd7e1cec43e9634bcfc1a8b66154"
+  }
+}

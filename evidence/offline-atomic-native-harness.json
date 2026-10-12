@@ -1,0 +1,230 @@
+{
+  "schema": 1,
+  "classification": "offline fixed atomic native harness and callback-oracle model; no hardware atomic evidence",
+  "base_source": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "source_commit": "06956e4d425758a7cee4daabe484191f3c90a95f",
+  "source_frozen_clean": true,
+  "branch": "development/g3-atomics",
+  "macro": "PS5HIP_CANARY_ATOMIC_SUITE=1",
+  "native_linked": false,
+  "package_created": false,
+  "console_access": false,
+  "hardware_validated": false,
+  "source_files": {
+    "CMakeLists.txt": {
+      "sha256": "94b1c8b24e52059877875373c4ceb7fb7b64a68c2d6e4772fbd1edd226cabe5e",
+      "bytes": 8524
+    },
+    "tools/native_canary.cpp": {
+      "sha256": "9ec45545c3ef354c94728a7a074aeae0530358d6d57540117294f4028e4cf1ca",
+      "bytes": 9299
+    },
+    "tools/native_atomics.h": {
+      "sha256": "0ba4ab84ed07fb7c867d327b767ec6cc2f079b366a2298bf1b7903f0d6eea44d",
+      "bytes": 5728
+    },
+    "tests/atomic_suite_test.cpp": {
+      "sha256": "d1d3ac9bc581923fe9416617a818e868d8e2b0e5736cb6e35e9b8cc1c627a270",
+      "bytes": 11865
+    },
+    "docs/ATOMIC_DIAGNOSTIC.md": {
+      "sha256": "3cf4e62d9a52cec64d1b08ab5c36b8c68ff4341ce64247fb1653240014bacd18",
+      "bytes": 4434
+    }
+  },
+  "protected_base_files": 107,
+  "protected_inventory": {
+    "sha256": "9720982ebc9ebb7b3c88e46fb29020845d87e88712585d9fe5da955135930c08",
+    "bytes": 15084
+  },
+  "fixture_evidence": {
+    "path": "evidence/offline-atomic-contention-probe.json",
+    "sha256": "05d2d666eac562ab956d6635db8f041f484d1f8f5170290f6d5ad5fe4534cdfa",
+    "bytes": 33779
+  },
+  "fixture_source_sha256": "42bc699fb32a445ffbb8ad31cc87c21d9f124ec257ad811bcff8402c4fda403b",
+  "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+  "validation": {
+    "integrated_sanitizer_ctest": {
+      "passed": 28,
+      "total": 28
+    },
+    "each_of_four_real_objects": {
+      "valid_suites": 12,
+      "corruption_cases": 77,
+      "quarantine_cases": 30
+    },
+    "native_sdk_objects": {
+      "gfx1013": {
+        "sha256": "e76eff8f47ced118c7baee4b83588736bcbadf4fdbf47a5fd37554b632c7ea0d",
+        "bytes": 54656
+      },
+      "gfx1030": {
+        "sha256": "5aebdb9564d7fbeac87cf07c55211e46e86f13778ad05de9fde750cab5c32cce",
+        "bytes": 54656
+      }
+    },
+    "gpu_instruction_emulation": false,
+    "native_memory_replaced_in_host_test": true
+  },
+  "profile": {
+    "same_queue_dispatch_order": [
+      "atomic_ticket32",
+      "atomic_ticket64",
+      "atomic_cas32",
+      "atomic_cas64",
+      "atomic_indirect32",
+      "atomic_indirect64"
+    ],
+    "groups": 257,
+    "threads": 64,
+    "invocations": 16448,
+    "initial_add": "2^width - 4096",
+    "final_add": 12352,
+    "cas64_token_base": "0x13579bdf00000000",
+    "offsets": "16448 zero u32 values, unchanged",
+    "guards": "64-byte prefix and full rounded allocation suffix",
+    "software_poll_timeout_ms": 2000
+  },
+  "limits": [
+    "No native builder/stager/verifier/log-checker support for this macro-only profile yet",
+    "SDK outputs are relocatable objects, not linked title/runtime evidence",
+    "Synthetic callbacks supply complete atomic observations; no ISA execution/emulation",
+    "Direct ticket kernels are wave-aggregated (514 contending reservations); indirect zero-offset kernels retain per-lane atomics",
+    "Relaxed fixtures do not qualify other order/scope modes or system coherence",
+    "Driver calls remain outside software completion timeout"
+  ],
+  "worktree": ".local/g3-atomics",
+  "macro_only": true,
+  "package_selectable": false,
+  "main_implementation_integrated": false,
+  "parent_source_review": {
+    "reviewer": "parent agent /root",
+    "result": "no actionable logic finding",
+    "scope": [
+      "exact modular counter and complete ticket set",
+      "CAS winner identity including full 64-bit token",
+      "immutable zero pointer offsets",
+      "complete rounded allocation guards",
+      "same-queue fresh dispatch resources and uncertain ownership quarantine",
+      "actual synthetic-callback model paths"
+    ],
+    "independent_native_review_agent_review": false
+  },
+  "raw_receipt": {
+    "path": ".local/g3-atomics/results/atomic-readiness/receipt-06956e4.json",
+    "sha256": "ca8de8bd947113c07fa89afb6d65ead61af51d5cf855fa0ae511d926299ef2c4",
+    "bytes": 11036
+  },
+  "rehash_verification": {
+    "path": "results/atomic-native-harness-record/verification.json",
+    "sha256": "24efc40b98a6f4f5f79a89716851516c17aed6c8bfbc7af6c7d4881ef243aeef",
+    "bytes": 560
+  },
+  "fixture_objects": {
+    "gfx1013-O1": {
+      "sha256": "39e8c08b947673d1f6620e6d7871a06bef1c61183d2c0a2e0a37a791fcedb0d9",
+      "bytes": 8272
+    },
+    "gfx1013-O2": {
+      "sha256": "fb8c32a84c62755f37157bf60435f2d86ade4f8d093bc3d5b2a9f6c9c7186bc1",
+      "bytes": 8272
+    },
+    "gfx1030-O1": {
+      "sha256": "66fb1eed5f70bb8b3837ab5dc42e7d8d35685612f9638432cf44ca347e1fd0af",
+      "bytes": 8272
+    },
+    "gfx1030-O2": {
+      "sha256": "fc65d98ae2cdb34e6d5e37b940d3170abc416b5b5d3f1fd98dfc4fa2e51d16d2",
+      "bytes": 8272
+    }
+  },
+  "validation_logs": {
+    "results/atomic-host/commands.json": {
+      "sha256": "9a182e10ad3ab550874f7555661cc968307a455e9cd0f9d9cf59cfc24af862f3",
+      "bytes": 661
+    },
+    "results/atomic-host/ctest.log": {
+      "sha256": "adae684eb9ceda0c426dd910fc80c7926ed4011fb3e5fd7d7b61622889c4888f",
+      "bytes": 3278
+    },
+    "results/atomic-sdk/commands.json": {
+      "sha256": "de479879a481c7f047d3a93185deec79c92b6c6bcfc6a356bb2546da4a07e07c",
+      "bytes": 2337
+    },
+    "build/atomic-host/Testing/Temporary/LastTest.log": {
+      "sha256": "401cad0600e0823f66f5cde14c328ffe81c51f7ce9dd79953e797165002f5d09",
+      "bytes": 26062
+    }
+  },
+  "tool_identities": {
+    "clang++-18": {
+      "resolved": "/usr/lib/llvm-18/bin/clang",
+      "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4",
+      "bytes": 140672
+    },
+    "ld.lld-18": {
+      "resolved": "/usr/lib/llvm-18/bin/lld",
+      "sha256": "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19",
+      "bytes": 5150720
+    },
+    "llvm-config-18": {
+      "resolved": "/usr/lib/llvm-18/bin/llvm-config",
+      "sha256": "d990de2c4592ed899d4e3bb0d66ea7808080b5c88c5e1839da18d364975a24ea",
+      "bytes": 604680
+    },
+    "llvm-readobj-18": {
+      "resolved": "/usr/lib/llvm-18/bin/llvm-readobj",
+      "sha256": "3dad3c6cfdbf380edf0415299ce5c8e6a52381f296690f2362da63d2562a4f04",
+      "bytes": 1938800
+    },
+    "cmake": {
+      "resolved": "/usr/bin/cmake",
+      "sha256": "6e1dccda39845415d68eabb934c598998949c99ec4668625d571aee1827b05c7",
+      "bytes": 14253272
+    },
+    "ninja": {
+      "resolved": "/usr/bin/ninja",
+      "sha256": "91e9548850cda2799facfdaa7abe33f9e978832f85e98212255708a7bbe437f2",
+      "bytes": 350624
+    },
+    "libclang-cpp.so.18.1": {
+      "resolved": "/usr/lib/llvm-18/lib/libclang-cpp.so.18.1",
+      "sha256": "5ad2aa56cdb24612047f3b87f77bf9e25ffac2c3dfdcc40af3a174a974753cf8",
+      "bytes": 64644584
+    },
+    "libLLVM-18.so.1": {
+      "resolved": "/usr/lib/x86_64-linux-gnu/libLLVM-18.so.1",
+      "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b",
+      "bytes": 122948952
+    }
+  },
+  "sdk_inputs": {
+    "tools/ps5-clangxx": {
+      "sha256": "6d2ffb092e76be69e687477c6177ff57385f9242df9d1d4a3df679c31bae9131",
+      "bytes": 192
+    },
+    ".deps/sdk/bin/prospero-clang++": {
+      "sha256": "270370c5765306a5a6741c15fa84d617c40c42bf1d4000c4c6bca51b8296ab0f",
+      "bytes": 3110
+    },
+    ".deps/sdk/.ps5-sdk-revision": {
+      "sha256": "9fff98b2d1064e63d3008a28ea3825a95676d6014d366d29cd89784a0c6dd38f",
+      "bytes": 41
+    },
+    ".deps/elevation/receipt.json": {
+      "sha256": "ed867c2c5600599fbdae19d4e3ba9a7c07a4279c0b669485abfc7ec1d3b6539a",
+      "bytes": 2061
+    },
+    ".deps/elevation/client/elevation.hpp": {
+      "sha256": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+      "bytes": 627
+    },
+    ".deps/elevation/client/protocol.hpp": {
+      "sha256": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+      "bytes": 2789
+    }
+  },
+  "test_scope": "Actual parser/materializer/harness/packet encoder/submission queue with synthetic GPU-address host allocations and independently supplied callback observations; no ISA emulation or execution. Native title main is not run by host tests.",
+  "sdk_scope": "Two PS5-target relocatable x86-64 objects compiled from actual harness; no native link, import conversion, startup, package or hardware proof."
+}

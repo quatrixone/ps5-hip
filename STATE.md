@@ -76,9 +76,13 @@ Contended atomic probes now compile at O1/O2 for both targets: 32/64-bit
 fetch-add and CAS, plus runtime-address additions that avoid wave aggregation.
 The CAS64 fixture uses a nonzero upper token word. Exact permutation/winner
 oracles pass 13 synthetic mutation tests; actual objects fit the existing entry
-structure. See `evidence/offline-atomic-contention-probe.json`. Native harness,
-GPU execution and memory-scope qualification remain pending; these results do
-not advertise atomic support.
+structure. See `evidence/offline-atomic-contention-probe.json`. A six-dispatch
+macro-only native harness is now frozen at `06956e4`, with 28 sanitizer CTests
+and two SDK object compiles. Its actual-harness models cover reordered modular
+tickets, full 64-bit CAS tokens, rounded guards, immutable offsets and quarantine
+at every dispatch. See `evidence/offline-atomic-native-harness.json`. Native
+linking/packaging, GPU execution and memory-scope qualification remain pending;
+these results do not advertise atomic support.
 
 Retained private-memory calls now have an isolated offline launch implementation
 at `6f7d9a1` (`development/g3-flat-calls`). It supplies eight user words with the
@@ -110,10 +114,18 @@ A default-off LLVM18 backend proof now compiles as a standalone pass object;
 review corrected instruction-encoding pseudo handling, bundle rejection and the
 pre-frame-lowering alignment check. Installed-compiler controls cover ordinary,
 generic, volatile, reordered, late-spill and MIR-reload cases. See
-`evidence/offline-private-backend-object.json`. The clean LLVM build and its
-baseline controls have completed; the separate patched build is still underway.
-The patched compiler has not run the acceptance matrix; no
-production compiler or hardware capability has changed.
+`evidence/offline-private-backend-object.json`. Clean and patched LLVM builds now
+complete. Actual enabled testing found two issues: conservative call-mask
+clobbers kept flat initialization despite a proven graph, and the module barrier
+disrupted IPRA's callee-first register-usage collection. Both failed revisions,
+binaries and strict comparison evidence remain preserved. Revision 4 keeps real
+register uses protected and rejects proof use unless IPRA is explicitly disabled;
+14 guard configurations pass. The clean compiler with IPRA disabled measures a
+304-byte cumulative frame for the first O1 ordinary fixture, rather than the
+older 288-byte contract. All profile frame contracts and full paired acceptance
+are being re-established. See `evidence/offline-private-backend-source-builds.json`.
+The candidate is unaccepted; no production compiler or hardware capability has
+changed.
 
 A separate read-only aperture diagnostic is frozen at `669d4fc` on
 `development/g3-aperture`. It uses the existing six-user-SGPR launch path and
@@ -171,7 +183,8 @@ as G2 item 5 explicitly requires. Its offline readiness and host evidence are
 recorded, and the package catalog preserves all 19 earlier entries. Reviewed
 controls are bound to committed catalog `2ad6d9b` and the exact candidate tools;
 their first deployment invocation stopped at the busy-console idle guard.
-Continue offline LDS/private-storage preparation. At the next suitable milestone,
+Continue the paired private-call compiler acceptance, measured frame contracts
+and reproducible experimental recipe offline. At the next suitable milestone,
 qualify two separately reviewed clean cycles on the user-selected .40 after its
 earlier process has cleared and the console is idle. This
 supersedes the planned vector-only cycle-two action;
@@ -356,3 +369,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G3 offline | 1e0428f | gfx1013 | forced-spill image packaged; no hardware run | evidence/offline-scratch-native-readiness.json | next: combined G2 acceptance candidate
 - 2026-10-11 | G2 offline | 5b74ac8 | gfx1013 | combined arithmetic image packaged | evidence/offline-arithmetic-suite-native-readiness.json | next: two idle-gated cycles
 - 2026-10-11 | G3 offline | 716c8eb / 669d4fc | retained-private-call harness modeled; read-only aperture package verified | evidence/offline-private-calls-native-harness.json; evidence/offline-private-aperture-native-readiness.json | no new hardware qualification
+- 2026-10-11 | G3 offline | 06956e4 | six-dispatch atomic harness modeled; both SDK objects compiled | evidence/offline-atomic-native-harness.json | no package or hardware qualification
+- 2026-10-11 | compiler research | source-built LLVM comparisons exposed call-mask and IPRA ordering issues; guarded revision 4 compiled | evidence/offline-private-backend-source-builds.json | full paired acceptance pending
