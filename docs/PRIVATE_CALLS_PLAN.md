@@ -97,3 +97,46 @@ would not satisfy the retained private-call requirement.
 G3 remains incomplete until these requirements execute correctly on hardware,
 with validated outputs, guards, ownership, visibility and teardown. The broader
 compute and HIP application gates remain unchanged.
+
+## Macro-only native harness preparation
+
+The isolated `development/g3-private-calls-native` branch adds the compile-only
+`PS5HIP_CANARY_PRIVATE_CALLS` harness profile. Existing builder, stager, checker
+and candidate-selection allowlists deliberately do not select it. It is not a
+packaged or hardware-ready title.
+
+The profile uses the existing `FlatCallLaunch` and `SubmissionQueue` without
+changing their admission rules: eight user SGPR words, 257 groups of 64 threads,
+16,448 immutable inputs and exact outputs, 288 cumulative private bytes, and an
+11,796,480-byte scratch payload. Separate 64-KiB scratch guards and every rounded
+allocation guard word are checked. Scratch must show activity. The module,
+kernargs, input, output and scratch remain owned through completion; the queue
+also owns its command buffer and completion marker. Success explicitly closes
+all seven allocations. Any uncertain submission retains them in quarantine.
+
+`tests/private_calls_native_test.cpp` invokes the actual harness, object parser,
+launch encoder and queue with a host-memory test double and synthetic GPU
+addresses. It checks the eight user-data words, raw scratch base versus descriptor
+flags, TMPRING, group geometry, uploaded module and arguments. A separate array
+model evaluates the original nested source operations. A second model stores
+outer and inner arrays in two 144-byte frames through the wave32 swizzle; the
+leaf adds no frame. Its two call counters describe source behavior, not GPU
+instruction execution. The saved compiler-contract test separately resolves the
+actual two linked calls. The existing flat-call test covers every byte in one
+288-byte-per-lane wave and first/last conservative ring slots.
+
+Negative cases alter outputs, immutable inputs, both sides and rounded tails of
+all guards, suppress all scratch activity, suppress the leaf store while keeping
+its register result, or swap outputs from distinct groups. Submit errors, kick
+errors and completion timeout are tested in forked children using a fake clock:
+all seven allocations retain one GPU hold, no owned allocation closes, and no
+PASS is printed. These new tests inject returned failure statuses; they do not
+exercise the title main function's exception-quarantine catch path. This does
+not execute native allocation, title startup, cache
+coherence, SPI wave-offset assignment, private-aperture translation or GPU ISA.
+
+Native SDK compilation is limited to objects. Actual candidate selection still
+requires an audited whole linked call graph and compiler identity, plus the
+appropriate hardware prerequisites. The ordinary compiler-specialization route
+must not silently stand in for volatile or ambiguous generic-pointer support.
+No flat-register or private-aperture support follows from these host checks.

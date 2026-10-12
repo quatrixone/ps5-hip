@@ -14,6 +14,9 @@
 #if defined(PS5HIP_CANARY_LDS_STATIC) || defined(PS5HIP_CANARY_LDS_DYNAMIC) || defined(PS5HIP_CANARY_LDS_MIXED)
 #define PS5HIP_CANARY_LDS 1
 #endif
+#if defined(PS5HIP_CANARY_REGISTER_SPILL) || defined(PS5HIP_CANARY_PRIVATE_CALLS)
+#define PS5HIP_CANARY_SCRATCH 1
+#endif
 #ifdef PS5HIP_WITH_ELEVATION
 #include "elevation.hpp"
 #endif
@@ -27,6 +30,9 @@ namespace {
 #ifndef PS5HIP_CANARY_LDS
 #ifdef PS5HIP_CANARY_WAVE
 constexpr uint32_t count = 64 * 4, guard_words = 16, poison = 0xdeadbeef;
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
+constexpr uint32_t count = 257 * 64, guard_words = 16, poison = 0xa5a5a5a5;
+constexpr uint32_t scratch_private_bytes = 288, scratch_prefix_bytes = 65536;
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
 constexpr uint32_t count = 64 * 64, guard_words = 16, poison = 0xa5a5a5a5;
 constexpr uint32_t scratch_private_bytes = 212, scratch_prefix_bytes = 65536;
@@ -59,6 +65,12 @@ void check_guards(const Memory &memory) {
 }
 #ifdef PS5HIP_CANARY_REGISTER_SPILL
 uint32_t spill_value(uint32_t index) { return (index * 0x9e3779b9u) ^ 0x6c8e9cf5u; }
+#endif
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS
+uint32_t private_input(uint32_t index) { return index * 4099u + 17u; }
+uint32_t private_expected(uint32_t x) { return 4u * x + 5u * (x & 31u) + 2u * ((x + 7u) & 31u) + 6u; }
+#endif
+#ifdef PS5HIP_CANARY_SCRATCH
 void check_scratch(const Memory &memory, ps5hip::GpuRange payload) {
     if (payload.address != memory->range().address + scratch_prefix_bytes ||
         payload.bytes != ps5hip::buffer_scratch_ring_bytes(scratch_private_bytes) ||
@@ -96,7 +108,7 @@ uint32_t bits(float value) {
 void validate(const Memory &output
 #ifdef PS5HIP_CANARY_VECTOR_ADD
               , const Memory &a, const Memory &b
-#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+#elif defined(PS5HIP_CANARY_SCRATCH)
               , const Memory &input
 #endif
 ) {
@@ -115,6 +127,9 @@ void validate(const Memory &output
                                       ballot, active * (2 * (base + first + 1) + active - 1) / 2};
             expected = values[i % 4];
         }
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
+        const uint32_t expected = private_expected(private_input(i));
+        if (data(input)[i] != private_input(i)) throw ps5hip::ObjectError("read-only input modified");
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
         const uint32_t expected = spill_value(i);
         if (data(input)[i] != expected) throw ps5hip::ObjectError("read-only input modified");
@@ -133,7 +148,7 @@ void validate(const Memory &output
     }
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     check_guards(a); check_guards(b);
-#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+#elif defined(PS5HIP_CANARY_SCRATCH)
     check_guards(input);
 #endif
 }
@@ -151,6 +166,8 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     kernel = "wave_full";
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
     kernel = "wave_partial";
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
+    kernel = "nested_private";
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
     kernel = "register_spill";
 #endif
@@ -165,9 +182,14 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     arguments = {argument(a), argument(b), argument(output), {count}};
 #elif defined(PS5HIP_CANARY_WAVE)
     arguments = {argument(output)};
-#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+#elif defined(PS5HIP_CANARY_SCRATCH)
     auto input = buffer();
-    for (uint32_t i = 0; i < count; ++i) data(input)[i] = spill_value(i);
+    for (uint32_t i = 0; i < count; ++i)
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS
+        data(input)[i] = private_input(i);
+#else
+        data(input)[i] = spill_value(i);
+#endif
     const auto scratch_bytes = ps5hip::buffer_scratch_ring_bytes(scratch_private_bytes);
     auto scratch = std::make_shared<ps5hip::NativeMemory>(scratch_bytes + 2 * scratch_prefix_bytes, 65536, false);
     std::memset(scratch->cpu(), 0xa5, scratch->range().bytes);
@@ -177,12 +199,19 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
 #else
     arguments = {argument(output), {count}};
 #endif
-#if defined(PS5HIP_CANARY_WAVE) || defined(PS5HIP_CANARY_REGISTER_SPILL)
+#if defined(PS5HIP_CANARY_PRIVATE_CALLS)
+    constexpr uint32_t groups = 257;
+#elif defined(PS5HIP_CANARY_WAVE) || defined(PS5HIP_CANARY_REGISTER_SPILL)
     constexpr uint32_t groups = 1;
 #else
     constexpr uint32_t groups = 2;
 #endif
-#ifdef PS5HIP_CANARY_REGISTER_SPILL
+#ifdef PS5HIP_CANARY_PRIVATE_CALLS
+    const auto private_launch = ps5hip::prepare_flat_call_launch(object, kernel, module->range(),
+        kernarg->range(), groups, arguments, ps5hip::plan_buffer_scratch(scratch_private_bytes, payload));
+    const auto &launch = private_launch.dispatch;
+    const auto commands = ps5hip::encode_flat_call_dispatch(private_launch);
+#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
     const auto scratch_launch = ps5hip::prepare_buffer_scratch_launch(object, kernel, module->range(),
         kernarg->range(), groups, arguments, ps5hip::plan_buffer_scratch(scratch_private_bytes, payload));
     const auto &launch = scratch_launch.dispatch;
@@ -196,6 +225,9 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
 #ifdef PS5HIP_CANARY_WAVE
     std::printf("PS5HIP SUBMIT target=%s kernel=%s invocations=64 output_words=256 groups=1 timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, kernel);
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
+    std::printf("PS5HIP SUBMIT target=%s kernel=nested_private invocations=16448 groups=257 user_sgprs=8 private_bytes=288 scratch_bytes=%u timeout_ms=2000\n",
+                PS5HIP_CANARY_TARGET, scratch_bytes);
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
     std::printf("PS5HIP SUBMIT target=%s kernel=register_spill invocations=64 output_words=4096 groups=1 private_bytes=212 scratch_bytes=%u timeout_ms=2000\n",
                 PS5HIP_CANARY_TARGET, scratch_bytes);
@@ -212,7 +244,7 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
     }
 #ifdef PS5HIP_CANARY_VECTOR_ADD
     validate(output, a, b);
-#elif defined(PS5HIP_CANARY_REGISTER_SPILL)
+#elif defined(PS5HIP_CANARY_SCRATCH)
     validate(output, input);
     check_scratch(scratch, payload);
     std::printf("PS5HIP SCRATCH payload=modified guards=unchanged\n");
@@ -241,6 +273,8 @@ int main() {
         "wave_full";
 #elif defined(PS5HIP_CANARY_WAVE_PARTIAL)
         "wave_partial";
+#elif defined(PS5HIP_CANARY_PRIVATE_CALLS)
+        "nested_private";
 #elif defined(PS5HIP_CANARY_REGISTER_SPILL)
         "register_spill";
 #else
