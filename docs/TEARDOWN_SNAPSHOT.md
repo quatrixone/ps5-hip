@@ -21,8 +21,9 @@ The [offline reassessment](../evidence/offline-teardown-count1110-design.json)
 proposes a fixed 2048-record ceiling with the same provider, layout and call
 sequence. Under the SDK count contract, 1110 plus 16 spare slots requires 1126
 records / 531,472 bytes; two tables require at most 1,933,312 bytes, excluding
-allocator overhead. No
-revised collector is implemented or run. The pinned FreeBSD 9 reference confirms
+allocator overhead. Version 3 implements this bound offline, with transcript
+version 3 and no other production control-flow change. It has not run on a
+console. The pinned FreeBSD 9 reference confirms
 record-count returns and byte-sized buffers, but can skip busy or hidden mounts
 and redact identities. A non-full validated returned buffer does not prove a
 complete global namespace. Any revised case must retain unknown release status
@@ -65,7 +66,7 @@ Two consecutive mount-table observations use the SDK's `struct statfs` and
 invented. The snapshot code validates the returned structure version and every
 string before comparing or reporting it.
 
-The allocation cap is 1024 records, with 16 spare entries and at most 3 allocation
+The version 3 allocation cap is 2048 records, with 16 spare entries and at most 3 allocation
 attempts per observation. Full, overflowing or error results remain unknown.
 There is an additional 128 matching-row cap per snapshot; exceeding it suppresses
 all row output for that snapshot. The pinned SDK's 16/88/88-byte string fields
@@ -73,6 +74,14 @@ bound escaped output below 256 KiB. Every logged string is hex encoded. Unrelate
 mount rows are never printed. All records, including duplicates, participate in
 the sorted identity comparison; mutable free-space counters do not. Two matching
 snapshots establish two matching observations, not atomicity between them.
+
+The largest admitted initial count is 2032; a full 2048-slot fill remains
+unknown. The measured initial count of 1110 requests 1126 slots (531,472 bytes)
+and can grow once to 2048 (966,656 bytes). Two retained tables require at most
+1,933,312 record-storage bytes, excluding allocator overhead. No response can
+cause growth beyond this fixed ceiling. At most eight getfsstat calls are possible
+across both observations. Missing known registration anchors do not establish
+absence or a useful comparison baseline; this diagnostic still reports unknown.
 
 The report distinguishes:
 
@@ -130,6 +139,13 @@ against host records, deliberately without pretending to reproduce the kernel AB
 It covers count/allocation/query failures, growing/full tables, malformed strings/
 versions, duplicate and reordered layers, changed source/target/type/flags/fsid,
 the output cap, title-prefix collisions and PID/app-query uncertainty.
+Version 3 additionally exercises the actual 1110 count using a 472-byte host
+record stride, a last-record own-title anchor, 2032/2033 and INT_MAX bounds,
+full-capacity growth, first/second allocation failure and the two-table live
+allocation budget. Corrupt unrelated final records, sparse initialization and
+incorrect strides are rejected. A host model with the SDK's record size is not
+firmware-layout qualification. Existing v1/v2 sources, observations and consumed
+markers remain frozen; no version 3 console sender is included.
 `teardown_snapshot_import_audit` rejects missing/wrong/duplicate providers and
 mutating or unknown imports. The native disassembly must also retain signal 0 at
 both PID 134 existence queries; permitting the `kill` symbol alone is insufficient.

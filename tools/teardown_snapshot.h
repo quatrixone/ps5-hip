@@ -9,7 +9,7 @@
 // Record is the SDK's struct statfs in the payload. Host fixtures model fields,
 // not the firmware ABI. No successful snapshot certifies namespace completeness.
 namespace teardown {
-constexpr size_t max_records = 1024;
+constexpr size_t max_records = 2048;
 constexpr size_t max_matching = 128;
 constexpr const char* title = "PPSA99014";
 constexpr const char* runtime = "/system_ex/app/PPSA99014";

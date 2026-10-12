@@ -1,10 +1,17 @@
-#include "../tools/teardown_snapshot.h"
 #include <algorithm>
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <array>
+
+// Interpose only the production header's free calls, without changing its API.
+void tracked_free(void* pointer);
+#define free(pointer) tracked_free(pointer)
+#include "../tools/teardown_snapshot.h"
+#undef free
 
 // Deliberately a host model, never a claim about firmware struct layout.
 struct Row {
@@ -15,8 +22,41 @@ struct Row {
     char f_mntonname[88] = "/unrelated";
     char f_mntfromname[88] = "/unrelated-source";
     unsigned volatile_free_blocks = 0;
+    unsigned char stride_padding[252] = {};
 };
+static_assert(sizeof(Row) == 472, "Exercise SDK-sized strides, not firmware ABI compatibility");
 void check(bool value) { if (!value) throw std::runtime_error("teardown snapshot assertion"); }
+struct Allocation { void* pointer = nullptr; size_t bytes = 0; };
+std::array<Allocation, 4> allocations;
+size_t live_bytes = 0, peak_bytes = 0, allocate_calls = 0, fail_allocate_call = 0;
+void* tracked_allocate(size_t count, size_t size) {
+    ++allocate_calls;
+    if (allocate_calls == fail_allocate_call) return nullptr;
+    check(count <= teardown::max_records && size == sizeof(Row));
+    void* pointer = std::calloc(count, size);
+    check(pointer != nullptr);
+    for (auto& allocation : allocations) if (!allocation.pointer) {
+        allocation = {pointer, count * size};
+        live_bytes += allocation.bytes;
+        peak_bytes = std::max(peak_bytes, live_bytes);
+        check(live_bytes <= 2 * teardown::max_records * sizeof(Row));
+        return pointer;
+    }
+    throw std::runtime_error("unexpected live allocation count");
+}
+void tracked_free(void* pointer) {
+    for (auto& allocation : allocations) if (pointer && allocation.pointer == pointer) {
+        live_bytes -= allocation.bytes;
+        allocation = {};
+        break;
+    }
+    std::free(pointer);
+}
+void reset_allocations() {
+    check(live_bytes == 0);
+    for (const auto& allocation : allocations) check(!allocation.pointer);
+    peak_bytes = allocate_calls = fail_allocate_call = 0;
+}
 Row row(const char* to, const char* from = "/unrelated-source") {
     Row value;
     check(std::strlen(to) < sizeof(value.f_mntonname));
@@ -132,7 +172,7 @@ int main() {
               failed.error == EACCES && error.calls == phase);
         if (phase == 1) for (const auto& fill : result.fills) check(!fill.attempted);
     }
-    for (int count : {1009, 1024, INT_MAX}) {
+    for (int count : {2033, 2048, INT_MAX}) {
         Query large; large.size_override = count;
         teardown::Snapshot<Row> result; collect(result, large);
         check(result.result == Result::count_bound && large.calls == 1);
@@ -151,17 +191,98 @@ int main() {
     Query endless; endless.full_calls = 3;
     teardown::Snapshot<Row> unstable; collect(unstable, endless);
     check(unstable.result == Result::unstable_capacity && endless.calls == 4);
-    Query maximum; maximum.size_override = 1008; maximum.full_calls = 1;
+    Query maximum; maximum.size_override = 2032; maximum.full_calls = 1;
     teardown::Snapshot<Row> capped; collect(capped, maximum);
     check(capped.result == Result::unstable_capacity && maximum.calls == 2);
-    check(capped.initial.returned == 1008 && capped.fills[0].capacity_records == 1024 &&
-          capped.fills[0].returned == 1024 && !capped.fills[1].attempted);
+    check(capped.initial.returned == 2032 && capped.fills[0].capacity_records == 2048 &&
+          capped.fills[0].returned == 2048 && !capped.fills[1].attempted);
     Query output; output.rows.assign(129, row(teardown::runtime));
     teardown::Snapshot<Row> too_many; collect(too_many, output);
     check(too_many.result == Result::output_bound && !teardown::same(too_many, too_many));
     output.rows.pop_back();
     teardown::Snapshot<Row> allowed; collect(allowed, output);
     check(allowed.result == Result::complete && allowed.matching == 128);
+
+    // The observed initial return now reaches a real, SDK-stride-sized fill.
+    reset_allocations();
+    {
+        Query observed; observed.rows.assign(1110, Row{});
+        observed.rows.back() = row(teardown::image, "/dev/lvd2");
+        teardown::Snapshot<Row> result;
+        teardown::collect(result, 7, [&](Row* rows, long bytes) { return observed(rows, bytes); }, tracked_allocate);
+        check(result.result == Result::complete && result.count == 1110 && result.matching == 1);
+        check(result.initial.returned == 1110 && result.fills[0].capacity_records == 1126 &&
+              result.fills[0].capacity_bytes == 531472 && observed.calls == 2);
+        check(peak_bytes == 531472);
+    }
+    reset_allocations();
+    for (int full_calls : {1, 2}) {
+        Query observed; observed.size_override = 1110; observed.full_calls = full_calls;
+        observed.rows.assign(1110, Row{});
+        teardown::Snapshot<Row> result;
+        teardown::collect(result, 7, [&](Row* rows, long bytes) { return observed(rows, bytes); }, tracked_allocate);
+        check(result.fills[0].capacity_records == 1126 && result.fills[1].capacity_records == 2048 &&
+              result.fills[1].capacity_bytes == 966656 && !result.fills[2].attempted && observed.calls == 3);
+        check(result.result == (full_calls == 1 ? Result::complete : Result::unstable_capacity));
+        check(peak_bytes == 966656); // The discarded first allocation was freed before growth.
+    }
+    reset_allocations();
+    {
+        Query maximum_rows; maximum_rows.size_override = 2032; maximum_rows.rows.assign(2047, Row{});
+        teardown::Snapshot<Row> a, b;
+        const auto query = [&](Row* rows, long bytes) { return maximum_rows(rows, bytes); };
+        teardown::collect(a, 7, query, tracked_allocate);
+        teardown::collect(b, 7, query, tracked_allocate);
+        check(teardown::same(a, b) && a.count == 2047 && a.matching == 0);
+        check(live_bytes == 1933312 && peak_bytes == 1933312);
+    }
+    reset_allocations();
+    for (size_t fail_at : {size_t(1), size_t(2)}) {
+        fail_allocate_call = allocate_calls + fail_at;
+        Query observed; observed.size_override = 1110; observed.full_calls = 1;
+        teardown::Snapshot<Row> result;
+        teardown::collect(result, 7, [&](Row* rows, long bytes) { return observed(rows, bytes); }, tracked_allocate);
+        check(result.result == Result::allocation_error && !result.rows && live_bytes == 0);
+        check(observed.calls == static_cast<int>(fail_at) && !result.fills[fail_at - 1].attempted);
+    }
+    reset_allocations();
+    for (int returned : {2049, INT_MAX}) {
+        int calls = 0;
+        teardown::Snapshot<Row> result;
+        teardown::collect(result, 7, [&](Row* rows, long) {
+            ++calls; return rows ? returned : 1110;
+        }, tracked_allocate);
+        check(result.result == Result::unstable_capacity && calls == 3 && !result.rows && live_bytes == 0);
+        check(result.fills[0].returned == returned && result.fills[1].returned == returned);
+    }
+    reset_allocations();
+    for (unsigned mutation = 0; mutation != 6; ++mutation) {
+        teardown::Snapshot<Row> result;
+        teardown::collect(result, 7, [&](Row* rows, long bytes) {
+            if (!rows) return 1110;
+            check(bytes == 531472);
+            std::fill_n(rows, 1110, Row{});
+            // Every row must be validated even when unrelated to our title.
+            auto& last = rows[1109];
+            switch (mutation) {
+            case 0: last.f_version = 0; break;
+            case 1: std::memset(last.f_fstypename, 'x', sizeof(last.f_fstypename)); break;
+            case 2: std::memset(last.f_mntonname, 'x', sizeof(last.f_mntonname)); break;
+            case 3: std::memset(last.f_mntfromname, 'x', sizeof(last.f_mntfromname)); break;
+            case 4: std::memset(static_cast<void*>(&last), 0, sizeof(last)); break;
+            case 5: // Wrong record stride leaves the expected final version zero.
+                std::memset(rows, 0, static_cast<size_t>(bytes));
+                for (size_t i = 0; i != 1110; ++i) {
+                    Row value;
+                    std::memcpy(reinterpret_cast<unsigned char*>(rows) + i * 464, &value, sizeof(value));
+                }
+                break;
+            }
+            return 1110;
+        }, tracked_allocate);
+        check(result.result == Result::malformed && !teardown::same(result, result));
+    }
+    reset_allocations();
 
     const teardown::Status absent{-1, ESRCH, -1, -1};
     check(teardown::queried_absence(absent));
