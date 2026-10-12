@@ -1,0 +1,4 @@
+*.hip text eol=lf
+*.ll text eol=lf
+*.patch -text
+*.py -text
