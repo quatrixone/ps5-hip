@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "classification": "offline aperture observation profile; not private-call or flat-support qualification",
+  "base_source": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+  "branch": "development/g3-aperture",
+  "source_commit": "669d4fc573bdd17ec2dfd29c666680d75149091d",
+  "hardware_validated": false,
+  "native_linked": false,
+  "package_created": false,
+  "console_access": false,
+  "layout": {
+    "groups": 1,
+    "threads": 64,
+    "wave_size": 32,
+    "words_per_lane": 6,
+    "output_words": 384,
+    "observation_only": true
+  },
+  "source_files": {
+    "CMakeLists.txt": {
+      "bytes": 8840,
+      "sha256": "e5fdcb647f995fcbcb7bcf99c69ebdbab7e31855861f985b7259a13d80a313e0"
+    },
+    "kernels/private_aperture.hip": {
+      "bytes": 586,
+      "sha256": "d877d87c872c3ebf16f77a37c45364554abc8ef8246da01f552924d77a3b9b41"
+    },
+    "tests/aperture_recipe_test.py": {
+      "bytes": 4792,
+      "sha256": "1a27722a689d431b17e5811cab819a856969f152862cd2ece3d86db288ba7b50"
+    },
+    "tests/aperture_test.cpp": {
+      "bytes": 10529,
+      "sha256": "2ba596cc186da31145a5077b8a46ea65c6dae0d77d00ac49faa6aff90b57b104"
+    },
+    "tests/canary_log_test.py": {
+      "bytes": 12677,
+      "sha256": "7d2fd06ed6b267168289f738d08cad0b81309aeb99a9f4f97510808ce25b4012"
+    },
+    "tests/native_case_test.py": {
+      "bytes": 9548,
+      "sha256": "ab6ba51fdd79d07d184917c0ea4ce8f5b97fe02f3f86b65d3e81a40844d7756b"
+    },
+    "tests/title_stage_test.py": {
+      "bytes": 8876,
+      "sha256": "ec7647f63e6ef7b71f9de7cba3bc456fd2f47e95edd0db079b91cdd875d20229"
+    },
+    "tools/build_native_canary.py": {
+      "bytes": 14081,
+      "sha256": "a0a8d39dbdc9622d46f78748d0e907e2f22d2208074a37407426730556aeedac"
+    },
+    "tools/check_canary_log.py": {
+      "bytes": 5530,
+      "sha256": "5bca09991bfe464f3ef9c7a5fb956462a430aabf7bbc2367d71ba078e35be0a7"
+    },
+    "tools/native_aperture.h": {
+      "bytes": 4332,
+      "sha256": "c142862490eb3d027f61888f581af63167987c4d0b87897cdfb24c00e9c25edf"
+    },
+    "tools/native_canary.cpp": {
+      "bytes": 9305,
+      "sha256": "e15ee651da851fd391f94ae38a6697dc9ecfdc5bfcf01dce08c507de9077672c"
+    },
+    "tools/probe_aperture.py": {
+      "bytes": 8845,
+      "sha256": "fabd99feefd954b493e67d1b22e1e5122e2295292eb6f686d48f637f810704cb"
+    },
+    "tools/stage_native_title.py": {
+      "bytes": 7937,
+      "sha256": "567fb0c9b0d88aad0163c7dae04470133b984d7bac5c658b647d411530e35e8c"
+    },
+    "tools/verify_native_case.py": {
+      "bytes": 5855,
+      "sha256": "827c11aeecbe0e03762c3fb45e2514a0d20c2bf4dc48b2be3f29df9f0fc42c9a"
+    },
+    "docs/APERTURE_DIAGNOSTIC.md": {
+      "bytes": 4844,
+      "sha256": "986936ed915be3f15015045814ce5761cbf3805be22092dc958758f5b01653af"
+    }
+  },
+  "native_objects": {
+    "gfx1013": {
+      "bytes": 41904,
+      "sha256": "f38cdf876e5528f79d52f002183a2888d357971fc18cdfd4173c52b10bee8d4d"
+    },
+    "gfx1030": {
+      "bytes": 41904,
+      "sha256": "932cab2aeb7f2d0f325d1747606ef43520c5e004a781ff508a8791a04aba9303"
+    }
+  },
+  "validation": {
+    "asan_ubsan_integrated_ctests": 29,
+    "chronology": "29 integrated tests passed; then two test-only raw-value acceptance cases passed4affectedtests; then reviewer ISA-padding correction passed5affectedtests. Device bytes unchanged across recipe revisions; native sources/objects unchanged after integrated run.",
+    "four_profile_host_model_each": {
+      "clean_observations": 4,
+      "corruption_cases": 17,
+      "quarantine_cases": 5
+    },
+    "clean_cases": [
+      "equal waves/highwords/base>limit",
+      "differentwaves includingzerobase",
+      "allzero raw values",
+      "all0xa5 raw values"
+    ],
+    "corruptions": [
+      "untouched output",
+      "wronglane",
+      "sentinel",
+      "eachof4rawfields intra-wave mismatch",
+      "prefixguard",
+      "firstsuffixguard",
+      "lastroundedguard",
+      "repeatedlane0record",
+      "allraw stores omitted",
+      "eachof4rawcolumns omitted",
+      "half-wave rawstores omitted"
+    ],
+    "quarantine": [
+      "submiterror",
+      "kickerror",
+      "timeout20000simulatedpolls",
+      "stdexception aftersubmission",
+      "unknownexception aftersubmission"
+    ],
+    "quarantine_assertions": "queuepoisoned,all5allocationslive,eachGPUholdcount1,noownedcloseattempt,noobservation/PASS",
+    "actual_harness_log_checker_agreement": "equal/different raw logs from actual host harness parsed independently; synthetic start/runtime prefix explicitly labeled, title main not executed",
+    "recipe_negative_tests": "preexistingoutput no writes;source/recipe/object/driverhash,duplicateprofile,missingO2,O1objectsubstitution,version;28instructionmutations+4injectedmidbodycodeend",
+    "protected_baseline_files": {
+      "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+      "kernels/canary.hip": "370499b59b485807418c1ee57b5776856d79e6d7f343a1952b71b9c7f4dd145c",
+      "src/launch.cpp": "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba",
+      "src/code_object.cpp": "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5",
+      "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+      "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+      "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+      "include/ps5hip/launch.h": "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b",
+      "include/ps5hip/code_object.h": "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02",
+      "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+      "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+      "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d"
+    }
+  },
+  "limits": [
+    "NativeMemory is replaced by synthetic-address hoststorage only in aperturemodel; no model run isGPUproof.",
+    "Aperture values are never validated against guessed thresholds or required across-wave equality.",
+    "Distinct raw initialization detects omitted raw columns/halfwaves via inconsistent lanes; a single omitted store whose truevalue equals its initial poison is intrinsically indistinguishable. No raw-value blacklist is imposed.",
+    "CPU-generated lane/sentinel witnesses and observed register values do not qualify flat address routing, scratch backing, SPI wave offsets, private memory, device calls or framework support.",
+    "Onlynativeharness PS5objects compiled; full link/import/startup/package validation remains pending.",
+    "Dependency links remain read-only; elevation/nativeexport must be localized before full builder/stager. Source committed locally after review. No full native builder,packagefreeze,push orconsole operation performed."
+  ],
+  "device_profiles": [
+    {
+      "target": "gfx1013",
+      "optimization": "O1",
+      "object": {
+        "bytes": 2936,
+        "sha256": "7609c0489cdb936ac8ad8d3014484b5e811fc5a7b5c4cd5a44cb6048dbdc68f9"
+      }
+    },
+    {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "object": {
+        "bytes": 2936,
+        "sha256": "f19b812a253c387d89d2136c90907b3f2ce46fe08b147d46ca104dde9ffeb4cb"
+      }
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O1",
+      "object": {
+        "bytes": 2936,
+        "sha256": "ff01e786b4fb4eb061d95f59accfa0f53746be1a74525af183f4a93d5e11ab43"
+      }
+    },
+    {
+      "target": "gfx1030",
+      "optimization": "O2",
+      "object": {
+        "bytes": 2936,
+        "sha256": "af8feca98a3ece38340a9532953b8da3a21cd9fa419f0ffe0d426ade0d28d833"
+      }
+    }
+  ],
+  "raw_receipt": {
+    "path": ".local/g3-aperture/results/aperture-offline-readiness/receipt-669d4fc.json",
+    "sha256": "b2766d24fde8f499561afe1d30adcb5ca7165215432f7a9b2dc7b1f1e0fa7c71",
+    "raw_files_reverified": 43,
+    "source_files_reverified": 15
+  }
+}

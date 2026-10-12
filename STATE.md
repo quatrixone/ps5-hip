@@ -100,9 +100,24 @@ tests. A separate volatile fixture preserves nested calls, post-store reloads an
 both valid global/private branches; all four compiler profiles and independent
 CPU oracles pass. Its accesses remain flat and are not eligible for the current
 specialization. See `evidence/offline-private-call-compiler-research.json`.
-A default-off LLVM18 backend proof has been drafted; the isolated clean baseline
-build is underway. The patch is not yet compiled or accepted, and no production
-compiler or hardware capability has changed.
+A default-off LLVM18 backend proof now compiles as a standalone pass object;
+review corrected instruction-encoding pseudo handling, bundle rejection and the
+pre-frame-lowering alignment check. Installed-compiler controls cover ordinary,
+generic, volatile, reordered, late-spill and MIR-reload cases. See
+`evidence/offline-private-backend-object.json`. Full clean and patched LLVM builds
+are underway. The patched compiler has not run the acceptance matrix; no
+production compiler or hardware capability has changed.
+
+A separate read-only aperture diagnostic is frozen at `669d4fc` on
+`development/g3-aperture`. It uses the existing six-user-SGPR launch path and
+reports 64 raw base/limit observations while checking lane witnesses, within-wave
+consistency, full rounded guards, ownership and closure. Distinct raw-field poison
+catches omitted-store patterns without imposing an invented aperture range.
+All 29 integrated sanitizer CTests passed, followed by four and five affected
+checks after test and ISA-audit improvements; both target harnesses compile with
+the PS5 SDK. See `evidence/offline-private-aperture-diagnostic.json`. No native
+link, package or console execution has occurred. Even plausible observations
+would not establish flat addressing or private-memory support.
 
 Historical failures and superseded packages remain preserved. The first GPU
 image `fb634e34...` faulted on a CPU import boundary; the isolated provider fix

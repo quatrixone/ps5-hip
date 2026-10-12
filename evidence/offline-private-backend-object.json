@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "classification": "offline LLVM18 backend API compilation and installed-compiler controls only",
+  "hardware_validated": false,
+  "accepted_compiler": false,
+  "source_commit": "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff",
+  "patch_revision": 2,
+  "pass_object_sha256": "06bd9c085db68437da1cec649dfaaa09068bab18a84b998810a8f91e4d1621a7",
+  "pass_object_preserved": "results/g3-private-backend-design/frozen-pass-v2.o",
+  "validation": {
+    "pass_object_compiled": true,
+    "baseline_source_unchanged": true,
+    "configurations_identical_except_paths": true,
+    "host_cxx_flags": "-include cstdint",
+    "compiled_artifacts_rehashed": 16,
+    "installed_controls": {
+      "ordinary_generic_volatile_order_cases": 24,
+      "negative_successful_compilations": 18,
+      "negative_unsupported_dynamic_alloca_cases": 2,
+      "stress_compilations": 6,
+      "mir_reload_controls": 2,
+      "ineligible_gfx900_controls": 1,
+      "strict_oracle_mutations": 4,
+      "diagnostic_parser_mutations": 8
+    }
+  },
+  "review_fixes": [
+    "explicit concrete MC mapping for encoding pseudos",
+    "reject bundles before skipped members",
+    "pre-PEI target register-info stack-realignment predicate",
+    "debug-only whole-module inventory and per-function proof results",
+    "explicit SIRegisterInfo definition include"
+  ],
+  "limits": [
+    "All patched behavior, same-build baseline equivalence and actual diagnostic sequencing remain untested until source-built compilers finish.",
+    "Dynamic variable-frame proof rejection and residual machine aliases remain coverage gaps.",
+    "Small constrained-register exploratory stress receipt expected_proof=proven was exploratory; its8VGPR spill pseudos instead imply rejection. Only unbounded-register variant is scheduled positive.",
+    "No runtime execution or full semantic equivalence claim; no native artifacts changed.",
+    "Successful object compilation proves API compatibility only. Full clean and patched llc builds are running; no patched compiler behavior has been accepted."
+  ],
+  "raw_evidence_sha256": {
+    "results/g3-private-backend-design/patched-object-validation.json": "e1fabf41ff5198bc743980033df010cd49c9570407d5d521d290d832d5bab9b6",
+    "results/g3-private-backend-design/buffer-call-proof-v2.patch": "5dbf08defb943974de039f61f78de4c2e7cd1efd7f9d94aebdd4f52e614f539e",
+    "results/g3-private-backend-validation/installed-controls-readiness.json": "bdf458df1486fb6617e1279175cffeded9fd61cbb48d734324328e489d3e2bec",
+    "results/g3-private-backend-review/review-receipt.json": "725906fbe4651d69a3d58db714340bf1f4ebefe193c2dbaf47013e80d834a146"
+  }
+}
