@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "hardware_validated": false,
+  "native_candidate_selectable": false,
+  "scope": "Offline macro-only native retained-private-call harness and host models; no selectable package, native executable or hardware qualification.",
+  "source_commit": "716c8eb4c01235d69ec0d8518f18761bcedb178f",
+  "baseline_source_commit": "6f7d9a1c59efc1657d6b73f7dd7d8f62ec673db0",
+  "branch": "development/g3-private-calls-native",
+  "worktree": ".local/g3-private-calls-native",
+  "source_binding": {
+    "clean_frozen_worktree": true,
+    "source_and_protected_files_compared_to_frozen_git": true,
+    "protected_git_blobs_identical_to_baseline": true,
+    "only_commit_changes": [
+      "CMakeLists.txt",
+      "tools/native_canary.cpp",
+      "tests/private_calls_native_test.cpp",
+      "docs/PRIVATE_CALLS_PLAN.md"
+    ],
+    "line_endings": "Raw compiled-file hashes are preserved. tests/private_calls_native_test.cpp has CRLF checkout bytes; CRLF-to-LF normalization alone matches its frozen Git blob."
+  },
+  "raw_receipt": {
+    "path": ".local/g3-private-calls-native/results/private-calls-native-receipt.json",
+    "bytes": 29833,
+    "sha256": "13c042b47534f700071dbaeec4fbe52c91e12d4569797a7137e1e152663c030c",
+    "immutable": true
+  },
+  "independent_verification": {
+    "path": "results/private-calls-native-main-validation/verified-artifacts.json",
+    "bytes": 33987,
+    "sha256": "61ddce03571777d3859a8dcc3c12b3cf14e142220e1d31b08df0ae1679d58ae3",
+    "counts": {
+      "source_files": 4,
+      "protected_files": 22,
+      "fixture_files": 40,
+      "fixture_profiles": 4,
+      "host_binaries": 6,
+      "sdk_objects": 9,
+      "logs_and_command_files": 16,
+      "tool_identity_records": 10,
+      "all_hash_references": 108,
+      "distinct_resolved_files": 106,
+      "raw_receipts": 1
+    }
+  },
+  "frozen_changed_inputs": [
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 11664,
+      "sha256": "fa00b0a1b40ed38eef4d347bb5bb124dee45e406340cab0c531ae8b0af6f5023",
+      "git_blob_sha256": "fa00b0a1b40ed38eef4d347bb5bb124dee45e406340cab0c531ae8b0af6f5023"
+    },
+    {
+      "path": "tools/native_canary.cpp",
+      "bytes": 15045,
+      "sha256": "aad1beaacd9a791d75e461367ba23b2a28b76bbf7147b66a19eccd505282283c",
+      "git_blob_sha256": "aad1beaacd9a791d75e461367ba23b2a28b76bbf7147b66a19eccd505282283c"
+    },
+    {
+      "path": "tests/private_calls_native_test.cpp",
+      "bytes": 14571,
+      "sha256": "0931cb22908dd35c83640bfa4635e6c24fcf2a36988cac8ae7aa393f9c1f5b93",
+      "git_blob_sha256": "839454d2ba2767e430f71b5a2993e5cd4b28de6bb6b9ffa73825e620f666eb9e"
+    },
+    {
+      "path": "docs/PRIVATE_CALLS_PLAN.md",
+      "bytes": 8343,
+      "sha256": "71d1aa40453a1053afa865609f6ccbb9833df1c8f0387b1ff222fa5987726b95",
+      "git_blob_sha256": "71d1aa40453a1053afa865609f6ccbb9833df1c8f0387b1ff222fa5987726b95"
+    }
+  ],
+  "profile": {
+    "kernel": "nested_private",
+    "native_selection": "macro only: PS5HIP_CANARY_PRIVATE_CALLS; absent from unchanged builder/stager/checker/verifier profiles",
+    "user_sgprs": 8,
+    "groups": 257,
+    "threads_per_group": 64,
+    "exact_values": 16448,
+    "private_bytes_cumulative": 288,
+    "frame_bytes": [
+      144,
+      144,
+      0
+    ],
+    "scratch_wave_stride_bytes": 9216,
+    "scratch_payload_bytes": 11796480,
+    "scratch_guard_bytes_each_side": 65536,
+    "timeout_ms": 2000,
+    "success_explicitly_closed_allocations": 7,
+    "quarantine_retained_allocations": 7,
+    "gpu_holds_each_retained_allocation": 1
+  },
+  "host_checks": {
+    "asan_ubsan": true,
+    "ctest_passed": 13,
+    "fixture_profiles": [
+      "gfx1013/O1",
+      "gfx1013/O2",
+      "gfx1030/O1",
+      "gfx1030/O2"
+    ],
+    "per_private_profile": {
+      "success_case": 1,
+      "corruption_rejection_cases": 16,
+      "returned_submission_failure_quarantine_cases": 3
+    },
+    "checks": [
+      "actual harness/parser/8-SGPR packet planner/queue routing",
+      "independent source-array oracle and wave32 swizzled cumulative frame arithmetic",
+      "16448 distinct inputs and outputs; 96 wrap/index boundary inputs",
+      "lost leaf store with forwarded register value changes output by three",
+      "immutable input, full rounded allocation guards, scratch guards and scratch activity",
+      "submit error, kick error and bounded fake-clock timeout retain all seven resources",
+      "saved compiler-contract audit resolves two real linked calls and post-call reload",
+      "existing indexed-store/register-spill/static-LDS oracles preserved"
+    ],
+    "log": {
+      "path": ".local/g3-private-calls-native/results/host-check-1.log",
+      "bytes": 1706,
+      "sha256": "f73d135f36d39640b1cac37db97f9f701d12d360326bc42309257aa20ef05ba8"
+    }
+  },
+  "native_sdk": {
+    "objects_compiled": 9,
+    "harness_variants": "gfx1013/gfx1030, each plain and elevation+shell flags",
+    "unchanged_runtime_objects": [
+      "code_object",
+      "launch",
+      "native_memory",
+      "submission",
+      "agc_backend"
+    ],
+    "linked": false,
+    "packaged": false,
+    "objects": [
+      {
+        "name": "gfx1013-plain",
+        "bytes": 11200,
+        "sha256": "f7f5d431db3934bc8399b6ab61fbd27fb05df58f4b514e40d0c26fd0f764c35f"
+      },
+      {
+        "name": "gfx1013-elevated-shell",
+        "bytes": 49192,
+        "sha256": "de01b6faee04bbe891ba84acfaf156eee81bb5e6f20d0093132bbd3bbbb09033"
+      },
+      {
+        "name": "gfx1030-plain",
+        "bytes": 11200,
+        "sha256": "f7f5d431db3934bc8399b6ab61fbd27fb05df58f4b514e40d0c26fd0f764c35f"
+      },
+      {
+        "name": "gfx1030-elevated-shell",
+        "bytes": 49192,
+        "sha256": "97d33ce40d6b3bcac8b6d681a766e063f889bd116e7223809c8ea4a4aa71763f"
+      },
+      {
+        "name": "code_object",
+        "bytes": 81520,
+        "sha256": "e114503b41f6131fc3ff11b434043f711a4b0cb217b37ee54a5109b30304df27"
+      },
+      {
+        "name": "launch",
+        "bytes": 35200,
+        "sha256": "c1f38d51c3436a4d08d1d7031efb96cac0821a86cb4ce5b2507fbcea8be49bf5"
+      },
+      {
+        "name": "native_memory",
+        "bytes": 12208,
+        "sha256": "e6fa4a4ddf7f352a1e63aecc30de4fab8839d38373857237a277e8590004917c"
+      },
+      {
+        "name": "submission",
+        "bytes": 18984,
+        "sha256": "11b7b18da0d9db31030c9de8a43966dabfa6f247ec8f84ff215e943e6342b6a6"
+      },
+      {
+        "name": "agc_backend",
+        "bytes": 11928,
+        "sha256": "914f42d4106390af33ef56c61f73d9763d3af444fb191bfacfa2661b75bacbd1"
+      }
+    ]
+  },
+  "fixture_receipt": {
+    "path": ".local/g3-private-calls-native/build/private-calls/comparison.json",
+    "bytes": 17750,
+    "sha256": "854e741e2cfe621c74f4857da6e579ef297458bfb1cb94736214aee5ee2f1365"
+  },
+  "limits": [
+    "native allocator/title startup/exception-quarantine catch not exercised by new model",
+    "synthetic host mappings and source-array scratch-swizzle model are not GPU ISA execution",
+    "actual SPI wave-slot assignment, private aperture, flat-register setup and coherence remain unproved",
+    "saved original generic-flat fixtures were modeled; no selection of unfinished patched-compiler candidate",
+    "volatile and ambiguous generic-pointer routes remain separate unmet requirements",
+    "no native link/import/lifecycle/package qualification or console access",
+    "CPU source operations and byte-swizzle accounting are not ISA/hardware emulation or proof of GPU call execution.",
+    "Compiler/backend acceptance remains a separate workstream; these are preserved original generic-flat fixtures.",
+    "This record does not close G3 or establish flat-scratch/private-aperture support."
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "classification": "offline read-only private aperture native package readiness",
+  "source_commit": "669d4fc573bdd17ec2dfd29c666680d75149091d",
+  "source_clean": true,
+  "target": "gfx1013",
+  "kernel": "private_aperture",
+  "title_id": "PPSA99014",
+  "stage": ".local/g3-aperture/dist/PPSA99014/gfx1013-private_aperture-c8a5a99267ee",
+  "manifest_sha256": "b4d96c0c9da0d02c7edb928ad2010aeb5f731031997ca0cc389fef4940dc6437",
+  "package_receipt_sha256": "1013e45d1c145a37e55026702391757924b96da491c0f0951d495b47e74bc277",
+  "build_receipt_sha256": "d508bb3075d90d0473ebb74ba41fdf945f581223fcb74fe97680202e675102d5",
+  "package": {
+    "schema": 1,
+    "hardware_validated": false,
+    "title_id": "PPSA99014",
+    "manifest_sha256": "b4d96c0c9da0d02c7edb928ad2010aeb5f731031997ca0cc389fef4940dc6437",
+    "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+    "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "7565cc2d8b11e382d938f34a46f9861826f3acd2da247b8fd45935b2ced17792",
+      "bytes": 3571712
+    },
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "aperture_layout": {
+    "groups": 1,
+    "threads": 64,
+    "wave_size": 32,
+    "words_per_lane": 6,
+    "output_words": 384,
+    "observation_only": true
+  },
+  "toolchain": {
+    "llvm_version": "18.1.8",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08"
+  },
+  "compiler_device_receipt_sha256": "1e438373b3412081a4c872efa20f7b60b422fb97ad0ad8c9da3e8942b6f3952a",
+  "host_receipt_sha256": "b2766d24fde8f499561afe1d30adcb5ca7165215432f7a9b2dc7b1f1e0fa7c71",
+  "imports": {
+    "count": 116,
+    "identical_to_frozen_arithmetic": true,
+    "selected": {
+      "sceAgcInit": [
+        "libSceAgc",
+        "libSceAgc"
+      ],
+      "sceAgcSuspendPoint": [
+        "libSceAgc",
+        "libSceAgc"
+      ],
+      "sceAgcDriverSubmitDcb": [
+        "libSceAgcDriver",
+        "libSceAgcDriver"
+      ],
+      "sceShellCoreUtilExitApp": [
+        "libSceSystemService",
+        "libSceShellCoreUtil"
+      ]
+    }
+  },
+  "reference_identical_files": [
+    "libc.raw.elf",
+    "candidate/sce_module/libc.prx",
+    "candidate/lapy.elf",
+    "ps5-native-tool",
+    "libc-builder"
+  ],
+  "startup": "shell exit installer before init/main/catchReturnFromMain",
+  "fself": "eboot and libc integrity valid",
+  "device_isa": "exact frozen O2 aperture contract passed",
+  "actual_object_host_model": "pass; synthetic host memory/addresses, not GPU evidence",
+  "preserved_previous_files": 1012,
+  "preservation_inventory_sha256": "90d527adaf681bf951efe43a80b52c855babc65e6e9d2744d5ce4581214f5934",
+  "console_access": false,
+  "deployed": false,
+  "hardware_validated": false,
+  "limits": [
+    "Read-only raw aperture register observation only; no private pointer, private memory, calls or flat setup qualification",
+    "A raw word equal to its initial poison cannot universally witness its individual store",
+    "Native startup, imports, GPU completion and clean shutdown remain unexecuted",
+    "Candidate catalog is recorded locally; no deployment or gate completion is implied."
+  ],
+  "native_linked": true,
+  "package_created": true,
+  "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-private_aperture.log",
+  "raw_readiness": {
+    "path": ".local/g3-aperture/results/aperture-native-ready/offline-aperture-native-readiness.json",
+    "sha256": "8d5e77383be02053cdbe8e8f421c7efbf49bbd4d1546cbbced5739ec76ca68a1",
+    "bytes": 24428
+  },
+  "independent_verification": {
+    "path": "results/aperture-native-catalog/verification.json",
+    "sha256": "d24d97695e62bc501d2303aa3e9f7f8460ca07cf7a35a8f5ab1ac90d2b452f8e",
+    "bytes": 2323
+  },
+  "historical_source_host_evidence": {
+    "path": "evidence/offline-private-aperture-diagnostic.json",
+    "sha256": "25c5e2c71c6364382d9a9119ec04b7182fde53cc216856d5a72d8b83c3764dd6",
+    "preserved_unchanged": true
+  },
+  "source_sha256": {
+    "tools/native_canary.cpp": "e15ee651da851fd391f94ae38a6697dc9ecfdc5bfcf01dce08c507de9077672c",
+    ".deps/elevation/client/elevation.cpp": "037e43b4b2db3d862af54377a5d25a14251ad6bba9c5199cb442bb99043ae79b",
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "src/code_object.cpp": "c743f7dab849da3c5ab916925be670769e065b3d5f45f50753ac5bef97ea56b5",
+    "src/launch.cpp": "200bc7e285946eff7d432bf96ea74e3171fd15521846473ba4c76f9888cd11ba",
+    "src/native_memory.cpp": "c2d4526a8a7c5d69313023b63e718b3d0cd1d469f7837c34b3af331326279d5f",
+    "src/submission.cpp": "14e2a45dbfd4a47751716ca02fe682c4e233c2db3aa482e503e09fe97f18a969",
+    "src/agc_backend.cpp": "f96e87f57ad7e0ac3153f6f03f52ad3095e7e21d41cfc0a4686d29094685efbb",
+    "include/ps5hip/agc_backend.h": "a637e406c9d9371f6c100200cedda8af9936b77a65fa7baeef024217b9aeca8c",
+    "include/ps5hip/code_object.h": "1c17585b87d2c01ca76e3f173776defbe63ff2dc89d8bb9d85ecab0830081b02",
+    "include/ps5hip/launch.h": "dc6551ae7a2d063a5f4af6b7b319fdf170564472842aea482db59b6fc904e30b",
+    "include/ps5hip/native_memory.h": "cc22948dfb61794168d8966ac45a888bb910d417976986fb4d7288ab38e32009",
+    "include/ps5hip/submission.h": "16fa556f871392c5cd9d437746fb9a1a12ef2170ff92809f75dada4867bcf1de",
+    "patches/native-shell-exit-probe.patch": "771e45f55e69917701eb97be58d13eb7ed999a6c3a186aab65553a37d0b6b77d",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "kernels/private_aperture.hip": "d877d87c872c3ebf16f77a37c45364554abc8ef8246da01f552924d77a3b9b41",
+    "tools/probe_aperture.py": "fabd99feefd954b493e67d1b22e1e5122e2295292eb6f686d48f637f810704cb",
+    "tools/native_aperture.h": "c142862490eb3d027f61888f581af63167987c4d0b87897cdfb24c00e9c25edf",
+    "tools/build_native_canary.py": "a0a8d39dbdc9622d46f78748d0e907e2f22d2208074a37407426730556aeedac",
+    "patches/native-import-libraries.patch": "54f5e5fbb85c97aa155a63a2cf92e68cf3c04e6949f536beadfbf6f12b8e6e95",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "dependencies.json": "d58bacc1844500109c9ee1454e946e5d95254f0557865ebabe9110142487d59b",
+    "elevation-inputs.json": "5a30c4d6c6bc43b46724488256db8b6e8548dba41add6f9d44c3ccdc6324d676",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/prepare_elevation.py": "d0ea2ad42b30987edbc47330031aef4fd19906db5355dcd722506013b40e027e",
+    ".deps/elevation/client/elevation.hpp": "7e262c5f5be6e933a2c9303236d836e3a66e309bc506ae156a26ef5e93043755",
+    ".deps/elevation/client/protocol.hpp": "2bd83e0b78df89d429b5ffc39208b8a175ef977f63744ce300ffeda497827f69",
+    ".deps/elevation/client/validate-helper.py": "770827f77c6bc1d856cdea54bb87842cd1f055523c1b24dd41b14a400d219c55",
+    ".deps/elevation/lapy/LICENSE": "5ef18e95f617c9d3a2674cc3256f5c0d6ec2f794a57e9e40f2185dd454c9f8da",
+    ".deps/elevation/lapy/tools/build_owned_daemon.py": "e435ad2b102f642c63c0d18900a672a77267993dd75a27deaa94327aa3fdf07f",
+    ".deps/elevation/lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    ".deps/elevation/lapy/source/donor_transaction.c": "6844275eca240aab25d5d61ae030f94b50b9538116452ccb6078f6518ba876d9",
+    ".deps/elevation/lapy/source/donor_transaction.h": "c976e43a298a3621b2ff0f83f92f1304dc5c177a00d5af14c5a78a9620d2ce5b",
+    ".deps/elevation/lapy/source/vnode_ref_probe.c": "ef49b83a80cdc980ea6b5cdb0477110b08b10feba7e7229cbb0c7db1bf0a87f0",
+    ".deps/elevation/lapy/source/vnode_ref_probe.h": "13e7f3b9ba77c696209f647e5a0fb60f50a6e8112991bb4bfc63da632a6a0153",
+    ".deps/elevation/lapy/source/lapy_elevation_protocol.h": "bb02c4aa814eaba7a7a423a31b29ff41f786212c2953678cf29434e85fa0f869",
+    ".deps/elevation/logging/ps5log.h": "394af67d0f8b60b3335deb53396e52855ea2daa50ca914a456ea7663f48900c6"
+  },
+  "tools": {
+    "clang++": {
+      "resolved": "/usr/lib/llvm-18/bin/clang",
+      "bytes": 140672,
+      "sha256": "690ac43e62210d7816e8d2c6a828549b5e690368c8c8b24dc1aa30fb5530b4c4"
+    },
+    "ld.lld": {
+      "resolved": "/usr/lib/llvm-18/bin/lld",
+      "bytes": 5150720,
+      "sha256": "8190f471e4c618d5cf283801fd060d727b4cb32b602acbcf3e989089c17c7e19"
+    },
+    "llvm-readobj": {
+      "resolved": "/usr/lib/llvm-18/bin/llvm-readobj",
+      "bytes": 1938800,
+      "sha256": "3dad3c6cfdbf380edf0415299ce5c8e6a52381f296690f2362da63d2562a4f04"
+    },
+    "llvm-objdump": {
+      "resolved": "/usr/lib/llvm-18/bin/llvm-objdump",
+      "bytes": 920000,
+      "sha256": "dae6cd5e22c931a4e24f0c892be3e621d0f7a856fbe00a2050e4d26d15c831a4"
+    },
+    "libclang-cpp.so.18.1": {
+      "resolved": "/usr/lib/llvm-18/lib/libclang-cpp.so.18.1",
+      "bytes": 64644584,
+      "sha256": "5ad2aa56cdb24612047f3b87f77bf9e25ffac2c3dfdcc40af3a174a974753cf8"
+    },
+    "libLLVM-18.so.18.1": {
+      "resolved": "/usr/lib/x86_64-linux-gnu/libLLVM-18.so.1",
+      "bytes": 122948952,
+      "sha256": "fb196c85705dad20792cb27090d49d52d33474dd531b98652a73a368ec977c0b"
+    }
+  },
+  "artifacts": {
+    "eboot.elf": {
+      "bytes": 929924,
+      "sha256": "4f00b69bdb40f83a72d339d3df5f8946d6b6c6160c810398ef31a4e0625dbbd3"
+    },
+    "llvm-pie.elf": {
+      "bytes": 1159272,
+      "sha256": "2d4e873a3f68d4fd0ee15d79d3eb05512f5440014a988d805edf1fabcfc2f81b"
+    },
+    "candidate/eboot.bin": {
+      "bytes": 814994,
+      "sha256": "96c090dd4b7299803945393f754ba654b4a1bdf451795cae0751710ff8ecb429"
+    },
+    "candidate/canary.hsaco": {
+      "bytes": 2936,
+      "sha256": "f19b812a253c387d89d2136c90907b3f2ce46fe08b147d46ca104dde9ffeb4cb"
+    },
+    "candidate/lapy.elf": {
+      "bytes": 155032,
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726"
+    },
+    "candidate/sce_module/libc.prx": {
+      "bytes": 1284674,
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+    }
+  },
+  "comparison_to_frozen_arithmetic": {
+    "only_changed_comparable_object": "native_canary.o",
+    "source_commit": "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe"
+  },
+  "catalog_update": {
+    "prior_count": 23,
+    "new_count": 24,
+    "prior_catalog_sha256": "a2c0705dd5b6987ad5e9d7f909c0e27fe7f621ee08b8327a19b9ef8dedd19d5d",
+    "all_prior_entries_and_revocations_preserved": true
+  },
+  "verification": {
+    "local_artifacts_verified": true,
+    "hardware_gate_passed": false,
+    "title_id": "PPSA99014",
+    "target": "gfx1013",
+    "kernel": "private_aperture",
+    "shutdown_mode": "shell-request-probe",
+    "aperture_layout": {
+      "groups": 1,
+      "threads": 64,
+      "wave_size": 32,
+      "words_per_lane": 6,
+      "output_words": 384,
+      "observation_only": true
+    },
+    "source_commit": "669d4fc573bdd17ec2dfd29c666680d75149091d",
+    "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-private_aperture.log",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "7565cc2d8b11e382d938f34a46f9861826f3acd2da247b8fd45935b2ced17792",
+      "bytes": 3571712
+    },
+    "controllers": {
+      "launch.elf": {
+        "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+        "bytes": 110544
+      },
+      "close.elf": {
+        "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+        "bytes": 110592
+      }
+    },
+    "unproven": [
+      "console idle state",
+      "remote bytes",
+      "registration",
+      "log freshness",
+      "native execution",
+      "clean teardown",
+      "service health"
+    ]
+  }
+}

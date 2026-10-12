@@ -43,9 +43,10 @@ Updated: 2026-10-11, America/New_York.
   shell-managed lifecycle. Ordinary C exit still faults with SIGSYS; threaded or
   framework teardown is unqualified. See `evidence/native-shell-exit.json` and
   `evidence/native-cpu-shutdown.json`. Do not repeat the failed exit diagnostics.
-- **Do not use .40 until recovery is established.** Its original loader-failure
-  PID204 had unresolved teardown after one identity-guarded termination. No
-  retry, guessed kill, reboot or settings change is authorized by this evidence.
+- The user now selects **.40 for useful milestone tests**. Before any launch,
+  establish that its earlier loader-failure PID204 has cleared and that the
+  console is idle. Its prior teardown remained unresolved; no automatic retry,
+  guessed kill, reboot or settings change follows from this authorization.
   See `evidence/first-native-cpu.json`.
 - Main has 27 passing host CTests. The exact frozen vector source also passes
   ten parser/resource/launch/memory/submission/AGC sanitizer cases independently;
@@ -88,7 +89,12 @@ passed focused checks, and both changed core files compile with the PS5 SDK.
 The strengthened source reloads a mutated private element after a retained call;
 16,448 outputs and 96 boundary cases distinguish a lost store from register
 forwarding. See `evidence/offline-private-call-launch.json`. No native flat-call
-harness is packaged. Private-aperture and flat-register support remain unproven;
+harness is packaged. A macro-only harness is now frozen at `716c8eb`, with 13
+sanitizer tests covering four real compiler profiles and nine SDK object compiles.
+Its models exercise the actual harness, parser and queue with synthetic GPU
+callbacks; they do not execute ISA. It remains absent from package-selection
+tools. See `evidence/offline-private-calls-native-harness.json`.
+Private-aperture and flat-register support remain unproven;
 prior graphics flat-scratch faults remain adverse evidence. A separate read-only
 aperture probe compiles offline, but has not run on hardware. Continue compiler
 specialization/backend research before considering the platform diagnostic.
@@ -104,8 +110,9 @@ A default-off LLVM18 backend proof now compiles as a standalone pass object;
 review corrected instruction-encoding pseudo handling, bundle rejection and the
 pre-frame-lowering alignment check. Installed-compiler controls cover ordinary,
 generic, volatile, reordered, late-spill and MIR-reload cases. See
-`evidence/offline-private-backend-object.json`. Full clean and patched LLVM builds
-are underway. The patched compiler has not run the acceptance matrix; no
+`evidence/offline-private-backend-object.json`. The clean LLVM build and its
+baseline controls have completed; the separate patched build is still underway.
+The patched compiler has not run the acceptance matrix; no
 production compiler or hardware capability has changed.
 
 A separate read-only aperture diagnostic is frozen at `669d4fc` on
@@ -115,8 +122,12 @@ consistency, full rounded guards, ownership and closure. Distinct raw-field pois
 catches omitted-store patterns without imposing an invented aperture range.
 All 29 integrated sanitizer CTests passed, followed by four and five affected
 checks after test and ISA-audit improvements; both target harnesses compile with
-the PS5 SDK. See `evidence/offline-private-aperture-diagnostic.json`. No native
-link, package or console execution has occurred. Even plausible observations
+the PS5 SDK. See `evidence/offline-private-aperture-diagnostic.json`. The same
+source now has a verified native package, image `7565cc2d...`, with startup,
+116 import bindings, exact device ISA, FSELF and full UFS extraction checks.
+All 1,012 preservation files remain unchanged; the catalog appends this as its
+24th candidate. See `evidence/offline-private-aperture-native-readiness.json`.
+No console execution has occurred. Even plausible observations
 would not establish flat addressing or private-memory support.
 
 Historical failures and superseded packages remain preserved. The first GPU
@@ -161,7 +172,8 @@ recorded, and the package catalog preserves all 19 earlier entries. Reviewed
 controls are bound to committed catalog `2ad6d9b` and the exact candidate tools;
 their first deployment invocation stopped at the busy-console idle guard.
 Continue offline LDS/private-storage preparation. At the next suitable milestone,
-qualify two separately reviewed clean cycles when .30 is idle. This
+qualify two separately reviewed clean cycles on the user-selected .40 after its
+earlier process has cleared and the console is idle. This
 supersedes the planned vector-only cycle-two action;
 preserve that control and its first-cycle evidence, but do not spend console time
 on it as a G2-closing test. The installed vector image and log must still be
@@ -343,3 +355,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G2 progress | c37f0db | FW6.02 | two vector dispatches and one clean cycle passed | evidence/native-vector-twice-cycle1.json | next: idle-gated second cycle
 - 2026-10-11 | G3 offline | 1e0428f | gfx1013 | forced-spill image packaged; no hardware run | evidence/offline-scratch-native-readiness.json | next: combined G2 acceptance candidate
 - 2026-10-11 | G2 offline | 5b74ac8 | gfx1013 | combined arithmetic image packaged | evidence/offline-arithmetic-suite-native-readiness.json | next: two idle-gated cycles
+- 2026-10-11 | G3 offline | 716c8eb / 669d4fc | retained-private-call harness modeled; read-only aperture package verified | evidence/offline-private-calls-native-harness.json; evidence/offline-private-aperture-native-readiness.json | no new hardware qualification

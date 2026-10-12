@@ -2,7 +2,8 @@
 
 Updated: 2026-10-11, America/New_York.
 
-Status: G1 passed its offline acceptance; G2 is in progress and G3-G12 remain planned.
+Status: G1 passed its offline acceptance; G2 is in progress, G3 has experimental
+offline implementations, and G4-G12 remain planned.
 Frozen native candidates and validation receipts exist; no GPU gate has passed. See `../STATE.md`
 for the current evidence and next experiment.
 
@@ -176,8 +177,8 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | Goal | Outcome | Dependencies | Status |
 | --- | --- | --- | --- |
 | G1 | Reproducible compiler and platform contract | None | passed offline |
-| G2 | Native execution of a real HIP code object | G1 | in progress; store and two vector dispatches passed; repeated vector lifecycle pending |
-| G3 | Correct general compute semantics | G2 | planned |
+| G2 | Native execution of a real HIP code object | G1 | in progress; store and two vector dispatches passed; two clean cycles of the frozen combined arithmetic image pending |
+| G3 | Correct general compute semantics | G2 | experimental offline implementations and native candidates; hardware qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | planned |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
