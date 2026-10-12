@@ -1,8 +1,10 @@
 #include "ps5hip/submission.h"
+#include "ps5hip/native_data.h"
 #include <ps5platform/kernel.h>
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <functional>
 
 namespace {
 std::map<int64_t, void *> allocations;
@@ -23,11 +25,13 @@ struct Model : ps5hip::SubmissionBackend {
     bool throw_kick = false, throw_clock = false, throw_sleep = false;
     unsigned flushes = 0, fail_flush_at = 0;
     volatile uint32_t *marker = nullptr;
+    std::function<void()> on_submit;
     void flush(void *, size_t) override {
         if (++flushes == fail_flush_at || throw_flush) throw ps5hip::ObjectError("injected flush failure");
     }
     int32_t submit(uint32_t *words, uint32_t count) override {
         ++submits;
+        if (on_submit) on_submit();
         if (throw_submit) throw ps5hip::ObjectError("injected driver exception");
         check(count >= 11);
         const auto *end = words + count - 8;
@@ -78,6 +82,23 @@ int main() {
     try {
         using namespace ps5hip;
         const std::vector<uint32_t> commands{0xffff1000}; // Model payload; never sent to hardware.
+        {
+            NativeDataRegistry data;
+            Model model; SubmissionQueue queue(model);
+            auto *base = data.allocate(64);
+            auto hold = data.resolve(base, 64);
+            model.on_submit = [&] {
+                check(hold.memory->gpu_in_use());
+                try { data.free(base); throw std::runtime_error("in-flight free accepted"); }
+                catch (const NativeDataError &error) { check(error.status() == NativeDataStatus::InUse); }
+            };
+            check(queue.submit_and_wait(commands, {hold.memory}, 10).status == SubmissionStatus::Complete);
+            check(!hold.memory->gpu_in_use());
+            data.free(base);
+            model.on_submit = {};
+            reject([&] { queue.submit_and_wait(commands, {hold.memory}, 10); });
+            check(model.submits == 1 && !queue.poisoned());
+        }
         {
             Model model; SubmissionQueue queue(model);
             auto resource = std::make_shared<NativeMemory>(64, 64, false);
