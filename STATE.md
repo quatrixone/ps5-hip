@@ -1,6 +1,6 @@
 # Current state
 
-Updated: 2026-10-11, America/New_York.
+Updated: 2026-10-12, America/New_York.
 
 ## Actual status
 
@@ -132,10 +132,25 @@ Six positive controls and six linked alias objects pass narrowly bounded schedul
 and actual-byte/call-target checks. Parent verification rehashed 1,409 artifact
 references. See `evidence/offline-private-backend-ipra-off-controls.json`; earlier
 failed research remains in `evidence/offline-private-backend-source-builds.json`.
-Fresh portable reproduction and a separately identified 304-byte native harness
-remain pending. The original 288-byte native control is preserved; generic and
-volatile private-call support, the production compiler and hardware capabilities
-remain unchanged.
+Fresh portable reproduction now passes at `fa8788e`: 61 cases per mode, eight
+ordinary linked graphs, 48 extension comparisons, 14 guard configurations, four
+register controls and six linked alias objects. Independent verification rehashed
+1,792 artifacts and bound the current binaries to retained source-build evidence.
+The recipe is included under `tools/experimental/private-calls`; see
+`evidence/offline-private-compiler-reproduction.json`. This used supplied
+source-built binaries on the same WSL host, without rebuilding LLVM or claiming
+independent-host reproduction.
+
+The separate 304-byte `private_calls_buffer` harness and connected package tools
+are frozen at `56dcbcf`. All 61 sanitizer CTests and eight checks on the four fresh
+objects pass. The experimental profile lock pins the exact compiler receipt,
+input IR and object bytes; equal private-byte metadata cannot substitute a generic,
+volatile or proof-disabled shader. Its gfx1013 O2 image `c539b220...` passes
+startup/import/FSELF/UFS2 checks and full extraction comparison; see
+`evidence/offline-private-buffer-native-readiness.json`. It has not executed.
+The original 288-byte native control is preserved; generic and volatile
+private-call support, the production compiler and hardware capabilities remain
+unchanged.
 
 A separate read-only aperture diagnostic is frozen at `669d4fc` on
 `development/g3-aperture`. It uses the existing six-user-SGPR launch path and
@@ -193,10 +208,13 @@ as G2 item 5 explicitly requires. Its offline readiness and host evidence are
 recorded, and the package catalog preserves all 19 earlier entries. Reviewed
 controls are bound to committed catalog `2ad6d9b` and the exact candidate tools;
 their first deployment invocation stopped at the busy-console idle guard.
-Continue the paired private-call compiler acceptance, measured frame contracts
-and reproducible experimental recipe offline. At the next suitable milestone,
-qualify two separately reviewed clean cycles on the user-selected .40 after its
-earlier process has cleared and the console is idle. This
+The portable private-call compiler reproduction and exact 304-byte native package are
+now ready offline. Check user-selected .40 once, with both coordination locks,
+declared services, foreground idle and the frozen read-only PID204 status probe.
+Require recovery evidence separately from foreground idle. If available, run the
+unchanged arithmetic control before the experimental buffer-call image. Qualify
+two separately reviewed clean arithmetic cycles for G2; a private-call pass is a
+separate G3 observation. This
 supersedes the planned vector-only cycle-two action;
 preserve that control and its first-cycle evidence, but do not spend console time
 on it as a G2-closing test. The installed vector image and log must still be
@@ -382,3 +400,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-11 | G3 offline | 06956e4 | six-dispatch atomic harness modeled; both SDK objects compiled | evidence/offline-atomic-native-harness.json | no package or hardware qualification
 - 2026-10-11 | compiler research | source-built LLVM comparisons exposed call-mask and IPRA ordering issues; guarded revision 4 compiled | evidence/offline-private-backend-source-builds.json | full paired acceptance pending
 - 2026-10-11 | compiler milestone | guarded revision 4 passes selected paired IPRA-off controls and eight linked ordinary graphs; generic/volatile fallback retained | evidence/offline-private-backend-ipra-off-controls.json | next: fresh portable reproduction and isolated304-byte native harness
+- 2026-10-12 | G3 offline | fa8788e / 56dcbcf | portable recipe and304 image verified | evidence/offline-private-buffer-native-readiness.json | next: .40 idle/recovery

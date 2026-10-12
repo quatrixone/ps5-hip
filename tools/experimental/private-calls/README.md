@@ -1,11 +1,14 @@
 # Experimental private-call compiler recipe
 
 This directory preserves the bounded specialization plugin v3 and backend patch
-v4 as reproducible research sources. **This compiler route and portable recipe
-remain experimental and unfrozen.** The independent paired-IPRA-off measurement
-is complete for all eight ordinary/volatile profiles; portable preparation and
-measurement are separate from full backend acceptance. No receipt here claims
-an accepted compiler or native execution.
+v4 as reproducible research sources. **This compiler route remains experimental.**
+The selected portable recipe passed fresh preparation, independent measurement,
+three paired compiler modes and its post-audits on 2026-10-12. See the
+[reproduction evidence](../../../evidence/offline-private-compiler-reproduction.json).
+That run used previously source-built binaries on the same WSL host; it did not
+rebuild LLVM or establish independent-host reproduction. No receipt here claims
+an accepted production compiler or native execution. Earlier pending-status
+wording in pinned reference receipts is retained as historical provenance.
 
 V4 rejects `-amdgpu-experimental-prove-buffer-calls` when
 `TM->Options.EnableIPRA` is true. Every clean-baseline, patched-default-off and
@@ -203,7 +206,7 @@ unknown calls/instructions, recursion, indirect/unresolved calls, bundles,
 dynamic/realigned frames, actual flat/aperture register use and unsupported
 semantic pseudos. V4 rejects proof with IPRA enabled. Paired no-IPRA measurements qualify only
 these fixtures and compiler configuration; V2/V3 failures never imply V4 success.
-Even a future passing selected matrix proves neither arbitrary-client compiler
+The passing selected matrix proves neither arbitrary-client compiler
 correctness nor PS5 private-memory placement, SPI input setup, cache behavior,
 scratch swizzling on hardware, launch success, or runtime support.
 

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "classification": "private-buffer-native-offline-ready",
+  "source_commit": "56dcbcf8f0b47808267064ec3553c17dd820018e",
+  "source_clean": true,
+  "stage": ".local/g3-private-buffer-native/dist/PPSA99014/gfx1013-private_calls_buffer-5b2c45af768e",
+  "target": "gfx1013",
+  "kernel": "private_calls_buffer",
+  "title_id": "PPSA99014",
+  "private_buffer": {
+    "experimental": true,
+    "entry": "nested_private",
+    "groups": 257,
+    "threads": 64,
+    "wave_size": 32,
+    "invocations": 16448,
+    "user_sgprs": 8,
+    "private_bytes": 304,
+    "root_frame_bytes": 144,
+    "middle_frame_bytes": 160,
+    "leaf_frame_bytes": 0,
+    "wave_stride_bytes": 10240,
+    "ring_bytes": 13107200,
+    "tmpring": 42240
+  },
+  "compiler_binding": {
+    "kind": "experimental-private-buffer",
+    "reproduction_receipt_sha256": "1112c2d13c90d78ec55f36c14c5d84491f70082345db3746b4ea3b893d61291d",
+    "profile_lock_sha256": "9918e3f90629c3c87a192fd84f762f1ca432baffa2a27808373e17cdc9f8c0c6",
+    "selected_profile": {
+      "target": "gfx1013",
+      "optimization": "O2",
+      "input_sha256": "9881c724a933e2102e32369c55d5da3742bf6935bb5773e5790c7e313c6c2328",
+      "code_sha256": "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+      "bytes": 15848,
+      "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O2-original/output.hsaco"
+    }
+  },
+  "package": {
+    "schema": 1,
+    "hardware_validated": false,
+    "title_id": "PPSA99014",
+    "manifest_sha256": "08f79dca2d9ad2adf554fab986ca3493cd1ba5b9879a48fbc9136a3d96fa3ba6",
+    "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+    "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+      "bytes": 3637248
+    },
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "build_receipt_sha256": "609f0afe9074bd87ae87b9bd5cd4e9c8ab63759b7746d931be605aac99e8b734",
+  "manifest_sha256": "08f79dca2d9ad2adf554fab986ca3493cd1ba5b9879a48fbc9136a3d96fa3ba6",
+  "package_receipt_sha256": "5c01f120a9bc257bcd83e9f8416d5bdcf4a71e001eada1ffe4e9e33eeb0d080e",
+  "toolchain": {
+    "llvm_version": "18.1.8",
+    "sdk_revision": "95c08f27386fc698f6bbe21dde3030140a41d10b",
+    "native_tools_revision": "3f3ee69607013b345d2baa6d6a37c86745649a08"
+  },
+  "import_bindings": 116,
+  "changed_objects": [
+    "code_object.o",
+    "launch.o",
+    "native_canary.o"
+  ],
+  "preserved_files": 721,
+  "preservation_inventory_sha256": "3ded124c94e2442c4d1646a3ff5a65d86eff98f4a80a8fa40e22943358218125",
+  "hardware_validated": false,
+  "console_access": false,
+  "deployed": false,
+  "limits": [
+    "Actual packaged object passed host models, which do not emulate GPU ISA.",
+    "Hardware scratch offsets, visibility, call behavior and ownership require a bounded console test.",
+    "Only exact ordinary O2 gfx1013 object selected; generic and volatile private calls remain unsupported."
+  ],
+  "source_branch": "development/g3-private-buffer-native",
+  "host_validation": {
+    "ctest_passed": 61,
+    "ctest_failed": 0,
+    "fresh_portable_object_model_checks": 8,
+    "all_portable_artifact_hashes_checked_per_target": 1792,
+    "target_selections": [
+      "gfx1013-O2",
+      "gfx1030-O2"
+    ],
+    "native_sdk_objects_unchanged": 2
+  },
+  "sdk_host_objects": 2,
+  "startup_fself_import_and_package_checks": "passed",
+  "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-private_calls_buffer.log",
+  "raw_receipts": {
+    ".local/g3-private-buffer-native/results/private-buffer-binding/connected-readiness-56dcbcf.json": "dadce685a57bbf941098750d35d8e1cd77dba2e02551befd80dd133fb4e1e934",
+    ".local/g3-private-buffer-native/results/private-buffer-binding/connected-readiness-prefreeze.json": "b1ee89fae31f3087040ea77ecf2662ac96ab1156b4d923f9e9d280c1f746824a",
+    "results/private-buffer-milestone/native/readiness.json": "3bb1c16f3bd17d3d9eab1e140e5d26b62ae697adec75fe77d4fcac909c90ec91",
+    "results/private-buffer-milestone/record-native.py": "e54d904cfc308d6c748346a003c01c99a55cd139c068027f6fffc53194c9c290"
+  },
+  "verification": {
+    "local_artifacts_verified": true,
+    "hardware_gate_passed": false,
+    "title_id": "PPSA99014",
+    "target": "gfx1013",
+    "kernel": "private_calls_buffer",
+    "shutdown_mode": "shell-request-probe",
+    "source_commit": "56dcbcf8f0b47808267064ec3553c17dd820018e",
+    "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-private_calls_buffer.log",
+    "image": {
+      "file": "PPSA99014.ffpkg",
+      "sha256": "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+      "bytes": 3637248
+    },
+    "controllers": {
+      "launch.elf": {
+        "sha256": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+        "bytes": 110544
+      },
+      "close.elf": {
+        "sha256": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+        "bytes": 110592
+      }
+    },
+    "unproven": [
+      "console idle state",
+      "remote bytes",
+      "registration",
+      "log freshness",
+      "native execution",
+      "clean teardown",
+      "service health"
+    ],
+    "private_buffer": {
+      "experimental": true,
+      "entry": "nested_private",
+      "groups": 257,
+      "threads": 64,
+      "wave_size": 32,
+      "invocations": 16448,
+      "user_sgprs": 8,
+      "private_bytes": 304,
+      "root_frame_bytes": 144,
+      "middle_frame_bytes": 160,
+      "leaf_frame_bytes": 0,
+      "wave_stride_bytes": 10240,
+      "ring_bytes": 13107200,
+      "tmpring": 42240
+    },
+    "private_buffer_compiler": {
+      "kind": "experimental-private-buffer",
+      "reproduction_receipt_sha256": "1112c2d13c90d78ec55f36c14c5d84491f70082345db3746b4ea3b893d61291d",
+      "profile_lock_sha256": "9918e3f90629c3c87a192fd84f762f1ca432baffa2a27808373e17cdc9f8c0c6",
+      "selected_profile": {
+        "target": "gfx1013",
+        "optimization": "O2",
+        "input_sha256": "9881c724a933e2102e32369c55d5da3742bf6935bb5773e5790c7e313c6c2328",
+        "code_sha256": "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+        "bytes": 15848,
+        "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O2-original/output.hsaco"
+      }
+    }
+  }
+}

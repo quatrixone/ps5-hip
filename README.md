@@ -31,6 +31,9 @@ The repository is private.
 - [Current state](STATE.md): the next action and completed milestones.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
 - [Native build](docs/NATIVE_BUILD.md): pinned SDK, native candidates and remaining runtime work.
+- [Experimental private-call compiler](tools/experimental/private-calls/README.md):
+  reproduced bounded compiler recipe and its limits; the separate 304-byte native
+  candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like

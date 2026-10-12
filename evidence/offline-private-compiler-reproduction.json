@@ -1,0 +1,95 @@
+{
+    "schema":  1,
+    "classification":  "Selected experimental private-call compiler recipe reproduced offline",
+    "source_commit":  "fa8788ebc024866cfa9f7778627cc48350ff7a25",
+    "source_branch":  "development/g3-private-compiler",
+    "recipe":  "tools/experimental/private-calls/recipe.py",
+    "recipe_sha256":  "87c034a34b94908542db2de26a6bd04665e721cfb413dcf479f33daa83ebd501",
+    "pins_sha256":  "8bcf335d123a8732b7a75ada8cdcae3a6de6e1349e69ad876d1b802943c9c630",
+    "llvm_commit":  "3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff",
+    "compiler_sha256":  {
+                            "baseline":  "fbfea56d543c6bcca9535f34ea3d38229e9d9a79e9766554aa9a67944c90fb96",
+                            "patched":  "881acfaaf52d08d04bf90e7f74bbb764e0c261c6e01cc1f930f7b81b63497d42"
+                        },
+    "patch_sha256":  "40ae297525b4cd9ddad9f4f3acc39a905b4f5ed5d4694643f739802d010a033b",
+    "specialization_sha256":  "37385c7108503176180e3e4bbb6ebde518f14dadedc797ae1b39dcec779eb627",
+    "selected_recipe_reproduction_passed":  true,
+    "accepted_compiler":  false,
+    "production_compiler_changed":  false,
+    "hardware_validated":  false,
+    "cases_per_mode":  {
+                           "baseline":  61,
+                           "patched-off":  61,
+                           "patched-on":  61
+                       },
+    "counts":  {
+                   "ordinary_audit":  8,
+                   "extension_audit":  48,
+                   "guard_controls":  14,
+                   "register_controls":  4,
+                   "alias_linked_objects":  6
+               },
+    "artifact_references_rehashed":  1792,
+    "reproduced_source_identities_preserved_in_git":  67,
+    "required_configuration":  [
+                                   "-enable-ipra=false",
+                                   "-verify-machineinstrs"
+                               ],
+    "selected_profiles":  [
+                              {
+                                  "target":  "gfx1013",
+                                  "optimization":  "O1",
+                                  "input_sha256":  "4dac7254b918a7df1ccec5b87ebd862798ae8e6fa7690d48e52286913f573a41",
+                                  "code_sha256":  "42a675988ca9ad6fd8cd80cac37c582e62014f487660458bc187208e544ea9da",
+                                  "bytes":  10536,
+                                  "path":  "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O1-original/output.hsaco"
+                              },
+                              {
+                                  "target":  "gfx1013",
+                                  "optimization":  "O2",
+                                  "input_sha256":  "9881c724a933e2102e32369c55d5da3742bf6935bb5773e5790c7e313c6c2328",
+                                  "code_sha256":  "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+                                  "bytes":  15848,
+                                  "path":  "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O2-original/output.hsaco"
+                              },
+                              {
+                                  "target":  "gfx1030",
+                                  "optimization":  "O1",
+                                  "input_sha256":  "9ab394bd0ab2cdcb058eaea4d0efa41882ff289a16be7ef789cbaf6db138d0fb",
+                                  "code_sha256":  "3c9d303511e602e49a73848fa9952a1857f25fca80e74ea940c2f1949867a801",
+                                  "bytes":  10536,
+                                  "path":  "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1030-O1-original/output.hsaco"
+                              },
+                              {
+                                  "target":  "gfx1030",
+                                  "optimization":  "O2",
+                                  "input_sha256":  "274bc1182af17ac2fc5188b1b12e13d4fd0bf90987457e122b2a046a83082d9f",
+                                  "code_sha256":  "73d0283ff5221d1c8b5b6aa52a0042adb0cf5fb9e6509109cc3da06edb835fd1",
+                                  "bytes":  15848,
+                                  "path":  "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1030-O2-original/output.hsaco"
+                              }
+                          ],
+    "reproduction_receipt":  {
+                                 "path":  ".local/g3-private-compiler/results/portable measured v4-r2/reproduction-receipt.json",
+                                 "sha256":  "1112c2d13c90d78ec55f36c14c5d84491f70082345db3746b4ea3b893d61291d"
+                             },
+    "independent_verification":  {
+                                     "path":  "results/private-buffer-milestone/portable-verification.json",
+                                     "sha256":  "aa1940fe54b9611e25484549c316ffd8866a90950ece328f08aaa66e5e41d121",
+                                     "checks":  [
+                                                    "Full artifact and source identity inventory",
+                                                    "Three-mode compiler flags and default-off byte identity",
+                                                    "Conservative post-PEI MIR reload identity",
+                                                    "All five post-audit/control counts",
+                                                    "Current compiler/library hashes match retained source-build acceptance"
+                                                ]
+                                 },
+    "limits":  [
+                   "Supplied previously source-built LLVM18.1.8 binaries; this reproduction does not rebuild LLVM.",
+                   "Fresh preparation, measurement and acceptance ran on the same WSL host, not an independent build host.",
+                   "Only selected bounded private-call fixtures and explicit IPRA-disabled configuration are qualified offline.",
+                   "Not a production compiler selection, arbitrary HIP guarantee, native package or PS5 execution result.",
+                   "Dynamic alloca cases are expected pre-proof unsupported failures, not passed proof rejections.",
+                   "Original IPRA-on 288-byte harness and failed earlier compiler revisions remain separate."
+               ]
+}

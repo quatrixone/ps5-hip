@@ -1327,6 +1327,93 @@
         "filesystem_check": "passed",
         "extracted_files_match": true
       }
+    },
+    {
+      "manifest": {
+        "schema": 1,
+        "title_id": "PPSA99014",
+        "target": "gfx1013",
+        "kernel": "private_calls_buffer",
+        "source_commit": "56dcbcf8f0b47808267064ec3553c17dd820018e",
+        "build_receipt_sha256": "609f0afe9074bd87ae87b9bd5cd4e9c8ab63759b7746d931be605aac99e8b734",
+        "stager_sha256": "002e2068109f41e0b16c8e180467936a63083b13908eec698ff3e267550cfb69",
+        "hardware_validated": false,
+        "expected_log": "/data/ps5-hip/results/ps5-hip-gfx1013-private_calls_buffer.log",
+        "files": {
+          "canary.hsaco": {
+            "sha256": "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+            "bytes": 15848
+          },
+          "eboot.bin": {
+            "sha256": "ca363fbe17e869554de7639f9281e211e37d243f9928ab01010c15e76f0fde91",
+            "bytes": 824130
+          },
+          "lapy.elf": {
+            "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+            "bytes": 155032
+          },
+          "sce_module/libc.prx": {
+            "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+            "bytes": 1284674
+          },
+          "sce_sys/param.json": {
+            "sha256": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+            "bytes": 733
+          },
+          "sce_sys/icon0.png": {
+            "sha256": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+            "bytes": 2199
+          },
+          "results-dir.txt": {
+            "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+            "bytes": 21
+          }
+        },
+        "private_buffer": {
+          "experimental": true,
+          "entry": "nested_private",
+          "groups": 257,
+          "threads": 64,
+          "wave_size": 32,
+          "invocations": 16448,
+          "user_sgprs": 8,
+          "private_bytes": 304,
+          "root_frame_bytes": 144,
+          "middle_frame_bytes": 160,
+          "leaf_frame_bytes": 0,
+          "wave_stride_bytes": 10240,
+          "ring_bytes": 13107200,
+          "tmpring": 42240
+        },
+        "private_buffer_compiler": {
+          "kind": "experimental-private-buffer",
+          "reproduction_receipt_sha256": "1112c2d13c90d78ec55f36c14c5d84491f70082345db3746b4ea3b893d61291d",
+          "profile_lock_sha256": "9918e3f90629c3c87a192fd84f762f1ca432baffa2a27808373e17cdc9f8c0c6",
+          "selected_profile": {
+            "target": "gfx1013",
+            "optimization": "O2",
+            "input_sha256": "9881c724a933e2102e32369c55d5da3742bf6935bb5773e5790c7e313c6c2328",
+            "code_sha256": "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+            "bytes": 15848,
+            "path": "results/g3-private-backend-validation/runs/patched-on/ordinary-gfx1013-O2-original/output.hsaco"
+          }
+        }
+      },
+      "package": {
+        "schema": 1,
+        "hardware_validated": false,
+        "title_id": "PPSA99014",
+        "manifest_sha256": "08f79dca2d9ad2adf554fab986ca3493cd1ba5b9879a48fbc9136a3d96fa3ba6",
+        "tool_receipt_sha256": "7922b0e6b2b394edd50f8d60f2e823c283c473418380922bcf18f44fc63a8299",
+        "tool_revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77",
+        "image": {
+          "file": "PPSA99014.ffpkg",
+          "sha256": "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+          "bytes": 3637248
+        },
+        "filesystem_check": "passed",
+        "extracted_files_match": true
+      }
     }
   ],
   "limitations": [
