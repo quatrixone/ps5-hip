@@ -8,6 +8,47 @@ layer-release records. See
 [`native-arithmetic-fw1270-cycle1.json`](../evidence/native-arithmetic-fw1270-cycle1.json).
 The release criterion and second accepted cycle remain outstanding.
 
+## Explicit lifecycle correction for future .40 controls
+
+The original control below required disappearance of sandbox, runtime and registered
+image layers after every exit. [Exact upstream1.6beta16 source](SHADOWMOUNT_16_LIFECYCLE.md)
+shows that valid registered images and `/system_ex/app/<title>` mappings persist
+deliberately. That literal criterion therefore tested the loader's registration
+policy as well as application cleanup. The implementation plan requires clean
+launch/close cycles, and the shared runbook requires runtime-layer release when
+available. Future .40 controls must use the following explicit, observed lifecycle
+contract. The saved first-cycle partial-pass and its original criterion remain
+unchanged; this correction does not retrospectively accept it.
+
+1. Verify the frozen deployed image bytes and title metadata independently of
+   mount names. The image mount suffix hashes its source path, not image content.
+2. Collect a fresh pre-launch registration/mount baseline. Record exact source,
+   target, filesystem type, fsid, flags and multiplicity for visible title records.
+   Report the observer's namespace and ABI limits; empty output proves no global
+   absence. Do not launch if the diagnostic is incomplete or idle is ambiguous.
+3. Require one fresh own-title PID/application start and matching exit, all-processes
+   exit, title sandbox ProcessTerm and completed OS EndAppMount. Require the full
+   arithmetic transcript, allocation closure and every finalization checkpoint,
+   self-stop before cleanup, and no observed fault or cleanup failure.
+4. Compare post-exit registration observations with the pre-launch baseline.
+   Deliberately persistent loader registration must have unchanged identity and
+   multiplicity. New or changed retained title records, including visible sandbox
+   or overlay rows, reject the cycle. A positive sandbox observation followed by
+   disappearance in the same view strengthens this evidence when available.
+5. Require declared service health and release of only the operation's owned locks.
+   Accept only the observed application/OS lifecycle and baseline equivalence;
+   do not claim global mount absence, detached-process enumeration or release of
+   references outside the observer's view. The snapshot itself always reports
+   release unknown and never decides gate acceptance.
+
+The matching tag and banner establish a relevant policy comparison, not the
+deployed loader's exact binary identity. Fresh measured behavior must agree with
+this contract. Before another arithmetic/private launch, prepare and independently
+review controls that implement these prospective checks. Preserve original raw
+results, scripts and one-use markers. No loader update, setting change or forced
+unmount is part of this correction. Two independently reviewed clean cycles of
+the same combined image remain required for G2.
+
 G2 item 5 requires one frozen application to execute indexed-write followed by
 vector-add. The successful store and vector images establish useful controls,
 but their separate lifecycles do not satisfy that requirement. See

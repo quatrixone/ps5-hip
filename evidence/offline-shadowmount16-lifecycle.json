@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "classification": "upstream source policy; deployed identity and hardware lifecycle unqualified",
+  "tag": "1.6beta16",
+  "commit": "8566c0294cbf37b55375602e950a0e6b6bb928d7",
+  "published_at": "2026-06-28T13:59:58Z",
+  "source_url": "https://github.com/drakmor/ShadowMountPlus/tree/8566c0294cbf37b55375602e950a0e6b6bb928d7",
+  "archive": {
+    "path": "source.tar.gz",
+    "bytes": 162633,
+    "sha256": "29d332edb88f7bfaa7001e66f70746e1285a535baa5a6987b5c3cc57f2384329"
+  },
+  "source_files": {
+    "Makefile": "cbaf7ea56331bf67a65b0c5354403ef70c15bbd0377687b0b605545b5681a57a",
+    "src/main.c": "604e5aa149d2eff18d5e0e97cb28f6f8b343727933b77f92cbe383322e84f42f",
+    "src/sm_game_lifecycle.c": "11700cc00138852295b7eee3484df885e7fec0b884ec3aed7647e7f057162b87",
+    "src/sm_kstuff.c": "660369019fb566b8be8ddffb6e6654999276bd03e5ddd383fb5b2f038bcb1056",
+    "src/sm_fakelib.c": "2dbf3a4beaebc42206c27f01292c9158ba278852cf7a5ea8b1c622cb40212bf8",
+    "src/sm_scan.c": "7ea0700925ca52596b7984fce6bac690aa9c24d328fa03a9c435e2091b86e22f",
+    "src/sm_filesystem.c": "083691348f4b2dfdf636c8bf2dc3c2e02fb6e3b82f9d68e844a623f66d99ab2f",
+    "src/sm_image.c": "5e4baa2ba529c54ca4e593094f7d0d96ef8af926df3466d8c8ae60b28dd250e2",
+    "src/sm_mount_device.c": "e5c89d9fda4a5c407f6ab8563e23d26823bf20e09b414859112796af41e15cc5",
+    "include/sm_hash.h": "51645e013c4426541f2132df663b78c75a521897733487227f7965c7b469b3a8",
+    "README.md": "66817708037d1065a646d76e910ba2763a2f5d80bae87be6ccf520d840e0e115",
+    "config.ini.example": "4134833fbaaedbe5d80861b8878a882fdfca3f46a76ef7dca6cf7bcdd41a4e11"
+  },
+  "observations": {
+    "normal_game_exit_unmounts_registration_image": false,
+    "valid_registered_title_nullfs_is_retained_or_recreated": true,
+    "banner_proves_deployed_binary_identity": false,
+    "image_mount_suffix_is_content_hash": false,
+    "strict_all_registered_mounts_absent_after_exit_matches_tag_policy": false,
+    "snapshot_certifies_release": false
+  },
+  "raw_directory": "results/teardown-upstream-1.6beta16-v1",
+  "raw_receipt_sha256": "4efd9530fd7f210f94a960d1aef1579d6bfc0004d0db66bf5fca3d63dbf22865",
+  "verified_raw_files": {
+    "commit.json": "e7e90c5010e3f197eeb3634b7a97b284eb49a69dc0c80310f392ad22ae7fad42",
+    "README.md": "05d7a726821c1baf9c4431c3fc8438bae09b2c91e3b74b5f53a23012e9452c6b",
+    "release.json": "fc67376d0710daf1a59a9000adb834c532772c061350233e5bfb7d3462fb7e1c",
+    "releases-index.json": "24233e468ad831cf1863f0bfbce9403d1548fea64373b00dd7921a9bd0fe2417",
+    "source.tar.gz": "29d332edb88f7bfaa7001e66f70746e1285a535baa5a6987b5c3cc57f2384329",
+    "tag.json": "2d5191c57207989ae9f78906a90ea972d1798770d4e4088d0f7ffd3fbef83f1f"
+  },
+  "report_sha256": "05d7a726821c1baf9c4431c3fc8438bae09b2c91e3b74b5f53a23012e9452c6b",
+  "old_arithmetic_classification_unchanged": "partial-pass",
+  "gate_accepted": false,
+  "console_access": false,
+  "deployed_binary_compared": false,
+  "settings_changed": false
+}

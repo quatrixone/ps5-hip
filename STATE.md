@@ -229,6 +229,16 @@ memory management; no production CLR/HSA implementation is being started. See
 `docs/RUNTIME_ARCHITECTURE.md` and `evidence/offline-runtime-architecture.json`.
 No runtime link, native execution or additional gate acceptance follows.
 
+The exact public ShadowMount1.6beta16 source is now verified at `8566c02`:
+normal exit deliberately retains valid registration images and title nullfs
+mappings. The earlier all-layer-disappearance expectation conflicts with that
+policy. `docs/G2_ARITHMETIC_ACCEPTANCE.md` explicitly corrects the prospective
+contract to observed process/OS teardown plus unchanged registration baseline;
+the historical partial-pass remains unchanged. Snapshot visibility and deployed
+loader identity remain unqualified. See `docs/SHADOWMOUNT_16_LIFECYCLE.md` and
+`evidence/offline-shadowmount16-lifecycle.json`. Review fresh before/after controls
+before another arithmetic/private launch; do not force unmounts or change settings.
+
 ## Next action
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
