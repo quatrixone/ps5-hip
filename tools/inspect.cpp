@@ -1,19 +1,24 @@
-#include "ps5hip/code_object.h"
+#include "ps5hip/fat_binary.h"
 #include <fstream>
 #include <iostream>
 #include <iterator>
 
 int main(int argc, char **argv) {
-    if (argc != 2) { std::cerr << "usage: ps5hip-inspect object.hsaco\n"; return 2; }
+    const bool bundle = argc == 4 && std::string(argv[1]) == "--bundle";
+    if (argc != 2 && !bundle) {
+        std::cerr << "usage: ps5hip-inspect object.hsaco | --bundle gfx1013|gfx1030 file.bundle\n";
+        return 2;
+    }
     try {
-        std::ifstream input(argv[1], std::ios::binary | std::ios::ate);
+        std::ifstream input(argv[bundle ? 3 : 1], std::ios::binary | std::ios::ate);
         if (!input) throw ps5hip::ObjectError("cannot open input");
         const auto bytes = input.tellg();
         if (bytes < 64 || bytes > 64 * 1024 * 1024) throw ps5hip::ObjectError("invalid object file size");
         std::vector<uint8_t> data(static_cast<size_t>(bytes));
         input.seekg(0);
         if (!input.read(reinterpret_cast<char *>(data.data()), bytes)) throw ps5hip::ObjectError("cannot read input");
-        const auto object = ps5hip::inspect_code_object(data.data(), data.size());
+        const auto object = bundle ? ps5hip::read_fat_binary(data.data(), data.size(), argv[2]).object :
+                                     ps5hip::inspect_code_object(data.data(), data.size());
         std::cout << object.target << " image_bytes=" << object.image_size << " hardware_validated=false\n";
         for (const auto &k : object.kernels) {
             auto rejection = ps5hip::initial_launch_rejection(k);
