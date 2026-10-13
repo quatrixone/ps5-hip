@@ -41,13 +41,17 @@ A small native runtime is preferred for the first examples because the actual co
 
 Reopen the decision **before** adding a general asynchronous scheduler, cross-stream event dependency graph, host callback worker, shared memory pool with deferred retirement, graph capture or VMM. Also reopen if the pinned ggml link inventory cannot be covered by the bounded public contract plus separately qualified math libraries. At that checkpoint, compare an authentic PS5-linked CLR OS/Device/Program/VirtualDevice vertical slice against the proposed custom machinery, with one copy-kernel-event-free workload, failure propagation, threading and shutdown. Do not maintain both as production runtimes meanwhile. An HSA shim supplies no demonstrated shortcut here and adds signal/queue/memory-model obligations; it is not selected.
 
-## Immediate complete implementation unit
+## Connected implementation unit
 
 The owned allocation/copy/free boundary and a distinct full-header memory ABI
 control are now implemented and validated offline; see
 [native data ownership](NATIVE_DATA_REGISTRY.md). Registration and capture controls
-remain unchanged. The next unit must connect these measured boundaries to actual
-native launch ownership; separate successful controls do not prove that connection.
+remain unchanged. Their connection to native launch ownership is now implemented
+in the [experimental vector control](HIP_NATIVE_VECTOR_CONTROL.md), frozen at
+`5509e31`. Its 26 host cases and PS5 link audits pass; 48 integrated CTests pass.
+See `../evidence/offline-hip-native-vector.json`. The raw executable still needs
+Eden and shell-managed lifecycle integration before packaging and hardware tests.
+The following defines this bounded unit; it does not close G4.
 
 Build a distinct experimental **single-TU, one-device, serialized default-stream vector example runtime** over the current registration core. Retain the old no-dispatch registration control. Scope the next offline milestone to an actual ordinary HIP compiler host stub flowing through registration, allocation registry, argument snapshot, checked planner, retained submission resources, blocking D2H observation, free and genuine compiler unregister. Use the measured 6.2.4/LLVM18 full-header vector fixture (73 outputs, 2 groups of 64, four explicit args, 288-byte kernarg including runtime geometry). Do not confuse its 288-byte kernarg extent with private-call scratch metadata from unrelated experiments.
 

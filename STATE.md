@@ -377,12 +377,15 @@ clean arithmetic cycles and final mapping to the written requirements are still
 needed for G2; private-call execution is a separate G3 observation. Existing version2
 GPU controls bind the previous 26-entry catalog; the current 27-entry catalog needs
 fresh reviewed controls before deployment. Never reuse consumed receipts, reset their
-markers or apply old log-absence assumptions. Continue offline work without
-console polling. The next coherent G4 unit should connect the genuine compiler
-vector stub to owned native data/code/kernargs and the existing blocking queue,
-with lazy AGC initialization, exact results, failed-submit retention and genuine
-unregister. Preserve the separate registration/capture/memory controls; no async
-stream or hardware launch claim follows from their offline checks.
+markers or apply old log-absence assumptions. The connected G4 vector control is
+now frozen at `5509e31`: genuine compiler constructor/stub, owned native data/code/
+kernargs, lazy AGC, blocking queue, synchronization and genuine unregister.
+All 26 host scenarios and 48 integrated CTests pass; the PS5 executable passes
+link/conversion/layout/import checks. Explicit cleanup failures prevent reuse,
+while normal in-flight NotReady errors no longer poison the runtime. See
+`evidence/offline-hip-native-vector.json`. This is modeled transport, not GPU
+execution. Next add Eden and shell-managed lifecycle integration before packaging
+this client. The separate registration/capture/memory controls remain preserved.
 Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
 corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
 checks, native startup/import/ISA and package extraction checks pass. Both measured
@@ -577,3 +580,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G4 offline | b4ab3cf | owned native data and full-header memory ABI pass;37 isolated tests | evidence/offline-native-data-memory.json | connect genuine vector launch
 - 2026-10-12 | G3 offline | ef9f296 | math image/oracle verified;46 integrated tests | evidence/offline-native-math-readiness.json | GPU qualification pending
 - 2026-10-12 | diagnostic | 0bf7fb9 | idle .40 returned1110 twice;1024 cap prevents baseline | evidence/native-teardown-v2-fw1270.json | offline reassessment
+- 2026-10-12 | G4 offline | 5509e31 | genuine HIP vector path:26 host cases,48 integrated checks,PS5 link | evidence/offline-hip-native-vector.json | package lifecycle next
