@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "classification": "native-bounded-upstream-reduction-pass",
+  "source_commit": "7b41b242cde4a42160d2509740feb445e5606c93",
+  "source_branch": "development/reduction-companion",
+  "root_integration_pending": true,
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "hip_reduction",
+  "image": {
+    "sha256": "6b8487e6b4c66bdd0a8ae5aa79b5fa4627a5f7fd296ed6e89d96216c1340c2ff",
+    "bytes": 3702784
+  },
+  "evidence": {
+    "execution": {
+      "path": "results/native-reduction-execution-v1/observation-20261013T182456.269359Z/receipt.json",
+      "sha256": "0903def408b10c328c902f6575b46c9831ad616cad16dfecdc0d7bab6251cc45"
+    },
+    "execution_review": {
+      "path": "results/native-reduction-execution-v1/observation-20261013T182456.269359Z-independent-review.json",
+      "sha256": "fc7e77eaecb5881c9c11c9f12b394b31cf9c9123967c97dfb3536097f68aff07"
+    },
+    "deployment_receipt": {
+      "path": "results/native-reduction-deployment-v1/deployment-20261013T181726.057873Z/deployment.json",
+      "sha256": "b217e213e88c572a5228a427b5d51b224b8b18123fde1371bf6b7645c130432f"
+    },
+    "deployment_review": {
+      "path": "results/native-reduction-deployment-v1/deployment-20261013T181726.057873Z-independent-review.json",
+      "sha256": "73b027d8a86b0c68a2f0de2cb1f07d7872bce05558d11817cc4954a7aec974fb"
+    },
+    "manifest": {
+      "path": ".local/g4-reduction-companion/dist/PPSA99014/gfx1013-hip_reduction-0513c5fb4416/manifest.json",
+      "sha256": "f5e3e746556838402f48daf46b26ec269c866e1735ed0f0e2f8d2ee5f3613913"
+    },
+    "package-receipt": {
+      "path": ".local/g4-reduction-companion/dist/PPSA99014/gfx1013-hip_reduction-0513c5fb4416/package-receipt.json",
+      "sha256": "77f0fa16e0a00f690aeebb57092cf4259b921755d4806e0368b797de597ad249"
+    },
+    "build-receipt": {
+      "path": ".local/g4-reduction-companion/dist/PPSA99014/gfx1013-hip_reduction-0513c5fb4416/build-receipt.json",
+      "sha256": "468dd0b0e31375e64733415d61f61861b95d746caefe574e14be6637b73ea959"
+    },
+    "title_review": {
+      "path": "results/reduction-title-independent-review-v1/review.json",
+      "sha256": "10d35a43174f4ead6722b87dcb139e1e6eecb8680efe97f0e0197685b06e2260"
+    },
+    "package_review": {
+      "path": "results/reduction-native-package-independent-review-v1/review.json",
+      "sha256": "cb8875d0e331d39533dd74a172539331ceaaa204c5fd0b0fb70ae1b9ee3c5174"
+    },
+    "controls_review": {
+      "path": "results/native-reduction-controls-independent-review-v1/review.json",
+      "sha256": "93f31890a60ed2f45047ae0774818e276a62c0dad99da46709f9e3755d6a5250"
+    },
+    "independent_oracle": {
+      "path": "results/reduction-independent-oracle-v1/fixture.json",
+      "sha256": "1c7220b801f435ccff3bee195b050041bb175b2285ee97cf90a70265afa77793"
+    }
+  },
+  "observed": {
+    "pid": 363,
+    "application_id": "0x0000c018",
+    "compiler_registered_functions": 1,
+    "blocking_dispatches": 3,
+    "threads_per_block": 1024,
+    "groups": 16,
+    "lds_bytes": 4096,
+    "rounds": 3,
+    "logical_sizes": [
+      16384,
+      16384,
+      16377
+    ],
+    "exact_values": 48,
+    "guard_comparisons": 72,
+    "allocations": 9,
+    "frees": 9,
+    "input_and_masks_unchanged": true,
+    "compiler_unregister_and_State_destruction_before_final_success": true,
+    "application_log_sha256": "8efabb57772a1524f55ab0de56b3bf847d9a6a7ce789a455b76c2717f5eed97a",
+    "natural_title_stop": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "full_g3_complete": false,
+  "full_g4_complete": false,
+  "performance_validated": false,
+  "limits": [
+    "Exact bounded upstream block-reduction workload on gfx1013/FW12.70: three dispatches,48 signed outputs,72 guards and9 allocations/frees.",
+    "Original1024-thread kernel and16 groups with4096 LDS bytes; changed deterministic rounds and partial logical tail, complete input/mask readback.",
+    "No full ROCm, framework readiness, performance or full G4 claim.",
+    "Per-value checks certified by frozen client; application log does not export every result.",
+    "Visible matching mounts do not prove global namespace completeness or reference release.",
+    "Application fetched after close; natural-stop/OS capture frozen before close and post-snapshot.",
+    "No console access or native re-execution by reviewer."
+  ],
+  "next": "Integrate reduction with the multi-module/query runtime and validate combined behavior."
+}

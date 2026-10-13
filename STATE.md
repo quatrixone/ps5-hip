@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Upstream block reduction passed on .40:** frozen `7b41b24` ran three
+  dispatches with 16 groups of 1,024 threads and 4,096 bytes of dynamic LDS.
+  All 48 signed outputs and 72 guard checks matched across changed inputs and
+  a partial logical tail; input/mask readback stayed unchanged. Nine allocations
+  and frees, genuine compiler/runtime cleanup, and natural PID363/application
+  `0x0000c018` shutdown passed independent audit. This qualifies the bounded
+  workload; general reduction libraries and performance remain open. Combined
+  SDK integration is pending; see `evidence/native-hip-reduction.json`.
+
 - **Tracked synchronous device copies passed on .40:** frozen `9628fa6`
   completed 24 producer/consumer launches around 12 D2D copies. All 2,648 active
   outputs and 5,926 whole-buffer comparisons, including 630 guards, matched.
@@ -1073,3 +1082,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 D2D | 9628fa6 | .40 | pass: 12 copies, 2648 GPU outputs, natural teardown | evidence/native-hip-device-copy.json | SDK integration
 
 - 2026-10-13 | G4 SDK | 9628fa6 source | offline | pass: D2D integration, 64 tests | evidence/offline-device-copy-sdk-integration.json | reduction and multi-module
+
+- 2026-10-13 | G3/G4 reduction | 7b41b24 | .40 | pass: 3 dispatches,48 outputs,72 guards,natural teardown | evidence/native-hip-reduction.json | combined SDK integration

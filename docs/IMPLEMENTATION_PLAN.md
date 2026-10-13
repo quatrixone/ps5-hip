@@ -85,6 +85,12 @@ See `../evidence/native-hip-device-copy.json`. The runtime and title are integra
 with 64 passing offline tests (`../evidence/offline-device-copy-sdk-integration.json`).
 DMA, bandwidth, asynchronous transfer and general cache coherence are unproven.
 
+The isolated `7b41b24` upstream block-reduction title passed three native
+dispatches at 16 groups of 1,024 threads and 4,096 bytes of dynamic LDS.
+All 48 exact signed outputs, 72 guards, unchanged input/mask readback and
+complete natural cleanup passed. See `../evidence/native-hip-reduction.json`.
+Combined SDK integration, arbitrary reduction kernels and performance remain open.
+
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
 training workloads. Make the runtime reusable beyond ProsperoAI and understandable
