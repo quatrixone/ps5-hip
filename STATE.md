@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Native ROCclr CPU title packaged and independently reviewed offline:** frozen
+  isolated `5db9751` passes the repaired six-mode client proof, focused watchdog
+  checks, actual SDK compile/link/conversion and startup/provider audits. Bound
+  source bytes match Git, and independent UFS extraction verifies all six files.
+  Console startup, command execution and natural teardown remain unvalidated.
+  See `evidence/offline-clr-cpu-native-package.json`. The prospective console case
+  checks eight computed values plus eight preserved failed-dependency sentinels;
+  it makes no GPU execution or public HIP initialization claim.
+
 - **Multi-module/query and reduction runtime integrated:** the exact qualified
   isolated implementation is imported at `de93ce1`, preserving the upstream CLR
   port. All 57 configured CMake tests, 24 multi-module runtime cases, 42 threaded
@@ -1148,3 +1157,4 @@ including the provider-fixed store and vector candidates.
 
 - 2026-10-13 | G4 multi/query | b253c62 | .40 | delayed post-state pass, original cycle remains incomplete | evidence/native-multi-query-delayed-post-state.json | native CLR startup
 - 2026-10-13 | G4 SDK | de93ce1 | offline | exact multi/reduction import and root compiler authority validated | evidence/offline-multi-reduction-sdk-integration.json | native CLR startup
+- 2026-10-13 | CLR | 5db9751 | offline | CPU package and exact source independently verified | evidence/offline-clr-cpu-native-package.json | native startup

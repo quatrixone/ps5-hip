@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "classification": "offline-native-clr-cpu-package",
+  "source_commit": "5db9751e4236d31f371b90fecb86aa35c2eb10f4",
+  "candidate_checkout": ".local/g4-clr-cpu-title",
+  "candidate": {
+    "path": ".local/g4-clr-cpu-title/results/offline-candidate-v2/receipt.json",
+    "sha256": "a0fe6b74dc00d7baf26aec2f1862ff0a70220874c5967fbbc576cbac8210d4c4"
+  },
+  "candidate_review": {
+    "path": "results/clr-cpu-candidate-independent-review-v2/review.json",
+    "sha256": "4845185b2c6e678f7dc2edab0ee31f742c80303028456c997dfdcce24e0442e1"
+  },
+  "package_review": {
+    "path": "results/clr-cpu-package-independent-review-v1/review.json",
+    "sha256": "cb11afb32574f2fccf1681d52721f40c34c229c30824e17572a4aa1b6817b8fe"
+  },
+  "package": {
+    "path": ".local/g4-clr-cpu-title/dist/PPSA99014/cpu-clr-815c4a699358/package-receipt.json",
+    "sha256": "a776c36e1f4b4c7edddd152b3be702cf7d638d27903de57ba707f26b6f892cf9"
+  },
+  "image": {
+    "path": ".local/g4-clr-cpu-title/dist/PPSA99014/cpu-clr-815c4a699358/PPSA99014.ffpkg",
+    "sha256": "e78490b0e0d58757aecbd0abc67157c80ba7db5d7ff119477e40f305c9b951ba",
+    "bytes": 5144576
+  },
+  "verified": [
+    "Six Linux client modes exercise genuine upstream queues and retained exception lifetimes on an explicit CPU backend.",
+    "Eight focused watchdog modes pass; watchdog-only fault tests use ASan/UBSan.",
+    "Updated native compile, strict link, conversion and SDK provider/startup audits pass.",
+    "All bound tracked candidate source bytes match the frozen Git blobs.",
+    "Independent UFS check and extraction reproduce all six manifest files exactly."
+  ],
+  "native_executed": false,
+  "gpu_execution": false,
+  "limits": [
+    "This candidate is in an isolated checkout; its implementation is not yet imported into the main development checkout.",
+    "Native OS, queue execution, watchdog and application shutdown remain unvalidated on console.",
+    "CPU workload checks eight computed values and eight preserved sentinels, not sixteen computed GPU results.",
+    "No public HIP initialization, GPU adapter, executable-memory support or full ROCm compatibility is established."
+  ]
+}

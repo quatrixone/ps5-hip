@@ -43,6 +43,13 @@ for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 
+The isolated native ROCclr CPU title is now frozen, packaged and independently
+reviewed. Its genuine upstream queue workload, repaired exception lifetimes,
+watchdog, native link/conversion and six-file UFS package pass offline checks;
+see `../evidence/offline-clr-cpu-native-package.json`. Native startup and shutdown
+still require console execution. This CPU-only case does not establish a GPU
+backend or public HIP initialization and does not complete G5.
+
 The integrated multi-module/query candidate produced correct A/B/A results and
 natural shutdown on .40, but its collector expired before the post-run snapshot.
 The original cycle remains inconclusive; see
