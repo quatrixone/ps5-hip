@@ -8,12 +8,14 @@ hardware computation observation with delayed completion evidence and one bounde
 compiler-spill cycle plus static, dynamic and mixed LDS cycles. Persistent-buffer
 visibility has recovered computation evidence with an inconclusive original cycle.
 Full/partial wave32 and exact 2D/3D geometry fixtures have passing bounded native
-cycles. Broader G3 qualification remains open. G4's fixed genuine HIP vector client
-has passed a native cycle with two launches and complete compiler/runtime cleanup;
-broader client qualification remains open. G5-G12 remain planned.
-The shared runtime and four-route genuine client now pass offline compiler,
-ownership-model, native-link and integration qualification at `de82c60`;
-title packaging and combined hardware validation remain pending. See
+cycles. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
+shared four-route clients have passed bounded native cycles with complete
+compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
+planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
+blocking launches in two changed-input sequences through integer, static LDS,
+buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
+including immutable inputs and guards; they are not an active shader output count.
+See `../evidence/native-hip-routes.json` and
 `../evidence/offline-shared-hip-runtime.json`.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
@@ -200,7 +202,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G1 | Reproducible compiler and platform contract | None | passed offline |
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
-| G4 | Real HIP C++ source compatibility | G3 | fixed genuine HIP vector client passed native cycle; broader client qualification pending |
+| G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | ProsperoAI HIP integration and SDK preview | G5-G6 | planned |
@@ -367,8 +369,15 @@ blocking submission, with actual compiler unregister. Its 26 host scenarios and
 do not execute AMD instructions. The follow-up [native HIP title](HIP_NATIVE_VECTOR_TITLE.md)
 adds Eden and checked shell-managed finalization;22 lifecycle cases and50 integrated
 sanitizer checks pass, and its frozen image passed filesystem/extraction validation.
-Actual unregister and complete runtime destruction precede shell exit. Hardware
-qualification remains required before claiming native example usability.
+Actual unregister and complete runtime destruction precede shell exit. The fixed
+vector title subsequently passed its bounded native cycle. The shared four-route
+title additionally passed 71 integrated checks, 29 lifecycle models, 19 ordinary
+route models, preserved vector coverage and a native cycle on .40. Eight blocking
+launches across two changed-input sequences passed all whole-page input, output
+and guard comparisons; actual compiler unregister and State destruction preceded
+natural process teardown. See `../evidence/native-hip-routes.json`. These measured
+single-TU clients do not qualify arbitrary programs, asynchronous streams or G4
+as a whole.
 
 The [argument capture control](HIP_HOST_LAUNCH_CAPTURE.md) additionally copies the
 real stub's argument values into owned storage, resolves synthetic live-data

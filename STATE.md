@@ -4,14 +4,26 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Shared genuine four-kernel HIP client passed on .40 and independent audit:**
+  frozen title `67072dd`, integrated at `1fb5ada`, completed eight blocking launches
+  in two changed-input sequences through one runtime: integer, static LDS,
+  buffer scratch and 2D geometry. All 393,216 whole-page host word comparisons
+  passed; this count includes inputs and guards, not only active shader outputs.
+  Four compiler registrations, genuine unregister, complete State destruction and
+  allocation closure preceded shell exit. PID222/application `0xc018` stopped
+  naturally; visible mount identities matched, services stayed healthy and locks
+  released. See `evidence/native-hip-routes.json`. Broader G3/G4 remain open.
+
 - **Shared HIP runtime and genuine four-kernel client qualified offline:** frozen
   `de82c60`, integrated at `0381b05`. All 70 integration tests, 26 vector models,
   22 vector title cases and 19 four-route models passed. Linux/PS5 compiler
   objects, PS5 link/conversion and independent evidence review passed; 70 native
   imports and no external HIP imports. Integer, LDS, compiler scratch and geometry
   share one runtime across eight launches and two changed-input sequences.
-  See `evidence/offline-shared-hip-runtime.json`. A descendant title package is
-  underway; this combined client has not executed on .40 and broad G3/G4 remain open.
+  See `evidence/offline-shared-hip-runtime.json`. The descendant title passed
+  71 integrated checks, 29 title lifecycle models, 19 ordinary route models and
+  the unchanged 22 vector title cases before the fixed native cycle above. Its
+  linked title has 117 imports and no external HIP imports; broad G3/G4 remain open.
 
 - **Genuine HIP vector client passed on .40 and independent audit:** two blocking
   73-element launches produced 146 exact results, unchanged inputs and intact
@@ -25,7 +37,8 @@ Updated: 2026-10-13, America/New_York.
   buffer-scratch and geometry routes share checked allocation and explicit
   temporary cleanup. All 65 sanitizer tests, 26 genuine vector host-model cases
   and independent review passed. Existing HIP admission remains unchanged; the
-  combined helper has no hardware qualification yet. See
+  helper now has bounded hardware evidence through the fixed four-route client
+  above, without generalizing its supported shapes or arguments. See
   `evidence/offline-owned-native-integration.json`.
 - The reviewed planners and owned helper are now integrated into
   `development/offline-bringup` at `469ada5`. All 184 implementation, build and
@@ -840,3 +853,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G3 geometry integration | 296222d | 63 sanitizer checks and independent review passed | evidence/offline-geometry-core-integration.json | shared owned preparation
 - 2026-10-13 | G4 shared preparation | 7aed16b | 65 sanitizer tests,26 genuine host-model cases and review passed | evidence/offline-owned-native-integration.json | shared HIP runtime
 - 2026-10-13 | G4 native client | 038fdb6 | .40:2 genuine HIP launches,146 exact results,clean unregister/destruction and bounded cycle | evidence/native-hip-vector.json | shared multi-kernel runtime
+
+- 2026-10-13 | G4 shared native client | 67072dd / 1fb5ada | .40:8 launches,2 changed-input sequences,393216 whole-page comparisons,clean unregister/destruction and bounded cycle independently audited | evidence/native-hip-routes.json | broader G3/G4 client qualification

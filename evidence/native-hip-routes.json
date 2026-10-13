@@ -1,0 +1,131 @@
+{
+  "source_commit": "67072ddadfa25aa2f4d36655154cfaac9ab7eca5",
+  "image_sha256": "a744edaed8bdd7a83a63bc3cee5bf44c3e7d3be33606371fcb34591c57768093",
+  "kernel": "hip_routes",
+  "accepted": true,
+  "script_sha256": "95b4cb246311ccf4adaad9213f30f6d4b4633ef45ca9118860c8653d596ece22",
+  "manifest_sha256": "f6d8dbae6a71e789471a2357282e4423e6edaffb4b12b71d79d2ded554b5acf2",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/hip-routes-deployment-v1/deployment-20261013T074158.655699Z/deployment.json",
+      "sha256": "4e3f8c1138c5dee9f82753dd0c0d6f843107f49643a80649326dbfe4368ca101"
+    },
+    "review": {
+      "path": "results/hip-routes-deployment-v1/deployment-20261013T074158.655699Z-independent-review.json",
+      "sha256": "bb4220d5c0f60c1e647c72dae387f40368756ccaec250bf74bc9dc6bbc0896c5"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "d645de10693da1dcb7ddec15b76c4d5a5beabc439a7d64e379a745e26cfa22f1",
+    "after-post.log": "d645de10693da1dcb7ddec15b76c4d5a5beabc439a7d64e379a745e26cfa22f1",
+    "application.log": "a3938c2b10dae283146562143448080a9dd4873ba2c3af6184ff085e90cc2952",
+    "before-close.log": "d645de10693da1dcb7ddec15b76c4d5a5beabc439a7d64e379a745e26cfa22f1",
+    "before-launch.log": "75ea2ebd8c7d59080033b9723fb25d35cff8d348c31add7658e7b53ea2381307",
+    "before-log-check.log": "75ea2ebd8c7d59080033b9723fb25d35cff8d348c31add7658e7b53ea2381307",
+    "before-post-snapshot.log": "d645de10693da1dcb7ddec15b76c4d5a5beabc439a7d64e379a745e26cfa22f1",
+    "before-pre-snapshot.log": "75ea2ebd8c7d59080033b9723fb25d35cff8d348c31add7658e7b53ea2381307",
+    "before.log": "75ea2ebd8c7d59080033b9723fb25d35cff8d348c31add7658e7b53ea2381307",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "d6f0df2d116b230bb8d2d69d46cfc18b62d3efdefe9c4a0c104d92dbf16b86f6",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "59aae01fa71f803ef557e6bc2cd81e1739cacd740f3692cd95b35010cc67d1bf",
+    "installed-eboot.bin": "d6f0df2d116b230bb8d2d69d46cfc18b62d3efdefe9c4a0c104d92dbf16b86f6",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "59aae01fa71f803ef557e6bc2cd81e1739cacd740f3692cd95b35010cc67d1bf",
+    "klog.log": "980c45b2b06d5c4a5b05196cccb2e9f8c8e9f8e711d62f66301ae563d3cfb4a9",
+    "launch-klog.log": "82fac4777e62a3864b352077c165fd404666bfd3d141482a01e0b7aac296f017",
+    "launch-response.log": "766201c3bd5008cde4bb8c2d3cd22d651d8564f0887d46de03f2dd01b9e5ecec",
+    "launch-shadow-delta.log": "c7e6d030f92b39865091f7af94fab0674b121377bcad3489c752288400fa99a8",
+    "lifecycle-delta.log": "c7e6d030f92b39865091f7af94fab0674b121377bcad3489c752288400fa99a8",
+    "observed.log": "d645de10693da1dcb7ddec15b76c4d5a5beabc439a7d64e379a745e26cfa22f1",
+    "post-snapshot.log": "cb972505cd5385c38cbe9a434824ce68bc2a0bb34209ca78f358ba68eea5713a",
+    "pre-snapshot.log": "cb972505cd5385c38cbe9a434824ce68bc2a0bb34209ca78f358ba68eea5713a",
+    "private-log-absence-before-launch.json": "b48608d89f04793f83f74fff7c82d3d65fbb37dcb8797de4a4d4223b79408943",
+    "private-log-absence.json": "b48608d89f04793f83f74fff7c82d3d65fbb37dcb8797de4a4d4223b79408943",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-genuine-hip-routes-cycle-pass",
+  "integrated_commit": "1fb5ada",
+  "hardware_gate_passed": false,
+  "full_g3_complete": false,
+  "full_g4_complete": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "dispatches": 8,
+  "changed_input_sequences": 2,
+  "route_order": [
+    "integer",
+    "static_lds",
+    "buffer_scratch",
+    "geometry_2d"
+  ],
+  "whole_page_word_comparisons": 393216,
+  "comparison_count_meaning": "Host comparisons across full input/output/tail pages, including inputs and guards; not active shader output count.",
+  "compiler_registered_functions": 4,
+  "compiler_unregister_observed": true,
+  "runtime_state_destroyed": true,
+  "allocations_closed": true,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "hip_routes",
+    "log_sha256": "a3938c2b10dae283146562143448080a9dd4873ba2c3af6184ff085e90cc2952",
+    "bytes": 1993,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 222,
+    "app_id": "0x0000c018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "prospective_observation_seconds": 40,
+  "receipt": {
+    "path": "results/hip-routes-execution-v1/observation-20261013T074456.773239Z/receipt.json",
+    "sha256": "1096fef4d19a8420d6b9ec426fc335d45602810d74cea4a727f2160f37592e95"
+  },
+  "independent_review": {
+    "path": "results/hip-routes-execution-v1/observation-20261013T074456.773239Z-independent-review.json",
+    "sha256": "7c4cd8cb5779ea1345d9975d69f97425b08a75e78125a97f204394258ac4f19d"
+  },
+  "offline_readiness": {
+    "path": ".local/g4-routes-title/results/title-ready-v2/readiness.json",
+    "sha256": "79313ed045b01d370602d5d0374bcb3e0e14e84f72b63167fdcbe645b4da8eca"
+  },
+  "independent_package_review": {
+    "path": ".local/g4-routes-title/results/title-package-independent-review-v3/review.json",
+    "sha256": "5cd116fb596abb75757400c6a0db9f95af27a1cbe2844f72f510619d92821827"
+  },
+  "limits": [
+    "Only the exact embedded gfx1013 four-route HIP client: eight blocking dispatches across integer, static LDS, buffer scratch and 2D geometry in two changed-input sequences; 393216 host word comparisons (not shader output count), immutable inputs and full guards, real compiler unregister and completed State destruction.",
+    "Serialized null-stream fixed client only; no arbitrary HIP programs, asynchronous overlap or full G4 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

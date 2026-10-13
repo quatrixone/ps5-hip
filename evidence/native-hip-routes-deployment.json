@@ -1,0 +1,86 @@
+{
+  "source_commit": "67072ddadfa25aa2f4d36655154cfaac9ab7eca5",
+  "image_sha256": "a744edaed8bdd7a83a63bc3cee5bf44c3e7d3be33606371fcb34591c57768093",
+  "kernel": "hip_routes",
+  "registered": true,
+  "launched": false,
+  "hardware_gate_passed": false,
+  "mounted_files": {
+    "eboot.bin": {
+      "bytes": 911410,
+      "sha256": "d6f0df2d116b230bb8d2d69d46cfc18b62d3efdefe9c4a0c104d92dbf16b86f6"
+    },
+    "sce_module/libc.prx": {
+      "bytes": 1284674,
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+    },
+    "lapy.elf": {
+      "bytes": 155032,
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726"
+    },
+    "results-dir.txt": {
+      "bytes": 21,
+      "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e"
+    }
+  },
+  "preservation": {
+    "package": "/data/homebrew/PPSA99014.ffpkg.hip-vector.sha256-3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4.preserved",
+    "package_sha256": "3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4",
+    "hip_vector_result": "/data/ps5-hip/results/ps5-hip-gfx1013-hip_vector.log.hip-vector-PID213-appa018.sha256-9ef8780932895ad209ca8d5a99c9e469f7553b1edb243d35601162f7be36e25f",
+    "hip_vector_result_sha256": "9ef8780932895ad209ca8d5a99c9e469f7553b1edb243d35601162f7be36e25f"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_file_sha256": {
+    "after.log": "f9887f05bcbdea7fdb8522e1b37b203105f62bfa4fe765c8bb2b64da50966c16",
+    "before-homebrew.list": "a83359bd251f61a6251fc5e738d65c6418f363d2a9f442a7a3f905dd63d6765c",
+    "before-preservation.log": "f3b4dd4e7f9ef5907eb2c12c6216fe87694aa85c03054046eec6875c172a15d6",
+    "before-preserve-image.log": "f3b4dd4e7f9ef5907eb2c12c6216fe87694aa85c03054046eec6875c172a15d6",
+    "before-preserve-log.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "before-promote.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "before-promotion.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "before-results.list": "884ac180c48603fce78c83cc17ed090c1acd02f6b0ce7add34d91f45d6c2bf3f",
+    "before-upload.log": "f3b4dd4e7f9ef5907eb2c12c6216fe87694aa85c03054046eec6875c172a15d6",
+    "before.log": "c822b187bb76c00367c7ee74d7d9d8eff7c2545b80cb73257f7b77576f0a90b9",
+    "final-idle.log": "f9887f05bcbdea7fdb8522e1b37b203105f62bfa4fe765c8bb2b64da50966c16",
+    "final-results.list": "0f79607044f8608924f7642a7b1281db676f3d50750948fd880875315328b7bd",
+    "mounted-eboot.bin": "d6f0df2d116b230bb8d2d69d46cfc18b62d3efdefe9c4a0c104d92dbf16b86f6",
+    "mounted-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "pre-promote-homebrew.list": "a5eaccbb173cb0180e67d30a8f4869864dd77a41df7a35873f57b5fca93cbc7f",
+    "preserved-hip-vector.ffpkg": "3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4",
+    "preserved-hip-vector.log": "9ef8780932895ad209ca8d5a99c9e469f7553b1edb243d35601162f7be36e25f",
+    "recheck-homebrew.list": "b4f6d641af3f853c1bb53fedd01180208c0fead3229cfd42dc50fba4112a5624",
+    "recheck-results.list": "884ac180c48603fce78c83cc17ed090c1acd02f6b0ce7add34d91f45d6c2bf3f",
+    "registration-001.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "registration-002.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "registration-003.log": "bf9951445fcbd1f8a7718486260e138331c780f5b278ffd78a13c577a6b961f0",
+    "registration-004.log": "bf9951445fcbd1f8a7718486260e138331c780f5b278ffd78a13c577a6b961f0",
+    "registration-005.log": "bf9951445fcbd1f8a7718486260e138331c780f5b278ffd78a13c577a6b961f0",
+    "registration-006.log": "bf9951445fcbd1f8a7718486260e138331c780f5b278ffd78a13c577a6b961f0",
+    "registration-007.log": "f9887f05bcbdea7fdb8522e1b37b203105f62bfa4fe765c8bb2b64da50966c16",
+    "release-001-homebrew.list": "a5eaccbb173cb0180e67d30a8f4869864dd77a41df7a35873f57b5fca93cbc7f",
+    "release-001.log": "b76e15a342c06cbb4478d0e18e645674b7c148448d19113c64fd31fa6f1090b9",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "deployment-verified",
+  "target": "console .40 firmware 12.70",
+  "receipt": {
+    "path": "results/hip-routes-deployment-v1/deployment-20261013T074158.655699Z/deployment.json",
+    "sha256": "4e3f8c1138c5dee9f82753dd0c0d6f843107f49643a80649326dbfe4368ca101"
+  },
+  "independent_review": {
+    "path": "results/hip-routes-deployment-v1/deployment-20261013T074158.655699Z-independent-review.json",
+    "sha256": "bb4220d5c0f60c1e647c72dae387f40368756ccaec250bf74bc9dc6bbc0896c5"
+  },
+  "limits": [
+    "Deployment/registration only; no title or GPU execution.",
+    "Signed eboot and libc independently compared to retained transfer bytes. Helper/config, metadata/link and promoted image equality are assertions of the reviewed hash-bound controller; those transfer bodies are not separately retained.",
+    "No global namespace completeness or reference-release claim.",
+    "Reviewer made no console calls."
+  ]
+}
