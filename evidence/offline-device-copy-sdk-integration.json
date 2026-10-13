@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "offline-device-copy-sdk-integration-pass",
+  "root_parent": "11781f5500412f0d6fff2046bcd35ce8b2bb5eb9",
+  "native_source_commit": "9628fa6cbb5e1e6e32459e0ee22474ce38e57fec",
+  "reviewed_diff_sha256": "cb0d3825633459f6405349eb04633063e5e627691cef53f8fb4c7ee6f7f939b8",
+  "evidence": {
+    "qualification": {
+      "path": ".local/g4-device-copy-sdk-integration/results/copy-sdk-qualification-v1/receipt.json",
+      "sha256": "20024d7c53f889410e5203dc05c27d9827e562e1ed5d83c485999289db70488f"
+    },
+    "metadata_reconciliation": {
+      "path": ".local/g4-device-copy-sdk-integration/results/copy-sdk-metadata-reconciliation-v2/receipt.json",
+      "sha256": "06ea97df8c6e0fabb8a8eda72e64f2fd4dfeec3ad2c1d1041ebd1f2ebeb2acd0"
+    },
+    "independent_review": {
+      "path": "results/copy-sdk-integration-independent-review-v1/review.json",
+      "sha256": "1dccf710592276d8ed0968254896cc73c65589535c8c34b5e6873edd0dfef2d4"
+    }
+  },
+  "supersedes_historical_integration_pending": {
+    "path": ".local/g4-device-copy-sdk-integration/evidence/native-hip-device-copy.json",
+    "sha256": "2f99b6e760976680e1ad72ac0f4e9402eeb7f780b24a2cd05e5a13166b015d73"
+  },
+  "observed": {
+    "cmake_tests_passed": 64,
+    "threaded_ASan_UBSan_modes": 40,
+    "CPU_only_TSAN_modes": 20,
+    "HIPIFY_runtime_models": 19
+  },
+  "scope": "Integrates tracked synchronous device-to-device copying and its native-tested producer-copy-consumer title. Device code remains unchanged.",
+  "hardware_executed_for_integration": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Native execution remains bound to frozen9628fa6 and its original image and receipts.",
+    "Copying is CPU-mediated and blocking; DMA, bandwidth, async transfers and general cache coherence remain unqualified."
+  ]
+}

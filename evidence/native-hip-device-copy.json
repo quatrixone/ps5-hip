@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "classification": "native-bounded-device-copy-pass",
+  "source_commit": "9628fa6cbb5e1e6e32459e0ee22474ce38e57fec",
+  "source_branch": "development/native-device-copy",
+  "root_title_and_api_integration_pending": true,
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "hip_device_copy",
+  "image": {
+    "sha256": "45311e46b536f7a65fb519ba45f44e1fbbd96492573df7483aa96f3e1d3a3134",
+    "bytes": 3670016
+  },
+  "evidence": {
+    "execution": {
+      "path": "results/native-device-copy-execution-v1/observation-20261013T164735.258657Z/receipt.json",
+      "sha256": "b76e05a5b61807546c79dddb52fb0efe1e8cc36826a2e224aea7abb819102b4c"
+    },
+    "execution_review": {
+      "path": "results/native-device-copy-execution-v1/observation-20261013T164735.258657Z-independent-review.json",
+      "sha256": "b2b7674ed3e6807ee6561b580b6c7baa2e530fce8927a0c7f53ae26e47815b09"
+    },
+    "deployment": {
+      "path": "results/native-device-copy-deployment-v1/deployment-20261013T164316.089402Z/deployment.json",
+      "sha256": "9c2c0338697f1ff8fc1e15b35f90d2041e641096565a4965c7b7c0c70d6e48eb"
+    },
+    "deployment_review": {
+      "path": "results/native-device-copy-deployment-v1/deployment-20261013T164316.089402Z-independent-review.json",
+      "sha256": "a33e93e673bbefa31568f81d70b35c2fbfc7099911bf760a9b5a3ab686a98e2d"
+    },
+    "source_review": {
+      "path": "results/native-device-copy-source-independent-review-v1/review.json",
+      "sha256": "dba83c5a42b075933e06c71de724c25e63182f38f34d5bcce47fa0a394e9554d"
+    },
+    "offline_qualification": {
+      "path": ".local/g4-native-device-copy/results/copy-qualification-v1/receipt.json",
+      "sha256": "ef64ce7cf32dc3a3336eab91abb9b1132a2a4a80155ce4e712055c5fe7cf19ac"
+    },
+    "native_package_review": {
+      "path": "results/native-device-copy-package-independent-review-v1/review.json",
+      "sha256": "d8c55eaabed0be9eec111ec44185e851999b3dab3efae2ed18e055efb3d5db01"
+    },
+    "controls": {
+      "path": "results/native-device-copy-controls-offline-v1/receipt.json",
+      "sha256": "a767e560b6eb09c4769255209772fd089f1bfc77b5b7d62aacbb498271713560"
+    },
+    "controls_review": {
+      "path": "results/native-device-copy-controls-independent-review-v1/review.json",
+      "sha256": "9db4ff4348a6304f12352d6a768b97064c94541a752941b4ec7369e04281461e"
+    },
+    "preceding_fill": {
+      "path": "evidence/native-hip-memory-fill.json",
+      "sha256": "73abcbd7793cc38dd48a2f9864b290ed8fd0d12380926b30cae197ed5c080988"
+    },
+    "manifest": {
+      "path": ".local/g4-native-device-copy/dist/PPSA99014/gfx1013-hip_device_copy-174e7149bd9f/manifest.json",
+      "sha256": "ad6b1921d22431b735cf60466cf57e21b5b166fe5626f43ae2d12749e5e93581"
+    },
+    "package-receipt": {
+      "path": ".local/g4-native-device-copy/dist/PPSA99014/gfx1013-hip_device_copy-174e7149bd9f/package-receipt.json",
+      "sha256": "b43f71095bcf4fa28ba3122c652ea70bb721d7d4169191e7945c7b6ad38868cb"
+    },
+    "build-receipt": {
+      "path": ".local/g4-native-device-copy/dist/PPSA99014/gfx1013-hip_device_copy-174e7149bd9f/build-receipt.json",
+      "sha256": "6b89966107c24fedfa43578d99948f70dd6720c2fb79b3d524d0e6e2f321874d"
+    }
+  },
+  "observed": {
+    "pid": 354,
+    "application_id": "0x0000a018",
+    "compiler_registered_functions": 2,
+    "blocking_dispatches": 24,
+    "pipeline_rounds": 12,
+    "copies": 12,
+    "copied_words": 1324,
+    "copied_bytes": 5296,
+    "sizes": [
+      1,
+      73,
+      257
+    ],
+    "topologies": [
+      "distinct",
+      "combined"
+    ],
+    "rounds": 2,
+    "exact_values": 2648,
+    "readback_words": 5926,
+    "guard_words": 630,
+    "allocations": 21,
+    "frees": 21,
+    "source_preservation": true,
+    "compiler_unregister_and_State_destruction_before_final_success": true,
+    "application_log_bytes": 3602,
+    "application_log_sha256": "10cdda626fdad484b1b7a5ef718d2156f7b61296b65fddb9f7b75d7b80515a94",
+    "natural_title_stop": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "scope": "Tracked synchronous CPU copies between GPU producer and consumer, distinct allocations and disjoint same-allocation ranges, changed inputs on reused storage with no destination reset.",
+  "DMA_validated": false,
+  "performance_validated": false,
+  "general_cache_visibility_validated": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Exact bounded tracked synchronous device-copy visibility workload on gfx1013/FW12.70;24 GPU producer/consumer launches,12 D2D copies,1324 copied words and2648 exact GPU outputs.",
+    "Distinct and disjoint same-allocation ranges with changed rounds;5926 readback comparisons including630 guards,21 allocations/frees. No destination reset or H2D substitution masks copied data.",
+    "No DMA, bandwidth, asynchronous transfer, general cache coherence, framework readiness or full G4 claim.",
+    "Per-value checks certified by frozen client; application log does not export every result.",
+    "Visible matching mounts do not prove global namespace completeness or reference release.",
+    "Application fetched after close; natural-stop/OS capture frozen before close and post-snapshot.",
+    "No console access or native re-execution by reviewer."
+  ],
+  "next": "Review SDK integration; continue bounded ordinary-client registration and computation qualification."
+}

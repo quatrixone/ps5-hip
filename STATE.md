@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Tracked synchronous device copies passed on .40:** frozen `9628fa6`
+  completed 24 producer/consumer launches around 12 D2D copies. All 2,648 active
+  outputs and 5,926 whole-buffer comparisons, including 630 guards, matched.
+  Distinct and disjoint same-allocation ranges, changed second rounds, source
+  preservation and all 21 allocations/frees passed. PID354/application `0x0000a018`
+  stopped naturally after audited cleanup. This proves the bounded workload;
+  DMA, bandwidth and general cache coherence remain unproven. The runtime and
+  title are now integrated with 64 passing offline tests; see
+  `evidence/native-hip-device-copy.json` and `evidence/offline-device-copy-sdk-integration.json`.
+
 - **Tracked fills and device discovery passed on .40:** frozen `9bb191b`
   checked discovery before backend initialization, then consumed 24 byte fills
   in six GPU launches. All 662 active values, 746 input and 746 output words
@@ -1059,3 +1069,7 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 contention | 70a604a | .40 | pass: overlapping HIP calls, 331 exact values, natural teardown | evidence/native-hip-contention.json | native memory fill
 - 2026-10-13 | G4 fills | 9bb191b | .40 | pass: 24 fills, 662 GPU values, discovery and natural teardown | evidence/native-hip-memory-fill.json | SDK integration, D2D
 - 2026-10-13 | G4 SDK | 9bb191b source | offline | pass: fill/discovery integration, 62 CMake tests | evidence/offline-fill-sdk-integration.json | native D2D
+
+- 2026-10-13 | G4 D2D | 9628fa6 | .40 | pass: 12 copies, 2648 GPU outputs, natural teardown | evidence/native-hip-device-copy.json | SDK integration
+
+- 2026-10-13 | G4 SDK | 9628fa6 source | offline | pass: D2D integration, 64 tests | evidence/offline-device-copy-sdk-integration.json | reduction and multi-module

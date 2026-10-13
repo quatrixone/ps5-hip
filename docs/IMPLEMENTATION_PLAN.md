@@ -77,6 +77,14 @@ The title and APIs are integrated with 62 passing offline CMake tests; see
 to the original frozen candidate. DMA, performance and general cache visibility
 are not established by this bounded case.
 
+The isolated `9628fa6` synchronous D2D title passed 24 producer/consumer
+launches around 12 copies (1,324 words/5,296 bytes), checking 2,648 GPU outputs
+and 5,926 whole-buffer words including 630 guards. Distinct and disjoint
+same-allocation ranges, changed rounds and complete natural teardown passed.
+See `../evidence/native-hip-device-copy.json`. The runtime and title are integrated
+with 64 passing offline tests (`../evidence/offline-device-copy-sdk-integration.json`).
+DMA, bandwidth, asynchronous transfer and general cache coherence are unproven.
+
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
 training workloads. Make the runtime reusable beyond ProsperoAI and understandable

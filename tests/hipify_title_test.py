@@ -81,11 +81,11 @@ def main():
     if a.check:verify(a.check.resolve());return
     require(a.reference_root and a.probe_dir and a.compiler_source_root and a.output,'reference-root/probe-dir/compiler-source-root/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='9b94ef064cbc6e76c6988c1644fc64b0d05f7ffa8480009f8fba0291731e58f0','reviewed threaded runtime proof')
+    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='289e97797b183e158369ff963565401d99f8e9422e86c60515b46cc480067f08','reviewed threaded runtime proof')
     require(r.get('schema')==2 and r.get('compiler_only') is False and r.get('compiler_proof'),'separate compiler and runtime authorities required')
     check_runtime_proof(probe)
     frozen=a.compiler_source_root.resolve();external=dict(r['inputs']);external.update({str(frozen/n):v for n,v in r['sources'].items()});external.update({str(probe/n):v for n,v in r['artifacts'].items()});external[str(probe/'receipt.json')]=sha(probe/'receipt.json')
-    review=ref/'results/fill-sdk-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='36a9a78690da3715a8535e6444132d6c6111aa9ce4afc1bf431cb625a2f0abaa','runtime review changed');external[str(review)]=sha(review)
+    review=ref/'results/copy-sdk-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='210d90b55ea3232d4621a48c76bca1a2548cb8185dda64c0b741a1406f933cdf','runtime review changed');external[str(review)]=sha(review)
     require(all(sha(n)==v for n,v in external.items()),'frozen runtime inputs changed')
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client';headers=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp'):external[str(h)]=sha(h)
