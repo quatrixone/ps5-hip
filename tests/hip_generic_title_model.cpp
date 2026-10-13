@@ -12,7 +12,7 @@
 extern "C" void ps5hip_install_shell_exit_probe();
 extern "C" void ps5hip_install_vector_title_finalizer();
 extern "C" void catchReturnFromMain(int);
-extern "C" unsigned ps5hip_generic_model_live(),ps5hip_generic_model_submits();
+extern "C" unsigned ps5hip_generic_model_live(),ps5hip_generic_model_submits(),ps5hip_generic_model_releases();
 extern "C" void ps5hip_generic_model_configure(const char*);
 extern "C" void __real___hipUnregisterFatBinary(void**),__real_ps5hip_runtime_finish();
 extern "C" void __hipRegisterFunction(void**,const void*,char*,const char*,unsigned,uint3*,uint3*,dim3*,dim3*,int*);
@@ -25,7 +25,11 @@ char scenario[80]{},config[4096]{};
 unsigned shell_requests=0,fini_calls=0,sync_calls=0;
 [[noreturn]] void fail(){::_exit(90);}
 bool is(const char *value){return std::strcmp(scenario,value)==0;}
-bool uncertain(){return is("submit")||is("kick")||is("timeout")||is("throw")||is("unknown");}
+bool uncertain(){return
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+    is("postflush")||
+#endif
+    is("submit")||is("kick")||is("timeout")||is("throw")||is("unknown");}
 __attribute__((constructor(101))) void install_before_compiler() {
     ps5hip_install_shell_exit_probe();
     ps5hip_install_vector_title_finalizer();
@@ -79,8 +83,19 @@ extern "C" int ps5hip_title_model_shell_exit() {
 extern "C" unsigned ps5hip_title_model_sleep(unsigned) {
     const bool success=is("normal")||is("post-finish")||is("shell-fail");
     if(shell_requests!=(success?1u:0u))fail();
+    #ifdef PS5HIP_DEVICE_COPY_TITLE
+    const unsigned expected_live=is("late-live")?1u:uncertain()?8u:is("cleanup")?5u:0u;
+#else
     const unsigned expected_live=is("late-live")?1u:uncertain()?6u:is("cleanup")?3u:0u;
+#endif
     if(ps5hip_generic_model_live()!=expected_live)fail();
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+    if(uncertain()||is("cleanup")) {
+        const auto releases=ps5hip_generic_model_releases();
+        if(releases!=(is("cleanup")?3u:0u)||ps5hip_generic_model_submits()!=1||ps5hip_runtime_gpu_unresolved()!=uncertain())fail();
+        std::printf("COPY_MODEL_RETAINED live=%u releases=%u submits=1 unresolved=%u\n",expected_live,releases,unsigned(uncertain()));
+    }
+#endif
     std::printf("HIP_TITLE_MODEL STOP shell_requests=%u live=%u model_only=true\n",shell_requests,expected_live);
     std::fflush(nullptr);::_exit(0);
 }
@@ -90,7 +105,7 @@ int main(int argc,char **argv) {
     const bool client_mode=uncertain()||is("cleanup")||is("init")||
         is("missing")||is("corrupt")||is("input")||is("guard")||
         is("wrong-route-output")||is("preflush")||is("late-partial")||
-        is("fill-noop")||is("fill-stale")||is("fill-byte")||is("fill-offset");
+        is("fill-noop")||is("fill-stale")||is("fill-byte")||is("fill-offset")||is("missing-consumer")||is("copy-noop")||is("copy-stale")||is("copy-destination")||is("copy-source")||is("copy-short")||is("copy-corrupt")||is("copy-source-mutation");
     const char *mode=client_mode?scenario:"normal";
     ps5hip_generic_model_configure(mode);
     char *client_argv[]={argv[0],const_cast<char*>(mode)};
