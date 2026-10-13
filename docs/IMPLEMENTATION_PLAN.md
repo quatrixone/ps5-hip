@@ -57,8 +57,15 @@ audit: 661 active values, 1,355 device-readback and 1,355 host-template comparis
 Worker-side queue initialization subsequently passed its separate native cycle
 at `a7e6da7`: prebackend state on A, actual AGC initialization on A, four ordered
 A/B/A/main dispatches and complete audited teardown. See
-`../evidence/native-hip-workers-init.json`. Simultaneous callers and repeated
+`../evidence/native-hip-workers-init.json`. General simultaneous callers and repeated
 initialization still require separate qualification.
+
+The subsequent isolated `70a604a` contention experiment passed its native cycle:
+three main/A/B dispatches, 331 exact values, 813 readback and 813 template checks,
+two joined workers and complete audited natural teardown. A launch and B push
+overlap in API lifetime; B requests the same runtime gate while A owns it.
+Kernel-level blocked waiting, performance and GPU overlap remain unproven.
+See `../evidence/native-hip-contention.json`; this experiment is not yet integrated.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
@@ -457,8 +464,10 @@ per-thread launch/error state and shared ownership subsequently passed isolated
 offline qualification; main-initialized joined-worker HIP calls then passed the
 finite native case in `../evidence/native-hip-workers-main.json`. This does not
 complete multithreaded HIP acceptance. Worker-side initialization has separately
-passed `../evidence/native-hip-workers-init.json`; simultaneous callers remain
-unqualified. The combined HIPIFY title/build integration is separately
+passed `../evidence/native-hip-workers-init.json`; the bounded overlapping API
+case in `../evidence/native-hip-contention.json` has also passed, with kernel-level
+blocked waiting and general concurrency still unqualified. The combined HIPIFY
+title/build integration is separately
 qualified in `../evidence/offline-hipify-title-integration.json`.
 
 Decision: publish the supported API matrix internally. Missing required semantics

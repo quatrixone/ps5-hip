@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "classification": "native-bounded-contending-HIP-callers-pass",
+  "source_commit": "70a604a6fd702faff7862384b8aa7a11cca3270e",
+  "source_branch": "development/native-hip-contention",
+  "contention_title_integrated": false,
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "hip_contend_main",
+  "image": {
+    "sha256": "57c92907f9f01ef58b58bfab99849a9390db3a4cdbd3816fc9a3d1962cee932c",
+    "bytes": 3670016
+  },
+  "evidence": {
+    "execution": {
+      "path": "results/contention-execution-v1/observation-20261013T155016.889882Z/receipt.json",
+      "sha256": "1aba244218b0ae18a7a62adf39c228aca9ce52e8831d4ca6f94dc5ea68df2fc7"
+    },
+    "execution_review": {
+      "path": "results/contention-execution-v1/observation-20261013T155016.889882Z-independent-review.json",
+      "sha256": "58c4bf5c05f98235f284e2d3f80a27ad245db976a422c6a4bd05b5820512a421"
+    },
+    "deployment": {
+      "path": "results/contention-deployment-v1/deployment-20261013T154008.021764Z/deployment.json",
+      "sha256": "224521ab90a5e27fdc68824680353d1753084d62e0528ae5bd8d6f4ab70de9cc"
+    },
+    "deployment_review": {
+      "path": "results/contention-deployment-v1/deployment-20261013T154008.021764Z-independent-review.json",
+      "sha256": "57f6f272bf9dd2f69755eafca33caa4f1cc50abea9e967e93802f23f5eb7ac28"
+    },
+    "source_review": {
+      "path": "results/contention-source-independent-review-v1/review.json",
+      "sha256": "c1aeb5f073f0f9ef995ee953da6d3bbaab801527bb7985f22d990c98a8066afd"
+    },
+    "offline_qualification": {
+      "path": ".local/g4-native-contention/results/qualification-v2/receipt.json",
+      "sha256": "66647e76426b33107905735269b929ae695e366e88d3ddad2155240e5b86338a"
+    },
+    "native_package_review": {
+      "path": "results/contention-package-independent-review-v1/review.json",
+      "sha256": "a8cce994d1a692943dd3f8029c4c0bea706c41a88432d16a2dccb52a11773019"
+    },
+    "controls": {
+      "path": "results/contention-controls-offline-v1/receipt.json",
+      "sha256": "662a0b88b83ce9ce971e7fe99cf10e4516fe21beddb78e1634a905b59b75f4f3"
+    },
+    "controls_review": {
+      "path": "results/contention-controls-independent-review-v1/review.json",
+      "sha256": "d792cfecd4b82c298437f04c9895a396d039c3b8522b0eda4b2db0cd981aeb9c"
+    },
+    "worker_init_control": {
+      "path": "evidence/native-hip-workers-init.json",
+      "sha256": "6a4431fa41460847f917296528dff16da29da215ce3ffa6f83559af5d3d4ad86"
+    },
+    "integrated_sdk": {
+      "path": "evidence/offline-worker-sdk-integration.json",
+      "sha256": "e38a31d8aefa4ef3805d5d5aed4d83729d2b359a8b5570117ad314fd32f1c94e"
+    },
+    "manifest": {
+      "path": ".local/g4-native-contention/dist/PPSA99014/gfx1013-hip_contend_main-69449026149e/manifest.json",
+      "sha256": "2f1f011caf4b1ab0d75200383eff01a4054c4b06be0053d681b565cbd6a64677"
+    },
+    "package-receipt": {
+      "path": ".local/g4-native-contention/dist/PPSA99014/gfx1013-hip_contend_main-69449026149e/package-receipt.json",
+      "sha256": "6645a7a6ffbbaba3bea4febc70aa5fb20485bacf308b24a1dae76ebc2417273f"
+    },
+    "build-receipt": {
+      "path": ".local/g4-native-contention/dist/PPSA99014/gfx1013-hip_contend_main-69449026149e/build-receipt.json",
+      "sha256": "1cedda61c3c504d67df7e7284ce3f84abdcaceb9db8cbe9df5bf94b5a7056276"
+    }
+  },
+  "observed": {
+    "pid": 336,
+    "application_id": "0x6018",
+    "compiler_registered_functions": 1,
+    "blocking_dispatches": 3,
+    "actors": [
+      "main",
+      "A",
+      "B"
+    ],
+    "counts": [
+      1,
+      73,
+      257
+    ],
+    "salts": [
+      11,
+      101,
+      1009
+    ],
+    "created": 2,
+    "joined": 2,
+    "exact_values": 331,
+    "device_readback_word_comparisons": 813,
+    "separate_host_template_comparisons": 813,
+    "AGC_events": 7,
+    "AGC_initialization_actor": "main",
+    "AGC_submit_kick_pair_actors": [
+      0,
+      1,
+      2
+    ],
+    "api_overlap": true,
+    "same_gate_request_while_owned": true,
+    "kernel_blocked_wait": "unproven",
+    "compiler_unregister_and_State_destruction_before_final_success": true,
+    "application_log_bytes": 1901,
+    "application_log_sha256": "460938f09a63357c222d2f609673b02f34911d39cde4235b37a3fd6eed15164c",
+    "natural_title_stop": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "measured_timing": {
+    "hold_ns": 60220983292668,
+    "request_ns": 60220984356327,
+    "release_ns": 60220984406042,
+    "acquired_ns": 60221029298091,
+    "lock_call_ns": 44941764,
+    "includes_scheduling": true,
+    "performance_measurement": false
+  },
+  "scope": "Main initializes the queue. A launch and B push overlap in host API lifetime; B requests the same runtime mutex while A owns it. Both workers join before cleanup.",
+  "kernel_blocked_wait": "unproven",
+  "performance_validated": false,
+  "asynchronous_GPU_overlap_validated": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Exact bounded contending HIP API experiment on gfx1013/FW12.70; main initializes, A/B API lifetimes overlap and B requests the same gate while A owns it. Kernel-level blocked wait and full G4 remain unproven.",
+    "331 exact GPU active values,813 readback comparisons and813 separate host-template checks; scalar-input shader, no GPU input-buffer preservation, general CUDA or performance claim.",
+    "Per-value checks certified by frozen client; application log does not export every result.",
+    "Visible matching mounts do not prove global namespace completeness or reference release.",
+    "Application fetched after close; natural-stop/OS capture frozen before close and post-snapshot.",
+    "No console access or native re-execution by reviewer."
+  ],
+  "next": "Integrate the reviewed experiment without broadening its claim; continue native memory-fill/discovery and reusable HIP API qualification."
+}

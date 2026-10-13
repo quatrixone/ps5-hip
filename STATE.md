@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Bounded contending HIP callers passed on .40:** frozen `70a604a` observed
+  overlapping A-launch/B-push API lifetimes and B requesting the same runtime
+  gate while A owned it. Three main/A/B dispatches produced 331 exact values,
+  813 readback and 813 template comparisons; seven AGC events passed and both
+  workers joined. PID336/application `0x6018` stopped naturally after complete
+  cleanup, with independent lifecycle, service and lock audit. Kernel-level
+  blocked waiting, performance and GPU overlap remain unproven. The experiment
+  is not yet integrated; see `evidence/native-hip-contention.json`.
+
 - **Compiler/model dependency split integrated offline:** compiler-only proofs
   bind their actual sources, headers, tools and recipes; HIPIFY runtime models
   consume a separate immutable compiler proof. Native builds also rehash imported
@@ -21,8 +30,8 @@ Updated: 2026-10-13, America/New_York.
   Both workers joined and PID327/application `0x4018` stopped naturally after
   complete cleanup. Independent audit verified freshness, mounts, services and
   locks. See `evidence/native-hip-workers-init.json`. The runtime is already
-  integrated, including this title variant. Overlapping callers remain
-  unqualified.
+  integrated, including this title variant. A bounded overlapping-caller case has now
+  passed above; general concurrency remains unqualified.
 
 - **Validated threaded runtime integrated:** `a5b89aa` brings the native-tested
   main-initialized worker implementation into this development line. Fresh
@@ -1036,3 +1045,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 joined HIP workers | 2aa3c530 | .40 | pass: main-initialized queue, two joined workers, five dispatches and natural teardown | evidence/native-hip-workers-main.json | worker-side initialization, root integration
 - 2026-10-13 | G4 integration | a5b89aa | offline | pass: threaded runtime, refreshed compiler authorities, 55 CMake tests | evidence/offline-threaded-runtime-integration.json | worker initialization
 - 2026-10-13 | G4 worker initialization | a7e6da7 | .40 | pass: init on A, four dispatches, natural teardown | evidence/native-hip-workers-init.json | overlapping host callers
+- 2026-10-13 | G4 contention | 70a604a | .40 | pass: overlapping HIP calls, 331 exact values, natural teardown | evidence/native-hip-contention.json | native memory fill
