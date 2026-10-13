@@ -10,6 +10,52 @@ spec.loader.exec_module(module)
 
 
 class LogTests(unittest.TestCase):
+    hip_title = (
+        b"PS5HIP START target=gfx1013 kernel=hip_vector\n"
+        b"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0\n"
+        b"PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n"
+        b"VECTOR_COMPLETE sequence=1 n=73 blocking=true\n"
+        b"VECTOR_COMPLETE sequence=2 n=73 blocking=true\n"
+        b"VECTOR_CLIENT_PASS exact_values=146 immutable_inputs=true full_guards=true blocking=true hardware_validated=false\n"
+        b"HIP_TITLE COMPUTE complete=true dispatches=2 exact_values=146 finalization=pending\n"
+        b"PS5HIP SHUTDOWN main-return=0\n"
+        b"PS5HIP SHUTDOWN atexit=observed\n"
+        b"PS5HIP SHUTDOWN static-dtor=observed\n"
+        b"VECTOR_UNREGISTER after_main=true active=0\n"
+        b"VECTOR_FINAL registered=1 removed=1 completed=2 active=0 terminal=0 main_finished=1 hardware_validated=false\n"
+        b"HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed exact_values=146\n"
+        b"PS5HIP SHELL_EXIT application-fini=completed\n"
+        b"PS5HIP SHELL_EXIT request=begin\n"
+        b"PS5HIP SHELL_EXIT request-return=0\n")
+
+    def test_hip_title_requires_complete_finalization(self):
+        def check(data):
+            return module.check_log(data, "gfx1013", "hip_vector", shell_exit_probe=True)
+        result = check(self.hip_title)
+        self.assertEqual(result["application_result"], "application-pass")
+        self.assertFalse(result["hardware_gate_passed"])
+        lines = self.hip_title.splitlines(keepends=True)
+        for index in range(len(lines)):
+            with self.subTest(missing=index):
+                self.assertNotEqual(check(b"".join(lines[:index] + lines[index+1:]))["application_result"], "application-pass")
+        # Computational success cannot substitute for genuine compiler teardown.
+        for data in (b"".join(lines[:7]), self.hip_title * 2, self.hip_title[:-1],
+                     self.hip_title.replace(b"\n", b"\r\n"),
+                     b"".join(lines[:10] + [lines[12], lines[11], lines[10]] + lines[13:])):
+            self.assertNotEqual(check(data)["application_result"], "application-pass")
+        for before, after in ((b"removed=1", b"removed=0"), (b"active=0", b"active=1"),
+                              (b"terminal=0", b"terminal=1"), (b"state_destroyed=true", b"state_destroyed=false"),
+                              (b"allocations=closed", b"allocations=retained"), (b"sequence=2", b"sequence=1"),
+                              (b"values=146", b"values=73"), (b"request-return=0", b"request-return=-1")):
+            self.assertNotEqual(check(self.hip_title.replace(before, after))["application_result"], "application-pass")
+        for suffix in (b"VECTOR_ERROR cleanup\n", b"VECTOR_CLIENT_REJECT bad output\n", b"HIP_TITLE FAIL finalization\n"):
+            self.assertEqual(check(self.hip_title + suffix)["application_result"], "failed")
+        self.assertEqual(check(self.hip_title + b"HIP_TITLE QUARANTINED retained\n")["application_result"], "quarantined")
+        with self.assertRaises(ValueError):
+            module.check_log(self.hip_title, "gfx1030", "hip_vector", shell_exit_probe=True)
+        with self.assertRaises(ValueError):
+            module.check_log(self.hip_title, "gfx1013", "hip_vector")
+
     runtime = (b"PS5HIP START target=gfx1013 kernel=runtime\n"
                b"PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\n"
                b"PS5HIP PASS kernel=runtime gpu_api_calls=0\n")

@@ -2,8 +2,8 @@
 
 Updated: 2026-10-11, America/New_York.
 
-Status: G1 passed its offline acceptance; G2 is in progress, G3 has experimental
-offline implementations, and G4-G12 remain planned.
+Status: G1 passed its offline acceptance; G2 is in progress, G3 and G4 have
+experimental offline implementations, and G5-G12 remain planned.
 Frozen native candidates and validation receipts exist; no GPU gate has passed. See `../STATE.md`
 for the current evidence and next experiment.
 
@@ -348,8 +348,13 @@ This is offline preparation, not working native HIP launch syntax or G4 acceptan
 
 The separate [owned native data and memory ABI control](NATIVE_DATA_REGISTRY.md)
 now checks real allocation owners, logical copy extents, free, GPU-use refusal and
-terminal poison against pinned full HIP headers. Host models and PS5 linking pass;
-the genuine compiler launch is not connected to that ownership path yet.
+terminal poison against pinned full HIP headers. Host models and PS5 linking pass.
+The subsequent [connected vector control](HIP_NATIVE_VECTOR_CONTROL.md) now routes
+the genuine compiler launch through native allocation, argument preparation and
+blocking submission, with actual compiler unregister. Its 26 host scenarios and
+48 integrated checks pass; native compilation/linking is verified. These checks
+do not execute AMD instructions. Title lifecycle integration and hardware
+qualification remain required before claiming native example usability.
 
 The [argument capture control](HIP_HOST_LAUNCH_CAPTURE.md) additionally copies the
 real stub's argument values into owned storage, resolves synthetic live-data

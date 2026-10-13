@@ -10,14 +10,22 @@ import math_native_fixture as math_fixture
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector"):
         raise ValueError("unsupported canary profile")
+    if kernel == "hip_vector" and (target != "gfx1013" or not shell_exit_probe):
+        raise ValueError("HIP vector requires the measured gfx1013 shell-managed profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
     lines = data.decode("utf-8", errors="strict").splitlines()
     expected = [f"PS5HIP START target={target} kernel={kernel}",
                 "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass"]
-    if kernel == "runtime":
+    if kernel == "hip_vector":
+        expected.insert(1, "HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0")
+        expected += ["VECTOR_COMPLETE sequence=1 n=73 blocking=true",
+                     "VECTOR_COMPLETE sequence=2 n=73 blocking=true",
+                     "VECTOR_CLIENT_PASS exact_values=146 immutable_inputs=true full_guards=true blocking=true hardware_validated=false",
+                     "HIP_TITLE COMPUTE complete=true dispatches=2 exact_values=146 finalization=pending"]
+    elif kernel == "runtime":
         expected.append("PS5HIP PASS kernel=runtime gpu_api_calls=0")
     elif kernel == "fp32_math":
         contract = math_fixture.profile(target)["contract_sha256"]
@@ -39,11 +47,17 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
         expected += ["PS5HIP SHUTDOWN main-return=0", "PS5HIP SHUTDOWN atexit=observed",
                      "PS5HIP SHUTDOWN static-dtor=observed"]
     if shell_exit_probe:
+        if kernel == "hip_vector":
+            expected += ["VECTOR_UNREGISTER after_main=true active=0",
+                         "VECTOR_FINAL registered=1 removed=1 completed=2 active=0 terminal=0 main_finished=1 hardware_validated=false",
+                         "HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed exact_values=146"]
         expected += ["PS5HIP SHELL_EXIT application-fini=completed", "PS5HIP SHELL_EXIT request=begin",
                      "PS5HIP SHELL_EXIT request-return=0"]
     if any("QUARANTINED" in line for line in lines):
         result = "quarantined"
-    elif any("PS5HIP FAIL" in line or "PS5HIP mismatch" in line for line in lines):
+    elif any("PS5HIP FAIL" in line or "PS5HIP mismatch" in line or
+             (kernel == "hip_vector" and line.startswith(("VECTOR_ERROR", "VECTOR_CLIENT_REJECT", "HIP_TITLE FAIL")))
+             for line in lines):
         result = "failed"
     elif data == ("\n".join(expected) + "\n").encode("utf-8"):
         result = "application-pass"
@@ -60,7 +74,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

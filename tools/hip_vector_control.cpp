@@ -21,7 +21,15 @@ extern const uint8_t __ps5hip_names_begin[], __ps5hip_names_end[];
 }
 namespace {
 struct Configuration { dim3 grid, block; size_t shared; hipStream_t stream; };
+#ifdef PS5HIP_VECTOR_TITLE
+// Trivial process-lifetime observation; callbacks never access a destroyed State.
+struct FinalObservation { bool checked, destroyed; } final_observation{};
+struct DestructionSentinel { ~DestructionSentinel() { final_observation.destroyed=true; } };
+#endif
 struct State {
+#ifdef PS5HIP_VECTOR_TITLE
+    DestructionSentinel destruction_sentinel; // First member is destroyed last.
+#endif
     ps5hip::HostRegistration registration;
     ps5hip::NativeDataRegistry data;
     std::unique_ptr<ps5hip::SubmissionBackend> backend;
@@ -33,6 +41,15 @@ struct State {
     bool terminal = false, init_attempted = false, partial = false, main_finished = false;
     unsigned registered = 0, removed = 0, completed = 0;
     ~State() {
+#ifdef PS5HIP_VECTOR_TITLE
+        try {
+            final_observation.checked = registered==1 && removed==1 && completed==2 &&
+                !registration.active_modules() && !registration.active_functions() && !terminal && !data.poisoned() &&
+                data.ranges().empty() && configurations.empty() && main_finished &&
+                queue && !queue->poisoned();
+            if(final_observation.checked) { queue.reset(); backend.reset(); }
+        } catch (...) { final_observation.checked=false; }
+#endif
         std::printf("VECTOR_FINAL registered=%u removed=%u completed=%u active=%zu terminal=%u main_finished=%u hardware_validated=false\n",
             registered, removed, completed, registration.active_modules(), unsigned(terminal), unsigned(main_finished));
     }
@@ -231,4 +248,29 @@ extern "C" bool ps5hip_vector_terminal(){return state().terminal;}
 #ifdef PS5HIP_VECTOR_MODEL
 extern "C" const void *ps5hip_vector_token(){return state().host_token;}
 extern "C" bool ps5hip_vector_gpu_unresolved(){return state().queue && state().queue->poisoned();}
+#endif
+
+#ifdef PS5HIP_VECTOR_TITLE
+extern "C" bool ps5hip_vector_title_registration() noexcept {
+    try {
+        const auto &s=state();
+        if(s.registered!=1 || !s.host_token || s.partial || s.error!=hipSuccess ||
+           s.registration.active_modules()!=1 || s.registration.active_functions()!=1 || s.terminal || s.data.poisoned() ||
+           !s.data.ranges().empty() || s.backend || s.queue || s.init_attempted) return false;
+        std::puts("HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0");
+        return true;
+    } catch (...) { return false; }
+}
+extern "C" bool ps5hip_vector_title_ready() noexcept {
+    try {
+        const auto &s=state();
+        return s.registered==1 && !s.removed && s.completed==2 && s.main_finished &&
+            !s.terminal && !s.data.poisoned() && s.data.ranges().empty() &&
+            s.configurations.empty() && s.queue && !s.queue->poisoned() &&
+            s.registration.active_modules()==1 && s.registration.active_functions()==1;
+    } catch (...) { return false; }
+}
+extern "C" bool ps5hip_vector_title_finalized() noexcept {
+    return final_observation.checked && final_observation.destroyed;
+}
 #endif
