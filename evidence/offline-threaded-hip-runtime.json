@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "classification": "independently-reviewed-offline-threaded-HIP-runtime",
+  "source_commit": "30f3c9f71dc7c2f1266aefdd1b2dffe19a02a5a1",
+  "source_branch": "development/hip-host-threads",
+  "root_implementation_integrated": false,
+  "review": {
+    "path": "results/threaded-runtime-final-source-independent-review-v3.json",
+    "sha256": "1ec7cd3397391c847c6e8804fce3a9c7445d321d1e06e2d7f619ee20c09c927b"
+  },
+  "source_sha256": {
+    "CMakeLists.txt": "f56e20137a67e8124907d8be4b68a9dcc4de1e11a9c0bccff9c5b9b7a7bd3be6",
+    "docs/HIPIFY_NATIVE_BUILD.md": "e9629467807b9dc32d2ce95a3d112b1d1f5ddf8b8c37ace4bdc8cec516e9b696",
+    "docs/HIP_HOST_THREADS.md": "4ddf1fd71f4c9a93811b9d618e3cb94d194d8943429d53e718a575cff9b65613",
+    "include/ps5hip/hip_runtime_control.h": "71271b29efc0369ed5655b3209fb201ec47bb1057b2338fd15004f4e2415d1a0",
+    "src/hip_runtime.cpp": "c09700e9af48af2eebdbd9753e820a07932dd4614a410c0ffeb5df141d2d7e61",
+    "tests/hip_generic_title_model.cpp": "2096cfa869e07cdfff7504fc1b3d264ff4ba70cbe890dd87d427ab347189d62a",
+    "tests/hip_generic_title_test.py": "2e4839cdd20b38ab0cec1a5843c58b3a7c76b7b8348581ab947529883009ffba",
+    "tests/hip_matmul_title_model.cpp": "f0c1b0f79f38d6f7410da35dff6481c3b7a9975383943b482374f5851356eab9",
+    "tests/hip_matmul_title_test.py": "1b1d1c7e8f6f88150d0c0a2575139dadb3b9f43f7d0c76ae0af7fc3574001204",
+    "tests/hip_routes_model.cpp": "73160f726419e7e372635891bab10eb27e0a2e4cf5d289415b565324ffd28173",
+    "tests/hip_routes_title_model.cpp": "f5e693614a1686a614a3475a7dbea9defe906647041e0a8895124333079bec86",
+    "tests/hip_routes_title_test.py": "0d7c0953b7b9db816e12950a1fe704cc5341840a773531a9e463ac68dccf4f2f",
+    "tests/hip_threads.hip": "be54758c88a68b6d7725dddaff089d312641c5811eb7b52b8c2b0f47c0990077",
+    "tests/hip_threads_model.cpp": "21ed6c62876fb8aabec7e412b9dfe4c2c583d33c08ad9f97743bdf02bd7eab03",
+    "tests/hip_threads_recipe_test.py": "8153eb2336a4353d85c98a8083e834cc5866d079cb90fdbd16c9ac8736b5d20b",
+    "tests/hip_vector_model.cpp": "fd3356901a5daea1d915d045b188e97cea1522f9796ef9ed3aed820a3d98d782",
+    "tests/hip_vector_title_model.cpp": "22d340681620111ec36f912b08368178fa4508b282854517a76dcc0b01abd653",
+    "tests/hip_vector_title_test.py": "0d402a09f3d6f33b55224f00297d22ec3ac58648e320c4f92fd31be6364fd69a",
+    "tests/hipify_native_title_test.py": "b017831396a7176d07b495252b430b6c815e2ac833e72aead9ba06e37edfd08b",
+    "tests/hipify_runtime_model.cpp": "65c4a1e4cb02e3548228ccc5d8eb6b7e30b02224ce8e297140ae9f4acd276aa2",
+    "tests/hipify_runtime_recipe_test.py": "fa8d2b34119c023a43615032350a1fbb7ba0f99749f2043ccbe6e78cb0eec2f5",
+    "tests/hipify_title_model.cpp": "1d330135562b114ef180dc7aa27311b280861b77cc3304e47a8ef26a822dc17b",
+    "tests/hipify_title_test.py": "1e69f7ef2f52e275bb6b62f11c9b8bfff27895ab448d4b08b0c9abb3e92d1ab0",
+    "tests/native_vector_recipe_test.py": "ac0e5e69dce472957b8e51636c6fc11c6d0d2df194c4f1dba0adf7c4ac9e8984",
+    "tools/native_vector_title.py": "9312ab6d4f3213d0d8b5ecd3f69597d7531e2928a6b0de46ec51481e46144566",
+    "tools/probe_hip_generic.py": "eff40d4e07d1819c96c082e8e2f544389cd95703770ceefb031b6dc1d959ef7d",
+    "tools/probe_hip_routes.py": "97c266ac94df755ae9e3f3d5b52b7ccf0f054b8c9d76b7bdc2c5ef491dc85e3d",
+    "tools/probe_hip_threads.py": "7910e8f763001cc31047e594b0cb538b139f64475fa38427275788d393352386",
+    "tools/probe_hipify_runtime.py": "bbb224fb918a5b741e0371581bbab67a325a0c00982a7c3589fc1e99e2cc5b89",
+    "tools/probe_native_vector.py": "cf901aa4b35d95e3555aeacdcfc8b7b9d1dabb6798e18a871210e2e9b7787726"
+  },
+  "proofs": [
+    {
+      "path": ".local/g4-threaded-runtime/results/threads-v10/receipt.json",
+      "sha256": "a1123e8e9861ef0326f331f02992a7ba6d0bb138991e25f0fec1607755e8e94d"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/threads-tsan-v5/receipt.json",
+      "sha256": "75bb48a079badcc698507f0d7ef5d753f7b02a2e256806ba8eef2330b9f308fc"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/thread-proof-readiness-v3/receipt.json",
+      "sha256": "d2232f58463da23dcd966b40fc02097d2bd1c8d9c00e7dae861d8ee3aa57e201"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/runtime-linux-check-v2/receipt.json",
+      "sha256": "6afd08d1fe51acc2772ff0fb1cf7004de1be8494ee334c8d6a16a6cd24bd5ae9"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/five-threaded-title-qualification-v2/receipt.json",
+      "sha256": "c21914d0614b07c37fd05da8ea5806e5242e6ea1c6de14524d9260b799216b37"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/threaded-generic-runtime-v3/receipt.json",
+      "sha256": "4fb6b6e876d3f9aeb4661c45eaf1457c05426ab91e1ea98c32736ddea62f1ed4"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/vector-host-regression-v5/receipt.json",
+      "sha256": "85eb7dbb5e11adfb4a3888f573a26485c389fd0caca0686995bc8fbd216631ae"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/threaded-hipify-runtime-v4/receipt.json",
+      "sha256": "2eef5b1bda9a0353cde60c7b85286b34c2308a846a7ada42d1ee58af4453008d"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/generic-title-threaded-v2/receipt.json",
+      "sha256": "e32f53dc3a27e242947a8997dda38fb58a4cda3055535cab8424572a87e4b6ba"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/matmul-title-threaded-v2/receipt.json",
+      "sha256": "9071e989bb1f382f9fef0df8fe4475c6925d0552e88be875185fc7678c1d44a3"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/routes-title-threaded-v2/receipt.json",
+      "sha256": "60de06e28c80025b8dcaa7891ed3f954148515bc0257f22a08f48f26a5cd4c11"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/hipify-title-threaded-v3/receipt.json",
+      "sha256": "840fa040fc5e340ca7dd315b1fdf290b98cc86faccd98a59be11f880afb2ffbf"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/vector-title-threaded-v2/receipt.json",
+      "sha256": "5e5b01323f14eafb8c66f6562d1b0c498aa822828da049227ab0503e66e86a51"
+    },
+    {
+      "path": ".local/g4-threaded-runtime/results/native-profile-threaded-v1/receipt.json",
+      "sha256": "7aa46c0e94aa6961c10c4534010f69fdeac813669da2172c5fc3cfa38add642a"
+    }
+  ],
+  "checks": {
+    "asan_ubsan_modes": 34,
+    "cpu_only_tsan_modes": 16,
+    "title_lifecycle_cases": 145,
+    "title_transcript_mutations": 83,
+    "hipify_runtime_modes": 19,
+    "generic_runtime_modes": 24,
+    "vector_runtime_modes": 26
+  },
+  "behavior": [
+    "Checked process-wide mutex serializes complete blocking HIP operations.",
+    "Checked pthread-key contexts isolate errors and launch configurations.",
+    "Joined-worker shutdown and genuine unregister govern safe State destruction.",
+    "Persistent infrastructure, registration and abandonment failures reject further work.",
+    "Uncertain GPU ownership remains retained rather than freed."
+  ],
+  "resolved_findings": [
+    "State deletion requires full normal closure; otherwise retains entire State.",
+    "Destroyed diagnostics use saved POD or conservative failure.",
+    "Registration bootstrap failure is sticky independently of last-error reset.",
+    "Open abandoned lifecycle returns sticky Unknown from both last-error queries without context allocation.",
+    "State is created only by fat-binary registration; noexcept error recovery never retries State allocation."
+  ],
+  "hardware_validated": false,
+  "full_gate_complete": false,
+  "next": "Qualify unchanged finite HIPIFY native control, then joined-worker GPU submissions.",
+  "limits": [
+    "Offline host qualification only; no new PS5 native package or console execution is approved or inferred by this review.",
+    "TSAN excludes low fixed-address transport model modes; host model is not GPU ISA emulation.",
+    "Unlock-fault injection physically releases host mutex before reporting failure; no claim of recovery from a truly stuck native lock.",
+    "Native AGC thread affinity, native threaded GPU execution and full ROCm/framework compatibility remain unproven."
+  ]
+}

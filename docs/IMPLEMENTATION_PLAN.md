@@ -40,6 +40,13 @@ for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 
+The isolated threaded runtime `30f3c9f` now passes independent offline review,
+34 ASan/UBSan modes, 16 CPU-only TSAN modes and five title lifecycle suites.
+See `../evidence/offline-threaded-hip-runtime.json`. It is not yet integrated
+into the root runtime or qualified on the console. The next native experiments
+first retain the existing HIPIFY workload, then introduce joined GPU callers;
+neither result can be inferred from the prior CPU-only threading proof.
+
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
 training workloads. Make the runtime reusable beyond ProsperoAI and understandable

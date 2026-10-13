@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Threaded HIP runtime qualified offline:** isolated frozen `30f3c9f` on
+  `development/hip-host-threads` passes 34 ASan/UBSan modes, 16 CPU-only TSAN
+  modes, all five title lifecycle suites (145 cases/83 transcript mutations),
+  and fresh legacy client regressions. Independent review binds all 30 changed
+  files and covers checked locking, per-thread errors/configurations, failure
+  retention and shutdown. This source is not yet integrated into this root.
+  Native HIPIFY control qualification and worker GPU affinity remain pending;
+  see `evidence/offline-threaded-hip-runtime.json`. G3/G4 remain open.
+
 - **CPU threading passed on .40 and independent audit:** frozen `147c3b2`
   ran two workers with explicit 512 KiB stacks, 256 ordered updates, isolated
   emulated TLS values and exactly one key destructor per worker. Both joined;
@@ -11,7 +20,7 @@ Updated: 2026-10-13, America/New_York.
   passed. Visible mounts matched, services stayed healthy and locks released.
   This CPU-only proof does not qualify concurrent HIP calls or worker-thread
   GPU affinity. See `evidence/native-host-threads.json`. Checked per-thread HIP
-  state and serialized ownership are the next implementation step.
+  state and serialized ownership now have the isolated offline proof above.
 
 - **HIPIFY title/build integration qualified offline:** frozen `6e35911` is
   integrated with existing matmul and corrected math. Nine focused proof,
@@ -974,3 +983,4 @@ including the provider-fixed store and vector candidates.
 
 - 2026-10-13 | G4 CPU threads | 147c3b2 | .40 | pass: 2 workers, 256 updates, TLS and natural teardown | evidence/native-host-threads.json | checked threaded HIP runtime
 - 2026-10-13 | G4 HIPIFY integration | 6e35911 | offline | pass: 9 focused checks, exact reviewed source | evidence/offline-hipify-title-integration.json | threaded runtime
+- 2026-10-13 | G4 threaded runtime | 30f3c9f | offline | pass: checked threading and lifecycle review | evidence/offline-threaded-hip-runtime.json | native control, then worker GPU submissions
