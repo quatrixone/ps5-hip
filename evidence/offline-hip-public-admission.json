@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "classification": "offline-upstream-public-hip-admission",
+  "base_commit": "169a118a2e61b505b606b0725f62bb0cfcd1471f",
+  "proofs": {
+    "asan-v2": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g5-hip-admission/results/asan-v2/receipt.json",
+      "sha256": "b50fe17bea5074c627e3a04726a30a5adfead2ad01211d27040bce4453993327",
+      "source_units": 69,
+      "cases": 7,
+      "expected_thread_leak": false
+    },
+    "tsan-v2": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g5-hip-admission/results/tsan-v2/receipt.json",
+      "sha256": "82ce55607dc89610752fdca7e42dd7b3ced269eae7928a9c8ef114c3fb5aa1f5",
+      "source_units": 69,
+      "cases": 7,
+      "expected_thread_leak": true
+    },
+    "patch-roundtrip": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g5-hip-admission/results/source-roundtrip-v1/public-hip-preparation.json",
+      "sha256": "043fac7abab6319e3e7bcb4a06f336bc012db36e1f9ce002c1e0b909b86103db"
+    },
+    "recipe-equivalence": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g5-hip-admission/results/recipe-equivalence-v2/receipt.json",
+      "sha256": "b6b2cc67736a4e27d1c75ae46379fdc46c07cae12ce559b2418c0c949951ef80"
+    }
+  },
+  "sources": {
+    "ports/clr/ps5-clr-tls.cpp": "8336282f09a854c315e4b5a9590299b6830367252738f7dbc869df629b082ba1",
+    "ports/clr/ps5-clr-tls.hpp": "b3af0fe8145ebedcc5fde4b38169b3b74ff5c754c0118cdcda535a19dc43a2bc",
+    "ports/clr/ps5-device.cpp": "826ee314a2eded8f22c43a3e0dcac484bc02eac214fae1591e81e79cf0be814e",
+    "ports/clr/ps5-device.hpp": "bbab17f260417f74eb245e9497d03ebdec6360d30cad495349ca33765bc54575",
+    "ports/clr/ps5-public-hip.json": "589fda4e70ad05a47fb92835f04e0eac04287664662b8ba159bc210354655804",
+    "ports/clr/ps5-public-hip.patch": "7821a092685d832c2e1cd04801628ab9e15f39efd16780f2a35e6e64748972dc",
+    "tests/hip_admission_model.cpp": "c9f33e870d1192e2e2a2cfa906d523008425fb9c898c2302eb8761e7c6df1ec9",
+    "tools/prepare_hip_admission.py": "cad65976a6f57db7bcb1ccd3c30731deb4a8b1981c859f97bad5d24b0b54f9bb",
+    "tools/qualify_hip_admission.py": "f29bac74e8276f45f465d89b6bd4ccc55ec70d9c320e50aac4de789cc797cea1",
+    "docs/HIP_PUBLIC_ADMISSION.md": "a8fd7d6bb1a17a254a044588eb96f742b571c03f19992fa2268935072b5ddd25"
+  },
+  "g5_accepted": false,
+  "gpu_executed": false,
+  "native_qualified": false,
+  "independent_shutdown_review": "pending",
+  "results": {
+    "genuine_hip_dispatch": true,
+    "real_device_context_pools": true,
+    "streams": 2,
+    "cross_stream_event_dependency": true,
+    "normal_tls_leaks": 0,
+    "asan_modes": 7,
+    "tsan_modes": 7,
+    "tsan_join_fault": "Expected exact finished-unjoined-thread warning, exit66; not a clean-join claim"
+  },
+  "limits": [
+    "Linux software event ordering only; synthetic backend never invoked.",
+    "Failed-join and self-destroy retain ownership; remaining global teardown awaits independent review.",
+    "Native integration is held for the separate CPU affinity startup validation."
+  ]
+}

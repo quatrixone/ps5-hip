@@ -206,7 +206,14 @@ public:
         if(!factory||!isa||!amd::Device::create(*isa))throw ObjectError("PS5 CLR device creation");
         state_->retained=state_;
     }
+    bool initialize_runtime_context(){
+        context_=new amd::Context({this},amd::Context::Info());
+        if(context_->create(nullptr)!=CL_SUCCESS){context_->release();context_=nullptr;return false;}
+        registerDevice();return true;
+    }
     ~Device(){
+        if(context_){context_->release();context_=nullptr;}
+
         if(!state_->observed.terminal&&state_->observed.allocations==state_->observed.frees&&
            state_->observed.queues==state_->observed.retired_queues&&state_.use_count()==2){
 #ifdef PS5HIP_CLR_MODEL
@@ -231,4 +238,12 @@ public:
 amd::Device* create_device(BackendFactory factory,Observation& observed)noexcept{
     try{return new Device(factory,observed);}catch(...){return nullptr;}
 }
+bool register_runtime_device(BackendFactory factory,Observation& observation) noexcept {
+    try {
+        std::unique_ptr<Device> device(new Device(factory,observation));
+        if(!device->initialize_runtime_context())return false;
+        device.release();return true; // Owned by upstream Device::tearDown.
+    }catch(...){return false;}
+}
+
 }

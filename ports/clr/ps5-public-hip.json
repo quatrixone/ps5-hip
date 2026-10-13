@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "base_adapter_commit": "169a118a2e61b505b606b0725f62bb0cfcd1471f",
+  "base_clr_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "patch_sha256": "7821a092685d832c2e1cd04801628ab9e15f39efd16780f2a35e6e64748972dc",
+  "files": {
+    "rocclr/device/device.cpp": {
+      "base_sha256": "a95926acf4bf78fde0cb8f8307398e9b5bb6eb129116fc31433804cddd5df500",
+      "result_sha256": "21c093bf0a858d642164015316227c43ce932e561b70d391d2f48405704127e2"
+    },
+    "rocclr/platform/runtime.hpp": {
+      "base_sha256": "774a39d3f6bae89ebefa96037c0de9141e419f6c0aef9639bf00d043f3062026",
+      "result_sha256": "b4b7fc52fefd6d060ee8ebd73372b2b03099ba88e5489b364197b59a42777510"
+    },
+    "rocclr/platform/runtime.cpp": {
+      "base_sha256": "d5fc4e72e304b1e3aef06f1151f389d2a082dd015d02b42867b1554873e29bad",
+      "result_sha256": "9132391d7390861799e0a5a4fee887ac4843031c418ee648a8d8414ea18b7538"
+    },
+    "rocclr/platform/commandqueue.cpp": {
+      "base_sha256": "28b28a7fb9dc723ffbf846a7b9b483ca87e45ee1059f1fe7312acc5386b5ff9e",
+      "result_sha256": "85756865515612dabddfd1c41037c13e9560808c657c42f3a5d3e155da1c5cb4"
+    },
+    "rocclr/thread/thread.cpp": {
+      "base_sha256": "26bf38f2b92e1f0495ff3066868379f3221bd1b67b0ac45a5af18a0206d09c5e",
+      "result_sha256": "fd784cf23f1d15e453db587ff0bbb38cfefd86b6946bdf5b5e00188a2d032633"
+    },
+    "hipamd/src/hip_code_object.cpp": {
+      "base_sha256": "c87df8995687cfb53eac1d5379860eb04020c0dd556c4c8c58b67b2c1a90aa20",
+      "result_sha256": "94aecd7fc79d1291dab99688cc82bc15c9570956f78909f6933d108b537c5d46"
+    },
+    "hipamd/src/hip_fatbin.cpp": {
+      "base_sha256": "077200b3f1b6a3b16fde7547f7d7ddcd806088cdaef413bca4300eaa4eb3d1c6",
+      "result_sha256": "b0b77db5df71f03220a2a546ad9d9f43a8f7aafa72826c9a0fdf8636dc82e87c"
+    },
+    "hipamd/src/hip_gl.cpp": {
+      "base_sha256": "99a2acb8b1e354215e003a5eaf95a24d6a8922178256046e1ac95b11a41497b6",
+      "result_sha256": "834e3783ba2b42d6ff14a4ca0ae3167cc73ce2801485f1b22f7b63aba0da9f7a"
+    },
+    "hipamd/src/hip_internal.hpp": {
+      "base_sha256": "1d31478b3b6268ead35c7d70013b078ca9f4abfeec7ea5f3ee398c44ffbd72eb",
+      "result_sha256": "10f18b2298f0032a212bd737928d8db60afe46fadc46c3cfa5b8ebbdbec62a72"
+    },
+    "hipamd/src/hip_stream.cpp": {
+      "base_sha256": "815882439bc2d1f2e1a26d2f21374b2c22daf302deb0b5fbd8c3388d2578679d",
+      "result_sha256": "9dfeaf7ea8702bd81a6cb234270a4053a07033305a6c11a376a6a32a5eaa0c44"
+    },
+    "hipamd/src/hip_device.cpp": {
+      "base_sha256": "8548f8d7c00848afb53d1ad8626c5040bf99a882ee8b8fcb25eeb7f3939e4284",
+      "result_sha256": "3c65a143fd1d5fcee492c2040724cd6f07c9605c6366fa371c7810094ece37ff"
+    },
+    "hipamd/src/hip_context.cpp": {
+      "base_sha256": "5b1e43da8133d7458d58cbdcb17d3bd1325c6e7cae63c03011e338e3e4e0041e",
+      "result_sha256": "1568b19b430f4d2483e784de0cc4620f2770e68e3b86850d10552f545713a31f"
+    }
+  },
+  "scope": "Linux public HIP admission over genuine ROCclr queues; no native or GPU acceptance"
+}

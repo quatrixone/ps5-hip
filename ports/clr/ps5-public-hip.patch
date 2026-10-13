@@ -1,0 +1,439 @@
+--- a/rocclr/device/device.cpp
++++ b/rocclr/device/device.cpp
+@@ -586,11 +586,15 @@
+   return true;
+ }
+ 
++extern "C" bool ps5hip_clr_admit_device();
+ bool Device::init() {
+   assert(!Runtime::initialized() && "initialize only once");
+   bool ret = false;
+   devices_ = nullptr;
+   appProfile_.init();
++#if defined(PS5HIP_PUBLIC_HIP)
++  ret = ps5hip_clr_admit_device();
++#endif
+ 
+ 
+ // IMPORTANT: Note that we are initialiing HSA stack first and then
+--- a/rocclr/platform/runtime.hpp
++++ b/rocclr/platform/runtime.hpp
+@@ -36,6 +36,11 @@
+   static bool LibraryDetached;
+ 
+  public:
++#if defined(PS5HIP_PUBLIC_HIP)
++  static std::atomic<bool> quarantined_;
++  static bool quarantined() { return quarantined_.load(std::memory_order_acquire); }
++  static void quarantine() { quarantined_.store(true, std::memory_order_release); }
++#endif
+   //! Return true if the OpencCL runtime is already initialized
+   inline static bool initialized() { return initialized_; }
+ 
+--- a/rocclr/platform/runtime.cpp
++++ b/rocclr/platform/runtime.cpp
+@@ -49,6 +49,9 @@
+ 
+ volatile bool Runtime::initialized_ = false;
+ bool Runtime::LibraryDetached = false;
++#if defined(PS5HIP_PUBLIC_HIP)
++std::atomic<bool> Runtime::quarantined_{false};
++#endif
+ volatile int Runtime::pid_ = 0;
+ 
+ bool Runtime::init() {
+@@ -89,6 +92,9 @@
+ }
+ 
+ void Runtime::tearDown() {
++#if defined(PS5HIP_PUBLIC_HIP)
++  if (quarantined()) return;
++#endif
+   if (!initialized_) {
+     return;
+   }
+@@ -111,12 +117,18 @@
+ std::vector<ReferenceCountedObject*> RuntimeTearDown::external_;
+ 
+ RuntimeTearDown::~RuntimeTearDown() {
++#if defined(PS5HIP_PUBLIC_HIP)
++  if (Runtime::quarantined()) return;
++#endif
+ #if !defined(_WIN32) && !defined(BUILD_STATIC_LIBS)
+   // Only perform destruction if process matches the initialization,
+   // to avoid a call with the child process after fork()
+   if (amd::IS_HIP && amd::Os::getProcessId() == Runtime::pid()) {
+     for (auto it: external_) {
+       it->release();
++#if defined(PS5HIP_PUBLIC_HIP)
++      if (Runtime::quarantined()) return;
++#endif
+     }
+     Runtime::tearDown();
+   }
+--- a/rocclr/platform/commandqueue.cpp
++++ b/rocclr/platform/commandqueue.cpp
+@@ -111,6 +111,16 @@
+ 
+ #if defined(PS5HIP_CLR_PLATFORM)
+   if (!AMD_DIRECT_DISPATCH && !thread_.join()) return false;
++#if defined(PS5HIP_PUBLIC_HIP)
++  // No worker can replace the last-command reference after successful join.
++  Command* retired = nullptr;
++  {
++    ScopedLock lock(lastCmdLock_);
++    retired = lastEnqueueCommand_;
++    lastEnqueueCommand_ = nullptr;
++  }
++  if (retired != nullptr) retired->release();
++#endif
+ #endif
+   if (Agent::shouldPostCommandQueueEvents()) {
+     Agent::postCommandQueueFree(as_cl(this->asCommandQueue()));
+--- a/rocclr/thread/thread.cpp
++++ b/rocclr/thread/thread.cpp
+@@ -31,6 +31,9 @@
+ 
+ HostThread::HostThread() : Thread("HostThread", 0, false) {
+   setCurrent();
++#if defined(PS5HIP_PUBLIC_HIP)
++  ps5_clr::adopt_current_thread(this, [](void* p) { delete static_cast<HostThread*>(p); });
++#endif
+   Os::currentStackInfo(&stackBase_, &stackSize_);
+   setState(RUNNABLE);
+ }
+--- a/hipamd/src/hip_code_object.cpp
++++ b/hipamd/src/hip_code_object.cpp
+@@ -620,6 +620,11 @@
+ hipError_t CodeObject::extractCodeObjectFromFatBinaryUsingComgr(
+     const void* data, size_t size, const std::vector<std::string>& agent_triple_target_ids,
+     std::vector<std::pair<const void*, size_t>>& code_objs) {
++#if defined(PS5HIP_PUBLIC_HIP) && !defined(USE_COMGR_LIBRARY)
++  // Compiler services are unavailable in this bounded AOT-only profile.
++  return hipErrorNotSupported;
++#else
++
+   hipError_t hipStatus = hipSuccess;
+   amd_comgr_status_t comgrStatus = AMD_COMGR_STATUS_SUCCESS;
+ 
+@@ -934,6 +939,8 @@
+   }
+ 
+   return hipStatus;
++
++#endif
+ }
+ 
+ hipError_t DynCO::loadCodeObject(const char* fname, const void* image) {
+--- a/hipamd/src/hip_fatbin.cpp
++++ b/hipamd/src/hip_fatbin.cpp
+@@ -123,6 +123,11 @@
+ }
+ 
+ hipError_t FatBinaryInfo::ExtractFatBinaryUsingCOMGR(const std::vector<hip::Device*>& devices) {
++#if defined(PS5HIP_PUBLIC_HIP) && !defined(USE_COMGR_LIBRARY)
++  // Compiler services are unavailable in this bounded AOT-only profile.
++  return hipErrorNotSupported;
++#else
++
+   amd_comgr_data_t data_object {0};
+   amd_comgr_status_t comgr_status = AMD_COMGR_STATUS_SUCCESS;
+   hipError_t hip_status = hipSuccess;
+@@ -318,6 +323,8 @@
+   }
+ 
+   return hip_status;
++
++#endif
+ }
+ 
+ hipError_t FatBinaryInfo::ExtractFatBinary(const std::vector<hip::Device*>& devices) {
+--- a/hipamd/src/hip_gl.cpp
++++ b/hipamd/src/hip_gl.cpp
+@@ -90,6 +90,10 @@
+ // NOTE: This method cooresponds to OpenCL functionality in clGetGLContextInfoKHR()
+ hipError_t hipGLGetDevices(unsigned int* pHipDeviceCount, int* pHipDevices,
+                            unsigned int hipDeviceCount, hipGLDeviceList deviceList) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGLGetDevices, pHipDeviceCount, pHipDevices, hipDeviceCount, deviceList);
+ 
+   std::call_once(amd::interopOnce, setupGLInteropOnce);
+@@ -154,6 +158,8 @@
+       HIP_RETURN(hipErrorInvalidValue);
+   }
+   HIP_RETURN(*pHipDeviceCount > 0 ? hipSuccess : hipErrorNoDevice);
++
++#endif
+ }
+ 
+ static inline void clearGLErrors(const amd::Context& amdContext) {
+@@ -180,6 +186,10 @@
+ 
+ hipError_t hipGraphicsSubResourceGetMappedArray(hipArray_t* array, hipGraphicsResource_t resource,
+                                       unsigned int arrayIndex, unsigned int mipLevel) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsSubResourceGetMappedArray, array, resource, arrayIndex, mipLevel);
+ 
+   amd::Context& amdContext = *(hip::getCurrentDevice()->asContext());
+@@ -219,10 +229,16 @@
+     hip::hipArraySet.insert(*array);
+   }
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsGLRegisterImage(hipGraphicsResource** resource, GLuint image, GLenum target,
+                                       unsigned int flags) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsGLRegisterImage, resource, image, target, flags);
+ 
+     if (!((flags == hipGraphicsRegisterFlagsNone) || (flags & hipGraphicsRegisterFlagsReadOnly) ||
+@@ -528,10 +544,16 @@
+   *resource = reinterpret_cast<hipGraphicsResource*>(pImageGL);
+   HIP_RETURN(hipSuccess);
+ 
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsGLRegisterBuffer(hipGraphicsResource** resource, GLuint buffer,
+                                        unsigned int flags) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsGLRegisterBuffer, resource, buffer, flags);
+ 
+   if (!((flags == hipGraphicsRegisterFlagsNone) || (flags & hipGraphicsRegisterFlagsReadOnly) ||
+@@ -625,10 +647,16 @@
+   *resource = reinterpret_cast<hipGraphicsResource*>(pBufferGL);
+ 
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsMapResources(int count, hipGraphicsResource_t* resources,
+                                    hipStream_t stream) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsMapResources, count, resources, stream);
+   amd::Context* amdContext = hip::getCurrentDevice()->asContext();
+   if (!amdContext || !amdContext->glenv()) {
+@@ -686,10 +714,16 @@
+     mobj->retain();
+   }
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsResourceGetMappedPointer(void** devPtr, size_t* size,
+                                                hipGraphicsResource_t resource) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsResourceGetMappedPointer, devPtr, size, resource);
+   amd::Context* amdContext = hip::getCurrentDevice()->asContext();
+   if (!amdContext || !amdContext->glenv()) {
+@@ -711,10 +745,16 @@
+   device::Memory* mem = reinterpret_cast<device::Memory*>(amdMem->getDeviceMemory(*curDev));
+   *devPtr = reinterpret_cast<void*>(static_cast<uintptr_t>(mem->virtualAddress()));
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsUnmapResources(int count, hipGraphicsResource_t* resources,
+                                      hipStream_t stream) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsUnmapResources, count, resources, stream);
+   if (!hip::isValid(stream)) {
+     HIP_RETURN(hipErrorContextIsDestroyed);
+@@ -758,9 +798,15 @@
+     mobj->release();
+   }
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ 
+ hipError_t hipGraphicsUnregisterResource(hipGraphicsResource_t resource) {
++#if defined(PS5HIP_CLR_NO_GRAPHICS)
++  return hipErrorNotSupported;
++#else
++
+   HIP_INIT_API(hipGraphicsUnregisterResource, resource);
+ 
+   if (resource == nullptr) {
+@@ -769,5 +815,7 @@
+   reinterpret_cast<amd::BufferGL*>(resource)->release();
+ 
+   HIP_RETURN(hipSuccess);
++
++#endif
+ }
+ } // namespace hip--- a/hipamd/src/hip_internal.hpp
++++ b/hipamd/src/hip_internal.hpp
+@@ -94,12 +94,20 @@
+ }ihipIpcEventHandle_t;
+ 
+ const char* ihipGetErrorName(hipError_t hip_error);
++#if defined(PS5HIP_PUBLIC_HIP)
++extern bool public_init_status;
++#endif
+ }
+ 
++#if defined(PS5HIP_PUBLIC_HIP)
++#define HIP_CALL_ONCE(status) std::call_once(hip::g_ihipInitialized, hip::init, &hip::public_init_status); status = hip::public_init_status;
++#else
++#define HIP_CALL_ONCE(status) std::call_once(hip::g_ihipInitialized, hip::init, &status);
++#endif
+ #define HIP_INIT(noReturn)                                                                         \
+   {                                                                                                \
+     bool status = true;                                                                            \
+-    std::call_once(hip::g_ihipInitialized, hip::init, &status);                                         \
++    HIP_CALL_ONCE(status)                                         \
+     if (!status && !noReturn) {                                                                    \
+       HIP_RETURN(hipErrorInvalidDevice);                                                           \
+     }                                                                                              \
+@@ -112,7 +120,7 @@
+ #define HIP_INIT_VOID()                                                                            \
+   {                                                                                                \
+     bool status = true;                                                                            \
+-    std::call_once(hip::g_ihipInitialized, hip::init, &status);                                         \
++    HIP_CALL_ONCE(status)                                         \
+     if (hip::tls.device_ == nullptr && hip::g_devices.size() > 0) {                           \
+       hip::tls.device_ = hip::g_devices[0];                                                   \
+       amd::Os::setPreferredNumaNode(hip::g_devices[0]->devices()[0]->getPreferredNumaNode()); \
+@@ -145,7 +153,13 @@
+   HIP_CB_SPAWNER_OBJECT(cid);
+ 
+ // This macro should be called at the beginning of every HIP API.
++#if defined(PS5HIP_PUBLIC_HIP)
++#define HIP_PUBLIC_LIFETIME_CHECK() if (amd::Runtime::quarantined()) { HIP_RETURN(hipErrorUnknown); }
++#else
++#define HIP_PUBLIC_LIFETIME_CHECK()
++#endif
+ #define HIP_INIT_API(cid, ...)                                                                     \
++  HIP_PUBLIC_LIFETIME_CHECK() \
+   HIP_INIT_API_INTERNAL(0, cid, __VA_ARGS__)                                                       \
+   if (hip::g_devices.size() == 0) {                                                                \
+     HIP_RETURN(hipErrorNoDevice);                                                                  \
+@@ -341,7 +355,13 @@
+     /// Check whether any blocking stream running
+     static bool StreamCaptureBlocking();
+ 
+-    static void Destroy(hip::Stream* stream);
++#if defined(PS5HIP_PUBLIC_HIP)
++    // One external teardown owner. Failed or recursive shutdown is permanent.
++    std::atomic<unsigned> shutdown_{0};
++    bool checkedShutdown();
++    bool terminate() override { return checkedShutdown(); }
++#endif
++    static bool Destroy(hip::Stream* stream);
+     /// Check Stream Capture status to make sure it is done
+     static bool StreamCaptureOngoing(hipStream_t hStream);
+ 
+@@ -484,6 +504,9 @@
+         graph_mem_pool_(nullptr)
+         { assert(ctx != nullptr); }
+     ~Device();
++#if defined(PS5HIP_PUBLIC_HIP)
++    bool terminate() override;
++#endif
+ 
+     bool Create();
+     amd::Context* asContext() const { return context_; }
+--- a/hipamd/src/hip_stream.cpp
++++ b/hipamd/src/hip_stream.cpp
+@@ -72,9 +72,30 @@
+ }
+ 
+ // ================================================================================================
+-void Stream::Destroy(hip::Stream* stream) {
++#if defined(PS5HIP_PUBLIC_HIP)
++bool Stream::checkedShutdown() {
++  unsigned expected = 0;
++  if (!shutdown_.compare_exchange_strong(expected, 1)) {
++    if (expected == 2) return true;
++    amd::Runtime::quarantine();
++    return false;
++  }
++  if (amd::Runtime::quarantined() || !amd::HostQueue::terminate()) {
++    shutdown_.store(3, std::memory_order_release);
++    amd::Runtime::quarantine();
++    return false;
++  }
++  shutdown_.store(2, std::memory_order_release);
++  return true;
++}
++#endif
++bool Stream::Destroy(hip::Stream* stream) {
++#if defined(PS5HIP_PUBLIC_HIP)
++  if (!stream->checkedShutdown()) return false;
++#endif
+   stream->device_->RemoveStream(stream);
+   stream->release();
++  return true;
+ }
+ 
+ // ================================================================================================
+@@ -383,6 +404,9 @@
+     HIP_RETURN(hipErrorContextIsDestroyed);
+   }
+   hip::Stream* s = reinterpret_cast<hip::Stream*>(stream);
++#if defined(PS5HIP_PUBLIC_HIP)
++  if (!s->checkedShutdown()) { HIP_RETURN(hipErrorUnknown); }
++#endif
+   if (s->GetCaptureStatus() != hipStreamCaptureStatusNone) {
+     if (s->GetParentStream() != nullptr) {
+       reinterpret_cast<hip::Stream*>(s->GetParentStream())->EraseParallelCaptureStream(stream);
+--- a/hipamd/src/hip_device.cpp
++++ b/hipamd/src/hip_device.cpp
+@@ -296,6 +296,19 @@
+ }
+ 
+ // ================================================================================================
++#if defined(PS5HIP_PUBLIC_HIP)
++bool Device::terminate() {
++  if (amd::Runtime::quarantined()) return false;
++  std::vector<Stream*> streams;
++  {
++    amd::ScopedLock lock(streamSetLock);
++    streams.assign(streamSet.begin(), streamSet.end());
++  }
++  for (auto* stream : streams) if (!stream->checkedShutdown()) return false;
++  destroyAllStreams();
++  return !amd::Runtime::quarantined();
++}
++#endif
+ Device::~Device() {
+   if (default_mem_pool_ != nullptr) {
+     default_mem_pool_->release();
+--- a/hipamd/src/hip_context.cpp
++++ b/hipamd/src/hip_context.cpp
+@@ -27,6 +27,7 @@
+ 
+ namespace hip {
+ std::once_flag g_ihipInitialized;
++bool public_init_status = false;
+ 
+ std::vector<hip::Device*> g_devices ROCCLR_INIT_PRIORITY(101);
+ thread_local TlsAggregator tls;
