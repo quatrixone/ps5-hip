@@ -325,8 +325,12 @@ or global completeness follows. Collector v3 is now frozen at `d6587ae`, built
 against the pinned SDK, and passes two focused sanitizer/import checks. Parent
 review verified the small production diff, source/audit hashes and native ELF.
 See `evidence/offline-teardown-count1110-design.json` and
-`evidence/offline-teardown-v3-readiness.json`. No new operational sender or console
-observation exists; release remains unknown.
+`evidence/offline-teardown-v3-readiness.json`. A fresh sender passed 17 mocked
+checks and independent review. Its first .40 preflight at 2026-10-13 01:01 UTC
+was no-run: FTP2121 and klog3232 refused connections, while9021 was reachable.
+No payload was sent; both locks were released and the v3 marker remains absent.
+See `evidence/native-teardown-v3-no-run.json`. Release remains unknown; require
+available services and fresh idle/firmware checks before any observation.
 
 ## Next action
 
@@ -363,8 +367,9 @@ The original first combined arithmetic cycle remains partial-pass. The read-only
 mount observation hit its count bound. Raw-query instrumentation v2 was later
 executed once while idle and measured 1110 twice, still above the 1024 ceiling.
 Both diagnostic one-use markers are consumed. The bounded v3 collector has now
-been frozen and reviewed offline; an operational observation case remains to be
-prepared. A usable baseline is still required before another launch. Do not infer an empty table from
+been frozen and reviewed offline; its reviewed operational case stopped before
+payload dispatch because FTP/klog were unavailable. A usable baseline is still
+required before another launch. Do not infer an empty table from
 initialized fields, a leak from registration persistence, or deployed identity
 from the banner. Preserve the installed arithmetic image, successful result and
 earlier unique CPU backup. No setting change or automatic repeat is authorized
@@ -581,3 +586,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G3 offline | ef9f296 | math image/oracle verified;46 integrated tests | evidence/offline-native-math-readiness.json | GPU qualification pending
 - 2026-10-12 | diagnostic | 0bf7fb9 | idle .40 returned1110 twice;1024 cap prevents baseline | evidence/native-teardown-v2-fw1270.json | offline reassessment
 - 2026-10-12 | G4 offline | 5509e31 | genuine HIP vector path:26 host cases,48 integrated checks,PS5 link | evidence/offline-hip-native-vector.json | package lifecycle next
+- 2026-10-12 | diagnostic no-run | d6587ae | .40 FTP/klog refused;no payload;locks released | evidence/native-teardown-v3-no-run.json | services then fresh idle checks
