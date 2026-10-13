@@ -63,5 +63,8 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size);
 // Returns the first unsupported requirement for the initial scratch-free launch
 // profile. An empty string means structurally eligible, never hardware-qualified.
 std::string initial_launch_rejection(const Kernel &kernel);
+// Separate measured XYZ system-register profile, still scratch/LDS-free wave32.
+// Structural eligibility only; never a claim of hardware support.
+std::string geometry_launch_rejection(const Kernel &kernel);
 
 } // namespace ps5hip

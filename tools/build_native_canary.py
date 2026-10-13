@@ -9,6 +9,7 @@ import subprocess
 from build_canaries import require_device_linker, require_tool_versions
 import math_native_fixture as math_fixture
 import visibility_fixture
+import geometry_fixture
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -53,12 +54,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-source", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "geometry_2d", "geometry_3d"], required=True)
+    parser.add_argument("--geometry-probes", type=pathlib.Path, help="Pinned full-HIP geometry compiler output")
     parser.add_argument("--visibility-probes", type=pathlib.Path, help="Pinned visibility compiler output")
     parser.add_argument("--ocml-probes", type=pathlib.Path, help="Frozen OCML recipe output; only fp32_math O2")
     parser.add_argument("--wave-probes", type=pathlib.Path, help="Verified probe_wave_compiler.py output; selects the O2 profile")
     parser.add_argument("--shell-exit-probe", action="store_true", help="Finite canary application finalization and shell closure")
     args = parser.parse_args()
+    geometry = args.kernel in ("geometry_2d", "geometry_3d")
+    if geometry != (args.geometry_probes is not None):
+        parser.error("--geometry-probes is required only for geometry kernels")
     visibility = args.kernel == "dependent_visibility"
     if visibility != (args.visibility_probes is not None):
         parser.error("--visibility-probes is required only for dependent_visibility")
@@ -76,8 +81,8 @@ def main():
     version = subprocess.check_output(["llvm-config-18", "--version"], text=True).strip()
     if version != lock["llvm"]["version"]:
         parser.error("compiler version does not match dependency lock")
-    device_data, device_report = (visibility_fixture.verified_device_object(ROOT, args.visibility_probes, args.target, version) if visibility else (math_fixture.verified_device_object(ROOT, args.ocml_probes, args.target, version) if math else (verified_device_object(ROOT, args.target, version, args.wave_probes)
-                                  if args.kernel != "runtime" else (None, None))))
+    device_data, device_report = (geometry_fixture.verified_device_object(ROOT, args.geometry_probes, args.target, version) if geometry else (visibility_fixture.verified_device_object(ROOT, args.visibility_probes, args.target, version) if visibility else (math_fixture.verified_device_object(ROOT, args.ocml_probes, args.target, version) if math else (verified_device_object(ROOT, args.target, version, args.wave_probes)
+                                  if args.kernel != "runtime" else (None, None)))))
     elevation = ROOT / ".deps/elevation"
     elevation_receipt = json.loads((elevation / "receipt.json").read_text())
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
@@ -137,6 +142,8 @@ def main():
             options.append("-DPS5HIP_CANARY_VECTOR_ADD=1")
         if args.kernel == "vector_add_twice":
             options.append("-DPS5HIP_CANARY_VECTOR_ADD_TWICE=1")
+        if geometry:
+            options.append("-DPS5HIP_CANARY_" + args.kernel.upper() + "=1")
         if visibility:
             options.append("-DPS5HIP_CANARY_DEPENDENT_VISIBILITY=1")
         if math:
@@ -220,16 +227,19 @@ def main():
                "host_zlib": zlib_receipt, "elevation": elevation_receipt,
                "device_build": device_report,
                "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
-                                 for path in ([ROOT / name for name in ["tools/native_visibility.h", "tools/visibility_fixture.py", "tools/visibility_inputs.json", "tools/probe_visibility_compiler.py"]] if visibility else []) + math_sources + sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
+                                 for path in ([ROOT / name for name in [*geometry_fixture.inputs(ROOT)["sources"], "tools/native_geometry.h", "tools/geometry_fixture.py", "tools/geometry_inputs.json"]] if geometry else []) + ([ROOT / name for name in ["tools/native_visibility.h", "tools/visibility_fixture.py", "tools/visibility_inputs.json", "tools/probe_visibility_compiler.py"]] if visibility else []) + math_sources + sources[1:] + sorted((ROOT / "include/ps5hip").glob("*.h")) +
                                  ([shell_patch] if args.shell_exit_probe else []) +
                                  [ROOT / "tools/build_canaries.py"] +
                                  ([ROOT / "tools/probe_wave_compiler.py"] if wave else []) +
-                                 ([ROOT / ("kernels/visibility.hip" if visibility else "kernels/ocml_math.hip" if math else "kernels/wave.hip" if wave else "kernels/canary.hip")] if args.kernel != "runtime" else []) +
+                                 ([ROOT / ("kernels/geometry.hip" if geometry else "kernels/visibility.hip" if visibility else "kernels/ocml_math.hip" if math else "kernels/wave.hip" if wave else "kernels/canary.hip")] if args.kernel != "runtime" else []) +
                                  [pathlib.Path(__file__).resolve(), import_patch, ROOT / "tools/native_runtime.h", ROOT / "dependencies.json",
                                   ROOT / "elevation-inputs.json", ROOT / "title.json", ROOT / "tools/prepare_elevation.py"] +
                                  [elevation / name for name in elevation_receipt["source_sha256"]]},
                "artifacts": {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest()
                              for name in artifacts}}
+    if geometry:
+        receipt["geometry_profile"] = geometry_fixture.PROFILES[args.kernel]
+        geometry_fixture.validate_build(receipt, device_data, ROOT)
     if visibility:
         receipt["visibility_profile"] = visibility_fixture.PROFILE
         visibility_fixture.validate_build(receipt, device_data, ROOT)

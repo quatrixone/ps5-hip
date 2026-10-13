@@ -6,6 +6,7 @@ import json
 import pathlib
 import math_native_fixture as math_fixture
 import visibility_fixture
+import geometry_fixture
 import native_vector_title as vector_title
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -61,6 +62,10 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
                 manifest.get("math_profile") != build.get("math_profile")):
             raise ValueError("math manifest/build profile mismatch")
         math_fixture.validate_build(build, (stage / "app/canary.hsaco").read_bytes(), ROOT)
+    if manifest["kernel"] in geometry_fixture.PROFILES or build.get("kernel") in geometry_fixture.PROFILES:
+        if manifest["kernel"] != build.get("kernel") or manifest["target"] != build.get("target") or manifest.get("geometry_profile") != build.get("geometry_profile"):
+            raise ValueError("geometry manifest/build mismatch")
+        geometry_fixture.validate_build(build, (stage / "app/canary.hsaco").read_bytes(), ROOT)
     if "dependent_visibility" in (manifest["kernel"], build.get("kernel")):
         if manifest["kernel"] != build.get("kernel") or manifest["target"] != build.get("target") or manifest.get("visibility_profile") != build.get("visibility_profile"):
             raise ValueError("visibility manifest/build mismatch")

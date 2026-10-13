@@ -9,6 +9,7 @@ import subprocess
 import struct
 import math_native_fixture as math_fixture
 import visibility_fixture
+import geometry_fixture
 import native_vector_title as vector_title
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -34,7 +35,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     receipt_bytes = (build / "receipt.json").read_bytes()
     receipt = json.loads(receipt_bytes)
     target, kernel = receipt["target"], receipt["kernel"]
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "hip_vector"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "geometry_2d", "geometry_3d", "hip_vector"):
         raise ValueError("unsupported candidate profile")
     if kernel == "vector_add_twice" and (type(receipt.get("dispatches")) is not int or receipt["dispatches"] != 2):
         raise ValueError("vector_add_twice requires exactly two dispatches")
@@ -58,6 +59,8 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         if digest(data) != receipt["artifacts"][name]:
             raise ValueError("candidate digest mismatch: " + name)
         files[name] = data
+    if kernel in geometry_fixture.PROFILES:
+        geometry_fixture.validate_build(receipt, files["canary.hsaco"], source_root)
     if kernel == "dependent_visibility":
         visibility_fixture.validate_build(receipt, files["canary.hsaco"], source_root)
     if kernel == "fp32_math":
@@ -97,6 +100,8 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     }
     if kernel == "vector_add_twice":
         manifest["dispatches"] = 2
+    if kernel in geometry_fixture.PROFILES:
+        manifest["geometry_profile"] = receipt["geometry_profile"]
     if kernel == "dependent_visibility":
         manifest["visibility_profile"] = receipt["visibility_profile"]
     if kernel == "fp32_math":
@@ -121,7 +126,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "hip_vector"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "geometry_2d", "geometry_3d", "hip_vector"], required=True)
     parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())

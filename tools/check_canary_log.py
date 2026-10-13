@@ -10,7 +10,7 @@ import math_native_fixture as math_fixture
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "hip_vector"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "geometry_2d", "geometry_3d", "hip_vector"):
         raise ValueError("unsupported canary profile")
     if kernel == "hip_vector" and (target != "gfx1013" or not shell_exit_probe):
         raise ValueError("HIP vector requires the measured gfx1013 shell-managed profile")
@@ -27,6 +27,10 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                      "HIP_TITLE COMPUTE complete=true dispatches=2 exact_values=146 finalization=pending"]
     elif kernel == "runtime":
         expected.append("PS5HIP PASS kernel=runtime gpu_api_calls=0")
+    elif kernel in ("geometry_2d", "geometry_3d"):
+        groups,threads,invocations,words,valid,inactive = ("3x2x1","8x8x1",384,6144,273,111) if kernel == "geometry_2d" else ("2x3x4","8x4x2",1536,24576,819,717)
+        expected.append(f"PS5HIP SUBMIT target={target} kernel={kernel} groups={groups} threads={threads} invocations={invocations} record_words={words} logical_points={valid} kernarg_bytes=296 timeout_ms=2000")
+        expected.append(f"PS5HIP PASS kernel={kernel} exact_records={invocations} record_words={words} logical_points={valid} inactive_points={inactive} inputs=unchanged guards=unchanged allocations=closed")
     elif kernel == "dependent_visibility":
         for round in range(1, 4):
             for entry in ("visibility_producer", "visibility_consumer"):
@@ -80,7 +84,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "hip_vector"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "dependent_visibility", "geometry_2d", "geometry_3d", "hip_vector"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

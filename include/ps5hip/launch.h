@@ -32,4 +32,17 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
 // compute drain/completion, bounded waiting and ownership. Never submit alone.
 std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch);
 
+struct GeometryShape {
+    std::array<uint32_t, 3> groups, threads;
+    uint32_t dimensions;
+};
+struct GeometryLaunch { InitialLaunch state; GeometryShape shape; };
+
+// Only measured uniform64-thread shapes8x8x1(dim2) or8x4x2(dim3).
+// Complete blocks, zero global offsets/remainders; logical tails live in kernels.
+GeometryLaunch prepare_geometry_launch(const CodeObject &object, const std::string &name,
+    GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
+    const std::vector<LaunchArgument> &arguments);
+std::vector<uint32_t> encode_geometry_dispatch(const GeometryLaunch &launch);
+
 } // namespace ps5hip

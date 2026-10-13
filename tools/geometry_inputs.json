@@ -1,0 +1,52 @@
+{
+  "report_sha256": "aae9a5726de5cb7bf9bb370af7b91336f2c459fea89ac1b9bf01b6fe9f432471",
+  "sources": {
+    "kernels/geometry.hip": "752d2a62c3235e81d14d6e759a262184af34ce42714b366a44a334323dc8992d",
+    "tools/probe_geometry_compiler.py": "4bc04c7a6f9ffec3601935315faadaf4e49261238dcd73aa193d8508fee41bc5",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1",
+    "tests/fat_binary_fixture_test.py": "7c3a5752d365e11ed3477dfa3af789533be79ead1e0a296f71419547f224d744",
+    "evidence/offline-compatible-hip-headers.json": "f57b92fb086ea09197138380f0b0fb188d2d871aef821333e7241734689408b3"
+  },
+  "artifacts": {
+    "commands.json": "e292f72c5bbeae45f3ed90bbb47a29d7d257c5fe26b3ff23ffe4b5dac945eb15",
+    "comparison.json": "aae9a5726de5cb7bf9bb370af7b91336f2c459fea89ac1b9bf01b6fe9f432471",
+    "gfx1013-O1/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O1/driver.txt": "643a560603b55b324d8a9cc8cba438c9fff648b95ecdd3a03bb0309ddadc01f1",
+    "gfx1013-O1/geometry.bundle": "4f99375b6a149d33b0ae35382cf309317aa96dd61596c890aa63d8a1c74215da",
+    "gfx1013-O1/geometry.hsaco": "88ab455cc4addae321102d919da4dcea4472c7bd2bc0e0e0d638617589e799d2",
+    "gfx1013-O1/geometry.o": "10bb8b6e2dd12123507c1742d3f8d8f8392696a34ea6be14f7c2f368f43b0ab8",
+    "gfx1013-O1/isa.txt": "18c164182ee23393a04ce89c1f87492f9649b9a92a8e86029f409d0120be8972",
+    "gfx1013-O1/metadata.txt": "f8b64d9098a68911a07b25bdcea1a71e6fd0f1585cbf139637183e13c86c941e",
+    "gfx1013-O2/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O2/driver.txt": "4ac7c76d1adbe15bca09992a061324f434ecf0d4572690a71a0cd80908eb7631",
+    "gfx1013-O2/geometry.bundle": "add37c8ac78e22fa980aac032054294507b9d654dadc9652a5823056ffa40ab1",
+    "gfx1013-O2/geometry.hsaco": "b8e2b6cbb6726d4beb16a8e6a6c3d4d414a1162abf4ee9828f3e84db7a54dfa4",
+    "gfx1013-O2/geometry.o": "836dc39147d11ba1f0dd061a9f1b9dc2d6172a1a1c971a20cf5b11b0ef66fd9f",
+    "gfx1013-O2/isa.txt": "aead7f37838286c251b70f6eb47dea994c939693cf4e4ba333a7c01ff5ea1a14",
+    "gfx1013-O2/metadata.txt": "3695e085d706af5b5edaafe16e42b02ebb13cb76c50970b42a9d3198b3dd2e47",
+    "gfx1030-O1/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O1/driver.txt": "79732451fee2dc85d38a9bf1fd30b4c91d5c5696242252d6ae2fc24bd5c83346",
+    "gfx1030-O1/geometry.bundle": "fae07780991947b293fd3a694621db9271dd6a543e215fa695119b0431102cd6",
+    "gfx1030-O1/geometry.hsaco": "00eb9adbc5434da18e27e7cf5c7688d14ee4e285b2cbd5cc016b5343e9a8b156",
+    "gfx1030-O1/geometry.o": "fd42d2cbc9471b716516fbd374152f710167e8d0d4d4db60431e46e2ee438792",
+    "gfx1030-O1/isa.txt": "872542543f6a950882411150aa36a0716cd0fe021373300555e8041e25faf65c",
+    "gfx1030-O1/metadata.txt": "4306f6b354317217549136a9856d0fbd452050997f1df7ca5a2f81c00fae1129",
+    "gfx1030-O2/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O2/driver.txt": "bc692bae02ea2ff3c8fe7633d5d112c503a7e7dad8fb591b9d5563f9b6998964",
+    "gfx1030-O2/geometry.bundle": "719ad82ce4921c4f37822a2952140c4da8ab15f5e56b2155f99be54d6739e431",
+    "gfx1030-O2/geometry.hsaco": "865104703dda59dfdbc0b425f705ebd27c23ce677bd6f60f27510d4d0b42f852",
+    "gfx1030-O2/geometry.o": "bcab1a0932d8673384e709ab83f9371e777638ec64580f6a7e7a9da09f986bde",
+    "gfx1030-O2/isa.txt": "d97e95b6260e1e42179df2fa4a84caad1201c4c82f1b622a45e33d80709e4179",
+    "gfx1030-O2/metadata.txt": "1f9cf8e8e3266445c4708cc801c7f4ce9b9319053e9c2641cf6bbc9ccf1265c5"
+  },
+  "objects": {
+    "gfx1013": {
+      "sha256": "b8e2b6cbb6726d4beb16a8e6a6c3d4d414a1162abf4ee9828f3e84db7a54dfa4",
+      "bytes": 6520
+    },
+    "gfx1030": {
+      "sha256": "865104703dda59dfdbc0b425f705ebd27c23ce677bd6f60f27510d4d0b42f852",
+      "bytes": 6456
+    }
+  }
+}
