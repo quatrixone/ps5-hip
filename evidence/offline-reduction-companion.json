@@ -1,0 +1,32 @@
+{
+  "classification": "offline-deterministic-reduction-companion",
+  "source_base": "61e634738f4fc08414ef6741ab97dd218aec13c9",
+  "sources": {
+    "tests/reduction_companion.hip": "34b502b23004edec0a005802f55a1e4480e83e75141e443e316ee3e7cf527fdf",
+    "tests/reduction_companion_model.cpp": "ad4a35bfe92fa720c8e0dcfb5b7c0d3c9a389d60cdee248bb004b4295fabdd43",
+    "tools/probe_reduction_companion_compiler.py": "e5c18633d84b5c12150bf34477774387b966de72be38be91ae067a2c77710be0",
+    "tools/probe_reduction_companion_runtime.py": "e8dee2c8d4857a0a6b5b2398a305ca420e40e018c524dbce7ff504254f2eaa7c"
+  },
+  "reviews": {
+    "runtime": [
+      "results/reduction-companion-runtime-independent-review-v2/review.json",
+      "a93c4b9ae5fda5ee0b32233241c0c79390b52125f10b90d42385d8e606ec2e70"
+    ],
+    "compiler": [
+      "results/reduction-companion-compiler-independent-review-v2/review.json",
+      "33788f7a694bad739e4fa4af78364a3855eb58f99a14f0021ed96e62e43a722a"
+    ]
+  },
+  "compiler_receipt_sha256": "ac7d27ebcbcb61ecd477e65d0be57aacd307d159ea8ded4be4491d66cffed7ed",
+  "runtime_receipt_sha256": "46ab681861ae3337733f21865a1582cede93be32fae3eca35920e3d8c74d0e1d",
+  "modes": 12,
+  "dispatches": 3,
+  "exact_values": 48,
+  "guard_elements": 72,
+  "hardware_executed": false,
+  "limits": [
+    "Original one module/kernel compiler object preserved; declaration-only companion.",
+    "CPU direct-sum transport validates actual image and entry, not GPU ISA.",
+    "Native title/startup/provider/build/package qualification remains separate."
+  ]
+}
