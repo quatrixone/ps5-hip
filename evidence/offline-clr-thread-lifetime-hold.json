@@ -3,6 +3,11 @@
   "classification": "native-clr-cpu-launch-held-shared-thread-lifetime",
   "source_commit": "5db9751e4236d31f371b90fecb86aa35c2eb10f4",
   "native_executed": false,
+  "disabled_execution_case": {
+    "path": "results/clr-cpu-execution-v1/launch-hold.json",
+    "sha256": "d0b93f97daec42d1b7a8535c69f378d3842f17c3ebacc15d95b07817e32ba7ba",
+    "scope": "An initial main exception blocks the old execution case before verification or console operations. Original bound script and manifest are preserved."
+  },
   "observed": [
     "Fully instrumented adapter run reports upstream Thread state races and HostQueue destruction races.",
     "UndefinedBehaviorSanitizer reports misaligned Semaphore construction and use.",

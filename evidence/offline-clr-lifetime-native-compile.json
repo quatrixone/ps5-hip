@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "classification": "six-lifetime-units-native-compile-only",
+  "source_revision": "isolated adapter clr-source-v5",
+  "receipt": {
+    "path": "results/clr-lifetime-native-compile-v1/receipt.json",
+    "sha256": "5f5ec5fb9c43a6fe7d19435de05a4dabf74de5868020bfe0beab6b10b5d517a7"
+  },
+  "units": [
+    "os/os_posix.cpp",
+    "os/alloc.cpp",
+    "thread/thread.cpp",
+    "thread/semaphore.cpp",
+    "platform/runtime.cpp",
+    "platform/commandqueue.cpp"
+  ],
+  "verified": "All six units and their included headers compile with the actual PS5 compiler wrapper and SDK. Source/header hashes are checked before and after the run.",
+  "native_linked": false,
+  "native_executed": false,
+  "launch_hold_resolved": false,
+  "limits": [
+    "Historical v5 compile checkpoint only; later queue-state, event-publication and pending-batch fixes are not covered.",
+    "Full upstream object rebuild, strict native link and startup/provider/package review remain required.",
+    "Compilation does not establish thread safety or native runtime behavior."
+  ]
+}

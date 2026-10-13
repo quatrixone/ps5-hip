@@ -4,6 +4,14 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Lifetime repair has partial offline evidence:** six affected upstream units
+  compile with the actual PS5 SDK at the isolated v5 checkpoint; see
+  `evidence/offline-clr-lifetime-native-compile.json`. The replacement CPU client
+  also passed seven fully instrumented ASan/UBSan modes with independent review,
+  including failed-join owner retention. Subsequent TSan findings require newer
+  event-publication and final-batch fixes, so neither result clears native launch.
+  The old execution case is mechanically disabled and its reviewed bytes preserved.
+
 - **ROCclr CPU launch held after new shared-thread findings:** the CPU package
   was deployed and registered on .40 with independently audited preservation,
   mounted bytes, idle state, service health and lock release; it was not launched.
