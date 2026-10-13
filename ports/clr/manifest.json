@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "upstream_repository": "https://github.com/ROCm/clr",
+  "upstream_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "profile_defines": [
+    "PS5HIP_CLR_PLATFORM",
+    "PS5HIP_CLR_NO_GRAPHICS"
+  ],
+  "patch_sha256": "88e0f41d146492dae0662b374ddf4c239252b7400a2bf0eea4abb8f9049356ae",
+  "files": {
+    "rocclr/compiler/lib/utils/options.cpp": {
+      "upstream_sha256": "33abcb804a6ef746b307f86fd78f06885c88c87564818458fec90db941dc819e",
+      "adapted_sha256": "7331755be75fcd6ce1e048245981030c455577f3a33912c52eb539ae7e9f0bb4"
+    },
+    "rocclr/compiler/lib/utils/options.hpp": {
+      "upstream_sha256": "f5a5302f1a689cd33cf0696b67e05cfe0b9b4da9d0a4a6643f6ed37bbd699778",
+      "adapted_sha256": "1bfe738803448ecd868e6b990ea6a6f4d06d06bf37eaf996a54ea48fff93e3a9"
+    },
+    "rocclr/os/os.hpp": {
+      "upstream_sha256": "f3300abc853d2de09ddd9d4955dda1bc8585bc940dff0e5776e2a4dcb08f680a",
+      "adapted_sha256": "2e93b632f33e9bf0e9e6798210840f96df9b132fab171e4d010bbf00dead886e"
+    },
+    "rocclr/os/os_posix.cpp": {
+      "upstream_sha256": "5acffaf04eb6c9b06a01029fe37cbfbd25839fe0776b72c5c921375a7649f81a",
+      "adapted_sha256": "c61c5d5cd8541c27c47d934b8a356316e13ef8d9c5e8a9c82686e5ba7c647a2c"
+    },
+    "rocclr/platform/activity.hpp": {
+      "upstream_sha256": "dbc7af96c81e1ced62c19e0a453758cbe776504151b4d6752b3aadfe99b456ab",
+      "adapted_sha256": "31c70928d6e3b57f2d773c08dba11b8382a73ef4314761e6735c763bbb2c39c4"
+    },
+    "rocclr/platform/command.cpp": {
+      "upstream_sha256": "b04d4f390bd9a5f32b5fd78982f3253272655c83d01c0134b30a724d00ff8e45",
+      "adapted_sha256": "c3e2cc01e37786db0a935edc5994fdd8850b0e9ea0658627b85f9312f67836e8"
+    },
+    "rocclr/platform/command.hpp": {
+      "upstream_sha256": "4c4f65965243e17123453b4561347a8682335e2660524e1cdac93428a6cddec1",
+      "adapted_sha256": "2349ccfe1d753eb9251c4074c2acba9f169fc6cb9659e581cdb37641c630bc98"
+    },
+    "rocclr/platform/context.cpp": {
+      "upstream_sha256": "3eb8d95423832f5f8dc001ff366cb0074872117e73773096fcc8dcf632a8be37",
+      "adapted_sha256": "0126ad315cd0a7819a107b2f1927404d97797d81f13bd7fc3daa05adb8408de3"
+    },
+    "rocclr/platform/interop_gl.cpp": {
+      "upstream_sha256": "03503b5e31b927828384f454f938fedfab9d81cb526b20a1aeeb374a2425df74",
+      "adapted_sha256": "125a5430ce79f52af8437cb5649100566f94bd5a1d2c12caec5e64801c2ad9a0"
+    },
+    "rocclr/platform/runtime.cpp": {
+      "upstream_sha256": "25560d910bb981349e2c16caa079da6654ba9317c09374ca6e810177afe680fb",
+      "adapted_sha256": "03efe65889a42384a6babe2c8483c69c38cf4d2006d890a9553945373ae59b70"
+    },
+    "rocclr/thread/semaphore.hpp": {
+      "upstream_sha256": "44d65a2b94615af61b355699482e1fc3bc4e3e05de42f8f0c87e37b55718123e",
+      "adapted_sha256": "57f227262b94fd29d77e415379fdc1a222ec45d157bab8d4aeff2d37d69e5646"
+    },
+    "rocclr/thread/thread.cpp": {
+      "upstream_sha256": "f7f9c83b95ae70d0e1dab399bab84a6ac3548befa8d5892dd46fa715805106f3",
+      "adapted_sha256": "00e75fa32b58b8d3e954d6277c90afbc8fec9bd9174538495bab9219d2c50ab1"
+    },
+    "rocclr/thread/thread.hpp": {
+      "upstream_sha256": "a9f0f039cd690c261e3a1fc41ed6b23a259b3f8121842caec62455e57592cacd",
+      "adapted_sha256": "fda06e7570c29c4d5e711b6d692c20710882ff730f563eda2504de50a4bdef8d"
+    },
+    "rocclr/utils/flags.cpp": {
+      "upstream_sha256": "2a375da4f39590babf15474737b6a84f774f18b4fbcaade0264b161992a3d6f2",
+      "adapted_sha256": "999f394fb95d48f9d260bf27ce5a586175b6a4474d6852578ffe015a091f9fe1"
+    }
+  },
+  "shim_sha256": {
+    "ps5-clr-tls.cpp": "b1d7888009cfb999d02d47ef737cc2bf2a30f2be5545c4445fd85107dcb009fd",
+    "ps5-clr-tls.hpp": "cb92dd25c880322a2911629ad5a62b5a2d2a3702be92b28a7c8fa9ca69ec3882"
+  },
+  "native_compile_receipt_sha256": "16bada106bafabcfd03b2300a8a1a1c0107acdbd4258ab5a8e99dccbffc4d419",
+  "scope": "Experimental internal ROCclr platform port; not the production HIP runtime or public HIP API port."
+}

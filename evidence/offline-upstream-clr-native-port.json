@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "classification": "experimental-upstream-clr-native-compile-link-port",
+  "port": "ports/clr",
+  "port_manifest_sha256": "d160fa83b8897bf082fefa66aca2739044bec690753d024b12ba0f9a56872b3b",
+  "evidence": {
+    "native_compile": {
+      "path": "results/clr-native-combined-v6/receipt.json",
+      "sha256": "16bada106bafabcfd03b2300a8a1a1c0107acdbd4258ab5a8e99dccbffc4d419"
+    },
+    "native_link": {
+      "path": "results/clr-native-combined-link-v6c/receipt.json",
+      "sha256": "fdad64b4636edc402e42ea61b1f4c8062f93cd4070bb406ab136a4438e58425a"
+    },
+    "independent_review": {
+      "path": "results/clr-native-closure-independent-review-v1/review.json",
+      "sha256": "6915cb2d26612e65a2da3cc6faa323753c4378b0b3cb5ab7a13ad9577f1ca983"
+    },
+    "combined_workload": {
+      "path": "results/clr-combined-workload-v1/receipt.json",
+      "sha256": "e3f0fb4f7e0f9df57b8db7b4126f34681b4783023be9401bca81f7c7d457682a"
+    },
+    "patch_roundtrip": {
+      "path": "results/clr-patch-roundtrip-v1/receipt.json",
+      "sha256": "ec555edcd64b0b2c0691f1a9baece172d4034b1a4e77d8905d95493e6c5627f3"
+    }
+  },
+  "upstream_units": 27,
+  "tls_helpers": 1,
+  "patched_upstream_files": 14,
+  "native_strong_imports_with_sdk_providers": 144,
+  "unresolved_weak_sdk_hooks": [
+    "__dlopen",
+    "__dlsym",
+    "__dladdr",
+    "__dlclose",
+    "__dlerror",
+    "kernel_mprotect"
+  ],
+  "verified": [
+    "All28 objects compile with real PS5 SDK and link into an ordinary shared ELF with --no-undefined.",
+    "Unwind boundaries match actual ELF sections;144 strong imports have SDK providers.",
+    "Combined source rebuilt on Linux and passed actual two-queue CPU workload, dependency failure and27 graphics rejection checks per mode.",
+    "Same CPU workload main compiles and links with exact native objects.",
+    "Portable patch applies to pinned upstream sources and reproduces all14 tested source files exactly."
+  ],
+  "native_executed": false,
+  "limits": [
+    "SDK weak loader/mprotect hooks require explicit startup/provider handling.",
+    "No executable CRT, PS5 conversion, package, native lifecycle or GPU backend qualification.",
+    "Linux CPU backend is synthetic; public HIP APIs and native process/path/OS behavior remain unqualified."
+  ]
+}

@@ -239,8 +239,12 @@ CLR units compiled on Linux in that initial comparison. The subsequent
 rebuilds 27 upstream units plus a pthread TLS helper and exercises actual
 two-queue memory/kernel commands on a synthetic CPU backend, including failures
 and retirement. PS5 OS and explicit graphics-rejection adaptations now compile;
-selected BSD API calls link against the SDK. Combined native linking, native OS
-behavior, public HIP initialization and a real GPU backend remain unqualified.
+selected BSD API calls link against the SDK. The subsequent
+[experimental port](../evidence/offline-upstream-clr-native-port.json) compiles
+all 27 upstream units plus TLS and links both the internal runtime and a CPU
+command workload with the native SDK. `ports/clr` preserves the exact patch.
+Application startup, six weak SDK hooks, native OS behavior, public HIP
+initialization and a real GPU backend remain unqualified.
 The early configure failures identified missing local COMGR dependencies, not
 platform impossibility.
 Reassess CLR before general asynchronous scheduling, cross-stream event dependencies,

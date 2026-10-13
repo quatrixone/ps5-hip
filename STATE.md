@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Experimental upstream ROCclr port now compiles and links natively:** all
+  27 upstream units plus pthread TLS link into an ordinary shared ELF against
+  the actual SDK. Independent review verifies unwind bounds and 144 strong
+  imports; six weak SDK hooks still require application startup handling.
+  The combined source passes the Linux two-queue CPU command workload, and the
+  same workload also links natively. `ports/clr` preserves the 14-file patch and
+  TLS helper, with exact patch-application verification. No native execution,
+  public HIP initialization or GPU backend is claimed. See
+  `evidence/offline-upstream-clr-native-port.json`.
+
 - **Upstream ROCclr platform checkpoint passed offline:** actual two-queue
   write/copy/kernel/read commands preserve dependencies, memory lifetime and
   failure propagation on a synthetic CPU backend. The compute profile rebuilds
@@ -1096,3 +1106,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G3/G4 reduction | 7b41b24 | .40 | pass: 3 dispatches,48 outputs,72 guards,natural teardown | evidence/native-hip-reduction.json | combined SDK integration
 
 - 2026-10-13 | CLR | pinned65d174c | offline | partial-pass: real CPU commands,PS5 platform objects | evidence/offline-upstream-clr-platform.json | combined native closure
+
+- 2026-10-13 | CLR port | pinned65d174c | offline | pass:28 native objects,strict link,exact patch | evidence/offline-upstream-clr-native-port.json | native startup
