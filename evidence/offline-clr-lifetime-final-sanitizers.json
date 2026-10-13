@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "classification": "offline-shared-clr-lifetime-and-cpu-sanitizers",
+  "cpu_review": {
+    "path": "results/clr-cpu-lifetime-final-independent-review-v1/review.json",
+    "sha256": "c4aee3afd011e8860005d6785e2352964335c289a06083a8d20347a8170f169d"
+  },
+  "cpu_asan_ubsan": {
+    "path": ".local/g4-clr-cpu-lifetime/results/client-asan-v4/receipt.json",
+    "sha256": "8ad2d288dd965b3b58310bbe9bc078f2255fe9d3c266b0eb26ef32f88ba81a49"
+  },
+  "cpu_tsan": {
+    "path": ".local/g4-clr-cpu-lifetime/results/client-tsan-v2/receipt.json",
+    "sha256": "126730e340e3f697a60a69091a219abe3df1ad590952c8c9afaf31428c739942"
+  },
+  "adapter_native_compile": {
+    "path": "results/clr-adapter-native-compile-v1/receipt.json",
+    "sha256": "6c9ea0a19ff43c7c0a5849359ad0f1c49225a11f8e9681616533da486a43d5b8"
+  },
+  "verified": [
+    "CPU proof rebuilds 31 real source units for each sanitizer configuration; seven modes pass under both ASan/UBSan and ThreadSanitizer.",
+    "Eleven shared patched files match across the two CPU proofs and the reviewed adapter v7 source.",
+    "Positive actual queue termination is required before manual backing deletion; injected join failure retains owners and the unconsumed pthread handle.",
+    "The adapter and two upstream AOT bridge units compile with the actual PS5 SDK without model hooks."
+  ],
+  "native_linked": false,
+  "native_executed": false,
+  "old_candidate_launch_hold_resolved": false,
+  "limits": [
+    "CPU behavior is an explicit CPU backend; no GPU computation is established by these proofs.",
+    "Native adapter result covers three translation units only, not full integration or provider resolution.",
+    "A fresh full native CPU rebuild, conversion, package and console validation remain required.",
+    "The previously deployed candidate stays disabled; these repaired sources do not alter its frozen bytes."
+  ]
+}

@@ -4,6 +4,14 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Repaired shared lifetime passes final CPU sanitizer review:** both 31-unit,
+  seven-mode CPU proofs pass ASan/UBSan and TSan with independent source/dependency
+  verification. Successful actual queue termination gates manual owner deletion;
+  failed joins retain those owners. The genuine adapter and two upstream AOT
+  bridge units also compile with the PS5 SDK without model hooks. See
+  `evidence/offline-clr-lifetime-final-sanitizers.json`. Full native CPU rebuild
+  and validation remain pending; the old deployed candidate remains disabled.
+
 - **Lifetime repair has partial offline evidence:** six affected upstream units
   compile with the actual PS5 SDK at the isolated v5 checkpoint; see
   `evidence/offline-clr-lifetime-native-compile.json`. The replacement CPU client
