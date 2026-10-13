@@ -4,13 +4,22 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Threaded runtime passed its native single-thread control:** frozen `30f3c9f`
+  ran the unchanged HIPIFY client on .40: six launches, 662 exact unsigned sums
+  and 2,238 whole-buffer comparisons. Actual PID309/application `0x18` completed
+  unregister, State destruction and natural shutdown. Independent audit verified
+  log freshness, installed/mounted bytes, healthy services and released locks.
+  Worker-thread GPU submission remains unqualified; next test uses joined
+  workers with a main-initialized queue. See
+  `evidence/native-threaded-hipify-control.json`.
+
 - **Threaded HIP runtime qualified offline:** isolated frozen `30f3c9f` on
   `development/hip-host-threads` passes 34 ASan/UBSan modes, 16 CPU-only TSAN
   modes, all five title lifecycle suites (145 cases/83 transcript mutations),
   and fresh legacy client regressions. Independent review binds all 30 changed
   files and covers checked locking, per-thread errors/configurations, failure
   retention and shutdown. This source is not yet integrated into this root.
-  Native HIPIFY control qualification and worker GPU affinity remain pending;
+  Native HIPIFY control qualification passed above; worker GPU affinity remains pending;
   see `evidence/offline-threaded-hip-runtime.json`. G3/G4 remain open.
 
 - **CPU threading passed on .40 and independent audit:** frozen `147c3b2`
@@ -984,3 +993,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 CPU threads | 147c3b2 | .40 | pass: 2 workers, 256 updates, TLS and natural teardown | evidence/native-host-threads.json | checked threaded HIP runtime
 - 2026-10-13 | G4 HIPIFY integration | 6e35911 | offline | pass: 9 focused checks, exact reviewed source | evidence/offline-hipify-title-integration.json | threaded runtime
 - 2026-10-13 | G4 threaded runtime | 30f3c9f | offline | pass: checked threading and lifecycle review | evidence/offline-threaded-hip-runtime.json | native control, then worker GPU submissions
+- 2026-10-13 | G4 threaded control | 30f3c9f | .40 | pass: six HIPIFY launches and natural teardown | evidence/native-threaded-hipify-control.json | joined worker GPU submissions

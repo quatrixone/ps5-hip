@@ -42,10 +42,12 @@ for the current evidence and next experiment.
 
 The isolated threaded runtime `30f3c9f` now passes independent offline review,
 34 ASan/UBSan modes, 16 CPU-only TSAN modes and five title lifecycle suites.
-See `../evidence/offline-threaded-hip-runtime.json`. It is not yet integrated
-into the root runtime or qualified on the console. The next native experiments
-first retain the existing HIPIFY workload, then introduce joined GPU callers;
-neither result can be inferred from the prior CPU-only threading proof.
+See `../evidence/offline-threaded-hip-runtime.json`. Its unchanged single-thread
+HIPIFY workload subsequently passed on .40 with independent audit of all six
+launches and natural teardown (`../evidence/native-threaded-hipify-control.json`).
+It is not yet integrated into the root runtime. Joined worker GPU callers and
+worker-side queue initialization require separate native experiments; neither
+follows from the CPU-only threading proof or this single-thread control.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and

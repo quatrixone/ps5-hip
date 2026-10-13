@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "classification": "native-threaded-runtime-single-thread-HIPIFY-control-pass",
+  "source_commit": "30f3c9f71dc7c2f1266aefdd1b2dffe19a02a5a1",
+  "source_branch": "development/hip-host-threads",
+  "root_implementation_integrated": false,
+  "image": {
+    "sha256": "635ef1c675174a3e950763212e05084cc6f9c3dc5f552fc3a12f5e378ca2bcf6",
+    "bytes": 3670016
+  },
+  "execution": {
+    "path": "results/threaded-hipify-execution-v1/observation-20261013T132622.819071Z/receipt.json",
+    "sha256": "5c6f910af870700fe2d9a68bfaba5961543d246ed992482e486cdfba1d5022f6"
+  },
+  "independent_review": {
+    "path": "results/threaded-hipify-execution-v1/observation-20261013T132622.819071Z-independent-review.json",
+    "sha256": "88bbf2c53abc35778eae1067a8026bc23ad65e514c05764a4364aae569b5bb14"
+  },
+  "observed": {
+    "pid": 309,
+    "application_id": "0x18",
+    "dispatches": 6,
+    "exact_unsigned_sums": 662,
+    "whole_buffer_comparisons": 2238,
+    "application_log_bytes": 1253,
+    "application_log_sha256": "fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4",
+    "inputs_and_guards_unchanged": true,
+    "genuine_unregister_and_state_destruction": true,
+    "natural_title_stop": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "scope": "Existing finite single-thread HIPIFY client with checked pthread gate/key/lifetime runtime.",
+  "worker_gpu_submission_validated": false,
+  "full_gate_complete": false,
+  "next": "Frozen main-initialized queue with joined worker callers, then a separate worker-initialized queue experiment."
+}
