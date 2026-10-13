@@ -7,7 +7,7 @@ from check_canary_log import check_log
 from probe_hip_generic import CORE
 UNCERTAIN={'submit','kick','timeout','throw','unknown','postflush'}
 CLIENT_FAILURE={'init','preflush','data-allocate','missing','corrupt','input','guard','stale-second'}
-CASES={'normal',*UNCERTAIN,*CLIENT_FAILURE,'cleanup','partial','no-finish','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','shell-fail','late-partial-destructor'}
+CASES={'normal',*UNCERTAIN,*CLIENT_FAILURE,'cleanup','partial','no-finish','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','post-finish','shell-fail','late-partial-destructor'}
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def require(ok,message):
     if not ok:raise RuntimeError(message)
@@ -30,12 +30,12 @@ def check(output):
         log=(output/record['log']).read_text();require(sha(output/record['log'])==record['sha256'],'log changed')
         captured=(output/('run-'+name+'.stdout')).read_text()+(output/('run-'+name+'.stderr')).read_text()
         require(not any(x in log+captured for x in ('AddressSanitizer','UndefinedBehaviorSanitizer','runtime error:','LeakSanitizer')),'sanitizer '+name)
-        success=name in ('normal','shell-fail')
+        success=name in ('normal','post-finish','shell-fail')
         if success:
-            instrumentation=[x for x in log.splitlines() if x.startswith(('HIPIFY_MODEL_FINAL ','HIP_TITLE_MODEL STOP '))]
-            require(len(instrumentation)==2,'model instrumentation inventory')
+            instrumentation=[x for x in log.splitlines() if x.startswith(('HIPIFY_MODEL_FINAL ','HIP_TITLE_MODEL STOP ','HIP_TITLE_MODEL POST_FINISH '))]
+            require(len(instrumentation)==(3 if name=='post-finish' else 2),'model instrumentation inventory')
             production='\n'.join(x for x in log.splitlines() if x not in instrumentation)+'\n'
-            if name=='normal':require(production==good_log(),'exact successful lifecycle')
+            if name in ('normal','post-finish'):require(production==good_log(),'exact successful lifecycle')
             else:require('PS5HIP FAIL: shell-exit request-return=0xfffffff9' in production and check_log(production.encode(),'gfx1013','hipify',shell_exit_probe=True)['application_result']=='failed','shell failure classification')
             require('HIPIFY_MODEL_FINAL live=0 backends=1 submits=6 releases=33 completed=6 modules=0 functions=0 finalized=1 model_only=true' in log,'normal ownership closure')
         else:
@@ -46,13 +46,23 @@ def check(output):
             require(f'HIPIFY_TITLE_RETENTION live={live} releases={freed} unresolved={unresolved} submits=1 no_retry=true model_only=true' in log and 'TRANSLATED_CLIENT_FAIL clean=0' in log and 'reason=client-or-ownership' in log,'terminal retention '+name)
             require('VECTOR_UNREGISTER' not in log and 'VECTOR_FINAL' not in log,'terminal false teardown')
         if name in CLIENT_FAILURE:require('TRANSLATED_CLIENT_FAIL clean=1' in log and 'reason=client-or-ownership' in log,'clean unwind '+name)
-        if name in ('skip-unregister','reject-unregister','late-live','late-partial-destructor'):require('reason=finalization' in log and 'finalized=0' in log,'finalization gate '+name)
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):require('reason=finalization' in log and 'finalized=0' in log,'finalization gate '+name)
         if name=='partial':require('reason=registration' in log and 'RUNTIME_COMPLETE' not in log,'partial registration')
         if name=='no-finish':require('reason=client-or-ownership' in log and 'VECTOR_UNREGISTER' not in log,'missing finish')
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):
+            late=int(name=='late-partial-destructor')
+            retained=f'RUNTIME_RETAINED registered=1 removed={late} completed=6 active={1-late} terminal=0 main_finished=1 contexts=0 pending=0 abandoned=0 registration_failed={late} hardware_validated=false'
+            require(log.splitlines().count(retained)==1 and 'VECTOR_FINAL ' not in log,'exact retained State closure '+name)
+        if name=='late-live':
+            require('HIP_TITLE_MODEL PRE_FINISH live=1 rejection_expected=true' in log and 'reason=client-or-ownership' in log and 'HIP_TITLE_MODEL STOP shell_requests=0 live=1 model_only=true' in log,'live allocation blocks closure')
+            require('VECTOR_UNREGISTER' not in log and 'VECTOR_FINAL' not in log and 'HIP_TITLE FINAL ' not in log,'dirty title destroyed runtime')
+        if name=='post-finish':require('HIP_TITLE_MODEL POST_FINISH allocation_rejected=true ownership_unchanged=true' in log,'late allocation rejection absent')
+        if name=='late-partial-destructor':
+            require('HIP_TITLE_MODEL LATE_REGISTRATION rejected=true state_unchanged=true' in log and 'RUNTIME_RETAINED registered=1 removed=1' in log and 'registration_failed=1 hardware_validated=false' in log and 'VECTOR_FINAL ' not in log,'late registration not sticky or State destroyed')
         if name=='final-sync':require('reason=final-log' in log,'final persistence')
         if name=='log-exists':require(log=='previous-result\n','existing log overwritten')
         if name not in ('elevation','config','log-exists'):
-            live=7 if name in UNCERTAIN else 4 if name=='cleanup' else 0
+            live=1 if name=='late-live' else 7 if name in UNCERTAIN else 4 if name=='cleanup' else 0
             require(f'HIP_TITLE_MODEL STOP shell_requests={int(success)} live={live} model_only=true' in log,'bounded model stop '+name)
     normal=(output/cases['normal']['log']).read_text()
     production='\n'.join(x for x in normal.splitlines() if not x.startswith(('HIPIFY_MODEL_FINAL ','HIP_TITLE_MODEL STOP ')))+'\n'
@@ -70,9 +80,9 @@ def main():
     if a.check:verify(a.check.resolve());return
     require(a.reference_root and a.probe_dir and a.compiler_source_root and a.output,'reference-root/probe-dir/compiler-source-root/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='f635bff479f6b57e65068ae8fdf91c899e34f2b982d3799c0805871768b8f38d','reviewed integrated runtime proof')
+    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='2eef5b1bda9a0353cde60c7b85286b34c2308a846a7ada42d1ee58af4453008d','reviewed threaded runtime proof')
     frozen=a.compiler_source_root.resolve();external=dict(r['inputs']);external.update({str(frozen/n):v for n,v in r['sources'].items()});external.update({str(probe/n):v for n,v in r['artifacts'].items()});external[str(probe/'receipt.json')]=sha(probe/'receipt.json')
-    review=ref/'results/integrated-hipify-runtime-independent-review-v1.json';require(sha(review)=='0323a5245f95840778defa778427219929653cb36d0bfd793b28117cbc2e185e','runtime review changed');external[str(review)]=sha(review)
+    review=ref/'results/threaded-hipify-runtime-independent-review-v4/review.json';require(sha(review)=='e69bf5d47ce1a6cb42c42d59ca888b935261f88c99fb92cedf13d44087ea0918','runtime review changed');external[str(review)]=sha(review)
     require(all(sha(n)==v for n,v in external.items()),'frozen runtime inputs changed')
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client';headers=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp'):external[str(h)]=sha(h)
@@ -83,7 +93,7 @@ def main():
         (out/(label+'.stdout')).write_text(q.stdout);(out/(label+'.stderr')).write_text(q.stderr);commands.append({'label':label,'argv':argv,'exit_code':q.returncode,'ASAN_OPTIONS':'protect_shadow_gap=0'});(out/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
         require(q.returncode==0,label+': '+q.stderr[-3000:]);return q.stdout
     try:
-        common=['clang++-18','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_HIPIFY_TITLE=1','-DPS5HIP_RUNTIME_MODEL=1']
+        common=['clang++-18','-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_HIPIFY_TITLE=1','-DPS5HIP_RUNTIME_MODEL=1']
         for d in (ROOT/'include',headers,platform,elevation):common+=['-I',str(d)]
         linker=out/'linux.ld';linker.write_bytes((probe/'linux.ld').read_bytes())
         objects=[]

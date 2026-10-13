@@ -48,11 +48,12 @@ class HipifyNative(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root=pathlib.Path(folder)
             for n in r['sources']:
-                if n in ('CMakeLists.txt','tests/hipify_runtime_model.cpp'):continue
                 p=root/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes((ROOT/n).read_bytes())
             profile.validate_hipify_compiler(receipt,combined,root)
-            (root/'tests/cuda_vector_add.cu').write_bytes(b'edited')
-            with self.assertRaises(ValueError):profile.validate_hipify_compiler(receipt,combined,root)
+            for name in ('tests/cuda_vector_add.cu','CMakeLists.txt','tests/hipify_runtime_model.cpp'):
+                target=root/name;original=target.read_bytes();target.write_bytes(b'edited')
+                with self.assertRaises(ValueError):profile.validate_hipify_compiler(receipt,combined,root)
+                target.write_bytes(original)
     def test_profile_resources_and_source_rejection(self):
         r=self.receipt();profile.validate_profile(r,ROOT)
         for key,value in (('target','gfx1030'),('shutdown_mode','unsupported'),('hardware_validated',True)):

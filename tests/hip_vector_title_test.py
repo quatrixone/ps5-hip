@@ -3,14 +3,17 @@
 import argparse,hashlib,json,os,shutil,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
+CASES={'partial','normal','submit','kick','timeout','unknown-submit','missing','corrupt','input','guard','data-allocate','data-close','init','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','post-finish','shell-fail'}
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(ok,why):
     if not ok:raise RuntimeError(why)
 def check(output):
     cases=json.loads((output/'cases.json').read_text())
+    require(set(cases)==CASES,'case inventory')
     for name,record in cases.items():
+        require(sha(output/record['log'])==record['sha256'],'log hash '+name)
         log=(output/record['log']).read_text()
-        normal=name=='normal'
+        normal=name in ('normal','post-finish')
         if normal:
             events=['HIP_TITLE REGISTRATION','VECTOR_COMPLETE sequence=1','VECTOR_COMPLETE sequence=2',
                 'VECTOR_CLIENT_PASS','HIP_TITLE COMPUTE','PS5HIP SHUTDOWN main-return=0',
@@ -27,10 +30,18 @@ def check(output):
             require('PS5HIP SHELL_EXIT request=begin' not in log,'failure requested shell exit: '+name)
             if name!='final-sync':require('HIP_TITLE FINAL ' not in log,'false final proof: '+name)
         if name not in ('elevation','config','log-exists'):
-            expected=1 if name in ('normal','shell-fail') else 0
+            expected=1 if name in ('normal','post-finish','shell-fail') else 0
             require(f'HIP_TITLE_MODEL STOP shell_requests={expected} ' in log,'missing model stop: '+name)
-        if name in ('skip-unregister','reject-unregister','late-live'):
+        if name in ('skip-unregister','reject-unregister'):
             require('reason=finalization' in log,'post-destructor rejection absent')
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):
+            late=int(name=='late-partial-destructor')
+            retained=f'RUNTIME_RETAINED registered=1 removed={late} completed=2 active={1-late} terminal=0 main_finished=1 contexts=0 pending=0 abandoned=0 registration_failed={late} hardware_validated=false'
+            require(log.splitlines().count(retained)==1 and 'VECTOR_FINAL ' not in log,'exact retained State closure '+name)
+        if name=='late-live':
+            require('HIP_TITLE_MODEL PRE_FINISH live=1 rejection_expected=true' in log and 'reason=client-or-ownership' in log and 'HIP_TITLE_MODEL STOP shell_requests=0 live=1 model_only=true' in log,'live allocation blocks closure')
+            require('VECTOR_UNREGISTER' not in log and 'VECTOR_FINAL' not in log and 'HIP_TITLE FINAL ' not in log,'dirty title destroyed runtime')
+        if name=='post-finish':require('HIP_TITLE_MODEL POST_FINISH allocation_rejected=true ownership_unchanged=true' in log,'late allocation rejection absent')
         if name=='final-sync':require('reason=final-log' in log,'final persistence rejection absent')
         if name=='log-exists':require(log=='previous-result\n','old result overwritten')
     # Production contract is checked after removing only explicitly model-only
@@ -72,10 +83,10 @@ def main():
     lock=json.loads((ROOT/'dependencies.json').read_text())
     platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include'
     elevation=ref/'.deps/elevation/client'
-    common=['clang++-18','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_VECTOR_TITLE=1']
+    common=['clang++-18','-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_VECTOR_TITLE=1']
     for d in (ROOT/'include',*inc,platform,elevation):common+=['-I',str(d)]
     core=[ROOT/'src'/n for n in ('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
-    sources=core+[ROOT/'src/hip_runtime.cpp',ROOT/'tools/hip_vector_control.cpp',ROOT/'tools/hip_vector_title.cpp',ROOT/'tools/native_shell_exit_probe.cpp',ROOT/'tools/native_runtime.h',ROOT/'tests/hip_vector_client.cpp',ROOT/'tests/hip_vector_model.cpp',ROOT/'tests/hip_vector_title_model.cpp',ROOT/'tools/check_canary_log.py',Path(__file__)]
+    sources=core+[ROOT/'src/hip_runtime.cpp',ROOT/'tools/hip_vector_control.cpp',ROOT/'tools/hip_vector_title.cpp',ROOT/'tools/native_shell_exit_probe.cpp',ROOT/'tools/native_runtime.h',ROOT/'tests/hip_vector_client.cpp',ROOT/'tests/hip_vector_model.cpp',ROOT/'tests/hip_vector_title_model.cpp',ROOT/'tools/check_canary_log.py',Path(__file__)]+list((ROOT/'include/ps5hip').glob('*.h'))
     sources+=list((ROOT/'include/ps5hip').glob('*.h'))
     external_headers += [generated,elevation/'elevation.hpp',elevation/'protocol.hpp',platform/'ps5platform/kernel.h']
     external_before={str(h):sha(h) for h in external_headers}
@@ -98,8 +109,8 @@ def main():
     for partial in (False,True):
         control=out/('control-partial.o' if partial else 'control.o');run(control.stem,[*common,'-DPS5HIP_VECTOR_MODEL=1',*(['-DPS5HIP_VECTOR_PARTIAL=1'] if partial else []),'-c',ROOT/'tools/hip_vector_control.cpp','-o',control])
         runtime=out/('runtime-partial.o' if partial else 'runtime.o');run(runtime.stem,[*common,'-DPS5HIP_VECTOR_MODEL=1',*(['-DPS5HIP_VECTOR_PARTIAL=1'] if partial else []),'-c',ROOT/'src/hip_runtime.cpp','-o',runtime])
-        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,control,runtime,probe/'linux-combined.o','-Wl,-T,'+str(probe/'linux.ld'),'-Wl,--wrap=__hipUnregisterFatBinary','-o',binary])
-        for name in (['partial'] if partial else ['normal','submit','kick','timeout','unknown-submit','missing','corrupt','input','guard','data-allocate','data-close','init','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','shell-fail']):
+        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,control,runtime,probe/'linux-combined.o','-Wl,-T,'+str(probe/'linux.ld'),'-Wl,--wrap=__hipUnregisterFatBinary','-Wl,--wrap=ps5hip_runtime_finish','-o',binary])
+        for name in (['partial'] if partial else sorted(CASES-{'partial'})):
             folder=out/'cases'/name;folder.mkdir(parents=True);config=folder/'results-dir.txt';config.write_text('relative-bad' if name=='config' else str(folder))
             log=folder/'ps5-hip-gfx1013-hip_vector.log'
             if name=='log-exists':log.write_text('previous-result\n')

@@ -1,5 +1,6 @@
 // Actual title/client/compiler constructors, with host-only platform services.
 #include "elevation.hpp"
+#include "ps5hip/hip_runtime_control.h"
 #define __HIP_PLATFORM_AMD__ 1
 #include <hip/hip_runtime_api.h>
 #include <cstdio>
@@ -13,9 +14,10 @@ extern "C" void catchReturnFromMain(int);
 extern "C" bool ps5hip_vector_title_finalized() noexcept;
 extern "C" unsigned ps5hip_vector_model_live(),ps5hip_vector_model_backends(),ps5hip_vector_model_submits();
 extern "C" void ps5hip_vector_model_configure(const char*);
-extern "C" void __real___hipUnregisterFatBinary(void**);
+extern "C" void __real___hipUnregisterFatBinary(void**),__real_ps5hip_runtime_finish();
 int ps5hip_vector_title_main(int,char**);
 namespace {
+bool finish_injected=false;
 char scenario[80]{},config[4096]{};
 unsigned shell_requests=0,fini_calls=0,sync_calls=0;
 [[noreturn]] void fail(){::_exit(90);}
@@ -32,6 +34,15 @@ Status request(Capability capability,const char *helper) noexcept {
        ps5hip_vector_model_live() || ps5hip_vector_model_backends()) fail();
     return is("elevation")?Status::unavailable:Status::ok;
 }
+}
+extern "C" void __wrap_ps5hip_runtime_finish() {
+    if (is("late-live") && !finish_injected) {
+        finish_injected=true;
+        void *extra=nullptr;
+        if (hipMalloc(&extra,16)!=hipSuccess || !extra || ps5hip_vector_model_live()!=1) fail();
+        std::puts("HIP_TITLE_MODEL PRE_FINISH live=1 rejection_expected=true");
+    }
+    if (!is("no-finish")) __real_ps5hip_runtime_finish();
 }
 extern "C" void __wrap___hipUnregisterFatBinary(void **handle) {
     if(is("skip-unregister")) return;
@@ -52,9 +63,9 @@ extern "C" int ps5hip_title_model_shell_exit() {
     return is("shell-fail")?-7:0;
 }
 extern "C" unsigned ps5hip_title_model_sleep(unsigned) {
-    const bool success=is("normal") || is("shell-fail");
+    const bool success=is("normal") || is("post-finish") || is("shell-fail");
     if(shell_requests!=(success?1u:0u))fail();
-    unsigned expected_live=0;
+    unsigned expected_live=is("late-live")?1u:0u;
     if(is("submit") || is("kick") || is("timeout") || is("unknown-submit"))expected_live=7;
     if(is("data-close"))expected_live=3;
     if(ps5hip_vector_model_live()!=expected_live)fail();
@@ -68,7 +79,13 @@ int main(int argc,char **argv) {
         is("missing") || is("corrupt") || is("input") || is("guard") || is("data-allocate") || is("data-close") || is("init");
     ps5hip_vector_model_configure(backend_mode?scenario:"normal");
     const int status=ps5hip_vector_title_main(1,argv);
-    if(is("late-live")) { void *extra=nullptr; if(hipMalloc(&extra,16)!=hipSuccess)fail(); }
+
+    if(is("post-finish")) {
+        const auto live=ps5hip_vector_model_live(), submits=ps5hip_vector_model_submits();
+        void *extra=reinterpret_cast<void*>(1);
+        if(hipMalloc(&extra,16)!=hipErrorDeinitialized || extra || ps5hip_vector_model_live()!=live || ps5hip_vector_model_submits()!=submits || !ps5hip_runtime_ready())fail();
+        std::puts("HIP_TITLE_MODEL POST_FINISH allocation_rejected=true ownership_unchanged=true");
+    }
     catchReturnFromMain(status);
     std::exit(status);
 }

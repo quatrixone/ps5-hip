@@ -22,6 +22,21 @@ target_link_libraries(ps5hip-inspect PRIVATE ps5hip_object)
 include(CTest)
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  find_package(Threads REQUIRED)
+  add_test(NAME hip_threads_boundaries COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_SOURCE_DIR}/tests/hip_threads_recipe_test.py)
+  set(PS5HIP_HIP_THREADS_PROBE "" CACHE PATH "Completed checked threaded runtime host proof")
+  set(PS5HIP_HIP_THREADS_REFERENCE "" CACHE PATH "Pinned dependencies for optional CPU-only TSAN proof")
+  if(PS5HIP_HIP_THREADS_REFERENCE)
+    add_custom_target(hip_threads_tsan COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tools/probe_hip_threads.py --sanitizer thread
+      --reference-root "${PS5HIP_HIP_THREADS_REFERENCE}"
+      --output "${CMAKE_BINARY_DIR}/hip-threads-tsan")
+  endif()
+  if(PS5HIP_HIP_THREADS_PROBE)
+    add_test(NAME hip_threads_runtime COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_threads_recipe_test.py --check "${PS5HIP_HIP_THREADS_PROBE}")
+  endif()
   add_test(NAME hipify_title_boundaries COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/hipify_title_test.py --boundaries)
   set(PS5HIP_HIPIFY_TITLE_MODEL "" CACHE PATH "Completed genuine HIPIFY title lifecycle model")

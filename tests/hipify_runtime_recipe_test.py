@@ -17,7 +17,9 @@ def transcript(mode):
     text += 'HIPIFY_RUNTIME_PASS launches=6 allocations=closed stale_rejected=true\n' if mode=='normal' else f'HIPIFY_EXPECTED_REJECT mode={mode} result={0 if success else 1} completed={completed}\n'
     unfinished = mode=='no-finish'
     text += ('VECTOR_UNREGISTER rejected=true\n' if unfinished else 'VECTOR_UNREGISTER after_main=true active=0\n')
-    text += f'VECTOR_FINAL registered=1 removed={int(not unfinished)} completed={completed} active={int(unfinished)} terminal=0 main_finished={int(not unfinished)} hardware_validated=false\n'
+    fields = f'registered=1 removed={int(not unfinished)} completed={completed} active={int(unfinished)} terminal=0 main_finished={int(not unfinished)}'
+    text += (f'VECTOR_FINAL {fields} hardware_validated=false\n' if finalized else
+             f'RUNTIME_RETAINED {fields} contexts=0 pending=0 abandoned=0 registration_failed={int(mode in ("partial", "late-partial"))} hardware_validated=false\n')
     return text+f'HIPIFY_MODEL_FINAL live=0 backends={backend} submits={submitted} releases={released} completed={completed} modules={int(unfinished)} functions={int(unfinished)} finalized={finalized} model_only=true\n'
 
 class Boundaries(unittest.TestCase):
@@ -34,6 +36,16 @@ class Boundaries(unittest.TestCase):
             for bad in (text.replace('live=0','live=1'),text.replace('modules=','modules=9'),text.replace('functions=','functions=9'),text.replace('submits=','submits=9'),text.replace('releases=','releases=9')): self.reject(bad,mode)
     def test_partial_or_unfinished_never_finalized(self):
         for mode in ('partial','late-partial','no-finish','init'):self.reject(transcript(mode).replace('finalized=0','finalized=1'),mode)
+    def test_retained_state_requires_exact_failure_record(self):
+        for mode in ('partial','late-partial','no-finish','init'):
+            text=transcript(mode)
+            for before,after in (('RUNTIME_RETAINED','VECTOR_FINAL'),('contexts=0','contexts=1'),
+                                 ('pending=0','pending=1'),('abandoned=0','abandoned=1'),
+                                 ('registration_failed=','registration_failed=9')):
+                self.reject(text.replace(before,after),mode)
+            line=next(line for line in text.splitlines() if line.startswith('RUNTIME_RETAINED '))
+            self.reject(text.replace(line+'\n',''),mode)
+            self.reject(text+line+'\n',mode)
     def test_unsafe_terminal_false_closure(self):
         for mode in TERMINAL:
             text=transcript(mode)

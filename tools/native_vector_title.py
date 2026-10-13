@@ -51,7 +51,7 @@ HIPIFY_PROFILE = {
     "bundle_sha256": "ec6228b5f8bb5d0ac6a79c5237ad715e949191dc0f6511295a83eb0008eb9612",
     "code_sha256": "86eeb4b965cf4b049990f4ea41c13301c95b864dee6078d2764de06d60985d8f",
     "code_bytes": 4024,
-    "compiler_receipt_sha256": "f635bff479f6b57e65068ae8fdf91c899e34f2b982d3799c0805871768b8f38d",
+    "compiler_receipt_sha256": "2eef5b1bda9a0353cde60c7b85286b34c2308a846a7ada42d1ee58af4453008d",
     "sequence_sizes": [1, 73, 257], "rounds_per_size": 2, "dispatches": 6,
     "exact_values": 662, "word_comparisons": 2238, "guard_words_each_end": 7,
     "original_cuda_sha256": "ecd50a2a6c8cfc4f58702b8725dfca2ae25dbf4049a358cc988562e8f1c2922a",
@@ -279,11 +279,8 @@ def validate_hipify_compiler(raw_receipt, combined, source_root):
             report.get("generated_source_hand_edits")!=0 or report.get("original_main_renamed_by_flag") is not True or
             report.get("hardware_executed") is not False or report.get("native_linked") is not False):
         raise ValueError("HIPIFY original translated compiler mode missing")
-    # These two historical proof-only files intentionally gained title support.
-    # Neither participated in the three device/host compiler invocations.
-    historical={"CMakeLists.txt", "tests/hipify_runtime_model.cpp"}
     for name,value in report["sources"].items():
-        if name not in historical and digest((source_root/name).read_bytes())!=value:
+        if digest((source_root/name).read_bytes())!=value:
             raise ValueError("HIPIFY compiler source changed: "+name)
     if digest((source_root/"tests/cuda_vector_add.cu").read_bytes())!=selected["original_cuda_sha256"]:
         raise ValueError("HIPIFY original CUDA source changed")

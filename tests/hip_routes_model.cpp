@@ -120,11 +120,8 @@ public:
             expected[52]=8;expected[54]=8;expected[56]=1;expected[104]=2;
         }
         check(std::memcmp(expected,k,argument_bytes)==0);
-#ifndef PS5HIP_ROUTES_TITLE
-        check(hipDeviceSynchronize()==hipErrorNotReady);
-        check(hipFree(reinterpret_cast<void*>(input_address-64))==hipErrorNotReady);
-        uint32_t sample=0;check(hipMemcpy(&sample,input,4,hipMemcpyDeviceToHost)==hipErrorNotReady);
-#endif
+        // Backing extents were checked above; hip_threads_model proves blocked
+        // cross-thread free/copy/synchronize without unsupported callback reentry.
         if(route==2) {
             if(mode=="scratch-submit")return -7;
             if(mode=="scratch-throw")throw std::runtime_error("scratch submit");
