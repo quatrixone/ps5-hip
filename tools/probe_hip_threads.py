@@ -40,7 +40,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument('--reference-root',type=pathlib.Path);p.add_argument('--output',type=pathlib.Path);p.add_argument('--check',type=pathlib.Path);p.add_argument('--sanitizer',choices=('address,undefined','thread'),default='address,undefined');a=p.parse_args()
  if a.check:check(a.check.resolve());return
  require(a.reference_root and a.output,'reference/output required');ref=a.reference_root.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=False)
- files=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_threads.hip',ROOT/'tests/hip_threads_model.cpp',pathlib.Path(__file__),ROOT/'tests/hip_threads_recipe_test.py',ROOT/'docs/HIP_HOST_THREADS.md',ROOT/'CMakeLists.txt',*list((ROOT/'include/ps5hip').glob('*.h'))]
+ files=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_threads.hip',ROOT/'tests/hip_threads_model.cpp',pathlib.Path(__file__),ROOT/'tests/hip_threads_recipe_test.py',ROOT/'docs/HIP_HOST_THREADS.md',*list((ROOT/'include/ps5hip').glob('*.h'))]
  files += [ROOT/n for n in ('tools/probe_hip_routes.py','tools/probe_hip_generic.py','tools/probe_hipify_client.py','tools/probe_host_registration.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py','tests/native_import_libraries_test.py','tests/native_agc_imports_test.py')]
  before={str(f.relative_to(ROOT)):sha(f) for f in files};commands=[]
  def run(label,argv,extra=None):

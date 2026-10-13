@@ -27,12 +27,25 @@ and exit the model process before destructors; they cannot report finalization.
 Run from this worktree with fresh output:
 
 ```
-python3 tools/probe_hipify_runtime.py --reference-root ../.. --output results/runtime-v1
+python3 tools/probe_hipify_runtime.py --reference-root ../.. --compiler-only --output results/compiler-v1
+python3 tools/probe_hipify_runtime.py --reference-root ../.. --compiler-proof results/compiler-v1 --output results/runtime-v1
 python3 tests/hipify_runtime_recipe_test.py
 python3 tests/hipify_runtime_recipe_test.py --check results/runtime-v1
+python3 tests/hipify_runtime_recipe_test.py --dependencies results/compiler-v1 results/runtime-v1
 ```
 
 Set `--reference-root` to the primary ps5-hip checkout if the relative path differs.
+Schema 2 separates the compiler authority from the runtime model proof. The
+compiler receipt binds CUDA, translation, every executed local recipe/import,
+dependency lock, actual prepared headers/device libraries and tool binaries.
+The model recipe copies the three exact objects from that immutable authority,
+then compiles the current runtime and model; it never recompiles HIP. Runtime or
+model edits require a new model proof, but do not invalidate unchanged compiler
+inputs. CMake is bound by integration qualification, not these direct clang
+recipes. Generic and matmul compiler-only receipts follow the same rule, retaining
+the genuinely included runtime-control header and its transitive local headers.
+Whole Python recipe hashes remain conservative dependencies; there are no stale
+hash exemptions and all historical receipts retain their original scope.
 The recipe binds the original checkpoint, exact translated text, all three renamed
 compiler objects and selected device bytes, consumed headers/libraries/tools,
 source before/after, commands and nineteen model transcripts. Linux and PS5 device

@@ -7,6 +7,11 @@ from build_canaries import require_device_linker, require_tool_versions
 from fat_binary_fixture_test import section
 
 CORE=('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp','hip_runtime.cpp')
+# Transitive local includes of hip_runtime_control.h in a compiled HIP title.
+COMPILER_HEADERS=('hip_runtime_control.h','native_launch.h','submission.h','fat_binary.h','launch.h','native_data.h','native_memory.h','code_object.h')
+def compiler_sources(title_entry):
+    sources=[ROOT/n for n in ('dependencies.json','tests/hip_generic.hip','tests/hip_generic_second.hip','tools/probe_hip_generic.py','tools/probe_hip_routes.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py')]
+    return sources+([ROOT/'include/ps5hip'/n for n in COMPILER_HEADERS] if title_entry else [])
 NAMES=('affine_words','block_sum')
 
 def validate_model(text,mode,code,functions):
@@ -59,12 +64,15 @@ def main():
         (out/'commands.json').write_text(json.dumps(commands,indent=2)+'\n');require(q.returncode==expected,label+' failed: '+q.stderr[-3000:]);return q.stdout,q.stderr
     sources=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'src/agc_backend.cpp',ROOT/'tests/hip_generic.hip',ROOT/'tests/hip_generic_model.cpp',ROOT/'tests/hip_launch_profile_test.cpp',pathlib.Path(__file__),ROOT/'tools/probe_hip_routes.py',ROOT/'tools/probe_host_registration.py',ROOT/'tools/build_canaries.py',ROOT/'tests/fat_binary_fixture_test.py',ROOT/'tests/native_import_libraries_test.py',ROOT/'tests/native_agc_imports_test.py',*list((ROOT/'include/ps5hip').glob('*.h'))]
     sources += [ROOT/'tests/hip_generic_second.hip',ROOT/'tests/hip_generic_recipe_test.py',ROOT/'docs/BOUNDED_HIP_RUNTIME.md']
+    if args.compiler_only:
+        sources=compiler_sources(args.title_entry)
     before={str(p.relative_to(ROOT)):sha(p) for p in sources}
     try:
         _,stage,libs,inputs=prepared_inputs(ref);lock=json.loads((ROOT/'dependencies.json').read_text())
         tools={n:shutil.which(n+'-18') for n in ('clang++','ld.lld','llvm-readobj','llvm-objdump','llvm-nm')};require(all(tools.values()),'LLVM18 missing')
         versions={n:run(n+'-version',[s,'--version'])[0] for n,s in tools.items()};require_tool_versions(versions,lock['llvm']['version']);tool_hashes={n:sha(pathlib.Path(s)) for n,s in tools.items()}
         sdk=(ref/'.deps/sdk').resolve();wrapper=sdk/'bin/prospero-clang++';inputs[str(wrapper)]=sha(wrapper)
+        inputs[str(sdk/'.ps5-sdk-revision')]=sha(sdk/'.ps5-sdk-revision')
         require((sdk/'.ps5-sdk-revision').read_text().strip()==lock['sdk']['revision'],'SDK revision')
         cases=[]
         for extra in (False,True):
@@ -119,7 +127,7 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
                     stdout,stderr=run(label+'-'+mode,[binary,mode],expected);validate_model(stdout+stderr,mode,expected,3 if extra else 2);models.append({'variant':label,'mode':mode,'exit_code':expected})
             if not args.host_only:native=native_proof(ref,out,core,common,run,inputs,adapter=policy)
         require(before=={str(p.relative_to(ROOT)):sha(p) for p in sources},'source drift');require(all(sha(pathlib.Path(p))==v for p,v in inputs.items()),'input drift');require(all(sha(pathlib.Path(tools[n]))==v for n,v in tool_hashes.items()),'tool drift')
-        receipt={'schema':1,'classification':'bounded-generic-runtime-offline-pass','title_entry':args.title_entry,'hardware_validated':False,'sources':before,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':v,'version':versions[n]} for n,v in tool_hashes.items()},'cases':cases,'second_module_registration':second_registration,'models':models,'native':native,'limits':['Host callbacks are not ISA emulation; native link is not execution.','Single thread/module; caller proves kernel indexing bounds.','SDK/resource/static host support trees not fully inventoried; not hermetic.']}
+        receipt={'schema':2,'compiler_only':args.compiler_only,'classification':'bounded-generic-runtime-offline-pass','title_entry':args.title_entry,'hardware_validated':False,'sources':before,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':v,'version':versions[n]} for n,v in tool_hashes.items()},'cases':cases,'second_module_registration':second_registration,'models':models,'native':native,'limits':['Host callbacks are not ISA emulation; native link is not execution.','Single thread/module; caller proves kernel indexing bounds.','SDK/resource/static host support trees not fully inventoried; not hermetic.']}
         receipt['artifacts']={str(p.relative_to(out)):sha(p) for p in out.rglob('*') if p.is_file()};(out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('Generic offline proof passed')
     except BaseException as error:
         (out/'failure.json').write_text(json.dumps({'error':repr(error),'sources_before':before,'inputs_before':inputs,'commands':commands},indent=2)+'\n');raise

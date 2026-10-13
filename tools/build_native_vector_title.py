@@ -33,6 +33,19 @@ def compiler_object(probe, kernel):
                     "hip_matmul": "ps5-O2/matmul.o", "hipify": "ps5/translated.o", "hip_workers_main": "ps5/threads.o", "hip_workers_init": "ps5/threads.o"}[kernel]
 
 
+def compiler_source_inputs(report, source_root):
+    root = source_root.resolve()
+    sources = report.get("sources", report.get("source_sha256", {}))
+    require(bool(sources), "compiler source inventory missing")
+    result = {}
+    for name, digest in sources.items():
+        path = (root / name).resolve()
+        require(not Path(name).is_absolute() and path.is_relative_to(root), "compiler source outside checkout")
+        require(sha(path) == digest, "compiler source changed")
+        result[str(path)] = digest
+    return result
+
+
 def patch_startup(source, kernel="hip_vector"):
     profile_for(kernel)
     declaration = 'extern "C" void ps5hip_install_shell_exit_probe();'
@@ -174,6 +187,7 @@ def main():
             compiler_inputs[str(path)] = digest
         compiler_inputs[str(compiler_receipt)] = sha(compiler_receipt)
         compiler_inputs.update(compiler_report["inputs"])
+        compiler_inputs.update(compiler_source_inputs(compiler_report, ROOT))
         for item in compiler_report["tools"].values():
             compiler_inputs[item["path"]] = item["sha256"]
         require(all(sha(Path(n)) == v for n, v in compiler_inputs.items()), "title compiler provenance changed")

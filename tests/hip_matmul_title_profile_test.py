@@ -1,4 +1,4 @@
-import argparse,copy,hashlib,json,pathlib,sys,unittest
+import argparse,copy,hashlib,json,pathlib,sys,tempfile,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'tools'))
 import native_vector_title as profile
 import build_native_vector_title as builder
@@ -6,6 +6,20 @@ p=argparse.ArgumentParser();p.add_argument('--compiler',type=pathlib.Path);args,
 sys.argv=[sys.argv[0],*rest]
 
 class Profile(unittest.TestCase):
+    def test_compiler_dependency_boundary(self):
+        if not args.compiler:self.skipTest('fresh title compiler output required')
+        raw=(args.compiler/'receipt.json').read_bytes();obj=(args.compiler/'ps5-O2/matmul.o').read_bytes();report=json.loads(raw)
+        with tempfile.TemporaryDirectory() as folder:
+            root=pathlib.Path(folder)
+            for name in report['sources']:
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes((ROOT/name).read_bytes())
+            for name in ('CMakeLists.txt','src/hip_runtime.cpp','tests/hip_tiled_matmul_model.cpp'):
+                self.assertNotIn(name,report['sources']);target=root/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('independent edit')
+            profile.validate_matmul_compiler(raw,obj,root)
+            for name in ('tests/hip_tiled_matmul_blockdim.hip','include/ps5hip/hip_runtime_control.h','include/ps5hip/native_memory.h','tools/probe_hip_matmul.py'):
+                target=root/name;original=target.read_bytes();target.write_bytes(original+b'\n')
+                with self.assertRaises(ValueError):profile.validate_matmul_compiler(raw,obj,root)
+                target.write_bytes(original)
     def test_identity_and_startup(self):
         selected=profile.profile_for('hip_matmul')
         self.assertEqual(selected['shapes_mnk'],[[8,8,8],[13,21,19],[1,1,17],[17,9,1]]);self.assertEqual(selected['dispatches'],8)

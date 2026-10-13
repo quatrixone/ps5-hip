@@ -20,6 +20,17 @@ class HipifyNative(unittest.TestCase):
         p=profile.profile_for('hipify');self.assertEqual(p['client_entry'],'_Z18hipify_client_mainv');self.assertEqual(p['kernel_names'],['translated_add']);self.assertEqual((p['dispatches'],p['exact_values'],p['word_comparisons']),(6,662,2238));self.assertEqual(len(profile.provenance_files('hipify')),10)
     def test_actual_compiler(self):
         receipt,combined=self.compiler();r=profile.validate_hipify_compiler(receipt,combined,ROOT);self.assertEqual(r['generated_source_hand_edits'],0)
+    def test_builder_retains_all_compiler_sources_until_final_rehash(self):
+        receipt,_=self.compiler();report=json.loads(receipt)
+        bindings=recipe.compiler_source_inputs(report,ROOT)
+        self.assertEqual(bindings,{str((ROOT/n).resolve()):v for n,v in report['sources'].items()})
+        with tempfile.TemporaryDirectory() as folder:
+            root=pathlib.Path(folder);helper=root/'helper.py';helper.write_bytes(b'original')
+            captured=recipe.compiler_source_inputs({'sources':{'helper.py':sha(b'original')}},root)
+            helper.write_bytes(b'changed after admission')
+            self.assertFalse(all(recipe.sha(pathlib.Path(n))==v for n,v in captured.items()))
+            for name in ('../outside.py',str(helper.resolve())):
+                with self.assertRaises(RuntimeError):recipe.compiler_source_inputs({'sources':{name:'0'*64}},root)
     def test_builder_selects_actual_compiler_object(self):
         for kernel,name in (('hip_routes','ps5/routes.o'),('hip_generic','ps5/routes.o'),('hip_matmul','ps5-O2/matmul.o'),('hipify','ps5/translated.o')):
             self.assertEqual(recipe.compiler_object(pathlib.Path('probe'),kernel),pathlib.Path('probe')/name)
@@ -50,10 +61,24 @@ class HipifyNative(unittest.TestCase):
             for n in r['sources']:
                 p=root/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes((ROOT/n).read_bytes())
             profile.validate_hipify_compiler(receipt,combined,root)
-            for name in ('tests/cuda_vector_add.cu','CMakeLists.txt','tests/hipify_runtime_model.cpp'):
+            for name in ('tests/cuda_vector_add.cu','tools/probe_hipify_runtime.py','tools/probe_hip_generic.py'):
                 target=root/name;original=target.read_bytes();target.write_bytes(b'edited')
                 with self.assertRaises(ValueError):profile.validate_hipify_compiler(receipt,combined,root)
                 target.write_bytes(original)
+            for name in ('CMakeLists.txt','src/hip_runtime.cpp','tests/hipify_runtime_model.cpp'):
+                self.assertNotIn(name,r['sources'])
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(b'independent model/integration edit')
+            profile.validate_hipify_compiler(receipt,combined,root)
+    def test_actual_tool_header_and_device_input_rejected(self):
+        receipt,combined=self.compiler();base=json.loads(receipt)
+        changes=[('inputs',next(n for n in base['inputs'] if n.endswith('.h'))),('inputs',next(n for n in base['inputs'] if n.endswith('.bc'))),('tools','clang++')]
+        for category,name in changes:
+            bad=copy.deepcopy(base)
+            if category=='tools':bad[category][name]['sha256']='0'*64
+            else:bad[category][name]='0'*64
+            raw=json.dumps(bad).encode()
+            with mock.patch.dict(profile.HIPIFY_PROFILE,{'compiler_receipt_sha256':sha(raw)}):
+                with self.assertRaises(ValueError):profile.validate_hipify_compiler(raw,combined,ROOT)
     def test_profile_resources_and_source_rejection(self):
         r=self.receipt();profile.validate_profile(r,ROOT)
         for key,value in (('target','gfx1030'),('shutdown_mode','unsupported'),('hardware_validated',True)):

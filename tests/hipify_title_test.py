@@ -5,6 +5,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 from check_canary_log import check_log
 from probe_hip_generic import CORE
+from probe_hipify_runtime import check as check_runtime_proof, compiler_sources
 UNCERTAIN={'submit','kick','timeout','throw','unknown','postflush'}
 CLIENT_FAILURE={'init','preflush','data-allocate','missing','corrupt','input','guard','stale-second'}
 CASES={'normal',*UNCERTAIN,*CLIENT_FAILURE,'cleanup','partial','no-finish','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','post-finish','shell-fail','late-partial-destructor'}
@@ -80,13 +81,16 @@ def main():
     if a.check:verify(a.check.resolve());return
     require(a.reference_root and a.probe_dir and a.compiler_source_root and a.output,'reference-root/probe-dir/compiler-source-root/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='1f91eb7f6b0047d946f73036635384bf49287320d00c9a5efd25c3437d35e230','reviewed threaded runtime proof')
+    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='808214cad321cc26a3125c17ec1b80a116a7eae2c59d054c8fed66c21243edbc','reviewed threaded runtime proof')
+    require(r.get('schema')==2 and r.get('compiler_only') is False and r.get('compiler_proof'),'separate compiler and runtime authorities required')
+    check_runtime_proof(probe)
     frozen=a.compiler_source_root.resolve();external=dict(r['inputs']);external.update({str(frozen/n):v for n,v in r['sources'].items()});external.update({str(probe/n):v for n,v in r['artifacts'].items()});external[str(probe/'receipt.json')]=sha(probe/'receipt.json')
-    review=ref/'results/integration-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='afbae5e6c474b266ca0a2ccb1830bee7d51c1477f8d49f04d14ba0a4395737ce','runtime review changed');external[str(review)]=sha(review)
+    review=ref/'results/sdk-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='b6198dc17313e3badd471458b6d35be97213e2f6889cab10c70cc0224ae02cf1','runtime review changed');external[str(review)]=sha(review)
     require(all(sha(n)==v for n,v in external.items()),'frozen runtime inputs changed')
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client';headers=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp'):external[str(h)]=sha(h)
-    sources=[ROOT/'src'/n for n in CORE]+[ROOT/n for n in ('src/hip_launch_profile.cpp','tools/hip_vector_title.cpp','tools/native_shell_exit_probe.cpp','tools/native_runtime.h','tests/hipify_runtime_model.cpp','tests/hipify_title_model.cpp','tests/hipify_title_test.py','tools/check_canary_log.py','tools/math_native_fixture.py','tools/math_native_inputs.json','docs/HIPIFY_TITLE.md','CMakeLists.txt')]+list((ROOT/'include/ps5hip').glob('*.h'))
+    sources=[ROOT/'src'/n for n in CORE]+[ROOT/n for n in ('src/hip_launch_profile.cpp','tools/hip_vector_title.cpp','tools/native_shell_exit_probe.cpp','tools/native_runtime.h','tests/hipify_runtime_model.cpp','tests/hipify_title_model.cpp','tests/hipify_title_test.py','tools/check_canary_log.py','tools/math_native_fixture.py','tools/math_native_inputs.json','docs/HIPIFY_TITLE.md')]+list((ROOT/'include/ps5hip').glob('*.h'))
+    sources += compiler_sources()
     before={str(f.relative_to(ROOT)):sha(f) for f in sources};tools={n:{'path':shutil.which(n),'sha256':sha(shutil.which(n))} for n in ('clang++-18','ld.lld-18','llvm-nm-18')};commands=[]
     def run(label,argv):
         argv=list(map(str,argv));q=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,timeout=180,env=dict(os.environ,ASAN_OPTIONS='protect_shadow_gap=0'))

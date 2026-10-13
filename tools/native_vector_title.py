@@ -58,7 +58,7 @@ GENERIC_PROFILE = {
     "combined_object_sha256": "b454e1dc47c7b97aa487fd7ddbf8ca0d3438df2a875853509be6582f7620c5c8",
     "bundle_sha256": "07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974",
     "code_sha256": "793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7", "code_bytes": 4664,
-    "compiler_receipt_sha256": "0dbce46e8995404624c5ac608b66a256ce2498224e6b35ba77c6aa1f9963a756",
+    "compiler_receipt_sha256": "a6e017d2873c567a2509f86886febd449afdb8c5fb25220b376b031661a35691",
     "sequence_launches": [0, 1, 3, 7], "dispatches": 11,
     "per_sequence_sizes": [1, 63, 64, 65, 127, 193, 257], "static_lds_bytes": 256,
     "zero_sequence_scope": "prebackend state within this process; not zero-work finalization",
@@ -71,7 +71,7 @@ HIPIFY_PROFILE = {
     "bundle_sha256": "ec6228b5f8bb5d0ac6a79c5237ad715e949191dc0f6511295a83eb0008eb9612",
     "code_sha256": "86eeb4b965cf4b049990f4ea41c13301c95b864dee6078d2764de06d60985d8f",
     "code_bytes": 4024,
-    "compiler_receipt_sha256": "1f91eb7f6b0047d946f73036635384bf49287320d00c9a5efd25c3437d35e230",
+    "compiler_receipt_sha256": "68c28533d8dbf8038e74e4fbc39b0e3d12197026784ebfe38fc5a1660602cfe0",
     "sequence_sizes": [1, 73, 257], "rounds_per_size": 2, "dispatches": 6,
     "exact_values": 662, "word_comparisons": 2238, "guard_words_each_end": 7,
     "original_cuda_sha256": "ecd50a2a6c8cfc4f58702b8725dfca2ae25dbf4049a358cc988562e8f1c2922a",
@@ -85,7 +85,7 @@ MATMUL_PROFILE = {'target': 'gfx1013',
  'bundle_sha256': '0995fde75b6909239847ac68ffb1290cfc5d208ba64c267016e9ecfc3c5ab0db',
  'code_sha256': '7b862ae012fcde99802191b5588e35057b3f8c92a5f7f4808d859611062613f6',
  'code_bytes': 4528,
- 'compiler_receipt_sha256': '1444522c140067ce99fd8e5ea76e291dabcea96094f633d2b1a9c75734cd75b1',
+ 'compiler_receipt_sha256': 'ebb6e8d2af25756716027ba40d42a2d1b64e01326dafe8b1e898e446b71c8cc6',
  'dispatches': 8,
  'cases': 4,
  'rounds': 2,
@@ -221,6 +221,24 @@ def validate_profile(receipt, source_root):
                 raise ValueError("genuine HIP vector fixture authority changed")
 
 
+def validate_compiler_dependencies(report, source_root, expected_sources=None):
+    sources=report.get('sources',report.get('source_sha256',{}))
+    if not sources or (expected_sources is not None and set(sources)!=set(expected_sources)):
+        raise ValueError('compiler source inventory mismatch')
+    for name,digest in sources.items():
+        if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:
+            raise ValueError('compiler source changed: '+name)
+    if not report.get('inputs') or set(report.get('tools',{}))!={'clang++','ld.lld','llvm-readobj','llvm-objdump','llvm-nm'}:
+        raise ValueError('compiler dependency inventory missing')
+    from pathlib import Path
+    for name,digest in report['inputs'].items():
+        if hashlib.sha256(Path(name).read_bytes()).hexdigest()!=digest:
+            raise ValueError('compiler input changed: '+name)
+    for tool in report['tools'].values():
+        if hashlib.sha256(Path(tool['path']).read_bytes()).hexdigest()!=tool['sha256']:
+            raise ValueError('compiler tool changed')
+
+
 def validate_routes_compiler(raw_receipt, combined, source_root):
     selected = ROUTES_PROFILE
     if (hashlib.sha256(raw_receipt).hexdigest() != selected["compiler_receipt_sha256"] or
@@ -250,7 +268,9 @@ def validate_generic_compiler(raw_receipt, combined, source_root):
     if hashlib.sha256(raw_receipt).hexdigest()!=selected["compiler_receipt_sha256"] or hashlib.sha256(combined).hexdigest()!=selected["combined_object_sha256"]:
         raise ValueError("generic title compiler/combined binding mismatch")
     report=json.loads(raw_receipt)
-    if report.get("title_entry") is not True or report.get("hardware_validated") is not False:
+    from probe_hip_generic import compiler_sources, ROOT
+    validate_compiler_dependencies(report,source_root,[str(p.relative_to(ROOT)) for p in compiler_sources(True)])
+    if report.get("schema")!=2 or report.get("compiler_only") is not True or report.get("title_entry") is not True or report.get("hardware_validated") is not False or report.get('models')!=[]:
         raise ValueError("generic title compiler mode missing")
     for name,digest in report["sources"].items():
         if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:
@@ -275,7 +295,9 @@ def validate_matmul_compiler(raw_receipt, combined, source_root):
     if hashlib.sha256(raw_receipt).hexdigest()!=selected["compiler_receipt_sha256"] or hashlib.sha256(combined).hexdigest()!=selected["combined_object_sha256"]:
         raise ValueError("matmul title compiler/combined binding mismatch")
     report=json.loads(raw_receipt)
-    if report.get("title_entry") is not True or report.get("compiler_only") is not True or report.get("hardware_validated") is not False or report.get("models")!=[]:
+    from probe_hip_matmul import compiler_sources, ROOT
+    validate_compiler_dependencies(report,source_root,[str(p.relative_to(ROOT)) for p in compiler_sources()])
+    if report.get("schema")!=2 or report.get("title_entry") is not True or report.get("compiler_only") is not True or report.get("hardware_validated") is not False or report.get("models")!=[]:
         raise ValueError("matmul title compiler mode mismatch")
     for name,digest in report["sources"].items():
         if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:raise ValueError("matmul title source changed: "+name)
@@ -302,7 +324,9 @@ def validate_hipify_compiler(raw_receipt, combined, source_root):
     if digest(raw_receipt)!=selected["compiler_receipt_sha256"] or digest(combined)!=selected["combined_object_sha256"]:
         raise ValueError("HIPIFY title compiler/combined binding mismatch")
     report=json.loads(raw_receipt)
-    if (report.get("classification")!="hipify-owned-runtime-host-model-pass" or
+    from probe_hipify_runtime import compiler_sources, ROOT
+    validate_compiler_dependencies(report,source_root,[str(p.relative_to(ROOT)) for p in compiler_sources()])
+    if (report.get("schema")!=2 or report.get("compiler_only") is not True or report.get("models")!=[] or report.get("classification")!="hipify-title-compiler-only-pass" or
             report.get("generated_source_hand_edits")!=0 or report.get("original_main_renamed_by_flag") is not True or
             report.get("hardware_executed") is not False or report.get("native_linked") is not False):
         raise ValueError("HIPIFY original translated compiler mode missing")

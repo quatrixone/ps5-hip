@@ -75,9 +75,15 @@ if(BUILD_TESTING)
   add_test(NAME hipify_runtime_boundaries COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py)
   set(PS5HIP_HIPIFY_RUNTIME_PROBE "" CACHE PATH "Completed HIPIFY owned-runtime host-model proof")
+  set(PS5HIP_HIPIFY_COMPILER_PROBE "" CACHE PATH "Completed schema-2 HIPIFY compiler-only proof")
   if(PS5HIP_HIPIFY_RUNTIME_PROBE)
     add_test(NAME hipify_runtime_actual_proof COMMAND ${Python3_EXECUTABLE}
       ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py --check "${PS5HIP_HIPIFY_RUNTIME_PROBE}")
+  endif()
+  if(PS5HIP_HIPIFY_RUNTIME_PROBE AND PS5HIP_HIPIFY_COMPILER_PROBE)
+    add_test(NAME hipify_compiler_model_dependencies COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py --dependencies
+      "${PS5HIP_HIPIFY_COMPILER_PROBE}" "${PS5HIP_HIPIFY_RUNTIME_PROBE}")
   endif()
   add_executable(teardown_snapshot_test tests/teardown_snapshot_test.cpp)
   target_link_libraries(teardown_snapshot_test PRIVATE ps5hip_object)

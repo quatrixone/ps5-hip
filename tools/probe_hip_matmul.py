@@ -5,7 +5,10 @@ import probe_hip_routes as shared
 from probe_hip_routes import ROOT,require
 def sha(path):return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
 from probe_geometry_lds import audit_host,audit_cfg,oracle_cases
-from probe_hip_generic import CORE
+from probe_hip_generic import CORE, COMPILER_HEADERS
+def compiler_sources():
+    names=('dependencies.json','tests/hip_tiled_matmul_blockdim.hip','tools/probe_hip_matmul.py','tools/probe_geometry_lds.py','tools/probe_hip_generic.py','tools/probe_hip_routes.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py')
+    return [ROOT/n for n in names]+[ROOT/'include/ps5hip'/n for n in COMPILER_HEADERS]
 from build_canaries import require_device_linker,require_tool_versions
 from fat_binary_fixture_test import section
 NAME='tiled_matmul'
@@ -69,6 +72,8 @@ def main():
     source='tests/hip_tiled_matmul_blockdim.hip'
     names=[source,'tests/hip_tiled_matmul_model.cpp','tests/hip_matmul_recipe_test.py','tools/probe_hip_matmul.py','tools/probe_geometry_lds.py','tools/probe_hip_generic.py','tools/probe_hip_routes.py','tools/probe_host_registration.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py','docs/HIP_TILED_MATMUL_CLIENT.md']
     names += ['src/'+n for n in CORE]+['src/hip_launch_profile.cpp']+[str(p.relative_to(ROOT)) for p in (ROOT/'include/ps5hip').glob('*.h')]
+    if args.compiler_only:
+        names=[str(p.relative_to(ROOT)) for p in compiler_sources()]
     sources={n:sha(ROOT/n) for n in names}
     def run(label,argv,expected=0):
         argv=list(map(str,argv));z=subprocess.run(argv,cwd=ROOT,capture_output=True,text=True,timeout=180,
@@ -86,6 +91,7 @@ def main():
         versions={n:run(n+'-version',[path,'--version'])[0] for n,path in tools.items()};require_tool_versions(versions,json.loads((ROOT/'dependencies.json').read_text())['llvm']['version'])
         tool_hashes={n:sha(path) for n,path in tools.items()}
         sdk=(ref/'.deps/sdk').resolve();wrapper=sdk/'bin/prospero-clang++';inputs[str(wrapper)]=sha(wrapper)
+        inputs[str(sdk/'.ps5-sdk-revision')]=sha(sdk/'.ps5-sdk-revision')
         require((sdk/'.ps5-sdk-revision').read_text().strip()==json.loads((ROOT/'dependencies.json').read_text())['sdk']['revision'],'SDK revision changed')
         for host in ('linux','ps5','linux-model'):
             for optimization in (('O2',) if host=='linux-model' else ('O1','O2')):
@@ -143,7 +149,7 @@ def main():
                 validate_model(stdout+stderr,mode,expected);models.append({'mode':mode,'exit_code':expected})
         require(all(sha(ROOT/n)==h for n,h in sources.items()),'sources changed')
         require(all(sha(n)==h for n,h in inputs.items()),'inputs changed');require(all(sha(tools[n])==h for n,h in tool_hashes.items()),'tools changed')
-        report={'schema':1,'classification':'genuine-tiled-matmul-runtime-offline-pass','title_entry':args.title_entry,'compiler_only':args.compiler_only,'sources':sources,'inputs':inputs,
+        report={'schema':2,'classification':'genuine-tiled-matmul-runtime-offline-pass','title_entry':args.title_entry,'compiler_only':args.compiler_only,'sources':sources,'inputs':inputs,
             'tools':{n:{'path':tools[n],'sha256':tool_hashes[n],'version':versions[n]} for n in tools},
             'commands':commands,'cases':cases,'models':models,'shader_body_sha256':__import__('hashlib').sha256(shader((ROOT/source).read_text()).encode()).hexdigest(),
             'hardware_validated':False,'native_linked':False,

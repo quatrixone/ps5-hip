@@ -1,9 +1,55 @@
 #!/usr/bin/env python3
 """Strict HIPIFY runtime result boundaries; optional saved actual proof check."""
-import pathlib, sys, unittest
+import copy, json, pathlib, shutil, sys, tempfile, unittest
+from unittest import mock
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
 from probe_hipify_runtime import MODES, TERMINAL, COUNTS, CLIENT_PASS, validate_model, check
+import probe_hipify_runtime as recipe
+
+def dependencies(compiler, model):
+    """Actual authorities: mutate copies, never historical receipts or inputs."""
+    compiler=compiler.resolve();model=model.resolve()
+    report=recipe.check_compiler(compiler);check(model)
+    with tempfile.TemporaryDirectory() as folder:
+        root=pathlib.Path(folder)/'source';root.mkdir()
+        records=json.loads((model/'receipt.json').read_text())
+        for name in set(report['sources'])|set(records['sources']):
+            target=root/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes((ROOT/name).read_bytes())
+        for name in ('src/hip_runtime.cpp','tests/hipify_runtime_model.cpp'):
+            target=root/name;original=target.read_bytes();target.write_bytes(original+b'\n// independent edit\n')
+            recipe.check_compiler(compiler,root)
+            with mock.patch.object(recipe,'ROOT',root):
+                try:check(model)
+                except ValueError:pass
+                else:raise AssertionError('model accepted changed '+name)
+            target.write_bytes(original)
+        (root/'CMakeLists.txt').write_text('independent integration edit')
+        recipe.check_compiler(compiler,root)
+        with mock.patch.object(recipe,'ROOT',root):check(model)
+        copied=pathlib.Path(folder)/'proof';shutil.copytree(compiler,copied)
+        for field in ('inputs','tools','artifacts'):
+            bad=copy.deepcopy(report);bad[field]={}
+            (copied/'receipt.json').write_text(json.dumps(bad))
+            try:recipe.check_compiler(copied)
+            except ValueError:pass
+            else:raise AssertionError('omitted '+field+' accepted')
+        for name in ('linux/translated.o','ps5/translated.o','linux-model/translated.o'):
+            bad=copy.deepcopy(report);del bad['artifacts'][name]
+            (copied/'receipt.json').write_text(json.dumps(bad))
+            try:recipe.check_compiler(copied)
+            except ValueError:pass
+            else:raise AssertionError('omitted object accepted')
+        (copied/'receipt.json').write_text(json.dumps(report))
+        for name in ('translated.hip','linux/translated.o','ps5/translated.o','linux-model/translated.o','ps5/translated.hsaco'):
+            target=copied/name;original=target.read_bytes();target.write_bytes(original+b'x')
+            try:recipe.check_compiler(copied)
+            except ValueError:pass
+            else:raise AssertionError('changed artifact accepted')
+            target.write_bytes(original)
+    commands=json.loads((model/'commands.json').read_text())
+    assert not any('-x' in c['argv'] and 'hip' in c['argv'] for c in commands)
+    print('Dependency boundaries passed: runtime/model edits invalidate model only; CMake belongs to integration; inventories and artifacts remain strict.')
 
 def transcript(mode):
     text = 'VECTOR_REGISTER owned=true gpu_calls=0\nVECTOR_FUNCTION bound=true\n'+f'HIPIFY_MODEL_BEGIN mode={mode} model_only=true\n'
@@ -68,5 +114,6 @@ class Boundaries(unittest.TestCase):
         self.reject(transcript('normal'),'normal',20)
 
 if __name__ == '__main__':
-    if len(sys.argv)>1 and sys.argv[1]=='--check': check(pathlib.Path(sys.argv[2]).resolve())
+    if len(sys.argv)>1 and sys.argv[1]=='--dependencies': dependencies(pathlib.Path(sys.argv[2]),pathlib.Path(sys.argv[3]))
+    elif len(sys.argv)>1 and sys.argv[1]=='--check': check(pathlib.Path(sys.argv[2]).resolve())
     else: unittest.main()
