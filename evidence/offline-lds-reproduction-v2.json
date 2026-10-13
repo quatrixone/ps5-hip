@@ -1,0 +1,32 @@
+{
+    "schema":  1,
+    "classification":  "offline-lds-reproduction-pass",
+    "source_commit":  "27165fd51fb16798d6bc340b5f254c8298c501b5",
+    "source_tracked_clean":  true,
+    "compiler_profiles_exactly_reproduced":  {
+                                                 "gfx1013-O1":  "fa34d113542f457c89f0fe193dbec665e2eb39bae6218119456d8e85c4232bfc",
+                                                 "gfx1013-O2":  "58b031f5dd1636cfd330e11ae1b89eae149b260b25707a44ea3f21c343470c11",
+                                                 "gfx1030-O1":  "cde778df4697778c98e852ea37d78f091b635979a0a6c21e18d2f1d53b7e72a1",
+                                                 "gfx1030-O2":  "9d25dbb90721d4b664a6ce5f9653ae64a803907b7e6af5dd3a9dc428cf254e59"
+                                             },
+    "oracle_files_exactly_reproduced":  [
+                                            "lds_static",
+                                            "lds_dynamic",
+                                            "lds_mixed"
+                                        ],
+    "host_tests_passed":  10,
+    "host_test_command":  "ctest --test-dir .local/g3-lds/build/host-lds -R lds --output-on-failure",
+    "comparison":  "results/lds-compiler-reproduction-v2/comparison.json",
+    "comparison_sha256":  "b9ed3c248cbc72bab11e6355c8a4fbc60ea6112cf11c044ab4a6b07440ef2fe8",
+    "groups":  257,
+    "threads_per_group":  64,
+    "input_values":  16448,
+    "output_sums":  257,
+    "hardware_validated":  false,
+    "console_access":  false,
+    "limitations":  [
+                        "No new LDS console observation.",
+                        "Offline model and compiler checks do not prove native barriers or memory visibility.",
+                        "Execution control preparation stopped by subagent content filter; no replacement route attempted."
+                    ]
+}

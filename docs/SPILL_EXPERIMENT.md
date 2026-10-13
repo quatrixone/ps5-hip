@@ -1,9 +1,9 @@
 # Native compiler-spill experiment
 
 Status: exact spill fixture passed one bounded .40 cycle. All 25 execution and eight
-deployment regression methods pass. Deployment/preflight were independently reviewed;
-saved execution evidence was parent-audited after a subagent content filter prevented
-independent post-run review. Full G3 remains open.
+deployment regression methods pass. Deployment/preflight and saved execution evidence
+have been independently reviewed. A content filter initially prevented the post-run
+audit; it subsequently completed, confirming the original parent audit. Full G3 remains open.
 
 ## Question and frozen candidate
 
@@ -81,6 +81,7 @@ guards, closed allocations and all finalization checkpoints, then stopped natura
 The original bounded cycle completed, with equal visible pre/post mount identity
 multisets, healthy services and released locks. No delayed supplemental capture was
 needed. Parent audit rehashed 25 raw files and reproduced the frozen acceptance
-checks with networking blocked; it does not claim an independent post-run review.
+checks with networking blocked. A subsequent independent audit confirmed those results,
+including natural shutdown within the original bounded observation window.
 See `../evidence/native-register-spill.json`. Installed spill image and result must
 be preserved before the next candidate replaces them.

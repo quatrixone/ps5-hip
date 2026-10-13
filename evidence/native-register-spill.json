@@ -1,6 +1,6 @@
 {
     "schema":  1,
-    "classification":  "exact-spill-cycle-pass-parent-reviewed",
+    "classification":  "exact-spill-cycle-pass-independently-reviewed",
     "accepted":  true,
     "hardware_gate_passed":  false,
     "full_g3_complete":  false,
@@ -103,8 +103,10 @@
                         "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
                     ],
     "next":  "Static LDS, then dynamic/mixed LDS, followed by remaining G3 qualification.",
-    "independent_postrun_review":  false,
-    "independent_review_status":  "Subagent content filter stopped post-run review before completion; preflight and deployment were independently reviewed.",
+    "independent_postrun_review":  true,
+    "independent_review_status":  "Independent saved-evidence audit completed after earlier content-filter failure; original parent audit retained.",
     "parent_audit":  "results/spill-execution-v1/parent-audit.json",
-    "parent_audit_sha256":  "58c865c575f41a7408ec36f3705306addfe572a7b1a3a60e4dd80ca60bb0a7f7"
+    "parent_audit_sha256":  "58c865c575f41a7408ec36f3705306addfe572a7b1a3a60e4dd80ca60bb0a7f7",
+    "independent_review":  "results/spill-execution-v1/observation-20261013T033512.645405Z-independent-review.json",
+    "independent_review_sha256":  "97d167ec203d0f11a5e47c3e430ec7e5cf2f46e4b07d03d2f54046ffa983fca0"
 }

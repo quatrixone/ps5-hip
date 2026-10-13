@@ -4,13 +4,27 @@ Updated: 2026-10-12, America/New_York.
 
 ## Actual status
 
+- **Static LDS fixture passed on .40:** 257 exact sums from 16,448 unchanged
+  inputs, intact guards, allocation closure, full finalization and natural PID141 /
+  application `0xa018` stop. Visible mount identities matched; services remained
+  healthy and both locks released. Parent saved-evidence audit reproduced acceptance
+  and rehashed 25 raw files. Post-run independent review was interrupted by a content
+  filter; preflight and deployment reviews passed. See `evidence/native-lds-static.json`.
+  Preserve the installed static LDS image and 616-byte result before replacement.
+  Dynamic LDS execution draft has 25 passing tests and a null deployment binding;
+  next prepare/review its deployment, then test dynamic and mixed LDS. Full G3 is open.
+- LDS offline revalidation passed: ten host tests, four byte-identical compiler
+  profiles and three byte-identical oracle files. Static LDS checks 257 sums from
+  16,448 inputs; see `docs/LDS_EXPERIMENT.md` and
+  `evidence/offline-lds-reproduction-v2.json`. Those checks preceded the static LDS
+  observation above; dynamic and mixed profiles remain unrun.
 - **Compiler-spill fixture passed on .40:** 4,096 exact outputs, modified scratch,
   unchanged guards, closed allocations, complete finalization and natural PID132 /
   application `0x8018` stop. The bounded cycle has matching visible mount snapshots,
   healthy services and released locks. Parent offline audit rehashed all 25 raw
-  files and reproduced acceptance. Independent post-run review was unavailable
-  after a subagent content-filter failure; preflight and deployment were independently
-  reviewed. See `evidence/native-register-spill.json` and
+  files and reproduced acceptance. Independent post-run review subsequently passed
+  after the earlier subagent content-filter failure; all 115 bindings and the
+  original bounded lifecycle were verified. See `evidence/native-register-spill.json` and
   `evidence/native-spill-deployment.json`. This covers one O2 two-wave spill shape,
   not full G3. Next: static LDS, then dynamic/mixed LDS. Preserve installed spill
   image/log and earlier private304 backups. Private304 milestone pushed as `e431228`.
@@ -641,6 +655,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-12 | G3 static LDS fixture | 27165fd | .40:257 exact sums,inputs/guards intact,natural teardown; parent-audited | evidence/native-lds-static.json | dynamic/mixed LDS next; G3 open
 
 - 2026-10-12 | G3 exact spill fixture | 1e0428f | .40:4,096 exact outputs,guards intact,full bounded teardown; parent-audited | evidence/native-register-spill.json | next static LDS; G3 open
 
