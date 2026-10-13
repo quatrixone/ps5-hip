@@ -288,3 +288,21 @@ if(BUILD_TESTING)
     message(STATUS "Genuine four-kernel contract unavailable: set PS5HIP_HIP_ROUTES_OBJECT")
   endif()
 endif()
+
+if(BUILD_TESTING)
+  add_test(NAME hip_generic_transcript_boundaries COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_SOURCE_DIR}/tests/hip_generic_recipe_test.py)
+  set(PS5HIP_HIP_GENERIC_PROBE "" CACHE PATH "Completed bounded generic runtime proof")
+  if(PS5HIP_HIP_GENERIC_PROBE)
+    add_test(NAME hip_generic_actual_proof COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_recipe_test.py --check "${PS5HIP_HIP_GENERIC_PROBE}")
+    add_executable(hip_launch_profile_test tests/hip_launch_profile_test.cpp src/hip_launch_profile.cpp)
+    target_link_libraries(hip_launch_profile_test PRIVATE ps5hip_object)
+    target_compile_options(hip_launch_profile_test PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    add_test(NAME hip_generic_profile COMMAND hip_launch_profile_test
+      "${PS5HIP_HIP_GENERIC_PROBE}/linux/routes.hsaco" "${PS5HIP_HIP_GENERIC_PROBE}/linux-extra/routes.hsaco"
+      "${PS5HIP_HIP_ROUTES_OBJECT}")
+  else()
+    message(STATUS "Bounded generic runtime proof unavailable: set PS5HIP_HIP_GENERIC_PROBE")
+  endif()
+endif()

@@ -21,6 +21,15 @@ extern const uint8_t __ps5hip_names_begin[], __ps5hip_names_end[];
 }
 namespace {
 struct Configuration { dim3 grid, block; size_t shared; hipStream_t stream; };
+bool fixed_diagnostic() noexcept {
+    return ps5hip::hip_runtime_contract().mode == ps5hip::HipRuntimeMode::FixedDiagnostic;
+}
+bool completion_expected(unsigned completed) noexcept {
+    return !fixed_diagnostic() || completed == ps5hip::hip_runtime_contract().expected_completions;
+}
+bool functions_ready(size_t count) noexcept {
+    return count != 0 && (!fixed_diagnostic() || count == ps5hip::hip_runtime_contract().expected_functions);
+}
 
 // Trivial process-lifetime observation; callbacks never access a destroyed State.
 struct FinalObservation { bool checked, destroyed; } final_observation{};
@@ -43,10 +52,10 @@ struct State {
     ~State() {
 
         try {
-            final_observation.checked = registered==1 && removed==1 && completed==ps5hip::hip_runtime_contract().expected_completions &&
+            final_observation.checked = registered==1 && removed==1 && completion_expected(completed) &&
                 !registration.active_modules() && !registration.active_functions() && !partial && !terminal && !data.poisoned() &&
                 data.ranges().empty() && configurations.empty() && main_finished &&
-                queue && !queue->poisoned();
+                (queue ? !queue->poisoned() : (!fixed_diagnostic() && !init_attempted));
             if(final_observation.checked) { queue.reset(); backend.reset(); }
         } catch (...) { final_observation.checked=false; }
         std::printf("VECTOR_FINAL registered=%u removed=%u completed=%u active=%zu terminal=%u main_finished=%u hardware_validated=false\n",
@@ -131,7 +140,14 @@ extern "C" void **__hipRegisterFatBinary(const void *wrapper) {
         ++s.registered;
         std::puts("VECTOR_REGISTER owned=true gpu_calls=0");
         return reinterpret_cast<void **>(s.handle);
-    } catch (...) { (void)record(hipErrorInvalidValue); return nullptr; }
+    } catch (...) {
+        if(!fixed_diagnostic()) {
+            auto &s=state(); s.partial=true;
+            try { if(!s.terminal && !s.data.poisoned() && s.registration.active_modules()) s.registration.unregister_module(s.handle); } catch (...) {}
+            s.tokens.clear();
+        }
+        (void)record(hipErrorInvalidValue); return nullptr;
+    }
 }
 extern "C" void __hipRegisterFunction(void **handle, const void *host, char *function,
     const char *name, unsigned limit, uint3 *tid, uint3 *bid, dim3 *block, dim3 *grid, int *warp) {
@@ -143,12 +159,12 @@ extern "C" void __hipRegisterFunction(void **handle, const void *host, char *fun
         if (limit != UINT32_MAX || tid || bid || block || grid || warp || name_string(function) != name_string(name))
             throw ps5hip::ObjectError("unsupported registration ABI");
 #if defined(PS5HIP_VECTOR_PARTIAL) || defined(PS5HIP_RUNTIME_PARTIAL)
-        if(s.function_attempts==ps5hip::hip_runtime_contract().expected_functions)
+        if(s.function_attempts==(fixed_diagnostic() ? ps5hip::hip_runtime_contract().expected_functions : 2u))
             s.registration.register_function(handle, host, "deliberately_absent");
         else
 #endif
         s.registration.register_function(handle, host, name_string(name));
-        if(s.registration.active_functions()>ps5hip::hip_runtime_contract().expected_functions)
+        if(s.registration.active_functions()>(fixed_diagnostic() ? ps5hip::hip_runtime_contract().expected_functions : 256u))
             throw ps5hip::ObjectError("too many registered functions");
         s.tokens.emplace_back(name_string(name),host);
         s.host_token = host;
@@ -187,7 +203,7 @@ extern "C" hipError_t hipLaunchKernel(const void *host, dim3 grid, dim3 block, v
     auto &s=state();
     if (s.terminal || s.data.poisoned()) return record(hipErrorUnknown);
     if(stream) return record(hipErrorNotSupported);
-    if(s.partial || s.registration.active_functions()!=ps5hip::hip_runtime_contract().expected_functions)
+    if(s.partial || !functions_ready(s.registration.active_functions()))
         return record(hipErrorInvalidDeviceFunction);
     std::vector<ps5hip::LaunchArgument> values;
     const ps5hip::Kernel *kernel=nullptr;
@@ -286,7 +302,7 @@ extern "C" bool ps5hip_runtime_registration_ready() noexcept {
     try {
         const auto &s=state();
         if(s.registered!=1 || !s.host_token || s.partial || s.error!=hipSuccess ||
-           s.registration.active_modules()!=1 || s.registration.active_functions()!=ps5hip::hip_runtime_contract().expected_functions || s.terminal || s.data.poisoned() ||
+           s.registration.active_modules()!=1 || !functions_ready(s.registration.active_functions()) || s.terminal || s.data.poisoned() ||
            !s.data.ranges().empty() || s.backend || s.queue || s.init_attempted) return false;
         if(ps5hip::hip_runtime_contract().vector_compatibility)
             std::puts("HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0");
@@ -296,10 +312,10 @@ extern "C" bool ps5hip_runtime_registration_ready() noexcept {
 extern "C" bool ps5hip_runtime_ready() noexcept {
     try {
         const auto &s=state();
-        return s.registered==1 && !s.partial && !s.removed && s.completed==ps5hip::hip_runtime_contract().expected_completions && s.main_finished &&
+        return s.registered==1 && !s.partial && !s.removed && completion_expected(s.completed) && s.main_finished &&
             !s.terminal && !s.data.poisoned() && s.data.ranges().empty() &&
-            s.configurations.empty() && s.queue && !s.queue->poisoned() &&
-            s.registration.active_modules()==1 && s.registration.active_functions()==ps5hip::hip_runtime_contract().expected_functions;
+            s.configurations.empty() && (s.queue ? !s.queue->poisoned() : (!fixed_diagnostic() && !s.init_attempted)) &&
+            s.registration.active_modules()==1 && functions_ready(s.registration.active_functions());
     } catch (...) { return false; }
 }
 extern "C" bool ps5hip_runtime_finalized() noexcept {

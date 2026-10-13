@@ -3,10 +3,13 @@
 #include "ps5hip/submission.h"
 
 namespace ps5hip {
-// Statically linked, bounded client contract; not runtime device capabilities.
+// Fixed diagnostics may constrain counts; reusable operation never depends on an oracle.
+// Neither mode advertises unrestricted runtime or device capabilities.
+enum class HipRuntimeMode { FixedDiagnostic, ReusableSingleModule };
 struct HipRuntimeContract {
     unsigned expected_functions, expected_completions;
     bool vector_compatibility;
+    HipRuntimeMode mode = HipRuntimeMode::FixedDiagnostic;
 };
 const HipRuntimeContract &hip_runtime_contract() noexcept;
 NativeLaunchRequest hip_runtime_request(const Kernel &, std::array<uint32_t,3> groups,
