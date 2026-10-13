@@ -14,7 +14,7 @@ namespace {
 ps5hip_workers::AgcTrace trace{};
 void record(unsigned operation,unsigned actor,std::int32_t result) noexcept {
     if(actor!=ps5hip_workers::actor())trace.actor_changed=true;
-    if(trace.count<11)trace.events[trace.count++]={operation,actor,result};
+    if(trace.count<ps5hip_workers::agc_event_count)trace.events[trace.count++]={operation,actor,result};
     else trace.overflow=true;
 }
 }
@@ -33,13 +33,17 @@ extern "C" std::int32_t __wrap_sceAgcSuspendPoint() {
 namespace ps5hip_workers {
 const AgcTrace &agc_trace() noexcept {return trace;}
 bool validate_agc_trace() noexcept {
+#ifdef PS5HIP_WORKERS_INIT_TITLE
+    constexpr unsigned actors[]={1,1,1,2,2,1,1,0,0};
+#else
     constexpr unsigned actors[]={0,0,0,1,1,2,2,1,1,0,0};
-    if(trace.count!=11 || trace.overflow || trace.actor_changed)return false;
-    for(unsigned i=0;i<11;++i) {
+#endif
+    if(trace.count!=agc_event_count || trace.overflow || trace.actor_changed)return false;
+    for(unsigned i=0;i<agc_event_count;++i) {
         const auto &event=trace.events[i];
         if(event.operation!=(i ? (i%2 ? 1u:2u):0u) || event.actor!=actors[i] || event.result!=0)return false;
     }
-    for(unsigned i=0;i<11;++i) {
+    for(unsigned i=0;i<agc_event_count;++i) {
         const auto &event=trace.events[i];
         std::printf("WORKERS_AGC ordinal=%u operation=%s actor=%u result=0x%08x\n",i,
             event.operation==0 ? "init":event.operation==1 ? "submit":"kick",event.actor,unsigned(event.result));

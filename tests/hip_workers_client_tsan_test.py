@@ -8,6 +8,7 @@ sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--variant',choices=('main','init'),default='main')
     p.add_argument('--reference-root',type=pathlib.Path,required=True)
     p.add_argument('--output',type=pathlib.Path,required=True)
     a=p.parse_args();out=a.output.resolve();out.mkdir(parents=True,exist_ok=False)
@@ -31,6 +32,7 @@ def main():
     try:
         common=[tools['clang++-18'],'-std=c++17','-O1','-g','-pthread','-Wall','-Wextra','-Werror',
                 '-fsanitize=thread','-fno-omit-frame-pointer','-fPIE','-I',ROOT/'include','-I',headers/'include']
+        if a.variant=='init':common.append('-DPS5HIP_WORKERS_INIT_TITLE=1')
         run('compile-client',common+['-Dpthread_create=tsan_client_create','-Dpthread_join=tsan_client_join',
                                     '-c',ROOT/'tools/hip_workers_client.cpp','-o',out/'client.o'],180)
         run('link',common+['-pie','-fuse-ld=lld-18',ROOT/'tests/hip_workers_client_tsan.cpp',out/'client.o','-o',out/'model'],180)
@@ -43,7 +45,7 @@ def main():
         assert all(sha(ROOT/n)==value for n,value in sources.items()),'source drift'
         assert all(sha(n)==value for n,value in inputs.items()),'input drift'
         receipt={'schema':1,'classification':'actual-worker-client-synthetic-HIP-TSAN-pass',
-                 'sources':sources,'inputs':inputs,'commands':commands,'modes':modes,
+                 'sources':sources,'inputs':inputs,'commands':commands,'modes':modes,'variant':a.variant,
                  'hardware_executed':False,'actual_hip_runtime_executed':False,
                  'limits':['Actual client coordination and pthreads only; HIP memory/launch/error APIs are synthetic.',
                            'Join-failure wrapper completes the real join before reporting failure; no termination of a stuck thread.'],

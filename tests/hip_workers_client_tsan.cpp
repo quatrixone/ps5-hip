@@ -58,7 +58,7 @@ extern "C" hipError_t __hipPopCallConfiguration(dim3 *grid,dim3 *block,size_t *s
 extern "C" void threads_launch(unsigned *output,unsigned count,unsigned salt){
     std::lock_guard<std::mutex> lock(gate);
     constexpr unsigned actors[]={0,1,2,1,0};
-    check(completed<5&&ps5hip_workers::actor()==actors[completed]&&span(output,count*sizeof(unsigned))&&stack.empty());
+    check(completed<ps5hip_workers::expected_dispatches&&ps5hip_workers::actor()==actors[completed+(ps5hip_workers::worker_initializes?1u:0u)]&&span(output,count*sizeof(unsigned))&&stack.empty());
     for(unsigned i=0;i<count;++i)output[i]=i*17u+salt;
     ++completed;(void)result(hipSuccess);
 }
@@ -79,9 +79,9 @@ extern "C" int tsan_client_join(pthread_t thread,void **result){
 }
 int main(int argc,char **argv){
     check(argc==2);mode=argv[1];const auto report=ps5hip_workers::run();
-    if(!std::strcmp(mode,"normal"))check(report.passed&&report.cleanup_complete&&!report.unsafe_teardown&&report.created==2&&report.joined==2&&report.dispatches==5&&report.phase_checks==17&&!allocation);
-    else if(!std::strcmp(mode,"partial-create"))check(!report.passed&&report.cleanup_complete&&!report.unsafe_teardown&&report.created==1&&report.joined==1&&report.dispatches==1&&!allocation);
-    else if(!std::strcmp(mode,"join-error"))check(!report.passed&&!report.cleanup_complete&&report.unsafe_teardown&&report.created==2&&report.joined==1&&report.dispatches==4&&allocation);
+    if(!std::strcmp(mode,"normal"))check(report.passed&&report.cleanup_complete&&!report.unsafe_teardown&&report.created==2&&report.joined==2&&report.dispatches==ps5hip_workers::expected_dispatches&&report.phase_checks==17&&report.prebackend_verified==ps5hip_workers::worker_initializes&&!allocation);
+    else if(!std::strcmp(mode,"partial-create"))check(!report.passed&&report.cleanup_complete&&!report.unsafe_teardown&&report.created==1&&report.joined==1&&report.dispatches==ps5hip_workers::warmup_dispatches&&!allocation);
+    else if(!std::strcmp(mode,"join-error"))check(!report.passed&&!report.cleanup_complete&&report.unsafe_teardown&&report.created==2&&report.joined==1&&report.dispatches==ps5hip_workers::expected_dispatches-1&&allocation);
     else std::abort();
     check(joins==report.created);
     std::printf("WORKERS_CLIENT_TSAN_PASS mode=%s synthetic_hip=true\n",mode);
