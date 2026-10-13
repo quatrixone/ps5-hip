@@ -30,7 +30,10 @@ The bounded reusable single-module HIP runtime now also has native client
 validation: eleven blocking submissions in sequences 0/1/3/7 through two genuine
 registered kernels, exact results and complete cleanup, independently audited.
 See `../evidence/native-hip-generic.json` and the offline qualification in
-`../evidence/offline-bounded-hip-runtime.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
+`../evidence/offline-bounded-hip-runtime.json`. The genuine tiled-matmul client
+also passed eight native launches across four shapes and two rounds, with 982
+exact integer-valued FP32 outputs and complete natural teardown; see
+`../evidence/native-hip-matmul.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels

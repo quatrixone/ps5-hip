@@ -6,9 +6,20 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: G1 passed offline; G2 passed for real HIP-compiled indexed-store and
-vector-add kernels. Two clean cycles of the same image on FW 12.70 checked 292
-exact values, unchanged guards and title teardown. No general HIP runtime is qualified.**
+**Status: a bounded native HIP runtime now executes genuine compiler-registered
+clients on PS5 firmware 12.70. G3/G4 remain incomplete; frameworks and application
+integration are still planned.** The [reusable client](evidence/native-hip-generic.json)
+passed eleven blocking launches through two kernels, with exact results and
+complete compiler/runtime cleanup. The [corrected math fixture](evidence/native-math-exp-corrected.json)
+passed 1,542 values under an unchanged numerical contract. The
+[tiled matrix client](evidence/native-hip-matmul.json) passed eight launches and
+982 exact outputs across four shapes using combined 2D geometry and static LDS.
+The runtime currently
+requires one module and serialized host calls; unsupported features fail explicitly.
+See [current state](STATE.md) for the latest candidate and its exact limits.
+
+The earlier G2 milestone checked 292 exact values over two clean cycles of one
+image, with unchanged guards and title teardown.
 The [G2 acceptance record](evidence/native-g2-acceptance.json) maps all six
 requirements to the exact gfx1013, wave32, 1D arithmetic fixture. Mount checks
 establish unchanged visible title records; persistent registration is expected.
@@ -35,13 +46,14 @@ The repository is private.
 - [Compiler launch capture](docs/HIP_HOST_LAUNCH_CAPTURE.md): owned arguments,
   hidden geometry and packet preparation through a genuine stub; no GPU submission.
 - [Pinned OCML math probe](docs/OCML_MATH_PROBE.md): reproducible partial library
-  build and four device objects; numerical accuracy and GPU execution remain unqualified.
-- [Native math candidate](docs/NATIVE_MATH_PROFILE.md): packaged fixed-corpus
-  harness with an independent MPFR oracle, full guards and 280-byte argument checks;
-  [offline evidence](evidence/offline-native-math-readiness.json), no GPU run.
+  build and four device objects. The [cutoff correction](docs/MATH_EXP_CORRECTION.md)
+  passed its finite native corpus; all-domain accuracy remains unqualified.
+- [Native math profile](docs/NATIVE_MATH_PROFILE.md): independent MPFR oracle,
+  full guards and 280-byte argument checks; see the
+  [corrected native result](evidence/native-math-exp-corrected.json).
 - [Owned native data](docs/NATIVE_DATA_REGISTRY.md): checked logical allocations,
-  copies and free, plus a separate full-header HIP memory control;
-  [offline evidence](evidence/offline-native-data-memory.json), no integrated HIP dispatch.
+  copies and free. These ownership components now support the qualified
+  [genuine HIP clients](evidence/native-hip-generic.json).
 - [Read-only teardown diagnostic](docs/TEARDOWN_SNAPSHOT.md): bounded observations
   with explicit visibility limits; the first .40 mount query remains inconclusive.
 - [Offline bring-up](docs/OFFLINE_BRINGUP.md): compiler recipe, loader tests and limitations.
@@ -52,17 +64,14 @@ The repository is private.
 - [HIP registration control](docs/HIP_HOST_REGISTRATION_CONTROL.md): genuine
   compiler constructors, owned module/token registration and explicit unsupported
   launch errors; Linux execution and PS5 link/conversion checks only.
-- [Atomic native package](evidence/offline-atomic-native-readiness.json): six
-  contended integer kernels and exact host oracles, packaged but unrun.
+- [Atomic native result](evidence/native-atomic-suite.json): six contended integer
+  dispatches passed 98,694 semantic values and complete teardown under the fixed
+  relaxed-order contract.
 - [Experimental private-call compiler](tools/experimental/private-calls/README.md):
-  reproduced bounded compiler recipe and its limits; the separate 304-byte native
-  candidate is recorded in [offline evidence](evidence/offline-private-buffer-native-readiness.json).
-  Its .40 deployment was [blocked before upload](evidence/native-private-buffer-console-no-run.json)
-  because another title was running. A later arithmetic control
-  [passed its compute checks on .40](evidence/native-arithmetic-fw1270-cycle1.json),
-  but left explicit loader-layer release unproven; the private-call candidate
-  remains unrun. The new prospective arithmetic cycles have now passed; reviewed
-  private-call deployment and hardware validation are next.
+  reproduced bounded compiler recipe and its limits. The separate 304-byte
+  private-call fixture has [exact computation evidence with delayed completion](evidence/native-private304-computation.json).
+  Its original bounded cycle remains unaccepted; this does not admit arbitrary
+  private-call kernels into the reusable runtime.
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like

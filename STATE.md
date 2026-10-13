@@ -15,17 +15,24 @@ Updated: 2026-10-13, America/New_York.
   qualifies the finite fixture, not all-domain math or full G3/G4; see
   `evidence/native-math-exp-corrected.json`.
 
-- **Tiled HIP matrix title is packaged and reviewed offline:** frozen `0d671174`
-  passed 83 integrated sanitizer checks, 36 title lifecycle cases and 15 transcript
-  mutations. Four shapes and two changed-input rounds exercise eight launches and
-  982 exact integer-valued FP32 results in the host model. Native package audits
-  passed; combined 2D geometry/LDS execution is pending. See
-  `evidence/offline-hip-matmul-title.json`.
+- **Tiled HIP matrix client passed on .40 and independent audit:** frozen
+  `0d671174`, integrated at `b61af98`, completed eight ordinary HIP launches over
+  four matrix shapes and two changed-input rounds. All 982 integer-valued FP32
+  results were exact, including partial tiles; inputs and guards stayed intact.
+  Compiler unregister, State destruction and allocation closure completed before
+  PID266/application `0x6018` stopped naturally. Visible mounts matched, services
+  stayed healthy and locks released. This proves the finite client using combined
+  2D geometry and static LDS, not arbitrary GEMM accuracy or performance. See
+  `evidence/native-hip-matmul.json` and `evidence/offline-hip-matmul-title.json`.
 
-- **Ordinary CUDA translation passed compiler qualification:** frozen `b1fd26c`
-  uses pinned ROCm HIPIFY without hand-editing its output. Linux, PS5 and sanitizer
-  model objects passed registration/profile inspection. Runtime ownership and
-  hardware execution are pending; see `evidence/offline-hipify-client.json`.
+- **Ordinary CUDA translation passed compiler and owned-runtime models:** frozen
+  `b1fd26c` uses pinned ROCm HIPIFY without hand-editing its output; descendant
+  `c49c1d9` preserves the client and device bytes while exercising genuine
+  registration, six launches and cleanup in 19 host-model scenarios. Eight
+  boundary tests and two CMake checks passed independent review. The model checks
+  662 wrapping sums and 2,238 whole-buffer words; it does not execute GPU ISA.
+  Native title qualification is next. See `evidence/offline-hipify-client.json`
+  and `evidence/offline-hipify-runtime.json`.
 
 - **Reusable HIP client passed on .40 and independent audit:** frozen `ed82c331`,
   integrated at `5807a97`, completed eleven blocking submissions in sequences
@@ -53,8 +60,8 @@ Updated: 2026-10-13, America/New_York.
 - **Combined geometry/LDS route qualified offline:** isolated `89bf865` admits
   the measured 8x8 block with static LDS512 and complete hidden geometry through
   shared planners/ownership. Forty sanitizer checks and two final test-only
-  replays passed, with independent review. Native tiled-matrix execution remains
-  pending; see `evidence/offline-geometry-lds-runtime.json`.
+  replays passed, with independent review. The tiled client subsequently passed
+  the native cycle above; see `evidence/offline-geometry-lds-runtime.json`.
 
 - **Reusable HIP runtime qualified offline:** frozen `c0cc2bb`, integrated at
   `860b8f6`, selects supported launch classes from metadata rather than kernel
@@ -937,3 +944,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 combined geometry/LDS | 89bf865 | offline route audited | evidence/offline-geometry-lds-runtime.json | genuine tiled-matrix client
 
 - 2026-10-13 | G3 corrected math | 1a399323/9b9c606 | .40 | pass: 1542 unchanged-oracle values and natural teardown | evidence/native-math-exp-corrected.json | genuine tiled HIP client
+
+- 2026-10-13 | G4 tiled HIP matmul | 0d671174/b61af98 | .40 | pass: 8 launches, 982 exact outputs and natural teardown | evidence/native-hip-matmul.json | HIPIFY runtime/title

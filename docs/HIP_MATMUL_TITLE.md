@@ -22,8 +22,11 @@ checks clean errors, uncertain ownership, missing/corrupt outputs, input/guard
 mutations, failed/late registration, rejected/skipped unregister, late live data,
 log persistence and shell errors. These models are not AMDGPU ISA emulation.
 
-The isolated candidate remains offline until native link, signed-container and
-full package extraction audits pass and a separate bounded experiment is reviewed.
-No full G4, arbitrary GEMM accuracy or performance claim follows from this title.
+Frozen `0d671174` passed native link, signed-container and full package audits,
+then completed its bounded .40 cycle: all eight launches and 982 exact outputs,
+intact inputs/guards, compiler unregister, State destruction and natural stop.
+Independent audit reproduced acceptance from the raw evidence; see
+`../evidence/native-hip-matmul.json`. No full G4, arbitrary GEMM accuracy or
+performance claim follows from this finite integer-valued FP32 corpus.
 Single-thread/module blocking-runtime limits and caller indexing responsibility
 remain unchanged. Installed SDK/resource support is not a hermetic inventory.

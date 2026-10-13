@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "classification": "offline-hipify-owned-runtime-pass",
+  "source_commit": "c49c1d951c3aeea154018568471fa4a219838cd0",
+  "source_sha256": {
+    "CMakeLists.txt": "a0e1c3eb774450ce644a34acc8c15c930e9d6dfd137cf4a354922e6308694539",
+    "docs/HIPIFY_RUNTIME.md": "dae26c5acb38cd15dd70f88bc1649da80279ee40bff635af74b4dbc02b2bc5cf",
+    "tests/hipify_runtime_model.cpp": "9d3ab5b919bf4a974702ff75e49d74b50eba0b2f8c99b3dc003031ffc9d92b64",
+    "tests/hipify_runtime_recipe_test.py": "14aa18ede160e86545fbfea55da541a2945259d905633de4f423e823654c2fcf",
+    "tools/probe_hipify_runtime.py": "6b09bdec5eb04bf0a9970a821d17e96d4c86fa9d75699cd243bfc84d807aa3a5"
+  },
+  "freeze": {
+    "path": ".local/g4-hipify-runtime/results/runtime-freeze-v1/receipt.json",
+    "sha256": "3095bb5fa43708adb41aa0f19430ee99087fa6c4596c99f039d5dfb912741512"
+  },
+  "independent_review": {
+    "path": "results/hipify-runtime-independent-review-v2/review.json",
+    "sha256": "65d746fedabfc13f876f10ff7e64ead1886b475082cb04522a21e7487ccc8e25"
+  },
+  "runtime_receipt": {
+    "path": ".local/g4-hipify-runtime/results/runtime-v4/receipt.json",
+    "sha256": "ecda112353ee45b232f239e1b86e251db49e65304bbe9b199f853eb1434d9d49"
+  },
+  "integration_receipt": {
+    "path": ".local/g4-hipify-runtime/results/runtime-integration-v2/receipt.json",
+    "sha256": "c827caf726e087d1b5f0c597a80ec537538c675ef6cf73606b80d8e61c2c12e3"
+  },
+  "compiler_checkpoint": {
+    "path": "evidence/offline-hipify-client.json",
+    "sha256": "aaf1db468ad9bf59c210b06a5f7b91185cd7aa063c52c96c8605af4b43b49225"
+  },
+  "genuine_renamed_main_signature": "int hipify_client_main()",
+  "original_CUDA_generated_HIP_device_bytes_unchanged": true,
+  "runtime_model_scenarios": 19,
+  "boundary_tests": 8,
+  "targeted_cmake_checks": 2,
+  "launches": 6,
+  "lengths": [
+    1,
+    73,
+    257
+  ],
+  "rounds": 2,
+  "active_wrapping_sums": 662,
+  "whole_buffer_comparisons": 2238,
+  "core_unchanged": true,
+  "compiler_unregister_and_state_destruction_observed_in_model": true,
+  "hardware_validated": false,
+  "native_title_pending": true,
+  "full_g4_complete": false,
+  "limits": [
+    "Host callback transport does not execute AMD ISA and does not qualify native mappings or performance.",
+    "ASan fixed shader-window mapping uses protect_shadow_gap=0; explicit logical guards provide the custom-mapping bounds evidence.",
+    "Exact translated client and serialized single-module runtime only; no general CUDA compatibility or fullG4 claim.",
+    "SDK/static support tree inventory is targeted, not hermetic."
+  ]
+}
