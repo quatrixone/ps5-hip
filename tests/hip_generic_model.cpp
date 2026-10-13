@@ -39,7 +39,14 @@ public:
             if(header==0xc0031502){check(!dispatch&&words[at+4]==0x8005);dispatch=true;groups={words[at+1],words[at+2],words[at+3]};}
             at+=length+1;
         }
-        check(dispatch && submits<=7);const unsigned iteration=submits-1,sizes[]{1,63,64,65,127,193,257},n=sizes[iteration];
+        check(dispatch);
+#ifdef PS5HIP_GENERIC_TITLE
+        check(submits<=11);const unsigned sequence=submits<=1?1:submits<=4?2:3;
+        const unsigned iteration=submits-(sequence==1?1:sequence==2?2:5),seed=iteration+sequence*17;
+#else
+        check(submits<=7);const unsigned iteration=submits-1,seed=iteration;
+#endif
+        const unsigned sizes[]{1,63,64,65,127,193,257},n=sizes[iteration];
         check(groups==std::array<uint32_t,3>{(n+63)/64,1,1} && registers.at(0x207)==std::vector<uint32_t>{64,1,1});
         const auto &s=registers.at(0x240),&p=registers.at(0x20c),&r=registers.at(0x212);
         check(s.size()==6 && p.size()==2 && r.size()==2 && r[1]==(iteration%2?0x1008cu:0x8cu));
@@ -49,11 +56,11 @@ public:
         const auto *k=reinterpret_cast<const uint8_t*>(arg);const auto input=read(k,8),output=read(k+8,8);
         check(read(k+16,4)==n);containing(input,n*4);containing(output,n*4);
         const auto *in=reinterpret_cast<const unsigned*>(input);auto *out=reinterpret_cast<unsigned*>(output);
-        for(unsigned i=0;i<n;++i)check(in[i]==((i*37u+iteration*1231u)^0x951dac37u));
+        for(unsigned i=0;i<n;++i)check(in[i]==((i*37u+seed*1231u)^0x951dac37u));
         if(mode=="submit")return -7;if(mode=="throw")throw std::runtime_error("submit");if(mode=="unknown")throw 42;
         if(mode!="missing") {
             if(iteration%2){for(unsigned g=0;g<groups[0];++g){unsigned sum=0;for(unsigned i=g*64;i<n&&i<(g+1)*64;++i)sum+=in[i];out[g]=sum;}}
-            else {check(read(k+20,4)==0);const auto salt=read(k+24,8);check(salt==0x13579bdf00000000ull+17+iteration);
+            else {check(read(k+20,4)==0);const auto salt=read(k+24,8);check(salt==0x13579bdf00000000ull+17+seed);
                 for(unsigned i=0;i<n;++i)out[i]=(in[i]+unsigned(salt))^unsigned(salt>>32);}
         }
         if(mode=="corrupt")out[0]^=1;if(mode=="input")const_cast<unsigned*>(in)[0]^=1;if(mode=="guard")out[-1]=0;
