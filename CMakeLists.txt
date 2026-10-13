@@ -22,6 +22,13 @@ target_link_libraries(ps5hip-inspect PRIVATE ps5hip_object)
 include(CTest)
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(NAME hipify_runtime_boundaries COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py)
+  set(PS5HIP_HIPIFY_RUNTIME_PROBE "" CACHE PATH "Completed HIPIFY owned-runtime host-model proof")
+  if(PS5HIP_HIPIFY_RUNTIME_PROBE)
+    add_test(NAME hipify_runtime_actual_proof COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py --check "${PS5HIP_HIPIFY_RUNTIME_PROBE}")
+  endif()
   add_executable(teardown_snapshot_test tests/teardown_snapshot_test.cpp)
   target_link_libraries(teardown_snapshot_test PRIVATE ps5hip_object)
   target_compile_options(teardown_snapshot_test PRIVATE -Wall -Wextra -Wpedantic -Werror)
