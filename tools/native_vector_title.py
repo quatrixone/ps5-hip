@@ -2,9 +2,25 @@
 import hashlib
 import json
 import struct
+import re
 
 PROVENANCE_FILES = {"llvm-pie.elf", "eboot.elf", "symbols.json", "startup-disassembly.stdout",
                     "app_crt.cpp", "ps5-pie.ld", "original-app_crt.cpp", "original-ps5-pie.ld"}
+
+WORKERS_PROFILE = {
+    "target": "gfx1013", "kernel_names": ["thread_words"],
+    "client_entry": "_Z26ps5hip_workers_client_mainiPPc", "launch_entry": "threads_launch",
+    "combined_object_sha256": "a51527f046165e437a0b9e2e151b43247340bea17e5497837d1091d15c3f81f3",
+    "bundle_sha256": "352c3eb26097a8723e39183f0050968ae5a1d1f591d6c2638f0d53388070dab2",
+    "code_sha256": "0484405bc2a5247de40c41105a170026be1ea1802d60930fb0df56099dfc3dc0",
+    "code_bytes": 3696,
+    "compiler_receipt_sha256": "f6c57047764720fbf6b61c7eb2d03939a914dc50a0942099d2b33a4a572f2d33",
+    "dispatches": 5, "exact_values": 661, "word_comparisons": 1355,
+    "template_comparisons": 1355, "created": 2, "joined": 2, "phase_checks": 17,
+    "actors": [0, 1, 2, 1, 0], "counts": [1, 73, 257, 73, 257],
+    "salts": [11, 101, 1009, 65521, 4294967280], "guard_words": 7,
+    "data_words": 271, "kernarg_bytes": 272, "initialization_actor": "main",
+}
 
 
 PROFILE = {
@@ -81,6 +97,8 @@ MATMUL_PROFILE = {'target': 'gfx1013',
 
 
 def profile_for(kernel):
+    if kernel == "hip_workers_main":
+        return WORKERS_PROFILE
     if kernel == "hip_vector":
         return PROFILE
     if kernel == "hip_routes":
@@ -97,7 +115,7 @@ def profile_for(kernel):
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main") else set()) | ({"workers-agc-disassembly.stdout"} if kernel == "hip_workers_main" else set())
 
 
 def validate_fself(container, elf):
@@ -173,6 +191,7 @@ def validate_profile(receipt, source_root):
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+                 ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel == "hip_workers_main" else
                  ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
                  ["src/hip_launch_profile.cpp", "tests/hip_tiled_matmul_blockdim.hip", "tools/probe_hip_matmul.py", "docs/HIP_MATMUL_TITLE.md"] if kernel == "hip_matmul" else
@@ -180,8 +199,12 @@ def validate_profile(receipt, source_root):
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
             raise ValueError("genuine HIP vector title source provenance mismatch: " + name)
+    if kernel == "hip_workers_main":
+        for name in ("tests/hip_workers_native_title_test.py", "tools/check_canary_log.py", "tools/stage_native_title.py", "tools/verify_native_case.py", "CMakeLists.txt"):
+            if sources.get(name)!=hashlib.sha256((source_root/name).read_bytes()).hexdigest():
+                raise ValueError("worker title source provenance mismatch: "+name)
     audits = receipt.get("vector_audits" if kernel == "hip_vector" else "routes_audits", {})
-    if (set(audits) != {"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} or
+    if (set(audits) != ({"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} | ({"workers_agc"} if kernel == "hip_workers_main" else set())) or
             any(audits[k].get("bundle_sha256") != selected["bundle_sha256"] for k in ("raw_pie", "converted_eboot")) or
             audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "main"] or
             audits["startup"].get("compiler_atexit_unregister") is not True or
@@ -302,6 +325,64 @@ def validate_hipify_compiler(raw_receipt, combined, source_root):
     return report
 
 
+def validate_workers_compiler(raw_receipt, combined, source_root):
+    selected=WORKERS_PROFILE
+    digest=lambda raw:hashlib.sha256(raw).hexdigest()
+    if digest(raw_receipt)!=selected["compiler_receipt_sha256"] or digest(combined)!=selected["combined_object_sha256"]:
+        raise ValueError("workers compiler/combined binding mismatch")
+    report=json.loads(raw_receipt)
+    if (report.get("classification")!="genuine-worker-kernel-compiler-proof" or
+            report.get("hardware_executed") is not False or report.get("native_linked") is not False or report.get("kernel_source_unchanged") is not True):
+        raise ValueError("workers compiler proof scope mismatch")
+    for name,value in report["sources"].items():
+        if digest((source_root/name).read_bytes())!=value:raise ValueError("workers compiler source changed: "+name)
+    cases=[c for c in report["cases"] if c["host"]=="ps5"]
+    if len(cases)!=1 or cases[0]["lifecycle"]!={"register_module_calls":1,"register_function_calls":1,"atexit_calls":1,"unregister_calls":1} or cases[0]["wrapper"]!={"payload_bytes":24,"section_bytes":24,"model_redzone_bytes":0}:
+        raise ValueError("workers compiler registration/wrapper mismatch")
+    descriptors=cases[0]["audit"]["descriptors"]
+    if descriptors!={"thread_words":{"group_bytes":0,"private_bytes":0,"kernarg_bytes":272,"rsrc1":1622081600,"rsrc2":140,"rsrc3":0,"properties":1033,"preload":0}}:
+        raise ValueError("workers measured descriptor mismatch")
+    if any(report["artifacts"].get("ps5/threads"+suffix)!=selected[key] for suffix,key in ((".o","combined_object_sha256"),(".bundle","bundle_sha256"),(".hsaco","code_sha256"))):
+        raise ValueError("workers compiler artifact binding mismatch")
+    from probe_hipify_client import device_object
+    from fat_binary_fixture_test import section
+    bundle=section(combined,b".hip_fatbin");device=device_object(bundle)
+    if digest(bundle)!=selected["bundle_sha256"] or digest(device)!=selected["code_sha256"] or len(device)!=selected["code_bytes"]:
+        raise ValueError("workers embedded device mismatch")
+    return report
+
+
+def audit_workers_agc(disassembly, image):
+    """Verify backend redirects and exactly one original import branch per wrapper."""
+    from fat_binary_fixture_test import section
+    from probe_host_registration import load_regions
+    data=image.read_bytes();reader,_,_=load_regions(image)
+    dynsym,dynstr=section(data,b".dynsym"),section(data,b".dynstr")
+    names={i//24:dynstr[struct.unpack_from("<I",dynsym,i)[0]:].split(b"\0",1)[0].decode() for i in range(0,len(dynsym),24)}
+    slots={}
+    for name in (b".rela.dyn",b".rela.plt"):
+        raw=section(data,name)
+        for offset in range(0,len(raw),24):
+            address,info,_=struct.unpack_from("<QQq",raw,offset)
+            if info&0xffffffff in (6,7):slots[address]=names.get(info>>32)
+    bodies=dict(re.findall(r"^[0-9a-f]+ <([^>]+)>:\n(.*?)(?=^[0-9a-f]+ <|\Z)",disassembly,re.M|re.S))
+    results=[]
+    for original,backend in (("sceAgcInit","_ZN6ps5hip10AgcBackendC2Ev"),("sceAgcDriverSubmitDcb","_ZN6ps5hip10AgcBackend6submitEPjj"),("sceAgcSuspendPoint","_ZN6ps5hip10AgcBackend4kickEv")):
+        wrapper="__wrap_"+original
+        # Some objdump versions select the C1 alias for the same constructor.
+        body=bodies.get(backend,bodies.get(backend.replace("C2Ev","C1Ev"),""))
+        if body.count("<"+wrapper+">")!=1 or wrapper not in bodies:raise ValueError("workers backend redirection missing: "+original)
+        forwarded=[]
+        for target in re.findall(r"\b(?:jmp|callq?)\s+0x([0-9a-f]+)",bodies[wrapper]):
+            address=int(target,16);raw,_=reader(address,6)
+            if raw[:2]==b"\xff\x25":forwarded.append(slots.get(address+6+struct.unpack_from("<i",raw,2)[0]))
+        for target in re.findall(r"(?:callq?|jmp)\s+\*[^\n]+#\s+0x([0-9a-f]+)",bodies[wrapper]):forwarded.append(slots.get(int(target,16)))
+        if forwarded.count(original)!=1 or any(n and n.startswith("sceAgc") and n!=original for n in forwarded):
+            raise ValueError("workers wrapper original forwarding missing/duplicate: "+original)
+        results.append({"backend":backend,"wrapper":wrapper,"original":original,"forward_calls":1})
+    return {"calls":results,"native_executed":False}
+
+
 def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_profile(receipt, source_root)
     kernel = receipt["kernel"]
@@ -314,7 +395,12 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
         path = provenance / name
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("genuine HIP vector linked artifact changed: " + name)
-    if kernel == "hip_routes":
+    if kernel == "hip_workers_main":
+        validate_workers_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                  (provenance / "routes-combined.o").read_bytes(), source_root)
+        if audit_workers_agc((provenance / "workers-agc-disassembly.stdout").read_text(), provenance / "llvm-pie.elf") != audits["workers_agc"]:
+            raise ValueError("workers AGC call redirection changed")
+    elif kernel == "hip_routes":
         validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                  (provenance / "routes-combined.o").read_bytes(), source_root)
     elif kernel == "hip_generic":
