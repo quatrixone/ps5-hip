@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Tracked fills and device discovery passed on .40:** frozen `9bb191b`
+  checked discovery before backend initialization, then consumed 24 byte fills
+  in six GPU launches. All 662 active values, 746 input and 746 output words
+  matched, including guards and changed second-round inputs on reused storage.
+  PID345/application `0x00008018` stopped naturally after complete cleanup;
+  independent lifecycle, service and lock audit passed. This proves the bounded
+  workload, not DMA, performance or general cache visibility. Title/API root
+  integration remains separate; see `evidence/native-hip-memory-fill.json`.
+
 - **Bounded contending HIP callers passed on .40:** frozen `70a604a` observed
   overlapping A-launch/B-push API lifetimes and B requesting the same runtime
   gate while A owned it. Three main/A/B dispatches produced 331 exact values,
@@ -1046,3 +1055,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 integration | a5b89aa | offline | pass: threaded runtime, refreshed compiler authorities, 55 CMake tests | evidence/offline-threaded-runtime-integration.json | worker initialization
 - 2026-10-13 | G4 worker initialization | a7e6da7 | .40 | pass: init on A, four dispatches, natural teardown | evidence/native-hip-workers-init.json | overlapping host callers
 - 2026-10-13 | G4 contention | 70a604a | .40 | pass: overlapping HIP calls, 331 exact values, natural teardown | evidence/native-hip-contention.json | native memory fill
+- 2026-10-13 | G4 fills | 9bb191b | .40 | pass: 24 fills, 662 GPU values, discovery and natural teardown | evidence/native-hip-memory-fill.json | SDK integration, D2D
