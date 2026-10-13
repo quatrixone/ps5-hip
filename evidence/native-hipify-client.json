@@ -1,0 +1,142 @@
+{
+  "source_commit": "1b9479cbd9c748542a6dab50748a8dba727655e9",
+  "image_sha256": "ead66563443612b713afe668dfe76dd3b974fb8f5c9575dacb23b799f52f32cb",
+  "kernel": "hipify",
+  "accepted": true,
+  "script_sha256": "04b4789149e30135b8d9541b7e903c234939c51e25cf26f9baa011dfd36d30da",
+  "manifest_sha256": "bd5df833fe19a93ce1f3a798dd9dad12693d641cf50ddccb4280eb5e7c4e39c9",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/hipify-deployment-v1/deployment-20261013T111546.023593Z/deployment.json",
+      "sha256": "dca431cb500eb427cc10394486b4920513a84d119f4e805fa2905d21626ed45c"
+    },
+    "review": {
+      "path": "results/hipify-deployment-v1/deployment-20261013T111546.023593Z-independent-review.json",
+      "sha256": "a2dd499a8d0af2f89126ef9dbc1bfdd46e50e7da81bb5509914fa19a5977a737"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "1657825f7c87253faa2614422539ec7ad335a3648e9185598609c9706f2acaae",
+    "after-post.log": "1657825f7c87253faa2614422539ec7ad335a3648e9185598609c9706f2acaae",
+    "application.log": "fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4",
+    "before-close.log": "1657825f7c87253faa2614422539ec7ad335a3648e9185598609c9706f2acaae",
+    "before-launch.log": "0d828cbbe9d72296fda26714fb85b0f4fd5aa8cfdb221c028b676135efc5c74f",
+    "before-log-check.log": "0d828cbbe9d72296fda26714fb85b0f4fd5aa8cfdb221c028b676135efc5c74f",
+    "before-post-snapshot.log": "1657825f7c87253faa2614422539ec7ad335a3648e9185598609c9706f2acaae",
+    "before-pre-snapshot.log": "0d828cbbe9d72296fda26714fb85b0f4fd5aa8cfdb221c028b676135efc5c74f",
+    "before.log": "0d828cbbe9d72296fda26714fb85b0f4fd5aa8cfdb221c028b676135efc5c74f",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "4dbeaa203f6fcf1b8e51dc35a886d691a63fadfbc521bda195b4e3c1777fc519",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "94a762a984c993d7c0f78493cb60684d2aeea3e0228619897388db1c6389002b",
+    "installed-eboot.bin": "4dbeaa203f6fcf1b8e51dc35a886d691a63fadfbc521bda195b4e3c1777fc519",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "94a762a984c993d7c0f78493cb60684d2aeea3e0228619897388db1c6389002b",
+    "klog.log": "c6bc668926fcd46007b2c1995bde907bc6a437bb87b18936f1673f6f9c496413",
+    "launch-klog.log": "365fec3027bcaaa466c024a9f9fc60ca03800b5372f292e1a2f7d956192327b6",
+    "launch-response.log": "2a0365690f94353ed43032687d7ee26c00f769ba41e90ddf57058f452dd9a5a2",
+    "launch-shadow-delta.log": "fd34dcff88eddceef756c33cb81e9cfdc958b9acd0a067b72c26df325c6b3c25",
+    "lifecycle-delta.log": "fd34dcff88eddceef756c33cb81e9cfdc958b9acd0a067b72c26df325c6b3c25",
+    "observed.log": "1657825f7c87253faa2614422539ec7ad335a3648e9185598609c9706f2acaae",
+    "post-snapshot.log": "464e5649248a97861a5f17e5f7657e6c1c9e12369bcac24ac1f3018f3c8c933a",
+    "pre-snapshot.log": "464e5649248a97861a5f17e5f7657e6c1c9e12369bcac24ac1f3018f3c8c933a",
+    "private-log-absence-before-launch.json": "22644b53e42b814e3f50e037832d7ad5660495ededa2f93bf4d9560fe2071972",
+    "private-log-absence.json": "22644b53e42b814e3f50e037832d7ad5660495ededa2f93bf4d9560fe2071972",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-unedited-hipify-client-native-pass",
+  "target": "console .40 firmware 12.70",
+  "full_g4_complete": false,
+  "hardware_gate_passed": false,
+  "original_cuda_and_generated_hip_unchanged": true,
+  "compiler_entry_adaptation": "-Dmain=hipify_client_main; genuine int hipify_client_main() ABI",
+  "launches": 6,
+  "lengths": [
+    1,
+    73,
+    257
+  ],
+  "changed_input_rounds": 2,
+  "exact_wrapping_u32_outputs": 662,
+  "whole_buffer_comparisons": 2238,
+  "guard_words_each_end": 7,
+  "compiler_registered_functions": 1,
+  "compiler_unregister_observed": true,
+  "runtime_state_destroyed": true,
+  "allocations_closed": true,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "hipify",
+    "log_sha256": "fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4",
+    "bytes": 1253,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 275,
+    "app_id": "0x00008018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "observation_budget_seconds": 30,
+  "receipt": {
+    "path": "results/hipify-execution-v1/observation-20261013T111830.822351Z/receipt.json",
+    "sha256": "5d7eac233061c0492e024273c58450a73f83845a111ac92efa5462db5f6f1f92"
+  },
+  "independent_review": {
+    "path": "results/hipify-execution-v1/observation-20261013T111830.822351Z-independent-review.json",
+    "sha256": "efeb9ffa6cbac5a8adc7f1fc977a8dc5f6070449098a14d577b982929d791ec8"
+  },
+  "package_readiness": {
+    "path": ".local/g4-hipify-title/results/native-package-v2/readiness.json",
+    "sha256": "b1d8112185301f2c0df92b1fd18ea9846355a6388d137948bca6de36f5b46697"
+  },
+  "package_review": {
+    "path": "results/hipify-native-package-independent-review-v1/review.json",
+    "sha256": "7a47bba2435122fc38678486e4aafb4ddd8f6dc6c377eb761d985957d75f73a7"
+  },
+  "title_freeze": {
+    "path": ".local/g4-hipify-title/results/title-freeze-v1/receipt.json",
+    "sha256": "57bb38d98f04c46e2fe9711120e95d169ed45143be51fee1f8fd20692c917c73"
+  },
+  "compiler_checkpoint": {
+    "path": "evidence/offline-hipify-client.json",
+    "sha256": "aaf1db468ad9bf59c210b06a5f7b91185cd7aa063c52c96c8605af4b43b49225"
+  },
+  "owned_runtime_checkpoint": {
+    "path": "evidence/offline-hipify-runtime.json",
+    "sha256": "5a8846f3302fc44545a9dda3c91dd280198b80d707286c8cc3600343836eccae"
+  },
+  "limits": [
+    "Only the exact embedded gfx1013 unedited HIPIFY client: six observed blocking dispatches, lengths1/73/257 twice with changed inputs, 662 unsigned wrapping sums and2238 whole-buffer comparisons including unchanged inputs and full guards, real compiler unregister and completed State destruction.",
+    "Serialized null-stream bounded title workload only; no arbitrary HIP programs, asynchronous overlap or full G4 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

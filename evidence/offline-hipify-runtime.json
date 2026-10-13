@@ -1,6 +1,15 @@
 {
   "schema": 1,
   "classification": "offline-hipify-owned-runtime-pass",
+  "integrated_commit": "0a6856d638520db871d776623d4a49bc04393da8",
+  "integrated_proof": {
+    "path": "results/integrated-hipify-runtime-v1/receipt.json",
+    "sha256": "48cfd89ed83346dbfebe0ce3961673d889e19862f9b73083f32001031fc8b5b3"
+  },
+  "integration_independent_review": {
+    "path": "results/integrated-hipify-runtime-independent-review-v1.json",
+    "sha256": "0323a5245f95840778defa778427219929653cb36d0bfd793b28117cbc2e185e"
+  },
   "source_commit": "c49c1d951c3aeea154018568471fa4a219838cd0",
   "source_sha256": {
     "CMakeLists.txt": "a0e1c3eb774450ce644a34acc8c15c930e9d6dfd137cf4a354922e6308694539",

@@ -14,6 +14,9 @@ complete compiler/runtime cleanup. The [corrected math fixture](evidence/native-
 passed 1,542 values under an unchanged numerical contract. The
 [tiled matrix client](evidence/native-hip-matmul.json) passed eight launches and
 982 exact outputs across four shapes using combined 2D geometry and static LDS.
+An [unedited HIPIFY translation](evidence/native-hipify-client.json) also passed
+six native launches and 662 exact unsigned sums with complete cleanup. This
+qualifies that ordinary CUDA source example, not general CUDA compatibility.
 The runtime currently
 requires one module and serialized host calls; unsupported features fail explicitly.
 See [current state](STATE.md) for the latest candidate and its exact limits.

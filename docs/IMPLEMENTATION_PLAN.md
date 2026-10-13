@@ -33,7 +33,9 @@ See `../evidence/native-hip-generic.json` and the offline qualification in
 `../evidence/offline-bounded-hip-runtime.json`. The genuine tiled-matmul client
 also passed eight native launches across four shapes and two rounds, with 982
 exact integer-valued FP32 outputs and complete natural teardown; see
-`../evidence/native-hip-matmul.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
+`../evidence/native-hip-matmul.json`. The unedited HIPIFY translation also passed
+six native launches, 662 exact wrapping sums and complete teardown; see
+`../evidence/native-hipify-client.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels

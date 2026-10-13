@@ -25,14 +25,20 @@ Updated: 2026-10-13, America/New_York.
   2D geometry and static LDS, not arbitrary GEMM accuracy or performance. See
   `evidence/native-hip-matmul.json` and `evidence/offline-hip-matmul-title.json`.
 
-- **Ordinary CUDA translation passed compiler and owned-runtime models:** frozen
-  `b1fd26c` uses pinned ROCm HIPIFY without hand-editing its output; descendant
-  `c49c1d9` preserves the client and device bytes while exercising genuine
-  registration, six launches and cleanup in 19 host-model scenarios. Eight
-  boundary tests and two CMake checks passed independent review. The model checks
-  662 wrapping sums and 2,238 whole-buffer words; it does not execute GPU ISA.
-  Native title qualification is next. See `evidence/offline-hipify-client.json`
-  and `evidence/offline-hipify-runtime.json`.
+- **Unedited HIPIFY client passed on .40 and independent audit:** frozen title
+  `1b9479c` completed six ordinary launches over lengths 1/73/257 with changed
+  inputs. All 662 wrapping unsigned sums and 2,238 whole-buffer comparisons
+  passed, including inputs and guards. Genuine compiler unregister, State
+  destruction and allocation closure preceded PID275/application `0x8018`'s
+  natural stop. Visible mounts matched, services stayed healthy and locks released.
+  Pinned HIPIFY output and device bytes are unchanged; the host entry is renamed
+  by compiler flag and called through its actual no-argument ABI. This qualifies
+  this translated client, not general CUDA compatibility. See
+  `evidence/native-hipify-client.json`.
+  Compiler/runtime checkpoints `b1fd26c`/`c49c1d9` and root integration `0a6856d`
+  retain their independent offline proofs; the root integration passed fresh
+  three-object/19-model qualification while preserving matmul and corrected math.
+  See `evidence/offline-hipify-client.json` and `evidence/offline-hipify-runtime.json`.
 
 - **Reusable HIP client passed on .40 and independent audit:** frozen `ed82c331`,
   integrated at `5807a97`, completed eleven blocking submissions in sequences
@@ -946,3 +952,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G3 corrected math | 1a399323/9b9c606 | .40 | pass: 1542 unchanged-oracle values and natural teardown | evidence/native-math-exp-corrected.json | genuine tiled HIP client
 
 - 2026-10-13 | G4 tiled HIP matmul | 0d671174/b61af98 | .40 | pass: 8 launches, 982 exact outputs and natural teardown | evidence/native-hip-matmul.json | HIPIFY runtime/title
+
+- 2026-10-13 | G4 HIPIFY | 1b9479c | .40 | pass: 6 launches, 662 exact sums, natural teardown | evidence/native-hipify-client.json | CPU threading proof
