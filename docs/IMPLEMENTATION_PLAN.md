@@ -48,7 +48,9 @@ The isolated threaded runtime `30f3c9f` now passes independent offline review,
 See `../evidence/offline-threaded-hip-runtime.json`. Its unchanged single-thread
 HIPIFY workload subsequently passed on .40 with independent audit of all six
 launches and natural teardown (`../evidence/native-threaded-hipify-control.json`).
-It is not yet integrated into the root runtime. The subsequent isolated
+It is now integrated at `a5b89aa`, with refreshed compiler authorities and 55
+configured host tests passing; see `../evidence/offline-threaded-runtime-integration.json`.
+The subsequent isolated
 `2aa3c530` main-initialized queue passed actual joined-worker calls and independent
 audit: 661 active values, 1,355 device-readback and 1,355 host-template comparisons,
 17 phase checks and 11 direct AGC events. See `../evidence/native-hip-workers-main.json`.

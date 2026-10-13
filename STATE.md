@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Validated threaded runtime integrated:** `a5b89aa` brings the native-tested
+  main-initialized worker implementation into this development line. Fresh
+  source-bound compiler authorities preserve the exact example objects and
+  shaders. All 55 configured Clang/ASan CMake tests, 34 threaded ASan modes,
+  16 CPU-only TSAN modes and 29 HIPIFY title cases passed. See
+  `evidence/offline-threaded-runtime-integration.json`. Worker-initialization
+  candidate `a7e6da7` is separately frozen and packaged; its console test remains
+  pending. G3/G4 and the larger platform plan remain open.
+
 - **Joined HIP worker callers passed on .40 and independent audit:** frozen
   `2aa3c530` initialized the queue on main, then submitted from main/A/B/A/main.
   Both workers joined; five dispatches produced 661 exact values with 1,355
@@ -12,7 +21,7 @@ Updated: 2026-10-13, America/New_York.
   completed unregister, State destruction and natural shutdown; mounted bytes,
   visible mounts, services and locks passed audit. This finite serialized case
   does not qualify worker-side initialization or simultaneous callers. The
-  isolated runtime is still not integrated into root; see
+  runtime is now integrated above; see
   `evidence/native-hip-workers-main.json`.
 
 - **Threaded runtime passed its native single-thread control:** frozen `30f3c9f`
@@ -28,7 +37,7 @@ Updated: 2026-10-13, America/New_York.
   modes, all five title lifecycle suites (145 cases/83 transcript mutations),
   and fresh legacy client regressions. Independent review binds all 30 changed
   files and covers checked locking, per-thread errors/configurations, failure
-  retention and shutdown. This source is not yet integrated into this root.
+  retention and shutdown. This source is now integrated into this root above.
   Native HIPIFY control and main-initialized joined-worker qualification passed above;
   see `evidence/offline-threaded-hip-runtime.json`. G3/G4 remain open.
 
@@ -1005,3 +1014,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 threaded runtime | 30f3c9f | offline | pass: checked threading and lifecycle review | evidence/offline-threaded-hip-runtime.json | native control, then worker GPU submissions
 - 2026-10-13 | G4 threaded control | 30f3c9f | .40 | pass: six HIPIFY launches and natural teardown | evidence/native-threaded-hipify-control.json | joined worker GPU submissions
 - 2026-10-13 | G4 joined HIP workers | 2aa3c530 | .40 | pass: main-initialized queue, two joined workers, five dispatches and natural teardown | evidence/native-hip-workers-main.json | worker-side initialization, root integration
+- 2026-10-13 | G4 integration | a5b89aa | offline | pass: threaded runtime, refreshed compiler authorities, 55 CMake tests | evidence/offline-threaded-runtime-integration.json | worker initialization

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "classification": "offline-threaded-runtime-integration-pass",
+  "source_commit": "a5b89aa4cd019452cf0fda830bd656e0d659b164",
+  "source_branch": "development/integrate-hip-workers",
+  "hardware_tested_source": "2aa3c530f54c91f44acaaddaf9d6c69996e96ee3",
+  "production_runtime_unchanged_from_native_control": true,
+  "code_delta_from_native_control": "Four compiler receipt pins and HIPIFY lifecycle recipe receipt/review pins; no admission exemptions.",
+  "checks": {
+    "cmake_tests": 55,
+    "threaded_asan_ubsan_modes": 34,
+    "cpu_only_tsan_modes": 16,
+    "hipify_runtime_models": 19,
+    "hipify_title_cases": 29,
+    "hipify_title_mutations": 34
+  },
+  "evidence": {
+    "final_verification": {
+      "path": ".local/g4-threaded-integration/results/final-integration-verification-v2/receipt.json",
+      "sha256": "e6c4f452304ed8feec5f1d235dd4f2a5c7a1b959da4af490c186520ddf729018"
+    },
+    "cmake": {
+      "path": ".local/g4-threaded-integration/results/cmake-integration-v3/receipt.json",
+      "sha256": "6b761e5fe9893c5f42c32686ce796e8e33c4b12a4f2e34a2c7463f5bb0936de6"
+    },
+    "threaded_asan": {
+      "path": ".local/g4-threaded-integration/results/threads-asan-integration-v1/receipt.json",
+      "sha256": "1481d9f98873485bc821720d483727a37f3f6d2ed1acf8a62c95b3cf6bd762da"
+    },
+    "threaded_cpu_tsan": {
+      "path": ".local/g4-threaded-integration/results/threads-tsan-integration-v1/receipt.json",
+      "sha256": "bbe8a7836406bc69a26a51522dff9212e080f8cf6a5c822b1be49b8c3838d935"
+    },
+    "hipify_runtime": {
+      "path": ".local/g4-threaded-integration/results/integration-hipify-runtime-v1/receipt.json",
+      "sha256": "1f91eb7f6b0047d946f73036635384bf49287320d00c9a5efd25c3437d35e230"
+    },
+    "hipify_title": {
+      "path": ".local/g4-threaded-integration/results/integration-hipify-title-v1/receipt.json",
+      "sha256": "42c820d6ed50642719efe5097b7227cb0fff86b8a4c1b3d693d3981d80a75cdd"
+    },
+    "hipify_review": {
+      "path": "results/integration-hipify-runtime-independent-review-v1/review.json",
+      "sha256": "afbae5e6c474b266ca0a2ccb1830bee7d51c1477f8d49f04d14ba0a4395737ce"
+    },
+    "compiler_authority_review": {
+      "path": "results/integration-compiler-authorities-independent-review-v1/review.json",
+      "sha256": "85e3c540f98ac26c4bf020eacae23fcc8c0463a494d5a9020f6c47bafa23b2e7"
+    },
+    "native_worker_control": {
+      "path": "evidence/native-hip-workers-main.json",
+      "sha256": "527e349eb7264c78e42fa3d21a640e0b994432963b47d37342f0a39548825989"
+    },
+    "routes_compiler": {
+      "path": ".local/g4-threaded-integration/results/routes-compiler-integration-v1/receipt.json",
+      "sha256": "f6cefacc365bdd10bd9c84d33955992f84cb6ca17adf06c4764d6210da652bdf"
+    },
+    "generic_compiler": {
+      "path": ".local/g4-threaded-integration/results/generic-compiler-integration-v1/receipt.json",
+      "sha256": "0dbce46e8995404624c5ac608b66a256ce2498224e6b35ba77c6aa1f9963a756"
+    },
+    "matmul_compiler": {
+      "path": ".local/g4-threaded-integration/results/matmul-compiler-integration-v1/receipt.json",
+      "sha256": "1444522c140067ce99fd8e5ea76e291dabcea96094f633d2b1a9c75734cd75b1"
+    }
+  },
+  "failed_attempts_preserved": [
+    ".local/g4-threaded-integration/results/cmake-integration-v1 (default GCC warning)",
+    ".local/g4-threaded-integration/results/cmake-integration-v2 (required fixtures absent)"
+  ],
+  "scope": "Integrates the qualified main-initialized, serialized worker runtime and refreshes source-bound example compiler authorities. No new console execution.",
+  "worker_initialization_qualified": false,
+  "simultaneous_callers_qualified": false,
+  "full_g4_complete": false,
+  "next": "Validate the separately frozen worker-initialization candidate, then contending calls and remaining HIP API semantics."
+}
