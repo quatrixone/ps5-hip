@@ -4,6 +4,13 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Partial-wave32 fixture passed on .40 and independent review:** lanes 4-19 in
+  each wave produced 128 exact active words; 128 inactive words retained poison.
+  Guards, allocation closure and finalization passed. PID186/application `0x4018`
+  stopped naturally; visible mount snapshots matched, services stayed healthy and
+  locks released. All 130 bindings and 25 raw files were audited. See
+  `evidence/native-wave-partial.json`. Arbitrary masks and full G3 remain open.
+
 - **Full-wave32 fixture passed on .40:** 256 exact words for broadcast, shuffle,
   ballot and reduction across two wave32 waves. Guards and allocation closure
   passed; PID177/application `0x2018` finalized and stopped naturally. The bounded
@@ -480,7 +487,7 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-Qualify the refreshed partial-wave candidate, then the reviewed 2D/3D packages.
+Qualify the reviewed 2D/3D packages. Both refreshed wave32 fixtures have passed.
 Preserve the successful visibility image/result and the original
 inconclusive receipt. The additive 2D/3D
 geometry packages have passed independent offline review in `.local/g3-geometry`. Atomic, numerical and broader
@@ -770,3 +777,5 @@ including the provider-fixed store and vector candidates.
 
 - 2026-10-13 | G3 full wave32 | c3972cb | .40:256 exact words, clean bounded cycle; independent audit clear | evidence/native-wave-full.json | partial waves next
 - 2026-10-13 | G3 geometry offline | 7bdcea0 | 69 host checks and both native packages independently reviewed | evidence/offline-geometry-readiness.json | hardware pending
+
+- 2026-10-13 | G3 partial wave32 | c3972cb | .40:128 active +128 inactive words, clean bounded cycle; independent audit clear | evidence/native-wave-partial.json | 2D/3D geometry next

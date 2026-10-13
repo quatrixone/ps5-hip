@@ -1,0 +1,69 @@
+{
+  "source_commit": "c3972cbc3f716f7f0712035d730c37d416420f06",
+  "image_sha256": "24f9b99b5e626dfa690346752d993c557b3425868269ee7cbbed1e8f3448a8f6",
+  "kernel": "wave_partial",
+  "registered": true,
+  "launched": false,
+  "hardware_gate_passed": false,
+  "mounted_files": {
+    "eboot.bin": {
+      "bytes": 819122,
+      "sha256": "45c558cf00fc02f31843a0989403c8b2ac0e76089800737b13ae85266bc392cc"
+    },
+    "canary.hsaco": {
+      "bytes": 4088,
+      "sha256": "1f98b6aeb261b9a5ddaa338b9dad3afc01c29e3a83d8189ffd5c89840021395a"
+    }
+  },
+  "preservation": {
+    "package": "/data/homebrew/PPSA99014.ffpkg.wave-full.sha256-19130975f2ba38688886bfed9fbccbc7fda7440799b3151261456913ea95decf.preserved",
+    "package_sha256": "19130975f2ba38688886bfed9fbccbc7fda7440799b3151261456913ea95decf",
+    "wave_full_result": "/data/ps5-hip/results/ps5-hip-gfx1013-wave_full.log.wave-full-PID177-app2018.sha256-abd6de171d09041be8279d30bb5ee0a38d278e891951e534eeefce9bc7526b7b",
+    "wave_full_result_sha256": "abd6de171d09041be8279d30bb5ee0a38d278e891951e534eeefce9bc7526b7b"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_file_sha256": {
+    "after.log": "b348dbfea0a0de6e8f17ee423547fa58ec64ae092d7e0af9aa71e5997a055ada",
+    "before-homebrew.list": "f4418c102797ba2080b442ef533c303a4ae8e200f93935d909845c9d8e162bfd",
+    "before-preservation.log": "eb7c0d99f092f261fd9317bc21a1b30cdb3177284c2782484305b4b72a499ff6",
+    "before-preserve-image.log": "eb7c0d99f092f261fd9317bc21a1b30cdb3177284c2782484305b4b72a499ff6",
+    "before-preserve-log.log": "481245fd250bfbc43c0746a463d8ba29cf9059c7769ccca52f827667970a6d86",
+    "before-promote.log": "481245fd250bfbc43c0746a463d8ba29cf9059c7769ccca52f827667970a6d86",
+    "before-promotion.log": "481245fd250bfbc43c0746a463d8ba29cf9059c7769ccca52f827667970a6d86",
+    "before-results.list": "6d331515dfa89eabaa1e6d36102e06ce4d5ab05678eeb1d4d8532622afa87ee0",
+    "before-upload.log": "eb7c0d99f092f261fd9317bc21a1b30cdb3177284c2782484305b4b72a499ff6",
+    "before.log": "eb7c0d99f092f261fd9317bc21a1b30cdb3177284c2782484305b4b72a499ff6",
+    "final-idle.log": "b348dbfea0a0de6e8f17ee423547fa58ec64ae092d7e0af9aa71e5997a055ada",
+    "final-results.list": "af32afdd90791f6c33925f6b9c9fe64bcf8a67384f89880e868f2354ab83cf20",
+    "mounted-eboot.bin": "45c558cf00fc02f31843a0989403c8b2ac0e76089800737b13ae85266bc392cc",
+    "pre-promote-homebrew.list": "a681d2f5c90f8f36a2365e6ff9ad66d2bd64953dd3aea6e2bff27c6f81289cd5",
+    "preserved-wave-full.ffpkg": "19130975f2ba38688886bfed9fbccbc7fda7440799b3151261456913ea95decf",
+    "preserved-wave-full.log": "abd6de171d09041be8279d30bb5ee0a38d278e891951e534eeefce9bc7526b7b",
+    "recheck-homebrew.list": "4d2b3460b70d9968164f45b3fd1bab3f4905a5a73cd50bff8fc05316d9fc1191",
+    "recheck-results.list": "6d331515dfa89eabaa1e6d36102e06ce4d5ab05678eeb1d4d8532622afa87ee0",
+    "registration-001.log": "481245fd250bfbc43c0746a463d8ba29cf9059c7769ccca52f827667970a6d86",
+    "registration-002.log": "cd86f4d624a7357021fca4a9afba619522b2851668502b305474a002797fd122",
+    "registration-003.log": "cd86f4d624a7357021fca4a9afba619522b2851668502b305474a002797fd122",
+    "registration-004.log": "cd86f4d624a7357021fca4a9afba619522b2851668502b305474a002797fd122",
+    "registration-005.log": "b348dbfea0a0de6e8f17ee423547fa58ec64ae092d7e0af9aa71e5997a055ada",
+    "release-001-homebrew.list": "a681d2f5c90f8f36a2365e6ff9ad66d2bd64953dd3aea6e2bff27c6f81289cd5",
+    "release-001.log": "481245fd250bfbc43c0746a463d8ba29cf9059c7769ccca52f827667970a6d86",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "deployment-verified",
+  "target": "console .40 firmware 12.70",
+  "receipt": {
+    "path": "results/wave-partial-deployment-v1/deployment-20261013T052017.039646Z/deployment.json",
+    "sha256": "3779de57bbdf9076d69f784f662cf5bd84656700458374b0a1ed879a38311360"
+  },
+  "independent_review": {
+    "path": "results/wave-partial-deployment-v1/deployment-20261013T052017.039646Z-independent-review.json",
+    "sha256": "0e91741f3ba5665686099428af79c8391e2319fdaab8dcf1dc915d2d5f122381"
+  }
+}
