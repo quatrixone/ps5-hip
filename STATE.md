@@ -4,6 +4,13 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Repaired native CPU package independently reviewed:** frozen `6ed79f5`
+  rebuilds all 34 native units and passes strict linking, 174-import/startup audits,
+  FSELF conversion and independent six-file package extraction. The missing-tool
+  packaging interruption and verified resume are recorded explicitly in
+  `evidence/offline-clr-cpu-lifetime-package.json`. Fresh console-control binding
+  and console validation remain pending; the old deployed image stays disabled.
+
 - **Reviewed ROCclr PS5 adapter imported:** `9289710` imports all 21 files from
   frozen `169a118` exactly, including the device/AOT bridge, portable lifetime
   repairs, sanitizer models and saved-evidence checker. Independent review clears

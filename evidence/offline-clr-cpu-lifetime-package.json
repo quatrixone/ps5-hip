@@ -1,0 +1,32 @@
+{
+  "classification": "independently-reviewed-offline-clr-cpu-lifetime-package",
+  "source_commit": "6ed79f5e79351831e20109b0ef47e93f4d2d156a",
+  "stage": ".local/g4-clr-cpu-lifetime/dist/PPSA99014/cpu-clr-ecb6c8169e82",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "bytes": 5144576,
+    "sha256": "8b2a8c8b1ce2e2d3713f88283b8402482aeebaf2210c555ed86cb1f16891fb91"
+  },
+  "package_review": {
+    "path": "results/clr-cpu-lifetime-package-independent-review-v2/review.json",
+    "sha256": "b7d853c81e16bed7ff023d686b706ed922de2eef06c895c04bb76976ae897911"
+  },
+  "native_review": {
+    "path": "results/clr-cpu-lifetime-native-complete-review-v2/review.json",
+    "sha256": "76e32d8a972920924289697ffcf67d59a0530c575da8db675c61ea6189aae982"
+  },
+  "verified": [
+    "34 fresh native units, strict linking and final dependency hashes.",
+    "174 actual imports, initialization/finalization order, six guarded absent hooks and exact FSELF round trip.",
+    "Independent filesystem check and exact six-file extraction.",
+    "All 41 packaging-recovery bindings verified independently."
+  ],
+  "packaging_recovery": "Outer helper stopped after staging because the isolated UFS tool was absent. The pinned tool was provisioned; unchanged production packaging and explicit postchecks succeeded. Outer-helper success is not claimed.",
+  "native_executed": false,
+  "gpu_execution": false,
+  "limits": [
+    "Fresh console controls must bind this package and the actual deployment receipt before execution.",
+    "The previously deployed CPU image remains disabled; this package has not been deployed.",
+    "CPU startup validation does not establish GPU execution through ROCclr or public HIP initialization."
+  ]
+}
