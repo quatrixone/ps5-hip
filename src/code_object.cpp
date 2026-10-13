@@ -361,7 +361,8 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
     if (lds) {
-        if (k.group_bytes > 65536 || k.properties != 0x409 || k.rsrc2 != 0x8c || !k.hidden_arguments.empty())
+        if (k.group_bytes > 65536 || k.properties != 0x409 || k.rsrc2 != (geometry ? 0x98cu : 0x8cu) ||
+            (geometry ? (k.group_bytes != 512 || k.hidden_arguments.empty()) : !k.hidden_arguments.empty()))
             return "unsupported LDS entry contract";
     } else if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
     if (k.preload || k.rsrc3) return "preload/resource3 requires additional launch support";
@@ -370,7 +371,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     const uint32_t user_sgprs = (k.rsrc2 >> 1) & 31;
     if (user_sgprs != (flat_call ? 8u : ((k.properties & 1) ? 6u : 2u))) return "user-SGPR count mismatch";
     if (geometry) {
-        if (k.rsrc2 != 0x138c || k.properties != 0x409 || k.hidden_arguments.empty() || k.sgpr_spills || k.vgpr_spills)
+        if (k.rsrc2 != (lds ? 0x98cu : 0x138cu) || k.properties != 0x409 || k.hidden_arguments.empty() || k.sgpr_spills || k.vgpr_spills)
             return "unsupported measured XYZ entry contract";
     } else if ((k.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
         return "unsupported system-SGPR/work-item contract";
@@ -419,5 +420,6 @@ std::string lds_launch_rejection(const Kernel &k) { return launch_rejection(k, f
 std::string flat_call_launch_rejection(const Kernel &k) { return launch_rejection(k, true, false, true); }
 
 std::string geometry_launch_rejection(const Kernel &k) { return launch_rejection(k, false, false, false, true); }
+std::string geometry_lds_launch_rejection(const Kernel &k) { return launch_rejection(k, false, true, false, true); }
 
 } // namespace ps5hip

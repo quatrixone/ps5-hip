@@ -45,6 +45,28 @@ GENERIC_PROFILE = {
 }
 
 
+MATMUL_PROFILE = {'target': 'gfx1013',
+ 'kernel_names': ['tiled_matmul'],
+ 'client_entry': '_Z25ps5hip_matmul_client_mainiPPc',
+ 'combined_object_sha256': '9848fed87e57caedc3b0e8cc2dea66b32f1b31f69f99437d5393b9bc2c2437f3',
+ 'bundle_sha256': '0995fde75b6909239847ac68ffb1290cfc5d208ba64c267016e9ecfc3c5ab0db',
+ 'code_sha256': '7b862ae012fcde99802191b5588e35057b3f8c92a5f7f4808d859611062613f6',
+ 'code_bytes': 4528,
+ 'compiler_receipt_sha256': 'c63dfd9188edadb67ec031309f14cde6a40ca1a10cc91d3b9d4a5b1c774f1333',
+ 'dispatches': 8,
+ 'cases': 4,
+ 'rounds': 2,
+ 'exact_values': 982,
+ 'shapes_mnk': [[8, 8, 8], [13, 21, 19], [1, 1, 17], [17, 9, 1]],
+ 'threads': [8, 8, 1],
+ 'static_lds_bytes': 512,
+ 'allocated_lds_bytes': 1024,
+ 'kernarg_bytes': 296,
+ 'rsrc2': 2444,
+ 'encoded_rsrc2': 67980,
+ 'guard_words': 16}
+
+
 def profile_for(kernel):
     if kernel == "hip_vector":
         return PROFILE
@@ -52,12 +74,14 @@ def profile_for(kernel):
         return ROUTES_PROFILE
     if kernel == "hip_generic":
         return GENERIC_PROFILE
+    if kernel == "hip_matmul":
+        return MATMUL_PROFILE
     raise ValueError("unsupported genuine HIP title profile")
 
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul") else set())
 
 
 def validate_fself(container, elf):
@@ -134,6 +158,7 @@ def validate_profile(receipt, source_root):
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
+                 ["src/hip_launch_profile.cpp", "tests/hip_tiled_matmul_blockdim.hip", "tools/probe_hip_matmul.py", "docs/HIP_MATMUL_TITLE.md"] if kernel == "hip_matmul" else
                  ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
@@ -201,6 +226,32 @@ def validate_generic_compiler(raw_receipt, combined, source_root):
     return report
 
 
+def validate_matmul_compiler(raw_receipt, combined, source_root):
+    selected=MATMUL_PROFILE
+    if hashlib.sha256(raw_receipt).hexdigest()!=selected["compiler_receipt_sha256"] or hashlib.sha256(combined).hexdigest()!=selected["combined_object_sha256"]:
+        raise ValueError("matmul title compiler/combined binding mismatch")
+    report=json.loads(raw_receipt)
+    if report.get("title_entry") is not True or report.get("compiler_only") is not True or report.get("hardware_validated") is not False or report.get("models")!=[]:
+        raise ValueError("matmul title compiler mode mismatch")
+    for name,digest in report["sources"].items():
+        if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:raise ValueError("matmul title source changed: "+name)
+    cases=report["cases"]
+    if [(c["host"],c["optimization"]) for c in cases]!=[("linux","O1"),("linux","O2"),("ps5","O1"),("ps5","O2"),("linux-model","O2")]:
+        raise ValueError("matmul compiler inventory mismatch")
+    from probe_hip_matmul import check_profile
+    from probe_hip_routes import section
+    for case in cases:
+        check_profile(case)
+        if case["lifecycle"]!={"modules":1,"functions":1,"atexit":1,"unregister":1,"ordinary_launch_stub":True}:raise ValueError("matmul genuine lifecycle inventory")
+    artifacts=report["artifacts"]
+    if (artifacts.get("ps5-O2/matmul.o")!=selected["combined_object_sha256"] or
+            artifacts.get("ps5-O2/matmul.bundle")!=selected["bundle_sha256"] or
+            artifacts.get("ps5-O2/matmul.hsaco")!=selected["code_sha256"] or
+            hashlib.sha256(section(combined,b".hip_fatbin")).hexdigest()!=selected["bundle_sha256"]):
+        raise ValueError("matmul title embedded device binding")
+    return report
+
+
 def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_profile(receipt, source_root)
     kernel = receipt["kernel"]
@@ -219,6 +270,9 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     elif kernel == "hip_generic":
         validate_generic_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
+    elif kernel == "hip_matmul":
+        validate_matmul_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                 (provenance / "routes-combined.o").read_bytes(), source_root)
     # Reinspect actual linked bytes rather than accepting stale audit booleans.
     from probe_host_registration import audit_image, load_regions
     from build_native_vector_title import patch_startup, patch_linker, audit_startup

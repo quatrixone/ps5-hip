@@ -58,6 +58,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     case NativeLaunchRoute::Lds: rejection = lds_launch_rejection(k); break;
     case NativeLaunchRoute::BufferScratch: rejection = buffer_scratch_launch_rejection(k); break;
     case NativeLaunchRoute::Geometry: rejection = geometry_launch_rejection(k); break;
+    case NativeLaunchRoute::GeometryLds: rejection = geometry_lds_launch_rejection(k); break;
     default: throw ObjectError("unknown native launch route");
     }
     if (!rejection.empty()) throw ObjectError(rejection);
@@ -66,7 +67,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     require(values.size() == k.arguments.size(), "native argument count mismatch");
     // Encode through the established pure routes once actual backing is known.
     auto plan = [&](GpuRange code, GpuRange args, GpuRange scratch) {
-        if (request.route != NativeLaunchRoute::Geometry)
+        if (request.route != NativeLaunchRoute::Geometry && request.route != NativeLaunchRoute::GeometryLds)
             require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{64,1,1} &&
                 request.shape.groups[1] == 1 && request.shape.groups[2] == 1, "unsupported native 1D shape");
         const auto groups = request.shape.groups[0];
@@ -87,6 +88,10 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
         case NativeLaunchRoute::Geometry: {
             auto p = prepare_geometry_launch(object, k.name, code, args, request.shape, values);
             return std::make_pair(encode_geometry_dispatch(p), std::move(p.state.kernargs));
+        }
+        case NativeLaunchRoute::GeometryLds: {
+            auto p = prepare_geometry_lds_launch(object, k.name, code, args, request.shape, values);
+            return std::make_pair(encode_geometry_lds_dispatch(p), std::move(p.geometry.state.kernargs));
         }
         }
         throw ObjectError("unknown native launch route");
@@ -113,8 +118,10 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     backing.reserve(live.size());
     for (auto range : live) backing.push_back(data.resolve(reinterpret_cast<void *>(range.address), range.bytes).memory->range());
     // Validate dimensions/capacity without invented GPU allocations.
-    if (request.route == NativeLaunchRoute::Geometry) {
+    if (request.route == NativeLaunchRoute::Geometry || request.route == NativeLaunchRoute::GeometryLds) {
         const auto &s = request.shape;
+        require(request.route != NativeLaunchRoute::GeometryLds || s.dimensions == 2,
+                "combined native geometry/LDS requires 2D");
         require((s.dimensions == 2 && s.threads == std::array<uint32_t,3>{8,8,1} && s.groups[2] == 1) ||
                 (s.dimensions == 3 && s.threads == std::array<uint32_t,3>{8,4,2}), "unsupported native geometry shape");
         uint64_t groups = 1;

@@ -26,6 +26,7 @@ struct NativeLaunchRequest {
 // Values already own their scalar bits; each pointer extent must equal the live
 // registry remainder. The caller still proves kernel-specific indexing bounds.
 // No private-call/flat entry or combined scratch+LDS/geometry admission.
+// GeometryLds admits only the measured static512, hidden-geometry XY profile.
 PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &, const Kernel &,
     const std::vector<LaunchArgument> &, NativeDataRegistry &, const NativeLaunchRequest &);
 
