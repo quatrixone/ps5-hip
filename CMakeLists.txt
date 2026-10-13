@@ -461,3 +461,18 @@ if(BUILD_TESTING)
     add_test(NAME hip_reduction_compiler COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/reduction_compiler_test.py --compiler "${PS5HIP_HIP_REDUCTION_COMPILER}")
   endif()
 endif()
+
+if(BUILD_TESTING AND Python3_Interpreter_FOUND)
+  set(PS5HIP_REDUCTION_TITLE_MODEL "" CACHE PATH "Completed reduction title lifecycle proof")
+  set(PS5HIP_REDUCTION_REFERENCE_ROOT "" CACHE PATH "Prepared dependency root for reduction profile checks")
+  if(PS5HIP_REDUCTION_TITLE_MODEL)
+    add_test(NAME hip_reduction_title_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/reduction_title_saved_test.py --check "${PS5HIP_REDUCTION_TITLE_MODEL}")
+    add_test(NAME hip_reduction_title_inventory COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/reduction_title_inventory_test.py --proof "${PS5HIP_REDUCTION_TITLE_MODEL}")
+  endif()
+  if(PS5HIP_REDUCTION_REFERENCE_ROOT)
+    add_test(NAME hip_reduction_title_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/reduction_native_title_test.py --reference-root "${PS5HIP_REDUCTION_REFERENCE_ROOT}")
+  endif()
+endif()

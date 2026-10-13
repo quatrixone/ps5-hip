@@ -102,7 +102,10 @@ MATMUL_PROFILE = {'target': 'gfx1013',
  'guard_words': 16}
 
 
+REDUCTION_PROFILE = {'target': 'gfx1013', 'kernel_names': ['_Z12block_reducePiPmS_m'], 'client_entry': 'ps5hip_reduction_companion_main', 'combined_object_sha256': '4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6', 'bundle_sha256': 'e456dfe0a15898ba15dc0531bc97e5454bfc82359c46dbb090e88bb031bd1409', 'code_sha256': '807b46dfaef2fbcb16be270fb76fe9b596fd3da96b0cf390e4da67ccebc7229a', 'code_bytes': 4488, 'compiler_receipt_sha256': 'ac7d27ebcbcb61ecd477e65d0be57aacd307d159ea8ded4be4491d66cffed7ed', 'dispatches': 3, 'exact_values': 48, 'guard_comparisons': 72, 'threads': [1024, 1, 1], 'groups': [16, 1, 1], 'dynamic_lds_bytes': 4096, 'kernarg_bytes': 288}
+
 def profile_for(kernel):
+    if kernel == "hip_reduction":return REDUCTION_PROFILE
     if kernel in ("hip_workers_main", "hip_workers_init"):
         return WORKERS_INIT_PROFILE if kernel == "hip_workers_init" else WORKERS_PROFILE
     if kernel == "hip_vector":
@@ -123,7 +126,7 @@ def profile_for(kernel):
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
 
 
 def validate_fself(container, elf):
@@ -198,7 +201,8 @@ def validate_profile(receipt, source_root):
     required = ["tools/build_native_vector_title.py", "tools/native_vector_title.py",
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
-    required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+    required += (["src/hip_launch_profile.cpp", "tests/reduction_companion.hip", "tools/probe_reduction_companion_compiler.py", "tests/reduction_companion_model.cpp", "tools/probe_reduction_companion_runtime.py", "tests/reduction_title_model.cpp", "tests/reduction_title_test.py", "tests/reduction_native_title_test.py", "tests/reduction_title_saved_test.py", "CMakeLists.txt", "tools/check_canary_log.py", "tools/stage_native_title.py", "tools/verify_native_case.py", "docs/HIP_REDUCTION_TITLE.md"] if kernel == "hip_reduction" else
+                 ["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
                  ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel in ("hip_workers_main", "hip_workers_init") else
                  ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tests/hip_memory_fill_client.h", "tools/probe_hip_generic.py", "docs/HIP_MEMORY_FILL_TITLE.md"] if kernel == "hip_memory_fill" else
@@ -216,7 +220,7 @@ def validate_profile(receipt, source_root):
     audits = receipt.get("vector_audits" if kernel == "hip_vector" else "routes_audits", {})
     if (set(audits) != ({"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} | ({"workers_agc"} if kernel in ("hip_workers_main", "hip_workers_init") else set())) or
             any(audits[k].get("bundle_sha256") != selected["bundle_sha256"] for k in ("raw_pie", "converted_eboot")) or
-            audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "main"] or
+            audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "reduction_title" if kernel == "hip_reduction" else "main"] or
             audits["startup"].get("compiler_atexit_unregister") is not True or
             audits["fself_roundtrip"].get("matches_except_unmapped_sie_note") is not True):
         raise ValueError("genuine HIP vector title embedded bundle/lifecycle audit missing")
@@ -225,6 +229,31 @@ def validate_profile(receipt, source_root):
         for suffix, key in ((".o", "combined_object_sha256"), (".hsaco", "code_sha256")):
             if authority["raw_file_hashes"]["ps5-vector-add-gfx1013-device-wchar4" + suffix]["sha256"] != selected[key]:
                 raise ValueError("genuine HIP vector fixture authority changed")
+
+
+def validate_reduction_compiler(raw_receipt, combined, source_root):
+    from probe_hip_routes import section
+    selected=REDUCTION_PROFILE
+    if hashlib.sha256(raw_receipt).hexdigest()!=selected['compiler_receipt_sha256'] or hashlib.sha256(combined).hexdigest()!=selected['combined_object_sha256']:
+        raise ValueError('reduction compiler authority changed')
+    report=json.loads(raw_receipt)
+    if report.get('classification')!='bound-declaration-only-reduction-companion-compiler' or report.get('native_linked') is not False or report.get('hardware_executed') is not False:
+        raise ValueError('reduction compiler scope changed')
+    from pathlib import Path
+    normalized={}
+    for name,digest in report['sources'].items():
+        path=Path(name).resolve()
+        if not path.is_relative_to(source_root.resolve()) or hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('reduction source changed')
+        normalized[str(path.relative_to(source_root.resolve()))]=digest
+    if not normalized or not report['inputs'] or set(report['tools'])!={'clang++','ld.lld','llvm-readobj','llvm-objdump','llvm-nm','llvm-config'}:raise ValueError('reduction dependency inventory')
+    for name,digest in report['inputs'].items():
+        if hashlib.sha256(Path(name).read_bytes()).hexdigest()!=digest:raise ValueError('reduction input changed')
+    for tool in report['tools'].values():
+        if hashlib.sha256(Path(tool['path']).read_bytes()).hexdigest()!=tool['sha256']:raise ValueError('reduction tool changed')
+    if hashlib.sha256(section(combined,b'.hip_fatbin')).hexdigest()!=selected['bundle_sha256']:raise ValueError('reduction bundle changed')
+    # Return a relative view for the existing builder's source confinement check.
+    report['sources']=normalized
+    return report
 
 
 def validate_compiler_dependencies(report, source_root, expected_sources=None):
@@ -439,6 +468,8 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
         if audit_workers_agc((provenance / "workers-agc-disassembly.stdout").read_text(), provenance / "llvm-pie.elf") != audits["workers_agc"]:
             raise ValueError("workers AGC call redirection changed")
+    elif kernel == "hip_reduction":
+        validate_reduction_compiler((provenance / "compiler-receipt.json").read_bytes(), (provenance / "routes-combined.o").read_bytes(), source_root)
     elif kernel == "hip_routes":
         validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                  (provenance / "routes-combined.o").read_bytes(), source_root)
