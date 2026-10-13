@@ -1,0 +1,27 @@
+{
+  "classification": "failed-native-clr-cpu-startup",
+  "source_commit": "6ed79f5e79351831e20109b0ef47e93f4d2d156a",
+  "image_sha256": "8b2a8c8b1ce2e2d3713f88283b8402482aeebaf2210c555ed86cb1f16891fb91",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "pid": 381,
+  "application_id": "0x00000018",
+  "execution_receipt": {
+    "path": "results/clr-cpu-lifetime-controls-v2/execution/observation-20261013T222946.929398Z/receipt.json",
+    "sha256": "50fea33d1526a6dbb878ded814d6adaee96e3ad0cd5a4002da7db8da52e96fe1"
+  },
+  "independent_review": {
+    "path": "results/clr-cpu-lifetime-controls-v2/execution/observation-20261013T222946.929398Z-independent-review.json",
+    "sha256": "e1088d7a650e7bc9472161d0d7c0fa902914729c18c479f497f0ef7a391deb20"
+  },
+  "first_boundary": "Native ROCclr constructor: Os::init() returned false and amd::init() called fatal/assert before title main.",
+  "first_failing_os_call": "unknown",
+  "workload_started": false,
+  "cycle_accepted": false,
+  "post_run_log_existence": "unknown",
+  "post_run_mounts_and_idle": "unverified due to FTP history timeout",
+  "postflight_services": "reachable",
+  "owned_locks_released": true,
+  "replay_permitted": false,
+  "next_step": "Build a distinct pre-main Os::init diagnostic preserving the failed image and case."
+}

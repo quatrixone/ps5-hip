@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Repaired CPU title failed native startup on .40:** frozen `6ed79f5` was
+  registered and launched once; PID 381 aborted in ROCclr's `Os::init()`
+  constructor before title `main` or the queue workload. Independent audit proves
+  the fatal path but not which OS prerequisite failed. The FTP history transfer
+  timed out, so post-run mounts and the result log remain unknown. Services stayed
+  reachable and owned locks were released. This consumed case is not accepted or
+  replayable. See `evidence/native-clr-cpu-startup-failure.json`; the next candidate
+  must diagnose the first failing `Os::init()` call without bypassing it.
+
 - **Repaired native CPU package independently reviewed:** frozen `6ed79f5`
   rebuilds all 34 native units and passes strict linking, 174-import/startup audits,
   FSELF conversion and independent six-file package extraction. The missing-tool
