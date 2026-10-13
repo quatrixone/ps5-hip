@@ -1,0 +1,69 @@
+{
+    "schema":  1,
+    "classification":  "deployment-verified",
+    "source_commit":  "1e0428f1d4d6069cc813f8a280a31460b3e37d63",
+    "image_sha256":  "0b081edfb997e8b54320ff01dab9c69010de2df38340497ac79af5c39405da57",
+    "target":  "console .40 firmware 12.70",
+    "title_id":  "PPSA99014",
+    "kernel":  "register_spill",
+    "registered":  true,
+    "launched":  false,
+    "hardware_gate_passed":  false,
+    "receipt":  "results/spill-deployment-v1/deployment-20261013T033149.823917Z/deployment.json",
+    "receipt_sha256":  "8e96e398de4fd397e71753f4fe5ecc3d4ebf68ca6f14664565777904364e28e5",
+    "script_sha256":  "e865e24441f16f7358c395f00046a4cb7fa240d19fb2f220d98485152e3943d2",
+    "manifest_sha256":  "cc2a97ae076f1cde8b934f9dbe115e721de02af0492c89b44e72180ca92ae675",
+    "mounted_files":  {
+                          "eboot.bin":  {
+                                            "bytes":  821266,
+                                            "sha256":  "84fce7fd3e08b5be3359287c9a4bbc8e5fe481beb98cfa8c3ede1c668c66c009"
+                                        },
+                          "canary.hsaco":  {
+                                               "bytes":  14720,
+                                               "sha256":  "355d788004f1bffb00456c2de4cd75162551281b3280cf9171a26e8021caf575"
+                                           }
+                      },
+    "preservation":  {
+                         "package":  "/data/homebrew/PPSA99014.ffpkg.private304.sha256-c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74.preserved",
+                         "package_sha256":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+                         "private304_result":  "/data/ps5-hip/results/ps5-hip-gfx1013-private_calls_buffer.log.private304-PID123-app6018.sha256-c66fd5253bb19734d7398b18f2631147563effab8de59c35b621db1b985c3833",
+                         "private304_result_sha256":  "c66fd5253bb19734d7398b18f2631147563effab8de59c35b621db1b985c3833"
+                     },
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "raw_file_sha256":  {
+                            "after.log":  "5e6ca0946544bd75f2648d183d5210ad536ad8fc2482a23c7d0f23fb0a49a0da",
+                            "before-homebrew.list":  "f3502b3402cbba3ae5740fc7a6b70496bc490f0c41f21567355210b86c526706",
+                            "before-preservation.log":  "00f4af7f8bf708f7834221b54e890a01f3d78445c0a807824233c75f843e2bb0",
+                            "before-preserve-image.log":  "00f4af7f8bf708f7834221b54e890a01f3d78445c0a807824233c75f843e2bb0",
+                            "before-preserve-log.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "before-promote.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "before-promotion.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "before-results.list":  "863bba5b95932936aac19a5cac4c5b7839d5255996d051e4c95c5ab26b03f93d",
+                            "before-upload.log":  "00f4af7f8bf708f7834221b54e890a01f3d78445c0a807824233c75f843e2bb0",
+                            "before.log":  "00f4af7f8bf708f7834221b54e890a01f3d78445c0a807824233c75f843e2bb0",
+                            "final-idle.log":  "5e6ca0946544bd75f2648d183d5210ad536ad8fc2482a23c7d0f23fb0a49a0da",
+                            "final-results.list":  "850a5ecd906323b84f59342323650bcc9e345d5724986ea54c399b954192179b",
+                            "mounted-eboot.bin":  "84fce7fd3e08b5be3359287c9a4bbc8e5fe481beb98cfa8c3ede1c668c66c009",
+                            "pre-promote-homebrew.list":  "0143a809209b7670e04969d3e09798769ea9316696ec20906c9ba78576679835",
+                            "preserved-private304.ffpkg":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+                            "preserved-private304.log":  "c66fd5253bb19734d7398b18f2631147563effab8de59c35b621db1b985c3833",
+                            "recheck-homebrew.list":  "8616b8e5f7ea0f6027067003c16781bc77e08bce080401383062dfda9ff25e60",
+                            "recheck-results.list":  "863bba5b95932936aac19a5cac4c5b7839d5255996d051e4c95c5ab26b03f93d",
+                            "registration-001.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "registration-002.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "registration-003.log":  "47bd6a98a26750e977d9f8156d7b8bf0dcbf0812015a3adf8f3d75808f03b403",
+                            "registration-004.log":  "47bd6a98a26750e977d9f8156d7b8bf0dcbf0812015a3adf8f3d75808f03b403",
+                            "registration-005.log":  "47bd6a98a26750e977d9f8156d7b8bf0dcbf0812015a3adf8f3d75808f03b403",
+                            "registration-006.log":  "5e6ca0946544bd75f2648d183d5210ad536ad8fc2482a23c7d0f23fb0a49a0da",
+                            "release-001-homebrew.list":  "0143a809209b7670e04969d3e09798769ea9316696ec20906c9ba78576679835",
+                            "release-001.log":  "d6cbd68503c0d7df8bbb958a488129f956d14d42c9a0373cf2360460a9b2deb9",
+                            "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                        },
+    "independent_review":  "results/spill-deployment-v1/deployment-20261013T033149.823917Z-independent-review.json",
+    "independent_review_sha256":  "aa365ae401b32141a1d0fda5cd17a86c5b234d9bf533ee8dd5cffd35eb3838df"
+}

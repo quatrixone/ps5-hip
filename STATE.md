@@ -4,12 +4,16 @@ Updated: 2026-10-12, America/New_York.
 
 ## Actual status
 
-- Next spill experiment is documented in `docs/SPILL_EXPERIMENT.md`. Windows
-  revalidation matched 43 frozen source/staged/image identities. New execution
-  controls in `results/spill-execution-v1` are inert with a null deployment binding;
-  all 25 regression methods now pass under WSL. Approval authentication recovered.
-  Deployment controls and independent executable review are in progress; complete
-  them before any console use. The private304 milestone is ready for commit/push.
+- **Compiler-spill fixture passed on .40:** 4,096 exact outputs, modified scratch,
+  unchanged guards, closed allocations, complete finalization and natural PID132 /
+  application `0x8018` stop. The bounded cycle has matching visible mount snapshots,
+  healthy services and released locks. Parent offline audit rehashed all 25 raw
+  files and reproduced acceptance. Independent post-run review was unavailable
+  after a subagent content-filter failure; preflight and deployment were independently
+  reviewed. See `evidence/native-register-spill.json` and
+  `evidence/native-spill-deployment.json`. This covers one O2 two-wave spill shape,
+  not full G3. Next: static LDS, then dynamic/mixed LDS. Preserve installed spill
+  image/log and earlier private304 backups. Private304 milestone pushed as `e431228`.
 - **Private304 computation passed on .40:** all 16,448 exact outputs, modified
   scratch, unchanged guards, closed allocations and full finalization. A separate
   independently audited completion capture recovered the unchanged application log
@@ -637,6 +641,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-12 | G3 exact spill fixture | 1e0428f | .40:4,096 exact outputs,guards intact,full bounded teardown; parent-audited | evidence/native-register-spill.json | next static LDS; G3 open
 
 - 2026-10-12 | G3 exact private-call observation | 56dcbcf | .40:16,448 exact outputs,304 private bytes/lane,guards intact; delayed composed capture audited | evidence/native-private304-computation.json | full G3 open; next forced spills
 

@@ -1,0 +1,110 @@
+{
+    "schema":  1,
+    "classification":  "exact-spill-cycle-pass-parent-reviewed",
+    "accepted":  true,
+    "hardware_gate_passed":  false,
+    "full_g3_complete":  false,
+    "target":  "console .40 firmware 12.70",
+    "source_commit":  "1e0428f1d4d6069cc813f8a280a31460b3e37d63",
+    "image_sha256":  "0b081edfb997e8b54320ff01dab9c69010de2df38340497ac79af5c39405da57",
+    "kernel":  "register_spill",
+    "compiler_profile":  "LLVM18.1.8 O2 gfx1013 wave32",
+    "groups":  1,
+    "threads_per_group":  64,
+    "waves":  2,
+    "private_bytes_per_lane":  212,
+    "compiler_vgpr_spill_pairs":  52,
+    "scratch_bytes":  9175040,
+    "exact_outputs":  4096,
+    "application":  {
+                        "application_result":  "application-pass",
+                        "target":  "gfx1013",
+                        "kernel":  "register_spill",
+                        "log_sha256":  "e4b190d2047a201db08dbdcf26103f665b5449fd1151bd6301c4ad0317f54624",
+                        "bytes":  622,
+                        "hardware_gate_passed":  false,
+                        "unproven":  [
+                                         "log freshness",
+                                         "remote artifact identity",
+                                         "native process status",
+                                         "title teardown",
+                                         "service health"
+                                     ]
+                    },
+    "lifecycle":  {
+                      "pid":  132,
+                      "app_id":  "0x00008018",
+                      "title_id":  "PPSA99014",
+                      "ordered_os_lifecycle_complete":  true,
+                      "shadow_self_stop":  true,
+                      "generic_kill_end_label_count":  1,
+                      "limits":  [
+                                     "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+                                 ]
+                  },
+    "stopped_before_close":  true,
+    "matching_mount_multiset_equal":  true,
+    "health_before":  {
+                          "2121":  "reachable",
+                          "3232":  "reachable",
+                          "9021":  "reachable"
+                      },
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "receipt":  "results/spill-execution-v1/observation-20261013T033512.645405Z/receipt.json",
+    "receipt_sha256":  "3dde0a381130d672479bc39a884e101b2c02e0943ac7cceef299d25d30b1853f",
+    "script_sha256":  "08d86c83d5d9625129642827d45a614a8940ce9cf256f8c4039db2e5219eb9ca",
+    "manifest_sha256":  "3c252e7c893d48e2db0f29557e99b0dd35468e0906fc0f1d9f99f690b4467c31",
+    "deployment_binding":  {
+                               "receipt":  {
+                                               "path":  "results/spill-deployment-v1/deployment-20261013T033149.823917Z/deployment.json",
+                                               "sha256":  "8e96e398de4fd397e71753f4fe5ecc3d4ebf68ca6f14664565777904364e28e5"
+                                           },
+                               "review":  {
+                                              "path":  "results/spill-deployment-v1/deployment-20261013T033149.823917Z-independent-review.json",
+                                              "sha256":  "7c411b8409f8fc88658cfcd0aa826556d19d1172ac871c79fd80692d4cd5bb50"
+                                          }
+                           },
+    "raw_sha256":  {
+                       "after-cycle.log":  "a640897ef90d15bfa77fc707e604f1b9eb6c938e4d366599a3989535aeb77088",
+                       "after-post.log":  "a640897ef90d15bfa77fc707e604f1b9eb6c938e4d366599a3989535aeb77088",
+                       "application.log":  "e4b190d2047a201db08dbdcf26103f665b5449fd1151bd6301c4ad0317f54624",
+                       "before-close.log":  "a640897ef90d15bfa77fc707e604f1b9eb6c938e4d366599a3989535aeb77088",
+                       "before-launch.log":  "9a2a5ca9e4bfddab17a7dc75539980621e1164b61b18838beb81a591a46a17e9",
+                       "before-log-check.log":  "9a2a5ca9e4bfddab17a7dc75539980621e1164b61b18838beb81a591a46a17e9",
+                       "before-post-snapshot.log":  "a640897ef90d15bfa77fc707e604f1b9eb6c938e4d366599a3989535aeb77088",
+                       "before-pre-snapshot.log":  "9a2a5ca9e4bfddab17a7dc75539980621e1164b61b18838beb81a591a46a17e9",
+                       "before.log":  "8675c628a0c8f29ecf1beb0665473c6426da7637527ec38ff030d4c02eaecb01",
+                       "close-response.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                       "installed-before-launch-eboot.bin":  "84fce7fd3e08b5be3359287c9a4bbc8e5fe481beb98cfa8c3ede1c668c66c009",
+                       "installed-before-launch.json":  "53bcb56f2459561442d11b143c250ea0e7666dada68c70af73be42491877e596",
+                       "installed-eboot.bin":  "84fce7fd3e08b5be3359287c9a4bbc8e5fe481beb98cfa8c3ede1c668c66c009",
+                       "installed.json":  "53bcb56f2459561442d11b143c250ea0e7666dada68c70af73be42491877e596",
+                       "klog.log":  "569dd6ddccada2f46a21931d7a61279185d2eeac1d19503e62aebe8ff4f0adfe",
+                       "launch-klog.log":  "8dcac35ed3ec7daecb1a51883dd52e5b6e86cc01a0f5fb1ea6fb6609570dbebb",
+                       "launch-response.log":  "2a0365690f94353ed43032687d7ee26c00f769ba41e90ddf57058f452dd9a5a2",
+                       "launch-shadow-delta.log":  "da70e556effa501aef7b0bef6eff84ea89636463dbfc4e9dc4fc8bccf0d0e2fd",
+                       "lifecycle-delta.log":  "da70e556effa501aef7b0bef6eff84ea89636463dbfc4e9dc4fc8bccf0d0e2fd",
+                       "observed.log":  "a640897ef90d15bfa77fc707e604f1b9eb6c938e4d366599a3989535aeb77088",
+                       "post-snapshot.log":  "72f12ded70b24dec64d6d55a5977ac44f1b4aaf49e44941e8e71655781af4636",
+                       "pre-snapshot.log":  "72f12ded70b24dec64d6d55a5977ac44f1b4aaf49e44941e8e71655781af4636",
+                       "private-log-absence-before-launch.json":  "a52abc7e19ac2f7236811223c5933a0af6fe502c1a4496ef5d5d4bba62932463",
+                       "private-log-absence.json":  "a52abc7e19ac2f7236811223c5933a0af6fe502c1a4496ef5d5d4bba62932463",
+                       "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                   },
+    "limitations":  [
+                        "Only the exact O2 gfx1013 register_spill object and212-byte buffer-scratch profile are tested.",
+                        "This does not qualify private calls, flat scratch, arbitrary shaders, repeated scratch dispatches or full G3.",
+                        "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+                        "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+                    ],
+    "next":  "Static LDS, then dynamic/mixed LDS, followed by remaining G3 qualification.",
+    "independent_postrun_review":  false,
+    "independent_review_status":  "Subagent content filter stopped post-run review before completion; preflight and deployment were independently reviewed.",
+    "parent_audit":  "results/spill-execution-v1/parent-audit.json",
+    "parent_audit_sha256":  "58c865c575f41a7408ec36f3705306addfe572a7b1a3a60e4dd80ca60bb0a7f7"
+}
