@@ -6,14 +6,18 @@ ROOT=Path(__file__).resolve().parents[1]
 UNCERTAIN={'submit','kick','timeout','throw','unknown'}
 CLIENT_FAILURE={'init','preflush','missing','corrupt','input','guard'}
 FILL=False
+COPY=False
+COPY_FAULTS={'copy-noop','copy-stale','copy-source','copy-destination','copy-short','copy-corrupt','copy-source-mutation','missing-consumer'}
 CASES={'normal','partial','late-partial','cleanup',*UNCERTAIN,*CLIENT_FAILURE,'elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','post-finish','shell-fail','late-partial-destructor'}
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(ok,why):
     if not ok:raise RuntimeError(why)
 def verify_receipt(output):
-    global FILL,CASES
+    global FILL,COPY,CASES,UNCERTAIN
     r=json.loads((output/'receipt.json').read_text())
-    FILL=r.get('memory_fill',False)
+    FILL=r.get('memory_fill',False);COPY=r.get('device_copy',False)
+    if COPY:
+        UNCERTAIN=UNCERTAIN|{'postflush'};CASES=(CASES-{'late-partial'})|COPY_FAULTS|{'postflush'}
     if FILL:CASES=(CASES-{'late-partial'})|{'fill-noop','fill-stale','fill-byte','fill-offset'}
     require(r['classification']=='genuine-generic-title-host-lifecycle-pass' and not r['native_executed'] and r['genuine_compiler_ctor_dtor'] and not r['model_is_isa_emulation'],'classification')
     for n,h in r['source_hashes'].items():require(sha(ROOT/n)==h,'source drift '+n)
@@ -24,6 +28,7 @@ def verify_receipt(output):
     result=check(output);require(result==(r['cases'],r['transcript_mutations']),'counts');return result
 
 def check(output):
+    if COPY:return check_copy(output)
     if FILL:return check_fill(output)
     cases=json.loads((output/'cases.json').read_text());require(set(cases)==CASES,'case inventory')
     for name,record in cases.items():
@@ -113,11 +118,54 @@ def check_fill(output):
     for mutation in mutations:require(check_log(mutation.encode(),'gfx1013','hip_memory_fill',shell_exit_probe=True)['application_result']!='application-pass','mutation accepted')
     return len(cases),len(mutations)
 
+def check_copy(output):
+    cases=json.loads((output/'cases.json').read_text());require(set(cases)==CASES,'copy case inventory')
+    sys.path.insert(0,str(ROOT/'tools'));from check_canary_log import check_log
+    normal=None
+    for name,record in cases.items():
+        path=output/record['log'];require(sha(path)==record['sha256'],'log hash');log=path.read_text()
+        captured=(output/('run-'+name+'.stdout')).read_text()+(output/('run-'+name+'.stderr')).read_text()
+        require(not any(x in log+captured for x in ('AddressSanitizer','UndefinedBehaviorSanitizer','runtime error:','LeakSanitizer')),'sanitizer '+name)
+        success=name in ('normal','post-finish','shell-fail')
+        lines=log.splitlines();production='\n'.join(x for x in lines if not x.startswith(('GENERIC_MODEL_FINAL ','HIP_TITLE_MODEL STOP ','HIP_TITLE_MODEL POST_FINISH ')))+'\n'
+        if name=='shell-fail':production=production.replace('PS5HIP FAIL: shell-exit request-return=0xfffffff9','PS5HIP SHELL_EXIT request-return=0')
+        accepted=check_log(production.encode(),'gfx1013','hip_device_copy',shell_exit_probe=True)['application_result']=='application-pass'
+        require(accepted==success,'strict copy transcript '+name)
+        if success:
+            require('HIP_TITLE_MODEL STOP shell_requests=1 live=0 model_only=true' in log,'clean shell '+name)
+        else:
+            require('PS5HIP SHELL_EXIT request=begin' not in log,'failed shell '+name)
+            if name!='final-sync':require('HIP_TITLE FINAL ' not in log,'false final '+name)
+        if name in CLIENT_FAILURE|COPY_FAULTS:
+            require('COPY_CLIENT_FAILURE terminal=false clean=1' in log,'safe rejection '+name)
+        if name in UNCERTAIN|{'cleanup'}:
+            require('COPY_CLIENT_FAILURE terminal=true retained=true' in log,'retention '+name)
+            require(f'COPY_MODEL_RETAINED live={5 if name=="cleanup" else 8} releases={3 if name=="cleanup" else 0} submits=1 unresolved={int(name!="cleanup")}' in log,'exact retained ownership '+name)
+        if name not in ('elevation','config','log-exists'):
+            live=1 if name=='late-live' else 8 if name in UNCERTAIN else 5 if name=='cleanup' else 0
+            require(f'HIP_TITLE_MODEL STOP shell_requests={int(success)} live={live} model_only=true' in log,'ownership '+name)
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):
+            late=int(name=='late-partial-destructor')
+            marker=f'RUNTIME_RETAINED registered=1 removed={late} completed=24 active={1-late} terminal=0 main_finished=1 contexts=0 pending=0 abandoned=0 registration_failed={late} hardware_validated=false'
+            require(log.splitlines().count(marker)==1 and 'VECTOR_FINAL ' not in log,'retained closure '+name)
+        if name=='log-exists':require(log=='previous-result\n','old log overwritten')
+        if name=='normal':normal=production
+    require(normal is not None,'normal missing');mutations=[]
+    for line in normal.splitlines():
+        mutations += [normal.replace(line+'\n','',1),normal.replace(line+'\n',line+'\n'+line+'\n',1)]
+    for old,new in [('topology=combined','topology=distinct'),('round=1','round=0'),('n=257','n=256'),('copies=12','copies=11'),('copied_words=1324','copied_words=1323'),('copied_bytes=5296','copied_bytes=5295'),('exact_values=2648','exact_values=2647'),('readback_words=5926','readback_words=5925'),('guard_words=630','guard_words=629'),('allocations=21','allocations=20'),('frees=21','frees=20'),('source_unchanged=true','source_unchanged=false')]:
+        require(old in normal,'semantic mutation absent');mutations.append(normal.replace(old,new))
+    for mutation in mutations:require(check_log(mutation.encode(),'gfx1013','hip_device_copy',shell_exit_probe=True)['application_result']!='application-pass','mutation accepted')
+    return len(cases),len(mutations)
+
 def main():
-    global FILL,CASES
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--memory-fill',action='store_true');p.add_argument('--check',type=Path);p.add_argument('--reference-root',type=Path);p.add_argument('--probe-dir',type=Path);p.add_argument('--output',type=Path);a=p.parse_args()
+    global FILL,COPY,CASES,UNCERTAIN
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--memory-fill',action='store_true');p.add_argument('--device-copy',action='store_true');p.add_argument('--check',type=Path);p.add_argument('--reference-root',type=Path);p.add_argument('--probe-dir',type=Path);p.add_argument('--output',type=Path);a=p.parse_args()
     if a.check:print('Checked source-bound title cases/mutations:',verify_receipt(a.check));return
-    FILL=a.memory_fill
+    FILL=a.memory_fill;COPY=a.device_copy
+    require(not (FILL and COPY),'exclusive variants')
+    if COPY:
+        UNCERTAIN=UNCERTAIN|{'postflush'};CASES=(CASES-{'late-partial'})|COPY_FAULTS|{'postflush'}
     if FILL:CASES=(CASES-{'late-partial'})|{'fill-noop','fill-stale','fill-byte','fill-offset'}
     require(a.reference_root and a.probe_dir and a.output,'reference-root/probe-dir/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
@@ -132,10 +180,12 @@ def main():
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp',platform/'ps5platform/kernel.h'):external[str(h)]=sha(h)
     common=['clang++-18','-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_GENERIC_TITLE=1','-DPS5HIP_RUNTIME_MODEL=1']
     if FILL:common+=['-DPS5HIP_MEMORY_FILL_TITLE=1']
+    if COPY:common+=['-DPS5HIP_DEVICE_COPY_TITLE=1']
     for d in (ROOT/'include',stage,platform,elevation):common+=['-I',str(d)]
     core=[ROOT/'src'/n for n in ('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
     sources=core+[ROOT/n for n in ('src/hip_runtime.cpp','src/hip_launch_profile.cpp','tools/hip_vector_title.cpp','tools/native_shell_exit_probe.cpp','tools/native_runtime.h','tests/hip_generic.hip','tests/hip_generic_model.cpp','tests/hip_generic_title_model.cpp','tools/check_canary_log.py','tests/hip_generic_title_test.py')]+list((ROOT/'include/ps5hip').glob('*.h'))
     if FILL:sources.append(ROOT/'tests/hip_memory_fill_client.h')
+    if COPY:sources.append(ROOT/'tests/hip_device_copy_client.h')
     before={str(s.relative_to(ROOT)):sha(s) for s in sources};commands=[]
     tools={n:{'path':shutil.which(n),'sha256':sha(Path(shutil.which(n)))} for n in ('clang++-18','ld.lld-18','llvm-nm-18')}
     def run(label,argv):
@@ -156,10 +206,10 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
     cases={}
     for partial in (False,True):
         runtime=out/('runtime-partial.o' if partial else 'runtime.o');run(runtime.stem,[*common,*(['-DPS5HIP_RUNTIME_PARTIAL=1'] if partial else []),'-c',ROOT/'src/hip_runtime.cpp','-o',runtime])
-        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,runtime,probe/'linux-model/routes.o','-Wl,-T,'+str(linker),'-Wl,--wrap=__hipUnregisterFatBinary','-Wl,--wrap=ps5hip_runtime_finish',*(['-Wl,--wrap=hipMemset'] if FILL else []),'-o',binary])
+        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,runtime,probe/'linux-model/routes.o','-Wl,-T,'+str(linker),'-Wl,--wrap=__hipUnregisterFatBinary','-Wl,--wrap=ps5hip_runtime_finish',*(['-Wl,--wrap=hipMemset'] if FILL else ['-Wl,--wrap=hipMemcpy'] if COPY else []),'-o',binary])
         listing=run(binary.name+'-symbols',['llvm-nm-18','-n',binary]);symbols={v[2]:int(v[0],16) for line in listing.splitlines() if len(v:=line.split())==3};begin=symbols['__ps5hip_wrappers_begin'];require(begin%32==0 and symbols['__hip_fatbin_wrapper']==begin and symbols['__ps5hip_wrappers_end']==begin+24,'model wrapper ABI span')
         for name in (['partial'] if partial else sorted(CASES-{'partial'})):
-            folder=out/'cases'/name;folder.mkdir(parents=True);config=folder/'results-dir.txt';config.write_text('relative-bad' if name=='config' else str(folder));log=folder/('ps5-hip-gfx1013-hip_memory_fill.log' if FILL else 'ps5-hip-gfx1013-hip_generic.log')
+            folder=out/'cases'/name;folder.mkdir(parents=True);config=folder/'results-dir.txt';config.write_text('relative-bad' if name=='config' else str(folder));log=folder/('ps5-hip-gfx1013-hip_device_copy.log' if COPY else 'ps5-hip-gfx1013-hip_memory_fill.log' if FILL else 'ps5-hip-gfx1013-hip_generic.log')
             if name=='log-exists':log.write_text('previous-result\n')
             run('run-'+name,[binary,name,config])
             if not log.exists():log.write_bytes((out/('run-'+name+'.stdout')).read_bytes()+(out/('run-'+name+'.stderr')).read_bytes())
@@ -168,6 +218,6 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
     require(before=={n:sha(ROOT/n) for n in before},'source changed during title model')
     require(all(sha(Path(n))==v for n,v in external.items()),'external input changed')
     require(all(sha(Path(t['path']))==t['sha256'] for t in tools.values()),'tool changed')
-    result={'schema':1,'memory_fill':FILL,'classification':'genuine-generic-title-host-lifecycle-pass','source_hashes':before,'input_hashes':external,'tools':tools,'cases':count,'transcript_mutations':mutations,'genuine_compiler_ctor_dtor':True,'model_is_isa_emulation':False,'native_executed':False,'inputs':{'combined_object':str(probe/'linux-model/routes.o'),'compiler_receipt':str(probe/'receipt.json'),'combined_sha256':sha(probe/'linux-model/routes.o'),'frozen_receipt_sha256':sha(probe/'receipt.json')},'artifacts':{str(q.relative_to(out)):sha(q) for q in out.rglob('*') if q.is_file()}}
+    result={'schema':1,'memory_fill':FILL,'device_copy':COPY,'classification':'genuine-generic-title-host-lifecycle-pass','source_hashes':before,'input_hashes':external,'tools':tools,'cases':count,'transcript_mutations':mutations,'genuine_compiler_ctor_dtor':True,'model_is_isa_emulation':False,'native_executed':False,'inputs':{'combined_object':str(probe/'linux-model/routes.o'),'compiler_receipt':str(probe/'receipt.json'),'combined_sha256':sha(probe/'linux-model/routes.o'),'frozen_receipt_sha256':sha(probe/'receipt.json')},'artifacts':{str(q.relative_to(out)):sha(q) for q in out.rglob('*') if q.is_file()}}
     (out/'receipt.json').write_text(json.dumps(result,indent=2)+'\n');print('Passed',count,'actual generic title cases and',mutations,'production transcript mutations')
 if __name__=='__main__':main()

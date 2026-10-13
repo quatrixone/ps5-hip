@@ -33,12 +33,12 @@ def stage(source_root, build, output, identity, source_commit, results_directory
     receipt_bytes = (build / "receipt.json").read_bytes()
     receipt = json.loads(receipt_bytes)
     target, kernel = receipt["target"], receipt["kernel"]
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         raise ValueError("unsupported candidate profile")
     if kernel == "vector_add_twice" and (type(receipt.get("dispatches")) is not int or receipt["dispatches"] != 2):
         raise ValueError("vector_add_twice requires exactly two dispatches")
     expected = {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}
-    if kernel not in ("runtime", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel not in ("runtime", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         expected.add("canary.hsaco")
     if set(receipt["artifacts"]) != expected or receipt.get("hardware_validated") is not False:
         raise ValueError("invalid offline candidate receipt")
@@ -59,7 +59,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         files[name] = data
     if kernel == "fp32_math":
         math_fixture.validate_build(receipt, files["canary.hsaco"], source_root)
-    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         if receipt.get("source_commit") != source_commit or receipt.get("source_tree_clean") is not True:
             raise ValueError("genuine HIP vector requires the frozen build source commit")
         vector_title.validate_build(receipt, source_root, build / "provenance", files["eboot.bin"])
@@ -96,7 +96,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         manifest["dispatches"] = 2
     if kernel == "fp32_math":
         manifest["math_profile"] = receipt["math_profile"]
-    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         manifest[kernel + "_profile"] = receipt[kernel + "_profile"]
     # Validate everything before creating output. A failure never replaces a prior candidate.
     output.mkdir(parents=True, exist_ok=False)
@@ -105,7 +105,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
     (output / "build-receipt.json").write_bytes(receipt_bytes)
-    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         (output / (kernel.replace("_", "-") + "-provenance")).mkdir()
         for name, data in sorted(provenance_files.items()):
             (output / (kernel.replace("_", "-") + "-provenance") / name).write_bytes(data)
@@ -116,7 +116,7 @@ def stage(source_root, build, output, identity, source_commit, results_directory
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"], required=True)
     parser.add_argument("--results-dir", required=True, help="precreated directory accessible after elevation")
     args = parser.parse_args()
     identity = json.loads((ROOT / "title.json").read_text())

@@ -400,6 +400,16 @@ if(BUILD_TESTING)
 endif()
 
 if(BUILD_TESTING)
+  set(PS5HIP_HIP_DEVICE_COPY_MODEL "" CACHE PATH "Completed device-copy title lifecycle proof")
+  set(PS5HIP_HIP_DEVICE_COPY_COMPILER "" CACHE PATH "Genuine device-copy compiler output")
+  if(PS5HIP_HIP_DEVICE_COPY_MODEL)
+    add_test(NAME hip_device_copy_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_test.py --check "${PS5HIP_HIP_DEVICE_COPY_MODEL}")
+  endif()
+  if(PS5HIP_HIP_DEVICE_COPY_COMPILER)
+    add_test(NAME hip_device_copy_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py --device-copy --compiler "${PS5HIP_HIP_DEVICE_COPY_COMPILER}")
+  endif()
   set(PS5HIP_HIP_MEMORY_FILL_MODEL "" CACHE PATH "Completed memory-fill title lifecycle proof")
   set(PS5HIP_HIP_MEMORY_FILL_COMPILER "" CACHE PATH "Genuine memory-fill compiler output")
   if(PS5HIP_HIP_MEMORY_FILL_MODEL)

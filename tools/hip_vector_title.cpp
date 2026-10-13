@@ -1,5 +1,5 @@
 // One fixed HIP title; startup/exit follow the existing finite shell lifecycle.
-#ifdef PS5HIP_MEMORY_FILL_TITLE
+#if defined(PS5HIP_MEMORY_FILL_TITLE) || defined(PS5HIP_DEVICE_COPY_TITLE)
 #define PS5HIP_GENERIC_TITLE 1
 #endif
 #include "native_runtime.h"
@@ -21,6 +21,8 @@
 #define ps5hip_vector_client_main hipify_client_main
 #elif defined(PS5HIP_MATMUL_TITLE)
 #define ps5hip_vector_client_main ps5hip_matmul_client_main
+#elif defined(PS5HIP_DEVICE_COPY_TITLE)
+#define ps5hip_vector_client_main ps5hip_device_copy_client_main
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
 #define ps5hip_vector_client_main ps5hip_memory_fill_client_main
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -68,6 +70,8 @@ void finalized() {
 #if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
 #if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
     constexpr unsigned expected_completed=ps5hip_workers::expected_dispatches;
+#elif defined(PS5HIP_DEVICE_COPY_TITLE)
+    constexpr unsigned expected_completed=24;
 #elif defined(PS5HIP_HIPIFY_TITLE) || defined(PS5HIP_MEMORY_FILL_TITLE)
     constexpr unsigned expected_completed=6;
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -120,6 +124,8 @@ int main(int argc,char **argv) {
         const auto log=directory+"/ps5-hip-gfx1013-hipify.log";
 #elif defined(PS5HIP_MATMUL_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hip_matmul.log";
+#elif defined(PS5HIP_DEVICE_COPY_TITLE)
+        const auto log=directory+"/ps5-hip-gfx1013-hip_device_copy.log";
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hip_memory_fill.log";
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -136,6 +142,8 @@ int main(int argc,char **argv) {
         std::puts("PS5HIP START target=gfx1013 kernel=hipify");
 #elif defined(PS5HIP_MATMUL_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hip_matmul");
+#elif defined(PS5HIP_DEVICE_COPY_TITLE)
+        std::puts("PS5HIP START target=gfx1013 kernel=hip_device_copy");
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hip_memory_fill");
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -189,6 +197,10 @@ int main(int argc,char **argv) {
         const auto completed=ps5hip_runtime_observation();
         if(completed.completed!=8)quarantine("completion-observation");
         std::printf("HIP_TITLE COMPUTE complete=true dispatches=%u cases=4 rounds=2 exact_values=982 finalization=pending\n",completed.completed);
+#elif defined(PS5HIP_DEVICE_COPY_TITLE)
+        const auto completed=ps5hip_runtime_observation();
+        if(completed.completed!=24)quarantine("completion-observation");
+        std::puts("HIP_TITLE COMPUTE complete=true dispatches=24 copies=12 exact_values=2648 readback_words=5926 finalization=pending");
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
         const auto completed=ps5hip_runtime_observation();
         if(completed.completed!=6)quarantine("completion-observation");

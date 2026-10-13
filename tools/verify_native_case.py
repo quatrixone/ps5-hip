@@ -44,7 +44,7 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
     build = read_json(stage / "build-receipt.json")
-    if any(k in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") for k in (manifest["kernel"], build.get("kernel"))):
+    if any(k in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") for k in (manifest["kernel"], build.get("kernel"))):
         kernel = manifest["kernel"]
         if (manifest["kernel"] != build.get("kernel") or manifest["target"] != build.get("target") or
                 manifest.get(kernel + "_profile") != build.get(kernel + "_profile") or
@@ -91,7 +91,7 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
                          "native execution", "clean teardown", "service health"]}
     if manifest["kernel"] == "vector_add_twice":
         result["dispatches"] = 2
-    if manifest["kernel"] in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if manifest["kernel"] in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         key = manifest["kernel"] + "_profile"
         result[key] = manifest[key]
     return result

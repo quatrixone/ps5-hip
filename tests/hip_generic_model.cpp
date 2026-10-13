@@ -30,7 +30,11 @@ uint64_t read(const uint8_t *p,unsigned n){uint64_t v=0;for(unsigned i=0;i<n;++i
 class Backend final:public ps5hip::SubmissionBackend {
     uint64_t clock=0;
 public:
-    void flush(void*,size_t) override {if(mode=="preflush" && !submits)throw std::runtime_error("preflush");}
+    void flush(void*,size_t) override {if(mode=="preflush" && !submits)throw std::runtime_error("preflush");
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+        if(mode=="postflush" && submits)throw std::runtime_error("postflush");
+#endif
+}
     int32_t submit(uint32_t *words,uint32_t count) override {
         ++submits;std::map<uint32_t,std::vector<uint32_t>> registers;std::array<uint32_t,3> groups{};bool dispatch=false;
         for(size_t at=0;at<count;) {
@@ -40,7 +44,11 @@ public:
             at+=length+1;
         }
         check(dispatch);
-#ifdef PS5HIP_MEMORY_FILL_TITLE
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+        check(submits<=24);const unsigned pipeline=(submits-1)/2,phase=(submits-1)%2;
+        const unsigned iteration=0,seed=pipeline%2,topology=(pipeline/2)%2;
+        const unsigned copy_sizes[]{1,73,257},n=copy_sizes[pipeline/4];
+#elif defined(PS5HIP_MEMORY_FILL_TITLE)
         check(submits<=6);const unsigned iteration=0,seed=(submits-1)%2;
         const unsigned fill_sizes[]{1,73,257},n=fill_sizes[(submits-1)/2];
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -49,7 +57,7 @@ public:
 #else
         check(submits<=7);const unsigned iteration=submits-1,seed=iteration;
 #endif
-#ifndef PS5HIP_MEMORY_FILL_TITLE
+#if !defined(PS5HIP_MEMORY_FILL_TITLE) && !defined(PS5HIP_DEVICE_COPY_TITLE)
         const unsigned sizes[]{1,63,64,65,127,193,257},n=sizes[iteration];
 #endif
         check(groups==std::array<uint32_t,3>{(n+63)/64,1,1} && registers.at(0x207)==std::vector<uint32_t>{64,1,1});
@@ -61,15 +69,32 @@ public:
         const auto *k=reinterpret_cast<const uint8_t*>(arg);const auto input=read(k,8),output=read(k+8,8);
         check(read(k+16,4)==n);containing(input,n*4);containing(output,n*4);
         const auto *in=reinterpret_cast<const unsigned*>(input);auto *out=reinterpret_cast<unsigned*>(output);
-#ifndef PS5HIP_MEMORY_FILL_TITLE
+#if !defined(PS5HIP_MEMORY_FILL_TITLE) && !defined(PS5HIP_DEVICE_COPY_TITLE)
         for(unsigned i=0;i<n;++i)check(in[i]==((i*37u+seed*1231u)^0x951dac37u));
 #endif
         // Fill variant intentionally consumes actual backing, including injected bad fills.
         // Its independent host oracle must detect a no-op or stale input, not this transport.
         if(mode=="submit")return -7;if(mode=="throw")throw std::runtime_error("submit");if(mode=="unknown")throw 42;
-        if(mode!="missing") {
+        if(mode!="missing"
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+            && !(mode=="missing-consumer" && phase)
+#endif
+        ) {
             if(iteration%2){for(unsigned g=0;g<groups[0];++g){unsigned sum=0;for(unsigned i=g*64;i<n&&i<(g+1)*64;++i)sum+=in[i];out[g]=sum;}}
-            else {check(read(k+20,4)==0);const auto salt=read(k+24,8);check(salt==0x13579bdf00000000ull+17+seed);
+            else {check(read(k+20,4)==0);const auto salt=read(k+24,8);
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+                check(salt==(phase?0x2468ace000000071ull:0x13579bdf00000011ull)+seed);
+                static uint64_t prior_seed=0,prior_source=0;
+                if(!phase){prior_seed=input;prior_source=output;check(&containing(input,n*4)!=&containing(output,n*4));}
+                else {
+                    check(input!=prior_source && output!=prior_source && output!=prior_seed);
+                    if(topology)check(input==prior_source+(n+7)*4 && &containing(input,n*4)==&containing(prior_source,n*4));
+                    else check(&containing(input,n*4)!=&containing(prior_source,n*4));
+                }
+#else
+                check(salt==0x13579bdf00000000ull+17+seed);
+#endif
+
                 for(unsigned i=0;i<n;++i)out[i]=(in[i]+unsigned(salt))^unsigned(salt>>32);}
         }
         if(mode=="corrupt")out[0]^=1;if(mode=="input")const_cast<unsigned*>(in)[0]^=1;if(mode=="guard")out[-1]=0;
@@ -85,6 +110,7 @@ public:
 extern "C" void ps5hip_generic_model_configure(const char *s){check(!allocation_calls&&!backends&&!submits);mode=s;}
 extern "C" unsigned ps5hip_generic_model_live(){return unsigned(allocations.size());}
 extern "C" unsigned ps5hip_generic_model_submits(){return submits;}
+extern "C" unsigned ps5hip_generic_model_releases(){return releases;}
 std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_runtime_model_backend(){++backends;if(mode=="init")throw std::runtime_error("init");return std::make_unique<Backend>();}
 extern "C" int64_t sceKernelGetDirectMemorySize(){return int64_t(12)<<30;}
 extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t bytes,size_t alignment,int type,int64_t *physical){
@@ -112,5 +138,25 @@ extern "C" hipError_t __wrap_hipMemset(void *p,int value,size_t bytes) {
     if(mode=="fill-byte" && at==1)value=0x24;
     if(mode=="fill-offset" && at==2)p=static_cast<unsigned char*>(p)+1;
     return __real_hipMemset(p,value,bytes);
+}
+#endif
+
+#ifdef PS5HIP_DEVICE_COPY_TITLE
+#define __HIP_PLATFORM_AMD__ 1
+#include <hip/hip_runtime_api.h>
+extern "C" hipError_t __real_hipMemcpy(void*,const void*,size_t,hipMemcpyKind);
+extern "C" hipError_t __wrap_hipMemcpy(void *dst,const void *src,size_t bytes,hipMemcpyKind kind) {
+    static unsigned copies=0;
+    if(kind!=hipMemcpyDeviceToDevice)return __real_hipMemcpy(dst,src,bytes,kind);
+    const unsigned at=copies++;
+    if(mode=="copy-noop" && at==0)return hipSuccess;
+    if(mode=="copy-stale" && at==1)return hipSuccess;
+    if(mode=="copy-destination")dst=static_cast<unsigned char*>(dst)+4;
+    if(mode=="copy-source")src=static_cast<const unsigned char*>(src)+4;
+    if(mode=="copy-short")bytes-=4;
+    const auto status=__real_hipMemcpy(dst,src,bytes,kind);
+    if(status==hipSuccess && mode=="copy-corrupt")*static_cast<unsigned*>(dst)^=1;
+    if(status==hipSuccess && mode=="copy-source-mutation")*const_cast<unsigned*>(static_cast<const unsigned*>(src))^=1;
+    return status;
 }
 #endif
