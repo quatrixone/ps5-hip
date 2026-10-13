@@ -18,6 +18,7 @@ import stage_native_title as stager
 import verify_native_case as verifier
 arguments = argparse.ArgumentParser(add_help=False)
 arguments.add_argument("--native-build", type=Path)
+arguments.add_argument("--routes-compiler", type=Path)
 options, remaining = arguments.parse_known_args()
 sys.argv = [sys.argv[0], *remaining]
 
@@ -227,11 +228,116 @@ class VectorTitleTests(unittest.TestCase):
                 recipe.audit_startup(invalid)
 
 
+class RoutesTitleTests(unittest.TestCase):
+    def setUp(self):
+        VectorTitleTests.setUp(self)
+        for name in ("tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"):
+            path = self.root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((ROOT / name).read_bytes())
+            self.receipt["source_sha256"][name] = digest(path.read_bytes())
+        self.receipt["kernel"] = "hip_routes"
+        del self.receipt["hip_vector_profile"]
+        del self.receipt["hip_vector_provenance"]
+        self.receipt["hip_routes_profile"] = copy.deepcopy(profile.ROUTES_PROFILE)
+        self.receipt["routes_audits"] = self.receipt.pop("vector_audits")
+        for name in ("raw_pie", "converted_eboot"):
+            self.receipt["routes_audits"][name]["bundle_sha256"] = profile.ROUTES_PROFILE["bundle_sha256"]
+        self.receipt["hip_routes_provenance"] = {}
+        for name in profile.provenance_files("hip_routes"):
+            path = self.build / "provenance" / name
+            path.write_bytes(b"synthetic provenance")
+            self.receipt["hip_routes_provenance"][name] = digest(path.read_bytes())
+
+    stage = VectorTitleTests.stage
+
+    def test_routes_staging_has_distinct_fixed_contract(self):
+        manifest = self.stage()
+        self.assertEqual(manifest["hip_routes_profile"], profile.ROUTES_PROFILE)
+        self.assertEqual(manifest["expected_log"], "/chosen/results/ps5-hip-gfx1013-hip_routes.log")
+        self.assertNotIn("hip_vector_profile", manifest)
+        self.assertNotIn("canary.hsaco", manifest["files"])
+        self.assertEqual(profile.provenance_files("hip_routes") - profile.PROVENANCE_FILES,
+                         {"routes-combined.o", "compiler-receipt.json"})
+        self.assertEqual(profile.provenance_files("hip_vector"), profile.PROVENANCE_FILES)
+
+    def test_routes_contract_mutations_refused_before_stage(self):
+        for key, value in (("dispatches", 4), ("sequences", 1), ("client_entry", "main"),
+                           ("outputs_per_sequence", [128, 2, 8192, 273]), ("private_segment_bytes", 304),
+                           ("static_lds_bytes", 0), ("geometry_inactive", 0),
+                           ("compiler_receipt_sha256", "0" * 64), ("data_logical_bytes", 16384)):
+            old = self.receipt["hip_routes_profile"][key]
+            self.receipt["hip_routes_profile"][key] = value
+            with self.assertRaises(ValueError):
+                self.stage()
+            self.assertFalse((self.root / "stage").exists())
+            self.receipt["hip_routes_profile"][key] = old
+        for name in ("tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py"):
+            old = self.receipt["source_sha256"].pop(name)
+            with self.assertRaisesRegex(ValueError, "source provenance"):
+                self.stage()
+            self.receipt["source_sha256"][name] = old
+
+    def test_routes_startup_retains_order_and_renamed_entry(self):
+        source = 'extern "C" void ps5hip_install_shell_exit_probe();\n    ps5hip_install_shell_exit_probe();\n#endif\n    _init();'
+        self.assertIn("PS5HIP_ROUTES_TITLE", recipe.patch_startup(source, "hip_routes"))
+        self.assertNotIn("PS5HIP_VECTOR_TITLE", recipe.patch_startup(source, "hip_routes"))
+        with self.assertRaises(ValueError):
+            recipe.patch_startup(source, "unknown")
+        text = '''00000000 <_start>:
+  call <ps5hip_install_shell_exit_probe>
+  call <ps5hip_install_vector_title_finalizer>
+  call <_init>
+  call <main>
+00000100 <__hip_module_ctor>:
+  call <__hipRegisterFunction>
+  call <__hipRegisterFunction>
+  call <__hipRegisterFunction>
+  call <__hipRegisterFunction>
+  call <atexit>
+00000200 <__hip_module_dtor>:
+  call <__hipUnregisterFatBinary>
+00000300 <ps5hip_install_vector_title_finalizer>:
+  call <atexit>
+00000400 <main>:
+  call <_Z25ps5hip_routes_client_mainiPPc>
+00000500 <_Z25ps5hip_routes_client_mainiPPc>:
+  ret
+'''
+        self.assertEqual(recipe.audit_startup(text, kernel="hip_routes")["client_entry"], profile.ROUTES_PROFILE["client_entry"])
+        for changed in (text.replace("  call <__hipRegisterFunction>\n", "", 1),
+                        text.replace("call <_Z25ps5hip_routes_client_mainiPPc>", "call <foreign>")):
+            with self.assertRaises(RuntimeError):
+                recipe.audit_startup(changed, kernel="hip_routes")
+
+
+@unittest.skipUnless(options.routes_compiler, "requires the fresh renamed compiler output")
+class ActualRoutesCompilerTests(unittest.TestCase):
+    def test_actual_renamed_compiler_binding(self):
+        path = options.routes_compiler
+        receipt = (path / "receipt.json").read_bytes()
+        combined = (path / "ps5/routes.o").read_bytes()
+        report = profile.validate_routes_compiler(receipt, combined, ROOT)
+        self.assertTrue(report["title_entry"])
+        self.assertEqual(set(c["host"] for c in report["cases"]), {"linux", "ps5", "linux-model"})
+        for host in ("linux", "ps5", "linux-model"):
+            cmd = next(c for c in json.loads((path / "commands.json").read_text()) if c["label"] == host + "-compile")
+            self.assertIn("-Dmain=ps5hip_routes_client_main", cmd["argv"])
+            self.assertIn("-DPS5HIP_ROUTES_TITLE=1", cmd["argv"])
+        for changed_receipt, changed_object in ((receipt + b" ", combined),
+                                                (receipt, combined[:-1]),
+                                                (receipt, combined[:100] + bytes([combined[100] ^ 1]) + combined[101:])):
+            with self.assertRaises(ValueError):
+                profile.validate_routes_compiler(changed_receipt, changed_object, ROOT)
+        self.assertEqual(report["cases"][1]["lifecycle"]["register_function_calls"], 4)
+
+
 @unittest.skipUnless(options.native_build, "requires a completed native title build")
 class ActualVectorTitleTests(unittest.TestCase):
     def test_actual_linked_artifacts_and_stale_candidate_rejection(self):
         build = options.native_build.resolve()
         receipt = json.loads((build / "receipt.json").read_text())
+        audit_key = "vector_audits" if receipt["kernel"] == "hip_vector" else "routes_audits"
         signed = (build / "candidate/eboot.bin").read_bytes()
         profile.validate_build(receipt, ROOT, build / "provenance", signed)
         for name, expected in receipt["raw_artifacts"].items():
@@ -244,18 +350,18 @@ class ActualVectorTitleTests(unittest.TestCase):
             profile.validate_build(replacement, ROOT, build / "provenance", changed)
         for name in ("signed_sha256", "raw_pie_sha256", "app_crt_sha256", "linker_sha256"):
             replacement = copy.deepcopy(receipt)
-            del replacement["vector_audits"]["fself_roundtrip"][name]
+            del replacement[audit_key]["fself_roundtrip"][name]
             with self.assertRaisesRegex(ValueError, "digest relation"):
                 profile.validate_build(replacement, ROOT, build / "provenance", signed)
         disassembly = (build / "startup-disassembly.stdout").read_text()
-        good = recipe.audit_startup(disassembly, build / "llvm-pie.elf")
-        self.assertEqual(good, receipt["vector_audits"]["startup"])
+        good = recipe.audit_startup(disassembly, build / "llvm-pie.elf", receipt["kernel"])
+        self.assertEqual(good, receipt[audit_key]["startup"])
         for wrong in ("ps5hip_install_vector_title_finalizer", "__hipUnregisterFatBinary", "__hip_module_dtor"):
             with self.assertRaises(RuntimeError):
-                recipe.audit_startup(disassembly.replace("<" + wrong + ">", "<foreign>"), build / "llvm-pie.elf")
+                recipe.audit_startup(disassembly.replace("<" + wrong + ">", "<foreign>"), build / "llvm-pie.elf", receipt["kernel"])
         wrong_slot = disassembly.replace("# 0x" + format(good["atexit_got"][0], "x") + " ", "# 0xdeadbeef ")
         with self.assertRaises(RuntimeError):
-            recipe.audit_startup(wrong_slot, build / "llvm-pie.elf")
+            recipe.audit_startup(wrong_slot, build / "llvm-pie.elf", receipt["kernel"])
 
 
 if __name__ == "__main__":

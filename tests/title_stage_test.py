@@ -66,6 +66,18 @@ class StageTests(unittest.TestCase):
         self.run_stage()
         self.assertEqual((self.output / "app/canary.hsaco").read_bytes(), b"fixture shader")
 
+    def test_both_hip_titles_require_frozen_source_and_embedded_code(self):
+        for kernel in ("hip_vector", "hip_routes"):
+            self.receipt["kernel"] = kernel
+            with self.assertRaisesRegex(ValueError, "frozen build source commit"):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+            self.receipt["artifacts"]["canary.hsaco"] = module.digest(b"unexpected shader")
+            with self.assertRaisesRegex(ValueError, "invalid offline candidate receipt"):
+                self.run_stage()
+            self.assertFalse(self.output.exists())
+            del self.receipt["artifacts"]["canary.hsaco"]
+
     def test_wave_requires_verified_shader(self):
         for kernel in ("wave_full", "wave_partial"):
             self.receipt["kernel"] = kernel

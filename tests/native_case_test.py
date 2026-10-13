@@ -55,6 +55,23 @@ class CaseTests(unittest.TestCase):
         self.assertFalse(result["hardware_gate_passed"])
         self.assertEqual(result["shutdown_mode"], "platform-exit")
 
+    def test_hip_profiles_cannot_be_relabelled(self):
+        candidate = self.packages["candidates"][0]
+        for manifest_kernel, build_kernel in (("hip_vector", "hip_routes"),
+                                              ("hip_routes", "hip_vector"),
+                                              ("runtime", "hip_routes"),
+                                              ("hip_routes", "runtime")):
+            build = {"kernel": build_kernel, "target": "gfx1013", "source_commit": "fixture",
+                     "source_tree_clean": True}
+            self.write(self.stage / "build-receipt.json", build)
+            candidate["manifest"].update(kernel=manifest_kernel,
+                build_receipt_sha256=module.fingerprint(self.stage / "build-receipt.json")["sha256"])
+            self.write(self.stage / "manifest.json", candidate["manifest"])
+            candidate["package"]["manifest_sha256"] = module.fingerprint(self.stage / "manifest.json")["sha256"]
+            self.write(self.stage / "package-receipt.json", candidate["package"])
+            with self.assertRaisesRegex(ValueError, "manifest/build profile mismatch"):
+                self.verify()
+
     def test_revoked_frozen_image_is_rejected(self):
         digest = self.packages["candidates"][0]["package"]["image"]["sha256"]
         self.packages["revoked_images"] = {digest: "incorrect linker provenance"}

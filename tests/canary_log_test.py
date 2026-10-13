@@ -10,6 +10,41 @@ spec.loader.exec_module(module)
 
 
 class LogTests(unittest.TestCase):
+    def test_routes_title_requires_all_routes_and_finalization(self):
+        lines = ["PS5HIP START target=gfx1013 kernel=hip_routes",
+                 "HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=4 constructor_gpu_calls=0",
+                 "PS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass"]
+        names = ("integer", "lds", "spill", "geometry")
+        for sequence in range(8):
+            lines += [f"RUNTIME_COMPLETE sequence={sequence+1} kernel=routes_{names[sequence%4]} blocking=true",
+                      f"ROUTES_COMPLETE round={sequence//4+1} route={sequence%4} blocking=true full_guards=true inputs=unchanged"]
+        lines += ["ROUTES_CLIENT_PASS sequences=2 dispatches=8 changed_inputs=true full_guards=true",
+                  "HIP_TITLE COMPUTE complete=true dispatches=8 word_comparisons=393216 finalization=pending",
+                  "PS5HIP SHUTDOWN main-return=0", "PS5HIP SHUTDOWN atexit=observed",
+                  "PS5HIP SHUTDOWN static-dtor=observed", "VECTOR_UNREGISTER after_main=true active=0",
+                  "VECTOR_FINAL registered=1 removed=1 completed=8 active=0 terminal=0 main_finished=1 hardware_validated=false",
+                  "HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=8",
+                  "PS5HIP SHELL_EXIT application-fini=completed", "PS5HIP SHELL_EXIT request=begin",
+                  "PS5HIP SHELL_EXIT request-return=0"]
+        data = ("\n".join(lines) + "\n").encode()
+        def check(raw):
+            return module.check_log(raw, "gfx1013", "hip_routes", shell_exit_probe=True)
+        self.assertEqual(check(data)["application_result"], "application-pass")
+        self.assertFalse(check(data)["hardware_gate_passed"])
+        for index in range(len(lines)):
+            missing = ("\n".join(lines[:index] + lines[index+1:]) + "\n").encode()
+            self.assertNotEqual(check(missing)["application_result"], "application-pass")
+        for before, after in ((b"routes_spill", b"routes_lds"), (b"round=2", b"round=1"),
+                              (b"completed=8", b"completed=7"), (b"functions=4", b"functions=1"),
+                              (b"393216", b"393215"), (b"removed=1", b"removed=0")):
+            self.assertNotEqual(check(data.replace(before, after))["application_result"], "application-pass")
+        for bad in (data*2, data[:-1], data.replace(b"\n", b"\r\n")):
+            self.assertNotEqual(check(bad)["application_result"], "application-pass")
+        self.assertEqual(check(data+b"ROUTES_CLIENT_REJECT failure\n")["application_result"], "failed")
+        self.assertEqual(check(data+b"HIP_TITLE QUARANTINED retained\n")["application_result"], "quarantined")
+        with self.assertRaises(ValueError):
+            module.check_log(data,"gfx1030","hip_routes",shell_exit_probe=True)
+
     hip_title = (
         b"PS5HIP START target=gfx1013 kernel=hip_vector\n"
         b"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0\n"
