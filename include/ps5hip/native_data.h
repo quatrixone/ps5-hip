@@ -33,6 +33,8 @@ public:
     // whole call. Arithmetic checks do not prove arbitrary CPU memory is mapped.
     void copy_to_device(void *device, const void *host, uint64_t bytes);
     void copy_from_device(void *host, const void *device, uint64_t bytes);
+    // Both nonempty ranges must be live, CPU-owned and nonoverlapping.
+    void copy_device(void *destination, const void *source, uint64_t bytes);
     void fill(void *device, int value, uint64_t bytes);
     void poison() noexcept { poisoned_ = true; }
     bool poisoned() const { return poisoned_; }

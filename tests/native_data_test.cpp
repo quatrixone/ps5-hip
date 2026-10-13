@@ -102,11 +102,31 @@ int main() {
             reject(S::InvalidValue, [&] { data.copy_to_device(p, p + 1, 1); });
             reject(S::InvalidValue, [&] { data.copy_from_device(other, p, 1); });
             reject(S::InvalidValue, [&] { data.copy_to_device(p, p + 100, 1); });
+            data.copy_device(other, p+1, 5);
+            const unsigned char copied[]{0x23,0xff,0xff,0xff,0x23};
+            check(std::memcmp(other,copied,5)==0 && p[0]==0xa5 && p[17]==0xa5);
+            data.copy_device(p+10,p+1,5); // disjoint ranges of the same allocation
+            check(std::memcmp(p+10,copied,5)==0 && p[9]==0x23 && p[15]==0x23);
+            unsigned char snapshot[17];std::memcpy(snapshot,p,17);
+            for(bool reverse:{false,true})reject(S::InvalidValue,[&]{data.copy_device(reverse?p:p+1,reverse?p+1:p,5);});
+            reject(S::InvalidValue,[&]{data.copy_device(p,p,1);});
+            reject(S::InvalidValue,[&]{data.copy_device(p,other,6);});
+            reject(S::InvalidValue,[&]{data.copy_device(other,p,6);});
+            reject(S::InvalidValue,[&]{data.copy_device(p,other,UINT64_MAX);});
+            reject(S::InvalidValue,[&]{data.copy_device(p,nullptr,1);});
+            reject(S::InvalidValue,[&]{data.copy_device(nullptr,p,1);});
+            reject(S::InvalidValue,[&]{data.copy_device(p,other,0);});
+            reject(S::InvalidPointer,[&]{data.copy_device(p,source,1);});
+            reject(S::InvalidPointer,[&]{data.copy_device(source,p,1);});
+            reject(S::InvalidPointer,[&]{data.copy_device(p+17,other,1);});
+            check(std::memcmp(p,snapshot,17)==0 && std::memcmp(other,copied,5)==0);
             auto old_unmaps = unmaps;
             hold.memory->acquire_gpu_use();
             reject(S::InUse, [&] { data.free(p); });
             reject(S::InUse, [&] { data.copy_from_device(destination, p, 1); });
             reject(S::InUse, [&] { data.fill(p, 0, 1); });
+            reject(S::InUse, [&] { data.copy_device(p,other,1); });
+            reject(S::InUse, [&] { data.copy_device(other,p,1); });
             check(p[0] == 0xa5);
             reject(S::InUse, [&] { data.ranges(); });
             check(unmaps == old_unmaps);
@@ -118,6 +138,8 @@ int main() {
             reject(S::InvalidPointer, [&] { data.free(p); });
             reject(S::InvalidPointer, [&] { data.resolve(p, 1); });
             reject(S::InvalidPointer, [&] { data.fill(p, 0, 1); });
+            reject(S::InvalidPointer, [&] { data.copy_device(p,other,1); });
+            reject(S::InvalidPointer, [&] { data.copy_device(other,p,1); });
             data.free(other);
             check(data.ranges().empty());
         }
@@ -135,6 +157,7 @@ int main() {
             reject(S::Poisoned, [&] { data.ranges(); });
             reject(S::Poisoned, [&] { data.allocate(1); });
             reject(S::Poisoned, [&] { data.fill(p, 0, 1); });
+            reject(S::Poisoned, [&] { data.copy_device(p,p,1); });
             check(unmaps == old_unmaps && releases == old_releases);
             // Shutdown may retry non-GPU cleanup; no registry operation retries it.
             fail_unmap = fail_release = false;
