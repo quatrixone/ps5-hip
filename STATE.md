@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Synchronous tracked memory fill qualified offline in this branch:**
+  `hipMemset` reuses allocation bounds and ownership checks, supports interior
+  ranges and byte truncation, and serializes against blocking submissions.
+  Registry ASan, 36 real-runtime ASan/UBSan modes and 17 CPU-only TSAN modes
+  passed, including a fill waiting on a submission's held gate. Independent
+  source/proof review is clear. See `evidence/offline-memory-fill.json`.
+  This isolated change is not integrated into the root development branch;
+  native fill/cache visibility and asynchronous APIs remain unqualified.
+
 - **Worker-side queue initialization passed on .40:** frozen `a7e6da7`
   observed no backend after the 17 host checks, then actual AGC initialization
   on worker A. Four A/B/A/main dispatches produced 660 exact values with 1,084

@@ -103,4 +103,8 @@ void NativeDataRegistry::copy_from_device(void *host, const void *device, uint64
     validate_host(host, bytes);
     std::memcpy(host, static_cast<unsigned char *>(hold.memory->cpu()) + hold.offset, size_t(bytes));
 }
+void NativeDataRegistry::fill(void *device, int value, uint64_t bytes) {
+    auto hold = resolve(device, bytes);
+    std::memset(static_cast<unsigned char *>(hold.memory->cpu()) + hold.offset, value, size_t(bytes));
+}
 } // namespace ps5hip
