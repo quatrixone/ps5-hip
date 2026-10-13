@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 UNCERTAIN={'submit','kick','timeout','throw','unknown'}
 CLIENT_FAILURE={'init','preflush','missing','corrupt','input','input-b','guard','tail','shape','dynamic','alloc1','alloc2','alloc3','map1','map2','map3'}
-CASES={'normal','registration-error','failed-module','late-partial','cleanup',*UNCERTAIN,*CLIENT_FAILURE,'elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','shell-fail','late-partial-destructor'}
+CASES={'normal','registration-error','failed-module','late-partial','cleanup',*UNCERTAIN,*CLIENT_FAILURE,'elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','post-finish','shell-fail','late-partial-destructor'}
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(ok,why):
     if not ok:raise RuntimeError(why)
@@ -25,7 +25,7 @@ def check(output):
         path=output/record['log'];require(sha(path)==record['sha256'],'log hash');log=path.read_text()
         captured=(output/('run-'+name+'.stdout')).read_text()+(output/('run-'+name+'.stderr')).read_text()
         require(not any(x in log+captured for x in ('AddressSanitizer','UndefinedBehaviorSanitizer','runtime error:','LeakSanitizer')),'sanitizer '+name)
-        success=name in ('normal','shell-fail')
+        success=name in ('normal','post-finish','shell-fail')
         if success:
             events=['HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0'];total=0
             for index,(m,n,k) in enumerate(((8,8,8),(13,21,19),(1,1,17),(17,9,1))):
@@ -42,14 +42,24 @@ def check(output):
         if name in UNCERTAIN|{'cleanup'}:
             require(f'MATMUL_TERMINAL live={4 if name=="cleanup" else 7} unresolved={int(name!="cleanup")} submits=1' in log and 'reason=client-or-ownership' in log,'retained boundary')
         if name in CLIENT_FAILURE:require('MATMUL_CLIENT_FAILURE clean=1 terminal=0' in log,'clean failure '+name)
-        if name in ('skip-unregister','reject-unregister','late-live','late-partial-destructor'):require('reason=finalization' in log and 'finalized=0' in log,'postdestruction gate '+name)
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):require('reason=finalization' in log and 'finalized=0' in log,'postdestruction gate '+name)
         if name=='late-partial':require('MATMUL_LATE_PARTIAL completed=8 finalized=false' in log and 'reason=client-or-ownership' in log,'late registration')
         if name=='registration-error':require('reason=registration' in log and 'RUNTIME_COMPLETE' not in log,'constructor failure')
         if name=='failed-module':require('MATMUL_FAILED_MODULE latched=true no_gpu=true' in log and 'reason=client-or-ownership' in log,'failed module')
+        if name in ('skip-unregister','reject-unregister','late-partial-destructor'):
+            late=int(name=='late-partial-destructor')
+            retained=f'RUNTIME_RETAINED registered=1 removed={late} completed=8 active={1-late} terminal=0 main_finished=1 contexts=0 pending=0 abandoned=0 registration_failed={late} hardware_validated=false'
+            require(log.splitlines().count(retained)==1 and 'VECTOR_FINAL ' not in log,'exact retained State closure '+name)
+        if name=='late-live':
+            require('HIP_TITLE_MODEL PRE_FINISH live=1 rejection_expected=true' in log and 'reason=client-or-ownership' in log and 'HIP_TITLE_MODEL STOP shell_requests=0 live=1 model_only=true' in log,'live allocation blocks closure')
+            require('VECTOR_UNREGISTER' not in log and 'VECTOR_FINAL' not in log and 'HIP_TITLE FINAL ' not in log,'dirty title destroyed runtime')
+        if name=='post-finish':require('HIP_TITLE_MODEL POST_FINISH allocation_rejected=true ownership_unchanged=true' in log,'late allocation rejection absent')
+        if name=='late-partial-destructor':
+            require('HIP_TITLE_MODEL LATE_REGISTRATION rejected=true state_unchanged=true' in log and 'RUNTIME_RETAINED registered=1 removed=1' in log and 'registration_failed=1 hardware_validated=false' in log and 'VECTOR_FINAL ' not in log,'late registration not sticky or State destroyed')
         if name=='final-sync':require('reason=final-log' in log,'final persistence')
         if name=='log-exists':require(log=='previous-result\n','old log overwritten')
         if name not in ('elevation','config','log-exists'):
-            live=7 if name in UNCERTAIN else 4 if name=='cleanup' else 0
+            live=1 if name=='late-live' else 7 if name in UNCERTAIN else 4 if name=='cleanup' else 0
             require(f'HIP_TITLE_MODEL STOP shell_requests={int(success)} live={live} model_only=true' in log,'stop '+name)
     sys.path.insert(0,str(ROOT/'tools'));from check_canary_log import check_log
     log=(output/cases['normal']['log']).read_text();lines=log.splitlines();extra=[x for x in lines if x.startswith(('MATMUL_MODEL_FINAL ','HIP_TITLE_MODEL STOP '))];require(len(extra)==2,'instrumentation')
@@ -76,7 +86,7 @@ def main():
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client'
     stage=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp',platform/'ps5platform/kernel.h'):external[str(h)]=sha(h)
-    common=['clang++-18','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_MATMUL_TITLE=1','-DPS5HIP_RUNTIME_MODEL=1']
+    common=['clang++-18','-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_MATMUL_TITLE=1','-DPS5HIP_RUNTIME_MODEL=1']
     for d in (ROOT/'include',stage,platform,elevation):common+=['-I',str(d)]
     core=[ROOT/'src'/n for n in ('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
     sources=core+[ROOT/n for n in ('src/hip_runtime.cpp','src/hip_launch_profile.cpp','tools/hip_vector_title.cpp','tools/native_shell_exit_probe.cpp','tools/native_runtime.h','tests/hip_tiled_matmul_blockdim.hip','tests/hip_tiled_matmul_model.cpp','tests/hip_matmul_title_model.cpp','tools/check_canary_log.py','tests/hip_matmul_title_test.py')]+list((ROOT/'include/ps5hip').glob('*.h'))
@@ -100,7 +110,7 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
     cases={}
     for partial in (False,):
         runtime=out/('runtime-partial.o' if partial else 'runtime.o');run(runtime.stem,[*common,*(['-DPS5HIP_RUNTIME_PARTIAL=1'] if partial else []),'-c',ROOT/'src/hip_runtime.cpp','-o',runtime])
-        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,runtime,probe/'linux-model-O2/matmul.o','-Wl,-T,'+str(linker),'-Wl,--wrap=__hipUnregisterFatBinary','-o',binary])
+        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,runtime,probe/'linux-model-O2/matmul.o','-Wl,-T,'+str(linker),'-Wl,--wrap=__hipUnregisterFatBinary','-Wl,--wrap=ps5hip_runtime_finish','-o',binary])
         listing=run(binary.name+'-symbols',['llvm-nm-18','-n',binary]);symbols={v[2]:int(v[0],16) for line in listing.splitlines() if len(v:=line.split())==3};begin=symbols['__ps5hip_wrappers_begin'];require(begin%32==0 and symbols['__hip_fatbin_wrapper']==begin and symbols['__ps5hip_wrappers_end']==begin+24,'model wrapper ABI span')
         for name in sorted(CASES):
             folder=out/'cases'/name;folder.mkdir(parents=True);config=folder/'results-dir.txt';config.write_text('relative-bad' if name=='config' else str(folder));log=folder/'ps5-hip-gfx1013-hip_matmul.log'

@@ -74,11 +74,15 @@ public:
         expected[32]=2;expected[36]=1;expected[40]=1;expected[44]=64;expected[46]=1;expected[48]=1;expected[96]=1;
         check(std::memcmp(k,expected,288)==0);
         check(words[count-15]==0xc0031502&&words[count-14]==2&&words[count-13]==1&&words[count-12]==1&&words[count-11]==0x8005);
-#ifndef PS5HIP_VECTOR_TITLE
-        check(hipDeviceSynchronize()==hipErrorNotReady);
-        check(hipFree(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(out)-64))==hipErrorNotReady);
-        float dummy=0;check(hipMemcpy(&dummy,out,4,hipMemcpyDeviceToHost)==hipErrorNotReady);
-#endif
+        // Callback reentry is unsupported; hip_threads_model proves blocked cross-thread access.
+        for(const void *pointer : {static_cast<const void *>(a),static_cast<const void *>(b),static_cast<const void *>(out)}) {
+            bool owned=false;const auto address=reinterpret_cast<uintptr_t>(pointer);
+            for(const auto &entry:allocations) {
+                const auto &allocation=entry.second;const auto base=reinterpret_cast<uintptr_t>(allocation.cpu);
+                if(base && address>=base && address-base<=allocation.bytes && n*sizeof(float)<=allocation.bytes-(address-base))owned=true;
+            }
+            check(owned);
+        }
         if(mode=="throw-submit")throw std::runtime_error("submit exception");
         if(mode=="unknown-submit")throw 42;
         if(mode=="submit")return -7;

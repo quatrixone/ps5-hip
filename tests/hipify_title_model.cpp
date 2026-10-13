@@ -12,8 +12,11 @@ extern "C" void ps5hip_install_shell_exit_probe(),ps5hip_install_vector_title_fi
 extern "C" unsigned ps5hip_hipify_model_live(),ps5hip_hipify_model_submits(),ps5hip_hipify_model_backends();
 extern "C" void ps5hip_hipify_model_configure(const char*),ps5hip_hipify_model_duplicate(),ps5hip_hipify_model_no_retry();
 extern "C" void __real___hipUnregisterFatBinary(void**),__real_ps5hip_runtime_finish();
+extern "C" void __hipRegisterFunction(void**,const void*,char*,const char*,unsigned,uint3*,uint3*,dim3*,dim3*,int*);
 int ps5hip_hipify_title_main(int,char**);
 namespace {
+const void *saved_token=nullptr;
+bool finish_injected=false;
 char scenario[80]{},config[4096]{};unsigned shell_requests=0,fini_calls=0,sync_calls=0;
 [[noreturn]] void fail(){::_exit(90);}
 bool is(const char*s){return std::strcmp(scenario,s)==0;}
@@ -27,10 +30,29 @@ Status request(Capability cap,const char*helper) noexcept {
  return is("elevation")?Status::unavailable:Status::ok;
 }
 }
-extern "C" void __wrap_ps5hip_runtime_finish(){if(!is("no-finish"))__real_ps5hip_runtime_finish();}
+extern "C" void __wrap_ps5hip_runtime_finish() {
+    if (is("late-live") && !finish_injected) {
+        finish_injected=true;
+        void *extra=nullptr;
+        if (hipMalloc(&extra,16)!=hipSuccess || !extra || ps5hip_hipify_model_live()!=1) fail();
+        std::puts("HIP_TITLE_MODEL PRE_FINISH live=1 rejection_expected=true");
+    }
+    if (is("late-partial-destructor")) { saved_token=ps5hip_runtime_token_for("translated_add"); if(!saved_token)fail(); }
+    if (!is("no-finish")) __real_ps5hip_runtime_finish();
+}
 extern "C" void __wrap___hipUnregisterFatBinary(void**handle){
  if(is("skip-unregister"))return;
- if(is("late-partial-destructor")){if(ps5hip_hipify_model_submits()!=6||ps5hip_hipify_model_live())fail();ps5hip_hipify_model_duplicate();}
+    if(is("late-partial-destructor")) {
+        const char *name="translated_add";
+        const auto before=ps5hip_runtime_observation();
+        if(!saved_token || !ps5hip_runtime_ready() || ps5hip_hipify_model_live())fail();
+        __hipRegisterFunction(handle,saved_token,const_cast<char*>(name),name,~0u,nullptr,nullptr,nullptr,nullptr,nullptr);
+        const auto after=ps5hip_runtime_observation();
+        if(hipGetLastError()!=hipErrorDeinitialized || hipDeviceSynchronize()!=hipErrorDeinitialized ||
+           ps5hip_runtime_ready() || before.modules!=after.modules || before.functions!=after.functions ||
+           before.completed!=after.completed || before.backend_attempted!=after.backend_attempted)fail();
+        std::puts("HIP_TITLE_MODEL LATE_REGISTRATION rejected=true state_unchanged=true");
+    }
  __real___hipUnregisterFatBinary(is("reject-unregister")?reinterpret_cast<void**>(1):handle);
 }
 extern "C" int ps5hip_title_model_fsync(int fd){
@@ -41,8 +63,8 @@ extern "C" int ps5hip_title_model_shell_exit(){
  if(!ps5hip_runtime_finalized()||ps5hip_hipify_model_live()||fini_calls!=1||++shell_requests!=1)fail();return is("shell-fail")?-7:0;
 }
 extern "C" unsigned ps5hip_title_model_sleep(unsigned){
- const bool success=is("normal")||is("shell-fail");if(shell_requests!=unsigned(success))fail();
- const unsigned live=uncertain()?7u:is("cleanup")?4u:0u;if(ps5hip_hipify_model_live()!=live)fail();
+ const bool success=is("normal")||is("post-finish")||is("shell-fail");if(shell_requests!=unsigned(success))fail();
+ const unsigned live=is("late-live")?1u:uncertain()?7u:is("cleanup")?4u:0u;if(ps5hip_hipify_model_live()!=live)fail();
  if(uncertain()||is("cleanup")){
   if(ps5hip_runtime_gpu_unresolved()!=uncertain())fail();ps5hip_hipify_model_no_retry();
  }
@@ -56,6 +78,12 @@ int main(int argc,char**argv){
  if(!ps5hip_runtime_registration_ready()||ps5hip_hipify_model_backends()||ps5hip_hipify_model_live())fail();
  if(is("partial"))ps5hip_hipify_model_duplicate();
  const int status=ps5hip_hipify_title_main(0,nullptr);
- if(is("late-live")){void*extra=nullptr;if(hipMalloc(&extra,16)!=hipSuccess)fail();}
+
+    if(is("post-finish")) {
+        const auto live=ps5hip_hipify_model_live(), submits=ps5hip_hipify_model_submits();
+        void *extra=reinterpret_cast<void*>(1);
+        if(hipMalloc(&extra,16)!=hipErrorDeinitialized || extra || ps5hip_hipify_model_live()!=live || ps5hip_hipify_model_submits()!=submits || !ps5hip_runtime_ready())fail();
+        std::puts("HIP_TITLE_MODEL POST_FINISH allocation_rejected=true ownership_unchanged=true");
+    }
  catchReturnFromMain(status);std::exit(status);
 }

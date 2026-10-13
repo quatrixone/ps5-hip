@@ -92,7 +92,7 @@ def main():
     core = [ROOT/'src'/name for name in ('code_object.cpp','fat_binary.cpp','host_registration.cpp',
         'host_launch.cpp','hip_runtime.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
     clients = [ROOT/'tools/hip_vector_control.cpp', ROOT/'tests/hip_vector_client.cpp']
-    common = ['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror',*includes]
+    common = ['-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror',*includes]
     source_files = [*core,*clients,ROOT/'src/agc_backend.cpp',ROOT/'tests/hip_vector_model.cpp',Path(__file__),
         ROOT/'tools/probe_host_registration.py',ROOT/'tests/native_vector_recipe_test.py',
         *[ROOT/'include/ps5hip'/n for n in ('hip_runtime_control.h','native_launch.h','native_data.h','native_memory.h',
@@ -129,6 +129,7 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
     if args.host_only:
         receipt={'schema':1,'classification':'Genuine compiler launch through host syscall/backend models only',
             'native_executed':False,'hardware_validated':False,'model_is_isa_emulation':False,
+            'header_hashes':header_hashes,'generated_version_sha256':sha(generated),
             'sources':source_before,'selected_host_objects':{k:sha(v) for k,v in selected.items()},
             'artifacts':{str(p.relative_to(out)):sha(p) for p in out.rglob('*') if p.is_file()}}
         (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')

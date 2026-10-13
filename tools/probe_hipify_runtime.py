@@ -43,7 +43,15 @@ def validate_model(text, mode, exit_code):
     require(live == 0 and modules == functions == int(unfinished) and (backend, submitted, released, completed, finalized) == COUNTS[mode], 'exact failure point/ownership/finalization counts')
     unregister = 'VECTOR_UNREGISTER rejected=true' if unfinished else 'VECTOR_UNREGISTER after_main=true active=0'
     require(text.splitlines().count(unregister) == 1 and text.count('VECTOR_UNREGISTER ') == 1, 'compiler unregister outcome')
-    require(text.splitlines().count(f'VECTOR_FINAL registered=1 removed={int(not unfinished)} completed={completed} active={int(unfinished)} terminal=0 main_finished={int(not unfinished)} hardware_validated=false') == 1, 'exact runtime finalization record')
+    fields = f'registered=1 removed={int(not unfinished)} completed={completed} active={int(unfinished)} terminal=0 main_finished={int(not unfinished)}'
+    final_marker = 'VECTOR_FINAL ' if finalized else 'RUNTIME_RETAINED '
+    if finalized:
+        expected = f'VECTOR_FINAL {fields} hardware_validated=false'
+        require('RUNTIME_RETAINED ' not in text, 'successful lifecycle retained State')
+    else:
+        expected = f'RUNTIME_RETAINED {fields} contexts=0 pending=0 abandoned=0 registration_failed={int(mode in ("partial", "late-partial"))} hardware_validated=false'
+        require('VECTOR_FINAL ' not in text, 'incomplete lifecycle destroyed State')
+    require(text.splitlines().count(expected) == 1 and text.count(final_marker) == 1, 'exact runtime closure or retention record')
     require(re.findall(r'^RUNTIME_COMPLETE sequence=(\d+) kernel=translated_add blocking=true$', text, re.M) == [str(i) for i in range(1,completed+1)], 'ordered runtime completion records')
     success = mode in ('normal', 'late-partial', 'no-finish')
     require(text.splitlines().count(CLIENT_PASS) == int(success), 'original client oracle result')
@@ -57,7 +65,7 @@ def validate_model(text, mode, exit_code):
     require('HIPIFY_QUARANTINE' not in text, 'unexpected quarantine')
     ordered = ('VECTOR_REGISTER ', 'VECTOR_FUNCTION ', 'HIPIFY_MODEL_BEGIN ',
                'HIPIFY_RUNTIME_PASS ' if mode=='normal' else 'HIPIFY_EXPECTED_REJECT ',
-               'VECTOR_UNREGISTER ', 'VECTOR_FINAL ', 'HIPIFY_MODEL_FINAL ')
+               'VECTOR_UNREGISTER ', final_marker, 'HIPIFY_MODEL_FINAL ')
     require([text.index(t) for t in ordered] == sorted(text.index(t) for t in ordered), 'compiler/main/destructor order')
 
 def check(output):
@@ -138,7 +146,7 @@ def main():
             print(host+' unchanged shader '+sha(code), flush=True)
         platform = ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include'
         inputs.update({str(f):sha(f) for f in platform.rglob('*.h') if f.is_file()})
-        common = ['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform,'-fsanitize=address,undefined','-fno-omit-frame-pointer']
+        common = ['-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform,'-fsanitize=address,undefined','-fno-omit-frame-pointer']
         policy = ROOT/'src/hip_launch_profile.cpp'
         profile = out/'profile-test'; run('profile-build',[tools['clang++'],*common,ROOT/'tests/hip_launch_profile_test.cpp',policy,ROOT/'src/code_object.cpp',ROOT/'src/host_launch.cpp',ROOT/'src/launch.cpp','-o',profile])
         run('profile-test',[profile,*[out/c['host']/'translated.hsaco' for c in cases]])

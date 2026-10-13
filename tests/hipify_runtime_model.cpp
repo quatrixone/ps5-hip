@@ -72,8 +72,9 @@ public:
   for(unsigned i=0;i<n;++i){check(a[i]==UINT32_MAX-i*17u-round*101u);check(b[i]==i*31u+round*701u+9u);check(out[i]==poison);}
   for(auto pointer:{a,b,static_cast<const unsigned*>(out)})for(unsigned i=0;i<guard;++i)check(pointer[int(i)-int(guard)]==poison&&pointer[n+i]==poison);
 #ifndef PS5HIP_HIPIFY_TITLE
-  const auto prior_releases=releases;unsigned dummy=0;
-  check(hipDeviceSynchronize()==hipErrorNotReady&&hipFree(reinterpret_cast<void*>(bases[2]))==hipErrorNotReady&&hipMemcpy(&dummy,out,4,hipMemcpyDeviceToHost)==hipErrorNotReady&&releases==prior_releases);
+  // Runtime callbacks are non-reentrant. The threaded model proves concurrent
+  // free/copy/synchronize block on this gate; inspect backing directly here.
+  check(allocations.size()==7&&containing(bases[2],(n+2*guard)*4).cpu!=nullptr);
 #endif
   if(mode=="submit")return -7;if(mode=="throw")throw std::runtime_error("submit");if(mode=="unknown")throw 42;
   std::vector<unsigned> values(n);for(unsigned i=0;i<n;++i)values[i]=unsigned((uint64_t(a[i])+b[i])&0xffffffffu);
@@ -147,9 +148,13 @@ int main(int argc,char**argv){
   }
   check(allocations.empty()&&!ps5hip_runtime_terminal());
   if(mode=="late-partial"){check(result==0&&submits==6);duplicate_binding();}
-  if(mode!="no-finish")ps5hip_runtime_finish();
-  const bool normal=mode=="normal";if(normal){check(result==0&&submits==6&&releases==33&&ps5hip_runtime_ready());
+  const bool normal=mode=="normal";if(normal){check(result==0&&submits==6&&releases==33);
    const auto prior_releases=releases;unsigned word=0;check(hipFree(reinterpret_cast<void*>(current_data[0]))==hipErrorInvalidDevicePointer&&hipMemcpy(&word,reinterpret_cast<void*>(current_data[0]),4,hipMemcpyDeviceToHost)==hipErrorInvalidDevicePointer&&releases==prior_releases);(void)hipGetLastError();
+  }
+  if(mode!="no-finish")ps5hip_runtime_finish();
+  if(normal){check(ps5hip_runtime_ready());const auto live=allocations.size();const auto freed=releases,submitted=submits,backend=backends;void*p=nullptr;
+   check(hipMalloc(&p,0)==hipErrorDeinitialized&&!p&&hipFree(nullptr)==hipErrorDeinitialized&&hipDeviceSynchronize()==hipErrorDeinitialized&&hipPeekAtLastError()==hipErrorDeinitialized&&hipGetLastError()==hipErrorDeinitialized);
+   check(allocations.size()==live&&releases==freed&&submits==submitted&&backends==backend);
    std::puts("HIPIFY_RUNTIME_PASS launches=6 allocations=closed stale_rejected=true");return 0;
   }
   if(mode=="no-finish")check(result==0&&!ps5hip_runtime_ready());

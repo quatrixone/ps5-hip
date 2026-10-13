@@ -220,7 +220,7 @@ def native_proof(ref,out,core,common,execute,inputs,adapter=None):
 def runtime_proof(ref,out,stage,execute):
     from hip_routes_recipe_test import validate_model
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include'
-    common=['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform]
+    common=['-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform]
     core=[ROOT/'src'/n for n in ('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp','hip_runtime.cpp')]
     sources=[*core,ROOT/'tools/hip_routes_control.cpp',ROOT/'tests/hip_routes_model.cpp',ROOT/'src/agc_backend.cpp',ROOT/'tools/probe_host_registration.py',ROOT/'tests/native_import_libraries_test.py',ROOT/'tests/native_agc_imports_test.py',ROOT/'tests/hip_routes_recipe_test.py',ROOT/'tests/hip_routes_contract_test.cpp',*list((ROOT/'include/ps5hip').glob('*.h'))]
     before={str(p.relative_to(ROOT)):sha(p) for p in sources}

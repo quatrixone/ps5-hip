@@ -100,7 +100,7 @@ def main():
         second_registration=audit_registration(second_asm,('second_module_kernel',))
         models=[];native={}
         if not args.compiler_only:
-            platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';common=['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform]
+            platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';common=['-pthread','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform]
             core=[ROOT/'src'/n for n in CORE];policy=ROOT/'src/hip_launch_profile.cpp'
             script=out/'linux.ld';script.write_text('''SECTIONS { .hip_fatbin ALIGN(4096) : { HIDDEN(__ps5hip_bundle_begin = .); KEEP(*(.hip_fatbin)) HIDDEN(__ps5hip_bundle_end = .); } } INSERT AFTER .rodata;
 SECTIONS { .data.rel.ro : { *(.data.rel.ro .data.rel.ro.*) . = ALIGN(32); HIDDEN(__ps5hip_wrappers_begin = .); KEEP(*(.hipFatBinSegment)) HIDDEN(__ps5hip_wrappers_end = __ps5hip_wrappers_begin + 24); } } INSERT BEFORE .dynamic;

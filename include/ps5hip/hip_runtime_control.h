@@ -27,6 +27,11 @@ void hip_runtime_validate_arguments(const Kernel &, const NativeLaunchRequest &,
 std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_runtime_model_backend();
 #endif
 extern "C" {
+// Owner thread only, after joining workers and freeing data. Closes normal work;
+// readiness remains false when ownership/context cleanup is incomplete. Live HIP
+// errors/configuration stacks are per thread. Closed calls return Deinitialized;
+// Failed pthread infrastructure or an abandoned launch stack is a sticky Unknown,
+// not a resettable HIP error. Normal per-thread error semantics apply while live.
 void ps5hip_runtime_finish();
 bool ps5hip_runtime_terminal();
 bool ps5hip_runtime_gpu_unresolved();
@@ -36,7 +41,7 @@ void **ps5hip_runtime_handle();
 const void *ps5hip_runtime_token_for(const char *name);
 bool ps5hip_runtime_registration_ready() noexcept;
 bool ps5hip_runtime_ready() noexcept;
-// Reads only process-lifetime POD, safe after the runtime State is destroyed.
+// Gate-protected process-lifetime POD; fails closed on synchronization failure.
 bool ps5hip_runtime_finalized() noexcept;
 // After registration, or after destruction: the latter reads saved POD only.
 ps5hip::HipRuntimeObservation ps5hip_runtime_observation() noexcept;
