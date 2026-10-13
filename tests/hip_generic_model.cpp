@@ -40,13 +40,18 @@ public:
             at+=length+1;
         }
         check(dispatch);
-#ifdef PS5HIP_GENERIC_TITLE
+#ifdef PS5HIP_MEMORY_FILL_TITLE
+        check(submits<=6);const unsigned iteration=0,seed=(submits-1)%2;
+        const unsigned fill_sizes[]{1,73,257},n=fill_sizes[(submits-1)/2];
+#elif defined(PS5HIP_GENERIC_TITLE)
         check(submits<=11);const unsigned sequence=submits<=1?1:submits<=4?2:3;
         const unsigned iteration=submits-(sequence==1?1:sequence==2?2:5),seed=iteration+sequence*17;
 #else
         check(submits<=7);const unsigned iteration=submits-1,seed=iteration;
 #endif
+#ifndef PS5HIP_MEMORY_FILL_TITLE
         const unsigned sizes[]{1,63,64,65,127,193,257},n=sizes[iteration];
+#endif
         check(groups==std::array<uint32_t,3>{(n+63)/64,1,1} && registers.at(0x207)==std::vector<uint32_t>{64,1,1});
         const auto &s=registers.at(0x240),&p=registers.at(0x20c),&r=registers.at(0x212);
         check(s.size()==6 && p.size()==2 && r.size()==2 && r[1]==(iteration%2?0x1008cu:0x8cu));
@@ -56,7 +61,11 @@ public:
         const auto *k=reinterpret_cast<const uint8_t*>(arg);const auto input=read(k,8),output=read(k+8,8);
         check(read(k+16,4)==n);containing(input,n*4);containing(output,n*4);
         const auto *in=reinterpret_cast<const unsigned*>(input);auto *out=reinterpret_cast<unsigned*>(output);
+#ifndef PS5HIP_MEMORY_FILL_TITLE
         for(unsigned i=0;i<n;++i)check(in[i]==((i*37u+seed*1231u)^0x951dac37u));
+#endif
+        // Fill variant intentionally consumes actual backing, including injected bad fills.
+        // Its independent host oracle must detect a no-op or stale input, not this transport.
         if(mode=="submit")return -7;if(mode=="throw")throw std::runtime_error("submit");if(mode=="unknown")throw 42;
         if(mode!="missing") {
             if(iteration%2){for(unsigned g=0;g<groups[0];++g){unsigned sum=0;for(unsigned i=g*64;i<n&&i<(g+1)*64;++i)sum+=in[i];out[g]=sum;}}
@@ -91,3 +100,17 @@ extern "C" int32_t sceKernelMapDirectMemory(void **pointer,size_t bytes,int prot
     a.cpu=cpu;next_address+=bytes;std::memset(cpu,0xa5,bytes);*pointer=cpu;return 0;}
 extern "C" int32_t sceKernelMunmap(void *pointer,size_t bytes){for(auto &entry:allocations)if(entry.second.cpu==pointer){check(entry.second.bytes==bytes);if(mode=="cleanup"&&pointer==code_pointer)return -1;dispose(entry.second);return 0;}return -1;}
 extern "C" int32_t sceKernelReleaseDirectMemory(int64_t physical,size_t bytes){check(allocations.at(physical).bytes==bytes);allocations.erase(physical);++releases;return 0;}
+
+#ifdef PS5HIP_MEMORY_FILL_TITLE
+#define __HIP_PLATFORM_AMD__ 1
+#include <hip/hip_runtime_api.h>
+extern "C" hipError_t __real_hipMemset(void*,int,size_t);
+extern "C" hipError_t __wrap_hipMemset(void *p,int value,size_t bytes) {
+    static unsigned calls=0;const unsigned at=calls++%8;
+    if(mode=="fill-noop" && at==1)return hipSuccess;
+    if(mode=="fill-stale" && at>=4 && at<=6)return hipSuccess;
+    if(mode=="fill-byte" && at==1)value=0x24;
+    if(mode=="fill-offset" && at==2)p=static_cast<unsigned char*>(p)+1;
+    return __real_hipMemset(p,value,bytes);
+}
+#endif

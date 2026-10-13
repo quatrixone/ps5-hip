@@ -16,7 +16,7 @@ from fat_binary_fixture_test import section
 from native_import_libraries_test import read_imports, nid
 from probe_host_registration import audit_image, load_regions
 import struct
-from native_vector_title import PROFILE, profile_for, provenance_files, validate_routes_compiler, validate_generic_compiler, validate_matmul_compiler, validate_build, audit_roundtrip, validate_hipify_compiler, validate_workers_compiler, audit_workers_agc
+from native_vector_title import PROFILE, profile_for, provenance_files, validate_routes_compiler, validate_generic_compiler, validate_memory_fill_compiler, validate_matmul_compiler, validate_build, audit_roundtrip, validate_hipify_compiler, validate_workers_compiler, audit_workers_agc
 
 
 def sha(path):
@@ -29,7 +29,7 @@ def require(condition, message):
 
 
 def compiler_object(probe, kernel):
-    return probe / {"hip_routes": "ps5/routes.o", "hip_generic": "ps5/routes.o",
+    return probe / {"hip_routes": "ps5/routes.o", "hip_generic": "ps5/routes.o", "hip_memory_fill": "ps5/routes.o",
                     "hip_matmul": "ps5-O2/matmul.o", "hipify": "ps5/translated.o", "hip_workers_main": "ps5/threads.o", "hip_workers_init": "ps5/threads.o"}[kernel]
 
 
@@ -90,7 +90,7 @@ def audit_startup(disassembly, image=None, kernel="hip_vector"):
     require("<__hipUnregisterFatBinary>" in body("__hip_module_dtor"), "genuine compiler unregister missing")
     result = {"install_order": ["shell", "vector_finalizer", "_init", "main"],
               "compiler_atexit_unregister": True, "native_executed": False}
-    if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         entry = profile_for(kernel)["client_entry"]
         require("<" + entry + ">" in body("main") and body(entry), "renamed genuine title client not called by wrapper")
         require(ctor.count("<__hipRegisterFunction>") == len(profile_for(kernel)["kernel_names"]), "compiler registrations missing from linked title")
@@ -132,7 +132,7 @@ def audit_startup(disassembly, image=None, kernel="hip_vector"):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference-root", type=Path, required=True)
-    parser.add_argument("--kernel", choices=("hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"), default="hip_vector")
+    parser.add_argument("--kernel", choices=("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"), default="hip_vector")
     parser.add_argument("--routes-probe", type=Path, help="Completed pinned --title-entry compiler-only output")
     parser.add_argument("--generic-probe", type=Path, help="Completed pinned generic --title-entry compiler-only output")
     parser.add_argument("--matmul-probe", type=Path, help="Completed pinned matmul title-entry compiler-only output")
@@ -145,7 +145,7 @@ def main():
     kernel = args.kernel
     profile = profile_for(kernel)
     require((kernel == "hip_routes") == bool(args.routes_probe), "--routes-probe is required only for hip_routes")
-    require((kernel == "hip_generic") == bool(args.generic_probe), "--generic-probe is required only for hip_generic")
+    require((kernel in ("hip_generic", "hip_memory_fill")) == bool(args.generic_probe), "--generic-probe is required only for hip_generic/hip_memory_fill")
     require((kernel == "hip_matmul") == bool(args.matmul_probe), "--matmul-probe is required only for hip_matmul")
     require((kernel == "hipify") == bool(args.hipify_probe), "--hipify-probe is required only for hipify")
     require((kernel in ("hip_workers_main", "hip_workers_init")) == bool(args.workers_probe), "--workers-probe is required only for worker profiles")
@@ -175,11 +175,11 @@ def main():
     require(sha(fixture_manifest) == evidence["raw_file_hashes"][fixture_manifest.name]["sha256"], "fixture manifest changed")
     combined = fixture_root / "ps5-vector-add-gfx1013-device-wchar4.o"
     compiler_inputs = {}
-    if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         probe = (args.workers_probe if kernel in ("hip_workers_main", "hip_workers_init") else args.hipify_probe if kernel == "hipify" else args.routes_probe if kernel == "hip_routes" else args.matmul_probe if kernel == "hip_matmul" else args.generic_probe).resolve()
         combined = compiler_object(probe, kernel)
         compiler_receipt = probe / "receipt.json"
-        validator = validate_workers_compiler if kernel in ("hip_workers_main", "hip_workers_init") else validate_hipify_compiler if kernel == "hipify" else validate_routes_compiler if kernel == "hip_routes" else validate_matmul_compiler if kernel == "hip_matmul" else validate_generic_compiler
+        validator = validate_workers_compiler if kernel in ("hip_workers_main", "hip_workers_init") else validate_hipify_compiler if kernel == "hipify" else validate_routes_compiler if kernel == "hip_routes" else validate_matmul_compiler if kernel == "hip_matmul" else validate_memory_fill_compiler if kernel == "hip_memory_fill" else validate_generic_compiler
         compiler_report = validator(compiler_receipt.read_bytes(), combined.read_bytes(), ROOT)
         for name, digest in compiler_report["artifacts"].items():
             path = (probe / name).resolve()
@@ -252,7 +252,7 @@ def main():
             "launch.cpp", "native_memory.cpp", "native_data.cpp", "native_launch.cpp", "submission.cpp", "agc_backend.cpp")]
     clients = [ROOT / "tools/hip_vector_title.cpp", ROOT / "tools/native_shell_exit_probe.cpp"]
     clients += ([ROOT / "tools/hip_vector_control.cpp", ROOT / "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
-                [ROOT / "src/hip_launch_profile.cpp"] if kernel in ("hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else [ROOT / "tools/hip_routes_control.cpp"])
+                [ROOT / "src/hip_launch_profile.cpp"] if kernel in ("hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else [ROOT / "tools/hip_routes_control.cpp"])
     if kernel in ("hip_workers_main", "hip_workers_init"):
         clients += [ROOT / "tools/hip_workers_client.cpp", ROOT / "tools/hip_workers_agc.cpp"]
     tracked = [*core, *clients, *sorted((ROOT / "include/ps5hip").glob("*.h")),
@@ -264,6 +264,8 @@ def main():
         authority, native_authority]
     if kernel == "hip_routes":
         tracked += [ROOT / n for n in ("tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md")]
+    elif kernel == "hip_memory_fill":
+        tracked += [ROOT / n for n in ("tests/hip_generic.hip", "tests/hip_memory_fill_client.h", "tools/probe_hip_generic.py", "docs/HIP_MEMORY_FILL_TITLE.md")]
     elif kernel == "hip_generic":
         tracked += [ROOT / n for n in ("tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md")]
     elif kernel == "hip_matmul":
@@ -273,6 +275,8 @@ def main():
     elif kernel in ("hip_workers_main", "hip_workers_init"):
         tracked += [ROOT / n for n in ("tests/hip_threads.hip", "tools/hip_workers_client.h", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md")]
         tracked += [ROOT / n for n in ("tests/hip_workers_native_title_test.py", "tools/check_canary_log.py", "tools/stage_native_title.py", "tools/verify_native_case.py", "CMakeLists.txt")]
+    if kernel == "hip_memory_fill":
+        tracked += [ROOT/n for n in ['tests/hip_generic_model.cpp', 'tests/hip_generic_title_model.cpp', 'tests/hip_generic_title_test.py', 'tests/hip_generic_title_profile_test.py', 'tools/check_canary_log.py', 'tools/stage_native_title.py', 'tools/verify_native_case.py', 'CMakeLists.txt']]
     source_before = {str(p.relative_to(ROOT)): sha(p) for p in tracked}
     common = ["-O2", "-g", "-Wall", "-Wextra", "-Werror", "-fPIC", "-fvisibility=hidden",
               "-DPS5HIP_WITH_ELEVATION=1", "-DPS5HIP_" + kernel.removeprefix("hip_").upper() + "_TITLE=1", "-DPS5HIP_SHELL_EXIT_PROBE=1",
@@ -331,7 +335,7 @@ def main():
     audits = {"raw_pie": audit_image(pie, symbols, bundle),
               "converted_eboot": audit_image(elf, symbols, bundle, native=True)}
     startup_symbols = "_start,__hip_module_ctor,__hip_module_dtor,ps5hip_install_vector_title_finalizer"
-    if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
         startup_symbols += ",main," + profile["client_entry"]
     startup = run("startup-disassembly", "llvm-objdump-18", "-d", "--no-show-raw-insn",
         "--disassemble-symbols=" + startup_symbols, pie)

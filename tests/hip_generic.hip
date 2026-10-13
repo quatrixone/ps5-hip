@@ -56,6 +56,9 @@ void require(bool yes) {if(!yes)throw std::runtime_error("generic client invaria
 constexpr unsigned poison=0xa5a5a5a5;
 unsigned source(unsigned i,unsigned iteration) {return (i*37u+iteration*1231u)^0x951dac37u;}
 }
+#ifdef PS5HIP_MEMORY_FILL_TITLE
+#include "hip_memory_fill_client.h"
+#else
 int main(int argc,char **argv) {
     const char *mode=argc==2?argv[1]:"seven";
 #ifdef PS5HIP_RUNTIME_MODEL
@@ -166,3 +169,5 @@ int main(int argc,char **argv) {
         ps5hip_runtime_finish();return 20;
     }
 }
+
+#endif

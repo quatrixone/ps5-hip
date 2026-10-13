@@ -9,8 +9,9 @@ from fat_binary_fixture_test import section
 CORE=('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp','hip_runtime.cpp')
 # Transitive local includes of hip_runtime_control.h in a compiled HIP title.
 COMPILER_HEADERS=('hip_runtime_control.h','native_launch.h','submission.h','fat_binary.h','launch.h','native_data.h','native_memory.h','code_object.h')
-def compiler_sources(title_entry):
+def compiler_sources(title_entry, memory_fill=False):
     sources=[ROOT/n for n in ('dependencies.json','tests/hip_generic.hip','tests/hip_generic_second.hip','tools/probe_hip_generic.py','tools/probe_hip_routes.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py')]
+    if memory_fill:sources.append(ROOT/'tests/hip_memory_fill_client.h')
     return sources+([ROOT/'include/ps5hip'/n for n in COMPILER_HEADERS] if title_entry else [])
 NAMES=('affine_words','block_sum')
 
@@ -53,7 +54,8 @@ def check_profiles(audit,names):
     require(set(audit['descriptors'])==set(names),'profile inventory')
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--compiler-only',action='store_true');p.add_argument('--host-only',action='store_true');p.add_argument('--title-entry',action='store_true');args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--compiler-only',action='store_true');p.add_argument('--host-only',action='store_true');p.add_argument('--title-entry',action='store_true');p.add_argument('--memory-fill',action='store_true');args=p.parse_args()
+    require(not args.memory_fill or args.title_entry,'memory-fill requires title entry')
     require(not args.title_entry or args.compiler_only,'title-entry requires compiler-only')
     ref=args.reference_root.resolve();out=args.output.resolve();require(not out.exists(),'fresh output required');out.mkdir(parents=True)
     commands=[];inputs={}
@@ -65,7 +67,7 @@ def main():
     sources=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'src/agc_backend.cpp',ROOT/'tests/hip_generic.hip',ROOT/'tests/hip_generic_model.cpp',ROOT/'tests/hip_launch_profile_test.cpp',pathlib.Path(__file__),ROOT/'tools/probe_hip_routes.py',ROOT/'tools/probe_host_registration.py',ROOT/'tools/build_canaries.py',ROOT/'tests/fat_binary_fixture_test.py',ROOT/'tests/native_import_libraries_test.py',ROOT/'tests/native_agc_imports_test.py',*list((ROOT/'include/ps5hip').glob('*.h'))]
     sources += [ROOT/'tests/hip_generic_second.hip',ROOT/'tests/hip_generic_recipe_test.py',ROOT/'docs/BOUNDED_HIP_RUNTIME.md']
     if args.compiler_only:
-        sources=compiler_sources(args.title_entry)
+        sources=compiler_sources(args.title_entry,args.memory_fill)
     before={str(p.relative_to(ROOT)):sha(p) for p in sources}
     try:
         _,stage,libs,inputs=prepared_inputs(ref);lock=json.loads((ROOT/'dependencies.json').read_text())
@@ -81,7 +83,8 @@ def main():
                 label=host+('-extra' if extra else '');d=out/label;d.mkdir();obj=d/'routes.o'
                 cmd=[wrapper if host=='ps5' else tools['clang++'],'-x','hip','-B'+str(pathlib.Path(tools['ld.lld']).resolve().parent),'--offload-arch=gfx1013','-mcode-object-version=5','-mno-wavefrontsize64','-D__HIP_PLATFORM_AMD__','-std=c++17','-O2','-fno-fast-math','-c',ROOT/'tests/hip_generic.hip','--hip-path='+str(stage),'-I'+str(stage/'include'),'-include','__clang_hip_runtime_wrapper.h','--rocm-device-lib-path='+str(libs),'--hip-device-lib=ockl-workitem-only.bc','--hip-device-lib=oclc_abi_version_500.bc','--hip-device-lib=oclc_isa_version_1013.bc','-o',obj]
                 if extra:cmd+=['-DPS5HIP_GENERIC_EXTRA_KERNEL=1']
-                if args.title_entry:cmd+=['-DPS5HIP_GENERIC_TITLE=1','-Dmain=ps5hip_generic_client_main','-I'+str(ROOT/'include')]
+                if args.title_entry:cmd+=['-DPS5HIP_GENERIC_TITLE=1','-Dmain='+('ps5hip_memory_fill_client_main' if args.memory_fill else 'ps5hip_generic_client_main'),'-I'+str(ROOT/'include')]
+                if args.memory_fill:cmd+=['-DPS5HIP_MEMORY_FILL_TITLE=1']
                 if host=='ps5':cmd+=['-Xarch_device','-fno-short-wchar']
                 if host=='linux-model':cmd+=['-DPS5HIP_RUNTIME_MODEL=1','-Xarch_host','-fsanitize=address,undefined','-Xarch_host','-fno-omit-frame-pointer']
                 _,trace=run(label+'-driver',cmd+['-###']);require_device_linker(trace,tools['ld.lld']);run(label+'-compile',cmd)
@@ -95,7 +98,7 @@ def main():
                 (d/'observed.json').write_text(json.dumps(audit,indent=2)+'\n');check_profiles(audit,names)
                 hostread,_=run(label+'-host-readobj',[tools['llvm-readobj'],'--sections','--symbols','--relocations',obj]);disasm,_=run(label+'-host-disassembly',[tools['llvm-objdump'],'-dr',obj])
                 if args.title_entry:
-                    require(re.search(r'^    Name: _Z26ps5hip_generic_client_mainiPPc \(',hostread,re.M) and not re.search(r'^    Name: main \(',hostread,re.M),'renamed generic title entry missing')
+                    require(re.search(r'^    Name: '+('_Z30ps5hip_memory_fill_client_mainiPPc' if args.memory_fill else '_Z26ps5hip_generic_client_mainiPPc')+r' \(',hostread,re.M) and not re.search(r'^    Name: main \(',hostread,re.M),'renamed generic title entry missing')
                 cases.append({'profile':label,'kernels':names,'wrapper':audit_wrapper(section(obj.read_bytes(),b'.hipFatBinSegment'),hostread,host),'registration':audit_registration(disasm,names),**audit})
         # A separately compiled, real second HIP constructor is unsupported. Keep
         # both objects and their init arrays; no hand-written registration substitute.
@@ -127,7 +130,7 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
                     stdout,stderr=run(label+'-'+mode,[binary,mode],expected);validate_model(stdout+stderr,mode,expected,3 if extra else 2);models.append({'variant':label,'mode':mode,'exit_code':expected})
             if not args.host_only:native=native_proof(ref,out,core,common,run,inputs,adapter=policy)
         require(before=={str(p.relative_to(ROOT)):sha(p) for p in sources},'source drift');require(all(sha(pathlib.Path(p))==v for p,v in inputs.items()),'input drift');require(all(sha(pathlib.Path(tools[n]))==v for n,v in tool_hashes.items()),'tool drift')
-        receipt={'schema':2,'compiler_only':args.compiler_only,'classification':'bounded-generic-runtime-offline-pass','title_entry':args.title_entry,'hardware_validated':False,'sources':before,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':v,'version':versions[n]} for n,v in tool_hashes.items()},'cases':cases,'second_module_registration':second_registration,'models':models,'native':native,'limits':['Host callbacks are not ISA emulation; native link is not execution.','Single thread/module; caller proves kernel indexing bounds.','SDK/resource/static host support trees not fully inventoried; not hermetic.']}
+        receipt={'schema':2,'compiler_only':args.compiler_only,'memory_fill':args.memory_fill,'classification':'bounded-generic-runtime-offline-pass','title_entry':args.title_entry,'hardware_validated':False,'sources':before,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':v,'version':versions[n]} for n,v in tool_hashes.items()},'cases':cases,'second_module_registration':second_registration,'models':models,'native':native,'limits':['Host callbacks are not ISA emulation; native link is not execution.','Single thread/module; caller proves kernel indexing bounds.','SDK/resource/static host support trees not fully inventoried; not hermetic.']}
         receipt['artifacts']={str(p.relative_to(out)):sha(p) for p in out.rglob('*') if p.is_file()};(out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('Generic offline proof passed')
     except BaseException as error:
         (out/'failure.json').write_text(json.dumps({'error':repr(error),'sources_before':before,'inputs_before':inputs,'commands':commands},indent=2)+'\n');raise

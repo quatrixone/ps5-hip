@@ -58,11 +58,13 @@ GENERIC_PROFILE = {
     "combined_object_sha256": "b454e1dc47c7b97aa487fd7ddbf8ca0d3438df2a875853509be6582f7620c5c8",
     "bundle_sha256": "07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974",
     "code_sha256": "793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7", "code_bytes": 4664,
-    "compiler_receipt_sha256": "a6e017d2873c567a2509f86886febd449afdb8c5fb25220b376b031661a35691",
+    "compiler_receipt_sha256": "febc6436621b1fb670cc65d52737af6043c7cdb0a22ef3c6d173400e1ad9dfbf",
     "sequence_launches": [0, 1, 3, 7], "dispatches": 11,
     "per_sequence_sizes": [1, 63, 64, 65, 127, 193, 257], "static_lds_bytes": 256,
     "zero_sequence_scope": "prebackend state within this process; not zero-work finalization",
 }
+
+MEMORY_FILL_PROFILE = {'target': 'gfx1013', 'kernel_names': ['affine_words', 'block_sum'], 'client_entry': '_Z30ps5hip_memory_fill_client_mainiPPc', 'combined_object_sha256': '7d3b52a67ddc6517662eb10b495e776280aae5478ef5c2e599ba7e4952a8e29d', 'bundle_sha256': '07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974', 'code_sha256': '793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7', 'code_bytes': 4664, 'compiler_receipt_sha256': 'eef246d7df359bd1d05af4d2039cbc534af7af780a51fb71051e60310a6f3b70', 'dispatches': 6, 'exact_values': 662, 'output_words': 746, 'input_words': 746, 'fills': 24, 'sizes': [1, 73, 257], 'rounds': 2, 'guard_words': 7}
 
 HIPIFY_PROFILE = {
     "target": "gfx1013", "kernel_names": ["translated_add"],
@@ -107,6 +109,8 @@ def profile_for(kernel):
         return PROFILE
     if kernel == "hip_routes":
         return ROUTES_PROFILE
+    if kernel == "hip_memory_fill":
+        return MEMORY_FILL_PROFILE
     if kernel == "hip_generic":
         return GENERIC_PROFILE
     if kernel == "hip_matmul":
@@ -119,7 +123,7 @@ def profile_for(kernel):
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
 
 
 def validate_fself(container, elf):
@@ -197,9 +201,11 @@ def validate_profile(receipt, source_root):
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
                  ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel in ("hip_workers_main", "hip_workers_init") else
                  ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
+                 ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tests/hip_memory_fill_client.h", "tools/probe_hip_generic.py", "docs/HIP_MEMORY_FILL_TITLE.md"] if kernel == "hip_memory_fill" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
                  ["src/hip_launch_profile.cpp", "tests/hip_tiled_matmul_blockdim.hip", "tools/probe_hip_matmul.py", "docs/HIP_MATMUL_TITLE.md"] if kernel == "hip_matmul" else
                  ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
+    if kernel == "hip_memory_fill":required += ['tests/hip_generic_model.cpp', 'tests/hip_generic_title_model.cpp', 'tests/hip_generic_title_test.py', 'tests/hip_generic_title_profile_test.py', 'tools/check_canary_log.py', 'tools/stage_native_title.py', 'tools/verify_native_case.py', 'CMakeLists.txt']
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
             raise ValueError("genuine HIP vector title source provenance mismatch: " + name)
@@ -263,18 +269,19 @@ def validate_routes_compiler(raw_receipt, combined, source_root):
     return report
 
 
-def validate_generic_compiler(raw_receipt, combined, source_root):
-    selected=GENERIC_PROFILE
+def validate_generic_compiler(raw_receipt, combined, source_root, *, memory_fill=False):
+    selected=MEMORY_FILL_PROFILE if memory_fill else GENERIC_PROFILE
     if hashlib.sha256(raw_receipt).hexdigest()!=selected["compiler_receipt_sha256"] or hashlib.sha256(combined).hexdigest()!=selected["combined_object_sha256"]:
         raise ValueError("generic title compiler/combined binding mismatch")
     report=json.loads(raw_receipt)
     from probe_hip_generic import compiler_sources, ROOT
-    validate_compiler_dependencies(report,source_root,[str(p.relative_to(ROOT)) for p in compiler_sources(True)])
+    validate_compiler_dependencies(report,source_root,[str(p.relative_to(ROOT)) for p in compiler_sources(True,memory_fill)])
     if report.get("schema")!=2 or report.get("compiler_only") is not True or report.get("title_entry") is not True or report.get("hardware_validated") is not False or report.get('models')!=[]:
         raise ValueError("generic title compiler mode missing")
     for name,digest in report["sources"].items():
         if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:
             raise ValueError("generic title compiler source changed: "+name)
+    if report.get("memory_fill",False) is not memory_fill:raise ValueError("generic fill variant mismatch")
     cases=[c for c in report["cases"] if c["profile"]=="ps5"]
     if len(cases)!=1 or cases[0]["kernels"]!=selected["kernel_names"] or cases[0]["registration"]["register_function_calls"]!=2:
         raise ValueError("generic genuine compiler registration inventory")
@@ -288,6 +295,10 @@ def validate_generic_compiler(raw_receipt, combined, source_root):
             hashlib.sha256(section(combined,b".hip_fatbin")).hexdigest()!=selected["bundle_sha256"]):
         raise ValueError("generic title device binding mismatch")
     return report
+
+
+def validate_memory_fill_compiler(raw_receipt,combined,source_root):
+    return validate_generic_compiler(raw_receipt,combined,source_root,memory_fill=True)
 
 
 def validate_matmul_compiler(raw_receipt, combined, source_root):
@@ -431,6 +442,9 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     elif kernel == "hip_routes":
         validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                  (provenance / "routes-combined.o").read_bytes(), source_root)
+    elif kernel == "hip_memory_fill":
+        validate_memory_fill_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                  (provenance / "routes-combined.o").read_bytes(), source_root)
     elif kernel == "hip_generic":
         validate_generic_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
