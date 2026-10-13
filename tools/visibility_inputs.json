@@ -1,0 +1,41 @@
+{
+  "report_sha256": "52f0ca3bcc578fa07d12f7abbfda33461d6d0bc9bbcf3e29a1e91abdd5c11fd8",
+  "sources": {
+    "kernels/visibility.hip": "acd81d62bf8a10401cf35d7c19b083ceadb17187aaae6e0fdd77d027ade00821",
+    "tools/probe_visibility_compiler.py": "1e892dca1dddf1ac1a305fd66498447b04e75c3072eff7d2e7439bb7070b8f00",
+    "tools/build_canaries.py": "b9742a3dcb4e0f2429747a4b8afbf1611ab6cabd971d2d01b5037bf7a6ebf8b1"
+  },
+  "objects": {
+    "gfx1013": {
+      "sha256": "aa4bd3a48309bbae3e844bd262a303147daa48a793c3850cda2b490d66b15c2b",
+      "bytes": 4120
+    },
+    "gfx1030": {
+      "sha256": "8ab439c88583f4a0dea3fa945ff974d26efe7db0dd13ee14434ca991695c57dd",
+      "bytes": 4120
+    }
+  },
+  "artifacts": {
+    "comparison.json": "52f0ca3bcc578fa07d12f7abbfda33461d6d0bc9bbcf3e29a1e91abdd5c11fd8",
+    "gfx1013-O1/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O1/driver.txt": "7e0c802a4fc31e3103647d8b192755d11e9843c8805811513f543d046bbb04ca",
+    "gfx1013-O1/isa.txt": "67cca39bb47a37f5ec3a8f604ff9c2ec229fdaf177b88b307a0a8477827868f1",
+    "gfx1013-O1/metadata.txt": "d960c2156e90bfecdc965c120d52b9623dfe9eea6b77656cf4a86db53689cdd4",
+    "gfx1013-O1/visibility.hsaco": "7b49e6848d1712a56105aaf1eb277a17c9a8b18cc129bfadda7463af4e2d71ad",
+    "gfx1013-O2/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1013-O2/driver.txt": "d8d25edd1e8d7dcf376ed6793d8fc1ca0ea700b6d933542a706d2aff35edd8aa",
+    "gfx1013-O2/isa.txt": "2bcd016caace1d7a9c7845251f615c96d7beb25c74fa4d75bc4131d1d560a10c",
+    "gfx1013-O2/metadata.txt": "c0aac2cd93d2ba95117cec37875b79abe91925340da7f51c64ce8a0025a83375",
+    "gfx1013-O2/visibility.hsaco": "aa4bd3a48309bbae3e844bd262a303147daa48a793c3850cda2b490d66b15c2b",
+    "gfx1030-O1/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O1/driver.txt": "5eb863f9fab0f2ce7169bd423f9266f8a76dd27112a2657f17250f2f4e3b3943",
+    "gfx1030-O1/isa.txt": "c973e971f35783ce04e2f1c9255d4df662aa45538cc0064b70c8928c5e21e62d",
+    "gfx1030-O1/metadata.txt": "cf9098c3b1db2b78422bf34d09bd1f69a62fa1f88ab900a296becb1dde959d09",
+    "gfx1030-O1/visibility.hsaco": "3636cb5f3f1dc9cc8015ef7ccf7ff21dcf0f238954cf4fee971fe2e14907e74b",
+    "gfx1030-O2/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gfx1030-O2/driver.txt": "be4f044554d3d46047ccc749ac543be2288c8ded72c3c39d47c7c4c1d4bed972",
+    "gfx1030-O2/isa.txt": "67f6d537600f62b865750fd72ff381ed4a8421490dfeb062f8dedd0fa3a9bd50",
+    "gfx1030-O2/metadata.txt": "e814a6c6f6f83224b9042aef03d1acd352dda24b50a20ae6351d8d18c1092da8",
+    "gfx1030-O2/visibility.hsaco": "8ab439c88583f4a0dea3fa945ff974d26efe7db0dd13ee14434ca991695c57dd"
+  }
+}

@@ -71,6 +71,10 @@ uint32_t bits(float value) {
     for (;;) ::sleep(1);
 }
 
+#ifdef PS5HIP_CANARY_DEPENDENT_VISIBILITY
+#include "native_visibility.h"
+void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object, const std::vector<uint8_t> &image) { visibility::run(queue, object, image); }
+#else
 void validate(const Memory &output
 #ifdef PS5HIP_CANARY_FP32_MATH
               , const Memory &input
@@ -210,12 +214,15 @@ void run(ps5hip::SubmissionQueue &queue, const ps5hip::CodeObject &object,
 #endif
 }
 #endif
+#endif
 } // namespace
 
 int main() {
     const char *kernel =
 #if defined(PS5HIP_RUNTIME_ONLY)
         "runtime";
+#elif defined(PS5HIP_CANARY_DEPENDENT_VISIBILITY)
+        "dependent_visibility";
 #elif defined(PS5HIP_CANARY_FP32_MATH)
         "fp32_math";
 #elif defined(PS5HIP_CANARY_VECTOR_ADD_TWICE)
