@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "upstream_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "base_patch_sha256": "79dd6d608ae1a6e5b2f43029d256fa0ee2af8ae45dabb3fda004fc8bb2368dad",
+  "apply_after": "ps5-platform.patch",
+  "patch_order": [
+    "ps5-lifetime.patch",
+    "ps5-device-aot.patch"
+  ],
+  "patches": {
+    "ps5-device-aot.patch": "3d2bb402d6beaff2427d3ae199911cf035169ecda9913476e99b3b520571afa7",
+    "ps5-lifetime.patch": "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b"
+  },
+  "files": {
+    "rocclr/device/devprogram.cpp": {
+      "base_sha256": "d8fe40952d070e60f56cc68be126948a247ca3120853b960321857b68ed122e0",
+      "adapted_sha256": "0ed766e1836cb69ffc0ee0c43b94aa4b383f7d2ad374c868c2e1c28ccd5e38e4"
+    },
+    "rocclr/platform/program.cpp": {
+      "base_sha256": "8c3f068acad37a2ee13ef983eb597dca83168463d45593044cb251df803b9751",
+      "adapted_sha256": "b76b1d031316a7584f35cec42b2dd713f1119acb01def7fa2b0c35818b1f34f2"
+    },
+    "rocclr/thread/thread.hpp": {
+      "base_sha256": "fda06e7570c29c4d5e711b6d692c20710882ff730f563eda2504de50a4bdef8d",
+      "adapted_sha256": "a0cb0c34927181a8e82e37c7e2bbdafbe869e560c2fca3703fcf1a2311f99aae"
+    },
+    "rocclr/os/os_posix.cpp": {
+      "base_sha256": "0693ec41b159be4a01b898b7daaf98a7484f2fde72c997d8c1d8ea3f756c0db2",
+      "adapted_sha256": "403b815cc5d8063a5fd4ac582000a063a2048dec5e1096dea16c846366b2060a"
+    },
+    "rocclr/platform/commandqueue.cpp": {
+      "base_sha256": "4b13ee86b691fee88744345632bc5e2682f68fc09d385164a75feb7c52385cd4",
+      "adapted_sha256": "28b28a7fb9dc723ffbf846a7b9b483ca87e45ee1059f1fe7312acc5386b5ff9e"
+    },
+    "rocclr/platform/runtime.cpp": {
+      "base_sha256": "03efe65889a42384a6babe2c8483c69c38cf4d2006d890a9553945373ae59b70",
+      "adapted_sha256": "d5fc4e72e304b1e3aef06f1151f389d2a082dd015d02b42867b1554873e29bad"
+    },
+    "rocclr/thread/semaphore.hpp": {
+      "base_sha256": "57f227262b94fd29d77e415379fdc1a222ec45d157bab8d4aeff2d37d69e5646",
+      "adapted_sha256": "bfb33b4578474ec88723b936f24edb3aa5d48f82915475bb2a8080b4ffa411ec"
+    },
+    "rocclr/os/alloc.cpp": {
+      "base_sha256": "dee6738636197fc33e8ed9d69ed2efb390351ed9dbf7beaec0f0f19612debd13",
+      "adapted_sha256": "1205402ae98b86fa2be575c4dcff4b820039ecc3e84a56e6f86e47313d801027"
+    },
+    "rocclr/thread/thread.cpp": {
+      "base_sha256": "00e75fa32b58b8d3e954d6277c90afbc8fec9bd9174538495bab9219d2c50ab1",
+      "adapted_sha256": "26bf38f2b92e1f0495ff3066868379f3221bd1b67b0ac45a5af18a0206d09c5e"
+    },
+    "rocclr/utils/concurrent.hpp": {
+      "base_sha256": "d8e465a6716a6b620e6a0d199f42c50ca2d244d24273ea3107ea8f5dfa81bda2",
+      "adapted_sha256": "f9fa36bc1d714de7cb68f53b4411d84302abeee026d6c6fe183c009af4709742"
+    },
+    "rocclr/platform/commandqueue.hpp": {
+      "base_sha256": "5f310d1c8687c0eb763f1179b6c3775504e2c39a0ae770266625380f322b05de",
+      "adapted_sha256": "41c98df312dcf81a7f699af593cbf8329fee60c8f3a3c2933c3c68c4b27d45f0"
+    },
+    "rocclr/platform/command.hpp": {
+      "base_sha256": "2349ccfe1d753eb9251c4074c2acba9f169fc6cb9659e581cdb37641c630bc98",
+      "adapted_sha256": "4058e96b81e5693f91eb68e20481e2e02c1c2d19b587307ea5a5ba20c91d6004"
+    },
+    "rocclr/platform/command.cpp": {
+      "base_sha256": "c3e2cc01e37786db0a935edc5994fdd8850b0e9ea0658627b85f9312f67836e8",
+      "adapted_sha256": "06f0f9fdbd828a77b06007da53f3fcdad0eaee6ce3ff21f10aea54c815415b18"
+    }
+  },
+  "defines": [
+    "PS5HIP_CLR_PLATFORM",
+    "PS5HIP_CLR_NO_GRAPHICS",
+    "WITH_PS5_DEVICE"
+  ],
+  "hardware_executed": false
+}

@@ -1,0 +1,75 @@
+--- a/rocclr/device/devprogram.cpp
++++ b/rocclr/device/devprogram.cpp
+@@ -1874,11 +1874,18 @@
+ // ================================================================================================
+ bool Program::load() {
+   bool ret;
++#if defined(WITH_PS5_DEVICE)
++  // AOT only: the PS5 adapter validates and owns the exact executable image.
++  ret = type() == TYPE_EXECUTABLE &&
++      setKernels(const_cast<void*>(binary().first), binary().second,
++                 BinaryFd().first, BinaryFd().second, BinaryURI());
++#else
+   if (isLC()) {
+     ret = loadLC();
+   } else {
+     ret = loadHSAIL();
+   }
++#endif
+   if (ret) {
+     coLoaded_ = 1;
+   }
+--- a/rocclr/platform/program.cpp
++++ b/rocclr/platform/program.cpp
+@@ -1,3 +1,7 @@
++#if defined(WITH_PS5_DEVICE)
++#include "ps5hip/code_object.h"
++#endif
++#include <memory>
+ /* Copyright (c) 2008 - 2021 Advanced Micro Devices, Inc.
+ 
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+@@ -112,6 +116,14 @@
+                                   bool make_copy, amd::option::Options* options,
+                                   const amd::Program* same_prog, amd::Os::FileDesc fdesc,
+                                   size_t foffset, std::string uri) {
++#if defined(WITH_PS5_DEVICE)
++  ScopedLock ps5Lock(&programLock_);
++  if (symbolTable_ != nullptr) return CL_INVALID_OPERATION;
++  try {
++    if (image == nullptr || length < 64) return CL_INVALID_BINARY;
++    (void)ps5hip::inspect_code_object(static_cast<const uint8_t*>(image), length);
++  } catch (...) { return CL_INVALID_BINARY; }
++#endif
+   if (image != NULL &&  !amd::Elf::isElfMagic((const char*)image)) {
+     if (device.settings().useLightning_) {
+       return CL_INVALID_BINARY;
+@@ -597,6 +609,10 @@
+ 
+ bool Program::load(const std::vector<Device*>& devices) {
+   ScopedLock sl(&programLock_);
++#if defined(WITH_PS5_DEVICE)
++  // Symbols are referenced by captured kernels; never replace a published table.
++  if (symbolTable_ != nullptr) return true;
++#endif
+ 
+   for (const auto& it : devicePrograms_) {
+     const Device& device = *(it.first);
+@@ -623,6 +639,17 @@
+     }
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  // Publish only a completely loaded AOT symbol table; no stack-owned kernels.
++  std::unique_ptr<symbols_t> pending(new symbols_t);
++  for (const auto& entry : devicePrograms_) {
++    for (const auto& kernel : entry.second->kernels()) {
++      if (!(*pending)[kernel.first].setDeviceKernel(*entry.first, kernel.second)) return false;
++    }
++  }
++  delete symbolTable_;
++  symbolTable_ = pending.release();
++#endif
+   return true;
+ }
+ 

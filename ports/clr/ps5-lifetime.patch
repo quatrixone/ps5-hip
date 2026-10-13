@@ -1,0 +1,353 @@
+--- a/rocclr/thread/thread.hpp
++++ b/rocclr/thread/thread.hpp
+@@ -60,7 +60,7 @@
+   //! The thread's name.
+   const std::string name_;
+   //! Current running state.
+-  volatile ThreadState state_;
++  std::atomic<ThreadState> state_;
+   //! The argument passed to run()
+   void* data_;
+ 
+@@ -95,7 +95,7 @@
+   void create();
+ 
+   //! Set the current thread state.
+-  void setState(ThreadState state) { state_ = state; }
++  void setState(ThreadState state) { state_.store(state, std::memory_order_release); }
+ 
+   //! Set the thread-local _thread variable (used by current()).
+   void setCurrent();
+@@ -131,6 +131,9 @@
+ 
+   //! Start the thread execution
+   bool start(void* data = NULL);
++#if defined(PS5HIP_CLR_PLATFORM)
++  bool join(); // Single external owner; failed join must retain the enclosing queue.
++#endif
+ 
+   //! Resume the thread
+   void resume();
+@@ -142,7 +145,7 @@
+   virtual bool isWorkerThread() const { return false; }
+ 
+   //! Get the current thread state.
+-  ThreadState state() const { return state_; }
++  ThreadState state() const { return state_.load(std::memory_order_acquire); }
+ 
+   //! Return this thread's stack base.
+   address stackBase() const { return stackBase_; }
+--- a/rocclr/os/os_posix.cpp
++++ b/rocclr/os/os_posix.cpp
+@@ -428,8 +428,23 @@
+   return thread->main();
+ }
+ 
++#if defined(PS5HIP_CLR_PLATFORM)
++bool Thread::join() {
++  if (handle_ == nullptr) return true;
++  const pthread_t target = (pthread_t)handle_;
++  if (::pthread_equal(target, ::pthread_self())) return false;
++  if (::pthread_join(target, nullptr) != 0) return false;
++  handle_ = nullptr; // Never reuse a consumed pthread identity.
++  return true;
++}
++#endif
++
+ bool Os::isThreadAlive(const Thread& thread) {
++#if defined(PS5HIP_CLR_PLATFORM)
++  return thread.handle() != nullptr && thread.state() < Thread::FINISHED;
++#else
+   return ::pthread_kill((pthread_t)thread.handle(), 0) == 0;
++#endif
+ }
+ 
+ static size_t tlsSize = 0;
+@@ -477,8 +492,9 @@
+     ::pthread_attr_setstacksize(&threadAttr, thread->stackSize_ + guardsize + tlsSize);
+   }
+ 
+-  // We never plan the use join, so free the resources now.
++#if !defined(PS5HIP_CLR_PLATFORM)
+   ::pthread_attr_setdetachstate(&threadAttr, PTHREAD_CREATE_DETACHED);
++#endif
+ 
+   pthread_t handle = 0;
+   if (0 != ::pthread_create(&handle, &threadAttr, (void* (*)(void*)) & Thread::entry, thread)) {
+--- a/rocclr/platform/commandqueue.cpp
++++ b/rocclr/platform/commandqueue.cpp
+@@ -48,7 +48,7 @@
+     // Initialize the queue
+     thread_.Init(this);
+   } else {
+-    if (thread_.state() >= Thread::INITIALIZED) {
++    if (thread_.state() == Thread::INITIALIZED) {
+       ScopedLock sl(queueLock_);
+       thread_.start(this);
+       queueLock_.wait();
+@@ -57,6 +57,10 @@
+ }
+ 
+ bool HostQueue::terminate() {
++#if defined(PS5HIP_CLR_PLATFORM)
++  // A worker cannot wait for its own marker or completion. Retain the queue.
++  if (!AMD_DIRECT_DISPATCH && amd::Thread::current() == &thread_) return false;
++#endif
+   if (AMD_DIRECT_DISPATCH) {
+     if (vdev() != nullptr) {
+       Command* marker = new Marker(*this, true);
+@@ -105,6 +109,9 @@
+     }
+   }
+ 
++#if defined(PS5HIP_CLR_PLATFORM)
++  if (!AMD_DIRECT_DISPATCH && !thread_.join()) return false;
++#endif
+   if (Agent::shouldPostCommandQueueEvents()) {
+     Agent::postCommandQueueFree(as_cl(this->asCommandQueue()));
+   }
+@@ -180,12 +187,18 @@
+       ScopedLock sl(queueLock_);
+       while ((command = queue_.dequeue()) == NULL) {
+         if (!thread_.acceptingCommands_) {
+-          return;
++          break;
+         }
+         queueLock_.wait();
+       }
+     }
+ 
++    if (command == nullptr) {
++      // Even already-completed synchronous commands retain a batch reference.
++      // Retire it before destroying the virtual device, outside queueLock_.
++      virtualDevice->flush(head, true);
++      return;
++    }
+     command->retain();
+ 
+     // Process the command's event wait list.
+--- a/rocclr/platform/runtime.cpp
++++ b/rocclr/platform/runtime.cpp
+@@ -134,7 +134,7 @@
+ }
+ 
+ uint ReferenceCountedObject::release() {
+-  uint newCount = referenceCount_.fetch_sub(1, std::memory_order_relaxed) - 1;
++  uint newCount = referenceCount_.fetch_sub(1, std::memory_order_acq_rel) - 1;
+   if (newCount == 0) {
+     if (terminate()) {
+       delete this;
+--- a/rocclr/thread/semaphore.hpp
++++ b/rocclr/thread/semaphore.hpp
+@@ -23,6 +23,8 @@
+ 
+ #include "top.hpp"
+ #include "utils/util.hpp"
++#include "os/alloc.hpp"
++#include <new>
+ 
+ #include <atomic>
+ #if defined(__linux__) || defined(PS5HIP_CLR_PLATFORM)
+@@ -53,6 +55,9 @@
+ #endif /*!_WIN32*/
+ 
+ public:
++  // HeapObject's malloc overload does not honor this class's 64-byte alignment.
++  void* operator new(size_t n) { void* p = AlignedMemory::allocate(n, 64); if (!p) throw std::bad_alloc(); return p; }
++  void operator delete(void* p) { AlignedMemory::deallocate(p); }
+   Semaphore();
+   ~Semaphore();
+ 
+--- a/rocclr/os/alloc.cpp
++++ b/rocclr/os/alloc.cpp
+@@ -19,6 +19,7 @@
+  THE SOFTWARE. */
+ 
+ #include "os/alloc.hpp"
++#include <new>
+ #include "os/os.hpp"
+ #include "utils/util.hpp"
+ 
+@@ -77,7 +78,7 @@
+   Os::releaseMemory(static_cast<address>(ptr) - offset, size);
+ }
+ 
+-void* HeapObject::operator new(size_t size) { return malloc(size); }
++void* HeapObject::operator new(size_t size) { void* p = malloc(size); if (!p) throw std::bad_alloc(); return p; }
+ 
+ void HeapObject::operator delete(void* obj) { free(obj); }
+ 
+--- a/rocclr/thread/thread.cpp
++++ b/rocclr/thread/thread.cpp
+@@ -36,11 +36,20 @@
+ }
+ 
+ void Thread::create() {
+-  created_ = new Semaphore();
+-  lock_ = new Semaphore();
+-  suspend_ = new Semaphore();
+-
+-  selfSuspendLock_ = new Monitor();
++  created_ = lock_ = suspend_ = nullptr;
++  selfSuspendLock_ = nullptr;
++  try {
++    created_ = new Semaphore();
++    lock_ = new Semaphore();
++    suspend_ = new Semaphore();
++    selfSuspendLock_ = new Monitor();
++  } catch (...) {
++    delete selfSuspendLock_;
++    delete suspend_;
++    delete lock_;
++    delete created_;
++    throw; // No OS thread exists until create() returns successfully.
++  }
+ 
+   data_ = NULL;
+   handle_ = NULL;
+--- a/rocclr/utils/concurrent.hpp
++++ b/rocclr/utils/concurrent.hpp
+@@ -49,10 +49,10 @@
+   }
+ 
+   //! Return the pointer value.
+-  T* ptr() { return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) & ~TagMask); }
++  static T* ptr(const TaggedPointerHelper* value) { return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(value) & ~TagMask); }
+ 
+   //! Return the tag value.
+-  size_t tag() const { return reinterpret_cast<uintptr_t>(this) & TagMask; }
++  static size_t tag(const TaggedPointerHelper* value) { return reinterpret_cast<uintptr_t>(value) & TagMask; }
+ };
+ 
+ }  // namespace details
+@@ -130,12 +130,12 @@
+ template <typename T, int N> inline ConcurrentLinkedQueue<T, N>::~ConcurrentLinkedQueue() {
+   typename Node::Ptr head = head_;
+   typename Node::Ptr tail = tail_;
+-  while (head->ptr() != tail->ptr()) {
+-    Node* node = head->ptr();
+-    head = head->ptr()->next_;
++  while (Node::TaggedPointerHelper::ptr(head) != Node::TaggedPointerHelper::ptr(tail)) {
++    Node* node = Node::TaggedPointerHelper::ptr(head);
++    head = Node::TaggedPointerHelper::ptr(head)->next_;
+     reclaimNode(node);
+   }
+-  reclaimNode(head->ptr());
++  reclaimNode(Node::TaggedPointerHelper::ptr(head));
+ }
+ 
+ template <typename T, int N> inline void ConcurrentLinkedQueue<T, N>::enqueue(T elem) {
+@@ -145,18 +145,18 @@
+ 
+   for (;;) {
+     typename Node::Ptr tail = tail_.load(std::memory_order_acquire);
+-    typename Node::Ptr next = tail->ptr()->next_.load(std::memory_order_acquire);
++    typename Node::Ptr next = Node::TaggedPointerHelper::ptr(tail)->next_.load(std::memory_order_acquire);
+     if (likely(tail == tail_.load(std::memory_order_acquire))) {
+-      if (next->ptr() == NULL) {
+-        if (tail->ptr()->next_.compare_exchange_weak(next, Node::ptr(node, next->tag() + 1),
++      if (Node::TaggedPointerHelper::ptr(next) == NULL) {
++        if (Node::TaggedPointerHelper::ptr(tail)->next_.compare_exchange_weak(next, Node::ptr(node, Node::TaggedPointerHelper::tag(next) + 1),
+                                                      std::memory_order_acq_rel,
+                                                      std::memory_order_acquire)) {
+-          tail_.compare_exchange_strong(tail, Node::ptr(node, tail->tag() + 1),
++          tail_.compare_exchange_strong(tail, Node::ptr(node, Node::TaggedPointerHelper::tag(tail) + 1),
+                                         std::memory_order_acq_rel, std::memory_order_acquire);
+           return;
+         }
+       } else {
+-        tail_.compare_exchange_strong(tail, Node::ptr(next->ptr(), tail->tag() + 1),
++        tail_.compare_exchange_strong(tail, Node::ptr(Node::TaggedPointerHelper::ptr(next), Node::TaggedPointerHelper::tag(tail) + 1),
+                                       std::memory_order_acq_rel, std::memory_order_acquire);
+       }
+     }
+@@ -167,20 +167,20 @@
+   for (;;) {
+     typename Node::Ptr head = head_.load(std::memory_order_acquire);
+     typename Node::Ptr tail = tail_.load(std::memory_order_acquire);
+-    typename Node::Ptr next = head->ptr()->next_.load(std::memory_order_acquire);
++    typename Node::Ptr next = Node::TaggedPointerHelper::ptr(head)->next_.load(std::memory_order_acquire);
+     if (likely(head == head_.load(std::memory_order_acquire))) {
+-      if (head->ptr() == tail->ptr()) {
+-        if (next->ptr() == NULL) {
++      if (Node::TaggedPointerHelper::ptr(head) == Node::TaggedPointerHelper::ptr(tail)) {
++        if (Node::TaggedPointerHelper::ptr(next) == NULL) {
+           return NULL;
+         }
+-        tail_.compare_exchange_strong(tail, Node::ptr(next->ptr(), tail->tag() + 1),
++        tail_.compare_exchange_strong(tail, Node::ptr(Node::TaggedPointerHelper::ptr(next), Node::TaggedPointerHelper::tag(tail) + 1),
+                                       std::memory_order_acq_rel, std::memory_order_acquire);
+       } else {
+-        T value = next->ptr()->value_;
+-        if (head_.compare_exchange_weak(head, Node::ptr(next->ptr(), head->tag() + 1),
++        T value = Node::TaggedPointerHelper::ptr(next)->value_;
++        if (head_.compare_exchange_weak(head, Node::ptr(Node::TaggedPointerHelper::ptr(next), Node::TaggedPointerHelper::tag(head) + 1),
+                                         std::memory_order_acq_rel, std::memory_order_acquire)) {
+           // we can reclaim head now
+-          reclaimNode(head->ptr());
++          reclaimNode(Node::TaggedPointerHelper::ptr(head));
+           return value;
+         }
+       }
+@@ -192,10 +192,10 @@
+   for (;;) {
+     typename Node::Ptr head = head_.load(std::memory_order_acquire);
+     typename Node::Ptr tail = tail_.load(std::memory_order_acquire);
+-    typename Node::Ptr next = head->ptr()->next_.load(std::memory_order_acquire);
++    typename Node::Ptr next = Node::TaggedPointerHelper::ptr(head)->next_.load(std::memory_order_acquire);
+     if (likely(head == head_.load(std::memory_order_acquire))) {
+-      if (head->ptr() == tail->ptr()) {
+-        if (next->ptr() == NULL) {
++      if (Node::TaggedPointerHelper::ptr(head) == Node::TaggedPointerHelper::ptr(tail)) {
++        if (Node::TaggedPointerHelper::ptr(next) == NULL) {
+           return true;
+         }
+       }
+--- a/rocclr/platform/commandqueue.hpp
++++ b/rocclr/platform/commandqueue.hpp
+@@ -289,7 +289,7 @@
+   Command* tail_;   //!< Tail of the batch list
+ 
+   //! True if this command queue is active
+-  bool isActive_;
++  std::atomic<bool> isActive_;
+ };
+ 
+ class DeviceQueue : public CommandQueue {
+--- a/rocclr/platform/command.hpp
++++ b/rocclr/platform/command.hpp
+@@ -169,7 +169,7 @@
+   const ProfilingInfo& profilingInfo() const { return profilingInfo_; }
+ 
+   //! Return this command's execution status.
+-  int32_t status() const { return status_.load(std::memory_order_relaxed); }
++  int32_t status() const { return status_.load(std::memory_order_acquire); }
+ 
+   //! Insert the given \a callback into the callback stack.
+   bool setCallback(int32_t status, CallBackFunction callback, void* data);
+--- a/rocclr/platform/command.cpp
++++ b/rocclr/platform/command.cpp
+@@ -133,12 +133,12 @@
+     if (callbacks_ != (CallBackEntry*)0) {
+       processCallbacks(status);
+     }
+-    if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_relaxed)) {
++    if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_acq_rel)) {
+       // Somebody else beat us to it, let them deal with the release/signal.
+       return false;
+     }
+   } else {
+-    if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_relaxed)) {
++    if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_acq_rel)) {
+       // Somebody else beat us to it, let them deal with the release/signal.
+       return false;
+     }
+@@ -189,7 +189,7 @@
+     ClPrint(LOG_ERROR, LOG_CMD, "command is reset before complete current status :%d",
+             currentStatus);
+   }
+-  if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_relaxed)) {
++  if (!status_.compare_exchange_strong(currentStatus, status, std::memory_order_acq_rel)) {
+     ClPrint(LOG_ERROR, LOG_CMD, "Failed to reset command status");
+     return false;
+   }
