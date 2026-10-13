@@ -234,10 +234,15 @@ memory management, reassess the CLR route before accumulating incompatible APIs.
 
 The [bounded ROCm6.2.4 comparison](RUNTIME_ARCHITECTURE.md) selects one small
 native HIP compatibility runtime for the first serialized examples. Five unchanged
-CLR units compile on Linux; only the small NDRange unit compiles with the PS5 SDK
-under the measured backend-neutral profile. OS/thread dependencies and the actual
-Device/Program/VirtualDevice boundary remain substantial porting work. Configure
-failures identify missing local COMGR dependencies, not platform impossibility.
+CLR units compiled on Linux in that initial comparison. The subsequent
+[upstream platform checkpoint](../evidence/offline-upstream-clr-platform.json)
+rebuilds 27 upstream units plus a pthread TLS helper and exercises actual
+two-queue memory/kernel commands on a synthetic CPU backend, including failures
+and retirement. PS5 OS and explicit graphics-rejection adaptations now compile;
+selected BSD API calls link against the SDK. Combined native linking, native OS
+behavior, public HIP initialization and a real GPU backend remain unqualified.
+The early configure failures identified missing local COMGR dependencies, not
+platform impossibility.
 Reassess CLR before general asynchronous scheduling, cross-stream event dependencies,
 callback workers, deferred shared pools, graph capture or VMM. This decision does
 not qualify G2/G3, HIP API behavior, device libraries or the ggml client.

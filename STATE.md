@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Upstream ROCclr platform checkpoint passed offline:** actual two-queue
+  write/copy/kernel/read commands preserve dependencies, memory lifetime and
+  failure propagation on a synthetic CPU backend. The compute profile rebuilds
+  27 upstream units plus pthread TLS, rejects unsupported graphics sharing, and
+  compiles its three adapted graphics units with the PS5 SDK. A separate BSD OS
+  adaptation compiles, passes affinity-mask sanitizer tests, and links its selected
+  OS API calls against the real SDK. Combined native linking, native OS behavior
+  and a GPU backend remain open. The validated narrow HIP runtime remains the
+  current implementation; see `evidence/offline-upstream-clr-platform.json`.
+
 - **Upstream block reduction passed on .40:** frozen `7b41b24` ran three
   dispatches with 16 groups of 1,024 threads and 4,096 bytes of dynamic LDS.
   All 48 signed outputs and 72 guard checks matched across changed inputs and
@@ -1084,3 +1094,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 SDK | 9628fa6 source | offline | pass: D2D integration, 64 tests | evidence/offline-device-copy-sdk-integration.json | reduction and multi-module
 
 - 2026-10-13 | G3/G4 reduction | 7b41b24 | .40 | pass: 3 dispatches,48 outputs,72 guards,natural teardown | evidence/native-hip-reduction.json | combined SDK integration
+
+- 2026-10-13 | CLR | pinned65d174c | offline | partial-pass: real CPU commands,PS5 platform objects | evidence/offline-upstream-clr-platform.json | combined native closure

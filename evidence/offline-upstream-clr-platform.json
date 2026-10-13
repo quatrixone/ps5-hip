@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "classification": "offline-upstream-clr-platform-checkpoint",
+  "upstream_clr_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "evidence": {
+    "cpu_commands": {
+      "path": "results/clr-memory-kernel-qualified-v1/receipt.json",
+      "sha256": "a27dbce8c78d198d280f5720edd0c06bc4c688cc9b0ff743eaaffd8471321f7e"
+    },
+    "adapted_compute": {
+      "path": "results/clr-no-graphics-qualified-v1/receipt.json",
+      "sha256": "5540daa667d7b6361398de91208bb58f0d5a8439978b15ddc805ae01fcc6da67"
+    },
+    "adapted_compute_review": {
+      "path": "results/clr-no-graphics-independent-review-v1/review.json",
+      "sha256": "8d33174361e89ceb4f99652bd2652b7ab048f00785085655a52e91cbb6c778c9"
+    },
+    "native_os": {
+      "path": "results/clr-ps5-platform-v5/receipt.json",
+      "sha256": "210faa3550fbb61e1c4dc86b4d5b8993a56eb169750ad3cc7f715a548453a598"
+    },
+    "native_os_api_link": {
+      "path": "results/clr-os-native-api-v1/receipt.json",
+      "sha256": "06d813d2772fb00d1aaec0615dec48505d4cfebc25dd3c10b3caf480b2f24649"
+    }
+  },
+  "verified": [
+    "Actual upstream HostQueue/Event/Memory/Program/Kernel command path: write, copy, kernel and read across two queues on a synthetic CPU backend.",
+    "Held completion preserves dependent ordering and memory lifetime; failed write prevents downstream commands; eight exact outputs and two memory/two queue retirements.",
+    "Compute profile rebuilds27 upstream units and one pthread TLS helper, links strictly on Linux, and rejects27 graphics-sharing cases in each of two workload modes.",
+    "Adapted context/runtime/graphics units compile with the real PS5 SDK.",
+    "BSD OS unit and affinity-mask ABI compile with the PS5 SDK; portable mask tests pass ASan/UBSan.",
+    "Selected native BSD OS API calls resolve through a strict link against the actual SDK libkernel."
+  ],
+  "architecture": "Keep the validated narrow HIP runtime while qualifying reuse of upstream ROCclr before implementing general asynchronous scheduling.",
+  "native_executed": false,
+  "limits": [
+    "These are separate source snapshots; combined native closure compilation/linking remains pending at this checkpoint.",
+    "No upstream CLR GPU backend or public HIP initialization qualified.",
+    "Native stack, affinity, mapping, physical-memory sysctl and dynamic-loader behavior need console validation; inherited process and /proc services remain unqualified.",
+    "Graphics sharing and native SIGFPE instruction repair explicitly unsupported.",
+    "Linux command backend and kernel metadata are synthetic; no performance or full ROCm compatibility claim."
+  ]
+}
