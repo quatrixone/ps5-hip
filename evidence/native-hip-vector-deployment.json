@@ -1,0 +1,78 @@
+{
+  "source_commit": "038fdb6c30a72decb7df599d50c983b6b8a0e5e0",
+  "image_sha256": "3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4",
+  "kernel": "hip_vector",
+  "registered": true,
+  "launched": false,
+  "hardware_gate_passed": false,
+  "mounted_files": {
+    "eboot.bin": {
+      "bytes": 878706,
+      "sha256": "c259c0fa2d25265a50dca2a0a819f79cb4ffe977e3747f9ec71aa51768d9dc80"
+    },
+    "sce_module/libc.prx": {
+      "bytes": 1284674,
+      "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+    },
+    "lapy.elf": {
+      "bytes": 155032,
+      "sha256": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726"
+    },
+    "results-dir.txt": {
+      "bytes": 21,
+      "sha256": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e"
+    }
+  },
+  "preservation": {
+    "package": "/data/homebrew/PPSA99014.ffpkg.geometry-3d.sha256-591148ba56d977ed2d281b06d3666b9068eed66a72c8f84c9355cc2753b23bec.preserved",
+    "package_sha256": "591148ba56d977ed2d281b06d3666b9068eed66a72c8f84c9355cc2753b23bec",
+    "geometry_3d_result": "/data/ps5-hip/results/ps5-hip-gfx1013-geometry_3d.log.geometry-3d-PID204-app8018.sha256-14c4c2af6a285ed111f9038f2d15a71eacf38b00fb814f801ee0b2ccfa9673b0",
+    "geometry_3d_result_sha256": "14c4c2af6a285ed111f9038f2d15a71eacf38b00fb814f801ee0b2ccfa9673b0"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_file_sha256": {
+    "after.log": "7df6a6bafa8a63747b63ab440d388dc362f3a524dcef9b990b14f10ab91839a9",
+    "before-homebrew.list": "29b16cf5e2dd90b2c9160a6a1a47d169370058f009eeb9312cb7d0a5eca63c63",
+    "before-preservation.log": "76f63ae12e34911a3ea1af83f36455324dfccce68af6644b2754656a6120369a",
+    "before-preserve-image.log": "76f63ae12e34911a3ea1af83f36455324dfccce68af6644b2754656a6120369a",
+    "before-preserve-log.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "before-promote.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "before-promotion.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "before-results.list": "3d6be9d7236ed93daafbdf552c689e1a39d6edf76f49024c533ff3959030aa27",
+    "before-upload.log": "76f63ae12e34911a3ea1af83f36455324dfccce68af6644b2754656a6120369a",
+    "before.log": "76f63ae12e34911a3ea1af83f36455324dfccce68af6644b2754656a6120369a",
+    "final-idle.log": "7df6a6bafa8a63747b63ab440d388dc362f3a524dcef9b990b14f10ab91839a9",
+    "final-results.list": "e2752b0eedeba0e57477d3465d04bac5282f93f168cc9f1bf96312f894a8c541",
+    "mounted-eboot.bin": "c259c0fa2d25265a50dca2a0a819f79cb4ffe977e3747f9ec71aa51768d9dc80",
+    "mounted-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "pre-promote-homebrew.list": "1a4eea5d2f86a60dc63ac4992694e5d840020241a1d8706ac7f223554f9768b7",
+    "preserved-geometry-3d.ffpkg": "591148ba56d977ed2d281b06d3666b9068eed66a72c8f84c9355cc2753b23bec",
+    "preserved-geometry-3d.log": "14c4c2af6a285ed111f9038f2d15a71eacf38b00fb814f801ee0b2ccfa9673b0",
+    "recheck-homebrew.list": "a567d85b4f20243a75a0ac6304af0e860976d8ebda2551e7aaa54d8c9066edbd",
+    "recheck-results.list": "3d6be9d7236ed93daafbdf552c689e1a39d6edf76f49024c533ff3959030aa27",
+    "registration-001.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "registration-002.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "registration-003.log": "3df131115ee447660be709faf13d93845593dcb7e3b133da00edd308eca5f914",
+    "registration-004.log": "3b73b0aeccaf3a740e4a594de1aff992c04a2149c744150033ad20094a450b54",
+    "registration-005.log": "7df6a6bafa8a63747b63ab440d388dc362f3a524dcef9b990b14f10ab91839a9",
+    "release-001-homebrew.list": "1a4eea5d2f86a60dc63ac4992694e5d840020241a1d8706ac7f223554f9768b7",
+    "release-001.log": "b863c680b6f249c3752c4bd4600bf939b2771f65622e6e6221b28b6c068fe039",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "deployment-verified",
+  "target": "console .40 firmware 12.70",
+  "receipt": {
+    "path": "results/hip-vector-deployment-v1/deployment-20261013T054654.433656Z/deployment.json",
+    "sha256": "a0bb18e65b560f43b0785efa07509110693503613aacae93dc2c94db52ddac15"
+  },
+  "independent_review": {
+    "path": "results/hip-vector-deployment-v1/deployment-20261013T054654.433656Z-independent-review.json",
+    "sha256": "06aacb7d5ebc030b0fc0b242bae139c66c908ac8b92f010c2236c856ab8af0d3"
+  }
+}

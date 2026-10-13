@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "classification": "offline-geometry-core-planner-integration-reviewed",
+  "source_commit": "296222d8691fa02260f74d360add6ee2312987c8",
+  "branch": "development/g3-geometry-core-integration",
+  "base_commit": "ce24c01719d0a764299137a271344b2474e9339c",
+  "qualification": {
+    "path": ".local/g3-geometry-core-integration/results/qualify-v2/receipt.json",
+    "sha256": "725a03f3c9fbf6da03d1fff693282fca00d71e88c4f51a7ad40a9bf801bf2479"
+  },
+  "independent_review": {
+    "path": "results/geometry-core-integration-independent-review-v1/review.json",
+    "sha256": "f05164455665e9b946c96ee5593c1955d9f58078d97791dbd4a3735dcc55c052"
+  },
+  "saved_sanitizer_ctests": 63,
+  "reviewed_source_sha256": {
+    "CMakeLists.txt": "00ab3b7acdc05f6c828976875f211a04a286d9928f3448951824dd14899792d5",
+    "include/ps5hip/code_object.h": "b2f553723fb0dc842e50b1703fba64d29a9521337c968b87d5d7ed3c129565ff",
+    "include/ps5hip/launch.h": "da5809c2ad51761e224106ee595e8d4e4755586b2872cfcd6671d26aae9e230d",
+    "src/code_object.cpp": "2f6c3a8da60529019e8c7fc02dc8982ba410798e2807406148d121091872e3ff",
+    "src/launch.cpp": "69c428f65bcfeff01daecdcd32b378d7d57ba009daa9732ad57e54ce6764d434",
+    "tests/planner_integration_test.cpp": "dd72259c5d78d1d77a5e2ed8e0bbc77f4bcaf78ab538d678b2606c34cc8b7b5d",
+    "docs/GEOMETRY_CORE_INTEGRATION.md": "b6c9530e8475b435b160dbe211ff200ba712f9f0d7f69616cf824ff4f1a5a0e1",
+    "tests/geometry_test.cpp": "267811c2f1b28f1a67f689eb73ea7bd33e2658cea4dbc813d99727e8380b4d2f"
+  },
+  "modern_ownership_G4_files_unchanged": 14,
+  "limitations": [
+    "Saved63ASan/UBSan pass evidence rehashed/inspected, not rerun.",
+    "Four genuineO1/O2 geometry objects plus prior planner fixtures checked; no regeneration/nativebuild.",
+    "Pure planner integration does not qualify merged sources on GPU, arbitrary shapes or combinedscratch/LDS/geometry.",
+    "Optional math certificates/old vector transcripts absent as declared."
+  ],
+  "hardware_qualified": false,
+  "full_g3_complete": false
+}

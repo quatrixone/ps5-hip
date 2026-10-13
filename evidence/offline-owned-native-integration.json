@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "classification": "offline-owned-native-launch-integration-reviewed",
+  "source_commit": "7aed16b3fb5c3667cb85b4e4e0908359e954520f",
+  "branch": "development/g3-owned-native-integration",
+  "base_commit": "296222d8691fa02260f74d360add6ee2312987c8",
+  "readiness": {
+    "path": ".local/g3-owned-native-integration/results/ready-v1/readiness.json",
+    "sha256": "91952c9db684be4b2544b08ef83810afa11a845cc7b6214b790e2e7ea70529d0"
+  },
+  "independent_review": {
+    "path": ".local/g3-owned-native-integration/results/independent-review-v1/review.json",
+    "sha256": "a0fcb7d3b8843fc1b5039539f575dc86e0dfc13d9439d9e3181d79e40a89eefa"
+  },
+  "tests": {
+    "tests": 65,
+    "asan_ubsan": true,
+    "receipt": ".local/g3-owned-native-integration/results/qualify-v1/receipt.json",
+    "sha256": "9071b1def4161ccacf873b4b14b9816ffde1fc27c7208f60261086d90d253b69"
+  },
+  "genuine_hip_vector_models": {
+    "cases": 26,
+    "receipt": ".local/g3-owned-native-integration/results/vector-compatibility-v1/receipt.json",
+    "sha256": "eac3b3e7bd8ba0f796fd6163873305cdf4f5889dfd97b6cb537d47dc8cb3ab36",
+    "native_phase_run": false
+  },
+  "reviewed_source_sha256": {
+    "CMakeLists.txt": "6649c46a91533fd2040a4e0d16562e922c956df78f16497428db46ded1756034",
+    "include/ps5hip/native_launch.h": "22059c761422f07f8f2e2c40f1c1646987d727d9a96230cf447b786634b9db3d",
+    "src/native_launch.cpp": "a82f77f34249ea02d5042d4bff06bb15ff1fb7d085ac33d2d647201a7b400d2d",
+    "tests/native_launch_test.cpp": "3c4af22b16eb3091459bac675c8c2d1b08dd4794944c78a46efa25fb76825b55",
+    "tests/native_routes_test.cpp": "dfa78b0f206422e489c352fdaf48255a1c60d8b3c5975137c393fbbc7d4d5378",
+    "tools/hip_vector_control.cpp": "222f5ea44e41e68e6c0de822f0d69cfaaa9e8dc9c0ce51479b682ccb9b67d8b4",
+    "docs/OWNED_NATIVE_LAUNCH.md": "bef00ce9e55c766e141ef81e7250a7382e48a6a887a86dd130ee19c80fd9d59d"
+  },
+  "limitations": [
+    "No native package or GPU execution. No ISA emulation.",
+    "Initial HIP capture/admission unchanged; only exactvector compatibility wrapper used by existing HIP control.",
+    "Generic preparation is structural; caller establishes shader indexing bounds and alignment.",
+    "No private-call/flat route; accepted compilergraph proof is outside this interface.",
+    "ASan model uses bounded mapped shader-window slots without heap redzones; not native allocator safety proof."
+  ],
+  "hardware_qualified": false,
+  "new_hip_admission": false,
+  "full_g3_complete": false,
+  "full_g4_complete": false
+}

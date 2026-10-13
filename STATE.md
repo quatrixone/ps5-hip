@@ -4,6 +4,27 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Genuine HIP vector client passed on .40 and independent audit:** two blocking
+  73-element launches produced 146 exact results, unchanged inputs and intact
+  guards. Compiler unregister, runtime State destruction and allocation closure
+  preceded successful shell exit. PID213/application `0xa018` stopped naturally;
+  matching visible mounts, healthy services and released locks complete the
+  bounded cycle. All 145 inputs and 27 raw files were audited. See
+  `evidence/native-hip-vector.json`. This fixed client does not close broad G4.
+
+- Shared owned native preparation is frozen at `7aed16b`: initial, LDS,
+  buffer-scratch and geometry routes share checked allocation and explicit
+  temporary cleanup. All 65 sanitizer tests, 26 genuine vector host-model cases
+  and independent review passed. Existing HIP admission remains unchanged; the
+  combined helper has no hardware qualification yet. See
+  `evidence/offline-owned-native-integration.json`.
+
+- Geometry joins the shared pure planners in frozen commit `296222d`. All 63
+  saved sanitizer tests and independent review passed. The 14 allocation,
+  submission and HIP control files remain unchanged; this is offline integration,
+  not new runtime admission or a combined hardware qualification. See
+  `evidence/offline-geometry-core-integration.json`.
+
 - **3D geometry fixture passed on .40 and independent audit:** 1,536 exact records
   (24,576 words), 819 logical points and 717 inactive tail positions, unchanged
   inputs/guards and closed allocations. PID204/application `0x8018` finalized
@@ -507,9 +528,9 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-Validate the packaged genuine HIP vector client and continue unified-runtime integration.
+Continue unified-runtime integration after the fixed genuine HIP vector client pass.
 Both wave32 and both measured geometry fixtures have passed.
-Preserve the installed 3D image/result and all earlier retained evidence, including
+Preserve the installed HIP image/result, retained 3D image/result and earlier evidence, including
 the original inconclusive private-call and visibility cycles. Atomic, numerical,
 addressing and broader visibility qualification remain open; isolated fixture
 passes do not close G3.
@@ -803,3 +824,6 @@ including the provider-fixed store and vector candidates.
 
 - 2026-10-13 | G3 geometry | 7bdcea0 | .40:2D384 and3D1536 exact records, bounded cycles independently audited | evidence/native-geometry-3d.json | genuine HIP client next
 - 2026-10-13 | G3 core integration | ce24c01 | scratch/LDS/private planners combined;58 sanitizer tests and independent review passed | evidence/offline-core-planner-integration.json | add geometry
+- 2026-10-13 | G3 geometry integration | 296222d | 63 sanitizer checks and independent review passed | evidence/offline-geometry-core-integration.json | shared owned preparation
+- 2026-10-13 | G4 shared preparation | 7aed16b | 65 sanitizer tests,26 genuine host-model cases and review passed | evidence/offline-owned-native-integration.json | shared HIP runtime
+- 2026-10-13 | G4 native client | 038fdb6 | .40:2 genuine HIP launches,146 exact results,clean unregister/destruction and bounded cycle | evidence/native-hip-vector.json | shared multi-kernel runtime

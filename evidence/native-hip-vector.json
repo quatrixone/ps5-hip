@@ -1,0 +1,123 @@
+{
+  "source_commit": "038fdb6c30a72decb7df599d50c983b6b8a0e5e0",
+  "image_sha256": "3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4",
+  "kernel": "hip_vector",
+  "accepted": true,
+  "script_sha256": "b601e735fa518e5ab4b184b4bbb376887b068d11d1267a4f22e6feb98d5afa72",
+  "manifest_sha256": "61598088dd31ef4150ec29ef802fa559d6d5d156010e25ee8bc6219ec1146db1",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/hip-vector-deployment-v1/deployment-20261013T054654.433656Z/deployment.json",
+      "sha256": "a0bb18e65b560f43b0785efa07509110693503613aacae93dc2c94db52ddac15"
+    },
+    "review": {
+      "path": "results/hip-vector-deployment-v1/deployment-20261013T054654.433656Z-independent-review.json",
+      "sha256": "06aacb7d5ebc030b0fc0b242bae139c66c908ac8b92f010c2236c856ab8af0d3"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "ac99407d6bd44736a90ac7857db6dca989d403eb979ce3893be065aec4376721",
+    "after-post.log": "ac99407d6bd44736a90ac7857db6dca989d403eb979ce3893be065aec4376721",
+    "application.log": "9ef8780932895ad209ca8d5a99c9e469f7553b1edb243d35601162f7be36e25f",
+    "before-close.log": "ac99407d6bd44736a90ac7857db6dca989d403eb979ce3893be065aec4376721",
+    "before-launch.log": "89fa4377ed8ff1b7082a7d58b06c7fd4eaf4336cc48807e99b9ab9b2a711960d",
+    "before-log-check.log": "89fa4377ed8ff1b7082a7d58b06c7fd4eaf4336cc48807e99b9ab9b2a711960d",
+    "before-post-snapshot.log": "ac99407d6bd44736a90ac7857db6dca989d403eb979ce3893be065aec4376721",
+    "before-pre-snapshot.log": "89fa4377ed8ff1b7082a7d58b06c7fd4eaf4336cc48807e99b9ab9b2a711960d",
+    "before.log": "89fa4377ed8ff1b7082a7d58b06c7fd4eaf4336cc48807e99b9ab9b2a711960d",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "c259c0fa2d25265a50dca2a0a819f79cb4ffe977e3747f9ec71aa51768d9dc80",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "c52a9b82e3cf78488573b76bc7e4c206697f5509f25c1a53982be78199183d01",
+    "installed-eboot.bin": "c259c0fa2d25265a50dca2a0a819f79cb4ffe977e3747f9ec71aa51768d9dc80",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "c52a9b82e3cf78488573b76bc7e4c206697f5509f25c1a53982be78199183d01",
+    "klog.log": "06e50cb6e652de285a4589f35eda45f0adad1c229142001dc944f5fcdac9f3ff",
+    "launch-klog.log": "8e37c9cb101cf7da4a9462edf8cf3ff09b96c1c049c7db9d713b4369df10b65d",
+    "launch-response.log": "ed7e4897f0931640c4c7c7ff6863ede516f0078178ba6aab297805bbd7464d38",
+    "launch-shadow-delta.log": "aed009267ad24fdaa72a831f6fab42a4159501e8f841d84363cd7292eb8d05af",
+    "lifecycle-delta.log": "aed009267ad24fdaa72a831f6fab42a4159501e8f841d84363cd7292eb8d05af",
+    "observed.log": "ac99407d6bd44736a90ac7857db6dca989d403eb979ce3893be065aec4376721",
+    "post-snapshot.log": "d5b0bb6c8e845952429df3e2d3e2287bc3d796a3b7d1619a7653becc24d6cc24",
+    "pre-snapshot.log": "d5b0bb6c8e845952429df3e2d3e2287bc3d796a3b7d1619a7653becc24d6cc24",
+    "private-log-absence-before-launch.json": "5eaa89b2a59caf94b5edebfaf2b4b33152085e3ce85c08b1ae30bc8a0b6ebdf5",
+    "private-log-absence.json": "5eaa89b2a59caf94b5edebfaf2b4b33152085e3ce85c08b1ae30bc8a0b6ebdf5",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-genuine-hip-vector-cycle-pass",
+  "hardware_gate_passed": false,
+  "full_g4_complete": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "groups": [
+    2,
+    1,
+    1
+  ],
+  "threads_per_group": [
+    64,
+    1,
+    1
+  ],
+  "dispatches": 2,
+  "elements_per_dispatch": 73,
+  "exact_values": 146,
+  "kernarg_bytes": 288,
+  "compiler_registration_observed": true,
+  "compiler_unregister_observed": true,
+  "runtime_state_destroyed": true,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "hip_vector",
+    "log_sha256": "9ef8780932895ad209ca8d5a99c9e469f7553b1edb243d35601162f7be36e25f",
+    "bytes": 973,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 213,
+    "app_id": "0x0000a018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "receipt": {
+    "path": "results/hip-vector-execution-v1/observation-20261013T055553.088884Z/receipt.json",
+    "sha256": "a86e6e924e09f03d06bf75b55c469dbe07d5654a7abc5de60289a5513155253d"
+  },
+  "independent_review": {
+    "path": "results/hip-vector-execution-v1/observation-20261013T055553.088884Z-independent-review.json",
+    "sha256": "072707bb46b7a1508bd49c96807b7def399ac8c2731aa395ee1e86181b2a9a35"
+  },
+  "limits": [
+    "Only the exact embedded gfx1013 HIP vector client: two blocking 73-value launches, 146 exact results, immutable inputs and full guards, real compiler unregister and completed State destruction.",
+    "Serialized null-stream fixed client only; no arbitrary HIP programs, asynchronous overlap or full G4 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

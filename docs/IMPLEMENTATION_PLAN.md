@@ -8,8 +8,9 @@ hardware computation observation with delayed completion evidence and one bounde
 compiler-spill cycle plus static, dynamic and mixed LDS cycles. Persistent-buffer
 visibility has recovered computation evidence with an inconclusive original cycle.
 Full/partial wave32 and exact 2D/3D geometry fixtures have passing bounded native
-cycles. Broader G3 qualification remains open. G4 has an offline native candidate;
-G5-G12 remain planned.
+cycles. Broader G3 qualification remains open. G4's fixed genuine HIP vector client
+has passed a native cycle with two launches and complete compiler/runtime cleanup;
+broader client qualification remains open. G5-G12 remain planned.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
@@ -195,7 +196,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G1 | Reproducible compiler and platform contract | None | passed offline |
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
-| G4 | Real HIP C++ source compatibility | G3 | native HIP vector candidate ready offline; hardware and broader client qualification pending |
+| G4 | Real HIP C++ source compatibility | G3 | fixed genuine HIP vector client passed native cycle; broader client qualification pending |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | ProsperoAI HIP integration and SDK preview | G5-G6 | planned |

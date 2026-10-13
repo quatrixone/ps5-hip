@@ -16,7 +16,7 @@ structural loader acceptance does not qualify arbitrary compatible-looking code.
 | Atomics | Six relaxed atomic fixture kernels packaged; `../evidence/offline-atomic-native-readiness.json` | Native results, current-substrate review, additional memory orders/scopes and publication semantics |
 | FP32 device math | Fixed numerical corpus and native package prepared; `../evidence/offline-native-math-readiness.json` | Native results under the predeclared numerical policy; broader domains and modes |
 | Addressing, FP16 and linking | Existing loader and pointer checks cover bounded subsets | Native large-offset/legal-alignment cases, FP16/integer boundaries, separate compilation, globals/constants and required relocations |
-| Integrated runtime | Scratch/LDS/private planners combined at `ce24c01`; 58 sanitizer tests and review passed; `../evidence/offline-core-planner-integration.json` | Add geometry, connect shared ownership/HIP launch paths and qualify combined runtime interactions |
+| Integrated runtime | Combined planners at `296222d`, owned preparation at `7aed16b`; 65 sanitizer tests,26 genuine vector host-model cases and review passed; `../evidence/offline-owned-native-integration.json` | Connect broader HIP launch paths and qualify combined runtime interactions; private-call admission remains excluded |
 
 The visibility path completes each queue submission and includes CPU cache
 maintenance. It does not establish GPU synchronization without CPU involvement.
