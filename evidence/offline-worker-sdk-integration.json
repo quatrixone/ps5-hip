@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "classification": "compiler-model-dependency-integration-offline-pass",
+  "source_commit": "3e81d9d",
+  "hardware_executed": false,
+  "sources": {
+    "CMakeLists.txt": "e67416292e6fc201055966b59e21fec6893357b938aeb3b8f575eb63ad39323a",
+    "docs/HIPIFY_NATIVE_BUILD.md": "4e336325ab14c672da3b4d3d8e832a5ab1ad3cdccc1d1d8934855a6d04650048",
+    "docs/HIPIFY_RUNTIME.md": "29af4e2396ae99f7c22ac7981522055384de01262e2bd1f72f03c36979343168",
+    "tests/hip_generic_title_profile_test.py": "b6c5358724bc5df3f91a3c4a126e927b2b1d7b855e522d4a7088443b588f10f2",
+    "tests/hip_matmul_title_profile_test.py": "9ef25f3f86c35c1494a120d822b2633f51eb391a38e9a3ac56c097b7d75757cb",
+    "tests/hipify_native_title_test.py": "d06f43321fa39505dcdefa99b516d0c4b6889374c9ee26bce27a6b5fc687178b",
+    "tests/hipify_runtime_recipe_test.py": "f686f11a23dd9c190325ac01378bbc98d2bf369fd8abdc52f600670b86a0e32a",
+    "tests/hipify_title_test.py": "0d78d9640dd80b9092ad3fd082e7fdd55d4391b4a969574dea4c82a43c99aef8",
+    "tools/build_native_vector_title.py": "5e6c275cb2acfdc6972f1d456e66d399f4acd3f4cf92e4dd3ade03772ba54927",
+    "tools/native_vector_title.py": "ec01c16c784854d8df37ed28a180da39fdd6e10f345a59d072695c875a0e1fe5",
+    "tools/probe_hip_generic.py": "404276fae05eb33d09dd017d59c8981d5951850a728d3223d0ed05e96fb1386d",
+    "tools/probe_hip_matmul.py": "58748797b2abece9229afeb5221d9d32ac6d0a5aca20c51c21c671fc8b508e0c",
+    "tools/probe_hip_threads.py": "6a15c587ab8d235f2070794e8ce32f272c2c2d5182c3070f19b1c66bc9bcb53d",
+    "tools/probe_hipify_runtime.py": "01f7431b78327328ffba01ec8f213b316f4a3c950b4fe56cf2bbdd4ba1b2bb7c"
+  },
+  "proofs": {
+    "integration-sdk-v2": "fe045ddb46bef3bc35e0d7ac4af1d4a4c14436322dd5ce631806d00dfbd81610",
+    "threads-asan-sdk-v1": "e31f9d69a626392ee99770151d4d54b300f089f2e112e2dc370259c53ff85057",
+    "threads-tsan-sdk-v1": "29db8f87fe50bc1ef37ee4d7e676eea7933a2b9bf6a233db5ef8ada25c39fffe",
+    "workers-main-sdk-v1": "9f9ffd3fbf8171712d82c0c65fa69a81e518d3c2038aff34847c7172ac4fe5ac",
+    "workers-init-sdk-v1": "f3925308dbe36b9fe377c5560b430dd411a4e61da84d6a29150e4f7f54518ffc",
+    "hipify-compiler-sdk-v2": "68c28533d8dbf8038e74e4fbc39b0e3d12197026784ebfe38fc5a1660602cfe0",
+    "generic-compiler-sdk-v1": "a6e017d2873c567a2509f86886febd449afdb8c5fb25220b376b031661a35691",
+    "matmul-compiler-sdk-v1": "ebb6e8d2af25756716027ba40d42a2d1b64e01326dafe8b1e898e446b71c8cc6",
+    "hipify-runtime-sdk-v1": "808214cad321cc26a3125c17ec1b80a116a7eae2c59d054c8fed66c21243edbc",
+    "hipify-title-sdk-v1": "041b94460d05d65c0c28d851332f8b42ea20136d56c96e0e5dfc0611bacb41dd",
+    "dependency-qualification-v3": "aadd58ebe933b2f63557beb6c0f68070ea3564616471922d78ac906173f4617f"
+  },
+  "source_review_sha256": "3b7a05191d27c671dd4f4248339c7a75beb4e9637cfe87e9c306cc5b58eef2a4",
+  "integration_review_sha256": "81dca3b0826f5e301a6f86cff1a44b634cf3a7b467c117baa0e2ec33acb366dd",
+  "checks": {
+    "cmake": 59,
+    "threaded_asan": 34,
+    "threaded_cpu_tsan": 16,
+    "worker_main_models": 20,
+    "worker_init_models": 21,
+    "hipify_runtime_models": 19,
+    "hipify_title_cases": 29
+  },
+  "scope": [
+    "Compiler and runtime-model dependency inventories are separate and independently checked.",
+    "Native builders bind and rehash compiler source helpers in addition to artifacts/tools/inputs.",
+    "Three compiler objects and device payloads remain unchanged.",
+    "Previously native-validated worker-init title is now included in this integration line."
+  ],
+  "limits": [
+    "No new console execution or native rebuild in this milestone.",
+    "G3/G4 and later platform gates remain open."
+  ],
+  "preserved_failed_integration_sha256": "b8f462d88307f1f57f905ec8048e19277958525b50319884a89191be23b8140b"
+}

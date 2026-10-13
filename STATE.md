@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Compiler/model dependency split integrated offline:** compiler-only proofs
+  bind their actual sources, headers, tools and recipes; HIPIFY runtime models
+  consume a separate immutable compiler proof. Native builds also rehash imported
+  compiler helpers. Three compiler objects/device payloads remain unchanged.
+  All 59 CMake tests, 34 threaded ASan modes, 16 CPU-only TSAN modes, refreshed
+  main/init worker models and HIPIFY lifecycle checks passed independent review.
+  The previously native-tested worker-init title is included in this line.
+  See `evidence/offline-worker-sdk-integration.json`. This milestone adds no
+  hardware execution; broader G3/G4 remain open.
+
 - **Worker-side queue initialization passed on .40:** frozen `a7e6da7`
   observed no backend after the 17 host checks, then actual AGC initialization
   on worker A. Four A/B/A/main dispatches produced 660 exact values with 1,084
@@ -11,7 +21,7 @@ Updated: 2026-10-13, America/New_York.
   Both workers joined and PID327/application `0x4018` stopped naturally after
   complete cleanup. Independent audit verified freshness, mounts, services and
   locks. See `evidence/native-hip-workers-init.json`. The runtime is already
-  integrated; this title variant remains separate. Overlapping callers remain
+  integrated, including this title variant. Overlapping callers remain
   unqualified.
 
 - **Validated threaded runtime integrated:** `a5b89aa` brings the native-tested
