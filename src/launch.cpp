@@ -31,21 +31,21 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
                                     const BufferScratchPlan *scratch, bool lds = false, bool flat_call = false,
-                                    const GeometryShape *geometry = nullptr) {
+                                    const GeometryShape *geometry = nullptr, bool reduction = false) {
     const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
     const auto &k = *found;
-    const auto rejection = geometry ? (lds ? geometry_lds_launch_rejection(k) : geometry_launch_rejection(k)) : flat_call ? flat_call_launch_rejection(k) : lds ? lds_launch_rejection(k) :
+    const auto rejection = reduction ? reduction_lds_launch_rejection(k) : geometry ? (lds ? geometry_lds_launch_rejection(k) : geometry_launch_rejection(k)) : flat_call ? flat_call_launch_rejection(k) : lds ? lds_launch_rejection(k) :
         (scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k));
     if (!rejection.empty()) throw ObjectError(rejection);
-    const auto threads = geometry ? geometry->threads : std::array<uint32_t,3>{64,1,1};
+    const auto threads = geometry ? geometry->threads : std::array<uint32_t,3>{reduction ? 1024u : 64u,1,1};
     const auto groups = geometry ? geometry->groups : std::array<uint32_t,3>{groups_x,1,1};
     if (geometry) check_geometry(*geometry);
-    require(k.max_workgroup_size >= 64, "kernel cannot support the initial 64-thread group");
+    require(k.max_workgroup_size >= (reduction ? 1024u : 64u), "kernel cannot support the initial 64-thread group");
     require(k.required_workgroup == std::array<uint32_t, 3>{} ||
             k.required_workgroup == threads, "required workgroup shape mismatch");
-    if (!geometry) require(groups_x != 0 && groups_x <= UINT32_MAX / 64, "invalid initial dispatch dimensions");
+    if (!geometry) require(groups_x != 0 && groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid initial dispatch dimensions");
     check_range(module); check_range(kernarg_storage);
     require(module.address >= window_begin && module.address < window_end &&
             module.bytes <= window_end - module.address, "shader allocation outside PS5 code window");
@@ -83,6 +83,9 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
                 result.kernargs[base + field.offset + byte] = uint8_t(values[i] >> (byte * 8));
         }
     }
+    if(reduction) {
+        result.kernargs[152]=0; result.kernargs[153]=0x10; //4096 little-endian dynamic LDS bytes.
+    }
     for (size_t i = 0; i < arguments.size(); ++i) {
         const auto &arg = arguments[i];
         const auto &layout = k.arguments[i];
@@ -106,7 +109,7 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
 
 static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const BufferScratchPlan *scratch, const LdsPlan *lds = nullptr,
                                              const std::array<uint32_t, 2> *flat_init = nullptr,
-                                             const GeometryShape *geometry = nullptr) {
+                                             const GeometryShape *geometry = nullptr, bool reduction = false) {
     require(launch.entry_address >= window_begin && launch.entry_address < window_end &&
             launch.entry_address % 256 == 0, "invalid dispatch entry address");
     if (geometry) {
@@ -124,8 +127,19 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
         }
         require(std::equal(expected.begin(), expected.end(), launch.kernargs.end() - 256),
                 "geometry implicit arguments disagree with dispatch shape");
-    } else require(launch.threads == std::array<uint32_t, 3>{64, 1, 1} && launch.groups_x != 0 &&
-                   launch.groups_x <= UINT32_MAX / 64, "invalid dispatch shape");
+    } else require(launch.threads == std::array<uint32_t, 3>{reduction ? 1024u : 64u, 1, 1} && launch.groups_x != 0 &&
+                   launch.groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid dispatch shape");
+    if(reduction) {
+        require(launch.rsrc1==0x60af0080u && !scratch && !geometry && !flat_init && lds && launch.kernargs.size()==288,"invalid reduction dispatch ABI");
+        std::array<uint8_t,256> expected{};
+        const std::array<uint64_t,13> values{{launch.groups_x,1,1,1024,1,1,0,0,0,0,0,0,1}};
+        for(size_t i=0;i<detail::cov5_geometry.size();++i) {
+            const auto &f=detail::cov5_geometry[i];
+            for(unsigned b=0;b<f.size;++b) expected[f.offset+b]=uint8_t(values[i]>>(8*b));
+        }
+        expected[121]=0x10;
+        require(std::equal(expected.begin(),expected.end(),launch.kernargs.begin()+32),"reduction implicit arguments changed");
+    }
     require(flat_init ? launch.user_sgpr_count == 8 :
             (launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6), "invalid dispatch user-SGPR count");
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count &&
@@ -167,8 +181,9 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     registers(0xb830, program, 2);
     registers(0xb848, resources, 2);
     registers(0xb8a0, &launch.rsrc3, 1);
-    // Two waves per group, no occupancy cap, one CU group: Mesa's GFX10 formula gives zero.
-    const uint32_t limits = 0;
+    // Pinned Mesa GFX10: SIMD_DEST_CNTL when waves/group is divisible by4.
+    // Existing64-thread routes have2 waves; bounded reduction has32 waves.
+    const uint32_t limits = reduction ? (1u<<22) : 0;
     registers(0xb854, &limits, 1);
     registers(0xb81c, launch.threads.data(), 3);
     if (flat_init) {
@@ -250,6 +265,17 @@ LdsLaunch prepare_lds_launch(
     require(lds.allocated_bytes != 0, "zero LDS allocation does not require LDS launch");
     dispatch.rsrc2 |= lds.rsrc2_lds;
     return {std::move(dispatch), lds};
+}
+LdsLaunch prepare_reduction_lds_launch(const CodeObject &object,const std::string &name,
+    GpuRange module,GpuRange kernarg_storage,uint32_t groups_x,const std::vector<LaunchArgument> &arguments) {
+    auto d=prepare_launch(object,name,module,kernarg_storage,groups_x,arguments,nullptr,true,false,nullptr,true);
+    auto lds=plan_lds(0,4096); d.rsrc2|=lds.rsrc2_lds;
+    return {std::move(d),lds};
+}
+std::vector<uint32_t> encode_reduction_lds_dispatch(const LdsLaunch &launch) {
+    require(launch.lds.static_bytes==0 && launch.lds.dynamic_bytes==4096 &&
+        launch.lds.allocated_bytes==4096 && launch.lds.rsrc2_lds==0x40000,"invalid reduction LDS plan");
+    return encode_dispatch(launch.dispatch,nullptr,&launch.lds,nullptr,nullptr,true);
 }
 std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch) {
     const auto expected = plan_lds(launch.lds.static_bytes, launch.lds.dynamic_bytes);

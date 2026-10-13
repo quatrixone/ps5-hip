@@ -350,7 +350,9 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
     return image;
 }
 
-static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false, bool geometry = false) {
+static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false, bool geometry = false, bool reduction = false) {
+    if (reduction && (k.rsrc1 != 0x60af0080u || k.group_bytes || k.max_workgroup_size < 1024 || k.kernarg_size != 288 ||
+        k.sgpr_spills || k.vgpr_spills)) return "unsupported reduction resources";
     if (k.wave_size != 32) return "initial launch supports wave32 only";
     if (flat_call) {
         if (!k.private_bytes || k.properties != 0x429 || k.rsrc2 != 0x91 || !k.hidden_arguments.empty())
@@ -362,7 +364,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
         return "private storage requires a qualified scratch implementation";
     if (lds) {
         if (k.group_bytes > 65536 || k.properties != 0x409 || k.rsrc2 != (geometry ? 0x98cu : 0x8cu) ||
-            (geometry ? (k.group_bytes != 512 || k.hidden_arguments.empty()) : !k.hidden_arguments.empty()))
+            (geometry ? (k.group_bytes != 512 || k.hidden_arguments.empty()) : (!reduction && !k.hidden_arguments.empty())))
             return "unsupported LDS entry contract";
     } else if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
     if (k.preload || k.rsrc3) return "preload/resource3 requires additional launch support";
@@ -394,12 +396,18 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     if (k.hidden_arguments.empty() && k.kernarg_size != explicit_end)
         return "unaccounted initial kernarg storage";
     if (!k.hidden_arguments.empty()) {
-        if (k.hidden_arguments.size() != detail::cov5_geometry.size() ||
+        if (k.hidden_arguments.size() != detail::cov5_geometry.size() + (reduction ? 1u : 0u) ||
             k.kernarg_size != base + 256 || k.kernarg_size > 65536 ||
             !power2(k.kernarg_alignment) || k.kernarg_alignment < 8 || k.kernarg_alignment > 4096)
             return "unsupported COv5 implicit geometry storage";
         std::array<bool, 13> seen{};
+        bool dynamic_seen = false;
         for (const auto &arg : k.hidden_arguments) {
+            if (reduction && arg.kind == "hidden_dynamic_lds_size") {
+                if (dynamic_seen || arg.offset != base + 120 || arg.size != 4) return "invalid dynamic LDS argument";
+                dynamic_seen = true;
+                continue;
+            }
             const auto field = std::find_if(detail::cov5_geometry.begin(), detail::cov5_geometry.end(),
                                            [&](const auto &item) { return arg.kind == item.kind; });
             if (field == detail::cov5_geometry.end()) return "unsupported hidden argument kind";
@@ -416,6 +424,13 @@ std::string initial_launch_rejection(const Kernel &k) { return launch_rejection(
 std::string buffer_scratch_launch_rejection(const Kernel &k) { return launch_rejection(k, true); }
 
 std::string lds_launch_rejection(const Kernel &k) { return launch_rejection(k, false, true); }
+std::string reduction_lds_launch_rejection(const Kernel &k) {
+    if (k.arguments.size() != 4 || k.hidden_arguments.empty()) return "unsupported reduction ABI";
+    for (size_t i=0;i<4;++i)
+        if (k.arguments[i].offset != i*8 || k.arguments[i].size != 8 ||
+            k.arguments[i].kind != (i<3 ? "global_buffer" : "by_value")) return "unsupported reduction arguments";
+    return launch_rejection(k, false, true, false, false, true);
+}
 
 std::string flat_call_launch_rejection(const Kernel &k) { return launch_rejection(k, true, false, true); }
 

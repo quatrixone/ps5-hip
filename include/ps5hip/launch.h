@@ -6,7 +6,7 @@
 namespace ps5hip {
 
 // Explicit checked routes; private-call entry is deliberately excluded.
-enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry, GeometryLds };
+enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry, GeometryLds, ReductionLds };
 
 struct GpuRange { uint64_t address, bytes; };
 
@@ -79,6 +79,11 @@ LdsLaunch prepare_lds_launch(
     GpuRange kernarg_storage, uint32_t groups_x,
     const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes = 0);
 std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch);
+
+// Bounded 1024x1x1 wave32 reduction with4096 dynamic LDS bytes.
+LdsLaunch prepare_reduction_lds_launch(const CodeObject &, const std::string &,
+    GpuRange, GpuRange, uint32_t groups_x, const std::vector<LaunchArgument> &);
+std::vector<uint32_t> encode_reduction_lds_dispatch(const LdsLaunch &);
 
 struct FlatCallLaunch {
     InitialLaunch dispatch; // First six user words; the selected route requires count eight.

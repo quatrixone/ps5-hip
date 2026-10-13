@@ -13,10 +13,15 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     NativeLaunchRequest request;
     request.shape.groups=groups;request.shape.threads=threads;
     request.dynamic_lds_bytes=uint32_t(shared);
-    const bool geometry=threads!=std::array<uint32_t,3>{64,1,1};
+    const bool reduction=threads==std::array<uint32_t,3>{1024,1,1};
+    const bool geometry=!reduction && threads!=std::array<uint32_t,3>{64,1,1};
     // Never drop one resource to force a kernel through a different entry ABI.
     require(!(kernel.private_bytes && (kernel.group_bytes || shared || geometry)),"combined scratch resources unsupported");
-    if(kernel.private_bytes) request.route=NativeLaunchRoute::BufferScratch;
+    if(reduction) {
+        require(shared==4096 && !kernel.private_bytes && !kernel.group_bytes,"unsupported reduction LDS request");
+        request.route=NativeLaunchRoute::ReductionLds;
+    }
+    else if(kernel.private_bytes) request.route=NativeLaunchRoute::BufferScratch;
     else if(geometry && kernel.group_bytes) {
         require(!shared && threads==std::array<uint32_t,3>{8,8,1},"unsupported combined geometry/LDS shape or dynamic size");
         request.route=NativeLaunchRoute::GeometryLds;
@@ -26,7 +31,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     else if(geometry) request.route=NativeLaunchRoute::Geometry;
     else request.route=NativeLaunchRoute::Initial;
     validate_capture_layout(kernel,request.route);
-    require(kernel.max_workgroup_size>=64 && (kernel.required_workgroup==std::array<uint32_t,3>{} || kernel.required_workgroup==threads),"required workgroup mismatch");
+    require(kernel.max_workgroup_size>=(reduction ? 1024u : 64u) && (kernel.required_workgroup==std::array<uint32_t,3>{} || kernel.required_workgroup==threads),"required workgroup mismatch");
     if(geometry) {
         require((threads==std::array<uint32_t,3>{8,8,1} && groups[2]==1) || threads==std::array<uint32_t,3>{8,4,2},"unsupported geometry block");
         request.shape.dimensions=threads[2]==1?2u:3u;
@@ -36,7 +41,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
             product*=groups[axis];
         }
     } else {
-        require(groups[0] && groups[0]<=UINT32_MAX/64 && groups[1]==1 && groups[2]==1,"unsupported 1D extent");
+        require(groups[0] && groups[0]<=UINT32_MAX/(reduction ? 1024u : 64u) && groups[1]==1 && groups[2]==1,"unsupported 1D extent");
         request.shape.dimensions=1;
     }
     if(request.route==NativeLaunchRoute::Lds)

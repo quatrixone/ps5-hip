@@ -71,6 +71,7 @@ std::string buffer_scratch_launch_rejection(const Kernel &kernel);
 // Experimental explicit-argument wave32 LDS allocation; descriptor LDS bits
 // remain zero, with no scratch or implicit/dynamic-pointer entry state.
 std::string lds_launch_rejection(const Kernel &kernel);
+std::string reduction_lds_launch_rejection(const Kernel &kernel);
 
 // Experimental structural eight-slot flat-call entry only. Metadata cannot prove
 // a bounded call graph, valid private aperture, or safe hardware execution.

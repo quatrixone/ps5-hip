@@ -56,19 +56,22 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     switch (request.route) {
     case NativeLaunchRoute::Initial: rejection = initial_launch_rejection(k); break;
     case NativeLaunchRoute::Lds: rejection = lds_launch_rejection(k); break;
+    case NativeLaunchRoute::ReductionLds: rejection = reduction_lds_launch_rejection(k); break;
     case NativeLaunchRoute::BufferScratch: rejection = buffer_scratch_launch_rejection(k); break;
     case NativeLaunchRoute::Geometry: rejection = geometry_launch_rejection(k); break;
     case NativeLaunchRoute::GeometryLds: rejection = geometry_lds_launch_rejection(k); break;
     default: throw ObjectError("unknown native launch route");
     }
     if (!rejection.empty()) throw ObjectError(rejection);
-    require(request.route == NativeLaunchRoute::Lds || request.dynamic_lds_bytes == 0,
+    const bool reduction=request.route==NativeLaunchRoute::ReductionLds;
+    require(!reduction || request.dynamic_lds_bytes==4096,"reduction requires4096 dynamic LDS bytes");
+    require(request.route == NativeLaunchRoute::Lds || reduction || request.dynamic_lds_bytes == 0,
         "dynamic LDS specified for another native route");
     require(values.size() == k.arguments.size(), "native argument count mismatch");
     // Encode through the established pure routes once actual backing is known.
     auto plan = [&](GpuRange code, GpuRange args, GpuRange scratch) {
         if (request.route != NativeLaunchRoute::Geometry && request.route != NativeLaunchRoute::GeometryLds)
-            require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{64,1,1} &&
+            require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{reduction ? 1024u : 64u,1,1} &&
                 request.shape.groups[1] == 1 && request.shape.groups[2] == 1, "unsupported native 1D shape");
         const auto groups = request.shape.groups[0];
         switch (request.route) {
@@ -79,6 +82,10 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
         case NativeLaunchRoute::Lds: {
             auto p = prepare_lds_launch(object, k.name, code, args, groups, values, request.dynamic_lds_bytes);
             return std::make_pair(encode_lds_dispatch(p), std::move(p.dispatch.kernargs));
+        }
+        case NativeLaunchRoute::ReductionLds: {
+            auto p=prepare_reduction_lds_launch(object,k.name,code,args,groups,values);
+            return std::make_pair(encode_reduction_lds_dispatch(p),std::move(p.dispatch.kernargs));
         }
         case NativeLaunchRoute::BufferScratch: {
             auto p = prepare_buffer_scratch_launch(object, k.name, code, args, groups, values,
@@ -131,11 +138,11 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
             groups *= s.groups[axis];
         }
     } else {
-        require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{64,1,1} &&
+        require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{reduction ? 1024u : 64u,1,1} &&
             request.shape.groups[1] == 1 && request.shape.groups[2] == 1 && request.shape.groups[0] &&
-            request.shape.groups[0] <= UINT32_MAX / 64, "unsupported native 1D shape");
+            request.shape.groups[0] <= UINT32_MAX / (reduction ? 1024u : 64u), "unsupported native 1D shape");
     }
-    require(k.max_workgroup_size >= 64 && (k.required_workgroup == std::array<uint32_t,3>{} ||
+    require(k.max_workgroup_size >= (reduction ? 1024u : 64u) && (k.required_workgroup == std::array<uint32_t,3>{} ||
         k.required_workgroup == request.shape.threads), "native required workgroup mismatch");
     const uint32_t scratch_bytes = request.route == NativeLaunchRoute::BufferScratch ? buffer_scratch_ring_bytes(k.private_bytes) : 0;
     if (request.route == NativeLaunchRoute::Lds)

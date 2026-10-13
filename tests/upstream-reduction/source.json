@@ -1,0 +1,8 @@
+{
+  "source_url": "https://raw.githubusercontent.com/ROCm/rocm-systems/d5c528019d0fcfbbc32d96b53ac2c61df6d0e67d/projects/hip/docs/tools/example_codes/warp_size_reduction.hip",
+  "upstream_commit": "d5c528019d0fcfbbc32d96b53ac2c61df6d0e67d",
+  "sha256": "42ffe47b3d8dfdd59d2c8ebaabcf7ae6451c97f1055fe9ca6fafebdcc274a57a",
+  "bytes": 6135,
+  "local_patched_commit": "2f2a92736dbe3f65108539b6659d2c7289d300e8",
+  "patch_equivalence_verified": false
+}

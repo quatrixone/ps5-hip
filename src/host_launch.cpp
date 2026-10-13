@@ -16,7 +16,8 @@ void validate_capture_layout(const Kernel &kernel, NativeLaunchRoute route) {
     std::string rejection;
     switch (route) {
     case NativeLaunchRoute::Initial: rejection=initial_launch_rejection(kernel); break;
-    case NativeLaunchRoute::Lds: rejection=lds_launch_rejection(kernel); break;
+    case NativeLaunchRoute::Lds: rejection = lds_launch_rejection(kernel); break;
+    case NativeLaunchRoute::ReductionLds: rejection = reduction_lds_launch_rejection(kernel); break;
     case NativeLaunchRoute::BufferScratch: rejection=buffer_scratch_launch_rejection(kernel); break;
     case NativeLaunchRoute::Geometry: rejection=geometry_launch_rejection(kernel); break;
     case NativeLaunchRoute::GeometryLds: rejection=geometry_lds_launch_rejection(kernel); break;
