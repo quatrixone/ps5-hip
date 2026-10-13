@@ -103,6 +103,18 @@ void NativeDataRegistry::copy_from_device(void *host, const void *device, uint64
     validate_host(host, bytes);
     std::memcpy(host, static_cast<unsigned char *>(hold.memory->cpu()) + hold.offset, size_t(bytes));
 }
+void NativeDataRegistry::copy_device(void *destination, const void *source, uint64_t bytes) {
+    // Resolve both endpoints before writing, including GPU ownership checks.
+    auto to = resolve(destination, bytes);
+    auto from = resolve(source, bytes);
+    const auto dst = reinterpret_cast<uintptr_t>(destination);
+    const auto src = reinterpret_cast<uintptr_t>(source);
+    // Difference arithmetic avoids wrapping end pointers. HIP forbids overlap.
+    if ((dst >= src ? dst - src : src - dst) < bytes)
+        fail(NativeDataStatus::InvalidValue, "device copy ranges overlap");
+    std::memcpy(static_cast<unsigned char *>(to.memory->cpu()) + to.offset,
+                static_cast<const unsigned char *>(from.memory->cpu()) + from.offset, size_t(bytes));
+}
 void NativeDataRegistry::fill(void *device, int value, uint64_t bytes) {
     auto hold = resolve(device, bytes);
     std::memset(static_cast<unsigned char *>(hold.memory->cpu()) + hold.offset, value, size_t(bytes));

@@ -14,6 +14,8 @@ MODES+=('memset','blocked-memset')
 CPU_MODES+=('memset',)
 MODES+=('discovery','discovery-unlock')
 CPU_MODES+=('discovery','discovery-unlock')
+MODES+=('device-copy','blocked-device-copy')
+CPU_MODES+=('device-copy',)
 sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def require(ok,message):
  if not ok:raise RuntimeError(message)
@@ -26,7 +28,7 @@ def validate(text,mode):
   require(text.count('THREAD_MODEL_FINAL finalized='+str(int(expected))+' ')==1,'finalizer result')
   if not expected:require('VECTOR_FINAL ' not in text,'unsafe automatic State destruction')
   if expected:
-   count=2 if mode=='blocked-launch' else int(mode in ('ownership','blocked-free','blocked-sync','blocked-copy','blocked-memset'))
+   count=2 if mode=='blocked-launch' else int(mode in ('ownership','blocked-free','blocked-sync','blocked-copy','blocked-memset','blocked-device-copy'))
    require(text.splitlines().count(f'VECTOR_FINAL registered=1 removed=1 completed={count} active=0 terminal=0 main_finished=1 hardware_validated=false')==1,'exact complete State destructor')
    require(text.splitlines().count('THREAD_MODEL_FINAL finalized=1 live=0')==1,'complete backing closure')
   elif mode in ('unlock','finish-wait'):

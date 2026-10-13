@@ -441,9 +441,10 @@ static hipError_t hipMalloc_locked(void **pointer,size_t bytes) {
 }
 static hipError_t hipFree_locked(void *pointer) { return checked([&]{if(pointer)state().data.free(pointer);}); }
 static hipError_t hipMemcpy_locked(void *destination,const void *source,size_t bytes,hipMemcpyKind kind) {
-    if(kind!=hipMemcpyHostToDevice && kind!=hipMemcpyDeviceToHost)return record(hipErrorNotSupported);
+    if(kind!=hipMemcpyHostToDevice && kind!=hipMemcpyDeviceToHost && kind!=hipMemcpyDeviceToDevice)return record(hipErrorNotSupported);
     return checked([&]{if(!bytes)return; if(kind==hipMemcpyHostToDevice)state().data.copy_to_device(destination,source,bytes);
-        else state().data.copy_from_device(destination,source,bytes);});
+        else if(kind==hipMemcpyDeviceToHost)state().data.copy_from_device(destination,source,bytes);
+        else state().data.copy_device(destination,source,bytes);});
 }
 static hipError_t hipDeviceSynchronize_locked() {
     auto &s=state();
