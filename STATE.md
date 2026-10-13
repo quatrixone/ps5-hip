@@ -4,6 +4,14 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Fixed relaxed atomic suite passed on .40 and independent audit:** frozen
+  `90df59d` completed six dispatches covering contended unsigned 32/64-bit add,
+  CAS and indirect add. All 98,694 semantic values, wrapping tickets, guards and
+  unchanged offsets passed; allocations closed. PID231/application `0xe018`
+  stopped naturally, visible mounts matched, services stayed healthy and locks
+  released. See `evidence/native-atomic-suite.json`. This does not qualify other
+  atomic memory orders/scopes or general HIP atomic support; broader G3 remains open.
+
 - **Shared genuine four-kernel HIP client passed on .40 and independent audit:**
   frozen title `67072dd`, integrated at `1fb5ada`, completed eight blocking launches
   in two changed-input sequences through one runtime: integer, static LDS,
@@ -855,3 +863,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 native client | 038fdb6 | .40:2 genuine HIP launches,146 exact results,clean unregister/destruction and bounded cycle | evidence/native-hip-vector.json | shared multi-kernel runtime
 
 - 2026-10-13 | G4 shared native client | 67072dd / 1fb5ada | .40:8 launches,2 changed-input sequences,393216 whole-page comparisons,clean unregister/destruction and bounded cycle independently audited | evidence/native-hip-routes.json | broader G3/G4 client qualification
+
+- 2026-10-13 | G3 atomics | 90df59d | .40:6 dispatches,98694 values,clean bounded cycle audited | evidence/native-atomic-suite.json | numerical and broader compute qualification

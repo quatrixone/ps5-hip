@@ -1,0 +1,131 @@
+{
+  "source_commit": "90df59dcaaf1fb877cb6cc187bf1e949262cdd98",
+  "image_sha256": "14e07323b96c081c040ab65babc412da985fe36b10fd73dfe27ba4293f178498",
+  "kernel": "atomic_suite",
+  "accepted": true,
+  "script_sha256": "d3041a5e45549d47ecc63e73ec62701a1a48a904bccca02ad6e8769ed74dfd1a",
+  "manifest_sha256": "231b2b775dd3f73a294a27751dbc8ec9fe780f74170a9c3c5b3368af1913d28b",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/atomic-current-deployment-v1/deployment-20261013T080309.991806Z/deployment.json",
+      "sha256": "3325865e65ff56cb58e3ea5363d93ad4e29142c686e3299cfbae17445765a237"
+    },
+    "review": {
+      "path": "results/atomic-current-deployment-v1/deployment-20261013T080309.991806Z-independent-review.json",
+      "sha256": "f568e1057bac276bbfb5b2e94965683b4ce9dad7a83224de3b839573b430bacc"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "9119795c6d3143d4cec1e21272a9edffab5e232316831d69e0dbece8cc936f0d",
+    "after-post.log": "9119795c6d3143d4cec1e21272a9edffab5e232316831d69e0dbece8cc936f0d",
+    "application.log": "bccfb21af8a5de24f2bd1e88b20a941fb96bd629e5bf877ebe03c55b50de310c",
+    "before-close.log": "9119795c6d3143d4cec1e21272a9edffab5e232316831d69e0dbece8cc936f0d",
+    "before-launch.log": "fda1ddc106ab1832fcb4199bc19a69449df406970d43c2b3b8d7cbebadb908a3",
+    "before-log-check.log": "b8898e2ce6375e299fcebed29d854585c4f61817aa1bb308f24b6c21e2b36018",
+    "before-post-snapshot.log": "9119795c6d3143d4cec1e21272a9edffab5e232316831d69e0dbece8cc936f0d",
+    "before-pre-snapshot.log": "b8898e2ce6375e299fcebed29d854585c4f61817aa1bb308f24b6c21e2b36018",
+    "before.log": "b8898e2ce6375e299fcebed29d854585c4f61817aa1bb308f24b6c21e2b36018",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "98364a44ccfb43cab87ab7ddaeaa69e7fb7232d723c909b2acd8b1ed20db7796",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "3e62e18633c2fe23b1131a802f16b718f1a21cc953d608ee461a3c7afb1bda20",
+    "installed-eboot.bin": "98364a44ccfb43cab87ab7ddaeaa69e7fb7232d723c909b2acd8b1ed20db7796",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "3e62e18633c2fe23b1131a802f16b718f1a21cc953d608ee461a3c7afb1bda20",
+    "klog.log": "cb3aba7e214bb1753db508d84527f51f26e53cefe4e956dc4c40d61c059b1f87",
+    "launch-klog.log": "f781d1be1f63ade144fceb3c108bbe3c3f47e87badfb7c4febf8968a1d53c1a0",
+    "launch-response.log": "9cfa8bc87a647fa2d916a819d9fc324afa620480b43cffb06e756e556b184a67",
+    "launch-shadow-delta.log": "297c63b63ce4261c15a94f66dfdde43f0b7f6f725c2e1b77eae09ba6de5658e3",
+    "lifecycle-delta.log": "297c63b63ce4261c15a94f66dfdde43f0b7f6f725c2e1b77eae09ba6de5658e3",
+    "observed.log": "9119795c6d3143d4cec1e21272a9edffab5e232316831d69e0dbece8cc936f0d",
+    "post-snapshot.log": "7bc381ee73af94c7678c87616f32c89e87cfca5814ddeee7694961e08c881251",
+    "pre-snapshot.log": "7bc381ee73af94c7678c87616f32c89e87cfca5814ddeee7694961e08c881251",
+    "private-log-absence-before-launch.json": "75b3099c3339723f0eac4f23ce6429de5809aa82e76c4df7a636ebb444329c93",
+    "private-log-absence.json": "75b3099c3339723f0eac4f23ce6429de5809aa82e76c4df7a636ebb444329c93",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-relaxed-atomic-suite-cycle-pass",
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "dispatches": 6,
+  "invocations_per_dispatch": 16448,
+  "semantic_values": 98694,
+  "operations": [
+    "unsigned32 relaxed add",
+    "unsigned64 relaxed add",
+    "unsigned32 relaxed CAS",
+    "unsigned64 relaxed CAS",
+    "unsigned32 indirect relaxed add",
+    "unsigned64 indirect relaxed add"
+  ],
+  "wrapping_ticket_oracle": true,
+  "guards_unchanged": true,
+  "indirect_offsets_unchanged": true,
+  "allocations_closed": true,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "atomic_suite",
+    "log_sha256": "bccfb21af8a5de24f2bd1e88b20a941fb96bd629e5bf877ebe03c55b50de310c",
+    "bytes": 1904,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 231,
+    "app_id": "0x0000e018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "prospective_observation_seconds": 40,
+  "receipt": {
+    "path": "results/atomic-current-execution-v1/observation-20261013T080603.148628Z/receipt.json",
+    "sha256": "a7ce042c72472fca16ef350d292b5a593f15914e2ac632a555c4d2673a048158"
+  },
+  "independent_review": {
+    "path": "results/atomic-current-execution-v1/observation-20261013T080603.148628Z-independent-review.json",
+    "sha256": "28fb02c5aaaa479d663501a1af3c04a3f9d1382da495d09d612c8b76f14cfeb1"
+  },
+  "offline_readiness": {
+    "path": ".local/g3-atomics-current/results/atomic-current-native-completion-v1/readiness.json",
+    "sha256": "f13d0b19e2f158bd6ddacc7365babb73334051f24590b365d58260ace066f4a3"
+  },
+  "independent_package_review": {
+    "path": "results/atomic-current-package-independent-review-v1.json",
+    "sha256": "55bc428616d09ece943fda095c661877a7e4a1d3f6849dd4e2b56bff3ef3d120"
+  },
+  "hardware_gate_passed": false,
+  "full_g3_complete": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Only exact O2gfx1013 atomic_suite: six ordered dispatches, 98694 exact values, 32/64-bit relaxed add/CAS with wrapping tickets and indirect offsets, guards/offset immutability/closed allocations and normal finite-title finalization.",
+    "No generic HIP atomic API or broader ordering/scope qualification; full G3 remains open.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

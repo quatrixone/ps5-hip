@@ -8,7 +8,9 @@ hardware computation observation with delayed completion evidence and one bounde
 compiler-spill cycle plus static, dynamic and mixed LDS cycles. Persistent-buffer
 visibility has recovered computation evidence with an inconclusive original cycle.
 Full/partial wave32 and exact 2D/3D geometry fixtures have passing bounded native
-cycles. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
+cycles. The fixed relaxed atomic suite also passed six contended 32/64-bit add,
+CAS and indirect-add dispatches with 98,694 validated values and clean teardown;
+see `../evidence/native-atomic-suite.json`. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
 shared four-route clients have passed bounded native cycles with complete
 compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
