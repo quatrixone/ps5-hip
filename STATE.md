@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Shared HIP runtime and genuine four-kernel client qualified offline:** frozen
+  `de82c60`, integrated at `0381b05`. All 70 integration tests, 26 vector models,
+  22 vector title cases and 19 four-route models passed. Linux/PS5 compiler
+  objects, PS5 link/conversion and independent evidence review passed; 70 native
+  imports and no external HIP imports. Integer, LDS, compiler scratch and geometry
+  share one runtime across eight launches and two changed-input sequences.
+  See `evidence/offline-shared-hip-runtime.json`. A descendant title package is
+  underway; this combined client has not executed on .40 and broad G3/G4 remain open.
+
 - **Genuine HIP vector client passed on .40 and independent audit:** two blocking
   73-element launches produced 146 exact results, unchanged inputs and intact
   guards. Compiler unregister, runtime State destruction and allocation closure

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "classification": "reviewed offline shared HIP runtime and four-route client qualification",
+  "source_commit": "de82c60dcb7b7b11e89eb945a856301e1cffc778",
+  "integrated_commit": "0381b0571fb2247a849ba79df8143bc9510764ca",
+  "implementation_paths_identical_to_frozen_commit": [
+    "CMakeLists.txt",
+    "docs/HIP_ROUTES_COMPILER.md",
+    "docs/SHARED_HIP_RUNTIME.md",
+    "include/ps5hip/hip_runtime_control.h",
+    "include/ps5hip/host_launch.h",
+    "include/ps5hip/launch.h",
+    "include/ps5hip/native_launch.h",
+    "src/hip_runtime.cpp",
+    "src/host_launch.cpp",
+    "tests/hip_routes.hip",
+    "tests/hip_routes_contract_test.cpp",
+    "tests/hip_routes_model.cpp",
+    "tests/hip_routes_recipe_test.py",
+    "tests/hip_vector_title_test.py",
+    "tests/host_launch_test.cpp",
+    "tests/native_vector_title_test.py",
+    "tools/build_native_vector_title.py",
+    "tools/hip_routes_control.cpp",
+    "tools/hip_vector_control.cpp",
+    "tools/native_vector_title.py",
+    "tools/probe_hip_routes.py",
+    "tools/probe_native_vector.py"
+  ],
+  "qualified_working_bytes_vs_git_lf_normalization": {
+    "docs/SHARED_HIP_RUNTIME.md": {
+      "working_bytes_sha256": "43cbc2cb959ee1ec5f0430e7db1d0a8b350b76dac470eda4f6d931a6a518158f",
+      "committed_lf_sha256": "35987a6da9845696971b3332cc27d076db81c0bce4d8a409c14535766b593859"
+    },
+    "include/ps5hip/hip_runtime_control.h": {
+      "working_bytes_sha256": "8aded4a2f384b21465fa915e87c5e66885b9703514a6b2df115d5e21a69cc737",
+      "committed_lf_sha256": "7357f324cd1c00409804411a46c2d47f93ae453ec5bf7ec5ecc4e254526fb2ad"
+    }
+  },
+  "validation": {
+    "integration_tests": 70,
+    "genuine_vector_model_modes": 26,
+    "vector_title_lifecycle_cases": 22,
+    "four_route_model_modes": 19,
+    "compiler_hosts": [
+      "linux",
+      "ps5",
+      "linux-model"
+    ],
+    "native_named_imports": 70,
+    "native_HIP_imports": 0
+  },
+  "client": {
+    "kernels": [
+      "routes_integer",
+      "routes_lds",
+      "routes_spill",
+      "routes_geometry"
+    ],
+    "dispatches": 8,
+    "changed_input_sequences": 2,
+    "persistent_data_allocations": 3,
+    "allocation_bytes": 65536,
+    "word_comparisons": 393216
+  },
+  "evidence": {
+    "readiness": {
+      "path": ".local/g4-shared-runtime/results/shared-runtime-ready-v1/readiness.json",
+      "sha256": "a38b344c5903326d2113bfe81f5e3cb2d3d1bfc446342652150fd00030b29ab9"
+    },
+    "freeze": {
+      "path": ".local/g4-shared-runtime/results/shared-runtime-ready-v1/freeze.json",
+      "sha256": "1c537440f4e54d5ee842fc293cbf3067cea603725c47e01872ade81c23455839"
+    },
+    "integration": {
+      "path": ".local/g4-shared-runtime/results/integrated-final-v1/receipt.json",
+      "sha256": "27b2d4b2532ef35168dc6558014bab25d4b27872fa92399a8b4cd10ef6d65096"
+    },
+    "compiler_models_native": {
+      "path": ".local/g4-shared-runtime/results/hip-routes-final-v5/receipt.json",
+      "sha256": "b8529920e8a5796a04e1912bcfd11a0d65837b0ad0c3913dee76cc74fecf4fd2"
+    },
+    "compiler_review": {
+      "path": ".local/g4-shared-runtime/results/hip-routes-independent-review-v1/review.json",
+      "sha256": "1c83d32c7c2b23c5814d8f847a8d87bb390ba1497d092d2092e297738d696c2a"
+    },
+    "vector_compatibility": {
+      "path": ".local/g4-shared-runtime/results/vector-shared-final-v1/receipt.json",
+      "sha256": "a5b9bbd17f2da0b028cafae9486c9c5e3abf239e24a68d8fef468cf717bf49d8"
+    },
+    "title_compatibility": {
+      "path": ".local/g4-shared-runtime/results/title-shared-final-v1/receipt.json",
+      "sha256": "fdaf63efc9eaaf701ae60c88b68944361e08d7e5a2e5bec73865fd7e9133c329"
+    },
+    "runtime_review": {
+      "path": ".local/g4-shared-runtime/results/shared-runtime-independent-review-v1/review.json",
+      "sha256": "c0fbb4b915aa7d604dbe721e36ae59c112d085d7d9e223249fab81d1751bdbcc"
+    },
+    "adapter_parent_review": {
+      "path": "results/routes-adapter-parent-review-v1.json",
+      "sha256": "abdd9529513e02d1827e31628f200c81f7ded378167306e0207ee6cd60e702b4"
+    }
+  },
+  "preserved_failed_attempts": [
+    "hip-routes-final-v1",
+    "hip-routes-final-v2",
+    "hip-routes-final-v3",
+    "hip-routes-final-v4"
+  ],
+  "console_access": false,
+  "hardware_validated": false,
+  "limits": [
+    "Host models test control/ownership and use CPU arithmetic; they do not execute AMD ISA.",
+    "The combined four-route runtime has not yet been packaged or executed on PS5.",
+    "Fixed one-module serialized contract; broader G3/G4, private calls, asynchronous APIs and G5-G12 remain open."
+  ]
+}

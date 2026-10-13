@@ -11,6 +11,10 @@ Full/partial wave32 and exact 2D/3D geometry fixtures have passing bounded nativ
 cycles. Broader G3 qualification remains open. G4's fixed genuine HIP vector client
 has passed a native cycle with two launches and complete compiler/runtime cleanup;
 broader client qualification remains open. G5-G12 remain planned.
+The shared runtime and four-route genuine client now pass offline compiler,
+ownership-model, native-link and integration qualification at `de82c60`;
+title packaging and combined hardware validation remain pending. See
+`../evidence/offline-shared-hip-runtime.json`.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
