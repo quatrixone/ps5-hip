@@ -23,6 +23,24 @@ include(CTest)
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   find_package(Threads REQUIRED)
+  set(PS5HIP_HIP_WORKERS_CLIENT_MODEL "" CACHE PATH "Completed worker client host proof")
+  set(PS5HIP_HIP_WORKERS_TITLE_MODEL "" CACHE PATH "Completed worker title wrapper proof")
+  set(PS5HIP_HIP_WORKERS_COMPILER "" CACHE PATH "Completed worker compiler proof")
+  if(PS5HIP_HIP_WORKERS_CLIENT_MODEL)
+    add_test(NAME hip_workers_client COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_client_test.py --check "${PS5HIP_HIP_WORKERS_CLIENT_MODEL}")
+  endif()
+  if(PS5HIP_HIP_WORKERS_TITLE_MODEL)
+    add_test(NAME hip_workers_title COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_title_test.py --check "${PS5HIP_HIP_WORKERS_TITLE_MODEL}")
+  endif()
+  if(PS5HIP_HIP_WORKERS_COMPILER)
+    add_test(NAME hip_workers_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_native_title_test.py --compiler "${PS5HIP_HIP_WORKERS_COMPILER}")
+  else()
+    add_test(NAME hip_workers_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_native_title_test.py)
+  endif()
   add_test(NAME hip_threads_boundaries COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/hip_threads_recipe_test.py)
   set(PS5HIP_HIP_THREADS_PROBE "" CACHE PATH "Completed checked threaded runtime host proof")
