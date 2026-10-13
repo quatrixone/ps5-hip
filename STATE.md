@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Single-device discovery qualified offline in this branch:** five HIP APIs
+  expose device zero and the admitted wave32 attribute without creating State
+  or AGC. Genuine pre-registration worker/main calls, normal registration,
+  error precedence, output preservation and shutdown passed 38 ASan/UBSan
+  modes and 19 CPU-only TSAN modes. Independent review inspected actual
+  constructor ordering and source/proof hashes. See
+  `evidence/offline-device-discovery.json`. Native execution and root integration
+  remain pending; discovery-only clean internal finalization is not claimed.
+
 - **Synchronous tracked memory fill qualified offline in this branch:**
   `hipMemset` reuses allocation bounds and ownership checks, supports interior
   ranges and byte truncation, and serializes against blocking submissions.

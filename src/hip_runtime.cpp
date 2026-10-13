@@ -482,6 +482,41 @@ extern "C" hipError_t __hipPopCallConfiguration(dim3 *grid, dim3 *block, size_t 
 extern "C" hipError_t hipLaunchKernel(const void *host, dim3 grid, dim3 block, void **args, size_t shared, hipStream_t stream) {
     return call([&] { return hipLaunchKernel_locked(host,grid,block,args,shared,stream); });
 }
+template<class F> static hipError_t device_call(F action) {
+    return call([&] {
+        if(state_pointer) {
+            if(state_pointer->terminal || state_pointer->data.poisoned())return hipErrorUnknown;
+            if(state_pointer->partial)return hipErrorInvalidDeviceFunction;
+        }
+        return action();
+    });
+}
+extern "C" hipError_t hipInit(unsigned flags) {
+    return device_call([&] { return flags ? hipErrorInvalidValue : hipSuccess; });
+}
+extern "C" hipError_t hipGetDeviceCount(int *count) {
+    const auto result=device_call([&] { return count ? hipSuccess : hipErrorInvalidValue; });
+    if(result==hipSuccess)*count=1;
+    return result;
+}
+extern "C" hipError_t hipGetDevice(int *device) {
+    const auto result=device_call([&] { return device ? hipSuccess : hipErrorInvalidValue; });
+    if(result==hipSuccess)*device=0;
+    return result;
+}
+extern "C" hipError_t hipSetDevice(int device) {
+    return device_call([&] { return device==0 ? hipSuccess : hipErrorInvalidDevice; });
+}
+extern "C" hipError_t hipDeviceGetAttribute(int *value, hipDeviceAttribute_t attribute, int device) {
+    const auto result=device_call([&] {
+        if(!value)return hipErrorInvalidValue;
+        if(device!=0)return hipErrorInvalidDevice;
+        return attribute==hipDeviceAttributeWarpSize ? hipSuccess : hipErrorInvalidValue;
+    });
+    // Publish only after successful unlock; wave32 is the admitted execution ABI.
+    if(result==hipSuccess)*value=32;
+    return result;
+}
 extern "C" hipError_t hipMalloc(void **pointer, size_t bytes) {
     if (pointer) *pointer=nullptr;
     return call([&] { return hipMalloc_locked(pointer,bytes); });
@@ -532,6 +567,7 @@ extern "C" const char *hipGetErrorString(hipError_t e) {
     case hipErrorInvalidDevicePointer:return "invalid device pointer";case hipErrorInvalidDeviceFunction:return "invalid device function";
     case hipErrorNotReady:return "data GPU-owned";case hipErrorNotSupported:return "unmeasured operation";
     case hipErrorDeinitialized:return "runtime closed";
+    case hipErrorInvalidDevice:return "invalid device ordinal";
     case hipErrorOutOfMemory:return "host allocation failed";default:return "native/control failure";}
 }
 extern "C" void ps5hip_runtime_finish() {

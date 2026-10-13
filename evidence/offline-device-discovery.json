@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "isolated-device-discovery-offline-pass",
+  "base_commit": "4ed8980",
+  "hardware_executed": false,
+  "sources": {
+    "src/hip_runtime.cpp": "32ef3ad38a838b614c9b2bb0b0b1be879f70d90cf53377a31d16f7cae4aa4c2a",
+    "tests/hip_threads_model.cpp": "7c0e8809153dee7a9aa2d41549ead73c09e4b9233b95f972a15428991d0e8b19",
+    "tools/probe_hip_threads.py": "301e6d10d15f49c51122d13c162b4f53526d26dd17073b8f1a02db9b495cbb87",
+    "docs/HIP_DEVICE_DISCOVERY.md": "83d3187aeeb23e0d933481ee6889fb17876110a22fed82cd38215464f3771089"
+  },
+  "proofs": {
+    "discovery-runtime-v2": {
+      "receipt_sha256": "e6164b3d5ccae3223314c3a58476efddd04648a9b78e7b0ba8f103256a08e5ef",
+      "modes": 38
+    },
+    "discovery-tsan-v1": {
+      "receipt_sha256": "b7ee02447949dbd58eecd5730fe03fdd3bd2178e9b56d6b1f5e2431370601406",
+      "modes": 19
+    }
+  },
+  "review_sha256": "2698fb771bdeec523b287fa2e5e36dd803325f99549dad8f2ff35a11af676451",
+  "scope": [
+    "Five single-device discovery APIs; wave32 attribute only.",
+    "Actual pre-registration worker/main calls plus genuine compiler registration and clean registered-runtime finalization.",
+    "ELF constructor ordering and absence of later gate/counter dynamic resets independently inspected."
+  ],
+  "preserved_failure": {
+    "receipt": "results/discovery-runtime-v1/failure.json",
+    "sha256": "841be024877dffc18d3353a5c5639741f382c6bc8d473d1aed64bbef2e5fad67",
+    "cause": "Test used INT_MAX outside the C++ enum representable range; fixed to representable unknown selector30000."
+  },
+  "limits": [
+    "Isolated branch, no native qualification or root integration.",
+    "Discovery-only programs retain existing process-lifetime thread context policy; no successful internal finalization claim.",
+    "No device properties/reset or broader attribute compatibility."
+  ]
+}
