@@ -1,0 +1,31 @@
+{
+  "classification": "offline-unchanged-upstream-reduction-runtime",
+  "source_base": "3301092490c23d6584601b932796e4632e2c0505",
+  "review": {
+    "path": "results/reduction-upstream-runtime-independent-review-v1/review.json",
+    "sha256": "52143d8d369586d5e27198e68fc039d105f2177516322f9680ca7b8318811fc2"
+  },
+  "proof": {
+    "path": ".local/g4-reduction-runtime/results/upstream-runtime-v3/receipt.json",
+    "sha256": "3d158602383c196078105f4049dfbefc9508c7c3820db838631cd466a55d5952"
+  },
+  "sources": {
+    "tests/reduction_upstream_model.cpp": "bb691a28d434ebf5901aaa6e8b16c8189f5b293db7cc04f84c1c1ce1ad849b43",
+    "tools/probe_reduction_upstream_runtime.py": "1d58c843b593146cf87fb0df252dd58bb3d650eec77309eed77c90865ed298d7"
+  },
+  "modes": {
+    "normal": 0,
+    "corrupt": 20,
+    "missing": 20,
+    "submit": 30
+  },
+  "normal_released_allocations": 7,
+  "failed_submit_retained_allocations": 7,
+  "hardware_executed": false,
+  "limits": [
+    "Actual HIP runtime with synthetic direct-sum transport, not GPU ISA execution.",
+    "Original sample object is unchanged and uninstrumented; runtime/transport use ASan/UBSan.",
+    "Transport checks shape, selected resources and ABI fields; full code-image/entry and native linkage require separate qualification.",
+    "Original host masks are random; deterministic native companion remains separate."
+  ]
+}
