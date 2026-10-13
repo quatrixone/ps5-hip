@@ -1,0 +1,93 @@
+{
+    "schema":  1,
+    "classification":  "pass",
+    "scope":  "Read-only verification of already promoted private304 candidate; no application execution",
+    "source_commit":  "56dcbcf8f0b47808267064ec3553c17dd820018e",
+    "image":  {
+                  "file":  "PPSA99014.ffpkg",
+                  "sha256":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+                  "bytes":  3637248
+              },
+    "target":  "console .40 firmware 12.70",
+    "registered":  true,
+    "accepted":  true,
+    "launched":  false,
+    "hardware_validated":  false,
+    "raw_observation":  "results/private304-readonly-recovery-v1/observation-20261013T024544.509664Z",
+    "receipt_sha256":  "7125734730e62a525e1ccb493b226ebeaedfe066f573596f95d83e8d1d72b840",
+    "promoted_deployment_receipt_sha256":  "658f36f3cddb8e3b99750295a3c01c9a5061188307f3ff9bc53dbd0b86040b75",
+    "runner_sha256":  "9994fc7fd137682099e29e0e9e456a76c52d580659f16fd16d81d99c7995fbfb",
+    "manifest_sha256":  "fe6c35553f079e5daa39859b2c659c05225d53ea500d8bf5aa738fcb004f31e1",
+    "independent_preflight_review_sha256":  "a7795c9e1554493b39c1100c293fc20d42712069587cdc79b2cb3ac50a787bf5",
+    "independent_observation_review_sha256": "4970cced60b8ff149931ab29f7f47481102209e40dcabdffbb273ffff6040b1f",
+    "raw_self_ack":  "226 SELF transfer mode disabled",
+    "mounted_files":  {
+                          "eboot.bin":  {
+                                            "bytes":  824130,
+                                            "sha256":  "ca363fbe17e869554de7639f9281e211e37d243f9928ab01010c15e76f0fde91"
+                                        },
+                          "canary.hsaco":  {
+                                               "bytes":  15848,
+                                               "sha256":  "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6"
+                                           }
+                      },
+    "verified_files":  {
+                           "/data/homebrew/PPSA99014.ffpkg":  {
+                                                                  "bytes":  3637248,
+                                                                  "sha256":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74"
+                                                              },
+                           "/data/homebrew/PPSA99014.ffpkg.arithmetic-cycle2.sha256-28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887.preserved":  {
+                                                                                                                                                                      "bytes":  3571712,
+                                                                                                                                                                      "sha256":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887"
+                                                                                                                                                                  },
+                           "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log.cycle2-20261013T022218.879692Z.sha256-6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39":  {
+                                                                                                                                                                                                     "bytes":  863,
+                                                                                                                                                                                                     "sha256":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39"
+                                                                                                                                                                                                 },
+                           "/mnt/shadowmnt/PPSA99014_b6d9b2e4/eboot.bin":  {
+                                                                               "bytes":  824130,
+                                                                               "sha256":  "ca363fbe17e869554de7639f9281e211e37d243f9928ab01010c15e76f0fde91"
+                                                                           },
+                           "/mnt/shadowmnt/PPSA99014_b6d9b2e4/canary.hsaco":  {
+                                                                                  "bytes":  15848,
+                                                                                  "sha256":  "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6"
+                                                                              },
+                           "/user/appmeta/PPSA99014/param.json":  {
+                                                                      "bytes":  733,
+                                                                      "sha256":  "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071"
+                                                                  },
+                           "/user/app/PPSA99014/mount.lnk":  {
+                                                                 "bytes":  33,
+                                                                 "sha256":  "04aa5cda2894fd0fc7b4d50afb06722f3f380f938f9130936cd8292f6c6e60d3"
+                                                             }
+                       },
+    "idle_after":  true,
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "raw_sha256":  {
+                       "after.log":  "ff3f2257c92db70f071969b2044810bf1039cdabc53e64d6ddabc6efc7b07daa",
+                       "before-mounted-read.log":  "ff3f2257c92db70f071969b2044810bf1039cdabc53e64d6ddabc6efc7b07daa",
+                       "before.log":  "fbd5024fec664be5c9c54adcef6a2b0de36b22124d6c8af485a53f97b4ddd765",
+                       "candidate-package.ffpkg":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+                       "final-idle.log":  "ff3f2257c92db70f071969b2044810bf1039cdabc53e64d6ddabc6efc7b07daa",
+                       "homebrew.list":  "f3502b3402cbba3ae5740fc7a6b70496bc490f0c41f21567355210b86c526706",
+                       "mount.lnk":  "04aa5cda2894fd0fc7b4d50afb06722f3f380f938f9130936cd8292f6c6e60d3",
+                       "mounted-canary.hsaco":  "4b58430d35fa789c551186a5df68ab41009805628bdba0780711b923626fc7a6",
+                       "mounted-eboot.bin":  "ca363fbe17e869554de7639f9281e211e37d243f9928ab01010c15e76f0fde91",
+                       "param.json":  "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+                       "preserved-arithmetic.ffpkg":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+                       "preserved-arithmetic.log":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+                       "results.list":  "caf835b3df53b7a7976dff415679b65202dea161fe1a159b677b1c2bad185ac4",
+                       "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                   },
+    "limits":  [
+                   "Exact mounted signed executable and device object bytes are verified under acknowledged connection-local raw transfer.",
+                   "The earlier discarded oversized response is not reconstructed; its exact content remains unknown.",
+                   "This verifies deployment and preservation only, not GPU behavior."
+               ],
+    "next_action":  "Bind independently reviewed actual recovery evidence to the private304 execution control."
+}

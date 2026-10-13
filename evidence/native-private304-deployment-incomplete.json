@@ -1,0 +1,73 @@
+{
+    "schema":  1,
+    "classification":  "inconclusive",
+    "stage":  "candidate promoted; mounted identity verification incomplete",
+    "source_commit":  "56dcbcf8f0b47808267064ec3553c17dd820018e",
+    "image":  {
+                  "file":  "PPSA99014.ffpkg",
+                  "sha256":  "c539b22061334a283bae136f0c2d3404fd047cca38e9e8cf07594803d431db74",
+                  "bytes":  3637248
+              },
+    "target":  "console .40 firmware 12.70",
+    "launched":  false,
+    "hardware_validated":  false,
+    "accepted":  false,
+    "raw_observation":  "results/private304-deployment-v1/deployment-20261013T023610.523495Z",
+    "receipt_sha256":  "658f36f3cddb8e3b99750295a3c01c9a5061188307f3ff9bc53dbd0b86040b75",
+    "runner_sha256":  "4764759cb82c886ddc165ec3bacf1d9a20716acf7d2ac79ee1afe6936147ca65",
+    "manifest_sha256":  "024290c36d87a7cb307b4149f3a481f24338c5870f7b663bcc06b4b2733667e7",
+    "independent_preflight_review_sha256":  "25001774fdac268952fafeddc4cff2dd5c4b36b832e8a404709d610fd9914095",
+    "independent_observation_review_sha256": "c3d870892259a488543ba5470ba9df7cbc91ce695fa1033b2f31dc69a1bbea40",
+    "attempted":  [
+                      "upload",
+                      "preserve-image",
+                      "preserve-log",
+                      "promote"
+                  ],
+    "preservation":  {
+                         "package":  "/data/homebrew/PPSA99014.ffpkg.arithmetic-cycle2.sha256-28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887.preserved",
+                         "package_sha256":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+                         "arithmetic_result":  "/data/ps5-hip/results/ps5-hip-gfx1013-arithmetic_suite.log.cycle2-20261013T022218.879692Z.sha256-6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+                         "arithmetic_result_sha256":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39"
+                     },
+    "old_source_unmount_observed":  true,
+    "fresh_ufs_nullfs_registration_observed":  true,
+    "stored_candidate_verified":  true,
+    "mounted_eboot_verified":  false,
+    "mounted_eboot_bound_bytes":  824130,
+    "error":  "RuntimeError(\u0027FTP response exceeded bound\u0027)",
+    "final_idle_available":  false,
+    "last_observed_idle":  "registration-006.log",
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "raw_sha256":  {
+                       "before-homebrew.list":  "9dc8895416ba1cc4928f439d0117c609de2c0ebf1896f70edd8f76052cb2b1a2",
+                       "before-preservation.log":  "0c8f4823888f59a88880b0a8d538698eb1764b9cef44ab18554d2fb113b36a3e",
+                       "before-preserve-image.log":  "0c8f4823888f59a88880b0a8d538698eb1764b9cef44ab18554d2fb113b36a3e",
+                       "before-preserve-log.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "before-promote.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "before-promotion.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "before-results.list":  "220b5f56c78b982b3c0fc5a99b0670f9435c27c41d1aea95091e736afea3d021",
+                       "before-upload.log":  "0c8f4823888f59a88880b0a8d538698eb1764b9cef44ab18554d2fb113b36a3e",
+                       "before.log":  "0c8f4823888f59a88880b0a8d538698eb1764b9cef44ab18554d2fb113b36a3e",
+                       "pre-promote-homebrew.list":  "290540baf43ce7db4373bde9a56042f1ba594a53e2c428362039767042a0b204",
+                       "preserved-arithmetic.ffpkg":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+                       "preserved-arithmetic.log":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+                       "recheck-homebrew.list":  "a431a6fe91307f23f785043d5dadf9abbe43e763d9cd9656bf9acc98f176d573",
+                       "recheck-results.list":  "220b5f56c78b982b3c0fc5a99b0670f9435c27c41d1aea95091e736afea3d021",
+                       "registration-001.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "registration-002.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "registration-003.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "registration-004.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c",
+                       "registration-005.log":  "7922d3a18b93a3acd1635cb0e5556332da0da31ad3be0c1842cf64a551fa2f4b",
+                       "registration-006.log":  "d59fd843d7408767e5cef27b8641fb0489831f359076623e5b4f7f23b8a6601b",
+                       "release-001-homebrew.list":  "290540baf43ce7db4373bde9a56042f1ba594a53e2c428362039767042a0b204",
+                       "release-001.log":  "7d7055c032942a0aeb9b52668433cb0f5ed8d256a51315466623e8b602c6a84c"
+                   },
+    "interpretation":  "The first mounted eboot read exceeded its signed-SELF size bound; partial bytes were not retained. Per-connection FTP SELF-to-ELF conversion is a documented hypothesis, not proof of the actual returned bytes.",
+    "next_action":  "Preserve consumed deployment; prepare bounded read-only verification using explicitly acknowledged raw SELF transfer mode. No redeployment or launch until verified."
+}

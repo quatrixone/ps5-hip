@@ -4,6 +4,44 @@ Updated: 2026-10-12, America/New_York.
 
 ## Actual status
 
+- Next spill experiment is documented in `docs/SPILL_EXPERIMENT.md`. Windows
+  revalidation matched 43 frozen source/staged/image identities. New execution
+  controls in `results/spill-execution-v1` are inert with a null deployment binding;
+  all 25 regression methods now pass under WSL. Approval authentication recovered.
+  Deployment controls and independent executable review are in progress; complete
+  them before any console use. The private304 milestone is ready for commit/push.
+- **Private304 computation passed on .40:** all 16,448 exact outputs, modified
+  scratch, unchanged guards, closed allocations and full finalization. A separate
+  independently audited completion capture recovered the unchanged application log
+  without rerunning the GPU and found eventual visible mount-baseline equivalence.
+  Its post snapshot was 452.68 seconds after launch, with an unlocked/klog gap;
+  the original bounded cycle remains inconclusive. This qualifies only the exact
+  O2 buffer-private nested-call fixture, not full G3. See
+  `evidence/native-private304-computation.json`. Next: frozen compiler-spill case,
+  then static/dynamic/mixed LDS; use the reviewed strict-idle wait correction.
+- The first private304 title launched as PID123/application `0x6018` and
+  self-stopped with complete observed OS teardown. Its host controller then
+  refused cleanup during a short shell-focus lag; no close was sent, and the
+  application result/post-run snapshot were not fetched. The failure postcheck
+  observed idle; services were healthy and locks released. This attempt remains
+  inconclusive as an original host-control cycle. The separate completion evidence
+  above establishes computation while preserving this record and disclosing the
+  delayed post-observation. See `evidence/native-private304-execution-incomplete.json`.
+- The private304 mounted image is now independently verified on .40, with exact
+  package, signed executable, device object, metadata and mount-link bytes.
+  The read-only recovery used acknowledged connection-local raw SELF transfer;
+  preserved arithmetic artifacts matched, idle/health passed and locks released.
+  See `evidence/native-private304-deployment-verified.json`; this verification
+  preceded and was bound into the first private-memory run above.
+- The private304 image was promoted on idle .40 after preserving the arithmetic
+  image/log and observing normal old-image unmount. Fresh UFS/nullfs registration
+  followed, but the first mounted executable read exceeded its signed-SELF size
+  bound. That original deployment verification was incomplete; no application was launched.
+  Services remained reachable and locks were released; final idle could not be
+  reread after the failed FTP transfer. A connection-local SELF-to-ELF conversion
+  is the documented hypothesis; the later read-only raw-byte verification above
+  established mounted identity without reconstructing the discarded response.
+  See `evidence/native-private304-deployment-incomplete.json`.
 - **G2 passed for the declared arithmetic fixture.** Two independently reviewed
   cycles of the same frozen image on .40 checked 146 exact values each, unchanged
   guards, allocation closure and full finalization. PID105/application `0x2018`
@@ -12,8 +50,7 @@ Updated: 2026-10-12, America/New_York.
   release passed. The six-item requirement map is in
   `evidence/native-g2-acceptance.json`. Scope is gfx1013 wave32, the named
   relocation-free store/vector kernels, 64x1x1 threads and two X groups over
-  73 elements. Next: reviewed deployment and native validation of the frozen
-  304-byte private-memory call candidate; it remains unrun.
+  73 elements. The subsequent private-memory observation is recorded above.
 - The new prospective arithmetic cycle on .40 was **inconclusive** because of a
   host-controller defect: it treated successful launch return `0x18` (the new
   application ID) as failure and closed PID99 before natural self-stop. No fresh
@@ -43,7 +80,7 @@ Updated: 2026-10-12, America/New_York.
   blocked before launch or log preservation by unrelated
   PPSA99930 PID394. Both locks were released. See
   `evidence/native-vector-twice-cycle2-no-run.json`. The successful vector image
-  and original first-cycle log remain installed; preserve them before replacement.
+  and original first-cycle log were preserved before subsequent replacements.
 - Identity is **PPSA99014**; PPSA99012 was occupied. Use the Eden client and the
   bundled exact-title Lapy helper with configurable ordinary results storage.
   The current staging choice is `/data/ps5-hip/results`, not a compiled path.
@@ -600,6 +637,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-12 | G3 exact private-call observation | 56dcbcf | .40:16,448 exact outputs,304 private bytes/lane,guards intact; delayed composed capture audited | evidence/native-private304-computation.json | full G3 open; next forced spills
 
 - 2026-10-11 | planning | twelve measurable goals and pinned research references recorded | next: G1 offline inventory
 - 2026-10-11 | G1 progress | arithmetic and resource probes compiled for two targets; host parser checks pass; private-array flat-scratch incompatibility identified | not a completed gate
