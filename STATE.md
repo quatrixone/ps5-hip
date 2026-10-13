@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Reusable HIP client passed on .40 and independent audit:** frozen `ed82c331`,
+  integrated at `5807a97`, completed eleven blocking submissions in sequences
+  0/1/3/7 through one genuine two-kernel module. Exact results, changed inputs,
+  guards, compiler unregister, State destruction and allocation closure passed.
+  PID248/application `0x2018` stopped naturally; visible mounts matched, services
+  remained healthy and locks released. All 76 offline integration checks passed.
+  The zero sequence establishes prebackend state within this process. Serialized
+  single-module limits and broader G4 remain open; see `evidence/native-hip-generic.json`.
+
 - **Math validation found a real numerical failure:** the original `722a59a`
   run lost FTP observation within its 20-second bound and remains inconclusive.
   Read-only recovery retrieved the failure at output 645: `expf` of input bits
@@ -11,8 +20,17 @@ Updated: 2026-10-13, America/New_York.
   subnormal. Offline reproduction identifies LLVM's explicit underflow cutoff
   in the emitted code. The exact title was subsequently cleaned up separately;
   this does not establish natural teardown or successful math qualification.
-  See `evidence/native-math-current-failure.json`. Next: correct and qualify the
-  compiler lowering without weakening the oracle.
+  See `evidence/native-math-current-failure.json`. The isolated compiler
+  correction is now independently qualified offline in `5e856b4`: no-op builds
+  reproduce original bytes, while corrected objects change only two cutoff
+  immediates. The oracle is unchanged. New native validation remains pending;
+  see `evidence/offline-exp-cutoff-correction.json`.
+
+- **Combined geometry/LDS route qualified offline:** isolated `89bf865` admits
+  the measured 8x8 block with static LDS512 and complete hidden geometry through
+  shared planners/ownership. Forty sanitizer checks and two final test-only
+  replays passed, with independent review. Native tiled-matrix execution remains
+  pending; see `evidence/offline-geometry-lds-runtime.json`.
 
 - **Reusable HIP runtime qualified offline:** frozen `c0cc2bb`, integrated at
   `860b8f6`, selects supported launch classes from metadata rather than kernel
@@ -888,3 +906,8 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 reusable runtime | c0cc2bb/860b8f6 | offline qualification audited | evidence/offline-bounded-hip-runtime.json | dedicated native client validation
 
 - 2026-10-13 | G3 math | 722a59a | failed numerical contract recovered; separate cleanup | evidence/native-math-current-failure.json | correct compiler underflow lowering
+
+- 2026-10-13 | G4 reusable client | ed82c331/5807a97 | .40 | pass: 11 submissions and natural teardown | evidence/native-hip-generic.json | tiled matrix client
+
+- 2026-10-13 | G3 exp cutoff | 5e856b4 | offline correction audited | evidence/offline-exp-cutoff-correction.json | new unchanged-oracle native candidate
+- 2026-10-13 | G4 combined geometry/LDS | 89bf865 | offline route audited | evidence/offline-geometry-lds-runtime.json | genuine tiled-matrix client

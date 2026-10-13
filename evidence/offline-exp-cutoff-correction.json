@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "classification": "reviewed-isolated-offline-exp-cutoff-correction",
+  "source_commit": "5e856b40cb97f5442c0b8932e5bf9aa54f37d776",
+  "branch": "development/exp-underflow-correction",
+  "integrated_into_primary_development": false,
+  "freeze": {
+    "path": ".local/exp-underflow-correction/results/freeze-v1/receipt.json",
+    "sha256": "2bbda06fab0dfb614400ab161bb14d5674814748a60fe2fac7bb78c0c4d360f0"
+  },
+  "independent_review": {
+    "path": "results/exp-cutoff-independent-review-v2/review.json",
+    "sha256": "0de001b46d8d1c8a8709a63a4e76590125e626fd4c4fad66483e05945bdedda3"
+  },
+  "readiness": {
+    "path": ".local/exp-underflow-correction/results/readiness-v1/receipt.json",
+    "sha256": "ce50098d6d0e622b014565f6720da3919fd2b5d5135837960db5dd8efb71da5f"
+  },
+  "profiles": {
+    "gfx1013-O1": {
+      "original_whole_elf_reproduced": true,
+      "patch_changed_byte_offsets": [
+        3288,
+        3289,
+        3290,
+        3484,
+        3485,
+        3486
+      ],
+      "baseline_sha256": "5a05c69d740e6aad30e0f21780183b5dbfe7c1239be599a03d438c87c9436383",
+      "patched_sha256": "f1bec63e2510b91b90dc03b4941e28562cdd06e968ffeb459208f518b7279fcb",
+      "bytes": 5232
+    },
+    "gfx1013-O2": {
+      "original_whole_elf_reproduced": true,
+      "patch_changed_byte_offsets": [
+        3244,
+        3245,
+        3246,
+        3404,
+        3405,
+        3406
+      ],
+      "baseline_sha256": "ed3b1b6b3d82f6775a20f3f0781c31c2ffc7e48a8dc813b23bc0617558114ced",
+      "patched_sha256": "bbf825113bc2b8136062b9654868b446a3eab668e0bff2a6126f339e134fc61c",
+      "bytes": 5168
+    },
+    "gfx1030-O1": {
+      "original_whole_elf_reproduced": true,
+      "patch_changed_byte_offsets": [
+        3292,
+        3293,
+        3294,
+        3488,
+        3489,
+        3490
+      ],
+      "baseline_sha256": "69f5276503e20b2c901440de07ff555dd25ad26af12d0cf0f21d348c88011040",
+      "patched_sha256": "fe0672372b538edef406217a3f95587df5299ff7c733759af5cb7bcdda4220d8",
+      "bytes": 5232
+    },
+    "gfx1030-O2": {
+      "original_whole_elf_reproduced": true,
+      "patch_changed_byte_offsets": [
+        3248,
+        3249,
+        3250,
+        3408,
+        3409,
+        3410
+      ],
+      "baseline_sha256": "5df632cbe219b637c3eb62e3246b56422cfd90614f5060281dd2fdcad96e59e6",
+      "patched_sha256": "6751905c89962031d412747fc26b7351040f80b5d1c3e78e4fa20fc083e50995",
+      "bytes": 5168
+    }
+  },
+  "oracle_sha256": "373c94b8ad8dac7326401ad54a1299d750298a5922c1a226d0d4816c854430b8",
+  "focused_tests": 4,
+  "boundary": {
+    "last_zero_input_bits": "0xc2cff1b5",
+    "first_nonzero_input_bits": "0xc2cff1b4"
+  },
+  "hardware_executed": false,
+  "limits": [
+    "MPFR certifies the mathematical cutoff, not GPU EXP/FLDEXP approximation.",
+    "Original numerical failure remains failed; new package and native validation are pending.",
+    "Private relink of pinned source-built LLVM components, not a hermetic full toolchain build."
+  ]
+}

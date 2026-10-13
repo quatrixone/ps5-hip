@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "reviewed-isolated-offline-geometry-lds-route",
+  "source_commit": "89bf865ae3d247265de78a48a3e418305974e38e",
+  "branch": "development/g4-geometry-lds-runtime",
+  "integrated_into_primary_development": false,
+  "freeze": {
+    "path": ".local/g4-geometry-lds-runtime/results/freeze-v1/receipt.json",
+    "sha256": "b4ac96249ef02ac5e2bf5b4d948a73878d518425e834153acb22afa22fb360df"
+  },
+  "independent_review": {
+    "path": "results/geometry-lds-runtime-independent-review-v1.json",
+    "sha256": "ef85dec80f0885660776d83ab8c0f5a4c80c1cdd5e7d868b51b06090eda909a1"
+  },
+  "qualification_receipts": {
+    "results/core-v1/receipt.json": "03af41819b9fde57df426fa27429c3ef35db0d91704dc3a6ea7eff119a5fec3b",
+    "results/owned-v2/receipt.json": "509372e612f3cfc1107be222911e387509e39247657eff71f8ff7c33b1c4633f"
+  },
+  "selected_sanitizer_checks": 40,
+  "final_test_only_correction_replay": 2,
+  "profile": {
+    "block": [
+      8,
+      8,
+      1
+    ],
+    "static_lds_bytes": 512,
+    "allocated_lds_bytes": 1024,
+    "input_rsrc2": "0x98c",
+    "dispatch_rsrc2": "0x1098c",
+    "hidden_geometry_fields": 13
+  },
+  "hardware_executed": false,
+  "limits": [
+    "Host models do not execute AMDGPU ISA or establish matrix numerical correctness.",
+    "Runnable client and native qualification remain separate work."
+  ]
+}

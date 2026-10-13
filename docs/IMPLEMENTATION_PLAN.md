@@ -12,8 +12,10 @@ cycles. The fixed relaxed atomic suite also passed six contended 32/64-bit add,
 CAS and indirect-add dispatches with 98,694 validated values and clean teardown;
 see `../evidence/native-atomic-suite.json`. The numerical math candidate failed its unchanged subnormal-output contract;
 offline reproduction identifies an explicit compiler underflow cutoff. See
-`../evidence/native-math-current-failure.json`; correction and new native
-validation remain pending. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
+`../evidence/native-math-current-failure.json`. The isolated compiler correction
+passed independent offline review without changing the oracle; see
+`../evidence/offline-exp-cutoff-correction.json`. New native validation remains
+pending. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
 shared four-route clients have passed bounded native cycles with complete
 compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
@@ -22,9 +24,11 @@ buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
 including immutable inputs and guards; they are not an active shader output count.
 See `../evidence/native-hip-routes.json` and
 `../evidence/offline-shared-hip-runtime.json`.
-A bounded reusable single-module HIP runtime is now qualified offline;
-see `../evidence/offline-bounded-hip-runtime.json`. Its own native client
-validation remains pending. Frozen native candidates and validation receipts exist. See `../STATE.md`
+The bounded reusable single-module HIP runtime now also has native client
+validation: eleven blocking submissions in sequences 0/1/3/7 through two genuine
+registered kernels, exact results and complete cleanup, independently audited.
+See `../evidence/native-hip-generic.json` and the offline qualification in
+`../evidence/offline-bounded-hip-runtime.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
