@@ -18,6 +18,10 @@ Updated: 2026-10-13, America/New_York.
   and independent review passed. Existing HIP admission remains unchanged; the
   combined helper has no hardware qualification yet. See
   `evidence/offline-owned-native-integration.json`.
+- The reviewed planners and owned helper are now integrated into
+  `development/offline-bringup` at `469ada5`. All 184 implementation, build and
+  test paths match the qualified `7aed16b` tree exactly; only current documentation
+  and evidence differ. See `evidence/offline-development-integration.json`.
 
 - Geometry joins the shared pure planners in frozen commit `296222d`. All 63
   saved sanitizer tests and independent review passed. The 14 allocation,

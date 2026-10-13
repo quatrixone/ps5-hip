@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "classification": "reviewed-implementation-integrated",
+  "qualified_source_commit": "7aed16b3fb5c3667cb85b4e4e0908359e954520f",
+  "integrated_source_commit": "469ada5d8c28c60cc67c0e5deb8add170dd0091b",
+  "implementation_paths_identical": 184,
+  "differing_paths": [
+    "STATE.md",
+    "docs/G3_QUALIFICATION.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "evidence/native-geometry-2d-deployment.json",
+    "evidence/native-geometry-2d.json",
+    "evidence/native-geometry-3d-deployment.json",
+    "evidence/native-geometry-3d.json",
+    "evidence/native-hip-vector-deployment.json",
+    "evidence/native-hip-vector.json",
+    "evidence/native-wave-partial-deployment.json",
+    "evidence/native-wave-partial.json",
+    "evidence/offline-core-planner-integration.json",
+    "evidence/offline-geometry-core-integration.json",
+    "evidence/offline-owned-native-integration.json"
+  ],
+  "qualification": {
+    "path": "evidence/offline-owned-native-integration.json",
+    "sha256": "13a18361db684e8df59e511e0d56d3aa779789fab551ec80f97e2b66225428f2"
+  },
+  "additional_tests_run": false,
+  "reason": "Implementation/build/test bytes equal the independently reviewed 65-test and 26-mode candidate. Only current-state documentation and compact evidence differ.",
+  "hardware_qualified": false,
+  "new_hip_admission": false
+}
