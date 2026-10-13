@@ -8,6 +8,7 @@ namespace {
 std::map<int64_t, void *> allocations;
 int64_t next_id = 1;
 unsigned released = 0;
+unsigned allocation_calls = 0, fail_allocate_at = 0;
 bool fail_unmap = false, fail_release = false;
 unsigned cleanup_failures = 0;
 void check(bool ok) { if (!ok) throw std::runtime_error("submission assertion failed"); }
@@ -58,6 +59,7 @@ struct Model : ps5hip::SubmissionBackend {
 }
 extern "C" int64_t sceKernelGetDirectMemorySize() { return int64_t(12) << 30; }
 extern "C" int32_t sceKernelAllocateDirectMemory(int64_t, int64_t, size_t bytes, size_t alignment, int, int64_t *physical) {
+    if (++allocation_calls == fail_allocate_at) return -1;
     void *memory = nullptr;
     if (posix_memalign(&memory, alignment, bytes)) return -1;
     *physical = next_id++; allocations[*physical] = memory; return 0;
@@ -95,10 +97,41 @@ int main() {
             const auto failures_before = cleanup_failures;
             fail_unmap = unmap;
             fail_release = !unmap;
-            reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
+            try { queue.submit_and_wait(commands, {resource}, 1); throw std::runtime_error("cleanup error accepted"); }
+            catch (const NativeMemoryCleanupError &) {}
             // Completion released GPU holds, but a cleanup failure must not pass.
             check(!queue.poisoned() && model.submits == 1);
             check(cleanup_failures == failures_before + 1);
+            check(released == before + 2 && allocations.size() == 1);
+            check(resource->close() && allocations.empty());
+        }
+        {
+            Model model; SubmissionQueue queue(model);
+            auto resource = std::make_shared<NativeMemory>(64, 64, false);
+            const auto before = released;
+            fail_allocate_at = allocation_calls + 2; // Marker setup fails after command allocation.
+            reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
+            fail_allocate_at = 0;
+            check(!queue.poisoned() && !model.submits && !resource->gpu_in_use());
+            check(released == before + 1 && allocations.size() == 1);
+            check(resource->close() && allocations.empty());
+        }
+        for (bool cleanup_failure : {false, true}) {
+            Model model; SubmissionQueue queue(model);
+            auto resource = std::make_shared<NativeMemory>(64, 64, false);
+            const auto before = released;
+            model.throw_flush = true;
+            fail_unmap = cleanup_failure;
+            try {
+                queue.submit_and_wait(commands, {resource}, 1);
+                throw std::runtime_error("pre-submit failure accepted");
+            } catch (const NativeMemoryCleanupError &) {
+                check(cleanup_failure);
+            } catch (const ObjectError &) {
+                check(!cleanup_failure);
+            }
+            // The one-shot cleanup failure is retried by the temporary's destructor.
+            check(!queue.poisoned() && !model.submits && !resource->gpu_in_use());
             check(released == before + 2 && allocations.size() == 1);
             check(resource->close() && allocations.empty());
         }

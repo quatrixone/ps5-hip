@@ -32,17 +32,28 @@ int main() {
             check(allocated_bytes == 0x4000 && allocated_alignment == 0x10000);
             check(memory.range().address == mapped_address && memory.range().bytes == 0x4000);
             memory.acquire_gpu_use(); memory.acquire_gpu_use();
+            check(memory.gpu_in_use());
             check(!memory.close() && !unmaps && !releases);
             memory.complete_gpu_use(); check(!memory.close());
             memory.complete_gpu_use();
+            check(!memory.gpu_in_use());
             fail_unmap = 1; check(!memory.close() && !releases);
             fail_unmap = 0; fail_release = 1; check(!memory.close());
             fail_release = 0; check(memory.close());
             reject([&] { memory.range(); }); reject([&] { memory.complete_gpu_use(); });
         }
         auto prior = releases;
-        fail_map = 1; reject([] { NativeMemory m(1, 256, true); }); fail_map = 0;
+        fail_map = 1;
+        try { NativeMemory m(1, 256, true); throw std::runtime_error("failed map accepted"); }
+        catch (const ps5hip::NativeMemorySetupError &error) { check(!error.retained_backing); }
+        fail_map = 0;
         check(releases == prior + 1);
+        fail_map = fail_release = 1;
+        try { NativeMemory m(1, 256, true); throw std::runtime_error("failed retained map accepted"); }
+        catch (const ps5hip::NativeMemorySetupError &error) { check(error.retained_backing); }
+        // This syscall-only model owns no actual backing; the failed constructor
+        // intentionally cannot release its physical ID after throwing.
+        fail_map = fail_release = 0;
         prior = releases;
         fail_allocate = 1; reject([] { NativeMemory m(1, 256, true); }); fail_allocate = 0;
         check(releases == prior);

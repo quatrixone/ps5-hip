@@ -34,8 +34,9 @@ NativeMemory::NativeMemory(uint64_t bytes, uint64_t alignment, bool code_window)
 }
 
 [[noreturn]] void NativeMemory::fail(const char *message) {
-    if (!close()) std::fprintf(stderr, "ps5hip: setup cleanup failed; native allocation retained\n");
-    throw ObjectError(message);
+    const bool retained = !close();
+    if (retained) std::fprintf(stderr, "ps5hip: setup cleanup failed; native allocation retained\n");
+    throw NativeMemorySetupError(message, retained);
 }
 
 NativeMemory::~NativeMemory() {
