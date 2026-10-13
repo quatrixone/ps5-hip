@@ -326,3 +326,13 @@ if(BUILD_TESTING)
       ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py)
   endif()
 endif()
+
+if(BUILD_TESTING)
+  set(PS5HIP_HOST_THREADS_PROOF "" CACHE PATH "Completed real-pthread host proof")
+  if(PS5HIP_HOST_THREADS_PROOF)
+    add_test(NAME host_threads_actual_proof COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tools/probe_host_threads.py --check "${PS5HIP_HOST_THREADS_PROOF}")
+  else()
+    message(STATUS "CPU pthread proof unavailable: set PS5HIP_HOST_THREADS_PROOF")
+  endif()
+endif()
