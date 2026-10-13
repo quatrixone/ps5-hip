@@ -43,6 +43,12 @@ for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 
+The integrated multi-module/query candidate produced correct A/B/A results and
+natural shutdown on .40, but its collector expired before the post-run snapshot.
+The original cycle remains inconclusive; see
+`../evidence/native-multi-query-incomplete.json`. A separate read-only observation
+may establish eventual post-state without replaying the consumed GPU workload.
+
 The experimental upstream ROCclr port now explicitly rejects unsupported RWX
 memory requests before mapping changes. Ordinary memory operations, two CPU
 command modes, native object/link checks and exact patch reproduction pass;

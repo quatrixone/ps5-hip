@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Multi-module/query computation observed; full cycle incomplete:** frozen
+  `b253c62` produced all 219 exact A/B/A outputs, 522 whole-allocation comparisons,
+  84 guard checks, 32 successful allocation queries and eight invalid/stale
+  rejections. Independent audit binds the fresh application log and mounted bytes
+  to PID372/application `0x0000e018`, both unregister callbacks, State destruction
+  and natural stop. The collector reached its 120-second deadline before sending
+  the post-run snapshot, so original acceptance remains false. Preserve this
+  consumed case; collect only a separate delayed read-only observation next.
+  See `evidence/native-multi-query-incomplete.json`.
+
 - **Upstream ROCclr executable-memory boundary qualified offline:** the current
   `ports/clr` patch rejects RWX reserve, commit and protect requests before any
   mapping mutation. Focused syscall checks preserve existing bytes and writable
@@ -1119,3 +1129,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | CLR port | pinned65d174c | offline | pass:28 native objects,strict link,exact patch | evidence/offline-upstream-clr-native-port.json | native startup
 
 - 2026-10-13 | CLR memory boundary | reviewed v7 | offline | pass: early RWX rejection, ordinary memory and two command modes, native link, exact patch | evidence/offline-clr-rwx-guard.json | native CPU title startup
+
+- 2026-10-13 | G4 multi/query | b253c62 | .40 | inconclusive cycle: exact computation and natural stop, post-snapshot missing | evidence/native-multi-query-incomplete.json | separate read-only observation

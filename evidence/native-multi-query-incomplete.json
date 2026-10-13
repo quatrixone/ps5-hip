@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "classification": "inconclusive",
+  "scope": "Computation and natural application lifecycle observed; full console cycle incomplete.",
+  "source_commit": "b253c621b8646b5520e8e96c0e3c6d87aeeb34a8",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "image_sha256": "5266e6b0c1c85029613e698639000ff53d6f889005d46d47800ec08063269151",
+  "hardware_gate_passed": false,
+  "original_accepted": false,
+  "receipt": {
+    "path": "results/integrated-multi-query-execution-v1/observation-20261013T192805.694532Z/receipt.json",
+    "sha256": "dd1bd9e8659c2f274c50fbf2092f5546cc8559505c3d88d421a11bd6415c9fde"
+  },
+  "independent_review": {
+    "path": "results/integrated-multi-query-incomplete-independent-review-v1/review.json",
+    "sha256": "6d0e826b47aebe6924d854ea4ea8d05c2b96fc7fcfb7c871ebb32ec1822a81db"
+  },
+  "application_log_sha256": "b055f5d3b5abc82c14869b9ff1e2b36d4983cfeeeced004537a0f13eb0bb3842",
+  "observed": {
+    "modules": 2,
+    "functions": 2,
+    "dispatch_order": ["A", "B", "A"],
+    "exact_outputs": 219,
+    "whole_allocation_comparisons": 522,
+    "guards": 84,
+    "successful_allocation_queries": 32,
+    "invalid_or_stale_query_rejections": 8,
+    "allocations": 2,
+    "frees": 2,
+    "compiler_unregister_callbacks": 2,
+    "state_destruction": true,
+    "natural_stop_before_close": true,
+    "pid": 372,
+    "application_id": "0x0000e018"
+  },
+  "missing": [
+    "The post-run mount snapshot was never sent, so no pre/post mount comparison exists.",
+    "The collector reached its absolute 120-second deadline; the original error-free capture requirement failed."
+  ],
+  "next_action": "Separate idle-gated read-only collection of eventual mount state and unchanged installed bytes/log; never rerun the consumed GPU case or rewrite original acceptance.",
+  "limits": [
+    "No full G4, general module compatibility, asynchronous execution or performance qualification.",
+    "The snapshot delay is consistent with repeated full local validation inside the collector budget; individual operation timings were not instrumented."
+  ]
+}
