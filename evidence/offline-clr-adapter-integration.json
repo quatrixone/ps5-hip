@@ -1,0 +1,40 @@
+{
+    "classification":  "exact-reviewed-clr-adapter-source-import",
+    "source_commit":  "169a118a2e61b505b606b0725f62bb0cfcd1471f",
+    "import_commit":  "9289710",
+    "independent_review":  {
+                               "sha256":  "7a2b3c58ad05437780e73a915f3251d75adec5176dc58085fdde5eadf8debce2",
+                               "path":  "results/clr-adapter-final-independent-review-v3/review.json"
+                           },
+    "source_files":  {
+                         "evidence/offline-clr-ps5-adapter.json":  "ceb243dfcadfc1b14b6cd2872fcd771c0aaf9ebc210b63ae829438c02a6603ad",
+                         "ports/clr/ADAPTER.md":  "778c0923a712e419cb012d2f690d1549720da5dfd6bd65a8d5398a6a752587c1",
+                         "ports/clr/adapter-manifest.json":  "9f27829686e53c1a49036925b8d1c2231c1199ab328548a166ac53f1fb6d4331",
+                         "ports/clr/ps5-device-aot.patch":  "3d2bb402d6beaff2427d3ae199911cf035169ecda9913476e99b3b520571afa7",
+                         "ports/clr/ps5-device-unsupported.inc":  "8785c18199fd34c7f52ad29d73440ccbb40056f42132200329bb3eb0d57d36af",
+                         "ports/clr/ps5-device.cpp":  "253eb57a60d77e203c95decc884769c1a437b81d79cf8c6e061913ae28ec1d9c",
+                         "ports/clr/ps5-device.hpp":  "94cd355ce3d415986761954333491eaffea4ebe6cffca04474a644f8810ce1a0",
+                         "ports/clr/ps5-lifetime.patch":  "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b",
+                         "ports/clr/ps5-virtual-unsupported.inc":  "27234485de3e36ae153c11233921bf598172e620bc7d41a84f544da1e3c63b2e",
+                         "tests/clr_adapter_model.cpp":  "58f1176f951ba4145b44514cd7f7e50b5a8d5aeb9114a8f5e26a27e6089cc222",
+                         "tests/clr_adapter_receipt_test.py":  "a94c704c3076217bd6bfdbe9d7c9e9e2429b4fd4426148c944e8d4b49bf7f3c5",
+                         "tests/clr_lifetime/README.md":  "777317b40427b99d033f5dfdf8974fd10e660e923fc08e522b8b3bd66e086c61",
+                         "tests/clr_lifetime/thread_model.cpp":  "ffcda57432a4e178e4f6849ccc9cc2503b55fe342f2f732133582b862632d1ba",
+                         "tools/check_clr_adapter.py":  "c75e1dab6c19ef204a573a1e565c3402511fafb35870c57737251d1f247d9478",
+                         "tools/patch_clr_lifetime.py":  "64e338a5ca080405274b696406fccfe854a8f5359ca099b9d75c9cc1282fbe4e",
+                         "tools/patch_clr_lifetime_v6.py":  "91be61a123236ee7c81e87783c4c5a73d8cb34fd616f62e656f5db1cd85c6d29",
+                         "tools/patch_clr_lifetime_v7.py":  "91eb65b8a6b2317ad526ff9de3c748728b348fec5f8a0b75870e5ab7b33da5a1",
+                         "tools/prepare_clr_adapter.py":  "de7a6ccf304d423601190f4ea4673453e97d3c83bd3ef5150cb658f116c43dcd",
+                         "tools/probe_clr_adapter.py":  "039cd5ea0f526e36b0b56f69ec8dc5c08447b070eef43cb9623407955c5a3cda",
+                         "tools/probe_clr_lifetime.py":  "346c0d8126f73030dec6397b8f6d6709e158b7d898289554bac29d11a6b47488",
+                         "tools/qualify_clr_adapter.py":  "286774880bb556c93ea221f9c33730e6af1c8365aa6f2bd7b8d6b2efc15b0fde"
+                     },
+    "verified_source_count":  21,
+    "native_full_link_verified":  false,
+    "native_gpu_execution_verified":  false,
+    "limits":  [
+                   "Exact additive source import; prior sanitizer and portable-patch evidence remains bound to the frozen isolated source.",
+                   "No public HIP initialization or complete ROCm compatibility claim.",
+                   "Native CPU rebuild and genuine GPU adapter native integration remain pending."
+               ]
+}

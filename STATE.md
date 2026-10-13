@@ -4,6 +4,13 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Reviewed ROCclr PS5 adapter imported:** `9289710` imports all 21 files from
+  frozen `169a118` exactly, including the device/AOT bridge, portable lifetime
+  repairs, sanitizer models and saved-evidence checker. Independent review clears
+  the final LF sources, 19 checker mutations and optimized-Python rejection.
+  See `evidence/offline-clr-adapter-integration.json`. Full native adapter linking,
+  console GPU execution through ROCclr and public HIP initialization remain open.
+
 - **Repaired shared lifetime passes final CPU sanitizer review:** both 31-unit,
   seven-mode CPU proofs pass ASan/UBSan and TSan with independent source/dependency
   verification. Successful actual queue termination gates manual owner deletion;
