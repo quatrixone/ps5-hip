@@ -7,7 +7,9 @@ fixture in `../evidence/native-g2-acceptance.json`. G3 has one exact private-cal
 hardware computation observation with delayed completion evidence and one bounded
 compiler-spill cycle plus static, dynamic and mixed LDS cycles. Persistent-buffer
 visibility has recovered computation evidence with an inconclusive original cycle; broad G3
-qualification remains open. G4 has an offline native candidate; G5-G12 remain planned.
+qualification remains open. The full-wave32 fixture now has a passing bounded
+native cycle; partial-wave and multidimensional hardware qualification remain
+open. G4 has an offline native candidate; G5-G12 remain planned.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 

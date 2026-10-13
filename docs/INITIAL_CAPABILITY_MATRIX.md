@@ -1,5 +1,9 @@
 # Initial compute capability contract
 
+Historical contract for the first arithmetic experiments. Later G2 and G3 results
+are recorded in [the current qualification map](G3_QUALIFICATION.md) and `../STATE.md`.
+The pending-gate language below describes that earlier experiment state.
+
 Scope: corrected LLVM/LLD 18.1.8 arithmetic fixtures, AMDHSA V5, little-endian
 ELF64, targets gfx1013 and gfx1030. Hardware evidence now covers the frozen
 gfx1013 indexed-store once and vector-add twice in one later title cycle on

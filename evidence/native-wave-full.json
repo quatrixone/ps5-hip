@@ -1,0 +1,113 @@
+{
+  "source_commit": "c3972cbc3f716f7f0712035d730c37d416420f06",
+  "image_sha256": "19130975f2ba38688886bfed9fbccbc7fda7440799b3151261456913ea95decf",
+  "kernel": "wave_full",
+  "accepted": true,
+  "script_sha256": "3846826ab039721dd1184a82dd1b04c2e767dccf96385752063ad2561bc158cb",
+  "manifest_sha256": "90e1a39b5230ffb5aaecfb1c6c8df2e8be5fcaf773c5247bd840606ecd24155c",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/wave-full-deployment-v1/deployment-20261013T051013.408050Z/deployment.json",
+      "sha256": "24912f1089b35785a2bf3479f45b83fd4baa505e9b69993950a53f7a5a77ced2"
+    },
+    "review": {
+      "path": "results/wave-full-deployment-v1/deployment-20261013T051013.408050Z-independent-review.json",
+      "sha256": "812c3dc2e87306ceac5bf0ff95e54d6f4dc5ca2b65364197d0a86562f0c1f183"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "86a8449daf1be255abe3936cd80f0c4568e997a28ace66c20f18c8b5f0c15353",
+    "after-post.log": "86a8449daf1be255abe3936cd80f0c4568e997a28ace66c20f18c8b5f0c15353",
+    "application.log": "abd6de171d09041be8279d30bb5ee0a38d278e891951e534eeefce9bc7526b7b",
+    "before-close.log": "86a8449daf1be255abe3936cd80f0c4568e997a28ace66c20f18c8b5f0c15353",
+    "before-launch.log": "abf8679c040db1351f2a3d05ee4aac99849520a9f126f36fa1b3eb7ab73c0ed1",
+    "before-log-check.log": "abf8679c040db1351f2a3d05ee4aac99849520a9f126f36fa1b3eb7ab73c0ed1",
+    "before-post-snapshot.log": "86a8449daf1be255abe3936cd80f0c4568e997a28ace66c20f18c8b5f0c15353",
+    "before-pre-snapshot.log": "abf8679c040db1351f2a3d05ee4aac99849520a9f126f36fa1b3eb7ab73c0ed1",
+    "before.log": "abf8679c040db1351f2a3d05ee4aac99849520a9f126f36fa1b3eb7ab73c0ed1",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "ab93e3018f8d226840b31d1d81b51db43c78b38f5206739173e5fe8b1825a24f",
+    "installed-before-launch.json": "1486a04d27c1d5974ec8f07fd3af3481f4d06761be9c74282e74e99e2b45e9c6",
+    "installed-eboot.bin": "ab93e3018f8d226840b31d1d81b51db43c78b38f5206739173e5fe8b1825a24f",
+    "installed.json": "1486a04d27c1d5974ec8f07fd3af3481f4d06761be9c74282e74e99e2b45e9c6",
+    "klog.log": "aee6bed0810cb932dea1beeb68876dbfb0ff16e64499de6c36586be6df787707",
+    "launch-klog.log": "065a540c87675706bc149f0fffa5cc0ff550508c1e57b20624a3b10c0b9ed950",
+    "launch-response.log": "34a710499863656b468e1080f8e9f57c29c109765482874f7075f684a7046386",
+    "launch-shadow-delta.log": "dc4aa16efa59dcf4f6ec26e6b1c974fa891d10a055a068a5d6fa18c11fb1e818",
+    "lifecycle-delta.log": "dc4aa16efa59dcf4f6ec26e6b1c974fa891d10a055a068a5d6fa18c11fb1e818",
+    "observed.log": "86a8449daf1be255abe3936cd80f0c4568e997a28ace66c20f18c8b5f0c15353",
+    "post-snapshot.log": "9c1cf8f1902adcc0757b10edd3a328129eeb58eef3a02f29e6191184aa09e417",
+    "pre-snapshot.log": "9c1cf8f1902adcc0757b10edd3a328129eeb58eef3a02f29e6191184aa09e417",
+    "private-log-absence-before-launch.json": "5c9036fc1fea3500d38b3b296c0def57236dcb5836814e8a66f14851c7582b5e",
+    "private-log-absence.json": "5c9036fc1fea3500d38b3b296c0def57236dcb5836814e8a66f14851c7582b5e",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-full-wave32-cycle-pass",
+  "hardware_gate_passed": false,
+  "full_g3_complete": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "groups": 1,
+  "threads_per_group": 64,
+  "exact_output_words": 256,
+  "operations": [
+    "broadcast",
+    "pair shuffle",
+    "odd-lane ballot",
+    "reduction"
+  ],
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "wave_full",
+    "log_sha256": "abd6de171d09041be8279d30bb5ee0a38d278e891951e534eeefce9bc7526b7b",
+    "bytes": 516,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 177,
+    "app_id": "0x00002018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "receipt": {
+    "path": "results/wave-full-execution-v1/observation-20261013T051312.605146Z/receipt.json",
+    "sha256": "5eeba6457ec99723f3c6a77b4c3a336231d54395922dde63ae7ce3530f87435d"
+  },
+  "independent_review": {
+    "path": "results/wave-full-execution-v1/observation-20261013T051312.605146Z-independent-review.json",
+    "sha256": "0cbf21f7678b3295b675aa6859e93243a8233d7b3a3b7306207b83493ce67e50"
+  },
+  "limits": [
+    "Only the exact O2 gfx1013 full-wave object: one 64-thread group, two wave32 waves, 256 exact words for broadcast, shuffle, ballot and reduction.",
+    "Completed queue includes CPU cache maintenance; no partial-wave, arbitrary shader, asynchronous overlap or full G3 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

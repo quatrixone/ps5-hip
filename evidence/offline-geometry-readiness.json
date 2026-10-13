@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "classification": "offline-ready-independently-reviewed",
+  "source_commit": "7bdcea0a96454d19c2f87d9a2c26b99d7cbb5019",
+  "source_tree": "3d372340d52ebdd122f4fdeceddb359d634e9500",
+  "branch": "development/g3-geometry",
+  "native_readiness": {
+    "path": ".local/g3-geometry/results/geometry-native-v1/readiness.json",
+    "sha256": "30015c643885745806889a2d4677190a0abba4077e04dc4598b83b0a2b3c85cd"
+  },
+  "independent_review": {
+    "path": "results/geometry-independent-native-review-v1/review.json",
+    "sha256": "adc6b3250b5d244fbab69258d832b0a7b99d867196b8d872fd873730058314af"
+  },
+  "source_host_review": {
+    "path": "results/geometry-independent-review-v1/review.json",
+    "sha256": "f0b1f308847bbfb25020145fe021aba0d46ebcc3b0fd14a855981c7875a8e706"
+  },
+  "candidates": [
+    {
+      "kernel": "geometry_2d",
+      "stage": ".local/g3-geometry/dist/PPSA99014/gfx1013-geometry_2d-060b54667240",
+      "profile": {
+        "dimensions": 2,
+        "groups": [
+          3,
+          2,
+          1
+        ],
+        "threads": [
+          8,
+          8,
+          1
+        ],
+        "invocations": 384,
+        "record_words": 6144,
+        "logical_points": 273,
+        "inactive_points": 111,
+        "kernarg_bytes": 296,
+        "timeout_ms": 2000
+      },
+      "manifest_sha256": "88c0651a7174aef3da776f8bf1d9514c8104afdba4d2c32b8c9107349ef72ef3",
+      "package_receipt_sha256": "9a5b84d8cd5dbc27a244c07d4eacb2ea4e4d7e418c5543944213c7488b359a8d",
+      "build_receipt_sha256": "17aede3bcc05c9f3cc401dcc25113383f8f4d28162289fe69a408290dd81d601",
+      "image": {
+        "file": "PPSA99014.ffpkg",
+        "sha256": "fdcda17ad4adf3721fd4692786adf90a573643dfd6a2c4ebcb38fdec1e67578d",
+        "bytes": 3637248
+      },
+      "device": {
+        "sha256": "b8e2b6cbb6726d4beb16a8e6a6c3d4d414a1162abf4ee9828f3e84db7a54dfa4",
+        "bytes": 6520
+      },
+      "signed_application": {
+        "sha256": "f643c25eae9942bda3016a26729c570fd2d993afe20d534acd19ee95cd8b2907",
+        "bytes": 824658
+      },
+      "local_case_verified": true
+    },
+    {
+      "kernel": "geometry_3d",
+      "stage": ".local/g3-geometry/dist/PPSA99014/gfx1013-geometry_3d-a520703a8754",
+      "profile": {
+        "dimensions": 3,
+        "groups": [
+          2,
+          3,
+          4
+        ],
+        "threads": [
+          8,
+          4,
+          2
+        ],
+        "invocations": 1536,
+        "record_words": 24576,
+        "logical_points": 819,
+        "inactive_points": 717,
+        "kernarg_bytes": 296,
+        "timeout_ms": 2000
+      },
+      "manifest_sha256": "83dc5141b3df24b5138b06f5e4108d1e0c9bcf3dd2958900cf4509282f4f3eae",
+      "package_receipt_sha256": "5d8bfaa74ac679fbd3cf7fac4349aa3a9c6a133fab9c70ed69444d87e0b1e35c",
+      "build_receipt_sha256": "d0e5cf14294d5bd908d401d1ca69ddecd7ee5130345664b747cc29becb748f21",
+      "image": {
+        "file": "PPSA99014.ffpkg",
+        "sha256": "591148ba56d977ed2d281b06d3666b9068eed66a72c8f84c9355cc2753b23bec",
+        "bytes": 3637248
+      },
+      "device": {
+        "sha256": "b8e2b6cbb6726d4beb16a8e6a6c3d4d414a1162abf4ee9828f3e84db7a54dfa4",
+        "bytes": 6520
+      },
+      "signed_application": {
+        "sha256": "963649d478cb5261f24269d64a4081417870025b071efb2f32519b11a9bd2495",
+        "bytes": 824690
+      },
+      "local_case_verified": true
+    }
+  ],
+  "qualification": {
+    "configured_sanitizer_ctests": 69,
+    "actual_compiler_profiles": 4,
+    "native_model_instances": 8,
+    "mutations_per_native_model": 31,
+    "uncertain_failure_modes_per_native_model": 5,
+    "descriptor_rsrc2": "0x138c",
+    "descriptor_properties": "0x409",
+    "kernarg_bytes": 296,
+    "user_sgprs": 6,
+    "native_import_count": 116,
+    "independent_source_entries_rehashed": 92,
+    "independent_native_raw_files_rehashed": 23,
+    "independent_package_checks": "both fsck, exact full extraction, FSELF, current case verifier and imports passed"
+  },
+  "hardware_validated": false,
+  "full_g3_complete": false,
+  "limits": [
+    "No GPU/console run; callback models do not emulate ISA or cache behavior.",
+    "Only two fixed64-thread XYZ profiles, zero global offsets/remainders, no LDS/private memory.",
+    "Author host69-test evidence is hash-bound/read, not independently rerun here.",
+    "Native-tool dependencies and full5682-file preservation inventory not independently rehashed.",
+    "Geometry encoder revalidates all256 implicit bytes against packet shape; this is structural and host-model evidence, not XYZ hardware qualification."
+  ]
+}

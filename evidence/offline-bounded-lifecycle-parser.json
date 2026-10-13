@@ -1,0 +1,27 @@
+{
+    "schema":  1,
+    "classification":  "prospective-parser-offline-reviewed",
+    "readiness":  {
+                      "sha256":  "0eb345b788533217ca6b336be45473fed53e77b9ac2811558085210ae6342655",
+                      "path":  "results/visibility-bounded-lifecycle-v1/readiness.json"
+                  },
+    "independent_review":  {
+                               "sha256":  "fb54cf5f02a7abb9ef564a6ad8c4a954db71ea6836354ebf6838c07478702b28",
+                               "path":  "results/visibility-bounded-lifecycle-v1/independent-review-v1.json"
+                           },
+    "source_sha256":  {
+                          "lifecycle.py":  "a58c7441346678761081ac97e719f6d8eab91b566090381782babcfdd68f8fae",
+                          "test_lifecycle.py":  "a094b4b78c305a55412d483a8cfee5afdfa1edd06c4c5e5f43cd5691cced1b50",
+                          "README.md":  "2f1a335d19bbf934791bb9fb9f37278cc43772bd013ac3634876eea7f10b0d62"
+                      },
+    "tests_passed":  8,
+    "change":  "Accept up to eight bounded known resource-manager context lines between adjacent own-title spawn context and matching PID; preserve original lifecycle, fault and uniqueness checks.",
+    "original_visibility_cycle_remains_inconclusive":  true,
+    "hardware_validated":  false,
+    "limitations":  [
+                        "Pure parser qualification; no operational controller or new hardware run is covered by this receipt.",
+                        "Only known space-delimited resource-manager records are admitted; unrelated new log forms remain rejected.",
+                        "Original raw captures and acceptance receipts are unchanged."
+                    ],
+    "next":  "Bind reviewed parser into future wave execution controls."
+}

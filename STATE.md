@@ -4,6 +4,24 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Full-wave32 fixture passed on .40:** 256 exact words for broadcast, shuffle,
+  ballot and reduction across two wave32 waves. Guards and allocation closure
+  passed; PID177/application `0x2018` finalized and stopped naturally. The bounded
+  cycle has matching visible mount snapshots, healthy services and released locks.
+  Independent review rehashed 137 bindings and 25 raw files and reproduced acceptance.
+  See `evidence/native-wave-full.json`; full G3 remains open.
+
+- 2D/3D geometry candidates are frozen at `7bdcea0`. All 69 host checks and
+  both native package validations passed; independent source/host and package
+  reviews are clear. The measured 64-thread shapes use full HIP builtins and
+  checked hidden arguments. Hardware validation remains open. See
+  `evidence/offline-geometry-readiness.json`.
+
+- Prospective lifecycle parsing now tolerates the bounded, known resource-manager
+  records observed between spawn context and matching PID. Eight offline tests and
+  independent review passed; foreign/duplicate identities and faults still reject.
+  Earlier raw logs and inconclusive acceptance remain unchanged. See
+  `evidence/offline-bounded-lifecycle-parser.json`. Future wave controls will bind it.
 - **Visibility computation and delayed cleanup independently audited; original cycle inconclusive:** the recovered
   result reports six dispatches, three rounds and 771 exact outputs over persistent
   buffers, intact guards, closed allocations and complete finalization. Two read-only
@@ -462,10 +480,10 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-Finish prospective interleaved-log parser qualification, then qualify the refreshed
-wave32 candidates. Preserve the successful visibility image/result and the original
+Qualify the refreshed partial-wave candidate, then the reviewed 2D/3D packages.
+Preserve the successful visibility image/result and the original
 inconclusive receipt. The additive 2D/3D
-geometry implementation is being tested in `.local/g3-geometry`. Atomic, numerical and broader
+geometry packages have passed independent offline review in `.local/g3-geometry`. Atomic, numerical and broader
 visibility qualification remain open; do not treat isolated fixture passes as G3.
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
@@ -749,3 +767,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | G2 inconclusive | 5b74ac8 | .40 host launch-parser bug caused early close;services healthy | evidence/native-arithmetic-prospective-cycle1.json | fix host parser offline
 - 2026-10-12 | G2 cycle pass | 5b74ac8 | .40 exact146,self-stop,visible mount equivalence | evidence/native-arithmetic-prospective-cycle1-pass.json | second same-image cycle
 - 2026-10-12 | G2 passed | 5b74ac8 | .40 two clean same-image cycles,292 exact values | evidence/native-g2-acceptance.json | G3 private304 validation
+
+- 2026-10-13 | G3 full wave32 | c3972cb | .40:256 exact words, clean bounded cycle; independent audit clear | evidence/native-wave-full.json | partial waves next
+- 2026-10-13 | G3 geometry offline | 7bdcea0 | 69 host checks and both native packages independently reviewed | evidence/offline-geometry-readiness.json | hardware pending
