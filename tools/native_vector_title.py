@@ -32,18 +32,32 @@ ROUTES_PROFILE = {
     "static_lds_bytes": 256, "private_segment_bytes": 212,
 }
 
+GENERIC_PROFILE = {
+    "target": "gfx1013", "kernel_names": ["affine_words", "block_sum"],
+    "client_entry": "_Z26ps5hip_generic_client_mainiPPc",
+    "combined_object_sha256": "b454e1dc47c7b97aa487fd7ddbf8ca0d3438df2a875853509be6582f7620c5c8",
+    "bundle_sha256": "07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974",
+    "code_sha256": "793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7", "code_bytes": 4664,
+    "compiler_receipt_sha256": "b1745ea3d6853b42267a57fee425cff925bbf1d01be8ab679aba36188100cf98",
+    "sequence_launches": [0, 1, 3, 7], "dispatches": 11,
+    "per_sequence_sizes": [1, 63, 64, 65, 127, 193, 257], "static_lds_bytes": 256,
+    "zero_sequence_scope": "prebackend state within this process; not zero-work finalization",
+}
+
 
 def profile_for(kernel):
     if kernel == "hip_vector":
         return PROFILE
     if kernel == "hip_routes":
         return ROUTES_PROFILE
+    if kernel == "hip_generic":
+        return GENERIC_PROFILE
     raise ValueError("unsupported genuine HIP title profile")
 
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel == "hip_routes" else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic") else set())
 
 
 def validate_fself(container, elf):
@@ -119,6 +133,7 @@ def validate_profile(receipt, source_root):
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+                 ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
                  ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
@@ -161,6 +176,31 @@ def validate_routes_compiler(raw_receipt, combined, source_root):
     return report
 
 
+def validate_generic_compiler(raw_receipt, combined, source_root):
+    selected=GENERIC_PROFILE
+    if hashlib.sha256(raw_receipt).hexdigest()!=selected["compiler_receipt_sha256"] or hashlib.sha256(combined).hexdigest()!=selected["combined_object_sha256"]:
+        raise ValueError("generic title compiler/combined binding mismatch")
+    report=json.loads(raw_receipt)
+    if report.get("title_entry") is not True or report.get("hardware_validated") is not False:
+        raise ValueError("generic title compiler mode missing")
+    for name,digest in report["sources"].items():
+        if hashlib.sha256((source_root/name).read_bytes()).hexdigest()!=digest:
+            raise ValueError("generic title compiler source changed: "+name)
+    cases=[c for c in report["cases"] if c["profile"]=="ps5"]
+    if len(cases)!=1 or cases[0]["kernels"]!=selected["kernel_names"] or cases[0]["registration"]["register_function_calls"]!=2:
+        raise ValueError("generic genuine compiler registration inventory")
+    from probe_hip_routes import section
+    from probe_hip_generic import check_profiles
+    check_profiles(cases[0],selected["kernel_names"])
+    artifacts=report["artifacts"]
+    if (artifacts.get("ps5/routes.o")!=selected["combined_object_sha256"] or
+            artifacts.get("ps5/routes.bundle")!=selected["bundle_sha256"] or
+            artifacts.get("ps5/routes.hsaco")!=selected["code_sha256"] or
+            hashlib.sha256(section(combined,b".hip_fatbin")).hexdigest()!=selected["bundle_sha256"]):
+        raise ValueError("generic title device binding mismatch")
+    return report
+
+
 def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_profile(receipt, source_root)
     kernel = receipt["kernel"]
@@ -176,6 +216,9 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     if kernel == "hip_routes":
         validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                  (provenance / "routes-combined.o").read_bytes(), source_root)
+    elif kernel == "hip_generic":
+        validate_generic_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                  (provenance / "routes-combined.o").read_bytes(), source_root)
     # Reinspect actual linked bytes rather than accepting stale audit booleans.
     from probe_host_registration import audit_image, load_regions
     from build_native_vector_title import patch_startup, patch_linker, audit_startup

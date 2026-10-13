@@ -32,7 +32,7 @@ bool functions_ready(size_t count) noexcept {
 }
 
 // Trivial process-lifetime observation; callbacks never access a destroyed State.
-struct FinalObservation { bool checked, destroyed; } final_observation{};
+struct FinalObservation { bool checked, destroyed; ps5hip::HipRuntimeObservation snapshot; } final_observation{};
 struct DestructionSentinel { ~DestructionSentinel() { final_observation.destroyed=true; } };
 struct State {
 
@@ -52,6 +52,7 @@ struct State {
     ~State() {
 
         try {
+            final_observation.snapshot={registration.active_modules(),registration.active_functions(),completed,init_attempted};
             final_observation.checked = registered==1 && removed==1 && completion_expected(completed) &&
                 !registration.active_modules() && !registration.active_functions() && !partial && !terminal && !data.poisoned() &&
                 data.ranges().empty() && configurations.empty() && main_finished &&
@@ -320,4 +321,9 @@ extern "C" bool ps5hip_runtime_ready() noexcept {
 }
 extern "C" bool ps5hip_runtime_finalized() noexcept {
     return final_observation.checked && final_observation.destroyed;
+}
+extern "C" ps5hip::HipRuntimeObservation ps5hip_runtime_observation() noexcept {
+    if(final_observation.destroyed)return final_observation.snapshot;
+    const auto &s=state();
+    return {s.registration.active_modules(),s.registration.active_functions(),s.completed,s.init_attempted};
 }
