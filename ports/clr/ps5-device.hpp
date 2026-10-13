@@ -14,4 +14,6 @@ using BackendFactory = std::unique_ptr<SubmissionBackend>(*)();
 // Native callers supply the actual AgcBackend factory; models explicitly supply
 // synthetic transport. There is no CPU implementation of a GPU kernel here.
 amd::Device* create_device(BackendFactory, Observation&) noexcept;
+// Called only during genuine single-threaded amd::Runtime initialization.
+bool register_runtime_device(BackendFactory, Observation&) noexcept;
 }

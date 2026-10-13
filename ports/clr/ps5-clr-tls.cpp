@@ -5,11 +5,16 @@
 
 namespace ps5_clr {
 namespace {
-struct State { void* current; std::uint64_t correlation; };
+struct State { void* current; std::uint64_t correlation; void* owned; void (*destroy_owned)(void*); };
 pthread_once_t once = PTHREAD_ONCE_INIT;
 pthread_key_t key;
 int key_error;
-void destroy(void* state) { delete static_cast<State*>(state); }
+void destroy(void* state) {
+  auto* value = static_cast<State*>(state);
+  // Do not access TLS from a pthread key destructor: the key is already cleared.
+  if (value->destroy_owned) value->destroy_owned(value->owned);
+  delete value;
+}
 void initialize() { key_error = pthread_key_create(&key, destroy); }
 State& state() {
   // CLR's pointer/reference accessors cannot report allocation failure.
@@ -28,5 +33,11 @@ State& state() {
 }
 void* current_thread() { return state().current; }
 void set_current_thread(void* value) { state().current = value; }
+void adopt_current_thread(void* value, void (*destroy_owned)(void*)) {
+  auto& s = state();
+  if (!value || s.current != value || s.owned || !destroy_owned) std::abort();
+  s.owned = value;
+  s.destroy_owned = destroy_owned;
+}
 std::uint64_t& correlation_id() { return state().correlation; }
 }
