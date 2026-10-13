@@ -116,7 +116,8 @@ int main() {
             const auto failures_before = cleanup_failures;
             fail_unmap = unmap;
             fail_release = !unmap;
-            reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
+            try { queue.submit_and_wait(commands, {resource}, 1); throw std::runtime_error("cleanup error accepted"); }
+            catch (const NativeMemoryCleanupError &) {}
             // Completion released GPU holds, but a cleanup failure must not pass.
             check(!queue.poisoned() && model.submits == 1);
             check(cleanup_failures == failures_before + 1);

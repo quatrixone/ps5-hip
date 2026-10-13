@@ -10,32 +10,40 @@ SubmissionResult SubmissionQueue::submit_and_wait(const std::vector<uint32_t> &c
     if (poisoned_) throw ObjectError("submission queue poisoned; GPU ownership is unresolved");
     if (commands.empty() || commands.size() > 16384 || !timeout_ms || timeout_ms > 10000)
         throw ObjectError("invalid initial command size or timeout");
-    auto command_memory = std::make_shared<NativeMemory>((commands.size() + 10) * 4, 256, false);
-    auto marker_memory = std::make_shared<NativeMemory>(4, 64, false);
-    std::vector<std::shared_ptr<NativeMemory>> pending{command_memory, marker_memory};
-    for (const auto &resource : resources) {
-        if (!resource) throw ObjectError("null submission resource");
-        resource->range();
-        if (std::find(pending.begin(), pending.end(), resource) == pending.end()) pending.push_back(resource);
-    }
-    auto *words = static_cast<uint32_t *>(command_memory->cpu());
-    std::memcpy(words, commands.data(), commands.size() * 4);
-    const uint64_t marker_address = marker_memory->range().address;
-    // Drain compute before the cache-release event can publish completion.
-    const uint32_t completion[] = {0xc0004600u, 0x407u, 0xc0064900u, 0x0030c514u, 0x20000000u,
-                                  uint32_t(marker_address), uint32_t(marker_address >> 32), 1, 0, 0};
-    std::memcpy(words + commands.size(), completion, sizeof(completion));
-    auto *marker = static_cast<volatile uint32_t *>(marker_memory->cpu());
-    *marker = 0;
+    std::shared_ptr<NativeMemory> command_memory, marker_memory;
+    std::vector<std::shared_ptr<NativeMemory>> pending;
+    uint32_t *words = nullptr;
+    volatile uint32_t *marker = nullptr;
     size_t acquired = 0;
     try {
+        command_memory = std::make_shared<NativeMemory>((commands.size() + 10) * 4, 256, false);
+        marker_memory = std::make_shared<NativeMemory>(4, 64, false);
+        pending = {command_memory, marker_memory};
+        for (const auto &resource : resources) {
+            if (!resource) throw ObjectError("null submission resource");
+            resource->range();
+            if (std::find(pending.begin(), pending.end(), resource) == pending.end()) pending.push_back(resource);
+        }
+        words = static_cast<uint32_t *>(command_memory->cpu());
+        std::memcpy(words, commands.data(), commands.size() * 4);
+        const uint64_t marker_address = marker_memory->range().address;
+        // Drain compute before the cache-release event can publish completion.
+        const uint32_t completion[] = {0xc0004600u, 0x407u, 0xc0064900u, 0x0030c514u, 0x20000000u,
+                                      uint32_t(marker_address), uint32_t(marker_address >> 32), 1, 0, 0};
+        std::memcpy(words + commands.size(), completion, sizeof(completion));
+        marker = static_cast<volatile uint32_t *>(marker_memory->cpu());
+        *marker = 0;
         for (auto &memory : pending) { memory->acquire_gpu_use(); ++acquired; }
         for (auto &memory : pending) backend_.flush(memory->cpu(), memory->range().bytes);
+        held_ = std::move(pending);
     } catch (...) {
         for (size_t i = 0; i < acquired; ++i) pending[i]->complete_gpu_use();
+        const bool commands_closed = !command_memory || command_memory->close();
+        const bool marker_closed = !marker_memory || marker_memory->close();
+        if (!commands_closed || !marker_closed)
+            throw NativeMemoryCleanupError("pre-submission allocation teardown failed");
         throw;
     }
-    held_ = std::move(pending);
     // From the instant submit is entered, any error may mean partial consumption.
     poisoned_ = true;
     const int32_t submitted = backend_.submit(words, uint32_t(commands.size() + 10));
@@ -56,7 +64,7 @@ SubmissionResult SubmissionQueue::submit_and_wait(const std::vector<uint32_t> &c
             const bool commands_closed = command_memory->close();
             const bool marker_closed = marker_memory->close();
             if (!commands_closed || !marker_closed)
-                throw ObjectError("completed submission allocation teardown failed");
+                throw NativeMemoryCleanupError("completed submission allocation teardown failed");
             return {SubmissionStatus::Complete};
         }
         const uint64_t now = backend_.now_ns();
