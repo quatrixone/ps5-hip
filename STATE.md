@@ -4,13 +4,23 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Joined HIP worker callers passed on .40 and independent audit:** frozen
+  `2aa3c530` initialized the queue on main, then submitted from main/A/B/A/main.
+  Both workers joined; five dispatches produced 661 exact values with 1,355
+  device-readback and 1,355 separate host-template comparisons. All 17 phase
+  checks and 11 directly observed AGC events passed. PID318/application `0x2018`
+  completed unregister, State destruction and natural shutdown; mounted bytes,
+  visible mounts, services and locks passed audit. This finite serialized case
+  does not qualify worker-side initialization or simultaneous callers. The
+  isolated runtime is still not integrated into root; see
+  `evidence/native-hip-workers-main.json`.
+
 - **Threaded runtime passed its native single-thread control:** frozen `30f3c9f`
   ran the unchanged HIPIFY client on .40: six launches, 662 exact unsigned sums
   and 2,238 whole-buffer comparisons. Actual PID309/application `0x18` completed
   unregister, State destruction and natural shutdown. Independent audit verified
   log freshness, installed/mounted bytes, healthy services and released locks.
-  Worker-thread GPU submission remains unqualified; next test uses joined
-  workers with a main-initialized queue. See
+  The subsequent joined-worker case passed above. See
   `evidence/native-threaded-hipify-control.json`.
 
 - **Threaded HIP runtime qualified offline:** isolated frozen `30f3c9f` on
@@ -19,7 +29,7 @@ Updated: 2026-10-13, America/New_York.
   and fresh legacy client regressions. Independent review binds all 30 changed
   files and covers checked locking, per-thread errors/configurations, failure
   retention and shutdown. This source is not yet integrated into this root.
-  Native HIPIFY control qualification passed above; worker GPU affinity remains pending;
+  Native HIPIFY control and main-initialized joined-worker qualification passed above;
   see `evidence/offline-threaded-hip-runtime.json`. G3/G4 remain open.
 
 - **CPU threading passed on .40 and independent audit:** frozen `147c3b2`
@@ -994,3 +1004,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 HIPIFY integration | 6e35911 | offline | pass: 9 focused checks, exact reviewed source | evidence/offline-hipify-title-integration.json | threaded runtime
 - 2026-10-13 | G4 threaded runtime | 30f3c9f | offline | pass: checked threading and lifecycle review | evidence/offline-threaded-hip-runtime.json | native control, then worker GPU submissions
 - 2026-10-13 | G4 threaded control | 30f3c9f | .40 | pass: six HIPIFY launches and natural teardown | evidence/native-threaded-hipify-control.json | joined worker GPU submissions
+- 2026-10-13 | G4 joined HIP workers | 2aa3c530 | .40 | pass: main-initialized queue, two joined workers, five dispatches and natural teardown | evidence/native-hip-workers-main.json | worker-side initialization, root integration

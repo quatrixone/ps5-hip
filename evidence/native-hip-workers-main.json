@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "classification": "native-main-initialized-joined-HIP-workers-pass",
+  "source_commit": "2aa3c530f54c91f44acaaddaf9d6c69996e96ee3",
+  "source_branch": "development/native-hip-workers",
+  "root_implementation_integrated": false,
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "hip_workers_main",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "4a4d969be9cd8187eacc0081d328977f7ac1b0f95b5d6f919a0b21878771265f",
+    "bytes": 3670016
+  },
+  "evidence": {
+    "compiler": {
+      "path": ".local/g4-native-workers/results/workers-compiler-v2/receipt.json",
+      "sha256": "f6c57047764720fbf6b61c7eb2d03939a914dc50a0942099d2b33a4a572f2d33"
+    },
+    "compiler_review": {
+      "path": "results/workers-compiler-independent-review-v1.json",
+      "sha256": "6fbe3ee81837927f441d8f61e0c5dd91c22a9ce50741edc03b6b1a789a285448"
+    },
+    "source_freeze": {
+      "path": ".local/g4-native-workers/results/source-freeze-v1/receipt.json",
+      "sha256": "61b6ab2dc98780d111ec0d4d86aec8c83e8a4bd6f56a7a5b3ffd40eb664d24d7"
+    },
+    "source_review": {
+      "path": "results/native-workers-source-independent-review-v1.json",
+      "sha256": "fedac7189654135a2721b7a6b99b2d8118461b0ceef19977b484bd4aa14d58bf"
+    },
+    "client_asan_ubsan": {
+      "path": ".local/g4-native-workers/results/client-model-v3/receipt.json",
+      "sha256": "5aaef2e3749c3ccc3251d7f970c48a884d884ff798046daf892c6d82d1b9afb9"
+    },
+    "client_coordination_tsan": {
+      "path": ".local/g4-native-workers/results/client-tsan-v1/receipt.json",
+      "sha256": "d041cd348e97ea7b8c52c4435181dbed561fd84223faa8f304b736ad5f172cf6"
+    },
+    "title_host_model": {
+      "path": ".local/g4-native-workers/results/workers-title-v1/receipt.json",
+      "sha256": "bc9f7fb4275a4e8cb6e340d2d3de49664e1e41eae13983854c600043e50d3c02"
+    },
+    "title_integration": {
+      "path": ".local/g4-native-workers/results/workers-title-integration-v1/receipt.json",
+      "sha256": "0081fa494146f0521eee6e01440e88b67e4194d561a9aaf6700cdaac0e23b325"
+    },
+    "focused_cmake": {
+      "path": ".local/g4-native-workers/results/cmake-integration-v2/receipt.json",
+      "sha256": "c02e90448be16b6a72890bbb2e0d844233d239a3179926aead2035b243a7754c"
+    },
+    "native_build": {
+      "path": ".local/g4-native-workers/dist/PPSA99014/gfx1013-hip_workers_main-182a1a5d0506/build-receipt.json",
+      "sha256": "fe1080fa6d2c15e9e5de01ae274ea405c31da9669007e3a6e6d7913381342719"
+    },
+    "native_stage": {
+      "path": ".local/g4-native-workers/dist/PPSA99014/gfx1013-hip_workers_main-182a1a5d0506/manifest.json",
+      "sha256": "1369b717ca705df2db6f7c3842ae25a4a1c8ad557596cd70c161ad8feac96201"
+    },
+    "native_package": {
+      "path": ".local/g4-native-workers/dist/PPSA99014/gfx1013-hip_workers_main-182a1a5d0506/package-receipt.json",
+      "sha256": "714f0b84fa38e55973a03d8b5b89406848063e39c0c0c6b7ca4004cdc2b466f4"
+    },
+    "package_review": {
+      "path": "results/native-workers-package-independent-review-v1/review-v2.json",
+      "sha256": "045e373657f49e6df94b454627f30459fb30290308ae1173bf2df2e07217f5e5"
+    },
+    "controls_offline": {
+      "path": "results/workers-main-controls-offline-v2/receipt.json",
+      "sha256": "d1ae1b0a1aba72b1da161d6329e00cd1c706a4d9c656dbc60061e8b9e34c809d"
+    },
+    "controls_review": {
+      "path": "results/workers-main-controls-independent-review-v1/review-v3.json",
+      "sha256": "66da5c471a977f2a967c9a9394ac405364c312423cc0345db2c18b02624dda04"
+    },
+    "deployment": {
+      "path": "results/workers-main-deployment-v1/deployment-20261013T140411.832188Z/deployment.json",
+      "sha256": "2212201287de5c6c3a1de0e34d812b04d83922f263543b1822a3a29b55c2513b"
+    },
+    "deployment_review": {
+      "path": "results/workers-main-deployment-v1/deployment-20261013T140411.832188Z-independent-review-v2.json",
+      "sha256": "1d6486e1a6d1b68c5149dd2caa8eff0a2402b070fa9d8bdfd4e0eab2f3ffbadc"
+    },
+    "execution": {
+      "path": "results/workers-main-execution-v1/observation-20261013T140745.581626Z/receipt.json",
+      "sha256": "4aec95c8a009f26217e81b1c5ebc282462afdc0b5a16c32860c57d515df5ea68"
+    },
+    "execution_review": {
+      "path": "results/workers-main-execution-v1/observation-20261013T140745.581626Z-independent-review.json",
+      "sha256": "a97f89c9e311927d258eb0834ca79617558080f0edd19c8e96f15db6e2349625"
+    },
+    "threaded_runtime_checkpoint": {
+      "path": "evidence/offline-threaded-hip-runtime.json",
+      "sha256": "92464ac589b26c0dd2b86f75c08fa3c07c3ef8f2474f3adefb7c1be01c60abdc"
+    },
+    "native_cpu_prerequisite": {
+      "path": "evidence/native-host-threads.json",
+      "sha256": "716fefe5e2b1a665a371328f7e1147c9083523565ee1ee69dbf58300d4910157"
+    },
+    "native_single_thread_control": {
+      "path": "evidence/native-threaded-hipify-control.json",
+      "sha256": "4c6e1ef40678d28bd06f81c416348992bb360c5bd354c369f27fb43652305425"
+    }
+  },
+  "observed": {
+    "pid": 318,
+    "application_id": "0x2018",
+    "compiler_registered_functions": 1,
+    "blocking_dispatches": 5,
+    "actors": [
+      "main",
+      "A",
+      "B",
+      "A",
+      "main"
+    ],
+    "counts": [
+      1,
+      73,
+      257,
+      73,
+      257
+    ],
+    "salts": [
+      11,
+      101,
+      1009,
+      65521,
+      4294967280
+    ],
+    "created": 2,
+    "joined": 2,
+    "exact_values": 661,
+    "device_readback_word_comparisons": 1355,
+    "separate_host_template_comparisons": 1355,
+    "phase_checks": 17,
+    "AGC_events": 11,
+    "AGC_initialization_actor": "main",
+    "AGC_submit_kick_pair_actors": [
+      0,
+      1,
+      2,
+      1,
+      0
+    ],
+    "compiler_unregister_and_State_destruction_before_final_success": true,
+    "application_log_bytes": 2419,
+    "application_log_sha256": "7eff115bc3050e3833a71055ff3a928df06e4e78796d17ee5f1af8f15b3a426b",
+    "natural_title_stop": true,
+    "visible_matching_mount_multiset_equal": true,
+    "services_healthy": true,
+    "owned_locks_released": true,
+    "observation_budget_seconds": 35
+  },
+  "offline_scope": {
+    "client_asan_ubsan_modes": 20,
+    "client_coordination_tsan_modes": 3,
+    "client_tsan_uses_synthetic_HIP": true,
+    "title_host_model_cases": 19,
+    "title_transcript_mutations": 79,
+    "control_tests": {
+      "deployment": 9,
+      "execution": 25
+    }
+  },
+  "scope": "One genuine compiler kernel, main-initialized queue, two joined host workers and five ordered blocking calls. Direct AGC wrappers attribute init/submit/kick by actual pthread identity.",
+  "worker_gpu_submission_validated_for_this_case": true,
+  "worker_queue_initialization_validated": false,
+  "simultaneous_HIP_callers_validated": false,
+  "asynchronous_GPU_overlap_validated": false,
+  "full_g4_complete": false,
+  "full_gate_complete": false,
+  "limits": [
+    "No general thread-affinity or queue migration claim.",
+    "Visible mount equivalence is not global namespace or reference-release proof.",
+    "Offline injected uncertain joins model retention, not recovery from a permanently stuck native worker."
+  ],
+  "next": "Separate worker-initialized queue experiment and reviewed root integration; retain serialized workload limits."
+}

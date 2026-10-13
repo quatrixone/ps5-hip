@@ -35,7 +35,10 @@ also passed eight native launches across four shapes and two rounds, with 982
 exact integer-valued FP32 outputs and complete natural teardown; see
 `../evidence/native-hip-matmul.json`. The unedited HIPIFY translation also passed
 six native launches, 662 exact wrapping sums and complete teardown; see
-`../evidence/native-hipify-client.json`. Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
+`../evidence/native-hipify-client.json`. A main-initialized queue now also passed
+five serialized main/A/B/A/main dispatches with two joined workers, 661 exact
+values and complete audited teardown; see `../evidence/native-hip-workers-main.json`.
+Broader G4 remains open. Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
@@ -45,9 +48,12 @@ The isolated threaded runtime `30f3c9f` now passes independent offline review,
 See `../evidence/offline-threaded-hip-runtime.json`. Its unchanged single-thread
 HIPIFY workload subsequently passed on .40 with independent audit of all six
 launches and natural teardown (`../evidence/native-threaded-hipify-control.json`).
-It is not yet integrated into the root runtime. Joined worker GPU callers and
-worker-side queue initialization require separate native experiments; neither
-follows from the CPU-only threading proof or this single-thread control.
+It is not yet integrated into the root runtime. The subsequent isolated
+`2aa3c530` main-initialized queue passed actual joined-worker calls and independent
+audit: 661 active values, 1,355 device-readback and 1,355 host-template comparisons,
+17 phase checks and 11 direct AGC events. See `../evidence/native-hip-workers-main.json`.
+Worker-side queue initialization, simultaneous callers and repeated initialization
+still require separate qualification.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
@@ -441,10 +447,12 @@ allocation failures and shutdown pass bounded tests.
 
 The CPU prerequisite has passed on firmware 12.70: two joined workers, 256
 ordered updates, isolated scalar emulated TLS, key destructors and clean
-synchronization teardown. See `../evidence/native-host-threads.json`. This does
-not satisfy multithreaded HIP acceptance; per-thread launch/error state, checked
-shared ownership and actual worker-thread GPU affinity remain to be implemented
-and validated. The combined HIPIFY title/build integration is separately
+synchronization teardown. See `../evidence/native-host-threads.json`. Checked
+per-thread launch/error state and shared ownership subsequently passed isolated
+offline qualification; main-initialized joined-worker HIP calls then passed the
+finite native case in `../evidence/native-hip-workers-main.json`. This does not
+complete multithreaded HIP acceptance or qualify worker-side initialization and
+simultaneous callers. The combined HIPIFY title/build integration is separately
 qualified in `../evidence/offline-hipify-title-integration.json`.
 
 Decision: publish the supported API matrix internally. Missing required semantics
