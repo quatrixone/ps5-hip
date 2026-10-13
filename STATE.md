@@ -4,6 +4,17 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **ROCclr CPU launch held after new shared-thread findings:** the CPU package
+  was deployed and registered on .40 with independently audited preservation,
+  mounted bytes, idle state, service health and lock release; it was not launched.
+  Full adapter ThreadSanitizer instrumentation then reported upstream thread-state
+  and queue-teardown races in the same termination path used by this CPU title.
+  Previous offline passes do not resolve this finding. Repair and qualify actual
+  thread termination before rebuilding a new CPU candidate. Raw diagnostic:
+  `.local/g5-clr-ps5-adapter/results/tsan-v1/normal.stderr`; deployment review:
+  `results/clr-cpu-deployment-v1/deployment-20261013T201506.283228Z-independent-review.json`.
+  Compact source-bound findings: `evidence/offline-clr-thread-lifetime-hold.json`.
+
 - **Native ROCclr CPU title packaged and independently reviewed offline:** frozen
   isolated `5db9751` passes the repaired six-mode client proof, focused watchdog
   checks, actual SDK compile/link/conversion and startup/provider audits. Bound
@@ -1158,3 +1169,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 multi/query | b253c62 | .40 | delayed post-state pass, original cycle remains incomplete | evidence/native-multi-query-delayed-post-state.json | native CLR startup
 - 2026-10-13 | G4 SDK | de93ce1 | offline | exact multi/reduction import and root compiler authority validated | evidence/offline-multi-reduction-sdk-integration.json | native CLR startup
 - 2026-10-13 | CLR | 5db9751 | offline | CPU package and exact source independently verified | evidence/offline-clr-cpu-native-package.json | native startup
+- 2026-10-13 | CLR | 5db9751 | offline | launch held after shared thread-lifetime findings | evidence/offline-clr-thread-lifetime-hold.json | repair and requalify

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "classification": "native-clr-cpu-launch-held-shared-thread-lifetime",
+  "source_commit": "5db9751e4236d31f371b90fecb86aa35c2eb10f4",
+  "native_executed": false,
+  "observed": [
+    "Fully instrumented adapter run reports upstream Thread state races and HostQueue destruction races.",
+    "UndefinedBehaviorSanitizer reports misaligned Semaphore construction and use.",
+    "Frozen CPU workload uses finish and queue release on the same detached upstream thread path.",
+    "Deployment was independently accepted as registration only; no execution phase was consumed."
+  ],
+  "decision": "Do not launch frozen CPU candidate. Repair and qualify synchronization, alignment and actual thread termination before a new freeze/build.",
+  "bindings": {
+    "tsan": {
+      "path": ".local/g5-clr-ps5-adapter/results/tsan-v1/normal.stderr",
+      "sha256": "e47321f7dc765be5006cc0f01281250f5761c762f78c44e5d690c22a9e937d99"
+    },
+    "ubsan": {
+      "path": ".local/g5-clr-ps5-adapter/results/asan-v2/normal.stderr",
+      "sha256": "fb748aefa166e7b2dcade4bd1cdda7c47b2219ff0f4c2bfdadd9400882378a58"
+    },
+    "cpu_client": {
+      "path": ".local/g4-clr-cpu-title/tools/clr_cpu/client.cpp",
+      "sha256": "7135cff7bdab93000b3de0789f4c1af2da7e446f443f879f39986074beabbe38"
+    },
+    "shared_thread": {
+      "path": "results/clr-native-combined-v7/source/rocclr/thread/thread.cpp",
+      "sha256": "00e75fa32b58b8d3e954d6277c90afbc8fec9bd9174538495bab9219d2c50ab1"
+    },
+    "shared_queue": {
+      "path": "results/clr-native-combined-v7/source/rocclr/platform/commandqueue.cpp",
+      "sha256": "4b13ee86b691fee88744345632bc5e2682f68fc09d385164a75feb7c52385cd4"
+    },
+    "shared_posix": {
+      "path": "results/clr-native-combined-v7/source/rocclr/os/os_posix.cpp",
+      "sha256": "0693ec41b159be4a01b898b7daaf98a7484f2fde72c997d8c1d8ea3f756c0db2"
+    },
+    "deployment_review": {
+      "path": "results/clr-cpu-deployment-v1/deployment-20261013T201506.283228Z-independent-review.json",
+      "sha256": "d91f1f18bf25520955b58802448e6d42d76bfd40d02bc33ba6852f2bb33eb602"
+    }
+  },
+  "limits": [
+    "Sanitizer diagnostics are host observations, not a PS5 crash report.",
+    "Root causes and complete repair remain under independent investigation.",
+    "Earlier successful build/package tests are preserved but do not prove thread safety."
+  ]
+}

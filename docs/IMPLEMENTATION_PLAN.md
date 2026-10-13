@@ -49,6 +49,10 @@ watchdog, native link/conversion and six-file UFS package pass offline checks;
 see `../evidence/offline-clr-cpu-native-package.json`. Native startup and shutdown
 still require console execution. This CPU-only case does not establish a GPU
 backend or public HIP initialization and does not complete G5.
+After registered-only deployment, fully instrumented adapter tests exposed shared
+upstream thread-state and queue-teardown races. The CPU launch is held: its
+termination path has the same missing join evidence. A corrected, independently
+qualified thread-lifetime implementation and new candidate are required.
 
 The integrated multi-module/query candidate produced correct A/B/A results and
 natural shutdown on .40, but its collector expired before the post-run snapshot.

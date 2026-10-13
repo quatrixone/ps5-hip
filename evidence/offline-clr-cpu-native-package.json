@@ -33,6 +33,12 @@
   ],
   "native_executed": false,
   "gpu_execution": false,
+  "launch_status": "held-after-shared-upstream-thread-lifetime-findings",
+  "subsequent_findings": {
+    "diagnostic": ".local/g5-clr-ps5-adapter/results/tsan-v1/normal.stderr",
+    "scope": "Fully instrumented adapter run reports upstream Thread state and queue teardown races. The CPU candidate uses the same upstream termination path without a confirmed pthread join.",
+    "decision": "Preserve package and historical offline passes, but do not launch this candidate. Repair and qualify thread ownership, then build a new frozen candidate."
+  },
   "limits": [
     "This candidate is in an isolated checkout; its implementation is not yet imported into the main development checkout.",
     "Native OS, queue execution, watchdog and application shutdown remain unvalidated on console.",
