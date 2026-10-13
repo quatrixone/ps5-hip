@@ -17,6 +17,9 @@ passed 1,542 values under an unchanged numerical contract. The
 An [unedited HIPIFY translation](evidence/native-hipify-client.json) also passed
 six native launches and 662 exact unsigned sums with complete cleanup. This
 qualifies that ordinary CUDA source example, not general CUDA compatibility.
+The [CPU threading proof](evidence/native-host-threads.json) passed two joined
+workers, isolated thread-local values and synchronization cleanup on the console.
+Concurrent HIP calls and GPU access from worker threads remain unqualified.
 The runtime currently
 requires one module and serialized host calls; unsupported features fail explicitly.
 See [current state](STATE.md) for the latest candidate and its exact limits.

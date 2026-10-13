@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "classification": "reviewed-offline-hipify-title-integration",
+  "root_parent": "b80ed1d14814f36e035db21673df9c70207ba7ca",
+  "frozen_source": "6e35911e5f2523aa1b10cfe038a8eca41697261b",
+  "source_sha256": {
+    "CMakeLists.txt": "22225dcdd469572ad0596214a821309ae962b2acac4d03f5b6510424530f40e1",
+    "docs/HIPIFY_NATIVE_BUILD.md": "8495c52b7a291d4a7bbd3ac2c6db84bda5d59b43f8b558b156419a48fcabb320",
+    "docs/HIPIFY_TITLE.md": "35e692e457165c5a84c8b49aa840c0f0e3e92d7d84049ac652fb8941f92148c4",
+    "tests/hipify_native_title_test.py": "bb3179cc4075bf5851778f02a5074351a2ec6e6d549a0ca7bb472bfe50788278",
+    "tests/hipify_runtime_model.cpp": "04dd13dbb42645c7c5b60bc587b26bc987dc667e5464ea532778380db00ac2ff",
+    "tests/hipify_title_model.cpp": "5186ba18a776f469ce3b4afeb2e659c7e4ec019bd9c10d494514489e043a470f",
+    "tests/hipify_title_test.py": "6aeba197ee6f759eb11eb06f68bede56c9a6b185651365097f4f6b176233b89c",
+    "tools/build_native_vector_title.py": "08cf246165319396d0f68a9facd83546e2b5b66a4da8a2e3dd3d474b69368ddd",
+    "tools/check_canary_log.py": "55ce770e7b876a80a385bc2d03d8914a742a273680264dd9226b2bd4a5b98552",
+    "tools/hip_vector_title.cpp": "2937f3256fa71ea366a73a3188218930f56b584db64ec99bc576c07b542e6b75",
+    "tools/native_vector_title.py": "98d2fa765fb10516625921f4d546ece62f6cfdd310621d7ea6af8b5876f9d2af",
+    "tools/stage_native_title.py": "7298769282e84253e00e5ece86429541a982346dcec628c864be8b2cc9936751",
+    "tools/verify_native_case.py": "38a715a6416f6c85b002294405f6535e3bd1e338a66b52821de3075cade0e04a"
+  },
+  "receipt": {
+    "path": "results/integrated-hipify-title-root-v1/receipt.json",
+    "sha256": "e812ba4ec41284a0ca8a6ab4c65b5a36b3341e21c9c14b7f1bd4c943675a51ae"
+  },
+  "independent_review": {
+    "path": "results/integrated-hipify-title-root-independent-review-v1.json",
+    "sha256": "75f28aee87697fb0c297e73895189d8c0402d6792cf5108720396a045282c526"
+  },
+  "focused_checks": [
+    "runtime-proof",
+    "hipify-title-proof",
+    "matmul-title-proof",
+    "hipify-profile",
+    "matmul-profile",
+    "legacy-vector-profile",
+    "legacy-stage",
+    "legacy-case",
+    "legacy-log"
+  ],
+  "compiler_authority_sha256": "f635bff479f6b57e65068ae8fdf91c899e34f2b982d3799c0805871768b8f38d",
+  "corrected_build_path": "HIPIFY compiler object is ps5/translated.o",
+  "native_build_performed": false,
+  "hardware_executed": false,
+  "full_g4_complete": false,
+  "native_client_evidence": {
+    "path": "evidence/native-hipify-client.json",
+    "sha256": "87e0f344ddfa8fba03abcc9728d9b282341ce74d51821fad470c9181e06c7f96"
+  },
+  "limits": [
+    "Replays saved runtime and title proofs plus focused profile/staging/log checks; not a new native build or full prior test-suite run.",
+    "Source integration does not extend the scope of the separately audited frozen HIPIFY console run."
+  ]
+}

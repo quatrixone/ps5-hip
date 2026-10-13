@@ -1,0 +1,135 @@
+{
+  "source_commit": "147c3b236316d7ee935ea98731a2208b05f38c80",
+  "image_sha256": "28f76350b682a2c47d20dc05d459d0d3cdf3793b1b70488267e10986e88f826f",
+  "kernel": "host_threads",
+  "accepted": true,
+  "script_sha256": "9ff67af5833ed622c5583be3b531053cb53a3c092670f741701626b935dde876",
+  "manifest_sha256": "4355c62dd1fbaa9baa00c3f9315b7943334ba76675a9292ba10cce73d869f22d",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/host-threads-deployment-v1/deployment-20261013T121846.490896Z/deployment.json",
+      "sha256": "edd77fb0745e3e8f5f3538e194d38edca4d82ce9ec3111252373a2fb4ad0a7d2"
+    },
+    "review": {
+      "path": "results/host-threads-deployment-v1/deployment-20261013T121846.490896Z-independent-review.json",
+      "sha256": "6091b73f4f69fb1ecef9c5e727d8ade47fb2e2f0f80ad402d9c6530a3cd43f35"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "eb72f0121fdd07e2ec1367563be01b3bb26ed350def59f4d51d4e41b36de6d26",
+    "after-post.log": "d1b96730bc44cea51a630a9c08a33d689927e4678cc37c28ae36ef75f7ad8e3a",
+    "application.log": "ffc24ede0a06643676ad86655a2df2046d7a4161fe569de98e1a9bef28ca3bc2",
+    "before-close.log": "eb72f0121fdd07e2ec1367563be01b3bb26ed350def59f4d51d4e41b36de6d26",
+    "before-launch.log": "761f1ebe502a17fe77c7fc07bef24adaee70a680d0e533abfc8bf04a1410bdf7",
+    "before-log-check.log": "761f1ebe502a17fe77c7fc07bef24adaee70a680d0e533abfc8bf04a1410bdf7",
+    "before-post-snapshot.log": "eb72f0121fdd07e2ec1367563be01b3bb26ed350def59f4d51d4e41b36de6d26",
+    "before-pre-snapshot.log": "6b34b63552d979f03c1f252ee65afdb40f0250d551ba4add4088775d95486006",
+    "before.log": "6b34b63552d979f03c1f252ee65afdb40f0250d551ba4add4088775d95486006",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "a1906bc7b049cfe5cefa349e06cfccf75855ea7cf406bbf2b0242e18019cdf6e",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "f282e2b75e76aab92b420ded865c647a47fa0ce0f299b2ece7f61555468c8e4c",
+    "installed-eboot.bin": "a1906bc7b049cfe5cefa349e06cfccf75855ea7cf406bbf2b0242e18019cdf6e",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "f282e2b75e76aab92b420ded865c647a47fa0ce0f299b2ece7f61555468c8e4c",
+    "klog.log": "191d8c95435ed1786b1822507e40d30d02cff2da41f07d202a826f203031b079",
+    "launch-klog.log": "555ded92dba42977102fc60841377a631474202eedcabb98e0baed858218bae1",
+    "launch-response.log": "9cfa8bc87a647fa2d916a819d9fc324afa620480b43cffb06e756e556b184a67",
+    "launch-shadow-delta.log": "05bcd6bfef4fd22c18915a6da3ab300429cc65cc53051a2ee52a8d22cba20b1a",
+    "lifecycle-delta.log": "b1557a60a698f8bbaf5ec79a1c39857e94bb586a908a647e8334b05c208214ec",
+    "observed.log": "eb72f0121fdd07e2ec1367563be01b3bb26ed350def59f4d51d4e41b36de6d26",
+    "post-snapshot.log": "6273ba7201915564cc002153f535d0724dfc0a789f84154c20880ac20b9a8ce2",
+    "pre-snapshot.log": "6273ba7201915564cc002153f535d0724dfc0a789f84154c20880ac20b9a8ce2",
+    "private-log-absence-before-launch.json": "6cb7b14408722c6b6c95a40ed3186a03d14401ada292793a525340eaf388da3a",
+    "private-log-absence.json": "6cb7b14408722c6b6c95a40ed3186a03d14401ada292793a525340eaf388da3a",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-cpu-host-threading-native-pass",
+  "target": "console .40 firmware 12.70",
+  "full_g4_complete": false,
+  "gpu_executed": false,
+  "workers": 2,
+  "stack_bytes_per_worker": 524288,
+  "ordered_updates": 256,
+  "joined_workers": 2,
+  "worker_key_destructors": [
+    1,
+    1
+  ],
+  "main_and_worker_tls": [
+    29,
+    256,
+    257
+  ],
+  "synchronization_closed": true,
+  "observation_budget_seconds": 20,
+  "application": {
+    "application_result": "application-pass",
+    "target": "cpu",
+    "kernel": "host_threads",
+    "log_sha256": "ffc24ede0a06643676ad86655a2df2046d7a4161fe569de98e1a9bef28ca3bc2",
+    "bytes": 663,
+    "hardware_gate_passed": false,
+    "gpu_executed": false,
+    "unproven": [
+      "freshness",
+      "native lifecycle",
+      "mount equivalence",
+      "health",
+      "locks"
+    ]
+  },
+  "lifecycle": {
+    "pid": 300,
+    "app_id": "0x0000e018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "receipt": {
+    "path": "results/host-threads-execution-v1/observation-20261013T122459.501657Z/receipt.json",
+    "sha256": "937187eda044d47d40817dec28ca86a0683ba5aee20acb8f68d4527c2a7819e6"
+  },
+  "independent_review": {
+    "path": "results/host-threads-execution-v1/observation-20261013T122459.501657Z-independent-review.json",
+    "sha256": "c7eb79054b7822b1424265c16e19e7046303a8651c697cf639f0d8f07dfe663b"
+  },
+  "package_readiness": {
+    "path": ".local/g4-host-threads-emutls/results/native-cpu-completion-v1/readiness.json",
+    "sha256": "eb0a08fa12761bb69298e174e60b538c2be4ab6e218dd4779ef980ffeda82187"
+  },
+  "package_review": {
+    "path": "results/host-threads-native-independent-review-v1/review.json",
+    "sha256": "2906520c58c3c2bdaad246960629f2b6c91149f11a0312de2efca94f79b7a366"
+  },
+  "source_freeze": {
+    "path": ".local/g4-host-threads-emutls/results/source-freeze-v1/freeze.json",
+    "sha256": "9b0b06b8609b22314d8a8f43038d20499cef2e3e344207360397e47d2b491bcb"
+  },
+  "limits": [
+    "Only this CPU pthread proof: two workers, 256 ordered updates, scalar emulated TLS isolation, two key destructors, joined workers and known synchronization closure before persisted final proof.",
+    "No HIP runtime or GPU dispatch; CPU acceptance does not qualify concurrent HIP calls, AGC affinity or full G4.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence.",
+    "SDK-internal emulated-TLS allocation/key failures are not qualified.",
+    "Worker-thread GPU backend affinity and concurrent HIP calls remain unqualified."
+  ]
+}

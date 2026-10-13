@@ -430,6 +430,14 @@ record every additional source/build change. This proves that example, not gener
 CUDA binary compatibility. Multithreaded host calls and repeated initialization,
 allocation failures and shutdown pass bounded tests.
 
+The CPU prerequisite has passed on firmware 12.70: two joined workers, 256
+ordered updates, isolated scalar emulated TLS, key destructors and clean
+synchronization teardown. See `../evidence/native-host-threads.json`. This does
+not satisfy multithreaded HIP acceptance; per-thread launch/error state, checked
+shared ownership and actual worker-thread GPU affinity remain to be implemented
+and validated. The combined HIPIFY title/build integration is separately
+qualified in `../evidence/offline-hipify-title-integration.json`.
+
 Decision: publish the supported API matrix internally. Missing required semantics
 block the client; do not fill exported symbols with success-returning stubs.
 

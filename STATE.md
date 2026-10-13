@@ -4,6 +4,23 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **CPU threading passed on .40 and independent audit:** frozen `147c3b2`
+  ran two workers with explicit 512 KiB stacks, 256 ordered updates, isolated
+  emulated TLS values and exactly one key destructor per worker. Both joined;
+  synchronization cleanup and natural PID300/application `0xe018` shutdown
+  passed. Visible mounts matched, services stayed healthy and locks released.
+  This CPU-only proof does not qualify concurrent HIP calls or worker-thread
+  GPU affinity. See `evidence/native-host-threads.json`. Checked per-thread HIP
+  state and serialized ownership are the next implementation step.
+
+- **HIPIFY title/build integration qualified offline:** frozen `6e35911` is
+  integrated with existing matmul and corrected math. Nine focused proof,
+  profile, staging and log checks passed with explicit optional native-artifact
+  skips. Independent review verified the exact 13-file change and unchanged
+  core. The build selects the actual `ps5/translated.o` compiler artifact;
+  no native rebuild or broader hardware claim follows. See
+  `evidence/offline-hipify-title-integration.json`.
+
 - **Corrected math fixture passed on .40 and independent audit:** frozen
   `1a399323`, integrated at `9b9c606`, passed all 1,542 results for 257 inputs
   under the unchanged numerical contract. Inputs, guards and 378 inactive words
@@ -954,3 +971,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 tiled HIP matmul | 0d671174/b61af98 | .40 | pass: 8 launches, 982 exact outputs and natural teardown | evidence/native-hip-matmul.json | HIPIFY runtime/title
 
 - 2026-10-13 | G4 HIPIFY | 1b9479c | .40 | pass: 6 launches, 662 exact sums, natural teardown | evidence/native-hipify-client.json | CPU threading proof
+
+- 2026-10-13 | G4 CPU threads | 147c3b2 | .40 | pass: 2 workers, 256 updates, TLS and natural teardown | evidence/native-host-threads.json | checked threaded HIP runtime
+- 2026-10-13 | G4 HIPIFY integration | 6e35911 | offline | pass: 9 focused checks, exact reviewed source | evidence/offline-hipify-title-integration.json | threaded runtime
