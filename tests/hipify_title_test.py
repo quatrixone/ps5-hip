@@ -80,9 +80,9 @@ def main():
     if a.check:verify(a.check.resolve());return
     require(a.reference_root and a.probe_dir and a.compiler_source_root and a.output,'reference-root/probe-dir/compiler-source-root/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='2eef5b1bda9a0353cde60c7b85286b34c2308a846a7ada42d1ee58af4453008d','reviewed threaded runtime proof')
+    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='1f91eb7f6b0047d946f73036635384bf49287320d00c9a5efd25c3437d35e230','reviewed threaded runtime proof')
     frozen=a.compiler_source_root.resolve();external=dict(r['inputs']);external.update({str(frozen/n):v for n,v in r['sources'].items()});external.update({str(probe/n):v for n,v in r['artifacts'].items()});external[str(probe/'receipt.json')]=sha(probe/'receipt.json')
-    review=ref/'results/threaded-hipify-runtime-independent-review-v4/review.json';require(sha(review)=='e69bf5d47ce1a6cb42c42d59ca888b935261f88c99fb92cedf13d44087ea0918','runtime review changed');external[str(review)]=sha(review)
+    review=ref/'results/integration-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='afbae5e6c474b266ca0a2ccb1830bee7d51c1477f8d49f04d14ba0a4395737ce','runtime review changed');external[str(review)]=sha(review)
     require(all(sha(n)==v for n,v in external.items()),'frozen runtime inputs changed')
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client';headers=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp'):external[str(h)]=sha(h)
