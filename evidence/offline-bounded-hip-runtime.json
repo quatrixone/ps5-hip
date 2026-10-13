@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "classification": "reviewed offline bounded reusable HIP runtime",
+  "source_commit": "c0cc2bb78d6c802eb3897d4c408b1a48b74e469e",
+  "integrated_commit": "860b8f66141d6282e1d6ad45e3b7be13723fd604",
+  "implementation_paths": [
+    "CMakeLists.txt",
+    "docs/RUNTIME_ARCHITECTURE.md",
+    "docs/SHARED_HIP_RUNTIME.md",
+    "docs/BOUNDED_HIP_RUNTIME.md",
+    "include/ps5hip/hip_runtime_control.h",
+    "include/ps5hip/hip_launch_profile.h",
+    "src/hip_runtime.cpp",
+    "src/hip_launch_profile.cpp",
+    "tests/hip_generic.hip",
+    "tests/hip_generic_model.cpp",
+    "tests/hip_generic_recipe_test.py",
+    "tests/hip_generic_second.hip",
+    "tests/hip_launch_profile_test.cpp",
+    "tools/probe_hip_generic.py",
+    "tools/probe_hip_routes.py"
+  ],
+  "qualification_sequence": "Original integrated run73/74; unchanged-source followup passes sole failed strict receipt check after complete native receipt provided. All74 pass across two runs.",
+  "validation_counts": {
+    "compiler_objects": 6,
+    "generic_models": 24,
+    "vector_models": 26,
+    "routes_models": 19,
+    "vector_title": 22,
+    "routes_title": 29,
+    "routes_title_mutations": 12,
+    "integrated_ctest": 74
+  },
+  "native_imports": 69,
+  "native_HIP_imports": 0,
+  "evidence": {
+    "generic": {
+      "file": ".local/g4-generic-runtime/results/generic-final-v1/receipt.json",
+      "sha256": "fa7e08622da69d0fa8c61c123e301a7ca50faa02071cbea2ef3e9679067ba644"
+    },
+    "vector26": {
+      "file": ".local/g4-generic-runtime/results/vector-compatibility-v1/receipt.json",
+      "sha256": "ebeb4ad44b5661e9cc42170ba0323866894cb77017260f0114921f8138d0d6e6"
+    },
+    "routes19": {
+      "file": ".local/g4-generic-runtime/results/routes-compatibility-v2/receipt.json",
+      "sha256": "f334ea0699697a84a2a7f7b0b86df4de2dc88e3fe813457d0655aafd7d98aded"
+    },
+    "vector22": {
+      "file": ".local/g4-generic-runtime/results/vector-title-compatibility-v2/receipt.json",
+      "sha256": "2f5fd7a35e13fbe00b75c2ef176c99c9f6f6f14f78ba5f1e9ae894f53c2c55fa"
+    },
+    "routes29": {
+      "file": ".local/g4-generic-runtime/results/routes-title-compatibility-v1/receipt.json",
+      "sha256": "ed6d449a59d93364a3a47a2cb7a6cb9dddd156a3b96f6ccf8fd548ad63e02c1d"
+    },
+    "integrated": {
+      "file": ".local/g4-generic-runtime/results/integrated-generic-v2/receipt.json",
+      "sha256": "b58a78f504e9fb25b737758df2fedbb901b75f218537e3ebc12fc303448cc955"
+    },
+    "independent": {
+      "file": "results/generic-runtime-independent-review-v1.json",
+      "sha256": "4ff4fb0930541fdd60dc37f759bf6f0d3d245e8a4be90f68e27c92850f8fc22c"
+    },
+    "readiness": {
+      "path": ".local/g4-generic-runtime/results/generic-readiness-v1/readiness.json",
+      "sha256": "71208813e987ad7455f0e907447285294d3054832ad4c92bd3ffe5a9313b23ae"
+    },
+    "freeze": {
+      "path": ".local/g4-generic-runtime/results/generic-readiness-v1/freeze.json",
+      "sha256": "0014e499ffb475a45e9465ac3b44c4f899218edbab1f3a5f9278307ea70484ef"
+    },
+    "committed_source_binding": {
+      "path": ".local/g4-generic-runtime/results/generic-readiness-v1/committed-source-binding.json",
+      "sha256": "c7eec4ed2f5fdea3498bba673545ee2f517b62eff6a40414747819f551bc494a"
+    }
+  },
+  "native_execution": false,
+  "full_g4_complete": false,
+  "limits": [
+    "No native execution or new package; existing hardware passes do not transfer.",
+    "One trusted module, one serialized thread, bounded known ABI classes.",
+    "Caller owns shader indexing safety; live extent is not an arbitrary shader bounds proof.",
+    "Full G3/G4/G5 and asynchronous runtime/library support remain open."
+  ]
+}

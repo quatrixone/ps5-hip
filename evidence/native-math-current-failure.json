@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "fixed-math-contract-failure; original cycle inconclusive; subsequent own-title cleanup observed",
+  "source_commit": "722a59a0eef9148b0306ac0aee6c1c013d5f3d4e",
+  "image_sha256": "54f5703f60d13c384725ed50cb3bae87f1286da518f50c024c8d1995054a7364",
+  "original": {
+    "path": "results/math-current-execution-v1/observation-20261013T082839.417330Z/receipt.json",
+    "sha256": "c0cab01f2b4ec05b217c61feb2321a8a596cdf6f16a567054ae1065fa5bb9301"
+  },
+  "original_review": {
+    "path": "results/math-current-execution-v1/observation-20261013T082839.417330Z-independent-review.json",
+    "sha256": "504e9d1c7c720a67d4650234de45f616eda03c82f902010db4cf8aa2398c1877"
+  },
+  "recovery": {
+    "path": "results/math-readonly-recovery-v1/observation-20261013T084057.148940Z/receipt.json",
+    "sha256": "d77709c0a7dcac4a92fe83a7297133a4b09c6fcbc4cc1af61254279f8ab8e11a"
+  },
+  "recovery_review": {
+    "path": "results/math-readonly-recovery-v1/observation-20261013T084057.148940Z-review.json",
+    "sha256": "fb764af61f5837724a0e5a0c3223591363951093161b1a807621f51a532422a2"
+  },
+  "cleanup": {
+    "path": "results/math-title-cleanup-v1/observation-20261013T085339.363515Z/receipt.json",
+    "sha256": "8f3a10475d004060d3ef341cc90d7571615c41ed07586a9029c02f0aead6ad87"
+  },
+  "cleanup_review": {
+    "path": "results/math-title-cleanup-v1/observation-20261013T085339.363515Z-review.json",
+    "sha256": "bd9dfa8050a2aed7611dcf647c19e7128f11bc61a8450ac5579d7438c420aef3"
+  },
+  "failure": {
+    "index": 645,
+    "input_index": 107,
+    "operation": "exp(x)",
+    "input_bits": "0xc2cff1b4",
+    "input_value": -103.97207641601562,
+    "actual_bits": "0x00000000",
+    "frozen_allowed_bits": [
+      "0x00000001",
+      "0x00000003"
+    ],
+    "rounded_reference_bits": "0x00000001"
+  },
+  "application_log_sha256": "5a90708f1bc3fbdd7bccc88cfede65f9bdea166ba6182ee1f045c29157329a5f",
+  "compiler_reproduction": {
+    "path": "results/math-underflow-offline-v1/receipt.json",
+    "sha256": "287f14b0cb1f3d81e28c3f6f3f85eddecba6caca561731ca0958e27a27b4f0f5"
+  },
+  "compiler_review": {
+    "path": "results/math-underflow-offline-v1/independent-review.json",
+    "sha256": "9217f0fd5f3af682c021635d9d0f289c153cb10410e9931a742e991841b0012a"
+  },
+  "compiler_clamp_bits": "0xc2ce8ed0",
+  "compiler_clamp_value": -103.2789306640625,
+  "accepted": false,
+  "hardware_gate_passed": false,
+  "oracle_unchanged": true,
+  "limits": [
+    "The original 20-second observation failed and remains inconclusive.",
+    "Delayed application evidence proves a numerical failure, not successful qualification.",
+    "Subsequent explicit title cleanup is not natural application teardown or allocation-closure proof.",
+    "The explicit compiler zero selection explains this input; broader correctness and a corrected native candidate remain unproven."
+  ]
+}

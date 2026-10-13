@@ -4,6 +4,25 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Math validation found a real numerical failure:** the original `722a59a`
+  run lost FTP observation within its 20-second bound and remains inconclusive.
+  Read-only recovery retrieved the failure at output 645: `expf` of input bits
+  `0xc2cff1b4` returned zero, while the unchanged oracle requires a nonzero
+  subnormal. Offline reproduction identifies LLVM's explicit underflow cutoff
+  in the emitted code. The exact title was subsequently cleaned up separately;
+  this does not establish natural teardown or successful math qualification.
+  See `evidence/native-math-current-failure.json`. Next: correct and qualify the
+  compiler lowering without weakening the oracle.
+
+- **Reusable HIP runtime qualified offline:** frozen `c0cc2bb`, integrated at
+  `860b8f6`, selects supported launch classes from metadata rather than kernel
+  names or fixed diagnostic counts. Six real compiler objects and 24 new models
+  passed, together with existing client regressions. The integrated run passed
+  73/74 checks; the remaining strict receipt check passed after supplying its
+  complete native evidence, with no source change. Single module, serialized
+  thread and blocking launches remain explicit limits. No new hardware claim;
+  see `evidence/offline-bounded-hip-runtime.json`.
+
 - **Fixed relaxed atomic suite passed on .40 and independent audit:** frozen
   `90df59d` completed six dispatches covering contended unsigned 32/64-bit add,
   CAS and indirect add. All 98,694 semantic values, wrapping tickets, guards and
@@ -865,3 +884,7 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 shared native client | 67072dd / 1fb5ada | .40:8 launches,2 changed-input sequences,393216 whole-page comparisons,clean unregister/destruction and bounded cycle independently audited | evidence/native-hip-routes.json | broader G3/G4 client qualification
 
 - 2026-10-13 | G3 atomics | 90df59d | .40:6 dispatches,98694 values,clean bounded cycle audited | evidence/native-atomic-suite.json | numerical and broader compute qualification
+
+- 2026-10-13 | G4 reusable runtime | c0cc2bb/860b8f6 | offline qualification audited | evidence/offline-bounded-hip-runtime.json | dedicated native client validation
+
+- 2026-10-13 | G3 math | 722a59a | failed numerical contract recovered; separate cleanup | evidence/native-math-current-failure.json | correct compiler underflow lowering
