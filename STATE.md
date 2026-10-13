@@ -4,6 +4,24 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **FP32 NN GEMM subset integrated offline:** a reusable checked API with
+  row-major strides and alpha/beta was imported from isolated `7feebc1` and
+  rebuilt in this checkout. The root proof ran 17 sanitizer/model modes, 14
+  numerical cases and genuine Linux/PS5 compiler paths with consumed inputs
+  bound. This is host-model and compiler evidence only: no GPU numerical run,
+  native framework integration or G6 acceptance. See
+  `evidence/offline-gemm-subset.json`.
+
+- **ROCclr pre-main failure localized on .40:** a distinct, independently
+  reviewed diagnostic image reported page size 16,384 and 16 processors, then
+  `pthread_getaffinity_np` returned 34 (`ERANGE`). PID 384 aborted before title
+  `main`; mounts, idle state, services and both lock releases were verified.
+  This consumed run is diagnostic only, with CPU/GPU acceptance false. Offline
+  inspection of a native `libkernel.sprx` suggests the port's 32-byte CPU mask
+  argument differs from a 16-byte console wrapper, but the dump's firmware is
+  unproven. A new candidate must repair and validate the actual affinity ABI.
+  See `evidence/native-clr-os-init-affinity-failure.json`.
+
 - **Repaired CPU title failed native startup on .40:** frozen `6ed79f5` was
   registered and launched once; PID 381 aborted in ROCclr's `Os::init()`
   constructor before title `main` or the queue workload. Independent audit proves

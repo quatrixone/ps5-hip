@@ -1,0 +1,38 @@
+{
+  "classification": "clear-diagnostic-observation-os-affinity-failure",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "source_commit": "c5846f71b2a871626493e900aa4f429c5fd4ec05",
+  "image_sha256": "cb9a134795672010b128dfeab17cdfd1fd5095d5ccbf2f26be1acc5c620c4a77",
+  "deployment_receipt": {
+    "path": "results/clr-os-init-controls-v1/deployment/deployment-20261013T225343.193293Z/deployment.json",
+    "sha256": "dea65e788507a3c70628175e840655c371fc18a83c8a2277172486dc38b78df4"
+  },
+  "execution_receipt": {
+    "path": "results/clr-os-init-controls-v1/execution/observation-20261013T225853.159308Z/receipt.json",
+    "sha256": "a01d65758fdceff1342fa009471bec75665b5fc6b34ca68fa79b24a594e53285"
+  },
+  "independent_review": {
+    "path": "results/clr-os-init-controls-v1/execution/observation-20261013T225853.159308Z-independent-review.json",
+    "sha256": "ac9d14675a71f73a02ac99453810f74d2178cb03c227396e2655769dd3c06283"
+  },
+  "observed_calls": [
+    {"step": "sysconf-pagesize", "value": 16384, "errno": 0},
+    {"step": "sysconf-processors", "value": 16, "errno": 0},
+    {"step": "pthread-getaffinity", "value": 34, "errno": 34}
+  ],
+  "first_failed_call": "pthread_getaffinity_np",
+  "pid": 384,
+  "application_id": "0x00002018",
+  "kernel_errno_name": "ERANGE",
+  "native_abort_and_exit_observed": true,
+  "pre_post_mounts_and_idle_verified": true,
+  "declared_services_healthy": true,
+  "owned_locks_released": true,
+  "postrun_log_absence": "receipt-only: postrun FTP LIST bytes were not separately saved",
+  "diagnostic_complete": true,
+  "cpu_workload_started": false,
+  "cpu_or_gpu_hardware_gate_passed": false,
+  "replay_permitted": false,
+  "repair_hypothesis": "The port passed sizeof(cpuset_t) (32 bytes) but an offline native scePthreadGetaffinity wrapper passes 16 bytes. The dumped library's firmware provenance is not established; a new repair candidate must prove the actual behavior on .40."
+}

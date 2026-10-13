@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "offline-fp32-nn-gemm-operation-subset",
+  "base_commit": "f2a7290c05b8d1eb68be4bacc41decbc35325ad7",
+  "isolated_source_commit": "7feebc165b1da85f330955d407360ee0e46f0e16",
+  "sources": {
+    "include/ps5hip/gemm.h": "c2ed08d8c58609cb881882ab443323fc2af10847cb5f0a7904ad8d12ee46386d",
+    "src/gemm.hip": "6ecc81b7dd7014d6370df2ba7ac0c4dd4aefa32bffe010329054a88e7418bcb1",
+    "tests/gemm_client_model.cpp": "e5b3abb2ef8a6f60adcd67c1dd38b02ca96ce05ef071baceb3226182f378d87e",
+    "tests/gemm_transport_model.cpp": "c9907aa4a2618352a2d229b22105ac089d019d3022b5bc4f7595e679b449e8e0",
+    "tools/probe_gemm.py": "49f3d42b716fa07b2cf1b36a7fa07149ab31939fd5b5f4cdd2667781a422edfa",
+    "docs/GEMM_SUBSET.md": "800f57d2a23c3150fc2bd50a00f79f300de6690119ecf85874814996c5c3c23a"
+  },
+  "proof": {
+    "path": "results/root-gemm-v1/receipt.json",
+    "sha256": "9a33a30d100f7d2612c86051a916bcf8b96c1bffb5c3ca531af549e186aeed7b"
+  },
+  "isolated_proof": {
+    "path": ".local/g6-gemm/results/model-v5/receipt.json",
+    "sha256": "ff7f1e000f6433a9a5a96711decbf6870dcb1a791ccf9391224f05f061dfe556"
+  },
+  "validation": {
+    "actual_runtime_asan_ubsan_modes": 17,
+    "numerical_cases": 14,
+    "logical_outputs": 11000,
+    "no_submit_rejections": 13,
+    "compiler_hosts": [
+      "linux",
+      "ps5"
+    ],
+    "identical_device_text": true,
+    "static_lds_bytes": 512,
+    "private_bytes": 0,
+    "kernarg_bytes": 328
+  },
+  "gpu_executed": false,
+  "g6_accepted": false,
+  "limits": [
+    "Synthetic arithmetic tests host orchestration, not AMDGPU numerical results.",
+    "Compiler-discovered host/device/model header closure and selected tools are bound; this is not an OS/container hermetic build.",
+    "No rocBLAS or upstream library test suite port.",
+    "No native link, startup, GPU numerical or performance validation.",
+    "Only NN row-major finite-scalar FP32 subset; no transpose/batch/FP16."
+  ]
+}
