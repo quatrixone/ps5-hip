@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "classification": "offline-hipify-translation-and-compiler-pass",
+  "source_commit": "b1fd26c0afd33a5d832b6f151da9006a402f24ca",
+  "translator_revision": "0776ed88a0386fea6a10c991485083bb6b8b3433",
+  "translator_sha256": "0a123408a7bd7cc0a4c2bc1c414d0ba254393b935e671a60ba97a4a4a6c7495f",
+  "source_sha256": {
+    "docs/HIPIFY_CLIENT.md": "cbf301252b28c8fe3f4cbd4f52b949a4424305d4f0118667a28347a7de93a6d8",
+    "tests/cuda_vector_add.cu": "ecd50a2a6c8cfc4f58702b8725dfca2ae25dbf4049a358cc988562e8f1c2922a",
+    "tests/hipify_recipe_test.py": "ac86cea17f003e9a3f0ec02c4b7aeef5909d8841f17a655b5e39b07370844794",
+    "tools/probe_hipify_client.py": "5b0ed7ab2717811e30392791e25be4db603e8930ad1c3fc52c30e808861bbce5"
+  },
+  "fresh_translation_exact_unedited": true,
+  "compiler_targets": [
+    "Linux",
+    "PS5",
+    "Linux sanitizer model object"
+  ],
+  "ordinary_cuda_main_preserved": true,
+  "runtime_executed": false,
+  "hardware_validated": false,
+  "review": {
+    "path": "results/hipify-independent-review-v1/review.json",
+    "sha256": "d2d93e2741f8fb8b0b97083a411c227f9917570bb4faa89563721da5b27544e2"
+  },
+  "compiler": {
+    "path": ".local/g4-hipify/results/compiler-v1/receipt.json",
+    "sha256": "5268dc54b57e1c6fc6584c78fd2f6879826fb983d990e0d84bf55656f404f2d5"
+  },
+  "qualification": {
+    "path": ".local/g4-hipify/results/qualification-v1/receipt.json",
+    "sha256": "d42aa98c0b4fe3d5d7016557c8ca6e8f50bdff7d4b2610106eeeb2e148b34dd6"
+  },
+  "limits": [
+    "Compilation and registration metadata only; runtime ownership and native execution remain pending.",
+    "No general CUDA binary compatibility or full G4 qualification."
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "source_commit": "1a39932399c931a55da54d1fcd4ab9cc9cd0cacd",
+  "image_sha256": "28581ca2a1ca2cdf94ebe902923195efffcf98f85128a013edcfc257fb307d82",
+  "kernel": "fp32_math",
+  "accepted": true,
+  "script_sha256": "b2fabffac5e7ab3f132cb382af17f7315ecd2b223e6da2781da2f7b9ebe46d20",
+  "manifest_sha256": "584412018ae579af9ed6d6855f8879f81019d7a4a90ab7d579f1c67e42be7779",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/math-exp-corrected-deployment-v1/deployment-20261013T100922.276763Z/deployment.json",
+      "sha256": "48f3dae01c0b8f0666fc0332998990873e25be01e92c67ece870a99fdebff27b"
+    },
+    "review": {
+      "path": "results/math-exp-corrected-deployment-v1/deployment-20261013T100922.276763Z-independent-review.json",
+      "sha256": "803edf6d478512ca701f6b67917303ddfc6819e8cf69d024ab88b964371395df"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "a07ed3813042610dd47acc5b02da2acea0c4c76d2838887d75db08c0459369f9",
+    "after-post.log": "a07ed3813042610dd47acc5b02da2acea0c4c76d2838887d75db08c0459369f9",
+    "application.log": "6db4b87ea5fbf3afb22f99c7cc70ddce0b5ff4d8ce3572cd52efea743b996c33",
+    "before-close.log": "a07ed3813042610dd47acc5b02da2acea0c4c76d2838887d75db08c0459369f9",
+    "before-launch.log": "cc6e2c4c8be2af81412a198131593b3d17eee0e8adf765869139860126525e52",
+    "before-log-check.log": "cc6e2c4c8be2af81412a198131593b3d17eee0e8adf765869139860126525e52",
+    "before-post-snapshot.log": "a07ed3813042610dd47acc5b02da2acea0c4c76d2838887d75db08c0459369f9",
+    "before-pre-snapshot.log": "cc6e2c4c8be2af81412a198131593b3d17eee0e8adf765869139860126525e52",
+    "before.log": "cc6e2c4c8be2af81412a198131593b3d17eee0e8adf765869139860126525e52",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "b7fc2b1203791b1cec0e5255a7455740d4a79eb454c44d85834b0a09f56926ad",
+    "installed-before-launch-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed-before-launch.json": "d080d37011a716823e45f6bf5f23b01df4981bb1021528efdcb2bd1bbabe8748",
+    "installed-eboot.bin": "b7fc2b1203791b1cec0e5255a7455740d4a79eb454c44d85834b0a09f56926ad",
+    "installed-sce_module_libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "installed.json": "d080d37011a716823e45f6bf5f23b01df4981bb1021528efdcb2bd1bbabe8748",
+    "klog.log": "eddf6cad6634eb0371fc7be2987bb9ef7fb3aabc78f3393deba9c9b86667eb6c",
+    "launch-klog.log": "47239e95874a4c51c8d06156f7d700c37a4cd41924a84222b7c19e0690d69b66",
+    "launch-response.log": "acd5c1b23898acb29532b0f9439585405e376c52a02c10f3d4a6cbeb8cf02db8",
+    "launch-shadow-delta.log": "6062dc3bf6fedda7b9be0e13d8376bd05a93104fae3cfc140f003f5bf242a0fe",
+    "lifecycle-delta.log": "6062dc3bf6fedda7b9be0e13d8376bd05a93104fae3cfc140f003f5bf242a0fe",
+    "observed.log": "a07ed3813042610dd47acc5b02da2acea0c4c76d2838887d75db08c0459369f9",
+    "post-snapshot.log": "f2b625659797657ea1c09084c555aaf9b3f6a2c7e84d16c456237d6ab8a4a0a5",
+    "pre-snapshot.log": "f2b625659797657ea1c09084c555aaf9b3f6a2c7e84d16c456237d6ab8a4a0a5",
+    "private-log-absence-before-launch.json": "3cb7a906913be1de0b3808fe5647e951d930751f22a20c5df5ccc6f46cfe2315",
+    "private-log-absence.json": "3cb7a906913be1de0b3808fe5647e951d930751f22a20c5df5ccc6f46cfe2315",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "root_integration": {
+    "path": "results/integration-math-corrected-v1/receipt.json",
+    "sha256": "498c8e94b43cc5d1954493cc47ce0df85a5bbddbd2ceabe2958c7fafef6d186d",
+    "focused_sanitizer_tests_passed": 27,
+    "includes_actual_fixture_admission_methods": 5,
+    "generic_proofs_rebuilt": false
+  },
+  "classification": "exact-corrected-math-fixture-native-pass",
+  "integrated_commit": "9b9c606c5b7817f9ea9cd4fba2fbb58393246fa0",
+  "full_g3_complete": false,
+  "full_g4_complete": false,
+  "hardware_gate_passed": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 experimental natural-exp cutoff correction, O2 gfx1013 wave32",
+  "dispatches": 1,
+  "groups": 5,
+  "threads_per_group": 64,
+  "inputs": 257,
+  "numeric_values": 1542,
+  "inactive_output_words": 378,
+  "operations": [
+    "fma",
+    "sqrt",
+    "sin",
+    "exp",
+    "log",
+    "tanh"
+  ],
+  "contract_sha256": "373c94b8ad8dac7326401ad54a1299d750298a5922c1a226d0d4816c854430b8",
+  "oracle_sha256": "d0db0e6aaa517e302b47eb2f2131683b92c6e927010d13c4bf8d6079af70c351",
+  "corrected_code_sha256": "bbf825113bc2b8136062b9654868b446a3eab668e0bff2a6126f339e134fc61c",
+  "host_objects_and_binaries_identical_to_original": true,
+  "changed_gpu_immediates": 2,
+  "changed_gpu_bytes": 6,
+  "former_failure": {
+    "output_index": 645,
+    "input_bits": "0xc2cff1b4",
+    "original_result_bits": "0x00000000",
+    "corrected_result": "passes unchanged nonzero contract; exact bits not exported"
+  },
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "fp32_math",
+    "log_sha256": "6db4b87ea5fbf3afb22f99c7cc70ddce0b5ff4d8ce3572cd52efea743b996c33",
+    "bytes": 625,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 257,
+    "app_id": "0x00004018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "prospective_observation_seconds": 20,
+  "receipt": {
+    "path": "results/math-exp-corrected-execution-v1/observation-20261013T101150.890826Z/receipt.json",
+    "sha256": "ef90553abe08398f03429eb34a351771ec463959d8185e045c7e7d7233b44629"
+  },
+  "independent_review": {
+    "path": "results/math-exp-corrected-execution-v1/observation-20261013T101150.890826Z-independent-review.json",
+    "sha256": "ea1228ec4d0c21b68b626a60a89d0db27aa590b825638a8159d6adc47ec90858"
+  },
+  "offline_readiness": {
+    "path": ".local/g3-math-exp-corrected/results/math-exp-native-completion-v1/readiness.json",
+    "sha256": "0786af60d6942a840db3e6cdf6650c91553b9c1e3b3dab74ddb873b5ade3cc17"
+  },
+  "package_review": {
+    "path": "results/math-exp-corrected-package-independent-review-v1.json",
+    "sha256": "398fae475582d247c880b787190cd9afafd7ff2590e94adad4b7e867f3de4e29"
+  },
+  "source_qualification": {
+    "path": ".local/g3-math-exp-corrected/results/source-qualification-completion-v1/receipt.json",
+    "sha256": "c0b1e1dc653fa35b90dbb85d13267ee7c26483a411db2c95a2f155e6b9f2595e"
+  },
+  "prior_failure_evidence": {
+    "path": "evidence/native-math-current-failure.json",
+    "sha256": "235075254cf8a2462b89cabb7f4c8718917a8a9afd0ff29f1036b55e8c606c6c"
+  },
+  "compiler_correction_evidence": {
+    "path": "evidence/offline-exp-cutoff-correction.json",
+    "sha256": "63044469b224437d6aa5f8ea579733adcf5e0966068532f1d5e25528bfd57400"
+  },
+  "limits": [
+    "Only exact O2gfx1013 fp32_math: one dispatch, 257 unchanged inputs and1542 checked numerical results under frozen contract373c94b8ad8dac7326401ad54a1299d750298a5922c1a226d0d4816c854430b8,378 inactive words plus allocation guards, closed allocations and normal finite-title finalization.",
+    "No changed tolerance, additional numerical mode or general HIP math API qualification; full G3 remains open.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

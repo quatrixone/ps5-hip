@@ -32,9 +32,15 @@ compiler/library authority and separately set `PS5HIP_MATH_NATIVE_FIXTURE_DIR`
 to the derived fixture. The four launch tests use the corrected objects; the
 original OCML recipe audit continues to use the original objects and reports.
 
-The artifact comparison and MPFR certificate are offline evidence. They do not
-prove native EXP/FLDEXP subnormal behavior or any six-operation numerical pass.
-No GPU result, production compiler acceptance, all-domain accuracy or broad G3
-completion is claimed. A newly frozen and independently reviewed native package
-must precede one new bounded console experiment, preserving the original failure
-and the oracle's rejection of flushing a finite nonzero result to zero.
+The frozen descendant `1a399323` subsequently passed a bounded native cycle on
+.40: all 1,542 values, unchanged inputs and guards, allocation closure and natural
+teardown. Independent audit reproduced the acceptance from the raw evidence;
+see `../evidence/native-math-exp-corrected.json`. The full-corpus checker proves
+that output 645 now satisfies its unchanged nonzero contract; the log does not
+export its exact bits. All nine host objects and linked/signed host binaries
+remain byte-identical to the failed candidate; the external GPU binary contains
+the six changed bytes. The original failure is preserved.
+
+This is evidence for the exact six-operation corpus and compiler configuration.
+It does not qualify all-domain accuracy, a production compiler release, general
+HIP math APIs or broad G3 completion.

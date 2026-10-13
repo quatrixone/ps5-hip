@@ -14,8 +14,10 @@ see `../evidence/native-atomic-suite.json`. The numerical math candidate failed 
 offline reproduction identifies an explicit compiler underflow cutoff. See
 `../evidence/native-math-current-failure.json`. The isolated compiler correction
 passed independent offline review without changing the oracle; see
-`../evidence/offline-exp-cutoff-correction.json`. New native validation remains
-pending. Broader G3 qualification remains open. G4's fixed genuine HIP vector and
+`../evidence/offline-exp-cutoff-correction.json`. The corrected fixture then passed
+all 1,542 values under the unchanged contract on .40, with complete natural
+teardown and independent audit; see `../evidence/native-math-exp-corrected.json`.
+Broader G3 qualification remains open. G4's fixed genuine HIP vector and
 shared four-route clients have passed bounded native cycles with complete
 compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight

@@ -4,6 +4,29 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Corrected math fixture passed on .40 and independent audit:** frozen
+  `1a399323`, integrated at `9b9c606`, passed all 1,542 results for 257 inputs
+  under the unchanged numerical contract. Inputs, guards and 378 inactive words
+  stayed intact; allocations closed and PID257/application `0x4018` stopped
+  naturally. Visible mounts matched, all services stayed healthy and locks
+  released. The correction changes two GPU cutoff immediates; all host binaries
+  match the failed candidate. All 27 focused integration sanitizer tests passed.
+  Its original failure remains preserved. This
+  qualifies the finite fixture, not all-domain math or full G3/G4; see
+  `evidence/native-math-exp-corrected.json`.
+
+- **Tiled HIP matrix title is packaged and reviewed offline:** frozen `0d671174`
+  passed 83 integrated sanitizer checks, 36 title lifecycle cases and 15 transcript
+  mutations. Four shapes and two changed-input rounds exercise eight launches and
+  982 exact integer-valued FP32 results in the host model. Native package audits
+  passed; combined 2D geometry/LDS execution is pending. See
+  `evidence/offline-hip-matmul-title.json`.
+
+- **Ordinary CUDA translation passed compiler qualification:** frozen `b1fd26c`
+  uses pinned ROCm HIPIFY without hand-editing its output. Linux, PS5 and sanitizer
+  model objects passed registration/profile inspection. Runtime ownership and
+  hardware execution are pending; see `evidence/offline-hipify-client.json`.
+
 - **Reusable HIP client passed on .40 and independent audit:** frozen `ed82c331`,
   integrated at `5807a97`, completed eleven blocking submissions in sequences
   0/1/3/7 through one genuine two-kernel module. Exact results, changed inputs,
@@ -23,8 +46,9 @@ Updated: 2026-10-13, America/New_York.
   See `evidence/native-math-current-failure.json`. The isolated compiler
   correction is now independently qualified offline in `5e856b4`: no-op builds
   reproduce original bytes, while corrected objects change only two cutoff
-  immediates. The oracle is unchanged. New native validation remains pending;
-  see `evidence/offline-exp-cutoff-correction.json`.
+  immediates. The oracle is unchanged. The corrected fixture subsequently passed
+  the bounded native cycle above; see `evidence/offline-exp-cutoff-correction.json`
+  and `evidence/native-math-exp-corrected.json`.
 
 - **Combined geometry/LDS route qualified offline:** isolated `89bf865` admits
   the measured 8x8 block with static LDS512 and complete hidden geometry through
@@ -911,3 +935,5 @@ including the provider-fixed store and vector candidates.
 
 - 2026-10-13 | G3 exp cutoff | 5e856b4 | offline correction audited | evidence/offline-exp-cutoff-correction.json | new unchanged-oracle native candidate
 - 2026-10-13 | G4 combined geometry/LDS | 89bf865 | offline route audited | evidence/offline-geometry-lds-runtime.json | genuine tiled-matrix client
+
+- 2026-10-13 | G3 corrected math | 1a399323/9b9c606 | .40 | pass: 1542 unchanged-oracle values and natural teardown | evidence/native-math-exp-corrected.json | genuine tiled HIP client

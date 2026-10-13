@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "classification": "offline-genuine-tiled-matmul-title-packaged",
+  "source_commit": "0d67117424222aee129f43fa486871d06d515269",
+  "client_source_commit": "d8b89996f12978f89f18ab60b4a8d951fa0f98ec",
+  "integrated_sanitizer_tests": 83,
+  "title_lifecycle_cases": 36,
+  "title_transcript_mutations": 15,
+  "standalone_client_models": 25,
+  "shapes_mnk": [
+    [
+      8,
+      8,
+      8
+    ],
+    [
+      13,
+      21,
+      19
+    ],
+    [
+      1,
+      1,
+      17
+    ],
+    [
+      17,
+      9,
+      1
+    ]
+  ],
+  "rounds": 2,
+  "dispatches": 8,
+  "exact_fp32_integer_outputs": 982,
+  "threads": [
+    8,
+    8,
+    1
+  ],
+  "static_lds_bytes": 512,
+  "private_bytes": 0,
+  "shader_body_unchanged": true,
+  "hardware_validated": false,
+  "source_review": {
+    "path": "results/matmul-title-independent-review-v3/review.json",
+    "sha256": "98046d3e8a350ff15b6b28cb328c44291fe1c0e4a6b35a1da95e34fe087cf2bf"
+  },
+  "source_freeze": {
+    "path": ".local/g4-matmul-title/results/title-freeze-v1/freeze.json",
+    "sha256": "8087be6d6e9d2d692d89b619b4d20c89f7965b85fe160f0c909e525f44fca4b0"
+  },
+  "package_review": {
+    "path": "results/matmul-title-package-independent-review-v1/review.json",
+    "sha256": "ae744de59b8979f90bf49c6645302bab2e23b3cca89074f526072b565cac7467"
+  },
+  "readiness": {
+    "path": ".local/g4-matmul-title/results/native-title-v1/readiness.json",
+    "sha256": "c1386363747e42cc2585c90e30286dfa523e38a4ec567b2830783430d22680c2"
+  },
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "cb1b0c39d36a73ecdabd05ef3185ef5c17ba662c7ac361e69bab235b809d532e",
+    "bytes": 3670016
+  },
+  "limits": [
+    "Models use synthetic transport callbacks, not AMDGPU ISA emulation.",
+    "Native combined geometry/LDS execution remains pending.",
+    "Finite integer-valued FP32 oracle is not arbitrary GEMM accuracy or performance evidence."
+  ]
+}
