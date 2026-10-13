@@ -1,23 +1,41 @@
 # Current state
 
-Updated: 2026-10-12, America/New_York.
+Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Mixed LDS fixture passed on .40 and independent review:** 257 exact
+  sum-XOR-tag outputs from 16,448 unchanged inputs, static/dynamic/allocated LDS
+  256/1280/2048 bytes, stride five. Guards, allocation closure and finalization
+  passed; PID159/application `0xe018` stopped naturally. Visible mount identities
+  matched, services stayed healthy and locks released. See
+  `evidence/native-lds-mixed.json`. Independent audit rehashed 25 raw files and
+  165 bindings and reproduced acceptance. The dynamic image and result were preserved.
+- **Persistent-buffer producer/consumer candidate ready offline:** frozen commit
+  `a049853` on `development/g3-dependent-visibility` reuses three guarded buffers
+  across six dispatches and three changed-input rounds. All 54 sanitizer tests,
+  native link/import checks and package extraction passed; independent review is
+  clear. See `evidence/offline-dependent-visibility-readiness.json`. Hardware is
+  untested; the fixture covers completed queues with CPU cache maintenance.
+- **Dynamic LDS fixture passed on .40 and independent review:** 257 exact sums
+  from 16,448 unchanged inputs, static/dynamic/allocated LDS 0/1280/2048 bytes,
+  stride five, intact guards and closed allocations. PID150/application `0xc018`
+  finalized and stopped naturally inside the original bounded cycle. Visible mount
+  identities matched, services stayed healthy and both locks released. Independent
+  audit verified 25 raw files and 160 bindings and reproduced acceptance. See
+  `evidence/native-lds-dynamic.json`. Mixed deployment preserved its image and log.
 - **Static LDS fixture passed on .40:** 257 exact sums from 16,448 unchanged
   inputs, intact guards, allocation closure, full finalization and natural PID141 /
   application `0xa018` stop. Visible mount identities matched; services remained
   healthy and both locks released. Parent saved-evidence audit reproduced acceptance
   and rehashed 25 raw files. Post-run independent review was interrupted by a content
   filter; preflight and deployment reviews passed. See `evidence/native-lds-static.json`.
-  Preserve the installed static LDS image and 616-byte result before replacement.
-  Dynamic LDS execution draft has 25 passing tests and a null deployment binding;
-  next prepare/review its deployment, then test dynamic and mixed LDS. Full G3 is open.
+  The later dynamic deployment preserved its image and 616-byte result. Full G3 is open.
 - LDS offline revalidation passed: ten host tests, four byte-identical compiler
   profiles and three byte-identical oracle files. Static LDS checks 257 sums from
   16,448 inputs; see `docs/LDS_EXPERIMENT.md` and
   `evidence/offline-lds-reproduction-v2.json`. Those checks preceded the static LDS
-  observation above; dynamic and mixed profiles remain unrun.
+  observations above; those native results cover only their exact frozen profiles.
 - **Compiler-spill fixture passed on .40:** 4,096 exact outputs, modified scratch,
   unchanged guards, closed allocations, complete finalization and natural PID132 /
   application `0x8018` stop. The bounded cycle has matching visible mount snapshots,
@@ -426,6 +444,10 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
+Prepare the independently reviewed offline persistent
+buffer producer/consumer candidate for hardware. Wave, atomic, numerical, geometry and broader
+visibility qualification remain open; do not treat isolated fixture passes as G3.
+
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
 requirement to evidence and records the selected LLVM/LLD 18.1.8, AMDHSA V5,
 wave32, gfx1013 indexed-store route. Four whole baseline objects reproduce in a
@@ -655,6 +677,11 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-13 | G3 mixed LDS | 27165fd | .40:257 exact outputs, intact guards, bounded natural teardown; independently audited | evidence/native-lds-mixed.json | remaining G3 features
+- 2026-10-13 | G3 visibility offline | a049853 | 54 tests, native package and independent review passed | evidence/offline-dependent-visibility-readiness.json | hardware validation pending
+
+- 2026-10-13 | G3 dynamic LDS | 27165fd | .40:257 exact sums, intact guards, bounded natural teardown; independently audited | evidence/native-lds-dynamic.json | mixed LDS next; G3 open
 
 - 2026-10-12 | G3 static LDS fixture | 27165fd | .40:257 exact sums,inputs/guards intact,natural teardown; parent-audited | evidence/native-lds-static.json | dynamic/mixed LDS next; G3 open
 

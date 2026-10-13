@@ -1,11 +1,11 @@
 # Native HIP and ROCm capabilities on PlayStation 5
 
-Updated: 2026-10-12, America/New_York.
+Updated: 2026-10-13, America/New_York.
 
 Status: G1 passed its offline acceptance; G2 passed for the declared arithmetic
 fixture in `../evidence/native-g2-acceptance.json`. G3 has one exact private-call
 hardware computation observation with delayed completion evidence and one bounded
-compiler-spill cycle plus a static LDS cycle; broad G3
+compiler-spill cycle plus static, dynamic and mixed LDS cycles; broad G3
 qualification remains open. G4 has an offline native candidate; G5-G12 remain planned.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.

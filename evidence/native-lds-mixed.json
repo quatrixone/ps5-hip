@@ -1,0 +1,113 @@
+{
+    "schema":  1,
+    "classification":  "exact-mixed-lds-cycle-pass",
+    "accepted":  true,
+    "hardware_gate_passed":  false,
+    "full_g3_complete":  false,
+    "target":  "console .40 firmware 12.70",
+    "source_commit":  "27165fd51fb16798d6bc340b5f254c8298c501b5",
+    "image_sha256":  "1565167882016c04d6c0a53149f637cbf10f8e991ac16e49a2c7936488b0b054",
+    "kernel":  "lds_mixed",
+    "compiler_profile":  "LLVM18.1.8 O2 gfx1013 wave32",
+    "groups":  257,
+    "threads_per_group":  64,
+    "input_values":  16448,
+    "static_lds_bytes":  256,
+    "dynamic_lds_bytes":  1280,
+    "allocated_lds_bytes":  2048,
+    "stride":  5,
+    "application":  {
+                        "application_result":  "application-pass",
+                        "target":  "gfx1013",
+                        "kernel":  "lds_mixed",
+                        "log_sha256":  "402dc6048825286ecf66ee1543aaaf96a34bc9cf7aa99a280ecac0270bf7af9b",
+                        "bytes":  616,
+                        "hardware_gate_passed":  false,
+                        "unproven":  [
+                                         "log freshness",
+                                         "remote artifact identity",
+                                         "native process status",
+                                         "title teardown",
+                                         "service health"
+                                     ]
+                    },
+    "lifecycle":  {
+                      "pid":  159,
+                      "app_id":  "0x0000e018",
+                      "title_id":  "PPSA99014",
+                      "ordered_os_lifecycle_complete":  true,
+                      "shadow_self_stop":  true,
+                      "generic_kill_end_label_count":  1,
+                      "limits":  [
+                                     "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+                                 ]
+                  },
+    "stopped_before_close":  true,
+    "matching_mount_multiset_equal":  true,
+    "health_before":  {
+                          "2121":  "reachable",
+                          "3232":  "reachable",
+                          "9021":  "reachable"
+                      },
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "receipt":  "results/lds-mixed-execution-v1/observation-20261013T042001.461964Z/receipt.json",
+    "receipt_sha256":  "3bfe76e308ea0fd1e3276674c7ba248859fa8b387752f01c4552cb809b0c30cd",
+    "script_sha256":  "312c89e5050a6d268b26b67a824aa580b8c87b8cccd04425b1ef23602effca15",
+    "manifest_sha256":  "44f8e7facebbcc71053704a4d03e0ce202ddfb5a59c53f6ec2340114f968b08f",
+    "deployment_binding":  {
+                               "receipt":  {
+                                               "path":  "results/lds-mixed-deployment-v1/deployment-20261013T041705.624127Z/deployment.json",
+                                               "sha256":  "d05055308a86fd77f55fcb0eef50b7542eab75171fc4d253acdb9bc6f397ac66"
+                                           },
+                               "review":  {
+                                              "path":  "results/lds-mixed-deployment-v1/deployment-20261013T041705.624127Z-independent-review.json",
+                                              "sha256":  "7772cb4ad69b60af6c60dfefb162e64d8fa436d0ffc5a7e9550903cfabaefb75"
+                                          }
+                           },
+    "raw_sha256":  {
+                       "after-cycle.log":  "2f940a107f809c7d8d32252c4b857c0e8b12dfb26dd072b5ba6baff182a4ca52",
+                       "after-post.log":  "2f940a107f809c7d8d32252c4b857c0e8b12dfb26dd072b5ba6baff182a4ca52",
+                       "application.log":  "402dc6048825286ecf66ee1543aaaf96a34bc9cf7aa99a280ecac0270bf7af9b",
+                       "before-close.log":  "2f940a107f809c7d8d32252c4b857c0e8b12dfb26dd072b5ba6baff182a4ca52",
+                       "before-launch.log":  "e75cda1d435020b493b6a646498518f308712dedeab64d7b04add87bb8a9c461",
+                       "before-log-check.log":  "e75cda1d435020b493b6a646498518f308712dedeab64d7b04add87bb8a9c461",
+                       "before-post-snapshot.log":  "2f940a107f809c7d8d32252c4b857c0e8b12dfb26dd072b5ba6baff182a4ca52",
+                       "before-pre-snapshot.log":  "e75cda1d435020b493b6a646498518f308712dedeab64d7b04add87bb8a9c461",
+                       "before.log":  "e75cda1d435020b493b6a646498518f308712dedeab64d7b04add87bb8a9c461",
+                       "close-response.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                       "installed-before-launch-eboot.bin":  "0cf164853b744244274f4888b4fefd03da4e2b4e7c4354a55c2149402c7ebe38",
+                       "installed-before-launch.json":  "43307eab15367ed1f87b131b392a488819326a7101938f09dd9d357831408f97",
+                       "installed-eboot.bin":  "0cf164853b744244274f4888b4fefd03da4e2b4e7c4354a55c2149402c7ebe38",
+                       "installed.json":  "43307eab15367ed1f87b131b392a488819326a7101938f09dd9d357831408f97",
+                       "klog.log":  "4b2532bab8056a7cb1a4b50cf3ae300a23d7fc2bb6c923bd48112fe65364d8fa",
+                       "launch-klog.log":  "78fbe1f9671f713cb275855f031045fbb5ea460a311eedaca73e2f056dfa7e53",
+                       "launch-response.log":  "9cfa8bc87a647fa2d916a819d9fc324afa620480b43cffb06e756e556b184a67",
+                       "launch-shadow-delta.log":  "94b36253a4f051f698b9a21e1c9ae893c98f440c158b4d7a2f714d71bfdb5ce9",
+                       "lifecycle-delta.log":  "94b36253a4f051f698b9a21e1c9ae893c98f440c158b4d7a2f714d71bfdb5ce9",
+                       "observed.log":  "2f940a107f809c7d8d32252c4b857c0e8b12dfb26dd072b5ba6baff182a4ca52",
+                       "post-snapshot.log":  "ebbb4102faad6ff1edeb7cdaed4626ad2c50c1a401c8a3b16a3217dba493bee9",
+                       "pre-snapshot.log":  "ebbb4102faad6ff1edeb7cdaed4626ad2c50c1a401c8a3b16a3217dba493bee9",
+                       "private-log-absence-before-launch.json":  "9fa484be08c8c3bd7ae66eea87cfd85a3f4cd28f1a09ee533d20faf1d4c225df",
+                       "private-log-absence.json":  "9fa484be08c8c3bd7ae66eea87cfd85a3f4cd28f1a09ee533d20faf1d4c225df",
+                       "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                   },
+    "limitations":  [
+                        "Only the exact O2 gfx1013 lds_mixed object: 257 groups of64, 257 sum-XOR-tag33 outputs, static256/dynamic1280/allocated2048 bytes.",
+                        "This does not qualify other mixed sizes, scratch, arbitrary shaders, repeated dispatches or full G3.",
+                        "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+                        "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+                    ],
+    "next":  "Wave, atomic, numerical and persistent-buffer visibility qualification; full G3 remains open.",
+    "independent_postrun_review":  true,
+    "independent_review":  {
+                               "sha256":  "eed54987253acf8e35b34787c2e2180f7c8389651dfa2b41f0589c3e195e761d",
+                               "path":  "results/lds-mixed-execution-v1/observation-20261013T042001.461964Z-independent-review.json"
+                           },
+    "exact_output_values":  257,
+    "output_oracle":  "group reduction sum XOR ((group * 64 + 33) XOR 0x53a971bd)"
+}

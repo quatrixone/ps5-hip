@@ -1,0 +1,52 @@
+{
+    "schema":  1,
+    "classification":  "offline-ready-independently-reviewed",
+    "source_commit":  "a0498530cb1a2d9d6d0db6a62d6f0d4e8df92e3e",
+    "source_tree":  "1f0cdda0c44aa33c7dcf3857eb97165357e24c77",
+    "branch":  "development/g3-dependent-visibility",
+    "stage":  ".local/g3-dependent-visibility/dist/PPSA99014/gfx1013-dependent_visibility-80ec854f0968",
+    "profile":  {
+                    "elements":  257,
+                    "groups":  5,
+                    "threads":  64,
+                    "rounds":  3,
+                    "dispatches":  6,
+                    "persistent_buffers":  3,
+                    "timeout_ms":  2000,
+                    "visibility":  "completed-queue-cpu-cache-maintenance"
+                },
+    "image":  {
+                  "file":  "PPSA99014.ffpkg",
+                  "sha256":  "ada43dba504c31b976c67a8bc0c75014437c9157f0b6f6befddb35bc1f5c683c",
+                  "bytes":  3637248
+              },
+    "native_readiness":  {
+                             "sha256":  "863cd41395af22e62bc4b568d4ce990b42d1bbaeaf269318f29c91391fa66ba1",
+                             "path":  ".local/g3-dependent-visibility/results/native-qualified-v1/readiness.json"
+                         },
+    "host_readiness":  {
+                           "sha256":  "1d03fc7b01b5e162b9d8d2c87690b852d9f36bc25fee76a2a826fc1ac6e6a592",
+                           "path":  ".local/g3-dependent-visibility/results/host-qualified-v1/receipt.json"
+                       },
+    "independent_review":  {
+                               "sha256":  "dbc2089bc480a3f01ddcb73174706b4c0798a1babd69f35115ad9f982e402db6",
+                               "path":  "results/g3-dependent-visibility-review-v1/review.json"
+                           },
+    "tests":  {
+                  "actual_compiler_object_models":  4,
+                  "extracted_files_match":  true,
+                  "package_filesystem_check":  "passed",
+                  "native_imports_verified":  116,
+                  "prior_files_preserved":  5646,
+                  "sanitizer_ctests_passed":  54
+              },
+    "hardware_validated":  false,
+    "full_g3_complete":  false,
+    "limitations":  [
+                        "Completed producer then consumer submissions with CPU cache maintenance; no asynchronous ordering claim.",
+                        "Host models compute expected device effects and do not emulate GPU ISA.",
+                        "No hardware execution of this candidate yet.",
+                        "Independent review rehashed candidate inputs and logs but not the full prior-file preservation inventory."
+                    ],
+    "next":  "Prepare reviewed single-use deployment and execution controls before hardware validation."
+}

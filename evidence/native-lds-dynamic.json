@@ -1,0 +1,112 @@
+{
+    "schema":  1,
+    "classification":  "exact-dynamic-lds-cycle-pass",
+    "accepted":  true,
+    "hardware_gate_passed":  false,
+    "full_g3_complete":  false,
+    "target":  "console .40 firmware 12.70",
+    "source_commit":  "27165fd51fb16798d6bc340b5f254c8298c501b5",
+    "image_sha256":  "5d606262de87e7eda327752e0654d4c9f0f3f90f5414f76370d2820a4b348bf4",
+    "kernel":  "lds_dynamic",
+    "compiler_profile":  "LLVM18.1.8 O2 gfx1013 wave32",
+    "groups":  257,
+    "threads_per_group":  64,
+    "input_values":  16448,
+    "exact_output_sums":  257,
+    "static_lds_bytes":  0,
+    "dynamic_lds_bytes":  1280,
+    "allocated_lds_bytes":  2048,
+    "stride":  5,
+    "application":  {
+                        "application_result":  "application-pass",
+                        "target":  "gfx1013",
+                        "kernel":  "lds_dynamic",
+                        "log_sha256":  "947c721a884a452bcf065b3415d53ff1ad96317acbeaacaa5888cccf40d709cf",
+                        "bytes":  620,
+                        "hardware_gate_passed":  false,
+                        "unproven":  [
+                                         "log freshness",
+                                         "remote artifact identity",
+                                         "native process status",
+                                         "title teardown",
+                                         "service health"
+                                     ]
+                    },
+    "lifecycle":  {
+                      "pid":  150,
+                      "app_id":  "0x0000c018",
+                      "title_id":  "PPSA99014",
+                      "ordered_os_lifecycle_complete":  true,
+                      "shadow_self_stop":  true,
+                      "generic_kill_end_label_count":  1,
+                      "limits":  [
+                                     "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+                                 ]
+                  },
+    "stopped_before_close":  true,
+    "matching_mount_multiset_equal":  true,
+    "health_before":  {
+                          "2121":  "reachable",
+                          "3232":  "reachable",
+                          "9021":  "reachable"
+                      },
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "receipt":  "results/lds-dynamic-execution-v1/observation-20261013T040635.649773Z/receipt.json",
+    "receipt_sha256":  "e201924b6c940322f50e2250fa12477a78762922c7298a59035984deec9ce38e",
+    "script_sha256":  "3762b13fd478384163290a6a843c16251d9f1d4ae457c85a24fe7efb28c4b23e",
+    "manifest_sha256":  "b16035472760060f7ef66eeb7bf7a68ed80e5ad0021758e616b7bc306820830b",
+    "deployment_binding":  {
+                               "receipt":  {
+                                               "path":  "results/lds-dynamic-deployment-v1/deployment-20261013T040326.480593Z/deployment.json",
+                                               "sha256":  "b463664c75bdf359f01df51a184b7fb8587a4e6f3a0f99d02ab6f8c457d4a222"
+                                           },
+                               "review":  {
+                                              "path":  "results/lds-dynamic-deployment-v1/deployment-20261013T040326.480593Z-independent-review.json",
+                                              "sha256":  "9a41a2000296ed03020611bcb798ca2df19e7376ffbc14553a2fda8ac57e9225"
+                                          }
+                           },
+    "raw_sha256":  {
+                       "after-cycle.log":  "ab28cb0a003e785e542c08a5c7e083315a9b6959b0af9a4af4c51bf0f0e8b938",
+                       "after-post.log":  "ab28cb0a003e785e542c08a5c7e083315a9b6959b0af9a4af4c51bf0f0e8b938",
+                       "application.log":  "947c721a884a452bcf065b3415d53ff1ad96317acbeaacaa5888cccf40d709cf",
+                       "before-close.log":  "ab28cb0a003e785e542c08a5c7e083315a9b6959b0af9a4af4c51bf0f0e8b938",
+                       "before-launch.log":  "fc9ebedd2c564f335665cc3b9e5200621eb8bf3525f2d399d148dfdd305e7630",
+                       "before-log-check.log":  "fc9ebedd2c564f335665cc3b9e5200621eb8bf3525f2d399d148dfdd305e7630",
+                       "before-post-snapshot.log":  "ab28cb0a003e785e542c08a5c7e083315a9b6959b0af9a4af4c51bf0f0e8b938",
+                       "before-pre-snapshot.log":  "fc9ebedd2c564f335665cc3b9e5200621eb8bf3525f2d399d148dfdd305e7630",
+                       "before.log":  "fc9ebedd2c564f335665cc3b9e5200621eb8bf3525f2d399d148dfdd305e7630",
+                       "close-response.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                       "installed-before-launch-eboot.bin":  "a4e850004b509c11df7fd17d99d980a99b1089a974512e222b203273a1a7e4f0",
+                       "installed-before-launch.json":  "1f46e759d138c5e96f26c15f89ef1ab6aca88cd7bd301bceaea83e8424b2d899",
+                       "installed-eboot.bin":  "a4e850004b509c11df7fd17d99d980a99b1089a974512e222b203273a1a7e4f0",
+                       "installed.json":  "1f46e759d138c5e96f26c15f89ef1ab6aca88cd7bd301bceaea83e8424b2d899",
+                       "klog.log":  "1a8118390234b67b80663943859f5eabd1741aa14999608a9269353468159ad5",
+                       "launch-klog.log":  "77d9a88f1789307df340b9f033de482e0c8afb230a39434856177c752383a317",
+                       "launch-response.log":  "766201c3bd5008cde4bb8c2d3cd22d651d8564f0887d46de03f2dd01b9e5ecec",
+                       "launch-shadow-delta.log":  "eb6679b8c1a2750d740620096e43f5dc4a212ebb8ef6d3da88fc9e5050cefc31",
+                       "lifecycle-delta.log":  "eb6679b8c1a2750d740620096e43f5dc4a212ebb8ef6d3da88fc9e5050cefc31",
+                       "observed.log":  "ab28cb0a003e785e542c08a5c7e083315a9b6959b0af9a4af4c51bf0f0e8b938",
+                       "post-snapshot.log":  "f052c75715bd37b095f2474b6ced22faeca9176fb6069c68992583fe6a5d93fd",
+                       "pre-snapshot.log":  "f052c75715bd37b095f2474b6ced22faeca9176fb6069c68992583fe6a5d93fd",
+                       "private-log-absence-before-launch.json":  "d5cbc87545368b922c042a39c885d59e9e4ed4d4dcb59dc95893d35ab35129df",
+                       "private-log-absence.json":  "d5cbc87545368b922c042a39c885d59e9e4ed4d4dcb59dc95893d35ab35129df",
+                       "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                   },
+    "limitations":  [
+                        "Only the exact O2 gfx1013 lds_dynamic object: 257 groups of64, 257 sums, static0/dynamic1280/allocated2048 bytes.",
+                        "This does not qualify other dynamic sizes or mixed LDS, scratch, arbitrary shaders, repeated dispatches or full G3.",
+                        "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+                        "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+                    ],
+    "next":  "Mixed LDS, then remaining G3 feature families.",
+    "independent_postrun_review":  true,
+    "independent_review":  {
+                               "sha256":  "a9d5e147a698b3a878241c71cdb00e770085e6882dbf3c1cae938e5a6d5b25c6",
+                               "path":  "results/lds-dynamic-execution-v1/observation-20261013T040635.649773Z-independent-review.json"
+                           }
+}

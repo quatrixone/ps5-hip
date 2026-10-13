@@ -66,6 +66,25 @@ See `../evidence/native-lds-static.json` and
 `../evidence/native-lds-static-deployment.json`. No broader optimization, geometry,
 dynamic/mixed LDS or full G3 qualification follows from this exact fixture.
 
-Dynamic execution controls have passed 25 offline regression methods and real
-candidate verification with a synthetic test-only deployment binding. Their actual
-deployment binding remains null until a separately verified deployment exists.
+## Dynamic observation
+
+PID150/application `0xc018` produced 257 exact sums from 16,448 unchanged inputs
+with 1,280 dynamic bytes, 2,048 allocated bytes and stride five. Guards, allocation
+closure and finalization passed; the title stopped naturally inside the original
+bounded cycle. Visible mount identities matched, services remained healthy and
+both locks released. Independent review verified 25 raw files and 160 bindings and
+reproduced acceptance. See `../evidence/native-lds-dynamic.json` and
+`../evidence/native-lds-dynamic-deployment.json`.
+
+## Mixed observation
+
+PID159/application `0xe018` produced 257 exact sum-XOR-tag33 outputs from 16,448
+unchanged inputs with 256 static bytes, 1,280 dynamic bytes, 2,048 allocated bytes
+and stride five. Guards, allocation closure, finalization and natural shutdown
+passed inside the original bounded cycle. Visible mount identities matched,
+services remained healthy and both locks released. Independent review rehashed
+25 raw files and 165 bindings and reproduced acceptance. See
+`../evidence/native-lds-mixed.json` and `../evidence/native-lds-mixed-deployment.json`.
+
+All three declared LDS profiles now have exact native observations. They do not
+qualify other shapes, sizes, optimization levels or the rest of G3.
