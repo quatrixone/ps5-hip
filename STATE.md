@@ -4,6 +4,24 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Visibility computation and delayed cleanup independently audited; original cycle inconclusive:** the recovered
+  result reports six dispatches, three rounds and 771 exact outputs over persistent
+  buffers, intact guards, closed allocations and complete finalization. Two read-only
+  fetches matched. The original controller rejected interleaved spawn records and
+  exhausted its deadline before result retrieval or a post snapshot. Both operations
+  ended with reachable services and released locks; no GPU rerun occurred. Recovery
+  review passed. A separate delayed snapshot matched the original visible mount
+  baseline with unchanged result and installed bytes; independent audit passed.
+  The post snapshot was 864.105950 seconds after launch, with unlocked/klog gaps;
+  it does not repair the original 20-second cycle. See
+  `evidence/native-visibility-computation.json` and
+  `evidence/native-visibility-execution-incomplete.json`.
+- Refreshed full/partial wave32 candidates are frozen at `c3972cb`, using current
+  allocation/submission cleanup. Device code and wave harness objects match the
+  older candidates; the new images need their own hardware qualification. All 38
+  configured sanitizer tests, eight actual-object launch/packet checks and both
+  native package validations passed. Parent artifact review rehashed sources,
+  logs, staged payloads and images. See `evidence/offline-wave32-current-readiness.json`.
 - **Mixed LDS fixture passed on .40 and independent review:** 257 exact
   sum-XOR-tag outputs from 16,448 unchanged inputs, static/dynamic/allocated LDS
   256/1280/2048 bytes, stride five. Guards, allocation closure and finalization
@@ -15,8 +33,8 @@ Updated: 2026-10-13, America/New_York.
   `a049853` on `development/g3-dependent-visibility` reuses three guarded buffers
   across six dispatches and three changed-input rounds. All 54 sanitizer tests,
   native link/import checks and package extraction passed; independent review is
-  clear. See `evidence/offline-dependent-visibility-readiness.json`. Hardware is
-  untested; the fixture covers completed queues with CPU cache maintenance.
+  clear. See `evidence/offline-dependent-visibility-readiness.json`. The subsequent
+  hardware observation is above; this fixture includes CPU cache maintenance.
 - **Dynamic LDS fixture passed on .40 and independent review:** 257 exact sums
   from 16,448 unchanged inputs, static/dynamic/allocated LDS 0/1280/2048 bytes,
   stride five, intact guards and closed allocations. PID150/application `0xc018`
@@ -444,8 +462,10 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-Prepare the independently reviewed offline persistent
-buffer producer/consumer candidate for hardware. Wave, atomic, numerical, geometry and broader
+Finish prospective interleaved-log parser qualification, then qualify the refreshed
+wave32 candidates. Preserve the successful visibility image/result and the original
+inconclusive receipt. The additive 2D/3D
+geometry implementation is being tested in `.local/g3-geometry`. Atomic, numerical and broader
 visibility qualification remain open; do not treat isolated fixture passes as G3.
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
@@ -677,6 +697,9 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-13 | G3 visibility | a049853 | .40:771 exact outputs; recovered result and delayed cleanup audited, original cycle inconclusive | evidence/native-visibility-computation.json | wave32 next
+- 2026-10-13 | G3 wave32 offline | c3972cb | refreshed cleanup,38 sanitizer tests,8 object checks,both packages verified | evidence/offline-wave32-current-readiness.json | hardware pending
 
 - 2026-10-13 | G3 mixed LDS | 27165fd | .40:257 exact outputs, intact guards, bounded natural teardown; independently audited | evidence/native-lds-mixed.json | remaining G3 features
 - 2026-10-13 | G3 visibility offline | a049853 | 54 tests, native package and independent review passed | evidence/offline-dependent-visibility-readiness.json | hardware validation pending

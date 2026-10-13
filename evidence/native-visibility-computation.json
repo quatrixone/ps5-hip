@@ -1,0 +1,79 @@
+{
+    "schema":  1,
+    "classification":  "exact-computation-pass-with-delayed-cleanup-evidence",
+    "original_cycle_accepted":  false,
+    "full_g3_complete":  false,
+    "hardware_gate_passed":  false,
+    "source_commit":  "a0498530cb1a2d9d6d0db6a62d6f0d4e8df92e3e",
+    "image_sha256":  "ada43dba504c31b976c67a8bc0c75014437c9157f0b6f6befddb35bc1f5c683c",
+    "profile":  {
+                    "exact_output_values":  771,
+                    "persistent_data_buffers":  3,
+                    "elements":  257,
+                    "visibility":  "completed-queue-cpu-cache-maintenance",
+                    "rounds":  3,
+                    "dispatches":  6
+                },
+    "original_receipt":  {
+                             "sha256":  "2a18140a33bd1de981df99e4474b34d937447e090681ed2a39ed3691fcd00785",
+                             "path":  "results/visibility-execution-v1/observation-20261013T043518.324248Z/receipt.json"
+                         },
+    "recovery_receipt":  {
+                             "sha256":  "0178f49952dc194d3c2ba6609f547ebb28f00010195764697bff1b16dff981e2",
+                             "path":  "results/visibility-result-recovery-v1/observation-20261013T043914.453535Z/receipt.json"
+                         },
+    "application":  {
+                        "application_result":  "application-pass",
+                        "target":  "gfx1013",
+                        "kernel":  "dependent_visibility",
+                        "log_sha256":  "9384ed5628d3e53d80e9d575e861be2310fd37c17bc74beab422ad7e1d3482bb",
+                        "bytes":  1300,
+                        "hardware_gate_passed":  false,
+                        "unproven":  [
+                                         "log freshness",
+                                         "remote artifact identity",
+                                         "native process status",
+                                         "title teardown",
+                                         "service health"
+                                     ]
+                    },
+    "application_unchanged":  true,
+    "installed_verified":  true,
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "recovery_raw_sha256":  {
+                                "after.log":  "139bf96d80cd4cbddd30082734a2f0c9b806c1879ebb82ce9bd556c5870e8418",
+                                "application-first.log":  "9384ed5628d3e53d80e9d575e861be2310fd37c17bc74beab422ad7e1d3482bb",
+                                "application-second.log":  "9384ed5628d3e53d80e9d575e861be2310fd37c17bc74beab422ad7e1d3482bb",
+                                "before.log":  "139bf96d80cd4cbddd30082734a2f0c9b806c1879ebb82ce9bd556c5870e8418",
+                                "between.log":  "139bf96d80cd4cbddd30082734a2f0c9b806c1879ebb82ce9bd556c5870e8418",
+                                "installed-eboot.bin":  "96cd66c171a84f4b53deffcb47ca61afc30ff070a581c6f11741886782330991",
+                                "installed.json":  "cfe09200533c0170cd167c7e4f0c079bf0e2fd8146532026f04d926220a61f96",
+                                "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                            },
+    "limitations":  [
+                        "Original 20-second cycle remains inconclusive; its strict-adjacency parser rejected interleaved spawn records.",
+                        "Supplemental mount snapshot occurred 864.105950 seconds after original launch, not within the original deadline.",
+                        "Recovery and post snapshot followed unlocked/klog gaps and do not supply continuous observation.",
+                        "Visible mount baseline equivalence does not prove global namespace completeness or reference release.",
+                        "Completed-queue path includes CPU cache maintenance; no asynchronous or CPU-cache-independent visibility or full G3 claim."
+                    ],
+    "recovery_independent_review":  {
+                                        "sha256":  "12e610ca1025a76ece87c1316f6ee493c2e1eadfce7268920074dd119c5f91b3",
+                                        "path":  "results/visibility-result-recovery-v1/observation-20261013T043914.453535Z-independent-review.json"
+                                    },
+    "supplemental_post_receipt":  {
+                                      "sha256":  "e4fb217597c5d0bd673d517c2d8605a1f237499d64ec7ebe9d3860d29554846b",
+                                      "path":  "results/visibility-post-snapshot-v1/observation-20261013T044946.613671Z/receipt.json"
+                                  },
+    "eventual_matching_mount_multiset_equal":  true,
+    "supplemental_independent_review":  {
+                                            "sha256":  "288bf6a3106d89feb173dd09e4b1703afff4cc95179afa5b42a70d5e8bcc35f8",
+                                            "path":  "results/visibility-post-snapshot-v1/observation-20261013T044946.613671Z-independent-review.json"
+                                        },
+    "launch_to_post_snapshot_seconds":  864.10595
+}

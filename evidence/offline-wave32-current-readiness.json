@@ -1,0 +1,55 @@
+{
+    "schema":  1,
+    "classification":  "offline-ready-parent-reviewed",
+    "source_commit":  "c3972cbc3f716f7f0712035d730c37d416420f06",
+    "source_tree":  "1646faa65531190a682c1244bae7eaee6011437c",
+    "branch":  "development/g3-wave32-current",
+    "readiness":  {
+                      "sha256":  "ecdbb54a01a48d30af16955e4eac0dcb789ddce3e8236b92aea5bc72e34906c8",
+                      "path":  ".local/g3-wave32-current/results/qualification-v1/readiness.json"
+                  },
+    "author_final_check":  {
+                               "sha256":  "00a31a670f5362f55814b6830dae55e90fdaccb1d9ea2bff20c2a2fe0bbec0c1",
+                               "path":  ".local/g3-wave32-current/results/qualification-v1/final-check.json"
+                           },
+    "candidates":  [
+                       {
+                           "stage":  ".local/g3-wave32-current/dist/PPSA99014/gfx1013-wave_full-f8e928dd0f1a",
+                           "build_receipt_sha256":  "97091846c7260ad25fa76f188270289653fa96d7e7aea3710dd45244cb543827",
+                           "kernel":  "wave_full",
+                           "image":  {
+                                         "file":  "PPSA99014.ffpkg",
+                                         "sha256":  "19130975f2ba38688886bfed9fbccbc7fda7440799b3151261456913ea95decf",
+                                         "bytes":  3571712
+                                     }
+                       },
+                       {
+                           "stage":  ".local/g3-wave32-current/dist/PPSA99014/gfx1013-wave_partial-e02aff5f46c1",
+                           "build_receipt_sha256":  "0e39441b5cb5ebcb2448cc4de0bc4f8e394c82c09d78bac45af3e354ed05c7ff",
+                           "kernel":  "wave_partial",
+                           "image":  {
+                                         "file":  "PPSA99014.ffpkg",
+                                         "sha256":  "24f9b99b5e626dfa690346752d993c557b3425868269ee7cbbed1e8f3448a8f6",
+                                         "bytes":  3571712
+                                     }
+                       }
+                   ],
+    "tests":  {
+                  "parent_rehashed_build_receipts":  2,
+                  "parent_rehashed_raw_files":  31,
+                  "sanitizer_ctests":  38,
+                  "parent_rehashed_images":  2,
+                  "parent_rehashed_source_entries":  82,
+                  "actual_object_launch_and_packet_checks":  8,
+                  "parent_rehashed_stage_payloads":  14
+              },
+    "source_relationship":  "Documentation-only commit on a049853; executable source unchanged from reviewed visibility substrate.",
+    "refresh_delta":  "Only native_memory.o and submission.o differ from old wave packages; exact device code and native_canary.o unchanged.",
+    "hardware_validated":  false,
+    "limitations":  [
+                        "Each refreshed image requires its own native qualification.",
+                        "38 configured host tests exclude optional unrelated OCML/HIP registration/vector suites.",
+                        "Parent rehashed candidate evidence but did not independently rehash the entire 6079-file preservation inventory."
+                    ],
+    "next":  "Prepare reviewed wave_full and wave_partial console experiments."
+}

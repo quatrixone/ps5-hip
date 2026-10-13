@@ -1,0 +1,47 @@
+{
+    "schema":  1,
+    "classification":  "inconclusive",
+    "accepted":  false,
+    "full_g3_complete":  false,
+    "source_commit":  "a0498530cb1a2d9d6d0db6a62d6f0d4e8df92e3e",
+    "image_sha256":  "ada43dba504c31b976c67a8bc0c75014437c9157f0b6f6befddb35bc1f5c683c",
+    "receipt":  "results/visibility-execution-v1/observation-20261013T043518.324248Z/receipt.json",
+    "receipt_sha256":  "2a18140a33bd1de981df99e4474b34d937447e090681ed2a39ed3691fcd00785",
+    "attempted":  [
+                      "pre-snapshot",
+                      "launch"
+                  ],
+    "error":  "RuntimeError(\u0027FTP history stream unavailable after failed transfer\u0027)",
+    "observation_error":  "TimeoutError(\u0027absolute I/O deadline expired\u0027)",
+    "pending_lifecycle":  "missing or ambiguous native spawn identity",
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "raw_sha256":  {
+                       "before-launch.log":  "b5bd0aee6594ec8e7a4fb64720ee1409dd24684baf893c62afe8297bff4dd0f1",
+                       "before-log-check.log":  "b5bd0aee6594ec8e7a4fb64720ee1409dd24684baf893c62afe8297bff4dd0f1",
+                       "before-pre-snapshot.log":  "b5bd0aee6594ec8e7a4fb64720ee1409dd24684baf893c62afe8297bff4dd0f1",
+                       "before.log":  "b5bd0aee6594ec8e7a4fb64720ee1409dd24684baf893c62afe8297bff4dd0f1",
+                       "installed-before-launch-eboot.bin":  "96cd66c171a84f4b53deffcb47ca61afc30ff070a581c6f11741886782330991",
+                       "installed-before-launch.json":  "cfe09200533c0170cd167c7e4f0c079bf0e2fd8146532026f04d926220a61f96",
+                       "installed-eboot.bin":  "96cd66c171a84f4b53deffcb47ca61afc30ff070a581c6f11741886782330991",
+                       "installed.json":  "cfe09200533c0170cd167c7e4f0c079bf0e2fd8146532026f04d926220a61f96",
+                       "klog.log":  "3f886639e430423a9b4512682eba25017cb6d01970e7e2074bac4f1bd42c6151",
+                       "launch-klog.log":  "9d2c4358dc4b8f98143f79ad6f2d0d331feba126882ec4476ce8bf41477ffa1d",
+                       "launch-response.log":  "8c7c0d93371be806ffe383e060c7990c4ea621cf4437d37debfc2b5f87daf264",
+                       "launch-shadow-delta.log":  "686fd29db15b14ba3189becaf88a709fbee4c1a26cc5b15b0537b4a9c023d3e5",
+                       "observed.log":  "ed92f623faeb9366dae9022e5b0dc57bc2ae1f3d901b099ba7b8f62c93f871b3",
+                       "pre-snapshot.log":  "e8b70bacbac3205fbe2c2e8905700039efb6b06482753824c798e87b4a9d7bce",
+                       "private-log-absence-before-launch.json":  "9040679723a9d6828ee336cc2aad9a8833e471d8326ed04b97b33bef0a9e10e4",
+                       "private-log-absence.json":  "9040679723a9d6828ee336cc2aad9a8833e471d8326ed04b97b33bef0a9e10e4",
+                       "self-mode-response.json":  "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+                   },
+    "limitations":  [
+                        "Original lifecycle parser requires adjacent spawn records; eight unrelated resource-manager rows interleaved before the matching PID.",
+                        "Deadline expired before close, result retrieval or post snapshot.",
+                        "Separate recovery must not rewrite this attempt as an original bounded-cycle pass."
+                    ]
+}
