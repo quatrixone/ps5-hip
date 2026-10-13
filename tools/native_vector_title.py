@@ -23,6 +23,10 @@ WORKERS_PROFILE = {
 }
 
 
+WORKERS_INIT_PROFILE = dict(WORKERS_PROFILE, dispatches=4, exact_values=660, word_comparisons=1084,
+    template_comparisons=1084, actors=[1,2,1,0], counts=[73,257,73,257],
+    salts=[101,1009,65521,4294967280], initialization_actor="A", prebackend_required=True)
+
 PROFILE = {
     "target": "gfx1013", "kernel_name": "_Z10vector_addPKfS0_Pfj",
     "combined_object_sha256": "b0c2518f45e63787221655374a0d678c02527eaf72c66a64b96fe3378333ddf0",
@@ -97,8 +101,8 @@ MATMUL_PROFILE = {'target': 'gfx1013',
 
 
 def profile_for(kernel):
-    if kernel == "hip_workers_main":
-        return WORKERS_PROFILE
+    if kernel in ("hip_workers_main", "hip_workers_init"):
+        return WORKERS_INIT_PROFILE if kernel == "hip_workers_init" else WORKERS_PROFILE
     if kernel == "hip_vector":
         return PROFILE
     if kernel == "hip_routes":
@@ -115,7 +119,7 @@ def profile_for(kernel):
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main") else set()) | ({"workers-agc-disassembly.stdout"} if kernel == "hip_workers_main" else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
 
 
 def validate_fself(container, elf):
@@ -191,7 +195,7 @@ def validate_profile(receipt, source_root):
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
-                 ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel == "hip_workers_main" else
+                 ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel in ("hip_workers_main", "hip_workers_init") else
                  ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
                  ["src/hip_launch_profile.cpp", "tests/hip_tiled_matmul_blockdim.hip", "tools/probe_hip_matmul.py", "docs/HIP_MATMUL_TITLE.md"] if kernel == "hip_matmul" else
@@ -199,12 +203,12 @@ def validate_profile(receipt, source_root):
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
             raise ValueError("genuine HIP vector title source provenance mismatch: " + name)
-    if kernel == "hip_workers_main":
+    if kernel in ("hip_workers_main", "hip_workers_init"):
         for name in ("tests/hip_workers_native_title_test.py", "tools/check_canary_log.py", "tools/stage_native_title.py", "tools/verify_native_case.py", "CMakeLists.txt"):
             if sources.get(name)!=hashlib.sha256((source_root/name).read_bytes()).hexdigest():
                 raise ValueError("worker title source provenance mismatch: "+name)
     audits = receipt.get("vector_audits" if kernel == "hip_vector" else "routes_audits", {})
-    if (set(audits) != ({"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} | ({"workers_agc"} if kernel == "hip_workers_main" else set())) or
+    if (set(audits) != ({"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} | ({"workers_agc"} if kernel in ("hip_workers_main", "hip_workers_init") else set())) or
             any(audits[k].get("bundle_sha256") != selected["bundle_sha256"] for k in ("raw_pie", "converted_eboot")) or
             audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "main"] or
             audits["startup"].get("compiler_atexit_unregister") is not True or
@@ -395,7 +399,7 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
         path = provenance / name
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("genuine HIP vector linked artifact changed: " + name)
-    if kernel == "hip_workers_main":
+    if kernel in ("hip_workers_main", "hip_workers_init"):
         validate_workers_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
         if audit_workers_agc((provenance / "workers-agc-disassembly.stdout").read_text(), provenance / "llvm-pie.elf") != audits["workers_agc"]:

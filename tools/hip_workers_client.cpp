@@ -17,6 +17,7 @@ struct State {
     pthread_mutex_t gate{};pthread_cond_t changed{};timespec deadline{};
     std::atomic<int> error{0};std::atomic<unsigned> hip_error{0};
     std::atomic<bool> abort{false},uncertain{false};
+    std::atomic<bool> prebackend_verified{false};
     std::atomic<unsigned> dispatches{0},active{0},comparisons{0},templates{0},checks{0};
     unsigned phase=0;unsigned *device=nullptr;Worker workers[2]{},main{};
 };
@@ -90,15 +91,21 @@ bool worker_a(Worker&w) noexcept {
     if(!phase_check(hipMalloc(nullptr,4),hipErrorInvalidValue)||!publish(1)||!await(3))return false;
     if(!phase_check(hipPeekAtLastError(),hipErrorInvalidValue)||!phase_check(hipGetLastError(),hipErrorInvalidValue)||!phase_check(hipPeekAtLastError()))return false;
     if(!push(w,2)||!publish(4)||!await(5)||!pop(w,2)||!push(w,7)||!push(w,9)||!pop(w,9)||!pop(w,7)||!publish(6)||!await(7))return false;
-    if(!launch(w,1,73,101,"A")||!publish(8)||!await(9))return false;
-    return launch(w,3,73,65521,"A")&&publish(10);
+    if constexpr(worker_initializes) {
+        const auto before=ps5hip_runtime_observation();
+        if(!check(before.modules==1&&before.functions==1&&!before.completed&&!before.backend_attempted&&state.checks==expected_phase_checks))return false;
+        state.prebackend_verified=true;
+        std::puts("WORKERS_PREBACKEND actor=A completed=0 backend_attempted=false");
+    }
+    if(!launch(w,warmup_dispatches,73,101,"A")||!publish(8)||!await(9))return false;
+    return launch(w,warmup_dispatches+2,73,65521,"A")&&publish(10);
 }
 bool worker_b(Worker&w) noexcept {
     if(!await(2)||!phase_check(hipPeekAtLastError()))return false;
     dim3 g,b;size_t shared;hipStream_t stream;
     if(!phase_check(__hipPopCallConfiguration(&g,&b,&shared,&stream),hipErrorInvalidValue)||!phase_check(hipGetLastError(),hipErrorInvalidValue)||!phase_check(hipPeekAtLastError())||!publish(3)||!await(4))return false;
     if(!push(w,5)||!publish(5)||!await(6)||!pop(w,5)||!publish(7)||!await(8))return false;
-    return launch(w,2,257,1009,"B")&&publish(9);
+    return launch(w,warmup_dispatches+1,257,1009,"B")&&publish(9);
 }
 void *worker_main(void*p) noexcept {
     auto&w=*static_cast<Worker*>(p);
@@ -129,7 +136,7 @@ Report run() noexcept {
         if(!status(pthread_attr_setstacksize(&attributes,worker_stack_bytes)))break;
         size_t stack=0;if(!status(pthread_attr_getstacksize(&attributes,&stack))||!check(stack==worker_stack_bytes))break;
         if(!hip(hipMalloc(reinterpret_cast<void**>(&state.device),words*sizeof(unsigned))))break;
-        if(!launch(state.main,0,1,11,"main"))break;
+        if constexpr(!worker_initializes)if(!launch(state.main,0,1,11,"main"))break;
         if(!status(clock_gettime(CLOCK_REALTIME,&state.deadline)?errno:0))break;
         state.deadline.tv_sec+=20;
         for(unsigned id=0;id<2;++id){state.workers[id].id=id;
@@ -139,7 +146,7 @@ Report run() noexcept {
         if(r.created!=2){wake_abort();break;}
         if(!await(1))break;
         const auto warm=ps5hip_runtime_observation();
-        if(!check(warm.completed==1&&warm.backend_attempted)||!phase_check(hipPeekAtLastError())||!publish(2))break;
+        if(!check(warm.completed==warmup_dispatches&&warm.backend_attempted==!worker_initializes)||!phase_check(hipPeekAtLastError())||!publish(2))break;
     }while(false);
     if(state.error.load()&&r.created)wake_abort();
     for(unsigned id=0;id<r.created;++id){void*value=reinterpret_cast<void*>(1);
@@ -149,7 +156,7 @@ Report run() noexcept {
     const bool joined=r.created==r.joined;
     if(joined&&!state.uncertain.load()&&!state.error.load()){
         if(check(r.created==2&&state.checks==expected_phase_checks))
-            (void)launch(state.main,4,257,4294967280u,"main");
+            (void)launch(state.main,warmup_dispatches+3,257,4294967280u,"main");
     }
     bool closed=joined&&!state.uncertain.load();
     if(closed&&state.device){
@@ -164,13 +171,14 @@ Report run() noexcept {
     r.error=state.error;r.hip_error=state.hip_error;r.dispatches=state.dispatches;r.active_values=state.active;
     r.word_comparisons=state.comparisons;r.template_comparisons=state.templates;r.phase_checks=state.checks;
     r.cleanup_complete=closed;r.unsafe_teardown=!closed;
-    r.passed=!r.error&&closed&&r.created==2&&r.joined==2&&r.dispatches==5&&r.active_values==661&&r.word_comparisons==1355&&r.template_comparisons==1355&&r.phase_checks==expected_phase_checks;
+    r.prebackend_verified=state.prebackend_verified;
+    r.passed=!r.error&&closed&&r.created==2&&r.joined==2&&r.dispatches==expected_dispatches&&r.active_values==expected_values&&r.word_comparisons==expected_words&&r.template_comparisons==expected_words&&r.phase_checks==expected_phase_checks&&(!worker_initializes||r.prebackend_verified);
     if(!r.passed&&!r.error)r.error=EINVAL;
     last_report=r;return r;
 }
 }
 int ps5hip_workers_client_main(int,char**) {
     const auto r=ps5hip_workers::run();
-    if(r.passed){std::printf("WORKERS_CLIENT_PASS created=2 joined=2 dispatches=5 exact_values=661 word_comparisons=1355 template_comparisons=1355 phase_checks=17\n");return 0;}
+    if(r.passed){std::printf("WORKERS_CLIENT_PASS created=2 joined=2 dispatches=%u exact_values=%u word_comparisons=%u template_comparisons=%u phase_checks=17\n",r.dispatches,r.active_values,r.word_comparisons,r.template_comparisons);return 0;}
     std::printf("WORKERS_CLIENT_FAIL error=%d hip_error=%u created=%u joined=%u cleanup_complete=%u unsafe=%u dispatches=%u\n",r.error,r.hip_error,r.created,r.joined,unsigned(r.cleanup_complete),unsigned(r.unsafe_teardown),r.dispatches);return 1;
 }

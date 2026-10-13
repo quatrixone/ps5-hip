@@ -26,6 +26,16 @@ if(BUILD_TESTING)
   set(PS5HIP_HIP_WORKERS_CLIENT_MODEL "" CACHE PATH "Completed worker client host proof")
   set(PS5HIP_HIP_WORKERS_TITLE_MODEL "" CACHE PATH "Completed worker title wrapper proof")
   set(PS5HIP_HIP_WORKERS_COMPILER "" CACHE PATH "Completed worker compiler proof")
+  set(PS5HIP_HIP_WORKERS_INIT_CLIENT_MODEL "" CACHE PATH "Completed worker-initialized client host proof")
+  set(PS5HIP_HIP_WORKERS_INIT_TITLE_MODEL "" CACHE PATH "Completed worker-initialized title wrapper proof")
+  if(PS5HIP_HIP_WORKERS_INIT_CLIENT_MODEL)
+    add_test(NAME hip_workers_init_client COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_client_test.py --check "${PS5HIP_HIP_WORKERS_INIT_CLIENT_MODEL}")
+  endif()
+  if(PS5HIP_HIP_WORKERS_INIT_TITLE_MODEL)
+    add_test(NAME hip_workers_init_title COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_workers_title_test.py --check "${PS5HIP_HIP_WORKERS_INIT_TITLE_MODEL}")
+  endif()
   if(PS5HIP_HIP_WORKERS_CLIENT_MODEL)
     add_test(NAME hip_workers_client COMMAND ${Python3_EXECUTABLE}
       ${CMAKE_SOURCE_DIR}/tests/hip_workers_client_test.py --check "${PS5HIP_HIP_WORKERS_CLIENT_MODEL}")

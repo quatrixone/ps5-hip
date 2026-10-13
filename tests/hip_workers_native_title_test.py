@@ -15,7 +15,7 @@ class WorkersProfile(unittest.TestCase):
         p=profile.profile_for('hip_workers_main');self.assertEqual(p['actors'],[0,1,2,1,0]);self.assertEqual(p['kernarg_bytes'],272);self.assertEqual(p['initialization_actor'],'main')
         self.assertEqual(builder.compiler_object(pathlib.Path('x'),'hip_workers_main'),pathlib.Path('x/ps5/threads.o'))
         self.assertIn('workers-agc-disassembly.stdout',profile.provenance_files('hip_workers_main'))
-        with self.assertRaises(ValueError):profile.profile_for('hip_workers_init')
+        q=profile.profile_for('hip_workers_init');self.assertEqual(q['actors'],[1,2,1,0]);self.assertEqual((q['dispatches'],q['exact_values'],q['word_comparisons']),(4,660,1084));self.assertEqual(q['initialization_actor'],'A');self.assertTrue(q['prebackend_required'])
     def test_actual_compiler(self):
         raw,obj=self.compiler();profile.validate_workers_compiler(raw,obj,ROOT)
         for r,o in ((raw+b' ',obj),(raw,obj+b' ')):

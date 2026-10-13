@@ -1,5 +1,22 @@
 # Main-initialized joined-worker title
 
+The separate `hip_workers_init` profile omits the main warm-up, keeping main's
+allocation and the same 17 host checks. After the entire host phase, A requires
+one module/function, zero completions and `backend_attempted=false` immediately
+before its first copy/launch. A emits `WORKERS_PREBACKEND` and its joined report
+must retain that proof before the wrapper permits finish. Steps A/B/A/main give
+4 dispatches, 660 active values, 1,084 device-word comparisons (424 inactive or
+guard words), and a separate 1,084 template comparisons. Its nine AGC events are
+init A followed by submit/kick pairs A/B/A/main. The original main profile and
+its exact transcript remain unchanged. Both use the same measured kernel/object;
+native evidence and packages are separate, and their logs reject cross-labeling.
+
+Client, title and CPU-only TSAN recipes accept `--variant main|init`, defaulting
+to main. The real-runtime init tests additionally inject a premature backend
+observation and require zero launches, complete joins and clean allocation closure.
+Actual backend construction actor is measured by the synthetic transport model;
+native entry attribution still requires the actual linked wrappers and live run.
+
 `hip_workers_main` uses the unchanged genuine `tests/hip_threads.hip` compiler
 object and the existing reusable runtime. Main initializes AGC with a warm-up;
 two joined workers then issue ordered calls, followed by one main-thread call.
