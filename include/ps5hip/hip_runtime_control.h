@@ -11,6 +11,12 @@ struct HipRuntimeContract {
     bool vector_compatibility;
     HipRuntimeMode mode = HipRuntimeMode::FixedDiagnostic;
 };
+// Diagnostic observations never participate in reusable launch admission.
+struct HipRuntimeObservation {
+    size_t modules, functions;
+    unsigned completed;
+    bool backend_attempted;
+};
 const HipRuntimeContract &hip_runtime_contract() noexcept;
 NativeLaunchRequest hip_runtime_request(const Kernel &, std::array<uint32_t,3> groups,
     std::array<uint32_t,3> threads, size_t shared);
@@ -32,4 +38,6 @@ bool ps5hip_runtime_registration_ready() noexcept;
 bool ps5hip_runtime_ready() noexcept;
 // Reads only process-lifetime POD, safe after the runtime State is destroyed.
 bool ps5hip_runtime_finalized() noexcept;
+// After registration, or after destruction: the latter reads saved POD only.
+ps5hip::HipRuntimeObservation ps5hip_runtime_observation() noexcept;
 }

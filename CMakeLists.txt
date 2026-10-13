@@ -331,3 +331,19 @@ if(BUILD_TESTING)
     message(STATUS "Bounded generic runtime proof unavailable: set PS5HIP_HIP_GENERIC_PROBE")
   endif()
 endif()
+
+if(BUILD_TESTING)
+  set(PS5HIP_HIP_GENERIC_TITLE_MODEL "" CACHE PATH "Completed generic title lifecycle proof")
+  set(PS5HIP_HIP_GENERIC_TITLE_COMPILER "" CACHE PATH "Genuine renamed generic compiler output")
+  if(PS5HIP_HIP_GENERIC_TITLE_MODEL)
+    add_test(NAME hip_generic_title_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_test.py --check "${PS5HIP_HIP_GENERIC_TITLE_MODEL}")
+  endif()
+  if(PS5HIP_HIP_GENERIC_TITLE_COMPILER)
+    add_test(NAME hip_generic_title_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py --compiler "${PS5HIP_HIP_GENERIC_TITLE_COMPILER}")
+  else()
+    add_test(NAME hip_generic_title_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py)
+  endif()
+endif()
