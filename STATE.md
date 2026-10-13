@@ -331,6 +331,21 @@ was no-run: FTP2121 and klog3232 refused connections, while9021 was reachable.
 No payload was sent; both locks were released and the v3 marker remains absent.
 See `evidence/native-teardown-v3-no-run.json`. Release remains unknown; require
 available services and fresh idle/firmware checks before any observation.
+A new user-authorized service preflight at 01:37 UTC had the same no-run result:
+no payload, both locks released, and the v3 marker still absent. The user has
+been asked to start FTP/klog; see `evidence/native-teardown-v3-service-recheck-no-run.json`.
+After the user started services, all three passed at 01:40 UTC. The fresh log
+reported FW12.70 and initial home focus7, but the frozen parser requires a later
+focus transition, so it stopped before payload dispatch. This is a log-format
+gap, not evidence of an active game. See `evidence/native-teardown-v3-initial-focus-no-run.json`.
+At 01:47 UTC a separately reviewed host parser accepted the initial focus format,
+and the unchanged v3 payload completed once. Both complete 1110-record snapshots
+contained the same registered UFS image and title nullfs mapping. This establishes
+a usable visible registration baseline under the prospective G2 criterion, not
+global namespace completeness or resource release. The console remained idle,
+all services stayed reachable and both locks were released. The shared v3 marker
+is now consumed. See `evidence/native-teardown-v3-fw1270.json`; prepare a new
+bounded arithmetic cycle with fresh pre/post evidence, not another standalone snapshot.
 
 ## Next action
 
@@ -366,10 +381,10 @@ lifecycle criterion is explicitly corrected in `docs/G2_ARITHMETIC_ACCEPTANCE.md
 The original first combined arithmetic cycle remains partial-pass. The read-only
 mount observation hit its count bound. Raw-query instrumentation v2 was later
 executed once while idle and measured 1110 twice, still above the 1024 ceiling.
-Both diagnostic one-use markers are consumed. The bounded v3 collector has now
-been frozen and reviewed offline; its reviewed operational case stopped before
-payload dispatch because FTP/klog were unavailable. A usable baseline is still
-required before another launch. Do not infer an empty table from
+All three diagnostic one-use markers are consumed. The bounded v3 collector
+now has two complete stable observations with positive registration anchors.
+The prospective baseline prerequisite is established; the next reviewed arithmetic
+cycle must still obtain its own fresh same-context pre/post snapshots. Do not infer an empty table from
 initialized fields, a leak from registration persistence, or deployed identity
 from the banner. Preserve the installed arithmetic image, successful result and
 earlier unique CPU backup. No setting change or automatic repeat is authorized
@@ -380,7 +395,7 @@ offline. Once the control's lifecycle prerequisite is established, test private3
 once with fresh idle/recovery checks under both locks. Two separately accepted
 clean arithmetic cycles and final mapping to the written requirements are still
 needed for G2; private-call execution is a separate G3 observation. Existing version2
-GPU controls bind the previous 26-entry catalog; the current 27-entry catalog needs
+GPU controls bind the previous 26-entry catalog; the current 28-entry catalog needs
 fresh reviewed controls before deployment. Never reuse consumed receipts, reset their
 markers or apply old log-absence assumptions. The connected G4 vector control is
 now frozen at `5509e31`: genuine compiler constructor/stub, owned native data/code/
@@ -389,8 +404,17 @@ All 26 host scenarios and 48 integrated CTests pass; the PS5 executable passes
 link/conversion/layout/import checks. Explicit cleanup failures prevent reuse,
 while normal in-flight NotReady errors no longer poison the runtime. See
 `evidence/offline-hip-native-vector.json`. This is modeled transport, not GPU
-execution. Next add Eden and shell-managed lifecycle integration before packaging
-this client. The separate registration/capture/memory controls remain preserved.
+execution. The follow-up title is now frozen at `038fdb6`, integrated as `c62fbe2`,
+and packaged with Eden and shell-managed lifecycle. It passed22 genuine-constructor
+lifecycle cases,26 standalone cases,50 integrated sanitizer CTests and11 recipe
+tests including actual-artifact mutations. Final checks require actual unregister,
+complete State destruction, closed allocations and persisted logs before shell exit.
+The UFS image passed filesystem and full extraction checks;38 source and140 raw
+artifact hashes were independently verified. The signer omits one final unmapped
+24-byte SIE note; every other reconstructed ELF byte matches, and the original
+whole-file-equality failure remains preserved. See `evidence/offline-hip-native-vector-title.json`.
+No native execution or G4 completion is claimed. Qualify the arithmetic lifecycle
+control before a new reviewed HIP title launch. Separate earlier controls remain preserved.
 Full/partial wave32 probes are now packaged at frozen source `5581dbd` with the
 corrected AGC import provider. All 27 sanitizer tests, four O1/O2 target launch
 checks, native startup/import/ISA and package extraction checks pass. Both measured
@@ -587,3 +611,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | diagnostic | 0bf7fb9 | idle .40 returned1110 twice;1024 cap prevents baseline | evidence/native-teardown-v2-fw1270.json | offline reassessment
 - 2026-10-12 | G4 offline | 5509e31 | genuine HIP vector path:26 host cases,48 integrated checks,PS5 link | evidence/offline-hip-native-vector.json | package lifecycle next
 - 2026-10-12 | diagnostic no-run | d6587ae | .40 FTP/klog refused;no payload;locks released | evidence/native-teardown-v3-no-run.json | services then fresh idle checks
+- 2026-10-12 | G4 offline | 038fdb6 | HIP title packaged;50 CTests;22 lifecycle cases | evidence/offline-hip-native-vector-title.json | native qualification pending
+- 2026-10-12 | read-only .40 | d6587ae | two complete1110 tables;visible registration baseline established | evidence/native-teardown-v3-fw1270.json | new prospective arithmetic cycle

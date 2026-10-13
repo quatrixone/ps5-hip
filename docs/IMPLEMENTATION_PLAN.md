@@ -353,8 +353,11 @@ The subsequent [connected vector control](HIP_NATIVE_VECTOR_CONTROL.md) now rout
 the genuine compiler launch through native allocation, argument preparation and
 blocking submission, with actual compiler unregister. Its 26 host scenarios and
 48 integrated checks pass; native compilation/linking is verified. These checks
-do not execute AMD instructions. Title lifecycle integration and hardware
-qualification remain required before claiming native example usability.
+do not execute AMD instructions. The follow-up [native HIP title](HIP_NATIVE_VECTOR_TITLE.md)
+adds Eden and checked shell-managed finalization;22 lifecycle cases and50 integrated
+sanitizer checks pass, and its frozen image passed filesystem/extraction validation.
+Actual unregister and complete runtime destruction precede shell exit. Hardware
+qualification remains required before claiming native example usability.
 
 The [argument capture control](HIP_HOST_LAUNCH_CAPTURE.md) additionally copies the
 real stub's argument values into owned storage, resolves synthetic live-data

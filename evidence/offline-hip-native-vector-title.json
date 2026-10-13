@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "classification": "genuine HIP client packaged with checked title lifecycle offline",
+  "source_commit": "038fdb6c30a72decb7df599d50c983b6b8a0e5e0",
+  "integrated_source_commit": "c62fbe2ac5ea6d996dd7af23c135e109ea29edd9",
+  "native_recipe_receipt_sha256": "6f6a582f6d1e0c61cf8c6ba9ffbe4755eb73904e67a41e2fb0ef78faee9b4f8c",
+  "final_readiness_receipt_sha256": "753477e217785940622cacc9aa7808fe33822fecee7ecdeca0ed430c4af33946",
+  "combined_suite_receipt_sha256": "868bcddda5f66e8e05a3704e3414cfffd80a71c8dcda231e215ff7a6327d0013",
+  "parent_artifact_review_sha256": "8f7988283d35a3de5c8104e11dc252d882886592afdb216862b2cada9cc98684",
+  "combined_ctests_passed": 50,
+  "title_lifecycle_model_cases_passed": 22,
+  "standalone_vector_model_cases_passed": 26,
+  "recipe_suite_tests_passed": 11,
+  "recipe_suite_scope": "Ten boundary tests and one actual-native-artifact test method, including mutations; no native execution.",
+  "title_model_receipt_sha256": "d091a359abb0820d62df8dbaab4b2a2399fa3bf21a2bd967f946ba384e6b4645",
+  "standalone_model_receipt_sha256": "414fb6b21895344b4023332af49e408b6180fcf2d4b240c88f5b99a7bc80d151",
+  "manifest_sha256": "0c89416586ae86aab4d595f3504b2a2f2e992c375bd992f3aff0456f82a56845",
+  "package_receipt_sha256": "f5f640982141e823aa18a00eeb13992963244a5befbffd0dd5c5f42eadba595c",
+  "image": {
+    "file": "PPSA99014.ffpkg",
+    "sha256": "3d35a5e03e19b39211bd40bec5d95cd07a274d6b1d4311919dcb1f0e3d7bd7b4",
+    "bytes": 3637248
+  },
+  "native_import_count": 117,
+  "hip_import_count": 0,
+  "parent_source_files_verified": 38,
+  "parent_raw_artifacts_verified": 140,
+  "filesystem_check": "passed",
+  "extracted_files_match": true,
+  "checks": [
+    "genuine compiler constructor, launch stub and unregister",
+    "Eden filesystem helper, configurable exclusive result log",
+    "two blocking launches, 146 exact modeled values, immutable inputs and full guards",
+    "unregister before complete State destruction; post-destruction POD proof before shell exit",
+    "terminal ownership and failed persistence prevent shell success",
+    "linked startup, embedded bundle, RELRO, import providers and candidate-bound provenance"
+  ],
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "fb00907a1c9531a5bd69bdf5c6759f9d5566500efa698a5fa634ede411bc2c9e",
+    "extracted_sha256": "7d59265f906324baffd0116ccd0c544c92051d911a43faeee776dfb0b3607f8b",
+    "omitted_note": {
+      "offset": 1013284,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500c700c5f7f0f1bc0d",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "native_executed": false,
+  "hardware_validated": false,
+  "g4_complete": false,
+  "limits": [
+    "One fixed serialized gfx1013 wave32 vector profile, not a general HIP runtime.",
+    "Host callbacks compute reference values; they do not emulate AMD ISA.",
+    "Custom mmap model buffers require protect_shadow_gap=0 and explicit guards, not heap redzones.",
+    "Signer omits one final unmapped 24-byte SIE note; every other reconstructed ELF byte matches. Original failed whole-file-equality result preserved.",
+    "Pinned UFS tool performs both fsck and extraction; no independent filesystem implementation.",
+    "Not a hermetic SDK or a console startup, GPU, teardown or stability qualification."
+  ]
+}

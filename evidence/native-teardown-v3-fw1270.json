@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "classification": "inconclusive",
+  "positive_result": "usable visible registration baseline; count-limit obstruction resolved",
+  "started_utc": "2026-10-13T01:47:08.486546+00:00",
+  "target": "console .40",
+  "firmware_observed": "12.70",
+  "source_commit": "d6587aebb268f773a5b9df02a9fca9dfd7a66a6d",
+  "elf_sha256": "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93",
+  "runner_sha256": "1753ecf4edb4c0243bea398e703cf0697f5983b5fa24ae29469eb6dea7e07e59",
+  "manifest_sha256": "4ea03e3acf047f67456fbb5e78154485ef2315d77230bdc3a1fc9d1194d57b8e",
+  "preparation_sha256": "a8c8adacf13ad680a1935c1c9ffb236f4859b013aa5b82f120595d5fb6984426",
+  "runner_review_sha256": "3d5f2bdfbc821b3c9f8fd9f0949346184ac60402fc39e3575a06b43e6e879358",
+  "observation_receipt_sha256": "6416e61486919b05a2da5bc17663ac56fa6a85c14b1522dd6b93fafd80a99e7e",
+  "snapshot_sha256": "109bf6328130225f22a8c838271b109c4ce5ca06c6d6660325aed4d3287d058f",
+  "shared_consumed_marker_sha256": "bf79042ace2404262553d4d2e9651018a7e013e3f4ce8422f3cd5aa812526cf2",
+  "query_trace": [
+    {
+      "snapshot": 1,
+      "initial_return": 1110,
+      "initial_errno": 0,
+      "result": "complete",
+      "count": 1110,
+      "matching": 2,
+      "snapshot_errno": 0,
+      "fills": [
+        {
+          "attempted": true,
+          "capacity_records": 1126,
+          "capacity_bytes": 531472,
+          "return": 1110,
+          "errno": 0
+        },
+        {
+          "attempted": false,
+          "capacity_records": 0,
+          "capacity_bytes": 0,
+          "return": 0,
+          "errno": 0
+        },
+        {
+          "attempted": false,
+          "capacity_records": 0,
+          "capacity_bytes": 0,
+          "return": 0,
+          "errno": 0
+        }
+      ],
+      "mounts": [
+        {
+          "kind": "registered_image",
+          "type": 53,
+          "flags_hex": "210001041",
+          "fsid_hex": "9403cc6a40970a00",
+          "fstype_hex": "756673",
+          "to_hex": "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+          "from_hex": "2f6465762f6c766432",
+          "fstype": "ufs",
+          "to": "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+          "from": "/dev/lvd2",
+          "known_registration_anchor": true
+        },
+        {
+          "kind": "runtime_layer",
+          "type": 53,
+          "flags_hex": "1000",
+          "fsid_hex": "7bff042929000000",
+          "fstype_hex": "6e756c6c6673",
+          "to_hex": "2f73797374656d5f65782f6170702f505053413939303134",
+          "from_hex": "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+          "fstype": "nullfs",
+          "to": "/system_ex/app/PPSA99014",
+          "from": "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+          "known_registration_anchor": false
+        }
+      ]
+    },
+    {
+      "snapshot": 2,
+      "initial_return": 1110,
+      "initial_errno": 0,
+      "result": "complete",
+      "count": 1110,
+      "matching": 2,
+      "snapshot_errno": 0,
+      "fills": [
+        {
+          "attempted": true,
+          "capacity_records": 1126,
+          "capacity_bytes": 531472,
+          "return": 1110,
+          "errno": 0
+        },
+        {
+          "attempted": false,
+          "capacity_records": 0,
+          "capacity_bytes": 0,
+          "return": 0,
+          "errno": 0
+        },
+        {
+          "attempted": false,
+          "capacity_records": 0,
+          "capacity_bytes": 0,
+          "return": 0,
+          "errno": 0
+        }
+      ],
+      "mounts": [
+        {
+          "kind": "registered_image",
+          "type": 53,
+          "flags_hex": "210001041",
+          "fsid_hex": "9403cc6a40970a00",
+          "fstype_hex": "756673",
+          "to_hex": "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+          "from_hex": "2f6465762f6c766432",
+          "fstype": "ufs",
+          "to": "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+          "from": "/dev/lvd2",
+          "known_registration_anchor": true
+        },
+        {
+          "kind": "runtime_layer",
+          "type": 53,
+          "flags_hex": "1000",
+          "fsid_hex": "7bff042929000000",
+          "fstype_hex": "6e756c6c6673",
+          "to_hex": "2f73797374656d5f65782f6170702f505053413939303134",
+          "from_hex": "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+          "fstype": "nullfs",
+          "to": "/system_ex/app/PPSA99014",
+          "from": "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+          "known_registration_anchor": false
+        }
+      ]
+    }
+  ],
+  "historical_pid134_esrch_and_app_queries_empty": true,
+  "visible_matching_rows_stable": true,
+  "global_namespace_qualified": false,
+  "payload_attempted": true,
+  "title_launched": false,
+  "gpu_calls": 0,
+  "idle_after": true,
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "both_locks_confirmed_absent": true,
+  "v3_consumed_marker_exists": true,
+  "fd_warnings_observed_before_and_after": true,
+  "warning_causal_attribution": false,
+  "release": "unknown",
+  "accepted": false,
+  "hardware_gate_passed": false,
+  "limits": [
+    "Only the two title-matching rows were compared, not equality of all1110 records.",
+    "Positive registration visibility is not global namespace completeness or absence proof.",
+    "runtime_layer is a path label; the observed title nullfs registration may intentionally persist.",
+    "Historical PID134 status does not establish teardown of a future title process.",
+    "Earlier arithmetic partial-pass is not reclassified."
+  ],
+  "next_action": "Prepare a new reviewed prospective arithmetic cycle with fresh same-context pre/post snapshots, immutable installed-image identity, exact PID and OS teardown evidence,146 values/guards/finalization, and healthy services. Never reuse the consumed v3 marker."
+}
