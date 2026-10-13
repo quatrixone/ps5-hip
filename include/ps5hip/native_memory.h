@@ -9,6 +9,11 @@ struct NativeMemorySetupError : ObjectError {
     const bool retained_backing;
 };
 
+// No GPU work was submitted, or completion is known, but explicit native
+// temporary teardown failed.
+// This is distinct from uncertain GPU ownership and remains an ObjectError.
+struct NativeMemoryCleanupError : ObjectError { using ObjectError::ObjectError; };
+
 // One CPU/GPU shared direct-memory allocation. Native submission owns a GPU
 // reference until completion; timeout must retain that reference and poison the queue.
 // Calls must be serialized by the owning device/queue; this is not a shared allocator.
