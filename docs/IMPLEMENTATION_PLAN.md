@@ -47,7 +47,10 @@ The integrated multi-module/query candidate produced correct A/B/A results and
 natural shutdown on .40, but its collector expired before the post-run snapshot.
 The original cycle remains inconclusive; see
 `../evidence/native-multi-query-incomplete.json`. A separate read-only observation
-may establish eventual post-state without replaying the consumed GPU workload.
+now establishes unchanged eventual mount state, installed bytes and application
+log, with no intervening title lifecycle; see
+`../evidence/native-multi-query-delayed-post-state.json`. Original acceptance
+remains false, and the consumed GPU workload was not replayed.
 
 The experimental upstream ROCclr port now explicitly rejects unsupported RWX
 memory requests before mapping changes. Ordinary memory operations, two CPU
@@ -101,7 +104,9 @@ The isolated `7b41b24` upstream block-reduction title passed three native
 dispatches at 16 groups of 1,024 threads and 4,096 bytes of dynamic LDS.
 All 48 exact signed outputs, 72 guards, unchanged input/mask readback and
 complete natural cleanup passed. See `../evidence/native-hip-reduction.json`.
-Combined SDK integration, arbitrary reduction kernels and performance remain open.
+Combined SDK integration now passes the source-bound offline qualification in
+`../evidence/offline-multi-reduction-sdk-integration.json`. Arbitrary reduction
+kernels, performance and broader G4 remain open.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and

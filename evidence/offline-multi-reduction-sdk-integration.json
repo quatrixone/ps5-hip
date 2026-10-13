@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "classification": "offline-sdk-integration-qualified",
+  "isolated_source_commit": "ab94d98b4cade17285af4413aac73d6507da4046",
+  "import_commit": "de93ce1",
+  "isolated_qualification": {
+    "path": ".local/g4-sdk-integration-v2/results/integration-summary-v1/receipt.json",
+    "sha256": "ef75f72de94d9c81ab36657b80fedf732c1934a274237e7ba5504984817e20ae"
+  },
+  "root_import_review": {
+    "path": "results/root-sdk-import-review-v1/review.json",
+    "sha256": "15eb65a0b2a8687b8d8a484a910fac08f3bdb61f80eb0765121495b3ea0dbb40"
+  },
+  "root_compiler_authority": {
+    "path": "results/sdk-reduction-compiler-v1/receipt.json",
+    "sha256": "d886b2ebd1c875be9156fa762f528234931e05421ed8a383e48d312cead3aa74"
+  },
+  "unchanged_combined_object_sha256": "4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6",
+  "checks": {
+    "imported_files": 78,
+    "configured_cmake_pass": 57,
+    "configured_cmake_skip": 0,
+    "multi_runtime_cases": 24,
+    "threaded_asan_cases": 42,
+    "threaded_tsan_cases": 22,
+    "multi_client_cases": 32,
+    "multi_title_cases": 30,
+    "multi_title_transcript_mutations": 69,
+    "reduction_companion_runtime_cases": 12,
+    "reduction_title_cases": 19,
+    "reduction_title_transcript_mutations": 49,
+    "native_title_builds": 2,
+    "native_artifact_tests_each": 16,
+    "native_artifact_skips_each": 1
+  },
+  "verified": [
+    "Imported runtime/test bytes match the qualified isolated candidate.",
+    "Root path rebinding changes only the literal compiler receipt pin and its evidence.",
+    "Linux and PS5 combined compiler objects are byte-identical to the isolated authority.",
+    "Production validator accepts the root authority and rejects corrupt receipts, corrupt objects and the wrong source root.",
+    "The upstream CLR port and historical incomplete hardware evidence remain intact."
+  ],
+  "limits": [
+    "The 57 tests cover the configured CMake inventory, not every optional proof. Unconfigured input names are enumerated in the isolated qualification.",
+    "Each native artifact suite skips one unrelated four-route compiler input.",
+    "Source-identical isolated runtime test results are inherited; root compiler binding is freshly validated.",
+    "No new GPU execution or full G3/G4/G5 acceptance follows from this integration."
+  ]
+}

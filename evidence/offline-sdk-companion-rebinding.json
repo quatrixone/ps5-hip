@@ -2,7 +2,7 @@
   "classification": "offline-companion-authority-rebound-for-sdk-integration",
   "prior_source_commit": "3a77afeae1c4e2ec29cfb47886a48d2f7dfbb6b0",
   "root_base": "762f789",
-  "compiler_receipt_sha256": "522722d6cd2eb21bd544e27b5b2d7f7a76a7985c2b4186b5a2d4d512bf30c1a8",
+  "compiler_receipt_sha256": "d886b2ebd1c875be9156fa762f528234931e05421ed8a383e48d312cead3aa74",
   "original_authority": {
     "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g4-reduction/results/reduction-compiler-v3/receipt.json",
     "sha256": "8cfc7008a5d93abbd09f0d88bfe754dabf06d3e79415860199dee9416696267b"
@@ -10,7 +10,9 @@
   "unchanged_combined_object_sha256": "4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6",
   "hardware_executed": false,
   "limits": [
-    "Checkout-specific authority; root integration needs a fresh root receipt before native title builds.",
-    "Previous hardware observations retain their original source and lifecycle scope."
-  ]
+    "Compiler receipt rebound to integrated root; original combined object and GPU code unchanged.",
+    "Historical hardware observations retain original source and lifecycle scope."
+  ],
+  "root_authority": "results/sdk-reduction-compiler-v1/receipt.json",
+  "isolated_compiler_receipt_sha256": "522722d6cd2eb21bd544e27b5b2d7f7a76a7985c2b4186b5a2d4d512bf30c1a8"
 }

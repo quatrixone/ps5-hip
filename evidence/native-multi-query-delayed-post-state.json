@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "classification": "pass-separate-delayed-post-state-observation",
+  "original_evidence": "evidence/native-multi-query-incomplete.json",
+  "original_accepted": false,
+  "hardware_gate_passed": false,
+  "receipt": {
+    "path": "results/integrated-multi-query-post-snapshot-v1/observation-20261013T194550.069860Z/receipt.json",
+    "sha256": "32291158c64c7c1b0f2741c56133a8f45deac04494abf510222fac3c7aabe89c"
+  },
+  "independent_review": {
+    "path": "results/integrated-multi-query-post-snapshot-v1/observation-20261013T194550.069860Z-independent-review.json",
+    "sha256": "c66c0586fb1d48733ed0cf7b29e64133c3df98e40767215c9113e18ef56e0e9c"
+  },
+  "verified": [
+    "One read-only mount snapshot; no application launch, close or deployment.",
+    "Append-continuous idle history with no new title lifecycle after the original failure baseline.",
+    "Eventual visible title mount multiset equals the original pre-run baseline.",
+    "Installed image and mounted executable/runtime bytes unchanged before and after collection.",
+    "Original 1991-byte application log unchanged before and after collection.",
+    "No captured fault diagnostics, healthy services and owned locks released."
+  ],
+  "limits": [
+    "The original collector timeout and missing contemporaneous snapshot remain preserved.",
+    "This delayed observation does not retroactively pass the original full cycle.",
+    "No repeated GPU execution, general lifecycle, performance or full G4 claim."
+  ]
+}

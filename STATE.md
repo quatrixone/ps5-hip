@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Multi-module/query and reduction runtime integrated:** the exact qualified
+  isolated implementation is imported at `de93ce1`, preserving the upstream CLR
+  port. All 57 configured CMake tests, 24 multi-module runtime cases, 42 threaded
+  ASan cases, 22 TSan cases, client/lifecycle suites and both native title builds
+  passed offline. Fresh root compiler authority preserves both combined objects;
+  independent review verifies the exact import and rejects corrupted/wrong-root
+  authorities. Optional CMake proofs remain separately scoped. See
+  `evidence/offline-multi-reduction-sdk-integration.json`. This adds no hardware
+  execution or broader G4 acceptance.
+
 - **Multi-module/query computation observed; full cycle incomplete:** frozen
   `b253c62` produced all 219 exact A/B/A outputs, 522 whole-allocation comparisons,
   84 guard checks, 32 successful allocation queries and eight invalid/stale
@@ -11,8 +21,12 @@ Updated: 2026-10-13, America/New_York.
   to PID372/application `0x0000e018`, both unregister callbacks, State destruction
   and natural stop. The collector reached its 120-second deadline before sending
   the post-run snapshot, so original acceptance remains false. Preserve this
-  consumed case; collect only a separate delayed read-only observation next.
-  See `evidence/native-multi-query-incomplete.json`.
+  consumed case. A separate read-only follow-up now passed independent audit:
+  eventual mount rows match, installed bytes/log remain unchanged, no intervening
+  title lifecycle or faults appeared, and services/lock cleanup passed. This does
+  not retroactively accept the original cycle. See
+  `evidence/native-multi-query-incomplete.json` and
+  `evidence/native-multi-query-delayed-post-state.json`.
 
 - **Upstream ROCclr executable-memory boundary qualified offline:** the current
   `ports/clr` patch rejects RWX reserve, commit and protect requests before any
@@ -50,7 +64,7 @@ Updated: 2026-10-13, America/New_York.
   and frees, genuine compiler/runtime cleanup, and natural PID363/application
   `0x0000c018` shutdown passed independent audit. This qualifies the bounded
   workload; general reduction libraries and performance remain open. Combined
-  SDK integration is pending; see `evidence/native-hip-reduction.json`.
+  SDK integration is now qualified above; see `evidence/native-hip-reduction.json`.
 
 - **Tracked synchronous device copies passed on .40:** frozen `9628fa6`
   completed 24 producer/consumer launches around 12 D2D copies. All 2,648 active
@@ -1131,3 +1145,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | CLR memory boundary | reviewed v7 | offline | pass: early RWX rejection, ordinary memory and two command modes, native link, exact patch | evidence/offline-clr-rwx-guard.json | native CPU title startup
 
 - 2026-10-13 | G4 multi/query | b253c62 | .40 | inconclusive cycle: exact computation and natural stop, post-snapshot missing | evidence/native-multi-query-incomplete.json | separate read-only observation
+
+- 2026-10-13 | G4 multi/query | b253c62 | .40 | delayed post-state pass, original cycle remains incomplete | evidence/native-multi-query-delayed-post-state.json | native CLR startup
+- 2026-10-13 | G4 SDK | de93ce1 | offline | exact multi/reduction import and root compiler authority validated | evidence/offline-multi-reduction-sdk-integration.json | native CLR startup

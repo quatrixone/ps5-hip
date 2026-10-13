@@ -104,7 +104,7 @@ MATMUL_PROFILE = {'target': 'gfx1013',
  'guard_words': 16}
 
 
-REDUCTION_PROFILE = {'target': 'gfx1013', 'kernel_names': ['_Z12block_reducePiPmS_m'], 'client_entry': 'ps5hip_reduction_companion_main', 'combined_object_sha256': '4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6', 'bundle_sha256': 'e456dfe0a15898ba15dc0531bc97e5454bfc82359c46dbb090e88bb031bd1409', 'code_sha256': '807b46dfaef2fbcb16be270fb76fe9b596fd3da96b0cf390e4da67ccebc7229a', 'code_bytes': 4488, 'compiler_receipt_sha256': '522722d6cd2eb21bd544e27b5b2d7f7a76a7985c2b4186b5a2d4d512bf30c1a8', 'dispatches': 3, 'exact_values': 48, 'guard_comparisons': 72, 'threads': [1024, 1, 1], 'groups': [16, 1, 1], 'dynamic_lds_bytes': 4096, 'kernarg_bytes': 288}
+REDUCTION_PROFILE = {'target': 'gfx1013', 'kernel_names': ['_Z12block_reducePiPmS_m'], 'client_entry': 'ps5hip_reduction_companion_main', 'combined_object_sha256': '4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6', 'bundle_sha256': 'e456dfe0a15898ba15dc0531bc97e5454bfc82359c46dbb090e88bb031bd1409', 'code_sha256': '807b46dfaef2fbcb16be270fb76fe9b596fd3da96b0cf390e4da67ccebc7229a', 'code_bytes': 4488, 'compiler_receipt_sha256': 'd886b2ebd1c875be9156fa762f528234931e05421ed8a383e48d312cead3aa74', 'dispatches': 3, 'exact_values': 48, 'guard_comparisons': 72, 'threads': [1024, 1, 1], 'groups': [16, 1, 1], 'dynamic_lds_bytes': 4096, 'kernarg_bytes': 288}
 
 def profile_for(kernel):
     if kernel == "hip_multi_query":
