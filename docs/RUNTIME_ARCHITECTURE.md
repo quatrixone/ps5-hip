@@ -43,6 +43,12 @@ Reopen the decision **before** adding a general asynchronous scheduler, cross-st
 
 ## Connected implementation unit
 
+The next additive implementation is the [bounded reusable HIP policy](BOUNDED_HIP_RUNTIME.md), sharing the existing compiler ABI, registry, capture and owned launch preparation. It removes fixed function/launch counts and experiment oracles from operational admission while retaining measured structural route classes. The original vector and four-route adapters remain diagnostic controls. This advances the selected native runtime without starting parallel CLR or HSA implementations.
+
+The pinned comparison above still governs that choice: CLR offers genuine program, memory and command semantics but requires a PS5 OS/TLS and Device/Program/VirtualDevice port; an HSA replacement also needs executable loading, agents, queues, signals and coherent memory-order semantics. Neither alternative removes the device-library or framework qualification work. Reconsider the decision at the asynchronous scheduling threshold already stated above. The reusable policy does not yet provide discovery/device attributes, multi-TU globals, threading, arbitrary resource combinations, streams or framework compatibility, and cannot infer arbitrary shader indexing bounds from scalar arguments. The historical vector-only unit below records the earlier milestone, not the current maximum contract.
+
+After this bounded unit is reviewed and separately qualified, the next implementation combines the existing 2D geometry and LDS contracts for an ordinary tiled-matmul client, followed by coherent HIP initialization/discovery, memset and D2D-copy semantics. These are still required work; accepting a smaller launch shape does not close the plan's full reduction or matrix-multiplication acceptance.
+
 The owned allocation/copy/free boundary and a distinct full-header memory ABI
 control are now implemented and validated offline; see
 [native data ownership](NATIVE_DATA_REGISTRY.md). Registration and capture controls

@@ -9,7 +9,7 @@ NAMES=('routes_integer','routes_lds','routes_spill','routes_geometry')
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(ok,message):
     if not ok:raise RuntimeError(message)
-def audit_object(data,metadata,isa):
+def audit_object(data,metadata,isa,kernel_names=NAMES):
     require(data[:6]==b'\x7fELF\x02\x01','ELF64LE required')
     shoff=struct.unpack_from('<Q',data,40)[0];shwidth,shcount,shstr=struct.unpack_from('<HHH',data,58)
     require(shwidth==64 and shoff+shcount*64<=len(data),'section table')
@@ -25,24 +25,24 @@ def audit_object(data,metadata,isa):
             n,info,other,index,value,size=struct.unpack_from('<IBBHQQ',raw,offset)
             require(n<len(names),'symbol name');end=names.find(b'\0',n);require(end>=0,'symbol termination')
             name=names[n:end].decode()
-            if name in {n+'.kd' for n in NAMES}:
+            if name in {n+'.kd' for n in kernel_names}:
                 require(index<len(sections) and size==64,'descriptor extent')
                 h=sections[index];at=value-h[3];rawsection=contents(h)
                 require(at>=0 and at+64<=len(rawsection),'descriptor outside section')
                 rawdesc=rawsection[at:at+64]
                 if name in symbols:require(symbols[name]==rawdesc,'different duplicate descriptor')
                 symbols[name]=rawdesc
-    require(set(symbols)=={n+'.kd' for n in NAMES},'four genuine descriptor inventory')
+    require(set(symbols)=={n+'.kd' for n in kernel_names},'genuine descriptor inventory')
     descriptors={}
     for name,d in symbols.items():
         group,private,kernarg=struct.unpack_from('<III',d);rsrc3=struct.unpack_from('<I',d,44)[0]
         rsrc1,rsrc2=struct.unpack_from('<II',d,48);properties,preload=struct.unpack_from('<HH',d,56)
         descriptors[name[:-3]]={'group_bytes':group,'private_bytes':private,'kernarg_bytes':kernarg,'rsrc1':rsrc1,'rsrc2':rsrc2,'rsrc3':rsrc3,'properties':properties,'preload':preload}
-    require(set(re.findall(r'^\s+\.name:\s+(\w+)\s*$',metadata,re.M))==set(NAMES),'kernel metadata inventory')
-    inventory=isa_inventory(isa,set(NAMES))
+    require(set(re.findall(r'^\s+\.name:\s+(\w+)\s*$',metadata,re.M))==set(kernel_names),'kernel metadata inventory')
+    inventory=isa_inventory(isa,set(kernel_names))
     return {'descriptors':descriptors,'isa':inventory}
 
-def audit_registration(disasm):
+def audit_registration(disasm,names=NAMES):
     functions={}
     for block in re.split(r'(?m)^([0-9a-f]+ <[^>]+>:)\n',disasm)[1:]:
         if re.fullmatch(r'[0-9a-f]+ <[^>]+>:',block):name=block.split('<',1)[1][:-2];functions[name]=''
@@ -50,10 +50,10 @@ def audit_registration(disasm):
     require('__hip_module_ctor' in functions and '__hip_module_dtor' in functions,'compiler lifecycle functions missing')
     ctor=functions['__hip_module_ctor'];dtor=functions['__hip_module_dtor']
     def references(text,name):return len(re.findall(r'R_X86_64_[A-Z0-9_]+\s+'+re.escape(name)+r'(?:-|\s|$)',text))
-    require(references(ctor,'__hipRegisterFatBinary')==1 and references(ctor,'__hipRegisterFunction')==4 and references(ctor,'atexit')==1,'compiler constructor registration/atexit count')
+    require(references(ctor,'__hipRegisterFatBinary')==1 and references(ctor,'__hipRegisterFunction')==len(names) and references(ctor,'atexit')==1,'compiler constructor registration/atexit count')
     require(references(dtor,'__hipUnregisterFatBinary')==1,'compiler destructor unregister missing')
-    require(all(references(ctor,n)==1 for n in NAMES),'constructor does not bind each genuine kernel token')
-    return {'register_module_calls':1,'register_function_calls':4,'atexit_calls':1,'unregister_calls':1}
+    require(all(references(ctor,n)==1 for n in names),'constructor does not bind each genuine kernel token')
+    return {'register_module_calls':1,'register_function_calls':len(names),'atexit_calls':1,'unregister_calls':1}
 
 def audit_wrapper(raw,readobj,host):
     # ASan adds a redzone to this global only in the instrumented host model.
@@ -120,7 +120,7 @@ def prepared_inputs(ref):
             inputs[str(p)]=sha(p)
     return fixture,stage,libs,inputs
 
-def native_proof(ref,out,core,common,execute,inputs):
+def native_proof(ref,out,core,common,execute,inputs,adapter=None):
     from probe_host_registration import audit_image
     from native_import_libraries_test import read_imports,nid
     def run(label,*argv):return execute(label,argv)[0]
@@ -159,7 +159,7 @@ def native_proof(ref,out,core,common,execute,inputs):
     native_libs = sdk/'target/lib'
     sdk_inputs = {n:sha(native_libs/n) for n in ('libc++.a','libc++abi.a','libunwind.a','libc.a','libps5platform.a','libkernel.so','libSceLibcInternal.so','libSceNet.so')}
     objects = [out/'ps5/routes.o']
-    for source in [*core,ROOT/'tools/hip_routes_control.cpp',ROOT/'src/agc_backend.cpp',native/'app_crt.cpp']:
+    for source in [*core,adapter or ROOT/'tools/hip_routes_control.cpp',ROOT/'src/agc_backend.cpp',native/'app_crt.cpp']:
         obj = out/('ps5-'+source.stem+'.o')
         run('native-compile-'+source.stem, sdk/'bin/prospero-clang++', *common, '-fPIC', '-fvisibility=hidden', '-c', source, '-o', obj)
         objects.append(obj)
