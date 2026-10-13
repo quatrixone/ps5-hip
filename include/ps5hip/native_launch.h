@@ -15,7 +15,6 @@ struct PreparedNativeLaunch {
     std::vector<std::shared_ptr<NativeMemory>> temporaries;
 };
 
-enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry };
 struct NativeLaunchRequest {
     NativeLaunchRoute route = NativeLaunchRoute::Initial;
     GeometryShape shape{{1,1,1},{64,1,1},1};

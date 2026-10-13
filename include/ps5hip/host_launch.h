@@ -8,6 +8,13 @@ namespace ps5hip {
 // This measured profile has at least one explicit argument. Pointer values must
 // resolve uniquely inside that inventory. Copies own their
 // bits, not GPU allocations; this cannot detect address reuse or prove mappings.
+// Performs full route/layout validation before reading any argument storage.
+void validate_capture_layout(const Kernel &, NativeLaunchRoute);
+std::vector<LaunchArgument> capture_launch_arguments(
+    const Kernel &, NativeLaunchRoute, ReadableSpan argument_addresses,
+    const std::vector<ReadableSpan> &value_storage,
+    const std::vector<GpuRange> &live_data_buffers);
+
 std::vector<LaunchArgument> capture_initial_arguments(
     const Kernel &, ReadableSpan argument_addresses,
     const std::vector<ReadableSpan> &value_storage,

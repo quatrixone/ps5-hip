@@ -5,6 +5,9 @@
 
 namespace ps5hip {
 
+// Explicit checked routes; private-call entry is deliberately excluded.
+enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry };
+
 struct GpuRange { uint64_t address, bytes; };
 
 // Scalars carry their raw bits and zero buffer_bytes; pointers carry the bytes

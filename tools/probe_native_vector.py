@@ -90,12 +90,12 @@ def main():
     platform = ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include'
     includes += ['-I', platform]
     core = [ROOT/'src'/name for name in ('code_object.cpp','fat_binary.cpp','host_registration.cpp',
-        'host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
+        'host_launch.cpp','hip_runtime.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
     clients = [ROOT/'tools/hip_vector_control.cpp', ROOT/'tests/hip_vector_client.cpp']
     common = ['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror',*includes]
     source_files = [*core,*clients,ROOT/'src/agc_backend.cpp',ROOT/'tests/hip_vector_model.cpp',Path(__file__),
         ROOT/'tools/probe_host_registration.py',ROOT/'tests/native_vector_recipe_test.py',
-        *[ROOT/'include/ps5hip'/n for n in ('native_launch.h','native_data.h','native_memory.h',
+        *[ROOT/'include/ps5hip'/n for n in ('hip_runtime_control.h','native_launch.h','native_data.h','native_memory.h',
         'host_launch.h','host_registration.h','submission.h','code_object.h','launch.h','fat_binary.h','agc_backend.h')]]
     source_before = {str(p.relative_to(ROOT)):sha(p) for p in source_files}
     linux_script = out/'linux.ld'

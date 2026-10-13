@@ -85,7 +85,7 @@ def validate_profile(receipt, source_root):
         raise ValueError("genuine HIP vector title profile mismatch")
     sources = receipt.get("source_sha256", {})
     required = ("tools/build_native_vector_title.py", "tools/native_vector_title.py",
-                "tools/hip_vector_title.cpp", "tools/hip_vector_control.cpp",
+                "tools/hip_vector_title.cpp", "tools/hip_vector_control.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tests/hip_vector_client.cpp", "tools/native_shell_exit_probe.cpp",
                 "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json")
     for name in required:

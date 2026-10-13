@@ -39,7 +39,7 @@ class VectorTitleTests(unittest.TestCase):
         self.candidate = self.build / "candidate"
         self.candidate.mkdir(parents=True)
         required = ("tools/build_native_vector_title.py", "tools/native_vector_title.py", "tools/hip_vector_title.cpp",
-                    "tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp", "tools/native_shell_exit_probe.cpp",
+                    "tools/hip_vector_control.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h", "tests/hip_vector_client.cpp", "tools/native_shell_exit_probe.cpp",
                     "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json", "assets/icon0.png")
         for name in required:
             destination = self.root / name
@@ -162,9 +162,11 @@ class VectorTitleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid offline"):
             self.stage()
         del self.receipt["artifacts"]["canary.hsaco"]
-        del self.receipt["source_sha256"]["tools/hip_vector_control.cpp"]
-        with self.assertRaisesRegex(ValueError, "source provenance"):
-            self.stage()
+        for name in ("tools/hip_vector_control.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h"):
+            value = self.receipt["source_sha256"].pop(name)
+            with self.assertRaisesRegex(ValueError, "source provenance"):
+                self.stage()
+            self.receipt["source_sha256"][name] = value
 
     def test_frozen_verifier_checks_matching_profile(self):
         manifest = self.stage()
