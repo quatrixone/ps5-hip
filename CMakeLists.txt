@@ -347,3 +347,13 @@ if(BUILD_TESTING)
       ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py)
   endif()
 endif()
+
+if(BUILD_TESTING)
+  add_test(NAME hip_matmul_boundaries COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_SOURCE_DIR}/tests/hip_matmul_recipe_test.py)
+  set(PS5HIP_HIP_MATMUL_PROBE "" CACHE PATH "Completed genuine tiled matmul runtime proof")
+  if(PS5HIP_HIP_MATMUL_PROBE)
+    add_test(NAME hip_matmul_actual_proof COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_matmul_recipe_test.py --check "${PS5HIP_HIP_MATMUL_PROBE}")
+  endif()
+endif()
