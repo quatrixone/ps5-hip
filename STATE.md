@@ -4,14 +4,24 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Worker-side queue initialization passed on .40:** frozen `a7e6da7`
+  observed no backend after the 17 host checks, then actual AGC initialization
+  on worker A. Four A/B/A/main dispatches produced 660 exact values with 1,084
+  device-readback and 1,084 template comparisons; all nine AGC events passed.
+  Both workers joined and PID327/application `0x4018` stopped naturally after
+  complete cleanup. Independent audit verified freshness, mounts, services and
+  locks. See `evidence/native-hip-workers-init.json`. The runtime is already
+  integrated; this title variant remains separate. Overlapping callers remain
+  unqualified.
+
 - **Validated threaded runtime integrated:** `a5b89aa` brings the native-tested
   main-initialized worker implementation into this development line. Fresh
   source-bound compiler authorities preserve the exact example objects and
   shaders. All 55 configured Clang/ASan CMake tests, 34 threaded ASan modes,
   16 CPU-only TSAN modes and 29 HIPIFY title cases passed. See
   `evidence/offline-threaded-runtime-integration.json`. Worker-initialization
-  candidate `a7e6da7` is separately frozen and packaged; its console test remains
-  pending. G3/G4 and the larger platform plan remain open.
+  candidate `a7e6da7` subsequently passed the separate native cycle above.
+  G3/G4 and the larger platform plan remain open.
 
 - **Joined HIP worker callers passed on .40 and independent audit:** frozen
   `2aa3c530` initialized the queue on main, then submitted from main/A/B/A/main.
@@ -1015,3 +1025,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 threaded control | 30f3c9f | .40 | pass: six HIPIFY launches and natural teardown | evidence/native-threaded-hipify-control.json | joined worker GPU submissions
 - 2026-10-13 | G4 joined HIP workers | 2aa3c530 | .40 | pass: main-initialized queue, two joined workers, five dispatches and natural teardown | evidence/native-hip-workers-main.json | worker-side initialization, root integration
 - 2026-10-13 | G4 integration | a5b89aa | offline | pass: threaded runtime, refreshed compiler authorities, 55 CMake tests | evidence/offline-threaded-runtime-integration.json | worker initialization
+- 2026-10-13 | G4 worker initialization | a7e6da7 | .40 | pass: init on A, four dispatches, natural teardown | evidence/native-hip-workers-init.json | overlapping host callers

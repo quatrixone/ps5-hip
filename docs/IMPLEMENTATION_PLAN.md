@@ -54,8 +54,11 @@ The subsequent isolated
 `2aa3c530` main-initialized queue passed actual joined-worker calls and independent
 audit: 661 active values, 1,355 device-readback and 1,355 host-template comparisons,
 17 phase checks and 11 direct AGC events. See `../evidence/native-hip-workers-main.json`.
-Worker-side queue initialization, simultaneous callers and repeated initialization
-still require separate qualification.
+Worker-side queue initialization subsequently passed its separate native cycle
+at `a7e6da7`: prebackend state on A, actual AGC initialization on A, four ordered
+A/B/A/main dispatches and complete audited teardown. See
+`../evidence/native-hip-workers-init.json`. Simultaneous callers and repeated
+initialization still require separate qualification.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
@@ -453,8 +456,9 @@ synchronization teardown. See `../evidence/native-host-threads.json`. Checked
 per-thread launch/error state and shared ownership subsequently passed isolated
 offline qualification; main-initialized joined-worker HIP calls then passed the
 finite native case in `../evidence/native-hip-workers-main.json`. This does not
-complete multithreaded HIP acceptance or qualify worker-side initialization and
-simultaneous callers. The combined HIPIFY title/build integration is separately
+complete multithreaded HIP acceptance. Worker-side initialization has separately
+passed `../evidence/native-hip-workers-init.json`; simultaneous callers remain
+unqualified. The combined HIPIFY title/build integration is separately
 qualified in `../evidence/offline-hipify-title-integration.json`.
 
 Decision: publish the supported API matrix internally. Missing required semantics

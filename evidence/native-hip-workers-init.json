@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "classification": "native-worker-initialized-joined-HIP-workers-pass",
+  "source_commit": "a7e6da7937dab5e43912c7a7a3cc39ef5a4dc3a2",
+  "source_branch": "development/worker-queue-init",
+  "runtime_implementation_integrated": true,
+  "worker_init_title_integrated": false,
+  "image": {
+    "sha256": "330b3a7205e076b5b9f873627a7084d1e5c27939e5b4dbf8787bcbd7c6a03cb4",
+    "bytes": 3670016
+  },
+  "evidence": {
+    "execution": {
+      "path": "results/workers-init-execution-v1/observation-20261013T144239.464007Z/receipt.json",
+      "sha256": "14f741fdf6c78ec0de7337ebf13ca1f3c9493e63734985e3b2f5ccf88c6defe9"
+    },
+    "execution_review": {
+      "path": "results/workers-init-execution-v1/observation-20261013T144239.464007Z-independent-review.json",
+      "sha256": "1f233c039a950f97ef8217dc3b00e529935629b202e86c1f6929d94b08bf1622"
+    },
+    "deployment": {
+      "path": "results/workers-init-deployment-v1/deployment-20261013T143935.883962Z/deployment.json",
+      "sha256": "01021768e51c1163a548128ffe458fbb20199f5c573cae35cc3b7edee746b4c2"
+    },
+    "deployment_review": {
+      "path": "results/workers-init-deployment-v1/deployment-20261013T143935.883962Z-independent-review.json",
+      "sha256": "d5c1f87dee2a698846d25d934b725f67244d3ec5734f2bb9b8edc1a08578f757"
+    },
+    "source_review": {
+      "path": "results/worker-init-source-independent-review-v1/review.json",
+      "sha256": "315f2037f48bfc7b8e1e401440f3d99dffbefd459ba29a63450a6d967d4b44be"
+    },
+    "source_freeze": {
+      "path": ".local/g4-worker-init/results/source-freeze-v1/receipt.json",
+      "sha256": "d7bd042fc0dc035328e54c9f0534d94127f695c89884dac9b410ca8ec638e8f6"
+    },
+    "offline_variants": {
+      "path": ".local/g4-worker-init/results/variant-qualification-v1/receipt.json",
+      "sha256": "ca11848614c863edece683b7fe191d18b201f18f3c7f36b31c6ac929b6f3907d"
+    },
+    "compiler_reuse": {
+      "path": "results/worker-init-compiler-reuse-v1.json",
+      "sha256": "147ea931060139f7b9b520593cb4ef44c1fa8df6ff1a539030e12c6015fb22bc"
+    },
+    "native_package_review": {
+      "path": "results/worker-init-package-independent-review-v1/review-v2.json",
+      "sha256": "8cf62d4c6042d7745bf971322dfdeb7a6450be97cf5611d7475f95363bd34e11"
+    },
+    "controls": {
+      "path": "results/workers-init-controls-offline-v1/receipt.json",
+      "sha256": "0b569f15bb03105aa08ec2c9b72245ac4d79b4f702b9a534c5f1d77139eefa8f"
+    },
+    "controls_review": {
+      "path": "results/workers-init-controls-independent-review-v1/review-v2.json",
+      "sha256": "a29b132e295d77178a00a70889c9585880d7e0cca48e4676633884a032738538"
+    },
+    "main_initialized_control": {
+      "path": "evidence/native-hip-workers-main.json",
+      "sha256": "527e349eb7264c78e42fa3d21a640e0b994432963b47d37342f0a39548825989"
+    },
+    "integrated_runtime": {
+      "path": "evidence/offline-threaded-runtime-integration.json",
+      "sha256": "8eff909c936f4413006ba276840ab77ed671d8bdc19f370bc6817c7ca1220f22"
+    },
+    "manifest": {
+      "path": ".local/g4-worker-init/dist/PPSA99014/gfx1013-hip_workers_init-e49c467785c0/manifest.json",
+      "sha256": "26524881f79e5d8bb64bd5261f0085683cec33d587d73f4a678ce12ce800e756"
+    },
+    "package-receipt": {
+      "path": ".local/g4-worker-init/dist/PPSA99014/gfx1013-hip_workers_init-e49c467785c0/package-receipt.json",
+      "sha256": "06396fc90d4d9bd62ecb1b30b3f7e65e9e5194d757663437cee0a525e7ca8711"
+    },
+    "build-receipt": {
+      "path": ".local/g4-worker-init/dist/PPSA99014/gfx1013-hip_workers_init-e49c467785c0/build-receipt.json",
+      "sha256": "bad6dae094edf3573840a6135bb9c1d1e9116895a1dc63db2b0d7e97d96c9787"
+    }
+  },
+  "observed": {
+    "pid": 327,
+    "application_id": "0x4018",
+    "host": "192.168.4.40",
+    "firmware": "12.70",
+    "title_id": "PPSA99014",
+    "prebackend_check": "A after all 17 host checks: one module/function, zero completed dispatches, backend_attempted=false",
+    "dispatches": 4,
+    "actors": [
+      "A",
+      "B",
+      "A",
+      "main"
+    ],
+    "counts": [
+      73,
+      257,
+      73,
+      257
+    ],
+    "salts": [
+      101,
+      1009,
+      65521,
+      4294967280
+    ],
+    "exact_values": 660,
+    "device_readback_word_comparisons": 1084,
+    "separate_host_template_comparisons": 1084,
+    "phase_checks": 17,
+    "AGC_events": 9,
+    "AGC_initialization_actor": "A",
+    "created": 2,
+    "joined": 2,
+    "application_log_bytes": 2206,
+    "application_log_sha256": "433c0f6cf2733994b0a54f2e714fc103e173cf77fb08acbbc54c4238a225e84e",
+    "compiler_unregister_and_state_destruction": true,
+    "allocations_closed": true,
+    "natural_title_stop": true,
+    "visible_mounts_matched": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "scope": "Worker A initializes the unchanged runtime/backend, followed by ordered A/B/A/main submissions with joined workers.",
+  "simultaneous_callers_validated": false,
+  "asynchronous_GPU_overlap_validated": false,
+  "full_g4_complete": false,
+  "next": "Integrate the worker-init title and qualify genuinely overlapping host calls; continue the remaining HIP API and platform gates."
+}
