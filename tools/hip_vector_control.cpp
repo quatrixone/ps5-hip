@@ -194,12 +194,8 @@ extern "C" hipError_t hipLaunchKernel(const void *host, dim3 grid, dim3 block, v
     return checked([&] {
         auto launch=ps5hip::prepare_native_vector(s.registration.module(s.handle),*kernel,values,s.data);
         auto close_temporaries = [&] {
-            bool closed=true;
-            for(size_t i=0;i<2;++i) if(!launch.resources.at(i)->close()) closed=false;
-            if(!closed) {
-                s.terminal=true;s.data.poison();
-                throw ps5hip::NativeMemoryCleanupError("vector temporary cleanup failed");
-            }
+            try { ps5hip::close_native_launch_temporaries(launch,s.data); }
+            catch (...) { s.terminal=true;throw; }
         };
         try {
             initialize_backend();
