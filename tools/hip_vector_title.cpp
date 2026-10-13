@@ -4,16 +4,21 @@
 #include <cstdlib>
 #include <fstream>
 
-#if defined(PS5HIP_ROUTES_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_ROUTES_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE))
 #include "ps5hip/hip_runtime_control.h"
 #define ps5hip_vector_title_registration ps5hip_runtime_registration_ready
 #define ps5hip_vector_title_ready ps5hip_runtime_ready
 #define ps5hip_vector_title_finalized ps5hip_runtime_finalized
 #define ps5hip_vector_terminal ps5hip_runtime_terminal
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+#include "hip_contention.h"
+#define ps5hip_vector_client_main ps5hip_contention_client_main
+#else
 #include "hip_workers_client.h"
 #include "hip_workers_agc.h"
 #define ps5hip_vector_client_main ps5hip_workers_client_main
+#endif
 #elif defined(PS5HIP_HIPIFY_TITLE)
 #define ps5hip_vector_client_main hipify_client_main
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -38,7 +43,7 @@ extern "C" const char *ps5hip_title_model_config();
 #endif
 namespace {
 bool finalizer_installed=false;
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
 [[noreturn]] void quarantine_workers() noexcept {
     // An unjoined worker may hold the runtime gate: never query it here.
     std::fputs("HIP_TITLE QUARANTINED reason=worker-lifecycle no_shell_request=true\n",stderr);
@@ -60,9 +65,13 @@ void finalized() {
         (void)ps5hip_canary::sync_log();
         for(;;) ::sleep(1);
     }
-#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE))
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
+    #if defined(PS5HIP_CONTEND_MAIN_TITLE)
+    constexpr unsigned expected_completed=3;
+#else
     constexpr unsigned expected_completed=ps5hip_workers::expected_dispatches;
+#endif
 #elif defined(PS5HIP_HIPIFY_TITLE)
     constexpr unsigned expected_completed=6;
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -109,8 +118,12 @@ int main(int argc,char **argv) {
         const std::string directory(bytes,static_cast<size_t>(length));
         if(!ps5hip_canary::valid_results_directory(directory)) return 2;
         if(elevation::request(elevation::Capability::filesystem,"/app0/lapy.elf")!=elevation::Status::ok) return 2;
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+        const auto log=directory+"/ps5-hip-gfx1013-hip_contend_main.log";
+#else
         const auto log=directory+(ps5hip_workers::worker_initializes ? "/ps5-hip-gfx1013-hip_workers_init.log":"/ps5-hip-gfx1013-hip_workers_main.log");
+#endif
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hipify.log";
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -123,8 +136,12 @@ int main(int argc,char **argv) {
         const auto log=directory+"/ps5-hip-gfx1013-hip_vector.log";
 #endif
         if(!ps5hip_canary::redirect_log(log.c_str())) return 2;
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+        std::puts("PS5HIP START target=gfx1013 kernel=hip_contend_main");
+#else
         std::puts(ps5hip_workers::worker_initializes ? "PS5HIP START target=gfx1013 kernel=hip_workers_init":"PS5HIP START target=gfx1013 kernel=hip_workers_main");
+#endif
 #elif defined(PS5HIP_HIPIFY_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hipify");
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -137,8 +154,8 @@ int main(int argc,char **argv) {
         std::puts("PS5HIP START target=gfx1013 kernel=hip_vector");
 #endif
         if(!finalizer_installed || !ps5hip_vector_title_registration()) quarantine("registration");
-#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
-#if defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE))
+#if defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE))
         constexpr unsigned expected_functions=1;
 #else
         constexpr unsigned expected_functions=2;
@@ -151,15 +168,24 @@ int main(int argc,char **argv) {
 #endif
         ps5hip_canary::check_runtime();
         if(!persist()) quarantine("startup-log");
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
         const int status=ps5hip_vector_client_main(argc,argv);
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+        const auto &workers=ps5hip_contention::report();
+#else
         const auto &workers=ps5hip_workers::report();
+#endif
         // A failed join may leave a live caller: do not enter runtime/static teardown.
         if(status || !workers.passed || !workers.cleanup_complete || workers.unsafe_teardown || workers.created!=2 || workers.joined!=2)
             quarantine_workers();
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+        if(workers.dispatches!=3||workers.values!=331||workers.words!=813||workers.templates!=813)quarantine("contention-counts");
+        if(!ps5hip_contention::evidence(true))quarantine("contention-evidence");
+#else
         if(workers.dispatches!=ps5hip_workers::expected_dispatches || workers.active_values!=ps5hip_workers::expected_values || workers.word_comparisons!=ps5hip_workers::expected_words ||
            workers.template_comparisons!=ps5hip_workers::expected_words || workers.phase_checks!=17 || (ps5hip_workers::worker_initializes&&!workers.prebackend_verified))quarantine("worker-counts");
         if(!ps5hip_workers::validate_agc_trace())quarantine("worker-agc-attribution");
+#endif
         ps5hip_runtime_finish();
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const int status=ps5hip_vector_client_main();
@@ -168,10 +194,15 @@ int main(int argc,char **argv) {
         const int status=ps5hip_vector_client_main(argc,argv);
 #endif
         if(status || !ps5hip_vector_title_ready()) quarantine("client-or-ownership");
-#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
+#if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE) || defined(PS5HIP_CONTEND_MAIN_TITLE)
         const auto completed=ps5hip_runtime_observation();
+#if defined(PS5HIP_CONTEND_MAIN_TITLE)
+        if(completed.completed!=3)quarantine("completion-observation");
+        std::puts("HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=331 word_comparisons=813 template_comparisons=813 created=2 joined=2 finalization=pending");
+#else
         if(completed.completed!=ps5hip_workers::expected_dispatches)quarantine("completion-observation");
         std::printf("HIP_TITLE COMPUTE complete=true dispatches=%u exact_values=%u word_comparisons=%u template_comparisons=%u created=2 joined=2 finalization=pending\n",workers.dispatches,workers.active_values,workers.word_comparisons,workers.template_comparisons);
+#endif
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const auto completed=ps5hip_runtime_observation();
         if(completed.completed!=6)quarantine("completion-observation");

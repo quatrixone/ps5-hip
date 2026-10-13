@@ -4,15 +4,16 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
 import math_native_fixture as math_fixture
 
 
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_contend_main"):
         raise ValueError("unsupported canary profile")
-    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") and (target != "gfx1013" or not shell_exit_probe):
+    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_contend_main") and (target != "gfx1013" or not shell_exit_probe):
         raise ValueError("HIP vector requires the measured gfx1013 shell-managed profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
@@ -55,6 +56,22 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
             expected.append(f"GENERIC_SEQUENCE index={sequence} requested={count} observed={count} completed={completed} prebackend={int(sequence<2)}")
         expected += ["GENERIC_CLIENT_PASS launches=11 sequences=0,1,3,7 variable_sizes=true full_guards=true inputs_unchanged=true",
                      "HIP_TITLE COMPUTE complete=true dispatches=11 sequences=0,1,3,7 finalization=pending"]
+    elif kernel == "hip_contend_main":
+        dispatches=3
+        expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0")
+        expected += [f"RUNTIME_COMPLETE sequence={i} kernel=thread_words blocking=true" for i in (1,2,3)]
+        expected += ["CONTEND_CLIENT_PASS created=2 joined=2 dispatches=3 exact_values=331 word_comparisons=813 template_comparisons=813",
+                     "CONTEND_PROOF api_overlap=1 same_gate_request_while_owned=1 a_launch_calls=1 b_push_calls=1 gate_acquired_a=1 gate_acquired_b=1 kernel_blocked_wait=unproven"]
+        measured=[line for line in lines if line.startswith("CONTEND_TIME ")]
+        match=re.fullmatch(r"CONTEND_TIME hold_ns=([1-9][0-9]{0,19}) request_ns=([1-9][0-9]{0,19}) release_ns=([1-9][0-9]{0,19}) acquired_ns=([1-9][0-9]{0,19}) lock_call_ns=([0-9]{1,20}) includes_scheduling=true",measured[0]) if len(measured)==1 else None
+        valid=False
+        if match:
+            hold,request,release,acquired,elapsed=map(int,match.groups())
+            valid=0<hold<=request<=release<=acquired<2**64 and elapsed==acquired-request
+        expected += [measured[0] if valid else "INVALID_CONTENTION_TIMESTAMPS"]
+        for i,actor in enumerate((0,0,0,1,1,2,2)):
+            expected += [f"CONTEND_AGC ordinal={i} operation={'init' if i==0 else 'submit' if i%2 else 'kick'} actor={actor} result=0x00000000"]
+        expected += ["HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=331 word_comparisons=813 template_comparisons=813 created=2 joined=2 finalization=pending"]
     elif kernel in ("hip_workers_main", "hip_workers_init"):
         expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0")
         init=kernel=="hip_workers_init"
@@ -109,7 +126,7 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
             expected += ["VECTOR_UNREGISTER after_main=true active=0",
                          "VECTOR_FINAL registered=1 removed=1 completed=11 active=0 terminal=0 main_finished=1 hardware_validated=false",
                          "HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=11"]
-        elif kernel in ("hip_workers_main", "hip_workers_init"):
+        elif kernel in ("hip_workers_main", "hip_workers_init", "hip_contend_main"):
             expected += ["VECTOR_UNREGISTER after_main=true active=0",
                          f"VECTOR_FINAL registered=1 removed=1 completed={dispatches} active=0 terminal=0 main_finished=1 hardware_validated=false",
                          f"HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches={dispatches}"]
@@ -122,7 +139,7 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
     if any("QUARANTINED" in line for line in lines):
         result = "quarantined"
     elif any("PS5HIP FAIL" in line or "PS5HIP mismatch" in line or
-             (kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") and line.startswith(("WORKERS_CLIENT_FAIL", "VECTOR_ERROR", "VECTOR_CLIENT_REJECT", "ROUTES_CLIENT_REJECT", "GENERIC_CLIENT_FAILURE", "TRANSLATED_CLIENT_FAIL", "MATMUL_CLIENT_FAILURE", "VECTOR_CLEANUP_FAILURE", "HIP_TITLE FAIL")))
+             (kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_contend_main") and line.startswith(("CONTEND_CLIENT_FAIL", "WORKERS_CLIENT_FAIL", "VECTOR_ERROR", "VECTOR_CLIENT_REJECT", "ROUTES_CLIENT_REJECT", "GENERIC_CLIENT_FAILURE", "TRANSLATED_CLIENT_FAIL", "MATMUL_CLIENT_FAILURE", "VECTOR_CLEANUP_FAILURE", "HIP_TITLE FAIL")))
              for line in lines):
         result = "failed"
     elif data == ("\n".join(expected) + "\n").encode("utf-8"):
@@ -140,7 +157,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_contend_main"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()
