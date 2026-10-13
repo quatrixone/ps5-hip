@@ -44,6 +44,19 @@ GENERIC_PROFILE = {
     "zero_sequence_scope": "prebackend state within this process; not zero-work finalization",
 }
 
+HIPIFY_PROFILE = {
+    "target": "gfx1013", "kernel_names": ["translated_add"],
+    "client_entry": "_Z18hipify_client_mainv",
+    "combined_object_sha256": "e6801b478241859f3e4961091098b89135a6f9b61024171d3b8b36de0cfbc56c",
+    "bundle_sha256": "ec6228b5f8bb5d0ac6a79c5237ad715e949191dc0f6511295a83eb0008eb9612",
+    "code_sha256": "86eeb4b965cf4b049990f4ea41c13301c95b864dee6078d2764de06d60985d8f",
+    "code_bytes": 4024,
+    "compiler_receipt_sha256": "ecda112353ee45b232f239e1b86e251db49e65304bbe9b199f853eb1434d9d49",
+    "sequence_sizes": [1, 73, 257], "rounds_per_size": 2, "dispatches": 6,
+    "exact_values": 662, "word_comparisons": 2238, "guard_words_each_end": 7,
+    "original_cuda_sha256": "ecd50a2a6c8cfc4f58702b8725dfca2ae25dbf4049a358cc988562e8f1c2922a",
+}
+
 
 def profile_for(kernel):
     if kernel == "hip_vector":
@@ -52,12 +65,14 @@ def profile_for(kernel):
         return ROUTES_PROFILE
     if kernel == "hip_generic":
         return GENERIC_PROFILE
+    if kernel == "hipify":
+        return HIPIFY_PROFILE
     raise ValueError("unsupported genuine HIP title profile")
 
 
 def provenance_files(kernel):
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hipify") else set())
 
 
 def validate_fself(container, elf):
@@ -133,6 +148,7 @@ def validate_profile(receipt, source_root):
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
     required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+                 ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tools/probe_hip_generic.py", "docs/HIP_GENERIC_TITLE.md"] if kernel == "hip_generic" else
                  ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
     for name in required:
@@ -201,6 +217,42 @@ def validate_generic_compiler(raw_receipt, combined, source_root):
     return report
 
 
+def validate_hipify_compiler(raw_receipt, combined, source_root):
+    selected=HIPIFY_PROFILE
+    digest=lambda raw:hashlib.sha256(raw).hexdigest()
+    if digest(raw_receipt)!=selected["compiler_receipt_sha256"] or digest(combined)!=selected["combined_object_sha256"]:
+        raise ValueError("HIPIFY title compiler/combined binding mismatch")
+    report=json.loads(raw_receipt)
+    if (report.get("classification")!="hipify-owned-runtime-host-model-pass" or
+            report.get("generated_source_hand_edits")!=0 or report.get("original_main_renamed_by_flag") is not True or
+            report.get("hardware_executed") is not False or report.get("native_linked") is not False):
+        raise ValueError("HIPIFY original translated compiler mode missing")
+    # These two historical proof-only files intentionally gained title support.
+    # Neither participated in the three device/host compiler invocations.
+    historical={"CMakeLists.txt", "tests/hipify_runtime_model.cpp"}
+    for name,value in report["sources"].items():
+        if name not in historical and digest((source_root/name).read_bytes())!=value:
+            raise ValueError("HIPIFY compiler source changed: "+name)
+    if digest((source_root/"tests/cuda_vector_add.cu").read_bytes())!=selected["original_cuda_sha256"]:
+        raise ValueError("HIPIFY original CUDA source changed")
+    cases=[c for c in report["cases"] if c["host"]=="ps5"]
+    if len(cases)!=1 or cases[0]["lifecycle"]!={"register_module_calls":1,"register_function_calls":1,"atexit_calls":1,"unregister_calls":1}:
+        raise ValueError("HIPIFY genuine compiler registration inventory")
+    desc=cases[0]["audit"]["descriptors"]
+    if (set(desc)!={"translated_add"} or
+            tuple(desc["translated_add"][n] for n in ("group_bytes","private_bytes","kernarg_bytes","rsrc1","rsrc2","rsrc3","properties","preload"))!=(0,0,288,0x60af0040,0x8c,0,0x409,0)):
+        raise ValueError("HIPIFY measured descriptor changed")
+    artifacts=report["artifacts"]
+    if any(artifacts.get("ps5/translated"+suffix)!=selected[key] for suffix,key in ((".o","combined_object_sha256"),(".bundle","bundle_sha256"),(".hsaco","code_sha256"))):
+        raise ValueError("HIPIFY compiler artifact binding mismatch")
+    from probe_hipify_client import device_object
+    from fat_binary_fixture_test import section
+    bundle=section(combined,b".hip_fatbin");device=device_object(bundle)
+    if digest(bundle)!=selected["bundle_sha256"] or digest(device)!=selected["code_sha256"] or len(device)!=selected["code_bytes"]:
+        raise ValueError("HIPIFY embedded device binding mismatch")
+    return report
+
+
 def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_profile(receipt, source_root)
     kernel = receipt["kernel"]
@@ -219,6 +271,9 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     elif kernel == "hip_generic":
         validate_generic_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
+    elif kernel == "hipify":
+        validate_hipify_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                 (provenance / "routes-combined.o").read_bytes(), source_root)
     # Reinspect actual linked bytes rather than accepting stale audit booleans.
     from probe_host_registration import audit_image, load_regions
     from build_native_vector_title import patch_startup, patch_linker, audit_startup

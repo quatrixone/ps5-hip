@@ -22,6 +22,13 @@ target_link_libraries(ps5hip-inspect PRIVATE ps5hip_object)
 include(CTest)
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(NAME hipify_title_boundaries COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_SOURCE_DIR}/tests/hipify_title_test.py --boundaries)
+  set(PS5HIP_HIPIFY_TITLE_MODEL "" CACHE PATH "Completed genuine HIPIFY title lifecycle model")
+  if(PS5HIP_HIPIFY_TITLE_MODEL)
+    add_test(NAME hipify_title_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hipify_title_test.py --check "${PS5HIP_HIPIFY_TITLE_MODEL}")
+  endif()
   add_test(NAME hipify_runtime_boundaries COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/hipify_runtime_recipe_test.py)
   set(PS5HIP_HIPIFY_RUNTIME_PROBE "" CACHE PATH "Completed HIPIFY owned-runtime host-model proof")
