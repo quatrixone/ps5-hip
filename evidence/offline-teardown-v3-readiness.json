@@ -1,0 +1,26 @@
+{
+  "classification": "offline-built-checked-not-executed",
+  "source_commit": "d6587aebb268f773a5b9df02a9fca9dfd7a66a6d",
+  "source_tree": "be5e961dfe306f172949f7fb1c4de4acf382480e",
+  "readiness_receipt_sha256": "853738942056b6dd96424242615bf8e53ee9bed6c3642078de4051f2a9351898",
+  "elf_bytes": 110904,
+  "elf_sha256": "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93",
+  "production_changes": ["record ceiling 1024 to 2048", "transcript version 2 to 3"],
+  "focused_sanitizer_tests_passed": 2,
+  "maximum_two_table_bytes": 1933312,
+  "parent_review": {
+    "source_diff_reviewed": true,
+    "source_and_audit_input_hashes_verified": true,
+    "native_elf_hash_verified": true,
+    "test_log_reviewed": true
+  },
+  "console_access": false,
+  "operational_runner_prepared": false,
+  "accepted": false,
+  "release": "unknown",
+  "limits": [
+    "SDK-sized host records do not establish firmware layout compatibility.",
+    "Returned mount tables do not establish complete namespace visibility.",
+    "Existing consumed v1 and v2 observations remain unchanged."
+  ]
+}

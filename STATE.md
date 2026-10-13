@@ -321,9 +321,12 @@ Offline reassessment proposes a separate 2048-record collector ceiling using
 the measured return and pinned SDK contract, with unchanged provider/layout/calls
 and bounded memory/output. FreeBSD reference source confirms count/byte units but
 also skipped busy/hidden mounts and possible identity redaction; no firmware ABI
-or global completeness follows. No revised collector exists yet. See
-`evidence/offline-teardown-count1110-design.json`; keep release unknown and require
-fresh source freeze, tests/import audit and independent review before any new case.
+or global completeness follows. Collector v3 is now frozen at `d6587ae`, built
+against the pinned SDK, and passes two focused sanitizer/import checks. Parent
+review verified the small production diff, source/audit hashes and native ELF.
+See `evidence/offline-teardown-count1110-design.json` and
+`evidence/offline-teardown-v3-readiness.json`. No new operational sender or console
+observation exists; release remains unknown.
 
 ## Next action
 
@@ -359,9 +362,9 @@ lifecycle criterion is explicitly corrected in `docs/G2_ARITHMETIC_ACCEPTANCE.md
 The original first combined arithmetic cycle remains partial-pass. The read-only
 mount observation hit its count bound. Raw-query instrumentation v2 was later
 executed once while idle and measured 1110 twice, still above the 1024 ceiling.
-Both diagnostic one-use markers are consumed. Reassess the finite record budget,
-provider contract and layout offline, then freeze and review any revised case;
-a usable baseline is still required before another launch. Do not infer an empty table from
+Both diagnostic one-use markers are consumed. The bounded v3 collector has now
+been frozen and reviewed offline; an operational observation case remains to be
+prepared. A usable baseline is still required before another launch. Do not infer an empty table from
 initialized fields, a leak from registration persistence, or deployed identity
 from the banner. Preserve the installed arithmetic image, successful result and
 earlier unique CPU backup. No setting change or automatic repeat is authorized
