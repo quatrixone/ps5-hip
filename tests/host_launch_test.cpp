@@ -107,6 +107,36 @@ int main(int argc, char **argv) {
             if (mutation == 4) ++bad.hidden_arguments[0].offset;
             reject([&] { ps5hip::capture_initial_arguments(bad, {nullptr, 32}, slots, buffers); });
         }
+        // A malformed LAST argument must reject before even the FIRST address read.
+        // Address 1 is deliberately unreadable; ASan would fail if validation were interleaved.
+        using R=ps5hip::NativeLaunchRoute;
+        for(auto route:{R::Initial,R::Lds,R::BufferScratch,R::Geometry}) {
+            auto profile=kernel;
+            if(route==R::Lds || route==R::BufferScratch) {
+                profile.hidden_arguments.clear();profile.kernarg_size=28;
+                if(route==R::Lds)profile.group_bytes=256;
+                else {profile.private_bytes=212;profile.rsrc2=0x8d;}
+            }
+            if(route==R::Geometry)profile.rsrc2=0x138c;
+            ps5hip::validate_capture_layout(profile,route);
+            auto valid=ps5hip::capture_launch_arguments(profile,route,address_span,slots,buffers);
+            check(valid[3].value==73);
+            for(uint32_t width:{0u,1u,2u,3u,9u,16u,UINT32_MAX}) {
+                auto bad=profile;bad.arguments.back().size=width;
+                reject([&]{ps5hip::capture_launch_arguments(bad,route,
+                    bytes(reinterpret_cast<const void *>(uintptr_t(1)),32),slots,buffers);});
+            }
+            for(unsigned mutation=0;mutation<4;++mutation) {
+                auto bad=profile;
+                if(mutation==0)bad.arguments.back().kind="hidden_dynamic_lds_size";
+                if(mutation==1)bad.arguments.back().offset=0;
+                if(mutation==2)bad.arguments.back().offset=UINT32_MAX-3;
+                if(mutation==3)bad.arguments.back().offset=25;
+                reject([&]{ps5hip::capture_launch_arguments(bad,route,
+                    bytes(reinterpret_cast<const void *>(uintptr_t(1)),32),slots,buffers);});
+            }
+        }
+        reject([&]{ps5hip::validate_capture_layout(kernel,static_cast<R>(99));});
         for (uint32_t groups : {0u, UINT32_MAX / 64 + 1, UINT32_MAX})
             reject([&] { ps5hip::prepare_initial_launch(owned.object, kernel.name, module, kernarg, groups, values); });
         auto wrong_shape = owned.object; wrong_shape.kernels.front().required_workgroup = {8, 8, 1};

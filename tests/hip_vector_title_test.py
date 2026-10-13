@@ -75,7 +75,7 @@ def main():
     common=['clang++-18','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-fPIE','-DPS5HIP_VECTOR_TITLE=1']
     for d in (ROOT/'include',*inc,platform,elevation):common+=['-I',str(d)]
     core=[ROOT/'src'/n for n in ('code_object.cpp','fat_binary.cpp','host_registration.cpp','host_launch.cpp','launch.cpp','native_memory.cpp','native_data.cpp','native_launch.cpp','submission.cpp')]
-    sources=core+[ROOT/'tools/hip_vector_control.cpp',ROOT/'tools/hip_vector_title.cpp',ROOT/'tools/native_shell_exit_probe.cpp',ROOT/'tools/native_runtime.h',ROOT/'tests/hip_vector_client.cpp',ROOT/'tests/hip_vector_model.cpp',ROOT/'tests/hip_vector_title_model.cpp',ROOT/'tools/check_canary_log.py',Path(__file__)]
+    sources=core+[ROOT/'src/hip_runtime.cpp',ROOT/'tools/hip_vector_control.cpp',ROOT/'tools/hip_vector_title.cpp',ROOT/'tools/native_shell_exit_probe.cpp',ROOT/'tools/native_runtime.h',ROOT/'tests/hip_vector_client.cpp',ROOT/'tests/hip_vector_model.cpp',ROOT/'tests/hip_vector_title_model.cpp',ROOT/'tools/check_canary_log.py',Path(__file__)]
     sources+=list((ROOT/'include/ps5hip').glob('*.h'))
     external_headers += [generated,elevation/'elevation.hpp',elevation/'protocol.hpp',platform/'ps5platform/kernel.h']
     external_before={str(h):sha(h) for h in external_headers}
@@ -97,7 +97,8 @@ def main():
     cases={}
     for partial in (False,True):
         control=out/('control-partial.o' if partial else 'control.o');run(control.stem,[*common,'-DPS5HIP_VECTOR_MODEL=1',*(['-DPS5HIP_VECTOR_PARTIAL=1'] if partial else []),'-c',ROOT/'tools/hip_vector_control.cpp','-o',control])
-        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,control,probe/'linux-combined.o','-Wl,-T,'+str(probe/'linux.ld'),'-Wl,--wrap=__hipUnregisterFatBinary','-o',binary])
+        runtime=out/('runtime-partial.o' if partial else 'runtime.o');run(runtime.stem,[*common,'-DPS5HIP_VECTOR_MODEL=1',*(['-DPS5HIP_VECTOR_PARTIAL=1'] if partial else []),'-c',ROOT/'src/hip_runtime.cpp','-o',runtime])
+        binary=out/('title-partial' if partial else 'title');run(binary.name+'-link',[*common,'-pie','-fuse-ld=lld-18',*objects,control,runtime,probe/'linux-combined.o','-Wl,-T,'+str(probe/'linux.ld'),'-Wl,--wrap=__hipUnregisterFatBinary','-o',binary])
         for name in (['partial'] if partial else ['normal','submit','kick','timeout','unknown-submit','missing','corrupt','input','guard','data-allocate','data-close','init','elevation','config','log-exists','startup-sync','final-sync','skip-unregister','reject-unregister','late-live','shell-fail']):
             folder=out/'cases'/name;folder.mkdir(parents=True);config=folder/'results-dir.txt';config.write_text('relative-bad' if name=='config' else str(folder))
             log=folder/'ps5-hip-gfx1013-hip_vector.log'

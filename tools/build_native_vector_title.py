@@ -192,7 +192,7 @@ def main():
     helper = elevation_source / "lapy/build" / ("owned_root_helper-" + title) / "lapy.elf"
     require(sha(helper) == elevation_receipt["helper_sha256"], "elevation helper changed")
     include_dirs.append(elevation / "client")
-    core = [ROOT / "src" / n for n in ("code_object.cpp", "fat_binary.cpp", "host_registration.cpp", "host_launch.cpp",
+    core = [ROOT / "src" / n for n in ("code_object.cpp", "fat_binary.cpp", "host_registration.cpp", "host_launch.cpp", "hip_runtime.cpp",
             "launch.cpp", "native_memory.cpp", "native_data.cpp", "native_launch.cpp", "submission.cpp", "agc_backend.cpp")]
     clients = [ROOT / n for n in ("tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp",
                "tools/hip_vector_title.cpp", "tools/native_shell_exit_probe.cpp")]
