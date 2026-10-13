@@ -4,6 +4,15 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Upstream ROCclr executable-memory boundary qualified offline:** the current
+  `ports/clr` patch rejects RWX reserve, commit and protect requests before any
+  mapping mutation. Focused syscall checks preserve existing bytes and writable
+  mappings; ordinary NONE/READ/RW operations and both real CPU command workloads
+  pass. The native OS object and strict native workload link pass, and the patch
+  reproduces all 14 adapted files exactly. This closes an unsafe path to an absent
+  SDK hook; it does not provide executable memory or native application startup.
+  See `evidence/offline-clr-rwx-guard.json`.
+
 - **Experimental upstream ROCclr port now compiles and links natively:** all
   27 upstream units plus pthread TLS link into an ordinary shared ELF against
   the actual SDK. Independent review verifies unwind bounds and 144 strong
@@ -1108,3 +1117,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | CLR | pinned65d174c | offline | partial-pass: real CPU commands,PS5 platform objects | evidence/offline-upstream-clr-platform.json | combined native closure
 
 - 2026-10-13 | CLR port | pinned65d174c | offline | pass:28 native objects,strict link,exact patch | evidence/offline-upstream-clr-native-port.json | native startup
+
+- 2026-10-13 | CLR memory boundary | reviewed v7 | offline | pass: early RWX rejection, ordinary memory and two command modes, native link, exact patch | evidence/offline-clr-rwx-guard.json | native CPU title startup

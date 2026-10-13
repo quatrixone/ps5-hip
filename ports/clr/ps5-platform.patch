@@ -281,7 +281,18 @@
  }
  
  static void __exit() __attribute__((destructor(101)));
-@@ -210,8 +250,11 @@
+@@ -201,6 +241,10 @@
+ }
+ 
+ address Os::reserveMemory(address start, size_t size, size_t alignment, MemProt prot) {
++#if defined(PS5HIP_CLR_PLATFORM)
++  // Native executable-memory allocation is not qualified for this CLR profile.
++  if (prot == MEM_PROT_RWX) return nullptr;
++#endif
+   size = alignUp(size, pageSize());
+   // check for invalid input size
+   if (size == 0) {
+@@ -210,8 +254,11 @@
    assert(isPowerOfTwo(alignment) && "not a power of 2");
  
    size_t requested = size + alignment - pageSize();
@@ -295,7 +306,7 @@
  
    // check for out of memory
    if (mem == MAP_FAILED) return NULL;
-@@ -233,7 +276,8 @@
+@@ -233,7 +280,8 @@
      }
    }
  
@@ -305,7 +316,7 @@
    constexpr size_t kLargePageSize = 2 * Mi;
    if (size >= kLargePageSize) {
      int status = madvise(aligned, size, MADV_HUGEPAGE);
-@@ -244,6 +288,7 @@
+@@ -244,6 +292,7 @@
      }
    }
  
@@ -313,7 +324,18 @@
    return aligned;
  }
  
-@@ -266,8 +311,11 @@
+@@ -255,6 +304,10 @@
+ }
+ 
+ bool Os::commitMemory(void* addr, size_t size, MemProt prot) {
++#if defined(PS5HIP_CLR_PLATFORM)
++  // Native executable-memory allocation is not qualified for this CLR profile.
++  if (prot == MEM_PROT_RWX) return false;
++#endif
+   assert(isMultipleOf(addr, pageSize()) && "not page aligned!");
+   size = alignUp(size, pageSize());
+ 
+@@ -266,11 +319,18 @@
    assert(isMultipleOf(addr, pageSize()) && "not page aligned!");
    size = alignUp(size, pageSize());
  
@@ -327,7 +349,14 @@
  }
  
  bool Os::protectMemory(void* addr, size_t size, MemProt prot) {
-@@ -284,7 +332,11 @@
++#if defined(PS5HIP_CLR_PLATFORM)
++  // Native executable-memory allocation is not qualified for this CLR profile.
++  if (prot == MEM_PROT_RWX) return false;
++#endif
+   assert(isMultipleOf(addr, pageSize()) && "not page aligned!");
+   size = alignUp(size, pageSize());
+ 
+@@ -284,7 +344,11 @@
      return totalPhys;
    }
  
@@ -339,7 +368,7 @@
    return totalPhys;
  }
  
-@@ -307,22 +359,35 @@
+@@ -307,22 +371,35 @@
    pthread_t self = ::pthread_self();
  
    pthread_attr_t threadAttr;
@@ -380,7 +409,7 @@
  
  void Os::setPreferredNumaNode(uint32_t node) {
  #ifdef ROCCLR_SUPPORT_NUMA_POLICY
-@@ -414,14 +479,16 @@
+@@ -414,14 +491,16 @@
  
  void Os::setThreadAffinity(const void* handle, const Os::ThreadAffinityMask& mask) {
    if (pthread_setaffinity_fptr != NULL) {
@@ -399,7 +428,7 @@
    }
    return true;
  }
-@@ -716,6 +783,13 @@
+@@ -716,6 +795,13 @@
  }
  
  size_t Os::getPhysicalMemSize() {
@@ -413,7 +442,7 @@
    struct ::sysinfo si;
  
    if (::sysinfo(&si) != 0) {
-@@ -728,6 +802,7 @@
+@@ -728,6 +814,7 @@
    }
  
    return (size_t)si.totalram * si.mem_unit;

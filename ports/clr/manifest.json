@@ -6,7 +6,7 @@
     "PS5HIP_CLR_PLATFORM",
     "PS5HIP_CLR_NO_GRAPHICS"
   ],
-  "patch_sha256": "88e0f41d146492dae0662b374ddf4c239252b7400a2bf0eea4abb8f9049356ae",
+  "patch_sha256": "79dd6d608ae1a6e5b2f43029d256fa0ee2af8ae45dabb3fda004fc8bb2368dad",
   "files": {
     "rocclr/compiler/lib/utils/options.cpp": {
       "upstream_sha256": "33abcb804a6ef746b307f86fd78f06885c88c87564818458fec90db941dc819e",
@@ -22,7 +22,7 @@
     },
     "rocclr/os/os_posix.cpp": {
       "upstream_sha256": "5acffaf04eb6c9b06a01029fe37cbfbd25839fe0776b72c5c921375a7649f81a",
-      "adapted_sha256": "c61c5d5cd8541c27c47d934b8a356316e13ef8d9c5e8a9c82686e5ba7c647a2c"
+      "adapted_sha256": "0693ec41b159be4a01b898b7daaf98a7484f2fde72c997d8c1d8ea3f756c0db2"
     },
     "rocclr/platform/activity.hpp": {
       "upstream_sha256": "dbc7af96c81e1ced62c19e0a453758cbe776504151b4d6752b3aadfe99b456ab",
@@ -69,6 +69,9 @@
     "ps5-clr-tls.cpp": "b1d7888009cfb999d02d47ef737cc2bf2a30f2be5545c4445fd85107dcb009fd",
     "ps5-clr-tls.hpp": "cb92dd25c880322a2911629ad5a62b5a2d2a3702be92b28a7c8fa9ca69ec3882"
   },
-  "native_compile_receipt_sha256": "16bada106bafabcfd03b2300a8a1a1c0107acdbd4258ab5a8e99dccbffc4d419",
-  "scope": "Experimental internal ROCclr platform port; not the production HIP runtime or public HIP API port."
+  "scope": "Experimental internal ROCclr platform port; not the production HIP runtime or public HIP API port.",
+  "base_native_compile_receipt_sha256": "16bada106bafabcfd03b2300a8a1a1c0107acdbd4258ab5a8e99dccbffc4d419",
+  "qualification_receipt_sha256": "48ddf6f90f6a479274796da688ea04a1a7306bc5e17f90085053f38e16acd594",
+  "independent_review_sha256": "39797a8dd959f17951b38280c3906589620257377e4ea0a16d93b3823e45b39d",
+  "executable_cpu_memory": "MEM_PROT_RWX rejected before mapping or protection by reserve/commit/protect under PS5HIP_CLR_PLATFORM"
 }

@@ -43,6 +43,12 @@ for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 
+The experimental upstream ROCclr port now explicitly rejects unsupported RWX
+memory requests before mapping changes. Ordinary memory operations, two CPU
+command modes, native object/link checks and exact patch reproduction pass;
+see `../evidence/offline-clr-rwx-guard.json`. Native application startup and the
+upstream GPU backend remain open; this is not G5 acceptance.
+
 The isolated threaded runtime `30f3c9f` now passes independent offline review,
 34 ASan/UBSan modes, 16 CPU-only TSAN modes and five title lifecycle suites.
 See `../evidence/offline-threaded-hip-runtime.json`. Its unchanged single-thread

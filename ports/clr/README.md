@@ -21,6 +21,15 @@ SIGFPE instruction repair is unsupported; physical-memory queries report zero
 when the OS query fails. The TLS helper aborts on infrastructure/allocation
 failure because the upstream pointer/reference accessors cannot return errors.
 
+Executable CPU memory is explicitly unsupported in this profile. Reserve,
+commit and protection requests for `MEM_PROT_RWX` return null/false before any
+mapping or protection call, including in Linux qualification. The v7 test checks
+zero calls and preservation of existing bytes, then exercises normal
+NONE/READ/RW, uncommit/recommit and release operations. Both upstream CPU workload
+modes pass. The changed native OS object was recompiled and linked with the 27
+unchanged, hash-verified native objects; no native execution is claimed. A future
+executable-memory route needs an owned, qualified native provider.
+
 The port currently covers an internal ROCclr compute profile. Public HIP
 correlation writers and initialization need additional work. Inherited process,
 `/proc` and dynamic-loader services are not qualified. The native shared-ELF
@@ -28,6 +37,8 @@ link uses the SDK's C++ runtime and actual unwind-section bounds; optional weak
 SDK loader hooks need explicit treatment before application conversion/startup.
 
 Evidence is summarized in `../../evidence/offline-upstream-clr-native-port.json`.
-The exact source hashes and native compile receipt are in `manifest.json`.
+The current guard qualification is in `../../evidence/offline-clr-rwx-guard.json`.
+The exact source hashes and qualification receipts are in `manifest.json`.
+The earlier evidence remains a historical v6 checkpoint.
 No asynchronous HIP API, graphics interoperability, native runtime behavior,
 framework support or performance result is implied by compiling these files.

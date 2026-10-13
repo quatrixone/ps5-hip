@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "classification": "offline-upstream-clr-early-rwx-rejection",
+  "port": "ports/clr",
+  "port_manifest_sha256": "8c83d303daef7d5765cecbd9266393a55b02c98b9798127f96854713c6b50054",
+  "patch_sha256": "79dd6d608ae1a6e5b2f43029d256fa0ee2af8ae45dabb3fda004fc8bb2368dad",
+  "qualification": {
+    "path": "results/clr-rwx-qualified-v7/receipt.json",
+    "sha256": "48ddf6f90f6a479274796da688ea04a1a7306bc5e17f90085053f38e16acd594"
+  },
+  "review": {
+    "path": "results/clr-rwx-independent-review-v7/review.json",
+    "sha256": "39797a8dd959f17951b38280c3906589620257377e4ea0a16d93b3823e45b39d"
+  },
+  "patch_roundtrip": {
+    "path": "results/clr-patch-roundtrip-v7/receipt.json",
+    "sha256": "c45320a5c7ccfc67b391f7ac4d35d8ba94d4cbaf462faa2d56f7435fd5255af2"
+  },
+  "verified": [
+    "Three guarded RWX requests return null/false before mmap or mprotect.",
+    "Rejected commit/protect preserve existing bytes and writable mapping.",
+    "Normal NONE/READ/RW protection, uncommit/recommit and release pass.",
+    "Actual upstream CPU normal and failed-dependency workloads pass.",
+    "Actual native OS object rebuilt; strict shared native workload link passes with27 verified unchanged objects.",
+    "Fresh patch reproduces all14 adapted upstream files exactly."
+  ],
+  "native_executed": false,
+  "limits": [
+    "No native executable-memory provider or loader-hook implementation.",
+    "No CRT/converter/package/native lifecycle or GPU backend qualification.",
+    "Historical v6 evidence preserved; this record supersedes its port manifest for the guard update."
+  ]
+}
