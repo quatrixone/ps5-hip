@@ -55,10 +55,12 @@ class Backend final:public ps5hip::SubmissionBackend{
  uint64_t now_ns()override{return clock;}void sleep_us(unsigned us)override{clock+=uint64_t(us)*1000;}
 };
 void closed(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases;void*p=nullptr;unsigned v=0;
+ check(hipMemset(nullptr,0,0)==hipErrorDeinitialized);
  check(hipMalloc(&p,4)==hipErrorDeinitialized&&!p&&hipFree(nullptr)==hipErrorDeinitialized&&hipMemcpy(&v,&v,0,hipMemcpyHostToHost)==hipErrorDeinitialized&&hipDeviceSynchronize()==hipErrorDeinitialized&&hipPeekAtLastError()==hipErrorDeinitialized&&hipGetLastError()==hipErrorDeinitialized);
  check(a==allocations.size()&&b==backends&&s==submits&&r==releases);
 }
 void poison(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases,c=contexts.load(),st=state_attempts.load();void*p=nullptr;check(hipMalloc(&p,0)==hipErrorUnknown&&!p&&hipDeviceSynchronize()==hipErrorUnknown&&hipFree(nullptr)==hipErrorUnknown);
+ check(hipMemset(nullptr,0,0)==hipErrorUnknown);
  // Transport poison may create a virgin caller's error context. Infrastructure
  // and abandoned-lifecycle faults reject before any context or State access.
  const bool transport=!std::strcmp(mode,"submit")||!std::strcmp(mode,"kick")||!std::strcmp(mode,"timeout")||!std::strcmp(mode,"throw")||!std::strcmp(mode,"unknown")||!std::strcmp(mode,"postflush")||!std::strcmp(mode,"cleanup");
@@ -101,6 +103,24 @@ int main(int argc,char**argv){
   expect_final=false;std::thread t([]{check(hipFree(nullptr)==hipSuccess);fault=!std::strcmp(mode,"destructor-lock")?3:4;});t.join();poison();check(!ps5hip_runtime_ready()&&allocations.empty());std::printf("THREAD_MODEL_PASS %s\n",mode);return 0;
  }else if(!std::strcmp(mode,"finish-clear")){
   expect_final=false;check(hipFree(nullptr)==hipSuccess);fault=6;ps5hip_runtime_finish();check(!ps5hip_runtime_ready());poison();check(allocations.empty()&&releases==0);std::puts("THREAD_MODEL_PASS finish-clear");return 0;
+ }else if(!std::strcmp(mode,"memset")){
+  unsigned char*p=nullptr;check(hipMalloc(reinterpret_cast<void**>(&p),17)==hipSuccess);
+  check(hipMemset(p,0xa5,17)==hipSuccess);
+  std::thread t([&]{
+   check(hipMemset(p+1,0x123,16)==hipSuccess&&hipMemset(p+2,-1,3)==hipSuccess);
+   check(hipMemset(p+16,0,2)==hipErrorInvalidValue);
+   check(hipMemset(p+17,0,1)==hipErrorInvalidValue);
+   check(hipMemset(p,0,SIZE_MAX)==hipErrorInvalidValue);
+   check(hipMemset(nullptr,0,1)==hipErrorInvalidValue&&hipGetLastError()==hipErrorInvalidValue);
+   unsigned local=7;check(hipMemset(&local,0,1)==hipErrorInvalidValue&&local==7);
+   check(hipMemset(p+17,0,0)==hipSuccess&&hipMemset(reinterpret_cast<void*>(1),0,0)==hipSuccess);
+   check(hipMemset(nullptr,0,0)==hipSuccess&&hipPeekAtLastError()==hipSuccess);
+  });t.join();
+  unsigned char out[17]{};check(hipMemcpy(out,p,17,hipMemcpyDeviceToHost)==hipSuccess);
+  for(unsigned i=0;i<17;++i)check(out[i]==(i==0?0xa5:i>=2&&i<5?0xff:0x23));
+  check(!backends&&!submits&&hipPeekAtLastError()==hipSuccess);
+  check(hipFree(p)==hipSuccess&&hipMemset(p,0,1)==hipErrorInvalidValue);
+  check(hipMemset(p,0,0)==hipSuccess);
  }else if(!std::strcmp(mode,"context-recover")){
   std::thread t([]{void*p=nullptr;fault=1;check(hipMalloc(&p,4)==hipErrorOutOfMemory&&!p);fault=1;check(hipMalloc(&p,4)==hipErrorOutOfMemory&&!p);check(hipMalloc(&p,4)==hipSuccess&&p&&hipPeekAtLastError()==hipSuccess);check(hipFree(p)==hipSuccess);});t.join();
  }else if(!std::strcmp(mode,"marker-exit")){
@@ -136,11 +156,11 @@ int main(int argc,char**argv){
   const bool ordinary=!std::strcmp(mode,"ownership")||!std::strcmp(mode,"no-finish")||!std::strcmp(mode,"reject-unregister");
   std::thread a([&]{threads_launch(p,257,31);if(ordinary||blocked)check(hipGetLastError()==hipSuccess);});
   if(blocked){std::unique_lock<std::mutex> l(coordination);changed.wait(l,[]{return entered;});l.unlock();
-   std::thread b([&]{waiter=true;if(!std::strcmp(mode,"blocked-free"))check(hipFree(p)==hipSuccess);else if(!std::strcmp(mode,"blocked-sync"))check(hipDeviceSynchronize()==hipSuccess);else if(!std::strcmp(mode,"blocked-copy")){unsigned values[257];check(hipMemcpy(values,p,sizeof(values),hipMemcpyDeviceToHost)==hipSuccess);for(unsigned i=0;i<257;++i)check(values[i]==i*17u+31);}else threads_launch(p,73,71);});
+   std::thread b([&]{waiter=true;if(!std::strcmp(mode,"blocked-free"))check(hipFree(p)==hipSuccess);else if(!std::strcmp(mode,"blocked-sync"))check(hipDeviceSynchronize()==hipSuccess);else if(!std::strcmp(mode,"blocked-memset"))check(hipMemset(p,0x5a,257*4)==hipSuccess);else if(!std::strcmp(mode,"blocked-copy")){unsigned values[257];check(hipMemcpy(values,p,sizeof(values),hipMemcpyDeviceToHost)==hipSuccess);for(unsigned i=0;i<257;++i)check(values[i]==i*17u+31);}else threads_launch(p,73,71);});
    l.lock();changed.wait(l,[]{return waiter_attempted;});check(submits==1&&backends==1&&releases==0);resume=true;changed.notify_all();l.unlock();a.join();b.join();
   }else a.join();
   if(!ordinary&&!blocked){expect_final=false;check(ps5hip_runtime_terminal());const bool cleanup=!std::strcmp(mode,"cleanup");check(allocations.size()==size_t(cleanup?2:5)&&releases==unsigned(cleanup?3:0)&&submits==1&&backends==1&&ps5hip_runtime_gpu_unresolved()!=cleanup);std::thread b([]{poison();});b.join();std::printf("THREAD_MODEL_PASS %s retained=true\n",mode);std::fflush(nullptr);std::_Exit(0);}
-  if(std::strcmp(mode,"blocked-free")){std::thread b([&]{unsigned out[257];check(hipMemcpy(out,p,sizeof(out),hipMemcpyDeviceToHost)==hipSuccess);const unsigned n=!std::strcmp(mode,"blocked-launch")?73:257;for(unsigned i=0;i<n;++i)check(out[i]==i*17u+(n==73?71:31));check(hipFree(p)==hipSuccess);check(hipFree(p)==hipErrorInvalidDevicePointer);});b.join();}
+  if(std::strcmp(mode,"blocked-free")){std::thread b([&]{unsigned out[257];check(hipMemcpy(out,p,sizeof(out),hipMemcpyDeviceToHost)==hipSuccess);const unsigned n=!std::strcmp(mode,"blocked-launch")?73:257;for(unsigned i=0;i<n;++i)check(out[i]==(!std::strcmp(mode,"blocked-memset")?0x5a5a5a5au:i*17u+(n==73?71:31)));check(hipFree(p)==hipSuccess);check(hipFree(p)==hipErrorInvalidDevicePointer);});b.join();}
   check(backends==1&&submits==unsigned(!std::strcmp(mode,"blocked-launch")?2:1));
  }
  if(!std::strcmp(mode,"no-finish")){expect_final=false;check(!ps5hip_runtime_ready());std::puts("THREAD_MODEL_PASS no-finish");return 0;}

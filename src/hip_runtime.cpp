@@ -487,6 +487,12 @@ extern "C" hipError_t hipMalloc(void **pointer, size_t bytes) {
     return call([&] { return hipMalloc_locked(pointer,bytes); });
 }
 extern "C" hipError_t hipFree(void *pointer) { return call([&] { return hipFree_locked(pointer); }); }
+extern "C" hipError_t hipMemset(void *pointer, int value, size_t bytes) {
+    return call([&] {
+        const auto result=checked([&] { if(bytes)state().data.fill(pointer,value,bytes); });
+        return record(result==hipErrorInvalidDevicePointer ? hipErrorInvalidValue : result);
+    });
+}
 extern "C" hipError_t hipMemcpy(void *destination, const void *source, size_t bytes, hipMemcpyKind kind) {
     return call([&] { return hipMemcpy_locked(destination,source,bytes,kind); });
 }

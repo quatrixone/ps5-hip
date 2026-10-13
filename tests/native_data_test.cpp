@@ -77,6 +77,17 @@ int main() {
             data.copy_from_device(destination, p + 1, 16);
             for (unsigned i = 0; i < 16; ++i) check(destination[i] == i + 3);
             check(p[0] == 0xa5 && p[17] == 0xa5); // logical boundary, not mapped padding
+            data.fill(p + 1, 0x123, 16);
+            for (unsigned i = 1; i < 17; ++i) check(p[i] == 0x23);
+            data.fill(p + 2, -1, 3);
+            for (unsigned i = 2; i < 5; ++i) check(p[i] == 0xff);
+            check(p[0] == 0xa5 && p[1] == 0x23 && p[5] == 0x23 && p[17] == 0xa5);
+            reject(S::InvalidValue, [&] { data.fill(p + 16, 0, 2); });
+            reject(S::InvalidValue, [&] { data.fill(p, 0, UINT64_MAX); });
+            reject(S::InvalidValue, [&] { data.fill(nullptr, 0, 1); });
+            reject(S::InvalidValue, [&] { data.fill(p, 0, 0); });
+            reject(S::InvalidPointer, [&] { data.fill(p + 17, 0, 1); });
+            check(p[16] == 0x23 && p[17] == 0xa5);
             reject(S::InvalidValue, [&] { data.resolve(p + 16, 2); });
             reject(S::InvalidValue, [&] { data.resolve(p, UINT64_MAX); });
             reject(S::InvalidPointer, [&] { data.resolve(p + 17, 1); });
@@ -95,6 +106,8 @@ int main() {
             hold.memory->acquire_gpu_use();
             reject(S::InUse, [&] { data.free(p); });
             reject(S::InUse, [&] { data.copy_from_device(destination, p, 1); });
+            reject(S::InUse, [&] { data.fill(p, 0, 1); });
+            check(p[0] == 0xa5);
             reject(S::InUse, [&] { data.ranges(); });
             check(unmaps == old_unmaps);
             hold.memory->complete_gpu_use();
@@ -104,6 +117,7 @@ int main() {
             catch (const ps5hip::ObjectError &) {}
             reject(S::InvalidPointer, [&] { data.free(p); });
             reject(S::InvalidPointer, [&] { data.resolve(p, 1); });
+            reject(S::InvalidPointer, [&] { data.fill(p, 0, 1); });
             data.free(other);
             check(data.ranges().empty());
         }
@@ -120,6 +134,7 @@ int main() {
             reject(S::Poisoned, [&] { data.resolve(p, 1); });
             reject(S::Poisoned, [&] { data.ranges(); });
             reject(S::Poisoned, [&] { data.allocate(1); });
+            reject(S::Poisoned, [&] { data.fill(p, 0, 1); });
             check(unmaps == old_unmaps && releases == old_releases);
             // Shutdown may retry non-GPU cleanup; no registry operation retries it.
             fail_unmap = fail_release = false;

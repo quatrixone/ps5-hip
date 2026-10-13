@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "classification": "isolated-synchronous-memory-fill-offline-pass",
+  "base_commit": "a8f8ac5",
+  "hardware_executed": false,
+  "sources": {
+    "src/hip_runtime.cpp": "4451ec3e9b8e2b3b5d39ba6f1d2391dcb1745f822f3e8e003731062ee2c1d043",
+    "src/native_data.cpp": "8245cf38652a8ab3cdec9b649c08e59b94ced84733c75be4570b25ca2e8a4354",
+    "include/ps5hip/native_data.h": "d698760d5d8434148f70a312bb94dd7f4733752dcb6ecff6504f46d33db94113",
+    "tests/native_data_test.cpp": "6ce84b2511947c6aa811decdb2c517ee7af23ac9eb1288cdf45fbe09e2b73301",
+    "tests/hip_threads_model.cpp": "ec3408eca113caac1b53fd598b3486eac2641a5b4637d724b30cd06e01eb8d37",
+    "tools/probe_hip_threads.py": "8b260c2ad857336691de1f82ab2f39048ad8d60dc14fb416c90c439d7fbefeca",
+    "docs/HIP_MEMORY_FILL.md": "d5454a59b7beb3a228b41eef6316194312e728c03dc5d2b9cfe6591fbfb473e2"
+  },
+  "proofs": {
+    "memory-fill-runtime-v2": {
+      "receipt_sha256": "5c4d4a93c4f9e79e3b789194aec52b4246cf32d6e570a45b98e5760e84a44874",
+      "modes": 36
+    },
+    "memory-fill-tsan-v1": {
+      "receipt_sha256": "bb0711af68c75a78182a75e5e5c69db622dcc5279cbc847832aa17cf93088041",
+      "modes": 17
+    }
+  },
+  "registry": {
+    "receipt_sha256": "4456a250d085c79c8f95484e8132ef0b98d61956c3f68ef3e84e5bda75e48579",
+    "scope": "ASan logical-allocation model; four registry/build inputs unchanged since saved qualification"
+  },
+  "source_review_sha256": "80ce74d25a29b1bf714f6dd564a2e5f67238a270931f7a06c2490d63292ca152",
+  "limits": [
+    "Not integrated into the root development branch.",
+    "No native PS5 memory-fill/cache-visibility qualification yet.",
+    "Blocking tracked allocation fill only; no async, pitched or GPU fill implementation.",
+    "Thread sanitizer runs CPU-only modes; GPU submission ownership is modeled under ASan/UBSan."
+  ]
+}
