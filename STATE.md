@@ -4,6 +4,18 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Native ROCclr startup advanced, then trapped in `AppProfile` on .40:**
+  independently reviewed affinity-repaired image `f63a8f3` registered with the
+  diagnostic image and all 32 earlier artifacts preserved. Its one-use CPU
+  launch reached PID 389/app `0x4018`, passed the earlier `Os::init` affinity
+  boundary, then hit `SYSTEM_ILLEGAL_FUNCTION_CALL` at a direct Linux
+  `readlink` syscall from the global `AppProfile` constructor before `main`.
+  A later read-only check confirms the installed image is unchanged, .40 is
+  idle and no CPU result log exists. The workload did not run and cannot be
+  accepted or replayed. A new isolated candidate must repair PS5 executable
+  path discovery and audit reachable pre-main calls. See
+  `evidence/native-clr-app-profile-readlink-failure.json`.
+
 - **FP32 NN GEMM subset integrated offline:** a reusable checked API with
   row-major strides and alpha/beta was imported from isolated `7feebc1` and
   rebuilt in this checkout. The root proof ran 17 sanitizer/model modes, 14
@@ -1227,3 +1239,4 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 SDK | de93ce1 | offline | exact multi/reduction import and root compiler authority validated | evidence/offline-multi-reduction-sdk-integration.json | native CLR startup
 - 2026-10-13 | CLR | 5db9751 | offline | CPU package and exact source independently verified | evidence/offline-clr-cpu-native-package.json | native startup
 - 2026-10-13 | CLR | 5db9751 | offline | launch held after shared thread-lifetime findings | evidence/offline-clr-thread-lifetime-hold.json | repair and requalify
+- 2026-10-13 | CLR | 347fa8c | .40 | failed: AppProfile readlink syscall58 before main; delayed idle/image/log checked | evidence/native-clr-app-profile-readlink-failure.json | repair path query

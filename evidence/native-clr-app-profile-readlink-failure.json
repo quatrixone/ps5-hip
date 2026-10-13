@@ -1,0 +1,57 @@
+{
+  "classification": "failed-native-startup-app-profile-readlink",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "source_commit": "347fa8cb91ba0e1fd37089f6f8ab85dae297ab33",
+  "image_sha256": "f63a8f3922d69e0689b6a3d99e57fe3980fb91dc5a7fbc6dbd53d73716e42e66",
+  "deployment_receipt": {
+    "path": "results/clr-affinity-controls-v1/deployment/deployment-20261013T234630.790853Z/deployment.json",
+    "sha256": "bb8c9e6cc73b958d6804e079f47d8bb4307a408735462a4d468b0a3158cd358a"
+  },
+  "deployment_review": {
+    "path": "results/clr-affinity-controls-v1/deployment/deployment-20261013T234630.790853Z-independent-review.json",
+    "sha256": "73fece408b7bae667da4d215eadabdee49653f95d1130f4d2a0e33436a486727"
+  },
+  "execution_receipt": {
+    "path": "results/clr-affinity-controls-v1/execution/observation-20261013T235106.461052Z/receipt.json",
+    "sha256": "5b29a49f3f15f18fc43f879d2f963eb946d0593966fdac132f05cd4fe71d28a3"
+  },
+  "execution_review": {
+    "path": "results/clr-affinity-controls-v1/execution/observation-20261013T235106.461052Z-independent-review.json",
+    "sha256": "0a476401d6248aa0f0ea348d21332109b9ae3c5247a31f3de64bc387a90b13bd"
+  },
+  "startup_analysis": {
+    "path": "results/clr-affinity-startup-analysis-v1/report.json",
+    "sha256": "01ddc509a9c044b39902288b34158a118cc12de29538ea3700f2f10f560485ce"
+  },
+  "read_only_poststate": {
+    "path": "results/clr-affinity-poststate-v1/20261013T235417.894456Z-8f0f37b4/receipt.json",
+    "sha256": "5211578ed870c938b6a54f2fc34417dd800d98836daf7a85142cd7e4d8b1b9a0",
+    "independent_review_sha256": "7e345bf0ac7f021c6fdce019af0414ff494aae3afad1a5e20c0deb82871df1a6"
+  },
+  "observed": {
+    "pid": 389,
+    "app_id": "0x00004018",
+    "signal": "0xa002030a SYSTEM_ILLEGAL_FUNCTION_CALL",
+    "direct_syscall": 58,
+    "rip": "0x53e5cc",
+    "function": "readlink",
+    "caller": "amd::AppProfile::AppProfile()",
+    "stage": "device global constructor before title main",
+    "application_log_present_after_crash": false,
+    "installed_image_unchanged_after_crash": true,
+    "console_idle_after_crash": true,
+    "declared_services_healthy": true,
+    "owned_locks_released": true
+  },
+  "limits": [
+    "The execution controller timed out on FTP history after observing the crash; its post-snapshot and finalization evidence are incomplete.",
+    "The later read-only check confirms idle history, installed image and absent application log, but it does not supply the missing post-snapshot or make the original CPU workload pass.",
+    "The affinity ABI repair progressed beyond the prior Os::init failure; queue computation, watchdog join, natural application finalization, GPU execution and public HIP remain unproven.",
+    "The consumed image and one-use execution case must not be replayed."
+  ],
+  "cpu_workload_accepted": false,
+  "gpu_hardware_gate_passed": false,
+  "replay_permitted": false,
+  "next_action": "Repair PS5 executable-path discovery in a new frozen candidate, audit reachable pre-main calls, then rebuild and review before another bounded console test."
+}
