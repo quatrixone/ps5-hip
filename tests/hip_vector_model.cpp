@@ -20,11 +20,18 @@ unsigned allocations_called=0, backend_calls=0, submits=0, releases=0;
 std::string mode;
 bool flush_failed=false, cleanup_failed=false;
 unsigned cleanup_failures=0;
+#ifdef PS5HIP_VECTOR_TITLE
+bool audit_done=false;
+unsigned final_allocations=0;
+#endif
 void check(bool v){if(!v)throw std::runtime_error("vector model invariant");}
 uint64_t read64(const uint8_t*p){uint64_t v;std::memcpy(&v,p,8);return v;}
 void dispose(Allocation &a){if(a.cpu){if(a.mapped_code)::munmap(a.cpu,a.bytes);else std::free(a.cpu);a.cpu=nullptr;}}
 struct Audit {
     ~Audit(){
+#ifdef PS5HIP_VECTOR_TITLE
+        final_allocations=unsigned(allocations.size());audit_done=true;
+#endif
         std::printf("VECTOR_MODEL_FINAL allocations=%zu backends=%u submits=%u releases=%u model_only=true\n",allocations.size(),backend_calls,submits,releases);
         std::printf("VECTOR_MODEL_CLEANUP failures=%u\n",cleanup_failures);
         // Quarantined native destructors must not release GPU-held mappings. Only
@@ -67,9 +74,11 @@ public:
         expected[32]=2;expected[36]=1;expected[40]=1;expected[44]=64;expected[46]=1;expected[48]=1;expected[96]=1;
         check(std::memcmp(k,expected,288)==0);
         check(words[count-15]==0xc0031502&&words[count-14]==2&&words[count-13]==1&&words[count-12]==1&&words[count-11]==0x8005);
+#ifndef PS5HIP_VECTOR_TITLE
         check(hipDeviceSynchronize()==hipErrorNotReady);
         check(hipFree(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(out)-64))==hipErrorNotReady);
         float dummy=0;check(hipMemcpy(&dummy,out,4,hipMemcpyDeviceToHost)==hipErrorNotReady);
+#endif
         if(mode=="throw-submit")throw std::runtime_error("submit exception");
         if(mode=="unknown-submit")throw 42;
         if(mode=="submit")return -7;
@@ -87,7 +96,12 @@ public:
 }
 extern "C" void ps5hip_vector_model_configure(const char*value){check(!allocations_called&&!backend_calls&&!submits);mode=value;}
 extern "C" unsigned ps5hip_vector_model_backends(){return backend_calls;}
-extern "C" unsigned ps5hip_vector_model_live(){return unsigned(allocations.size());}
+extern "C" unsigned ps5hip_vector_model_live(){
+#ifdef PS5HIP_VECTOR_TITLE
+    if(audit_done)return final_allocations;
+#endif
+    return unsigned(allocations.size());
+}
 extern "C" unsigned ps5hip_vector_model_submits(){return submits;}
 std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_vector_model_backend(){
     ++backend_calls;if(mode=="init"||mode=="init-unmap"||mode=="init-release")throw std::runtime_error("init failure");return std::make_unique<Backend>();
@@ -95,6 +109,9 @@ std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_vector_model_backend(){
 extern "C" int64_t sceKernelGetDirectMemorySize(){return int64_t(12)<<30;}
 extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t bytes,size_t alignment,int type,int64_t *physical){
     check(type==12);++allocations_called;
+#ifdef PS5HIP_VECTOR_TITLE
+    if(mode=="data-allocate" && allocations_called==2)return -1;
+#endif
     if(mode=="code-allocate"&&allocations_called==5)return -1;
     *physical=next_id++;allocations.emplace(*physical,Allocation{nullptr,bytes,alignment,false});return 0;
 }
@@ -119,6 +136,11 @@ extern "C" int32_t sceKernelMapDirectMemory(void **p,size_t bytes,int protection
 extern "C" int32_t sceKernelMunmap(void*p,size_t bytes){
     for(auto &a:allocations)if(a.second.cpu==p){
         check(a.second.bytes==bytes);
+#ifdef PS5HIP_VECTOR_TITLE
+        if(mode=="data-close" && a.first==1 && !cleanup_failed) {
+            cleanup_failed=true;++cleanup_failures;return -1;
+        }
+#endif
         if(!cleanup_failed&&((mode=="init-unmap"&&a.first==5)||
            ((mode=="preflush-unmap"||mode=="marker-map-unmap"||mode=="completed-unmap")&&a.first==7))){
             cleanup_failed=true;++cleanup_failures;return -1;

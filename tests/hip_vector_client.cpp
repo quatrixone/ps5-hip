@@ -23,6 +23,17 @@ uint32_t bits(float v){uint32_t b;std::memcpy(&b,&v,4);return b;}
 constexpr size_t words=4096,guard=16,count=73;
 constexpr uint32_t poison=0x7fcabcde;
 using Page=std::array<uint32_t,words>;
+bool close_data(void *&a,void *&b,void *&out) {
+    bool closed=true;
+    for(void **owner:{&a,&b,&out}) {
+        if(ps5hip_vector_terminal()) return false;
+        if(*owner) {
+            if(hipFree(*owner)==hipSuccess) *owner=nullptr;
+            else closed=false;
+        }
+    }
+    return closed;
+}
 }
 int main(int argc,char**argv){
     const char*mode=argc==2?argv[1]:"normal";
@@ -31,6 +42,7 @@ int main(int argc,char**argv){
 #else
     (void)mode;
 #endif
+    void *pa=nullptr,*pb=nullptr,*po=nullptr;
     try{
 #ifdef PS5HIP_VECTOR_PARTIAL
         check(hipPeekAtLastError()==hipErrorInvalidDeviceFunction);
@@ -43,7 +55,6 @@ int main(int argc,char**argv){
         Page a,b,out,read;
         a.fill(poison);b.fill(poison);out.fill(poison);
         for(size_t i=0;i<count;++i){a[guard+i]=bits(float(i)*.25f);b[guard+i]=bits(32.0f-float(i)*.125f);}
-        void *pa=nullptr,*pb=nullptr,*po=nullptr;
         check(hipMalloc(&pa,sizeof(a))==hipSuccess&&hipMalloc(&pb,sizeof(b))==hipSuccess&&hipMalloc(&po,sizeof(out))==hipSuccess);
         auto*A=reinterpret_cast<float*>(static_cast<unsigned char*>(pa)+64);
         auto*B=reinterpret_cast<float*>(static_cast<unsigned char*>(pb)+64);
@@ -107,7 +118,9 @@ int main(int argc,char**argv){
 #else
             if(result!=hipSuccess){
                 std::fprintf(stderr,"VECTOR_CLIENT_FAILURE error=%d terminal=%u\n",int(result),unsigned(ps5hip_vector_terminal()));
+#ifndef PS5HIP_VECTOR_TITLE
                 if(ps5hip_vector_terminal()){std::fflush(nullptr);for(;;)::sleep(1);}
+#endif
                 throw std::runtime_error("vector launch failed");
             }
 #endif
@@ -117,12 +130,25 @@ int main(int argc,char**argv){
             check(hipMemcpy(read.data(),pa,sizeof(read),hipMemcpyDeviceToHost)==hipSuccess&&read==a);
             check(hipMemcpy(read.data(),pb,sizeof(read),hipMemcpyDeviceToHost)==hipSuccess&&read==b);
         }
-        check(hipFree(pa)==hipSuccess&&hipFree(pb)==hipSuccess&&hipFree(po)==hipSuccess);
-        check(hipFree(po)==hipErrorInvalidDevicePointer);
+#ifndef PS5HIP_VECTOR_TITLE
+        void *stale=po;
+#endif
+        check(close_data(pa,pb,po));
+#ifndef PS5HIP_VECTOR_TITLE
+        check(hipFree(stale)==hipErrorInvalidDevicePointer);
         check(hipGetLastError()==hipErrorInvalidDevicePointer&&hipGetLastError()==hipSuccess);
+#endif
 #ifdef PS5HIP_VECTOR_MODEL
         check(ps5hip_vector_model_backends()==1&&ps5hip_vector_model_submits()==2&&!ps5hip_vector_model_live());
 #endif
         ps5hip_vector_finish();std::puts("VECTOR_CLIENT_PASS exact_values=146 immutable_inputs=true full_guards=true blocking=true hardware_validated=false");return 0;
-    }catch(const std::exception&e){std::fprintf(stderr,"VECTOR_CLIENT_REJECT %s\n",e.what());ps5hip_vector_finish();return 20;}
+    }catch(const std::exception&e){
+        const bool closed=close_data(pa,pb,po);
+        std::fprintf(stderr,"VECTOR_CLIENT_REJECT %s cleanup=%s terminal=%u\n",e.what(),closed?"closed":"failed",unsigned(ps5hip_vector_terminal()));
+        ps5hip_vector_finish();return 20;
+    }catch(...){
+        const bool closed=close_data(pa,pb,po);
+        std::fprintf(stderr,"VECTOR_CLIENT_REJECT unknown exception cleanup=%s terminal=%u\n",closed?"closed":"failed",unsigned(ps5hip_vector_terminal()));
+        ps5hip_vector_finish();return 20;
+    }
 }

@@ -5,6 +5,7 @@ import hashlib
 import json
 import pathlib
 import math_native_fixture as math_fixture
+import native_vector_title as vector_title
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -43,6 +44,13 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
     if fingerprint(stage / "build-receipt.json")["sha256"] != manifest["build_receipt_sha256"]:
         raise ValueError("build receipt bytes changed")
     build = read_json(stage / "build-receipt.json")
+    if "hip_vector" in (manifest["kernel"], build.get("kernel")):
+        if (manifest["kernel"] != build.get("kernel") or manifest["target"] != build.get("target") or
+                manifest.get("hip_vector_profile") != build.get("hip_vector_profile") or
+                manifest.get("source_commit") != build.get("source_commit") or build.get("source_tree_clean") is not True or
+                "canary.hsaco" in manifest["files"]):
+            raise ValueError("genuine HIP vector manifest/build profile mismatch")
+        vector_title.validate_build(build, ROOT, stage / "hip-vector-provenance", (stage / "app/eboot.bin").read_bytes())
     if "vector_add_twice" in (manifest["kernel"], build.get("kernel")):
         if (build.get("kernel") != manifest["kernel"] or build.get("target") != manifest["target"] or
                 any(type(item.get("dispatches")) is not int or item["dispatches"] != 2 for item in (manifest, build))):
@@ -82,6 +90,8 @@ def verify_case(stage, controllers, packages, controller_evidence, title):
                          "native execution", "clean teardown", "service health"]}
     if manifest["kernel"] == "vector_add_twice":
         result["dispatches"] = 2
+    if manifest["kernel"] == "hip_vector":
+        result["hip_vector_profile"] = manifest["hip_vector_profile"]
     return result
 
 
