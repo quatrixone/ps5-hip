@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "classification": "native-bounded-memory-fill-and-discovery-pass",
+  "source_commit": "9bb191ba7ef76188ef6a2e367fd21ce524f7c43d",
+  "source_branch": "development/native-memory-fill",
+  "root_title_and_api_integration_pending": true,
+  "host": "192.168.4.40",
+  "firmware": "12.70",
+  "title_id": "PPSA99014",
+  "kernel": "hip_memory_fill",
+  "image": {
+    "sha256": "cca66888e3233a84c8ef72a1f0c0dd7eab3a9f66ad51b9a057682a94fee83caf",
+    "bytes": 3670016
+  },
+  "evidence": {
+    "execution": {
+      "path": "results/native-fill-execution-v1/observation-20261013T161505.477030Z/receipt.json",
+      "sha256": "5f3955575be6b001d2853b84db9022a766f38442e4f9b7d711995c7167860418"
+    },
+    "execution_review": {
+      "path": "results/native-fill-execution-v1/observation-20261013T161505.477030Z-independent-review.json",
+      "sha256": "320640b2c5f6c572194ecc367be36fa59aae0ebdba169373b62b46ec36f4a6af"
+    },
+    "deployment": {
+      "path": "results/native-fill-deployment-v1/deployment-20261013T161030.434544Z/deployment.json",
+      "sha256": "4e8cbc796909a6e5b8ee43180fb412469a3c502775007a35678d75cfdcd50956"
+    },
+    "deployment_review": {
+      "path": "results/native-fill-deployment-v1/deployment-20261013T161030.434544Z-independent-review.json",
+      "sha256": "646ba4150485df0e722f7217b1389fca4d05133f69d885b7a54cf9bbe453296d"
+    },
+    "source_review": {
+      "path": "results/native-fill-source-independent-review-v1/review.json",
+      "sha256": "84bfad0379e3eff4769d818ca620fa79ca4397f34dfe2a54ce931c74b889f156"
+    },
+    "offline_qualification": {
+      "path": ".local/g4-native-fill/results/fill-qualification-v1/receipt.json",
+      "sha256": "ef126181ecd2f1da00b945dea812a2a11bc979ea78aeb8bdff9d9535b7942dee"
+    },
+    "host_abi": {
+      "path": ".local/g4-native-fill/results/fill-oracle-abi-v1/receipt.json",
+      "sha256": "76edc6f357780507122a6beb5d5b763138bbc2d1ccf492538a886d3a4923b39a"
+    },
+    "native_package_review": {
+      "path": "results/native-fill-package-independent-review-v1/review.json",
+      "sha256": "401e031c136f08848f5531a019c1e6ccaa92d155459c4a28674f942a96edf4f5"
+    },
+    "controls": {
+      "path": "results/native-fill-controls-offline-v2/receipt.json",
+      "sha256": "82a3dc4607150f906ed1007242e022cde8774608f6fe494da945573ed581f1d7"
+    },
+    "controls_review": {
+      "path": "results/native-fill-controls-independent-review-v1/review.json",
+      "sha256": "77c96026206966df2787991d98d00fd057c5fcdc7964c639ff3edaddb67bed33"
+    },
+    "preceding_contention": {
+      "path": "evidence/native-hip-contention.json",
+      "sha256": "def5b386df26295e0b6d96ac7c76eb215106ca0d522783933273f44e9cb47fd6"
+    },
+    "manifest": {
+      "path": ".local/g4-native-fill/dist/PPSA99014/gfx1013-hip_memory_fill-263901a52618/manifest.json",
+      "sha256": "994df7b7640bc6b25095b84efe3d937000736ba9501148e08390d66dd0040346"
+    },
+    "package-receipt": {
+      "path": ".local/g4-native-fill/dist/PPSA99014/gfx1013-hip_memory_fill-263901a52618/package-receipt.json",
+      "sha256": "c93e1b9611070839458d026cb2788acc14bb7d05ceacea33ffe9360f0ee4cc76"
+    },
+    "build-receipt": {
+      "path": ".local/g4-native-fill/dist/PPSA99014/gfx1013-hip_memory_fill-263901a52618/build-receipt.json",
+      "sha256": "23ea532829590bf765e2f6bad80a41bd7577360ceee6f0316ec9201758ddd09d"
+    }
+  },
+  "observed": {
+    "pid": 345,
+    "application_id": "0x00008018",
+    "compiler_registered_functions": 2,
+    "blocking_dispatches": 6,
+    "counts": [
+      1,
+      1,
+      73,
+      73,
+      257,
+      257
+    ],
+    "rounds": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+    ],
+    "exact_values": 662,
+    "output_words": 746,
+    "input_words": 746,
+    "fills": 24,
+    "discovery_before_backend": true,
+    "compiler_unregister_and_State_destruction_before_final_success": true,
+    "application_log_bytes": 1843,
+    "application_log_sha256": "217bb46f3303c01cada00fa434e00a83724650ef9fb5d573bd6929c3cbe74105",
+    "natural_title_stop": true,
+    "services_healthy": true,
+    "owned_locks_released": true
+  },
+  "scope": "Tracked CPU byte fills consumed by the unchanged affine_words GPU body, with whole-buffer guards, byte truncation, an unaligned patch and changed second-round inputs on reused allocations. Single-device discovery passes before backend initialization.",
+  "DMA_validated": false,
+  "performance_validated": false,
+  "general_cache_visibility_validated": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Exact bounded tracked byte-fill visibility workload on gfx1013/FW12.70; six genuine launches consume 662 GPU inputs,24 fills and746 input/output comparisons. Full G4 and general HIP compatibility remain unproven.",
+    "Frozen client validates input preservation, guards, byte truncation, unaligned interior patch and changed second-round fills with reused storage. No arbitrary memory/cache or performance claim.",
+    "Per-value checks certified by frozen client; application log does not export every result.",
+    "Visible matching mounts do not prove global namespace completeness or reference release.",
+    "Application fetched after close; natural-stop/OS capture frozen before close and post-snapshot.",
+    "No console access or native re-execution by reviewer."
+  ],
+  "next": "Complete separate reviewed SDK integration and continue tracked device-copy qualification."
+}

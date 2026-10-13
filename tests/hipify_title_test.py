@@ -81,11 +81,11 @@ def main():
     if a.check:verify(a.check.resolve());return
     require(a.reference_root and a.probe_dir and a.compiler_source_root and a.output,'reference-root/probe-dir/compiler-source-root/output required')
     ref,probe,out=a.reference_root.resolve(),a.probe_dir.resolve(),a.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='808214cad321cc26a3125c17ec1b80a116a7eae2c59d054c8fed66c21243edbc','reviewed threaded runtime proof')
+    r=json.loads((probe/'receipt.json').read_text());require(sha(probe/'receipt.json')=='9b94ef064cbc6e76c6988c1644fc64b0d05f7ffa8480009f8fba0291731e58f0','reviewed threaded runtime proof')
     require(r.get('schema')==2 and r.get('compiler_only') is False and r.get('compiler_proof'),'separate compiler and runtime authorities required')
     check_runtime_proof(probe)
     frozen=a.compiler_source_root.resolve();external=dict(r['inputs']);external.update({str(frozen/n):v for n,v in r['sources'].items()});external.update({str(probe/n):v for n,v in r['artifacts'].items()});external[str(probe/'receipt.json')]=sha(probe/'receipt.json')
-    review=ref/'results/sdk-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='b6198dc17313e3badd471458b6d35be97213e2f6889cab10c70cc0224ae02cf1','runtime review changed');external[str(review)]=sha(review)
+    review=ref/'results/fill-sdk-hipify-runtime-independent-review-v1/review.json';require(sha(review)=='36a9a78690da3715a8535e6444132d6c6111aa9ce4afc1bf431cb625a2f0abaa','runtime review changed');external[str(review)]=sha(review)
     require(all(sha(n)==v for n,v in external.items()),'frozen runtime inputs changed')
     lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include';elevation=ref/'.deps/elevation/client';headers=ref/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'
     for h in (elevation/'elevation.hpp',elevation/'protocol.hpp'):external[str(h)]=sha(h)

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "classification": "offline-fill-sdk-integration-pass",
+  "native_source_commit": "9bb191ba7ef76188ef6a2e367fd21ce524f7c43d",
+  "root_parent": "8d9ad1f217babe5c131eb431ad362b518eadd059",
+  "reviewed_diff_sha256": "0b100ce06fcc19d3c4688a526c57fda52ea9ed0161614e3bb0af76a933e5038a",
+  "evidence": {
+    "qualification": {
+      "path": ".local/g4-fill-sdk-integration/results/fill-sdk-qualification-v1/receipt.json",
+      "sha256": "92541a4fda8f349e170ce169bd11ee23a348b5ac63afb75a446f8d19ce77da9d"
+    },
+    "metadata_reconciliation": {
+      "path": ".local/g4-fill-sdk-integration/results/fill-sdk-metadata-reconciliation-v1/receipt.json",
+      "sha256": "ae4b3732bc18f54d159a0a11a4db957cd9dcc58742b6b1fa6533ccd2b003e719"
+    },
+    "independent_review": {
+      "path": "results/fill-sdk-integration-independent-review-v1/review.json",
+      "sha256": "d34cd28eba515e8df9c046f2be9516791894431e358fcecc4fe387011cf9cd56"
+    }
+  },
+  "observed": {
+    "cmake_tests_passed": 62,
+    "threaded_ASan_UBSan_modes": 38,
+    "CPU_only_TSAN_modes": 19,
+    "HIPIFY_runtime_models": 19,
+    "main_worker_models": 20,
+    "init_worker_models": 21
+  },
+  "scope": "Integrates tracked synchronous byte fill, five bounded discovery APIs and the native-tested fill title while retaining compiler/model dependency separation. Compiler device payloads remain unchanged.",
+  "hardware_executed_for_integration": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Native execution remains bound to frozen 9bb191b and its original image/receipts.",
+    "This offline integration does not qualify general HIP compatibility, DMA, performance, streams or asynchronous copies.",
+    "Tracked device-copy remains a separate candidate."
+  ],
+  "supersedes_historical_integration_pending": {
+    "path": ".local/g4-fill-sdk-integration/evidence/native-hip-memory-fill.json",
+    "sha256": "73abcbd7793cc38dd48a2f9864b290ed8fd0d12380926b30cae197ed5c080988"
+  }
+}

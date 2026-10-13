@@ -4,23 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
-- **Single-device discovery qualified offline in this branch:** five HIP APIs
-  expose device zero and the admitted wave32 attribute without creating State
-  or AGC. Genuine pre-registration worker/main calls, normal registration,
-  error precedence, output preservation and shutdown passed 38 ASan/UBSan
-  modes and 19 CPU-only TSAN modes. Independent review inspected actual
-  constructor ordering and source/proof hashes. See
-  `evidence/offline-device-discovery.json`. Native execution and root integration
-  remain pending; discovery-only clean internal finalization is not claimed.
-
-- **Synchronous tracked memory fill qualified offline in this branch:**
-  `hipMemset` reuses allocation bounds and ownership checks, supports interior
-  ranges and byte truncation, and serializes against blocking submissions.
-  Registry ASan, 36 real-runtime ASan/UBSan modes and 17 CPU-only TSAN modes
-  passed, including a fill waiting on a submission's held gate. Independent
-  source/proof review is clear. See `evidence/offline-memory-fill.json`.
-  This isolated change is not integrated into the root development branch;
-  native fill/cache visibility and asynchronous APIs remain unqualified.
+- **Tracked fills and device discovery passed on .40:** frozen `9bb191b`
+  checked discovery before backend initialization, then consumed 24 byte fills
+  in six GPU launches. All 662 active values, 746 input and 746 output words
+  matched, including guards and changed second-round inputs on reused storage.
+  PID345/application `0x00008018` stopped naturally after complete cleanup;
+  independent lifecycle, service and lock audit passed. This proves the bounded
+  workload, not DMA, performance or general cache visibility. The title and APIs are now integrated offline with 62 passing CMake tests;
+  see `evidence/native-hip-memory-fill.json` and
+  `evidence/offline-fill-sdk-integration.json`. The native run remains bound to
+  the original frozen source and image; broader G4 remains open.
 
 - **Bounded contending HIP callers passed on .40:** frozen `70a604a` observed
   overlapping A-launch/B-push API lifetimes and B requesting the same runtime
@@ -1064,3 +1057,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G4 integration | a5b89aa | offline | pass: threaded runtime, refreshed compiler authorities, 55 CMake tests | evidence/offline-threaded-runtime-integration.json | worker initialization
 - 2026-10-13 | G4 worker initialization | a7e6da7 | .40 | pass: init on A, four dispatches, natural teardown | evidence/native-hip-workers-init.json | overlapping host callers
 - 2026-10-13 | G4 contention | 70a604a | .40 | pass: overlapping HIP calls, 331 exact values, natural teardown | evidence/native-hip-contention.json | native memory fill
+- 2026-10-13 | G4 fills | 9bb191b | .40 | pass: 24 fills, 662 GPU values, discovery and natural teardown | evidence/native-hip-memory-fill.json | SDK integration, D2D
+- 2026-10-13 | G4 SDK | 9bb191b source | offline | pass: fill/discovery integration, 62 CMake tests | evidence/offline-fill-sdk-integration.json | native D2D

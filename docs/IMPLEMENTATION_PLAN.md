@@ -67,6 +67,16 @@ overlap in API lifetime; B requests the same runtime gate while A owns it.
 Kernel-level blocked waiting, performance and GPU overlap remain unproven.
 See `../evidence/native-hip-contention.json`; this experiment is not yet integrated.
 
+The isolated `9bb191b` fill/discovery title subsequently passed its native cycle:
+discovery before backend initialization, 24 tracked fills, six launches consuming
+662 GPU input values, and 746 input plus 746 output whole-buffer comparisons.
+Guard, truncation, unaligned patch and changed-round checks passed with complete
+audited natural teardown. See `../evidence/native-hip-memory-fill.json`.
+The title and APIs are integrated with 62 passing offline CMake tests; see
+`../evidence/offline-fill-sdk-integration.json`. Native execution remains bound
+to the original frozen candidate. DMA, performance and general cache visibility
+are not established by this bounded case.
+
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
 training workloads. Make the runtime reusable beyond ProsperoAI and understandable
