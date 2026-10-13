@@ -267,6 +267,11 @@ if(BUILD_TESTING)
   add_test(NAME hip_routes_transcript_boundaries COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/hip_routes_recipe_test.py)
   set(PS5HIP_HIP_ROUTES_PROBE "" CACHE PATH "Completed genuine four-kernel compiler/model/native proof")
+  set(PS5HIP_HIP_ROUTES_TITLE_MODEL "" CACHE PATH "Completed genuine four-kernel title lifecycle models")
+  if(PS5HIP_HIP_ROUTES_TITLE_MODEL)
+    add_test(NAME hip_routes_title_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_routes_title_test.py --check "${PS5HIP_HIP_ROUTES_TITLE_MODEL}")
+  endif()
   if(PS5HIP_HIP_ROUTES_PROBE)
     add_test(NAME hip_routes_actual_proof COMMAND ${Python3_EXECUTABLE}
       ${CMAKE_SOURCE_DIR}/tests/hip_routes_recipe_test.py --check "${PS5HIP_HIP_ROUTES_PROBE}")

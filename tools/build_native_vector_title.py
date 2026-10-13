@@ -16,7 +16,7 @@ from fat_binary_fixture_test import section
 from native_import_libraries_test import read_imports, nid
 from probe_host_registration import audit_image, load_regions
 import struct
-from native_vector_title import PROFILE, PROVENANCE_FILES, validate_build, audit_roundtrip
+from native_vector_title import PROFILE, profile_for, provenance_files, validate_routes_compiler, validate_build, audit_roundtrip
 
 
 def sha(path):
@@ -28,12 +28,14 @@ def require(condition, message):
         raise RuntimeError(message)
 
 
-def patch_startup(source):
+def patch_startup(source, kernel="hip_vector"):
+    profile_for(kernel)
     declaration = 'extern "C" void ps5hip_install_shell_exit_probe();'
     call = '    ps5hip_install_shell_exit_probe();\n#endif\n    _init();'
     require(source.count(declaration) == 1 and source.count(call) == 1, "pinned shell startup changed")
-    return source.replace(declaration, declaration + '\n#ifdef PS5HIP_VECTOR_TITLE\nextern "C" void ps5hip_install_vector_title_finalizer();\n#endif').replace(call,
+    patched = source.replace(declaration, declaration + '\n#ifdef PS5HIP_VECTOR_TITLE\nextern "C" void ps5hip_install_vector_title_finalizer();\n#endif').replace(call,
         '    ps5hip_install_shell_exit_probe();\n#endif\n#ifdef PS5HIP_VECTOR_TITLE\n    ps5hip_install_vector_title_finalizer();\n#endif\n    _init();')
+    return patched if kernel == "hip_vector" else patched.replace("PS5HIP_VECTOR_TITLE", "PS5HIP_ROUTES_TITLE")
 
 
 def patch_linker(source):
@@ -57,7 +59,7 @@ def patch_linker(source):
         HIDDEN(__ps5hip_relro_end = .);''')
 
 
-def audit_startup(disassembly, image=None):
+def audit_startup(disassembly, image=None, kernel="hip_vector"):
     def body(name):
         match = re.search(r"^[0-9a-f]+ <" + re.escape(name) + r">:\n(.*?)(?=^[0-9a-f]+ <|\Z)", disassembly, re.M | re.S)
         require(match is not None, "missing linked startup symbol " + name)
@@ -70,6 +72,11 @@ def audit_startup(disassembly, image=None):
     require("<__hipUnregisterFatBinary>" in body("__hip_module_dtor"), "genuine compiler unregister missing")
     result = {"install_order": ["shell", "vector_finalizer", "_init", "main"],
               "compiler_atexit_unregister": True, "native_executed": False}
+    if kernel == "hip_routes":
+        entry = profile_for(kernel)["client_entry"]
+        require("<" + entry + ">" in body("main") and body(entry), "renamed genuine title client not called by wrapper")
+        require(ctor.count("<__hipRegisterFunction>") == 4, "four compiler registrations missing from linked title")
+        result["client_entry"] = entry
     if image is None:
         require("<atexit>" in ctor and "<atexit>" in finalizer, "atexit registration missing")
         return result
@@ -107,12 +114,17 @@ def audit_startup(disassembly, image=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference-root", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=ROOT / "build/native/gfx1013-hip_vector",
+    parser.add_argument("--kernel", choices=("hip_vector", "hip_routes"), default="hip_vector")
+    parser.add_argument("--routes-probe", type=Path, help="Completed pinned --title-entry compiler-only output")
+    parser.add_argument("--output", type=Path,
                         help="Fresh output under build/native; never overwrites a prior attempt")
     args = parser.parse_args()
     ref = args.reference_root.resolve()
-    out = args.output.resolve()
-    require(out.parent == (ROOT / "build/native").resolve() and out.name.startswith("gfx1013-hip_vector"), "invalid fresh native output")
+    kernel = args.kernel
+    profile = profile_for(kernel)
+    require((kernel == "hip_routes") == bool(args.routes_probe), "--routes-probe is required only for hip_routes")
+    out = (args.output or ROOT / ("build/native/gfx1013-" + kernel)).resolve()
+    require(out.parent == (ROOT / "build/native").resolve() and out.name.startswith("gfx1013-" + kernel), "invalid fresh native output")
     out.mkdir(parents=True, exist_ok=False)
     commands = []
 
@@ -136,11 +148,26 @@ def main():
     fixture_manifest = fixture_root / "compatible-emitted-abi.json"
     require(sha(fixture_manifest) == evidence["raw_file_hashes"][fixture_manifest.name]["sha256"], "fixture manifest changed")
     combined = fixture_root / "ps5-vector-add-gfx1013-device-wchar4.o"
-    require(sha(combined) == PROFILE["combined_object_sha256"], "genuine combined object changed")
+    compiler_inputs = {}
+    if kernel == "hip_routes":
+        probe = args.routes_probe.resolve()
+        combined = probe / "ps5/routes.o"
+        compiler_receipt = probe / "receipt.json"
+        compiler_report = validate_routes_compiler(compiler_receipt.read_bytes(), combined.read_bytes(), ROOT)
+        for name, digest in compiler_report["artifacts"].items():
+            path = (probe / name).resolve()
+            require(path.is_relative_to(probe) and sha(path) == digest, "title compiler artifact changed")
+            compiler_inputs[str(path)] = digest
+        compiler_inputs[str(compiler_receipt)] = sha(compiler_receipt)
+        compiler_inputs.update(compiler_report["inputs"])
+        for item in compiler_report["tools"].values():
+            compiler_inputs[item["path"]] = item["sha256"]
+        require(all(sha(Path(n)) == v for n, v in compiler_inputs.items()), "title compiler provenance changed")
+    require(sha(combined) == profile["combined_object_sha256"], "genuine combined object changed")
     selected = out / "ps5-combined.o"
     shutil.copyfile(combined, selected)
     bundle = section(selected.read_bytes(), b".hip_fatbin")
-    require(hashlib.sha256(bundle).hexdigest() == PROFILE["bundle_sha256"], "embedded bundle changed")
+    require(hashlib.sha256(bundle).hexdigest() == profile["bundle_sha256"], "embedded bundle changed")
     (out / "ps5.bundle").write_bytes(bundle)
     headers, include_dirs, header_inputs = {}, [], {}
     for key, archive, subdir in (("HIP", "HIP.tar.gz", "include"), ("clr", "clr.tar.gz", "hipamd/include")):
@@ -162,6 +189,7 @@ def main():
     fixture_inputs = {str(p): sha(p) for p in (fixture_manifest, combined, generated,
                       fixture_root / "HIP.tar.gz", fixture_root / "clr.tar.gz")}
     fixture_inputs.update(header_inputs)
+    fixture_inputs.update(compiler_inputs)
     tool_inputs = {n: {"path": str(Path(shutil.which(n)).resolve()), "sha256": sha(Path(shutil.which(n)))}
                    for n in ("clang++-18", "ld.lld-18", "llvm-config-18", "llvm-nm-18", "llvm-objdump-18")}
     sdk_wrapper_before = sha(sdk / "bin/prospero-clang++")
@@ -174,7 +202,7 @@ def main():
     native_before = {str(p.relative_to(native_source)): sha(p) for p in native_source.rglob("*") if p.is_file()}
     native = out / "native-tools"
     shutil.copytree(native_source, native)
-    (native / "app_crt.cpp").write_text(patch_startup((native / "app_crt.cpp").read_text()))
+    (native / "app_crt.cpp").write_text(patch_startup((native / "app_crt.cpp").read_text(), kernel))
     (native / "ps5-pie.ld").write_text(patch_linker((native / "ps5-pie.ld").read_text()))
     elevation_source = ref / ".deps/elevation"
     elevation_receipt = json.loads((elevation_source / "receipt.json").read_text())
@@ -194,8 +222,9 @@ def main():
     include_dirs.append(elevation / "client")
     core = [ROOT / "src" / n for n in ("code_object.cpp", "fat_binary.cpp", "host_registration.cpp", "host_launch.cpp", "hip_runtime.cpp",
             "launch.cpp", "native_memory.cpp", "native_data.cpp", "native_launch.cpp", "submission.cpp", "agc_backend.cpp")]
-    clients = [ROOT / n for n in ("tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp",
-               "tools/hip_vector_title.cpp", "tools/native_shell_exit_probe.cpp")]
+    clients = [ROOT / "tools/hip_vector_title.cpp", ROOT / "tools/native_shell_exit_probe.cpp"]
+    clients += ([ROOT / "tools/hip_vector_control.cpp", ROOT / "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+                [ROOT / "tools/hip_routes_control.cpp"])
     tracked = [*core, *clients, *sorted((ROOT / "include/ps5hip").glob("*.h")),
         *[ROOT / n for n in ("tools/build_native_vector_title.py", "tools/native_vector_title.py",
             "tools/probe_host_registration.py", "tools/native_runtime.h", "tools/ps5-clangxx",
@@ -203,9 +232,11 @@ def main():
             "tests/native_import_libraries_test.py", "tests/native_agc_imports_test.py",
             "dependencies.json", "elevation-inputs.json", "title.json")],
         authority, native_authority]
+    if kernel == "hip_routes":
+        tracked += [ROOT / n for n in ("tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md")]
     source_before = {str(p.relative_to(ROOT)): sha(p) for p in tracked}
     common = ["-O2", "-g", "-Wall", "-Wextra", "-Werror", "-fPIC", "-fvisibility=hidden",
-              "-DPS5HIP_WITH_ELEVATION=1", "-DPS5HIP_VECTOR_TITLE=1", "-DPS5HIP_SHELL_EXIT_PROBE=1",
+              "-DPS5HIP_WITH_ELEVATION=1", "-DPS5HIP_" + ("VECTOR" if kernel == "hip_vector" else "ROUTES") + "_TITLE=1", "-DPS5HIP_SHELL_EXIT_PROBE=1",
               *[part for directory in include_dirs for part in ("-I", directory)]]
     objects = [selected]
     for source in [*core, *clients, native / "app_crt.cpp", elevation / "client/elevation.cpp"]:
@@ -258,9 +289,12 @@ def main():
     (out / "symbols.json").write_text(json.dumps(symbols, indent=2) + "\n")
     audits = {"raw_pie": audit_image(pie, symbols, bundle),
               "converted_eboot": audit_image(elf, symbols, bundle, native=True)}
+    startup_symbols = "_start,__hip_module_ctor,__hip_module_dtor,ps5hip_install_vector_title_finalizer"
+    if kernel == "hip_routes":
+        startup_symbols += ",main," + profile["client_entry"]
     startup = run("startup-disassembly", "llvm-objdump-18", "-d", "--no-show-raw-insn",
-        "--disassemble-symbols=_start,__hip_module_ctor,__hip_module_dtor,ps5hip_install_vector_title_finalizer", pie)
-    audits["startup"] = audit_startup(startup, pie)
+        "--disassemble-symbols=" + startup_symbols, pie)
+    audits["startup"] = audit_startup(startup, pie, kernel)
     modules, libraries, imports = read_imports(elf)
     names = {p[1]: imports[nid(p[1])] for line in lines if len(p := line.split()) == 2 and p[0] == "U" and nid(p[1]) in imports}
     require(len(names) == len(imports) and not any(n.startswith(("hip", "__hip")) for n in names), "unexpected native import identity")
@@ -286,7 +320,10 @@ def main():
     shutil.copyfile(helper, candidate / "lapy.elf")
     provenance = out / "provenance"
     provenance.mkdir()
-    for name in PROVENANCE_FILES:
+    for name in provenance_files(kernel):
+        if name in ("routes-combined.o", "compiler-receipt.json"):
+            shutil.copyfile(combined if name == "routes-combined.o" else compiler_receipt, provenance / name)
+            continue
         source = (native_source / name[len("original-"):]) if name.startswith("original-") else (
             native / name if name in ("app_crt.cpp", "ps5-pie.ld") else out / name)
         shutil.copyfile(source, provenance / name)
@@ -300,9 +337,9 @@ def main():
     require(source_before == {str(p.relative_to(ROOT)): sha(p) for p in tracked}, "source changed during recipe")
     source_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     source_changes = subprocess.check_output(["git", "status", "--porcelain", "--", *source_before], cwd=ROOT, text=True)
-    receipt = {"schema": 1, "classification": "Offline genuine HIP vector native title link/FSELF only",
-        "target": "gfx1013", "kernel": "hip_vector", "shutdown_mode": "shell-request-probe",
-        "hip_vector_profile": PROFILE, "vector_audits": audits, "source_sha256": source_before,
+    receipt = {"schema": 1, "classification": "Offline genuine " + kernel + " native title link/FSELF only",
+        "target": "gfx1013", "kernel": kernel, "shutdown_mode": "shell-request-probe",
+        kernel + "_profile": profile, ("vector_audits" if kernel == "hip_vector" else "routes_audits"): audits, "source_sha256": source_before,
         "hardware_validated": False, "native_executed": False, "gpu_calls": 0,
         "source_commit": source_commit, "source_tree_clean": not bool(source_changes),
         "fixture_manifest_sha256": sha(fixture_manifest), "header_hashes": headers,
@@ -311,7 +348,7 @@ def main():
         "elevation": elevation_receipt, "host_zlib": zlib_receipt, "sdk_inputs": sdk_before,
         "tools": tool_inputs, "fixture_inputs_before_after": fixture_inputs,
         "sdk_wrapper_sha256": sdk_wrapper_before,
-        "hip_vector_provenance": {n: sha(provenance / n) for n in sorted(PROVENANCE_FILES)},
+        kernel + "_provenance": {n: sha(provenance / n) for n in sorted(provenance_files(kernel))},
         "artifacts": {n: sha(candidate / n) for n in ("eboot.bin", "lapy.elf", "sce_module/libc.prx")},
         "raw_artifacts": {str(p.relative_to(out)): sha(p) for p in out.rglob("*") if p.is_file()},
         "limits": ["Not executed or hardware qualified.",

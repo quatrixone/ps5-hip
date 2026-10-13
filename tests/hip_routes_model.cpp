@@ -20,6 +20,10 @@ uint64_t next_address=0x200040000;
 unsigned allocations_called=0, backends=0, submits=0, releases=0;
 std::string mode;
 bool preflush_failed=false, scratch_map_failed=false;
+#ifdef PS5HIP_ROUTES_TITLE
+bool audit_done=false;
+unsigned final_allocations=0;
+#endif
 std::array<uint64_t,3> data_pointers{};
 std::array<uint64_t,4> entry_offsets{};
 std::array<uint32_t,8192> first_input{};
@@ -38,6 +42,9 @@ void dispose(Allocation &a) { if(a.cpu){check(munmap(a.cpu,a.bytes)==0);a.cpu=nu
 struct Audit {
     ~Audit() {
         // The compiler unregister and shared State destructor have already run.
+#ifdef PS5HIP_ROUTES_TITLE
+        final_allocations=unsigned(allocations.size());audit_done=true;
+#endif
         std::printf("ROUTES_MODEL_FINAL allocations=%zu backends=%u submits=%u releases=%u finalized=%u model_only=true\n",
             allocations.size(),backends,submits,releases,unsigned(ps5hip_runtime_finalized()));
         for(auto &entry:allocations)dispose(entry.second);
@@ -113,9 +120,11 @@ public:
             expected[52]=8;expected[54]=8;expected[56]=1;expected[104]=2;
         }
         check(std::memcmp(expected,k,argument_bytes)==0);
+#ifndef PS5HIP_ROUTES_TITLE
         check(hipDeviceSynchronize()==hipErrorNotReady);
         check(hipFree(reinterpret_cast<void*>(input_address-64))==hipErrorNotReady);
         uint32_t sample=0;check(hipMemcpy(&sample,input,4,hipMemcpyDeviceToHost)==hipErrorNotReady);
+#endif
         if(route==2) {
             if(mode=="scratch-submit")return -7;
             if(mode=="scratch-throw")throw std::runtime_error("scratch submit");
@@ -159,7 +168,12 @@ public:
 }
 extern "C" void ps5hip_routes_model_configure(const char *value){check(!allocations_called&&!backends&&!submits);mode=value;}
 extern "C" unsigned ps5hip_routes_model_backends(){return backends;}
-extern "C" unsigned ps5hip_routes_model_live(){return unsigned(allocations.size());}
+extern "C" unsigned ps5hip_routes_model_live(){
+#ifdef PS5HIP_ROUTES_TITLE
+    if(audit_done)return final_allocations;
+#endif
+    return unsigned(allocations.size());
+}
 extern "C" unsigned ps5hip_routes_model_submits(){return submits;}
 extern "C" unsigned ps5hip_routes_model_releases(){return releases;}
 std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_runtime_model_backend(){

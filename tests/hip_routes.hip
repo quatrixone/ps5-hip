@@ -193,7 +193,11 @@ int main(int argc,char **argv) {
         }
 #endif
         ps5hip_runtime_finish();
+#ifdef PS5HIP_ROUTES_TITLE
+        std::puts("ROUTES_CLIENT_PASS sequences=2 dispatches=8 changed_inputs=true full_guards=true");return 0;
+#else
         std::puts("ROUTES_CLIENT_PASS sequences=2 dispatches=8 changed_inputs=true full_guards=true hardware_validated=false");return 0;
+#endif
     } catch(const std::exception &error) {
         std::fprintf(stderr,"ROUTES_CLIENT_REJECT mode=%s reason=%s terminal=%u\n",mode,error.what(),unsigned(ps5hip_runtime_terminal()));
         if(!ps5hip_runtime_terminal()&&close_data(pi,po,pt)) {ps5hip_runtime_finish();return 20;}
@@ -210,7 +214,12 @@ int main(int argc,char **argv) {
         check(hipGetLastError()==hipErrorUnknown);
         check(ps5hip_routes_model_live()==live&&ps5hip_routes_model_submits()==submits&&ps5hip_routes_model_releases()==releases);
         std::printf("ROUTES_CLIENT_TERMINAL_PASS mode=%s unresolved=%u live=%u submits=%u releases=%u ownership_retained=true\n",mode,unsigned(unresolved),live,submits,releases);
-        std::fflush(nullptr);std::_Exit(30);
+        std::fflush(nullptr);
+#ifdef PS5HIP_ROUTES_TITLE
+        return 30; // The title wrapper owns quarantine and forbids shell finalization.
+#else
+        std::_Exit(30);
+#endif
 #else
         for(;;)::sleep(1);
 #endif

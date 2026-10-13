@@ -259,7 +259,8 @@ HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
     return core,common,before,results
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--compiler-only',action='store_true');p.add_argument('--host-only',action='store_true');args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--compiler-only',action='store_true');p.add_argument('--host-only',action='store_true');p.add_argument('--title-entry',action='store_true');args=p.parse_args()
+    require(not args.title_entry or args.compiler_only, '--title-entry requires --compiler-only')
     ref=args.reference_root.resolve();out=args.output.resolve();require(not out.exists(),'fresh output required');out.mkdir(parents=True)
     commands=[];inputs={};cases=[]
     def run(label,argv,expected=0):
@@ -276,6 +277,7 @@ def main():
             directory=out/host;directory.mkdir();combined=directory/'routes.o'
             compiler=wrapper if host=='ps5' else tools['clang++']
             cmd=[compiler,'-x','hip','-B'+str(pathlib.Path(tools['ld.lld']).resolve().parent),'--offload-arch=gfx1013','-mcode-object-version=5','-mno-wavefrontsize64','-D__HIP_PLATFORM_AMD__','-std=c++17','-O2','-fno-fast-math','-c',source,'--hip-path='+str(stage),'-I'+str(stage/'include'),'-include','__clang_hip_runtime_wrapper.h','--rocm-device-lib-path='+str(libs),'--hip-device-lib=ockl-workitem-only.bc','--hip-device-lib=oclc_abi_version_500.bc','--hip-device-lib=oclc_isa_version_1013.bc','-o',combined]
+            if args.title_entry:cmd+=['-DPS5HIP_ROUTES_TITLE=1','-Dmain=ps5hip_routes_client_main']
             if host=='ps5':cmd+=['-Xarch_device','-fno-short-wchar']
             if host=='linux-model':cmd+=['-DPS5HIP_RUNTIME_MODEL=1','-Xarch_host','-fsanitize=address,undefined','-Xarch_host','-fno-omit-frame-pointer']
             _,trace=run(host+'-driver',cmd+['-###']);require_device_linker(trace,tools['ld.lld']);run(host+'-compile',cmd)
@@ -289,6 +291,8 @@ def main():
             (directory/'observed.json').write_text(json.dumps(audit,indent=2)+'\n');check_profiles(audit)
             hostread,_=run(host+'-host-readobj',[tools['llvm-readobj'],'--sections','--symbols','--relocations',combined]);disasm,_=run(host+'-host-disassembly',[tools['llvm-objdump'],'-dr',combined]);nm,_=run(host+'-undefined',[tools['llvm-nm'],'--undefined-only',combined])
             require(all(n in nm for n in ('__hipRegisterFatBinary','__hipRegisterFunction','__hipUnregisterFatBinary','__hipPushCallConfiguration','__hipPopCallConfiguration','hipLaunchKernel','atexit')),'genuine registration/launch references missing')
+            if args.title_entry:
+                require(re.search(r'^    Name: _Z25ps5hip_routes_client_mainiPPc \(',hostread,re.M) is not None and re.search(r'^    Name: main \(',hostread,re.M) is None,'renamed title entry missing or bare main retained')
             wrapper_bytes=section(combined.read_bytes(),b'.hipFatBinSegment');wrapper_audit=audit_wrapper(wrapper_bytes,hostread,host)
             lifecycle=audit_registration(disasm)
             cases.append({'host':host,'target':'gfx1013','optimization':'O2','bundle_targets':targets,'wrapper_hex':wrapper_bytes.hex(),'wrapper_audit':wrapper_audit,'lifecycle':lifecycle,**audit,'files':{x.name:{'sha256':sha(x),'bytes':x.stat().st_size} for x in directory.iterdir() if x.is_file()}})
@@ -300,7 +304,7 @@ def main():
             if not args.host_only:native=native_proof(ref,out,core,common,run,inputs)
         require(all(sha(ROOT/n)==v for n,v in runtime_sources.items()),'runtime sources changed during native proof')
         require(all(sha(pathlib.Path(n))==v for n,v in inputs.items()),'inputs changed');require(all(sha(ROOT/n)==v for n,v in source_hashes.items()),'sources changed');require(all(sha(pathlib.Path(tools[n]))==v for n,v in tool_hashes.items()),'tools changed')
-        receipt={'schema':1,'classification':'genuine-single-TU-four-route-offline-proof-pass','models':models,'native':native,'runtime_sources':runtime_sources,'device_relation':device_relation,'hardware_validated':False,'source_sha256':source_hashes,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':tool_hashes[n],'version':versions[n]} for n in tools},'cases':cases,'limits':['No GPU execution: host callback arithmetic is not ISA emulation; native proof is compile/link only.','LLVM18.1.8/full pinned6.2.4 headers and exact workitem/constants only; no arbitraryROCm support.','InstalledSDK/resource support trees not fully inventoried; no hermetic SDK claim.']}
+        receipt={'schema':1,'classification':'genuine-single-TU-four-route-offline-proof-pass','models':models,'native':native,'runtime_sources':runtime_sources,'device_relation':device_relation,'hardware_validated':False,'title_entry':args.title_entry,'source_sha256':source_hashes,'inputs':inputs,'tools':{n:{'path':tools[n],'sha256':tool_hashes[n],'version':versions[n]} for n in tools},'cases':cases,'limits':['No GPU execution: host callback arithmetic is not ISA emulation; native proof is compile/link only.','LLVM18.1.8/full pinned6.2.4 headers and exact workitem/constants only; no arbitraryROCm support.','InstalledSDK/resource support trees not fully inventoried; no hermetic SDK claim.']}
         receipt['artifacts']={str(p.relative_to(out)):sha(p) for p in out.rglob('*') if p.is_file()}
         (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('Genuine Linux/PS5 four-route compiler proof passed; noGPU execution.')
     except BaseException as error:

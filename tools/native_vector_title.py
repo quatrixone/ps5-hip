@@ -17,6 +17,34 @@ PROFILE = {
     "data_logical_bytes": 16384, "interior_offset_bytes": 64,
 }
 
+# Fresh --title-entry compiler-only measurement; distinct from the bare-main proof.
+ROUTES_PROFILE = {
+    "target": "gfx1013", "kernel_names": ["routes_integer", "routes_lds", "routes_spill", "routes_geometry"],
+    "client_entry": "_Z25ps5hip_routes_client_mainiPPc",
+    "combined_object_sha256": "5c9c6741ed2f4203ea6c8dea8fe14fcd717a59d6498499524e7766e0373f1951",
+    "bundle_sha256": "106c3e28a3c417bc21f3a47298f8eebadcb2e86f4822036760dddff29029e4aa",
+    "code_sha256": "1f4a39915d66a8b562accf7a75e6518a6684746f2bc365423f16865b836c7ec0",
+    "code_bytes": 10208,
+    "compiler_receipt_sha256": "283c064b5af9d57df2014663b5407222649132567ec5271c8124894326ee6362",
+    "dispatches": 8, "sequences": 2, "outputs_per_sequence": [128, 2, 8192, 6144],
+    "data_logical_bytes": 65536, "interior_offset_bytes": 64,
+    "geometry_records": 384, "geometry_logical": 273, "geometry_inactive": 111,
+    "static_lds_bytes": 256, "private_segment_bytes": 212,
+}
+
+
+def profile_for(kernel):
+    if kernel == "hip_vector":
+        return PROFILE
+    if kernel == "hip_routes":
+        return ROUTES_PROFILE
+    raise ValueError("unsupported genuine HIP title profile")
+
+
+def provenance_files(kernel):
+    profile_for(kernel)
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel == "hip_routes" else set())
+
 
 def validate_fself(container, elf):
     """Narrow plaintext format emitted by the pinned signer; no retail SELF support."""
@@ -77,43 +105,77 @@ def audit_roundtrip(raw, extracted):
 
 
 def validate_profile(receipt, source_root):
-    if (receipt.get("target") != "gfx1013" or receipt.get("kernel") != "hip_vector" or
+    kernel = receipt.get("kernel")
+    selected = profile_for(kernel)
+    if (receipt.get("target") != "gfx1013" or
             receipt.get("shutdown_mode") != "shell-request-probe" or
             receipt.get("hardware_validated") is not False or
-            json.dumps(receipt.get("hip_vector_profile"), sort_keys=True) != json.dumps(PROFILE, sort_keys=True) or
+            json.dumps(receipt.get(kernel + "_profile"), sort_keys=True) != json.dumps(selected, sort_keys=True) or
+            not all(selected.get(n) for n in ("combined_object_sha256", "bundle_sha256", "code_sha256", "code_bytes")) or
             set(receipt.get("artifacts", {})) != {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}):
         raise ValueError("genuine HIP vector title profile mismatch")
     sources = receipt.get("source_sha256", {})
-    required = ("tools/build_native_vector_title.py", "tools/native_vector_title.py",
-                "tools/hip_vector_title.cpp", "tools/hip_vector_control.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
-                "tests/hip_vector_client.cpp", "tools/native_shell_exit_probe.cpp",
-                "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json")
+    required = ["tools/build_native_vector_title.py", "tools/native_vector_title.py",
+                "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
+                "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
+    required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+                 ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
             raise ValueError("genuine HIP vector title source provenance mismatch: " + name)
-    audits = receipt.get("vector_audits", {})
+    audits = receipt.get("vector_audits" if kernel == "hip_vector" else "routes_audits", {})
     if (set(audits) != {"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} or
-            any(audits[k].get("bundle_sha256") != PROFILE["bundle_sha256"]
-                for k in ("raw_pie", "converted_eboot")) or
+            any(audits[k].get("bundle_sha256") != selected["bundle_sha256"] for k in ("raw_pie", "converted_eboot")) or
             audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "main"] or
             audits["startup"].get("compiler_atexit_unregister") is not True or
             audits["fself_roundtrip"].get("matches_except_unmapped_sie_note") is not True):
         raise ValueError("genuine HIP vector title embedded bundle/lifecycle audit missing")
-    authority = json.loads((source_root / "evidence/offline-compatible-hip-headers.json").read_text())
-    for suffix, key in ((".o", "combined_object_sha256"), (".hsaco", "code_sha256")):
-        if authority["raw_file_hashes"]["ps5-vector-add-gfx1013-device-wchar4" + suffix]["sha256"] != PROFILE[key]:
-            raise ValueError("genuine HIP vector fixture authority changed")
+    if kernel == "hip_vector":
+        authority = json.loads((source_root / "evidence/offline-compatible-hip-headers.json").read_text())
+        for suffix, key in ((".o", "combined_object_sha256"), (".hsaco", "code_sha256")):
+            if authority["raw_file_hashes"]["ps5-vector-add-gfx1013-device-wchar4" + suffix]["sha256"] != selected[key]:
+                raise ValueError("genuine HIP vector fixture authority changed")
+
+
+def validate_routes_compiler(raw_receipt, combined, source_root):
+    selected = ROUTES_PROFILE
+    if (hashlib.sha256(raw_receipt).hexdigest() != selected["compiler_receipt_sha256"] or
+            hashlib.sha256(combined).hexdigest() != selected["combined_object_sha256"]):
+        raise ValueError("genuine HIP routes compiler/combined binding mismatch")
+    report = json.loads(raw_receipt)
+    if report.get("title_entry") is not True or report.get("hardware_validated") is not False:
+        raise ValueError("genuine HIP routes title compiler mode missing")
+    for name, digest in report["source_sha256"].items():
+        if hashlib.sha256((source_root / name).read_bytes()).hexdigest() != digest:
+            raise ValueError("genuine HIP routes compiler source changed: " + name)
+    cases = [c for c in report["cases"] if c["host"] == "ps5"]
+    if len(cases) != 1 or cases[0]["files"]["routes.o"]["sha256"] != selected["combined_object_sha256"]:
+        raise ValueError("genuine HIP routes PS5 compiler case missing")
+    files = cases[0]["files"]
+    if (files["routes.bundle"]["sha256"] != selected["bundle_sha256"] or
+            files["routes.hsaco"] != {"sha256": selected["code_sha256"], "bytes": selected["code_bytes"]}):
+        raise ValueError("genuine HIP routes device binding mismatch")
+    from probe_hip_routes import section
+    if hashlib.sha256(section(combined, b".hip_fatbin")).hexdigest() != selected["bundle_sha256"]:
+        raise ValueError("genuine HIP routes combined bundle mismatch")
+    return report
 
 
 def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_profile(receipt, source_root)
-    audits = receipt["vector_audits"]
-    if provenance is None or signed is None or set(receipt.get("hip_vector_provenance", {})) != PROVENANCE_FILES:
+    kernel = receipt["kernel"]
+    selected = profile_for(kernel)
+    audits = receipt["vector_audits" if kernel == "hip_vector" else "routes_audits"]
+    binding = receipt.get(kernel + "_provenance", {})
+    if provenance is None or signed is None or set(binding) != provenance_files(kernel):
         raise ValueError("genuine HIP vector linked artifact provenance missing")
-    for name, digest in receipt["hip_vector_provenance"].items():
+    for name, digest in binding.items():
         path = provenance / name
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("genuine HIP vector linked artifact changed: " + name)
+    if kernel == "hip_routes":
+        validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
+                                 (provenance / "routes-combined.o").read_bytes(), source_root)
     # Reinspect actual linked bytes rather than accepting stale audit booleans.
     from probe_host_registration import audit_image, load_regions
     from build_native_vector_title import patch_startup, patch_linker, audit_startup
@@ -122,9 +184,9 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     relation = audits["fself_roundtrip"]
     expected = {"signed_sha256": hashlib.sha256(signed).hexdigest(),
                 "elf_sha256": hashlib.sha256(elf).hexdigest(),
-                "raw_pie_sha256": receipt["hip_vector_provenance"]["llvm-pie.elf"],
-                "app_crt_sha256": receipt["hip_vector_provenance"]["app_crt.cpp"],
-                "linker_sha256": receipt["hip_vector_provenance"]["ps5-pie.ld"]}
+                "raw_pie_sha256": binding["llvm-pie.elf"],
+                "app_crt_sha256": binding["app_crt.cpp"],
+                "linker_sha256": binding["ps5-pie.ld"]}
     if any(relation.get(k) != v for k, v in expected.items()):
         raise ValueError("genuine HIP vector signed/audited digest relation mismatch")
     omitted = relation.get("omitted_note", {})
@@ -137,16 +199,17 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     validate_fself(signed, elf)
     reader, _, _ = load_regions(provenance / "eboot.elf")
     bundle, _ = reader(symbols["__ps5hip_bundle_begin"], symbols["__ps5hip_bundle_end"] - symbols["__ps5hip_bundle_begin"])
-    if hashlib.sha256(bundle).hexdigest() != PROFILE["bundle_sha256"]:
+    if hashlib.sha256(bundle).hexdigest() != selected["bundle_sha256"]:
         raise ValueError("genuine HIP vector linked bundle changed")
     for key, name, native in (("raw_pie", "llvm-pie.elf", False), ("converted_eboot", "eboot.elf", True)):
         if audit_image(provenance / name, symbols, bundle, native=native) != audits[key]:
             raise ValueError("genuine HIP vector recomputed image audit differs")
-    if audit_startup((provenance / "startup-disassembly.stdout").read_text(), provenance / "llvm-pie.elf") != audits["startup"]:
+    if audit_startup((provenance / "startup-disassembly.stdout").read_text(), provenance / "llvm-pie.elf", kernel) != audits["startup"]:
         raise ValueError("genuine HIP vector startup audit differs")
     native_expected = json.loads((source_root / "evidence/offline-lds-native-readiness.json").read_text())["profiles"][0]["native_tool_source_sha256"]
     for name, patch in (("app_crt.cpp", patch_startup), ("ps5-pie.ld", patch_linker)):
         original = provenance / ("original-" + name)
+        patched = patch(original.read_text(), kernel) if name == "app_crt.cpp" else patch(original.read_text())
         if (hashlib.sha256(original.read_bytes()).hexdigest() != native_expected[name] or
-                patch(original.read_text()) != (provenance / name).read_text()):
+                patched != (provenance / name).read_text()):
             raise ValueError("genuine HIP vector private native patch binding mismatch")
