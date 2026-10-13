@@ -3,6 +3,7 @@
 #include "ps5hip/submission.h"
 #include <ps5platform/kernel.h>
 #include <array>
+#include <algorithm>
 #include <cstring>
 #include <cstdlib>
 #include <fstream>
@@ -89,14 +90,26 @@ extern "C" int32_t sceKernelMapDirectMemory(void **address, size_t bytes, int pr
     check(protection == 0x33 && flags == 0);
     if (allocate_calls == fail_map_at) return -1;
     auto &a = allocations.at(physical);
-    check(a.bytes == bytes && a.alignment == alignment && bytes <= 0x200000 && alignment <= 0x200000);
+    check(a.bytes == bytes && a.alignment == alignment && alignment <= 0x200000);
+#ifdef PS5HIP_NATIVE_ROUTES_MODEL
+    check(bytes <= 0x2000000);
+#else
+    check(bytes <= 0x200000);
+#endif
     if (allocate_calls == alias_map_at) {
         a.cpu = allocations.begin()->second.cpu; a.alias = true;
     } else {
         // Real host pages, no ISA execution/emulation. ASan reserves this native
         // shader window in its gap; the dedicated model remaps only its bounded
         // disjoint pages with protect_shadow_gap=0. Normal builds use NOREPLACE.
-        const auto target = 0x200000000ull + uint64_t(physical) * 0x200000;
+        auto target = 0x200000000ull + uint64_t(physical) * 0x200000;
+#ifdef PS5HIP_NATIVE_ROUTES_MODEL
+        // Reuse bounded disjoint slots across sequential scratch preparations.
+        target = 0x202000000ull;
+        while (std::any_of(allocations.begin(),allocations.end(),[&](const auto &entry) {
+            return !entry.second.unmapped && uint64_t(entry.second.cpu)==target;
+        })) target += 0x2000000;
+#endif
         check(target >= 0x200000000ull && target < 0x300000000ull && bytes <= 0x300000000ull-target);
         int map_flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE;
 #ifndef __has_feature
@@ -143,6 +156,8 @@ int main(int argc, char **argv) {
             const auto original = values;
             auto prepared = ps5hip::prepare_native_vector(bundle, kernel, values, buffers.data);
             check(prepared.resources.size() == 5 && !prepared.commands.empty() && allocations.size() == 5);
+            check(prepared.temporaries.size() == 2 && prepared.temporaries[0] == prepared.resources[0] &&
+                prepared.temporaries[1] == prepared.resources[1]);
             buffers.pointers.fill(0); buffers.n = 0; values.clear();
             const auto *args = static_cast<const uint8_t *>(prepared.resources[1]->cpu());
             for (size_t i = 0; i < 3; ++i) check(get(args+i*8, 8) == original[i].value);
@@ -162,7 +177,7 @@ int main(int argc, char **argv) {
             ps5hip::SubmissionQueue queue(model);
             check(queue.submit_and_wait(prepared.commands, prepared.resources, 1).status == ps5hip::SubmissionStatus::Complete);
             for (auto &owner : prepared.resources) check(!owner->gpu_in_use());
-            check(prepared.resources[0]->close() && prepared.resources[1]->close());
+            ps5hip::close_native_launch_temporaries(prepared,buffers.data);
             for (auto *base : buffers.bases) buffers.data.free(base);
             reject([&] { queue.submit_and_wait(prepared.commands, prepared.resources, 1); });
             check(model.submits == 1);
@@ -192,7 +207,7 @@ int main(int argc, char **argv) {
             values[1] = values[0];
             auto prepared = ps5hip::prepare_native_vector(bundle, kernel, values, buffers.data);
             check(prepared.resources.size() == 4);
-            check(prepared.resources[0]->close() && prepared.resources[1]->close());
+            ps5hip::close_native_launch_temporaries(prepared,buffers.data);
             buffers.data.free(buffers.bases[0]);
             reject([&] { ps5hip::prepare_native_vector(bundle, kernel, values, buffers.data); });
         }
@@ -214,7 +229,7 @@ int main(int argc, char **argv) {
             reject([&] { queue.submit_and_wait(prepared.commands, prepared.resources, 1); });
             check(!queue.poisoned() && !model.submits && !buffers.data.poisoned());
             for (auto &owner : prepared.resources) check(!owner->gpu_in_use());
-            check(prepared.resources[0]->close() && prepared.resources[1]->close());
+            ps5hip::close_native_launch_temporaries(prepared,buffers.data);
         }
         check(allocations.empty());
         // Each unresolved ownership/faulty-provider case ends its own process.
@@ -255,5 +270,6 @@ int main(int argc, char **argv) {
         }
         check(allocations.empty());
         std::cout << "native launch ownership: measured fixture, 288-byte oracle, holds, clean unwind and quarantine passed; host transport model only\n";
+        return 0;
     } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }
 }
