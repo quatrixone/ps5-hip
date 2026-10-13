@@ -1,6 +1,7 @@
 """Fixed offline OCML fixture and numerical-contract admission for the native probe."""
 import hashlib
 import json
+import struct
 from pathlib import Path
 import probe_ocml_math as probe
 
@@ -51,9 +52,9 @@ def validate_build(build, data, root=ROOT):
             raise ValueError('missing or changed math source binding: ' + name)
 
 
-def verified_device_object(root, directory, target, version):
+def verified_original_device_object(root, directory, target, version):
     directory = directory.resolve()
-    value = lock(root)
+    value = lock(root)['original']
     raw = (directory / 'receipt.json').read_bytes()
     report = json.loads(raw)
     if sha(raw) != value['device_receipt_sha256'] or canonical(report) != value['device_report_sha256']:
@@ -89,8 +90,56 @@ def verified_device_object(root, directory, target, version):
         libraries = [directory / 'libs' / a.split('=', 1)[1] for a in command if a.startswith('--hip-device-lib=')]
         probe.audit_driver((directory / (label + '-driver.stderr')).read_text(),
                            Path(report['tools']['ld.lld']['path']), item['target'], libraries)
-    selected = profile(target, root)
+    selected = next(p for p in value['profiles'] if p['target'] == target and p['optimization'] == 'O2')
     data = (directory / (target + '-O2.hsaco')).read_bytes()
     if sha(data) != selected['code_sha256'] or len(data) != selected['bytes']:
         raise ValueError('math O2 selection changed')
     return data, report
+
+
+def corrected_bytes(original, offsets):
+    if (len(offsets) != 2 or any(type(x) is not int for x in offsets) or
+            abs(offsets[0] - offsets[1]) < 4):
+        raise ValueError('expected two distinct natural-exp sites')
+    result = bytearray(original)
+    for offset in offsets:
+        if type(offset) is not int or offset < 0 or offset + 4 > len(result):
+            raise ValueError('natural-exp site outside object')
+        if struct.unpack_from('<I', original, offset)[0] != 0xc2ce8ed0:
+            raise ValueError('original natural-exp immediate changed')
+        struct.pack_into('<I', result, offset, 0xc2cff1b4)
+    return bytes(result)
+
+
+def verified_device_object(root, directory, target, version):
+    directory = directory.resolve()
+    value = lock(root)
+    raw = (directory / 'receipt.json').read_bytes()
+    report = json.loads(raw)
+    if sha(raw) != value['device_receipt_sha256'] or canonical(report) != value['device_report_sha256']:
+        raise ValueError('unrecognized corrected math fixture receipt')
+    if report.get('classification') != 'derived-ocml-natural-exp-correction' or report.get('hardware_validated') is not False:
+        raise ValueError('wrong corrected math fixture classification')
+    original_directory = Path(report['original_directory']).resolve()
+    _, original_report = verified_original_device_object(root, original_directory, target, version)
+    if canonical(original_report) != report['original_report_sha256']:
+        raise ValueError('original OCML authority changed')
+    sources = dict(original_report['sources'])
+    sources['tools/export_math_correction.py'] = sha((root / 'tools/export_math_correction.py').read_bytes())
+    if report['sources'] != sources or report['profiles'] != value['profiles']:
+        raise ValueError('correction source or profile changed')
+    for name, expected in report['correction_files'].items():
+        if sha(Path(name).read_bytes()) != expected:
+            raise ValueError('corrected compiler authority changed: ' + name)
+    for item in report['profiles']:
+        label = item['target'] + '-' + item['optimization']
+        path = directory / (label + '.hsaco')
+        if path.is_symlink() or not path.resolve().is_relative_to(directory):
+            raise ValueError('corrected object path escaped fixture')
+        data = path.read_bytes()
+        original = (original_directory / (label + '.hsaco')).read_bytes()
+        if (sha(data) != item['code_sha256'] or len(data) != item['bytes'] or
+                data != corrected_bytes(original, report['cutoff_offsets'][label])):
+            raise ValueError('object changed beyond the two reviewed natural-exp immediates')
+    selected = profile(target, root)
+    return (directory / (target + '-O2.hsaco')).read_bytes(), report

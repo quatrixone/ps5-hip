@@ -3,6 +3,7 @@ import copy
 import json
 from pathlib import Path
 import shutil
+import struct
 import sys
 import tempfile
 import unittest
@@ -54,6 +55,15 @@ class Contract(unittest.TestCase):
                     dict(self.build, device_build={}), dict(self.build, source_sha256={})):
             with self.assertRaises(ValueError): fixture.validate_build(bad, self.code, self.root)
         with self.assertRaises(ValueError): fixture.validate_build(self.build, self.code + b'x', self.root)
+
+    def test_only_two_nonoverlapping_reviewed_immediates(self):
+        original = struct.pack('<III', 0xc2ce8ed0, 123, 0xc2ce8ed0)
+        expected = struct.pack('<III', 0xc2cff1b4, 123, 0xc2cff1b4)
+        self.assertEqual(fixture.corrected_bytes(original, [0,8]), expected)
+        for offsets in ([0,0],[0,2],[-1,8],[0,12],[False,8],[0],['0',8]):
+            with self.subTest(offsets=offsets), self.assertRaises(ValueError):
+                fixture.corrected_bytes(original, offsets)
+        with self.assertRaises(ValueError): fixture.corrected_bytes(b'x'+original[1:], [0,8])
 
     def test_stage_and_verifier_propagate_exact_profile(self):
         builddir = self.root / 'build'; candidate = builddir / 'candidate'; candidate.mkdir(parents=True)
@@ -107,9 +117,10 @@ class Contract(unittest.TestCase):
             self.assertEqual(len(report['profiles']),4)
         # Intercept reads, never write to the frozen reference artifacts.
         original = Path.read_bytes
+        basis = Path(json.loads((FIXTURES/'receipt.json').read_text())['original_directory'])
         for damaged in (FIXTURES/'receipt.json', ROOT/'tools/probe_ocml_math.py',
-                        FIXTURES/'gfx1013-O2.hsaco', FIXTURES/'libs/ocml.bc',
-                        FIXTURES/'libs/oclc_daz_opt_off.bc'):
+                        FIXTURES/'gfx1013-O2.hsaco', basis/'libs/ocml.bc',
+                        basis/'libs/oclc_daz_opt_off.bc', basis/'gfx1013-O2.hsaco'):
             damaged = damaged.resolve()
             def altered(path):
                 data = original(path)
