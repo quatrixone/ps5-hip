@@ -62,7 +62,8 @@ def validate_model(text,mode,code):
         else:require('MATMUL_LATE_PARTIAL completed=8 finalized=false' in text,'late registration latch')
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--compiler-only',action='store_true');p.add_argument('--title-entry',action='store_true');args=p.parse_args()
+    require(not args.title_entry or args.compiler_only,'title-entry requires compiler-only')
     ref=args.reference_root.resolve();out=args.output.resolve();require(not out.exists(),'fresh output required');out.mkdir(parents=True)
     inputs={};commands=[];cases=[]
     source='tests/hip_tiled_matmul_blockdim.hip'
@@ -94,6 +95,7 @@ def main():
                     '-fno-fast-math','-ffp-contract=off','-c',ROOT/source,'--hip-path='+str(stage),'-I'+str(stage/'include'),
                     '-I'+str(ROOT/'include'),'-include','__clang_hip_runtime_wrapper.h','--rocm-device-lib-path='+str(libs),'--hip-device-lib=ockl-workitem-only.bc',
                     '--hip-device-lib=oclc_abi_version_500.bc','--hip-device-lib=oclc_isa_version_1013.bc','-o',combined]
+                if args.title_entry:cmd+=['-DPS5HIP_MATMUL_TITLE=1','-Dmain=ps5hip_matmul_client_main']
                 if host=='ps5':cmd+=['-Xarch_device','-fno-short-wchar']
                 if host=='linux-model':cmd+=['-DPS5HIP_RUNTIME_MODEL=1','-Xarch_host','-fsanitize=address,undefined','-Xarch_host','-fno-omit-frame-pointer']
                 _,driver=run(label+'-driver',cmd+['-###']);require_device_linker(driver,tools['ld.lld']);run(label+'-compile',cmd)
@@ -109,6 +111,7 @@ def main():
                 audit=shared.audit_object(code.read_bytes(),meta,isa,(NAME,));(directory/'observed.json').write_text(json.dumps(audit,indent=2)+'\n')
                 check_profile(audit)
                 readobj,_=run(label+'-host-readobj',[tools['llvm-readobj'],'--sections','--symbols','--relocations',combined]);disasm,_=run(label+'-host-isa',[tools['llvm-objdump'],'-dr',combined])
+                if args.title_entry:require(re.search(r'^    Name: _Z25ps5hip_matmul_client_mainiPPc \(',readobj,re.M) and not re.search(r'^    Name: main \(',readobj,re.M),'renamed matmul entry missing')
                 lifecycle=audit_host(disasm);wrapper_audit=shared.audit_wrapper(section(combined.read_bytes(),b'.hipFatBinSegment'),readobj,host)
                 # Caller CFG is separate from the final linked AMD ISA; library linkage is not inferred.
                 # Retain -c: the SDK wrapper otherwise appends crt1.o, creating a
@@ -124,22 +127,23 @@ def main():
                     'files':{p.name:{'sha256':sha(p),'bytes':p.stat().st_size} for p in directory.iterdir() if p.is_file()}})
                 print(label,descriptor,flush=True)
         (out/'oracle-cases.json').write_text(json.dumps(oracle_cases(),indent=2)+'\n')
-        platform=ref/'.deps'/('sdk-source-'+json.loads((ROOT/'dependencies.json').read_text())['sdk']['revision'])/'platform/include'
-        script=out/'linux.ld';script.write_text("""SECTIONS { .hip_fatbin ALIGN(4096) : { HIDDEN(__ps5hip_bundle_begin = .); KEEP(*(.hip_fatbin)) HIDDEN(__ps5hip_bundle_end = .); } } INSERT AFTER .rodata;
-SECTIONS { .data.rel.ro : { *(.data.rel.ro .data.rel.ro.*) . = ALIGN(32); HIDDEN(__ps5hip_wrappers_begin = .); KEEP(*(.hipFatBinSegment)) HIDDEN(__ps5hip_wrappers_end = __ps5hip_wrappers_begin + 24); } } INSERT BEFORE .dynamic;
-HIDDEN(__ps5hip_names_begin = ADDR(.rodata)); HIDDEN(__ps5hip_names_end = ADDR(.rodata)+SIZEOF(.rodata));
-HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
-""")
-        binary=out/'model'
-        run('model-build',[tools['clang++'],'-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform,'-fsanitize=address,undefined','-fno-omit-frame-pointer','-DPS5HIP_RUNTIME_MODEL=1','-fPIE','-pie','-fuse-ld=lld-18',*[ROOT/'src'/n for n in CORE],ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_tiled_matmul_model.cpp',out/'linux-model-O2/matmul.o','-Wl,-T,'+str(script),'-o',binary])
         models=[]
-        for mode in MODES:
-            expected=30 if mode in TERMINAL else 20 if mode in CLEAN else 0
-            stdout,stderr=run('model-'+mode,[binary,mode],expected)
-            validate_model(stdout+stderr,mode,expected);models.append({'mode':mode,'exit_code':expected})
+        if not args.compiler_only:
+            platform=ref/'.deps'/('sdk-source-'+json.loads((ROOT/'dependencies.json').read_text())['sdk']['revision'])/'platform/include'
+            script=out/'linux.ld';script.write_text("""SECTIONS { .hip_fatbin ALIGN(4096) : { HIDDEN(__ps5hip_bundle_begin = .); KEEP(*(.hip_fatbin)) HIDDEN(__ps5hip_bundle_end = .); } } INSERT AFTER .rodata;
+    SECTIONS { .data.rel.ro : { *(.data.rel.ro .data.rel.ro.*) . = ALIGN(32); HIDDEN(__ps5hip_wrappers_begin = .); KEEP(*(.hipFatBinSegment)) HIDDEN(__ps5hip_wrappers_end = __ps5hip_wrappers_begin + 24); } } INSERT BEFORE .dynamic;
+    HIDDEN(__ps5hip_names_begin = ADDR(.rodata)); HIDDEN(__ps5hip_names_end = ADDR(.rodata)+SIZEOF(.rodata));
+    HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.init_array)+SIZEOF(.init_array));
+    """)
+            binary=out/'model'
+            run('model-build',[tools['clang++'],'-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-I',ROOT/'include','-I',stage/'include','-I',platform,'-fsanitize=address,undefined','-fno-omit-frame-pointer','-DPS5HIP_RUNTIME_MODEL=1','-fPIE','-pie','-fuse-ld=lld-18',*[ROOT/'src'/n for n in CORE],ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_tiled_matmul_model.cpp',out/'linux-model-O2/matmul.o','-Wl,-T,'+str(script),'-o',binary])
+            for mode in MODES:
+                expected=30 if mode in TERMINAL else 20 if mode in CLEAN else 0
+                stdout,stderr=run('model-'+mode,[binary,mode],expected)
+                validate_model(stdout+stderr,mode,expected);models.append({'mode':mode,'exit_code':expected})
         require(all(sha(ROOT/n)==h for n,h in sources.items()),'sources changed')
         require(all(sha(n)==h for n,h in inputs.items()),'inputs changed');require(all(sha(tools[n])==h for n,h in tool_hashes.items()),'tools changed')
-        report={'schema':1,'classification':'genuine-tiled-matmul-runtime-offline-pass','sources':sources,'inputs':inputs,
+        report={'schema':1,'classification':'genuine-tiled-matmul-runtime-offline-pass','title_entry':args.title_entry,'compiler_only':args.compiler_only,'sources':sources,'inputs':inputs,
             'tools':{n:{'path':tools[n],'sha256':tool_hashes[n],'version':versions[n]} for n in tools},
             'commands':commands,'cases':cases,'models':models,'shader_body_sha256':__import__('hashlib').sha256(shader((ROOT/source).read_text()).encode()).hexdigest(),
             'hardware_validated':False,'native_linked':False,

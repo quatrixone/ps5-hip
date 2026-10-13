@@ -357,3 +357,19 @@ if(BUILD_TESTING)
       ${CMAKE_SOURCE_DIR}/tests/hip_matmul_recipe_test.py --check "${PS5HIP_HIP_MATMUL_PROBE}")
   endif()
 endif()
+
+if(BUILD_TESTING)
+  set(PS5HIP_HIP_MATMUL_TITLE_MODEL "" CACHE PATH "Completed matmul title lifecycle proof")
+  set(PS5HIP_HIP_MATMUL_TITLE_COMPILER "" CACHE PATH "Genuine renamed matmul compiler output")
+  if(PS5HIP_HIP_MATMUL_TITLE_MODEL)
+    add_test(NAME hip_matmul_title_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_matmul_title_test.py --check "${PS5HIP_HIP_MATMUL_TITLE_MODEL}")
+  endif()
+  if(PS5HIP_HIP_MATMUL_TITLE_COMPILER)
+    add_test(NAME hip_matmul_title_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_matmul_title_profile_test.py --compiler "${PS5HIP_HIP_MATMUL_TITLE_COMPILER}")
+  else()
+    add_test(NAME hip_matmul_title_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_matmul_title_profile_test.py)
+  endif()
+endif()

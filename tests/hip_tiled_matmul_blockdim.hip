@@ -93,7 +93,12 @@ int main(int argc,char **argv) {
                     require(hipLaunchKernel(ps5hip_runtime_token_for("tiled_matmul"),dim3(1),dim3(8,8),nullptr,0,nullptr)!=hipSuccess);
                     require(ps5hip_matmul_model_submits()==count);
                     std::printf("MATMUL_TERMINAL live=%u unresolved=%u submits=%u\n",ps5hip_matmul_model_live(),unsigned(ps5hip_runtime_gpu_unresolved()),count);
-                    std::fflush(nullptr);std::_Exit(30);
+                    std::fflush(nullptr);
+#ifdef PS5HIP_MATMUL_TITLE
+                    return 30;
+#else
+                    std::_Exit(30);
+#endif
                 }
 #endif
                 check(error);check(hipDeviceSynchronize());
