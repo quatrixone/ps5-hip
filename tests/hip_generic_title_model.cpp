@@ -89,7 +89,8 @@ int main(int argc,char **argv) {
     std::strcpy(scenario,argv[1]);std::strcpy(config,argv[2]);
     const bool client_mode=uncertain()||is("cleanup")||is("init")||
         is("missing")||is("corrupt")||is("input")||is("guard")||
-        is("wrong-route-output")||is("preflush")||is("late-partial");
+        is("wrong-route-output")||is("preflush")||is("late-partial")||
+        is("fill-noop")||is("fill-stale")||is("fill-byte")||is("fill-offset");
     const char *mode=client_mode?scenario:"normal";
     ps5hip_generic_model_configure(mode);
     char *client_argv[]={argv[0],const_cast<char*>(mode)};

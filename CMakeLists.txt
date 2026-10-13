@@ -400,6 +400,16 @@ if(BUILD_TESTING)
 endif()
 
 if(BUILD_TESTING)
+  set(PS5HIP_HIP_MEMORY_FILL_MODEL "" CACHE PATH "Completed memory-fill title lifecycle proof")
+  set(PS5HIP_HIP_MEMORY_FILL_COMPILER "" CACHE PATH "Genuine memory-fill compiler output")
+  if(PS5HIP_HIP_MEMORY_FILL_MODEL)
+    add_test(NAME hip_memory_fill_lifecycle COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_test.py --check "${PS5HIP_HIP_MEMORY_FILL_MODEL}")
+  endif()
+  if(PS5HIP_HIP_MEMORY_FILL_COMPILER)
+    add_test(NAME hip_memory_fill_profile COMMAND ${Python3_EXECUTABLE}
+      ${CMAKE_SOURCE_DIR}/tests/hip_generic_title_profile_test.py --memory-fill --compiler "${PS5HIP_HIP_MEMORY_FILL_COMPILER}")
+  endif()
   set(PS5HIP_HIP_GENERIC_TITLE_MODEL "" CACHE PATH "Completed generic title lifecycle proof")
   set(PS5HIP_HIP_GENERIC_TITLE_COMPILER "" CACHE PATH "Genuine renamed generic compiler output")
   if(PS5HIP_HIP_GENERIC_TITLE_MODEL)
