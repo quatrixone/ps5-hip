@@ -14,11 +14,14 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     request.shape.groups=groups;request.shape.threads=threads;
     request.dynamic_lds_bytes=uint32_t(shared);
     const bool geometry=threads!=std::array<uint32_t,3>{64,1,1};
-    // These classes are deliberately disjoint. In particular, do not silently
-    // drop one resource when a kernel needs a combination we cannot establish.
+    // Never drop one resource to force a kernel through a different entry ABI.
     require(!(kernel.private_bytes && (kernel.group_bytes || shared || geometry)),"combined scratch resources unsupported");
-    require(!(geometry && (kernel.group_bytes || shared)),"geometry plus LDS unsupported");
     if(kernel.private_bytes) request.route=NativeLaunchRoute::BufferScratch;
+    else if(geometry && kernel.group_bytes) {
+        require(!shared && threads==std::array<uint32_t,3>{8,8,1},"unsupported combined geometry/LDS shape or dynamic size");
+        request.route=NativeLaunchRoute::GeometryLds;
+    }
+    else if(geometry && shared) throw ObjectError("dynamic geometry/LDS unsupported");
     else if(kernel.group_bytes || shared) request.route=NativeLaunchRoute::Lds;
     else if(geometry) request.route=NativeLaunchRoute::Geometry;
     else request.route=NativeLaunchRoute::Initial;

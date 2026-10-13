@@ -6,7 +6,7 @@
 namespace ps5hip {
 
 // Explicit checked routes; private-call entry is deliberately excluded.
-enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry };
+enum class NativeLaunchRoute { Initial, Lds, BufferScratch, Geometry, GeometryLds };
 
 struct GpuRange { uint64_t address, bytes; };
 
@@ -109,6 +109,14 @@ GeometryLaunch prepare_geometry_launch(const CodeObject &object, const std::stri
     GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
     const std::vector<LaunchArgument> &arguments);
 std::vector<uint32_t> encode_geometry_dispatch(const GeometryLaunch &launch);
+
+struct GeometryLdsLaunch { GeometryLaunch geometry; LdsPlan lds; };
+// Measured XY entry, 8x8x1, static512 LDS and the complete COv5 geometry area.
+// No dynamic LDS, scratch or explicit-only geometry entry in this profile.
+GeometryLdsLaunch prepare_geometry_lds_launch(const CodeObject &object, const std::string &name,
+    GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
+    const std::vector<LaunchArgument> &arguments);
+std::vector<uint32_t> encode_geometry_lds_dispatch(const GeometryLdsLaunch &launch);
 
 
 } // namespace ps5hip

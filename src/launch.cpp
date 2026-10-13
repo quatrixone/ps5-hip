@@ -36,7 +36,7 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
     const auto &k = *found;
-    const auto rejection = geometry ? geometry_launch_rejection(k) : flat_call ? flat_call_launch_rejection(k) : lds ? lds_launch_rejection(k) :
+    const auto rejection = geometry ? (lds ? geometry_lds_launch_rejection(k) : geometry_launch_rejection(k)) : flat_call ? flat_call_launch_rejection(k) : lds ? lds_launch_rejection(k) :
         (scratch ? buffer_scratch_launch_rejection(k) : initial_launch_rejection(k));
     if (!rejection.empty()) throw ObjectError(rejection);
     const auto threads = geometry ? geometry->threads : std::array<uint32_t,3>{64,1,1};
@@ -129,7 +129,7 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     require(flat_init ? launch.user_sgpr_count == 8 :
             (launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6), "invalid dispatch user-SGPR count");
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count &&
-            (geometry ? launch.rsrc2 == 0x138cu : !(launch.rsrc2 & ~((scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
+            (geometry ? launch.rsrc2 == (lds ? (0x98cu | lds->rsrc2_lds) : 0x138cu) : !(launch.rsrc2 & ~((scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     if (scratch) {
         require(launch.rsrc2 == (flat_init ? 0x91u : 0x8du) && launch.user_sgpr_count == (flat_init ? 8u : 6u) &&
@@ -142,7 +142,7 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
                 "flat initialization must contain the raw scratch base");
     }
     if (lds) {
-        require(launch.rsrc2 == (0x8c | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
+        require(launch.rsrc2 == ((geometry ? 0x98cu : 0x8cu) | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
                 std::all_of(launch.user_sgprs.begin(), launch.user_sgprs.begin() + 4,
                             [](uint32_t value) { return value == 0; }), "LDS dispatch entry state mismatch");
     }
@@ -280,6 +280,25 @@ GeometryLaunch prepare_geometry_launch(const CodeObject &object, const std::stri
 }
 std::vector<uint32_t> encode_geometry_dispatch(const GeometryLaunch &launch) {
     return encode_dispatch(launch.state, nullptr, nullptr, nullptr, &launch.shape);
+}
+
+GeometryLdsLaunch prepare_geometry_lds_launch(const CodeObject &object, const std::string &name,
+    GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
+    const std::vector<LaunchArgument> &arguments) {
+    check_geometry(shape);
+    require(shape.dimensions == 2, "combined geometry/LDS requires the measured 2D shape");
+    auto state = prepare_launch(object, name, module, kernarg_storage, shape.groups[0], arguments,
+                                nullptr, true, false, &shape);
+    const auto lds = plan_lds(512, 0);
+    state.rsrc2 |= lds.rsrc2_lds;
+    return {{std::move(state), shape}, lds};
+}
+std::vector<uint32_t> encode_geometry_lds_dispatch(const GeometryLdsLaunch &launch) {
+    const auto expected = plan_lds(512, 0);
+    require(launch.geometry.shape.dimensions == 2 && launch.lds.static_bytes == 512 &&
+            launch.lds.dynamic_bytes == 0 && launch.lds.allocated_bytes == expected.allocated_bytes &&
+            launch.lds.rsrc2_lds == expected.rsrc2_lds, "inconsistent geometry/LDS plan");
+    return encode_dispatch(launch.geometry.state, nullptr, &launch.lds, nullptr, &launch.geometry.shape);
 }
 
 } // namespace ps5hip

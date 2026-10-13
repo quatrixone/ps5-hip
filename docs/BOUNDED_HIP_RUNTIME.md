@@ -10,8 +10,10 @@ The reusable profile is one trusted compiler-generated module on one serialized
 thread. It supports up to 256 registered functions, unused functions, and zero or
 more blocking launches. The bound limits resources; it is not an expected count.
 The accepted classes are the existing 64-thread 1D initial, LDS and buffer-scratch
-routes, plus the measured 8x8x1 and 8x4x2 geometry routes. Combined scratch/LDS or
-geometry/resource combinations remain rejected. Private-call entry layouts,
+routes, plus the measured 8x8x1 and 8x4x2 geometry routes. The separate
+`GeometryLds` profile combines natural XY entry, an 8x8x1 group, static512-byte
+LDS and the complete COv5 geometry area; see `GEOMETRY_LDS_RUNTIME.md`.
+Combined scratch/LDS and other geometry/resource combinations remain rejected. Private-call entry layouts,
 including the eight-SGPR 304-byte candidate, are not admitted by descriptors alone.
 
 Capture validates the entire argument layout before reading compiler argument
