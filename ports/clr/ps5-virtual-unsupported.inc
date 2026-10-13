@@ -1,0 +1,21 @@
+void submitCopyMemoryP2P(amd::CopyMemoryP2PCommand& cmd) override { unsupported(cmd); }
+void submitMapMemory(amd::MapMemoryCommand& cmd) override { unsupported(cmd); }
+void submitUnmapMemory(amd::UnmapMemoryCommand& cmd) override { unsupported(cmd); }
+void submitNativeFn(amd::NativeFnCommand& cmd) override { unsupported(cmd); }
+void submitAccumulate(amd::AccumulateCommand& cmd) override { unsupported(cmd); }
+void submitExternalSemaphoreCmd(amd::ExternalSemaphoreCmd& cmd) override { unsupported(cmd); }
+void submitFillMemory(amd::FillMemoryCommand& cmd) override { unsupported(cmd); }
+void submitMigrateMemObjects(amd::MigrateMemObjectsCommand& cmd) override { unsupported(cmd); }
+void submitAcquireExtObjects(amd::AcquireExtObjectsCommand& cmd) override { unsupported(cmd); }
+void submitReleaseExtObjects(amd::ReleaseExtObjectsCommand& cmd) override { unsupported(cmd); }
+void submitPerfCounter(amd::PerfCounterCommand& cmd) override { unsupported(cmd); }
+void submitThreadTraceMemObjects(amd::ThreadTraceMemObjectsCommand& cmd) override { unsupported(cmd); }
+void submitThreadTrace(amd::ThreadTraceCommand& cmd) override { unsupported(cmd); }
+void submitSvmFreeMemory(amd::SvmFreeMemoryCommand& cmd) override { unsupported(cmd); }
+void submitSvmCopyMemory(amd::SvmCopyMemoryCommand& cmd) override { unsupported(cmd); }
+void submitSvmFillMemory(amd::SvmFillMemoryCommand& cmd) override { unsupported(cmd); }
+void submitSvmMapMemory(amd::SvmMapMemoryCommand& cmd) override { unsupported(cmd); }
+void submitSvmUnmapMemory(amd::SvmUnmapMemoryCommand& cmd) override { unsupported(cmd); }
+void submitSignal(amd::SignalCommand& cmd) override { unsupported(cmd); }
+void submitMakeBuffersResident(amd::MakeBuffersResidentCommand& cmd) override { unsupported(cmd); }
+bool dispatchAqlPacket(uint8_t* aqlpacket, const std::string& kernelName, amd::AccumulateCommand* vcmd = nullptr) override { return false; }

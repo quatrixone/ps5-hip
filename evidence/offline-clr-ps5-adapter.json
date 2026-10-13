@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "classification": "bounded-real-rocclr-ps5-adapter-offline",
+  "upstream_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "adapter_modes_per_sanitizer": 14,
+  "lifecycle_modes_per_sanitizer": 11,
+  "actual_adapter_source_units": 39,
+  "cpu_modes_per_sanitizer": 7,
+  "native_compiled_units": 3,
+  "saved_receipt_mutations": 19,
+  "optimized_python_rejected": true,
+  "proof_hashes": {
+    "adapter_asan": "61717102ab598b9aa7563eadf7b7dcd431e3785f7920b600605a5c67fb2dfd59",
+    "adapter_tsan": "b6766c7cb33bd799c8b6de0d971feb099b1b9efa0f6602cfaa45c17a3956db11",
+    "lifecycle_asan": "b023d5bad17720e8a1fa9c4793c329c1de3aa1885cdc164ea0fcfba64895edf6",
+    "lifecycle_tsan": "59cc2b011a5ed7389f060cffb03f37f355917494f8ccb637b4c62a7aa1ecf413",
+    "saved_checker": "d30a4a04a238811eda5f36a2c2d7c40d2d381364b6847ad0dc0b728c2df4d651",
+    "patch_roundtrip": "0cc81cec133e7d3fd7f90bd12640748e79b6282f65937ec747c407bab4393585",
+    "native_compile": "6c9ea0a19ff43c7c0a5849359ad0f1c49225a11f8e9681616533da486a43d5b8",
+    "cpu_asan": "8ad2d288dd965b3b58310bbe9bc078f2255fe9d3c266b0eb26ef32f88ba81a49",
+    "cpu_tsan": "126730e340e3f697a60a69091a219abe3df1ad590952c8c9afaf31428c739942",
+    "optimized_guard": "d3a601e6d95a202487c54ce38f35b3d4cd20f9c55b8da1dac4972f7525139ea7",
+    "event_source_review": "90e4de9a448f3dabd604a3cda0de932a122f6197ff51dfb0dcd048bd85f57c3f"
+  },
+  "portable_patch_hashes": {
+    "ps5-device-aot.patch": "3d2bb402d6beaff2427d3ae199911cf035169ecda9913476e99b3b520571afa7",
+    "ps5-lifetime.patch": "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b"
+  },
+  "proven": [
+    "Actual upstream AOT load, symbols, captured commands, cross-queue event dependencies and checked native substrate in a synthetic transport model.",
+    "Checked queue joins, startup failure cleanup, callback reentry, ordinary owner cleanup and exact uncertain-submission retention.",
+    "Actual SDK compilation of adapter and two AOT upstream units without model hooks."
+  ],
+  "not_proven": [
+    "PS5 GPU execution through ROCclr",
+    "Full native adapter link, provider admission or title startup",
+    "Public HIP initialization or framework compatibility"
+  ],
+  "gpu_executed": false
+}
