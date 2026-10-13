@@ -2,9 +2,10 @@
 
 Updated: 2026-10-11, America/New_York.
 
-Status: G1 passed its offline acceptance; G2 is in progress, G3 and G4 have
+Status: G1 passed its offline acceptance; G2 passed for the declared arithmetic
+fixture in `../evidence/native-g2-acceptance.json`. G3 and G4 have
 experimental offline implementations, and G5-G12 remain planned.
-Frozen native candidates and validation receipts exist; no GPU gate has passed. See `../STATE.md`
+Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
@@ -187,7 +188,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | Goal | Outcome | Dependencies | Status |
 | --- | --- | --- | --- |
 | G1 | Reproducible compiler and platform contract | None | passed offline |
-| G2 | Native execution of a real HIP code object | G1 | in progress; store and two vector dispatches passed; two clean cycles of the frozen combined arithmetic image pending |
+| G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | experimental offline implementations and native candidates; hardware qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | planned |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |

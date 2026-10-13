@@ -6,18 +6,19 @@ The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
 ProsperoAI, and ultimately run native PyTorch inference and training.
 
-**Status: real HIP-compiled indexed-store and vector-add kernels executed natively
-on PS5 with exact results, unchanged guards and clean title teardown on FW 6.02.
-G1 passed offline; G2 remains in progress. No general HIP runtime is qualified.**
+**Status: G1 passed offline; G2 passed for real HIP-compiled indexed-store and
+vector-add kernels. Two clean cycles of the same image on FW 12.70 checked 292
+exact values, unchanged guards and title teardown. No general HIP runtime is qualified.**
+The [G2 acceptance record](evidence/native-g2-acceptance.json) maps all six
+requirements to the exact gfx1013, wave32, 1D arithmetic fixture. Mount checks
+establish unchanged visible title records; persistent registration is expected.
 The first GPU candidate faulted on a CPU import boundary. Changing only the
 `sceAgcSuspendPoint` provider produced the successful run. See
 [the execution receipt](evidence/native-provider-fixed-store.json) and
 [the fault analysis](docs/FIRST_GPU_FAULT.md). A later title cycle passed two
 vector dispatches through one queue: [vector evidence](evidence/native-vector-twice-cycle1.json).
-Host tests and ten exact-candidate sanitizer checks pass. A strict audit
-identified the remaining G2 requirement: one frozen application must run both
-indexed-store and vector-add, then pass repeated clean title cycles. The existing
-separate profile images do not establish that combined-candidate proof.
+Host tests and exact-candidate sanitizer checks support the qualified subset;
+general compute semantics and framework compatibility remain unqualified.
 The [G1 acceptance receipt](evidence/offline-g1-acceptance.json) records each
 requirement, selected LLVM 18 route, TheRock comparison and remaining limits.
 The repository is private.
@@ -60,7 +61,8 @@ The repository is private.
   because another title was running. A later arithmetic control
   [passed its compute checks on .40](evidence/native-arithmetic-fw1270-cycle1.json),
   but left explicit loader-layer release unproven; the private-call candidate
-  remains unrun pending that prerequisite.
+  remains unrun. The new prospective arithmetic cycles have now passed; reviewed
+  private-call deployment and hardware validation are next.
 - [Agent instructions](AGENTS.md): how to continue without losing the evidence trail.
 
 ## What success looks like

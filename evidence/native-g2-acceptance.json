@@ -1,0 +1,111 @@
+{
+    "schema":  1,
+    "classification":  "pass",
+    "gate":  "G2",
+    "g2_complete":  true,
+    "full_project_complete":  false,
+    "source_commit":  "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+    "image_sha256":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+    "target":  "PS5 .40 firmware 12.70",
+    "declared_scope":  {
+                           "kernels":  [
+                                           "indexed_store",
+                                           "vector_add"
+                                       ],
+                           "target":  "gfx1013",
+                           "wave_size":  32,
+                           "threads":  [
+                                           64,
+                                           1,
+                                           1
+                                       ],
+                           "groups":  [
+                                          2,
+                                          1,
+                                          1
+                                      ],
+                           "elements_per_kernel":  73,
+                           "dispatches_per_cycle":  2,
+                           "accepted_cycles":  2,
+                           "total_checked_values":  292,
+                           "private_bytes":  0,
+                           "group_bytes":  0,
+                           "relocations":  "none",
+                           "arguments":  "explicit native pointers and scalar count"
+                       },
+    "cycles":  [
+                   {
+                       "evidence":  "evidence/native-arithmetic-prospective-cycle1-pass.json",
+                       "sha256":  "51ece6decbae60e07adc19ed97afd5307ee6f190cb29759ca63333c7c2b120c6",
+                       "pid":  105,
+                       "app_id":  "0x00002018",
+                       "independent_review_sha256":  "08e0e1683be883e655a543609153d47f923d6c83261c07f9630ce11cd4e48492",
+                       "exact_values":  146
+                   },
+                   {
+                       "evidence":  "evidence/native-arithmetic-prospective-cycle2-pass.json",
+                       "sha256":  "2e93a193ac45201f674b96ab13698fe52e7c619b09d119579d834f96d5c205b8",
+                       "pid":  114,
+                       "app_id":  "0x00004018",
+                       "independent_review_sha256":  "c94ec15562842b82f88a7193252bc598f16f9f2a3e322fccd57359de8692c7c5",
+                       "exact_values":  146
+                   }
+               ],
+    "requirements":  [
+                         {
+                             "item":  1,
+                             "status":  "satisfied_offline_for_declared_subset",
+                             "evidence":  "Bounded ELF64 AMDGPU reader validates headers/ranges/overflow/alignment/metadata/dynamic symbols/descriptors before native allocation. Original sanitizer object tests include every truncation, deliberate invalid fields and5000 mutations per real target fixture. Core is byte-identical in frozen5b74ac8; arithmetic host full24 checks and final affected2 saved logs rehashed.",
+                             "limits":  "Permitted relocation subset is empty. This is a bounded reader plus qualified fixture, not arbitrary AMDGPU instruction compatibility."
+                         },
+                         {
+                             "item":  2,
+                             "status":  "satisfied_for_relocation_free_fixture",
+                             "evidence":  "PT_LOAD materialization retains relative virtual addresses and zero-fill. Hardware candidate owns65536-aligned shader allocation in native code window, copies actual HIP object image, and uses native data allocations. Object/segment/kernel and packaged hsaco identities match frozen receipt.",
+                             "limits":  "No advertised device globals/constant-access/separate-link/relocation capability; these require their own G3 tests. Loading allocatable bytes is not a claim of qualified access to arbitrary globals."
+                         },
+                         {
+                             "item":  3,
+                             "status":  "satisfied_for_exact_entry_contract",
+                             "evidence":  "Actual indexed_store/vector_add descriptors: wave32, properties0x409,RSRC1=0x60af0040,RSRC2=0x8c,RSRC3=0; six userSGPRs with zero private-buffer slots s0:s3 and kernarg s4:s5, systemgroupX s6/localX v0. Explicit kernargs12/28bytes, scratch/LDS0. Host validates entry/alignment/resource/argument layout, encoder writes descriptor state,64x1x1 threads and wave32 dispatch.",
+                             "limits":  "No implicit records requested by these builtin-based kernels; hidden288-byte full-header ABI launch support is separate offline G4 evidence, not covered here. Wave64, scratch,LDS,preload/RSRC3 and unsupported user/system fields reject before submit."
+                         },
+                         {
+                             "item":  4,
+                             "status":  "satisfied_for_declared_fixture_in_two_independently_accepted_cycles",
+                             "evidence":  "Actual device-only HIP compiles use64-bit global pointers and count scalar. Indexed store verifies exact i XOR0x5a17c9e3; vector uses separate host-written A/B and GPU output, exact binary32 quarter-step sums plus unchanged input values/full guards. Two X groups exercise workgroup/local IDs; scalarcount73 masks second-group tail. Native RSRC1 copies compiler FP mode unchanged. The same frozen image subsequently passed both prospective cycles, PID105/app0x2018 and PID114/app0x4018, independently audited in the bound cycle records.",
+                             "limits":  "Geometry is the declared constant64x1x1 profile and2x1x1 groups. Only finite exactly representable FP32 operands are qualified; no IEEE-edge/FMA/denormal/rounding or multidimensional behavior claim."
+                         },
+                         {
+                             "item":  5,
+                             "status":  "satisfied_for_declared_fixture_in_two_independently_accepted_cycles",
+                             "evidence":  "One frozen5b74ac8 image executes indexed_store then vector_add on one AgcBackend/SubmissionQueue, two73-value checks, true native pointer readback, full guards, explicit resource closure and runtime finalization. Fresh first prospective cycle ties PID105/app0x2018 to ordered OS teardown and self-stop before hostclose; services and visible matching baseline remain stable. The same frozen image subsequently passed both prospective cycles, PID105/app0x2018 and PID114/app0x4018, independently audited in the bound cycle records.",
+                             "limits":  "Earlier partial and host-interrupted attempts are excluded. Only the two bound independently reviewed prospective cycles count."
+                         },
+                         {
+                             "item":  6,
+                             "status":  "satisfied_for_declared_fixture_in_two_independently_accepted_cycles",
+                             "evidence":  "Odd73 length,128 invocations across two64-thread workgroups, indices0..72 checked;16 leading guard words and all rounded backing words outside payload checked; vector inputs unchanged. Ordered two kernels use one serialized queue with fresh per-dispatch allocations. Host launch tests reject zero/overflowgroupcounts, unsupported required8x8x1 shape, invalid resources/storage/ranges; encoder rejects non64x1x1 threads. The same frozen image subsequently passed both prospective cycles, PID105/app0x2018 and PID114/app0x4018, independently audited in the bound cycle records.",
+                             "limits":  "Declared supported native launch set is exactly1D64x1x1 with2x1x1 groups and wave32 for named fixtures. No2D/3D flattening API exists here. Other groupcounts are host-planner functionality only, not advertised hardware coverage; persistent buffers/dependencies/async overlap belong to later gates."
+                         }
+                     ],
+    "conditional_mapping_sha256":  "2c574c55ca59c684aef7304af41449073e6fef33fdb37b559837fe3b5a5a759e",
+    "offline_evidence":  {
+                             "evidence/offline-candidate-host-c37f0db.json":  "e167347508d721abc147867ffbf47c6fa40a9367e5125097cd8c7e874ed81cab",
+                             "evidence/offline-arithmetic-suite-host.json":  "2e09ccfcd19095f44acc2bb9445f712abc64ae418834731b450a268caeab46aa",
+                             "evidence/offline-arithmetic-suite-native-readiness.json":  "39f32a6149c932610d4a666a90d199280fbf36060ea6c9d345ce4567a9e5f441"
+                         },
+    "validation":  "Existing frozen host/build evidence rehashed; 27 prospective controller/parser tests passed; two separately reviewed live cycles passed.",
+    "lifecycle_contract":  "Exact natural title self-stop and ordered OS teardown before host close, unchanged collector-visible title mount multiset, healthy declared services and owned lock release. Persistent registration is expected; global namespace and reference release are not claimed.",
+    "excluded_attempts":  [
+                              "evidence/native-arithmetic-fw1270-cycle1.json",
+                              "evidence/native-arithmetic-prospective-cycle1.json"
+                          ],
+    "limits":  [
+                   "G2 qualifies genuine native HIP-compiled execution only for the exact declared arithmetic fixture.",
+                   "General compute semantics, private storage and calls, LDS, atomics, waves, mathematical libraries and broad geometry are not qualified.",
+                   "No general HIP runtime, framework support, performance or sustained reliability claim follows.",
+                   "Visible mount equivalence does not prove global mount absence, detached process enumeration or reference release."
+               ],
+    "next_action":  "G3: prepare reviewed deployment and bounded native validation of the existing 304-byte private-memory call candidate on idle .40."
+}

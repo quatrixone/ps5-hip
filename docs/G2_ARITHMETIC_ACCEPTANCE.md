@@ -1,12 +1,15 @@
 # Combined G2 arithmetic experiment
 
-Status: first combined-image observation on .40 is partial-pass. Both arithmetic
+Status: two newly controlled prospective cycles on .40 passed independent review;
+G2 passed for the declared arithmetic fixture. See the six-item mapping and both
+cycle bindings in [`native-g2-acceptance.json`](../evidence/native-g2-acceptance.json).
+The earlier combined-image observation on .40 remains partial-pass. Both arithmetic
 dispatches, all 146 values, guards, allocation closure and application finalization
 passed. OS process termination and EndAppMount completion were observed, but the
 older deployed loader retained its registered image and emitted no explicit
 layer-release records. See
 [`native-arithmetic-fw1270-cycle1.json`](../evidence/native-arithmetic-fw1270-cycle1.json).
-The release criterion and second accepted cycle remain outstanding.
+Its original release criterion was not met; its classification is unchanged.
 
 ## Explicit lifecycle correction for future .40 controls
 
@@ -53,12 +56,25 @@ The first read-only snapshot on .40 returned `count_bound` for both mount
 observations. It supplied no rows or usable baseline, while confirming only the
 historical PID134/application-ID queries and service health. See
 [`native-teardown-snapshot-fw1270.json`](../evidence/native-teardown-snapshot-fw1270.json).
-Future arithmetic/private controls remain held while the raw query is investigated
-offline. The diagnostic's initialized zero counters must never be treated as
-mount absence or successful release.
+That obstruction was resolved by the frozen v3 collector: two complete snapshots
+each returned 1110 records, including the same registered UFS image and persistent
+title nullfs mapping. See
+[`native-teardown-v3-fw1270.json`](../evidence/native-teardown-v3-fw1270.json).
+This supplies a usable visible registration baseline, not proof of global mount
+absence or release. New arithmetic controls must still collect fresh pre/post
+snapshots and satisfy the full prospective contract above. The diagnostic's
+initialized zero counters must never be treated as mount absence or successful
+release; historical PID134 queries cannot prove a future title's termination.
 
 The sections below retain the original frozen experiment contract. The explicit
 prospective correction above governs newly prepared .40 controls.
+
+The first prospective host controller incorrectly required a zero launch result.
+The frozen native controller returns success for a nonnegative signed result,
+which identifies the launched application. That interrupted attempt remains
+inconclusive. The corrected controls validate the full response and match the
+returned application ID to fresh OS/ShadowMount evidence; direct socket-response
+regressions cover real successful IDs, signed errors and malformed responses.
 
 G2 item 5 requires one frozen application to execute indexed-write followed by
 vector-add. The successful store and vector images establish useful controls,

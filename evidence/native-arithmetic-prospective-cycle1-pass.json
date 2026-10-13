@@ -1,0 +1,141 @@
+{
+    "schema":  1,
+    "classification":  "pass",
+    "scope":  "First accepted prospective arithmetic cycle; not full G2",
+    "target":  "console .40",
+    "firmware_observed":  "12.70",
+    "source_commit":  "5b74ac8846f2cfcd0bdbea1c3eb1e1c464c210fe",
+    "image_sha256":  "28262f78937ef23f2cd688f4ab29bc0be8811dc50c3d53011d28927deb70b887",
+    "runner_sha256":  "2a9b7252ed960897e540b28fe8999879a125214776dd8c841ae5b83df07e0b9a",
+    "manifest_sha256":  "89ec51a91242eff3993c1cfcc28a613c590f49ae8c69209f6da9a5adca2a5d98",
+    "raw_observation":  "results/arithmetic-prospective-cycle1-launch-fix/observation-20261013T021658.970395Z",
+    "receipt_sha256":  "91da5b718d3bd648e9170a717f4cf402003dc02492cc90eeb2c6cddf6bea93e9",
+    "independent_preflight_review_sha256":  "eed592c6eabbb36898d66c1a15fcf4841dcd30e708d4065f812cbda5d328ee40",
+    "independent_observation_review_sha256": "08e0e1683be883e655a543609153d47f923d6c83261c07f9630ce11cd4e48492",
+    "attempted_phases":  [
+                             "pre-snapshot",
+                             "launch",
+                             "close",
+                             "post-snapshot"
+                         ],
+    "installed_verified":  true,
+    "launch_result":  {
+                          "unsigned_result":  8216,
+                          "result_hex":  "0x00002018",
+                          "nonnegative":  true
+                      },
+    "lifecycle":  {
+                      "pid":  105,
+                      "app_id":  "0x00002018",
+                      "title_id":  "PPSA99014",
+                      "ordered_os_lifecycle_complete":  true,
+                      "shadow_self_stop":  true,
+                      "generic_kill_end_label_count":  1,
+                      "limits":  [
+                                     "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+                                 ]
+                  },
+    "exact_values":  146,
+    "dispatches":  2,
+    "application_log_sha256":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+    "application_log_bytes":  863,
+    "self_stopped_before_close":  true,
+    "matching_mount_multiset_equal":  true,
+    "pre_matching_mounts":  [
+                                {
+                                    "kind":  "registered_image",
+                                    "type":  53,
+                                    "flags_hex":  "210001041",
+                                    "fsid_hex":  "9403cc6a40970a00",
+                                    "fstype_hex":  "756673",
+                                    "to_hex":  "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+                                    "from_hex":  "2f6465762f6c766432",
+                                    "fstype":  "ufs",
+                                    "to":  "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+                                    "from":  "/dev/lvd2",
+                                    "known_registration_anchor":  true
+                                },
+                                {
+                                    "kind":  "runtime_layer",
+                                    "type":  53,
+                                    "flags_hex":  "1000",
+                                    "fsid_hex":  "7bff042929000000",
+                                    "fstype_hex":  "6e756c6c6673",
+                                    "to_hex":  "2f73797374656d5f65782f6170702f505053413939303134",
+                                    "from_hex":  "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+                                    "fstype":  "nullfs",
+                                    "to":  "/system_ex/app/PPSA99014",
+                                    "from":  "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+                                    "known_registration_anchor":  false
+                                }
+                            ],
+    "post_matching_mounts":  [
+                                 {
+                                     "kind":  "registered_image",
+                                     "type":  53,
+                                     "flags_hex":  "210001041",
+                                     "fsid_hex":  "9403cc6a40970a00",
+                                     "fstype_hex":  "756673",
+                                     "to_hex":  "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+                                     "from_hex":  "2f6465762f6c766432",
+                                     "fstype":  "ufs",
+                                     "to":  "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+                                     "from":  "/dev/lvd2",
+                                     "known_registration_anchor":  true
+                                 },
+                                 {
+                                     "kind":  "runtime_layer",
+                                     "type":  53,
+                                     "flags_hex":  "1000",
+                                     "fsid_hex":  "7bff042929000000",
+                                     "fstype_hex":  "6e756c6c6673",
+                                     "to_hex":  "2f73797374656d5f65782f6170702f505053413939303134",
+                                     "from_hex":  "2f6d6e742f736861646f776d6e742f5050534139393031345f6236643962326534",
+                                     "fstype":  "nullfs",
+                                     "to":  "/system_ex/app/PPSA99014",
+                                     "from":  "/mnt/shadowmnt/PPSA99014_b6d9b2e4",
+                                     "known_registration_anchor":  false
+                                 }
+                             ],
+    "health_after":  {
+                         "2121":  "reachable",
+                         "3232":  "reachable",
+                         "9021":  "reachable"
+                     },
+    "owned_locks_released":  true,
+    "accepted":  true,
+    "accepted_same_image_cycles":  1,
+    "hardware_gate_passed":  false,
+    "raw_sha256":  {
+                       "after-cycle.log":  "952095b6777384d67543dbdd159d888f7c609236e74abe70db8427f94d1e109d",
+                       "after-post.log":  "952095b6777384d67543dbdd159d888f7c609236e74abe70db8427f94d1e109d",
+                       "application.log":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39",
+                       "before-close.log":  "952095b6777384d67543dbdd159d888f7c609236e74abe70db8427f94d1e109d",
+                       "before-launch.log":  "31dd244f8bbd125b9bc1cc2ffbecf4f85a95c4f08870b7e38b3efb3dcdaac5e6",
+                       "before-post-snapshot.log":  "952095b6777384d67543dbdd159d888f7c609236e74abe70db8427f94d1e109d",
+                       "before-pre-snapshot.log":  "31dd244f8bbd125b9bc1cc2ffbecf4f85a95c4f08870b7e38b3efb3dcdaac5e6",
+                       "before-preservation.log":  "31dd244f8bbd125b9bc1cc2ffbecf4f85a95c4f08870b7e38b3efb3dcdaac5e6",
+                       "before.log":  "31dd244f8bbd125b9bc1cc2ffbecf4f85a95c4f08870b7e38b3efb3dcdaac5e6",
+                       "close-response.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                       "installed.json":  "eb196fb5c6883a7a5f9d4999d8ed20fd56c2acad977e407608d79e6d7ce3034d",
+                       "klog.log":  "abfadc89b49b89bd0c5224c5f4f04581c12b80012c49723326667cbd1b617b28",
+                       "launch-klog.log":  "171f85f90a942ce457729a58d2672c3719e817982dda8940a4b86f9563febac6",
+                       "launch-response.log":  "34a710499863656b468e1080f8e9f57c29c109765482874f7075f684a7046386",
+                       "launch-shadow-delta.log":  "7432ea560b9468882eb055301b96bafeff9676233322e943d89d51c5b0bdcb58",
+                       "lifecycle-delta.log":  "7432ea560b9468882eb055301b96bafeff9676233322e943d89d51c5b0bdcb58",
+                       "observed.log":  "952095b6777384d67543dbdd159d888f7c609236e74abe70db8427f94d1e109d",
+                       "post-snapshot.log":  "109bf6328130225f22a8c838271b109c4ce5ca06c6d6660325aed4d3287d058f",
+                       "pre-snapshot.log":  "109bf6328130225f22a8c838271b109c4ce5ca06c6d6660325aed4d3287d058f",
+                       "preservation.json":  "cbb9a1c25a87c753298835b2a411a6d92c001bbdf83a29f113ff05ce39945852",
+                       "prior-application.log":  "6d449155ab7945ebea61449e8f73af1d9a12ef2482908489dff91962cfb3dd39"
+                   },
+    "limits":  [
+                   "Acceptance applies only to a new controller-evidenced cycle; it does not reclassify prior cycles.",
+                   "Matching-row multiset equivalence is not equality of all mount records or global absence proof.",
+                   "Collector namespace/ABI remains unqualified; persistent registration mounts may remain.",
+                   "Historical PID134 status is not evidence about the newly launched process.",
+                   "Fresh creation, capture windows, image identity, locks and health require controller raw evidence.",
+                   "One accepted cycle does not fulfill the required two clean same-image cycles."
+               ],
+    "next_action":  "Audit this cycle, then prepare separately reviewed second cycle of the same frozen image and map all G2 requirements."
+}

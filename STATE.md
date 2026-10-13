@@ -4,7 +4,27 @@ Updated: 2026-10-12, America/New_York.
 
 ## Actual status
 
-- G1 passed offline; G2 remains in progress. G3-G12 are not complete. There is
+- **G2 passed for the declared arithmetic fixture.** Two independently reviewed
+  cycles of the same frozen image on .40 checked 146 exact values each, unchanged
+  guards, allocation closure and full finalization. PID105/application `0x2018`
+  and PID114/application `0x4018` self-stopped before host close; ordered OS
+  teardown, visible pre/post mount equivalence, service health and owned lock
+  release passed. The six-item requirement map is in
+  `evidence/native-g2-acceptance.json`. Scope is gfx1013 wave32, the named
+  relocation-free store/vector kernels, 64x1x1 threads and two X groups over
+  73 elements. Next: reviewed deployment and native validation of the frozen
+  304-byte private-memory call candidate; it remains unrun.
+- The new prospective arithmetic cycle on .40 was **inconclusive** because of a
+  host-controller defect: it treated successful launch return `0x18` (the new
+  application ID) as failure and closed PID99 before natural self-stop. No fresh
+  arithmetic log or post-run mount snapshot was obtained. The installed image
+  and positive pre-run baseline verified; the prior log was preserved. Exact-title
+  host-close teardown completed, idle returned, all services stayed reachable and
+  both locks were released. That consumed controller is preserved; the separately
+  corrected controller and direct response regressions enabled the two passes above.
+  See `evidence/native-arithmetic-prospective-cycle1.json`; this is not evidence
+  of a GPU failure and does not change the earlier partial-pass.
+- G1 passed offline; G2 passed its declared native fixture. G3-G12 are not complete. There is
   no general HIP runtime, framework port or hardware-qualified SDK yet.
 - Three native HIP-compiled dispatches have passed on .30, firmware 6.02:
   one indexed-store at source `b8bc2b0`, then two vector additions in one title
@@ -17,9 +37,9 @@ Updated: 2026-10-12, America/New_York.
   no general ISA, coherence, throughput or stability claim follows.
 - Strict G2 audit found that numbered item 5 requires one frozen application
   candidate to execute indexed-write followed by vector-add. Existing successes
-  use two images, so another vector-only cycle cannot close G2. Prepare a combined
-  arithmetic suite using the unchanged proven kernels/core, then qualify two
-  clean cycles of that same image. The earlier vector cycle-two control was
+  used two images, so another vector-only cycle could not close G2. The combined
+  arithmetic suite using the unchanged proven kernels/core subsequently passed
+  two clean cycles of the same image, as recorded above. The earlier vector cycle-two control was
   blocked before launch or log preservation by unrelated
   PPSA99930 PID394. Both locks were released. See
   `evidence/native-vector-twice-cycle2-no-run.json`. The successful vector image
@@ -60,8 +80,10 @@ Updated: 2026-10-12, America/New_York.
   review classified this **partial-pass**: ShadowMount v1.6beta16 retained its
   registered UFS image and emitted no explicit layer-release records. This is
   not proof of a leak, but does not satisfy the declared release prerequisite.
-  Hold the second arithmetic cycle and private304 launch while resolving that
-  evidence gap offline. See `evidence/native-arithmetic-fw1270-cycle1.json`.
+  That evidence gap held further arithmetic/private304 launches until the explicit
+  prospective lifecycle contract and two new accepted cycles resolved the G2
+  prerequisite. The original partial-pass remains unchanged. See
+  `evidence/native-arithmetic-fw1270-cycle1.json`.
 - The current host suite passes 46 sanitizer CTests with real HIP bundle
   fixtures, registration/capture models, OCML objects, directed MPFR certificates,
   owned native data and telemetry v2 enabled. The earlier bundle/inspector
@@ -613,3 +635,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-12 | diagnostic no-run | d6587ae | .40 FTP/klog refused;no payload;locks released | evidence/native-teardown-v3-no-run.json | services then fresh idle checks
 - 2026-10-12 | G4 offline | 038fdb6 | HIP title packaged;50 CTests;22 lifecycle cases | evidence/offline-hip-native-vector-title.json | native qualification pending
 - 2026-10-12 | read-only .40 | d6587ae | two complete1110 tables;visible registration baseline established | evidence/native-teardown-v3-fw1270.json | new prospective arithmetic cycle
+- 2026-10-12 | G2 inconclusive | 5b74ac8 | .40 host launch-parser bug caused early close;services healthy | evidence/native-arithmetic-prospective-cycle1.json | fix host parser offline
+- 2026-10-12 | G2 cycle pass | 5b74ac8 | .40 exact146,self-stop,visible mount equivalence | evidence/native-arithmetic-prospective-cycle1-pass.json | second same-image cycle
+- 2026-10-12 | G2 passed | 5b74ac8 | .40 two clean same-image cycles,292 exact values | evidence/native-g2-acceptance.json | G3 private304 validation
