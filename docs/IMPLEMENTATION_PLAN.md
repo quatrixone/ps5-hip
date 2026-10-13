@@ -6,9 +6,10 @@ Status: G1 passed its offline acceptance; G2 passed for the declared arithmetic
 fixture in `../evidence/native-g2-acceptance.json`. G3 has one exact private-call
 hardware computation observation with delayed completion evidence and one bounded
 compiler-spill cycle plus static, dynamic and mixed LDS cycles. Persistent-buffer
-visibility has recovered computation evidence with an inconclusive original cycle; broad G3
-qualification remains open. Full and partial wave32 fixtures have passing bounded native
-cycles; multidimensional hardware qualification remains open. G4 has an offline native candidate; G5-G12 remain planned.
+visibility has recovered computation evidence with an inconclusive original cycle.
+Full/partial wave32 and exact 2D/3D geometry fixtures have passing bounded native
+cycles. Broader G3 qualification remains open. G4 has an offline native candidate;
+G5-G12 remain planned.
 Frozen native candidates and validation receipts exist. See `../STATE.md`
 for the current evidence and next experiment.
 
@@ -193,7 +194,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | --- | --- | --- | --- |
 | G1 | Reproducible compiler and platform contract | None | passed offline |
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
-| G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS and full/partial wave32 cycles passed; broader qualification pending |
+| G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | native HIP vector candidate ready offline; hardware and broader client qualification pending |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |

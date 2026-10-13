@@ -1,0 +1,119 @@
+{
+  "source_commit": "7bdcea0a96454d19c2f87d9a2c26b99d7cbb5019",
+  "image_sha256": "591148ba56d977ed2d281b06d3666b9068eed66a72c8f84c9355cc2753b23bec",
+  "kernel": "geometry_3d",
+  "accepted": true,
+  "script_sha256": "cf0e893955e192775a0395187fd960d119be9c185b4c0662679b44992f4993aa",
+  "manifest_sha256": "5d91c1ab66f68dfe67fcd5c48267cbed37d3568909ad758b51bc36d99732cac2",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/geometry-3d-deployment-v1/deployment-20261013T053512.074399Z/deployment.json",
+      "sha256": "a9556164f718c4366329526461e2b1d060f6d2574f3d66782324b7b211ee89f0"
+    },
+    "review": {
+      "path": "results/geometry-3d-deployment-v1/deployment-20261013T053512.074399Z-independent-review.json",
+      "sha256": "8a88335ba4532553d038fb0c5de33ec0c2ac93e6e994135a10626d8851885566"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "65e1a64ff0089840312bceac7180300d965f4cf61506b2aa2a2a8641bd9012e3",
+    "after-post.log": "65e1a64ff0089840312bceac7180300d965f4cf61506b2aa2a2a8641bd9012e3",
+    "application.log": "14c4c2af6a285ed111f9038f2d15a71eacf38b00fb814f801ee0b2ccfa9673b0",
+    "before-close.log": "65e1a64ff0089840312bceac7180300d965f4cf61506b2aa2a2a8641bd9012e3",
+    "before-launch.log": "c4b3df0c66d02fee53d3a4a317b7d3d07c2aeb9b818e34279c60bb1fca73b6e3",
+    "before-log-check.log": "c4b3df0c66d02fee53d3a4a317b7d3d07c2aeb9b818e34279c60bb1fca73b6e3",
+    "before-post-snapshot.log": "65e1a64ff0089840312bceac7180300d965f4cf61506b2aa2a2a8641bd9012e3",
+    "before-pre-snapshot.log": "16f0a32eb96e67c542ae48234009227e4efb34322143549fe754b300807c88d6",
+    "before.log": "16f0a32eb96e67c542ae48234009227e4efb34322143549fe754b300807c88d6",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "963649d478cb5261f24269d64a4081417870025b071efb2f32519b11a9bd2495",
+    "installed-before-launch.json": "ebe196eed237dea1f9514d1aef4c7fe53a015e702ba99c2d5ea83ecd6a497714",
+    "installed-eboot.bin": "963649d478cb5261f24269d64a4081417870025b071efb2f32519b11a9bd2495",
+    "installed.json": "ebe196eed237dea1f9514d1aef4c7fe53a015e702ba99c2d5ea83ecd6a497714",
+    "klog.log": "db0c70fc8a8c5b69e66e150bd4c4133a962c47370601456c5606da5f431b9485",
+    "launch-klog.log": "207392fba1a618493cb5d1cbf04d8fb4305a377ae77729761165dbdbe57f94aa",
+    "launch-response.log": "2a0365690f94353ed43032687d7ee26c00f769ba41e90ddf57058f452dd9a5a2",
+    "launch-shadow-delta.log": "262d1b15e1e3a6f594d710b3394f78e266aaddbdd43e34e66ceec5bc472928de",
+    "lifecycle-delta.log": "262d1b15e1e3a6f594d710b3394f78e266aaddbdd43e34e66ceec5bc472928de",
+    "observed.log": "65e1a64ff0089840312bceac7180300d965f4cf61506b2aa2a2a8641bd9012e3",
+    "post-snapshot.log": "001fbad7792e6cf0b66f4ff7d9e7cc7562d9b05c4771ab59c1ddcf74e937b85d",
+    "pre-snapshot.log": "001fbad7792e6cf0b66f4ff7d9e7cc7562d9b05c4771ab59c1ddcf74e937b85d",
+    "private-log-absence-before-launch.json": "bdc44f5d3947e5cf7537e3df156448aee602a53142f2dfcd815ad4c7af41341c",
+    "private-log-absence.json": "bdc44f5d3947e5cf7537e3df156448aee602a53142f2dfcd815ad4c7af41341c",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-geometry-3d-cycle-pass",
+  "hardware_gate_passed": false,
+  "full_g3_complete": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "groups": [
+    2,
+    3,
+    4
+  ],
+  "threads_per_group": [
+    8,
+    4,
+    2
+  ],
+  "exact_records": 1536,
+  "record_words": 24576,
+  "logical_points": 819,
+  "inactive_points": 717,
+  "kernarg_bytes": 296,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "geometry_3d",
+    "log_sha256": "14c4c2af6a285ed111f9038f2d15a71eacf38b00fb814f801ee0b2ccfa9673b0",
+    "bytes": 658,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 204,
+    "app_id": "0x00008018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "receipt": {
+    "path": "results/geometry-3d-execution-v1/observation-20261013T053745.180952Z/receipt.json",
+    "sha256": "8384ec1c700845e48539ee2261f52544bb1aa6e48a1058f164f713315b3983a4"
+  },
+  "independent_review": {
+    "path": "results/geometry-3d-execution-v1/observation-20261013T053745.180952Z-independent-review.json",
+    "sha256": "d5e1d8b98e08b4a2f9dbc2e8989d54607038992c73a9509bc1d8b918342ef9e1"
+  },
+  "limits": [
+    "Only the exact O2 gfx1013 3D object: 2x3x4 groups of 8x4x2 threads; 1536 coordinate records / 24576 words plus 819 exact logical tail values and 717 inactive sentinels.",
+    "Completed queue includes CPU cache maintenance; no other geometry, arbitrary grid/block shapes, asynchronous overlap or full G3 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

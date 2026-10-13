@@ -4,6 +4,25 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **3D geometry fixture passed on .40 and independent audit:** 1,536 exact records
+  (24,576 words), 819 logical points and 717 inactive tail positions, unchanged
+  inputs/guards and closed allocations. PID204/application `0x8018` finalized
+  and stopped naturally; matching visible mounts, healthy services and released
+  locks complete the bounded cycle. All 149 inputs and 25 raw files were audited.
+  See `evidence/native-geometry-3d.json`; arbitrary shapes and full G3 remain open.
+
+- **2D geometry fixture passed on .40:** 384 exact records (6,144 words), 273
+  logical points and 111 inactive tail positions. Inputs/guards stayed unchanged,
+  allocations closed, and PID195/application `0x6018` finalized and stopped
+  naturally. Visible mount snapshots matched; services stayed healthy and locks
+  released. Independent review reproduced acceptance and verified 144 inputs and
+  25 raw files. See `evidence/native-geometry-2d.json`.
+- Checked scratch/LDS/private-call planners are integrated in isolated development
+  commit `ce24c01`. All 58 sanitizer tests and independent source review passed;
+  current allocation/submission and HIP controls are unchanged. This is pure
+  planner integration, with no new HIP admission or combined hardware claim. See
+  `evidence/offline-core-planner-integration.json`.
+
 - **Partial-wave32 fixture passed on .40 and independent review:** lanes 4-19 in
   each wave produced 128 exact active words; 128 inactive words retained poison.
   Guards, allocation closure and finalization passed. PID186/application `0x4018`
@@ -21,14 +40,15 @@ Updated: 2026-10-13, America/New_York.
 - 2D/3D geometry candidates are frozen at `7bdcea0`. All 69 host checks and
   both native package validations passed; independent source/host and package
   reviews are clear. The measured 64-thread shapes use full HIP builtins and
-  checked hidden arguments. Hardware validation remains open. See
+  checked hidden arguments. Both exact O2 fixtures subsequently passed hardware
+  cycles above; broader shapes and O1 hardware remain open. See
   `evidence/offline-geometry-readiness.json`.
 
 - Prospective lifecycle parsing now tolerates the bounded, known resource-manager
   records observed between spawn context and matching PID. Eight offline tests and
   independent review passed; foreign/duplicate identities and faults still reject.
   Earlier raw logs and inconclusive acceptance remain unchanged. See
-  `evidence/offline-bounded-lifecycle-parser.json`. Future wave controls will bind it.
+  `evidence/offline-bounded-lifecycle-parser.json`. Wave and geometry controls bind it.
 - **Visibility computation and delayed cleanup independently audited; original cycle inconclusive:** the recovered
   result reports six dispatches, three rounds and 771 exact outputs over persistent
   buffers, intact guards, closed allocations and complete finalization. Two read-only
@@ -43,7 +63,7 @@ Updated: 2026-10-13, America/New_York.
   `evidence/native-visibility-execution-incomplete.json`.
 - Refreshed full/partial wave32 candidates are frozen at `c3972cb`, using current
   allocation/submission cleanup. Device code and wave harness objects match the
-  older candidates; the new images need their own hardware qualification. All 38
+  older candidates; both refreshed images now have exact hardware passes above. All 38
   configured sanitizer tests, eight actual-object launch/packet checks and both
   native package validations passed. Parent artifact review rehashed sources,
   logs, staged payloads and images. See `evidence/offline-wave32-current-readiness.json`.
@@ -487,11 +507,12 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-Qualify the reviewed 2D/3D packages. Both refreshed wave32 fixtures have passed.
-Preserve the successful visibility image/result and the original
-inconclusive receipt. The additive 2D/3D
-geometry packages have passed independent offline review in `.local/g3-geometry`. Atomic, numerical and broader
-visibility qualification remain open; do not treat isolated fixture passes as G3.
+Validate the packaged genuine HIP vector client and continue unified-runtime integration.
+Both wave32 and both measured geometry fixtures have passed.
+Preserve the installed 3D image/result and all earlier retained evidence, including
+the original inconclusive private-call and visibility cycles. Atomic, numerical,
+addressing and broader visibility qualification remain open; isolated fixture
+passes do not close G3.
 
 G1 passed its offline acceptance. `evidence/offline-g1-acceptance.json` maps every
 requirement to evidence and records the selected LLVM/LLD 18.1.8, AMDHSA V5,
@@ -779,3 +800,6 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | G3 geometry offline | 7bdcea0 | 69 host checks and both native packages independently reviewed | evidence/offline-geometry-readiness.json | hardware pending
 
 - 2026-10-13 | G3 partial wave32 | c3972cb | .40:128 active +128 inactive words, clean bounded cycle; independent audit clear | evidence/native-wave-partial.json | 2D/3D geometry next
+
+- 2026-10-13 | G3 geometry | 7bdcea0 | .40:2D384 and3D1536 exact records, bounded cycles independently audited | evidence/native-geometry-3d.json | genuine HIP client next
+- 2026-10-13 | G3 core integration | ce24c01 | scratch/LDS/private planners combined;58 sanitizer tests and independent review passed | evidence/offline-core-planner-integration.json | add geometry

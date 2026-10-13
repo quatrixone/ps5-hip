@@ -1,0 +1,119 @@
+{
+  "source_commit": "7bdcea0a96454d19c2f87d9a2c26b99d7cbb5019",
+  "image_sha256": "fdcda17ad4adf3721fd4692786adf90a573643dfd6a2c4ebcb38fdec1e67578d",
+  "kernel": "geometry_2d",
+  "accepted": true,
+  "script_sha256": "cb9fc681540d6261bd19e5ac27d6964776d8e23f68dd14cb2983067b6443fc3f",
+  "manifest_sha256": "a5102d149c2a740bbe9206ff037ab37eb12736c9e741223f20ff2eb081f2743e",
+  "deployment_binding": {
+    "receipt": {
+      "path": "results/geometry-2d-deployment-v1/deployment-20261013T052802.518069Z/deployment.json",
+      "sha256": "b4ef244dae11a380c39d9b5544e6e89f84273f3d6c66524cd486e398e4428fe7"
+    },
+    "review": {
+      "path": "results/geometry-2d-deployment-v1/deployment-20261013T052802.518069Z-independent-review.json",
+      "sha256": "83aa7674e7f5e03a20e3d811cef896c7db5c3bb63a35cf70c3f913c1d756006a"
+    }
+  },
+  "stopped_before_close": true,
+  "health_before": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_sha256": {
+    "after-cycle.log": "fdb2cf93b11b16c8def34b4ec0c976a7439c4b7817536bff72b1e27e5b7e0e66",
+    "after-post.log": "fdb2cf93b11b16c8def34b4ec0c976a7439c4b7817536bff72b1e27e5b7e0e66",
+    "application.log": "4f5198a4246a42cc7bef0b535164e9a8cca6faca19a930b0fefb5171b95cc3d8",
+    "before-close.log": "fdb2cf93b11b16c8def34b4ec0c976a7439c4b7817536bff72b1e27e5b7e0e66",
+    "before-launch.log": "adc2d044b804004f2255afd7ce3644c40306e5d2de835b64aa7fe8d6b2f8fdbd",
+    "before-log-check.log": "adc2d044b804004f2255afd7ce3644c40306e5d2de835b64aa7fe8d6b2f8fdbd",
+    "before-post-snapshot.log": "fdb2cf93b11b16c8def34b4ec0c976a7439c4b7817536bff72b1e27e5b7e0e66",
+    "before-pre-snapshot.log": "adc2d044b804004f2255afd7ce3644c40306e5d2de835b64aa7fe8d6b2f8fdbd",
+    "before.log": "adc2d044b804004f2255afd7ce3644c40306e5d2de835b64aa7fe8d6b2f8fdbd",
+    "close-response.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "installed-before-launch-eboot.bin": "f643c25eae9942bda3016a26729c570fd2d993afe20d534acd19ee95cd8b2907",
+    "installed-before-launch.json": "3cc9da8a08916abd18461c378be64e79acae05809ea9a07a35032d82e2dc11e0",
+    "installed-eboot.bin": "f643c25eae9942bda3016a26729c570fd2d993afe20d534acd19ee95cd8b2907",
+    "installed.json": "3cc9da8a08916abd18461c378be64e79acae05809ea9a07a35032d82e2dc11e0",
+    "klog.log": "28a6827d1a0d1998ec6ebe3ea7c2ae1aa5b5669ce3bd103614def33ea4c0abe9",
+    "launch-klog.log": "48dd5c33d74f4568fe097da0078219eca83158b96f5e9f1b52b94d09ddcd9706",
+    "launch-response.log": "491549ee7da0a8c41ef6bde7ab239f4ab5696e25d11c6d779505d868c8737424",
+    "launch-shadow-delta.log": "6daa2fa3f291fc4f2efc87a8105dd2b5ca21b3d76b2fb8e788c0f16517603b99",
+    "lifecycle-delta.log": "6daa2fa3f291fc4f2efc87a8105dd2b5ca21b3d76b2fb8e788c0f16517603b99",
+    "observed.log": "fdb2cf93b11b16c8def34b4ec0c976a7439c4b7817536bff72b1e27e5b7e0e66",
+    "post-snapshot.log": "a8ebb0c1ec19289cce15c65ea7d373f0fa8a650c4a814505041a75d285d0c231",
+    "pre-snapshot.log": "a8ebb0c1ec19289cce15c65ea7d373f0fa8a650c4a814505041a75d285d0c231",
+    "private-log-absence-before-launch.json": "382025b38ecfc06c3e100af2f47713d69f2d1d420c5a645fab3d4790a6a33dc3",
+    "private-log-absence.json": "382025b38ecfc06c3e100af2f47713d69f2d1d420c5a645fab3d4790a6a33dc3",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "exact-geometry-2d-cycle-pass",
+  "hardware_gate_passed": false,
+  "full_g3_complete": false,
+  "target": "console .40 firmware 12.70",
+  "compiler_profile": "LLVM18.1.8 O2 gfx1013 wave32",
+  "groups": [
+    3,
+    2,
+    1
+  ],
+  "threads_per_group": [
+    8,
+    8,
+    1
+  ],
+  "exact_records": 384,
+  "record_words": 6144,
+  "logical_points": 273,
+  "inactive_points": 111,
+  "kernarg_bytes": 296,
+  "application": {
+    "application_result": "application-pass",
+    "target": "gfx1013",
+    "kernel": "geometry_2d",
+    "log_sha256": "4f5198a4246a42cc7bef0b535164e9a8cca6faca19a930b0fefb5171b95cc3d8",
+    "bytes": 654,
+    "hardware_gate_passed": false,
+    "unproven": [
+      "log freshness",
+      "remote artifact identity",
+      "native process status",
+      "title teardown",
+      "service health"
+    ]
+  },
+  "lifecycle": {
+    "pid": 195,
+    "app_id": "0x00006018",
+    "title_id": "PPSA99014",
+    "ordered_os_lifecycle_complete": true,
+    "shadow_self_stop": true,
+    "generic_kill_end_label_count": 1,
+    "limits": [
+      "Unidentified generic events are accepted only within one uniquely bound PID/app lifecycle capture."
+    ]
+  },
+  "matching_mount_multiset_equal": true,
+  "receipt": {
+    "path": "results/geometry-2d-execution-v1/observation-20261013T053032.663789Z/receipt.json",
+    "sha256": "8fe5ee0dde0ece61249b3ade6d4a668b944c96f559ba8a55c36001c1eead1a96"
+  },
+  "independent_review": {
+    "path": "results/geometry-2d-execution-v1/observation-20261013T053032.663789Z-independent-review.json",
+    "sha256": "9e86d99380acee4608e2fcfd271703e114027cfe9dce222ddf6335f83fbd4b03"
+  },
+  "limits": [
+    "Only the exact O2 gfx1013 2D object: 3x2x1 groups of 8x8x1 threads; 384 coordinate records / 6144 words plus 273 exact logical tail values and 111 inactive sentinels.",
+    "Completed queue includes CPU cache maintenance; no 3D, arbitrary grid/block shapes, asynchronous overlap or full G3 qualification.",
+    "Visible matching-row equivalence is not global namespace completeness or reference-release proof.",
+    "Deployment/freshness/mounted bytes/capture boundaries/health/locks require independently reviewed controller evidence."
+  ]
+}

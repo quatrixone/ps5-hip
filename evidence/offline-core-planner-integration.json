@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "classification": "offline-core-planner-integration-reviewed",
+  "source_commit": "ce24c01719d0a764299137a271344b2474e9339c",
+  "branch": "development/g3-core-integration",
+  "base_commit": "e6725fdee0548314ac04a0ab582850a88cdf8940",
+  "qualification": {
+    "path": ".local/g3-core-integration/results/qualify-v1/receipt.json",
+    "sha256": "3bf5e426fd6657b675deaebcf717fe70c9780ecd76630471980da53bde354429"
+  },
+  "independent_review": {
+    "path": ".local/g3-core-integration/results/independent-review-v1/review.json",
+    "sha256": "95784375044f342227959e1f557a22d6f831aae3bec4a9d943bacc29ed69e559"
+  },
+  "tests": {
+    "sanitizer_ctests": 58,
+    "actual_spill_profiles": 4,
+    "actual_lds_profiles": 4,
+    "actual_private304_profiles": 4,
+    "initial_packet_literal_baseline": "passed",
+    "route_separation_and_mutated_packets": "passed",
+    "modern_ownership_submission_and_registration": "passed"
+  },
+  "reviewed_source_sha256": {
+    "CMakeLists.txt": "212f4e47ff265666ee8f04d66eb7f91daf9c0447ad99ce9e7e67d8cef97bad2c",
+    "docs/CORE_PLANNER_INTEGRATION.md": "d76d51064ba491ef74cdb7cf24762f0cee3518b7fd6ee806da6467bda1748bfd",
+    "include/ps5hip/code_object.h": "2996cd2a5278dc2da125cf1f0e829ce307900394fbc9829a0f48f44a65627210",
+    "include/ps5hip/launch.h": "3dc1442b81ff0033b9207a71476f270b8fa358b3417578280f8075ac62d63053",
+    "src/code_object.cpp": "eb82e23133e5805d9c500ccb009aea4ceb41c359330bc0bedfe75f277b43b09c",
+    "src/launch.cpp": "c097652a9010eb4314b3203bceab62029c68aa2168fcf370e0cd972a4a05355b",
+    "tests/buffer_scratch_test.cpp": "627be881d4537fe69aed62a8851672226dc8d2c2cddba0305fd35005806eca32",
+    "tests/flat_call_test.cpp": "8d1b0d638c70b45b30be728a33644e409ea9287326e3ab0b70492a9efd74a3a3",
+    "tests/lds_test.cpp": "67a4efba1f4956e866b417fc292d34b9ff2d61dd29701d05e3f04ee35c63c074",
+    "tests/planner_integration_test.cpp": "9bca742fe7fb18392fe976f223dd6822ef206f361397e271f72894f9656ef442"
+  },
+  "modern_ownership_G4_files_unchanged": 14,
+  "limitations": [
+    "Pure planner integration only; no new HIP admission, geometry or native package.",
+    "Structural eight-SGPR route cannot qualify generic/volatile code or private aperture.",
+    "Only four selected private304 bytes are independently rebound to compiler receipt; full1792 compiler artifact inventory not replayed.",
+    "Optional math actual-artifact/certificate and historical vector transcript checks not configured; current compiled data/registration/native-launch/queue models are configured.",
+    "Setup symlink excluded from Git source inventory; no shared inputs modified by this workflow."
+  ],
+  "hardware_qualified": false,
+  "full_g3_complete": false
+}

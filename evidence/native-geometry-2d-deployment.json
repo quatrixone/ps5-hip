@@ -1,0 +1,69 @@
+{
+  "source_commit": "7bdcea0a96454d19c2f87d9a2c26b99d7cbb5019",
+  "image_sha256": "fdcda17ad4adf3721fd4692786adf90a573643dfd6a2c4ebcb38fdec1e67578d",
+  "kernel": "geometry_2d",
+  "registered": true,
+  "launched": false,
+  "hardware_gate_passed": false,
+  "mounted_files": {
+    "eboot.bin": {
+      "bytes": 824658,
+      "sha256": "f643c25eae9942bda3016a26729c570fd2d993afe20d534acd19ee95cd8b2907"
+    },
+    "canary.hsaco": {
+      "bytes": 6520,
+      "sha256": "b8e2b6cbb6726d4beb16a8e6a6c3d4d414a1162abf4ee9828f3e84db7a54dfa4"
+    }
+  },
+  "preservation": {
+    "package": "/data/homebrew/PPSA99014.ffpkg.wave-partial.sha256-24f9b99b5e626dfa690346752d993c557b3425868269ee7cbbed1e8f3448a8f6.preserved",
+    "package_sha256": "24f9b99b5e626dfa690346752d993c557b3425868269ee7cbbed1e8f3448a8f6",
+    "wave_partial_result": "/data/ps5-hip/results/ps5-hip-gfx1013-wave_partial.log.wave-partial-PID186-app4018.sha256-15d366f47e95dfccb124537975c442237168d3419976e385f5a2256db492e5d3",
+    "wave_partial_result_sha256": "15d366f47e95dfccb124537975c442237168d3419976e385f5a2256db492e5d3"
+  },
+  "health_after": {
+    "2121": "reachable",
+    "3232": "reachable",
+    "9021": "reachable"
+  },
+  "owned_locks_released": true,
+  "raw_file_sha256": {
+    "after.log": "7385c568cf929a9dc809782150d83c076215864b63286b6d05827ae3b8b13eac",
+    "before-homebrew.list": "24b9b44008d929c0b7ddefb87d25f4db29079b07f2ba711d7baeaa9cd3c6a5ba",
+    "before-preservation.log": "5ad5c35f5e4cabab8d24e847bcd9aba85296f6a20ac40b540def2c73094a4d15",
+    "before-preserve-image.log": "5ad5c35f5e4cabab8d24e847bcd9aba85296f6a20ac40b540def2c73094a4d15",
+    "before-preserve-log.log": "472a4e31c8de0c846cc11727cacf92bb11cbdeef8bae098287374cb4be334e39",
+    "before-promote.log": "188d3df803d777e0a8378adf39bde09302c162e80eb4a540708d8325522884f1",
+    "before-promotion.log": "188d3df803d777e0a8378adf39bde09302c162e80eb4a540708d8325522884f1",
+    "before-results.list": "256fb08709ede29aea3b4a6c7f224fb05d557e39aa18aed861406ea49d9424f7",
+    "before-upload.log": "5ad5c35f5e4cabab8d24e847bcd9aba85296f6a20ac40b540def2c73094a4d15",
+    "before.log": "5ad5c35f5e4cabab8d24e847bcd9aba85296f6a20ac40b540def2c73094a4d15",
+    "final-idle.log": "7385c568cf929a9dc809782150d83c076215864b63286b6d05827ae3b8b13eac",
+    "final-results.list": "0cedcc38b0866a55fb01b7d9eb6b623d00dd4c7ebab8bd8a737aeb918f23cb9a",
+    "mounted-eboot.bin": "f643c25eae9942bda3016a26729c570fd2d993afe20d534acd19ee95cd8b2907",
+    "pre-promote-homebrew.list": "c408d3e789088a1aa5efecb157d45f3a06f145f0075e52cbe18339f7bf45330c",
+    "preserved-wave-partial.ffpkg": "24f9b99b5e626dfa690346752d993c557b3425868269ee7cbbed1e8f3448a8f6",
+    "preserved-wave-partial.log": "15d366f47e95dfccb124537975c442237168d3419976e385f5a2256db492e5d3",
+    "recheck-homebrew.list": "8fc0b902af450ff34848d883fc8a6e3b0fff74705db5f225bf2545a905881d20",
+    "recheck-results.list": "256fb08709ede29aea3b4a6c7f224fb05d557e39aa18aed861406ea49d9424f7",
+    "registration-001.log": "188d3df803d777e0a8378adf39bde09302c162e80eb4a540708d8325522884f1",
+    "registration-002.log": "188d3df803d777e0a8378adf39bde09302c162e80eb4a540708d8325522884f1",
+    "registration-003.log": "188d3df803d777e0a8378adf39bde09302c162e80eb4a540708d8325522884f1",
+    "registration-004.log": "62ed9e13c5ed5a1f0a92943bd6c409f0a72b479b735dca9530fd49e12ffcc7cc",
+    "registration-005.log": "7385c568cf929a9dc809782150d83c076215864b63286b6d05827ae3b8b13eac",
+    "release-001-homebrew.list": "c408d3e789088a1aa5efecb157d45f3a06f145f0075e52cbe18339f7bf45330c",
+    "release-001.log": "472a4e31c8de0c846cc11727cacf92bb11cbdeef8bae098287374cb4be334e39",
+    "self-mode-response.json": "f37d39ab9a1aa868baca055d6b102e8aad9770ac0d151f340e8b134e6f361758"
+  },
+  "schema": 1,
+  "classification": "deployment-verified",
+  "target": "console .40 firmware 12.70",
+  "receipt": {
+    "path": "results/geometry-2d-deployment-v1/deployment-20261013T052802.518069Z/deployment.json",
+    "sha256": "b4ef244dae11a380c39d9b5544e6e89f84273f3d6c66524cd486e398e4428fe7"
+  },
+  "independent_review": {
+    "path": "results/geometry-2d-deployment-v1/deployment-20261013T052802.518069Z-independent-review.json",
+    "sha256": "83aa7674e7f5e03a20e3d811cef896c7db5c3bb63a35cf70c3f913c1d756006a"
+  }
+}
