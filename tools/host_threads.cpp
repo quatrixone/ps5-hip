@@ -32,9 +32,10 @@ void error(Context &c, int e) noexcept {
 void key_destructor(void *value) noexcept {
     auto *w = static_cast<Worker *>(value);
     if (w != &state.worker[0] && w != &state.worker[1]) { error(state, EINVAL); return; }
-    auto &c = *w->context;
-    if (scalar_tls != 0x100u + w->id) error(c, EINVAL);
-    if (c.destroyed[w->id].fetch_add(1) != 0) error(c, EINVAL);
+    const unsigned id = w == &state.worker[0] ? 0 : 1;
+    if (w->context != &state || w->id != id) { error(state, EINVAL); return; }
+    // Independent pthread keys have no destructor order; emulated TLS may be gone.
+    if (state.destroyed[id].fetch_add(1) != 0) error(state, EINVAL);
 }
 bool lock(Context &c, pthread_mutex_t &m) noexcept {
     const int e = pthread_mutex_timedlock(&m, &c.deadline);

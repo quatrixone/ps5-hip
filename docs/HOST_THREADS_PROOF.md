@@ -48,3 +48,19 @@ and proof, replacing only elevation, final shell request, persistence failures
 and quarantine sleep. These host observations do not qualify native threading or
 worker-thread AGC behavior. Installed host headers and archives are not fully
 inventoried; this is not a hermetic toolchain package.
+
+The pinned SDK compiler uses `-femulated-tls`, with scalar descriptors/templates
+and `__emutls_get_address` from its libc, rather than a hardware TLS data section.
+The host recipe additionally compiles the exact pinned SDK `libc/emutls.c` and
+replays all 18 core cases with that lowering under ASan/UBSan. The original
+source checkpoint read scalar TLS inside the independent proof-key destructor;
+the saved SDK-emutls reproduction correctly failed because the emutls key may
+already have freed its storage, causing a fresh scalar lookup to return 17.
+This is an invalid destructor-order assumption, not a demonstrated use-after-free.
+
+The corrected key destructor checks only its own static Worker identity/context/id
+and exactly-once count. Scalar TLS isolation remains checked in the worker body,
+across the condition waits, and observed immediately before return. No behavior
+depends on order between the proof key and emutls's key. Native auditing must bind
+the actual emutls descriptors, initializers, helper and providers; it must not
+claim a populated PT_TLS segment when the SDK uses emulated TLS.

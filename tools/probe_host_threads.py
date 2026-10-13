@@ -23,10 +23,13 @@ def check(out):
     for n,h in r['inputs'].items():require(sha(n)==h,'input '+n)
     for n,h in r['artifacts'].items():require(sha(out/n)==h,'artifact '+n)
     for t in r['tools'].values():require(sha(t['path'])==t['sha256'],'tool')
-    require(set(r['core_cases'])==set(CORE_CASES) and set(r['title_cases'])==set(TITLE_CASES),'cases')
+    require(set(r['core_cases'])==set(CORE_CASES) and set(r['emulated_tls_cases'])==set(CORE_CASES) and set(r['title_cases'])==set(TITLE_CASES),'cases')
     for name in CORE_CASES:
         text=(out/f'core-{name}.stdout').read_text();require('actual_pthreads=true' in text,'real threads')
         require(('passed=1' if name in ('normal','repeat') else 'passed=0') in text,'result '+name)
+    for name in CORE_CASES:
+        text=(out/f'emutls-{name}.stdout').read_text();require('actual_pthreads=true' in text,'emutls real threads')
+        require(('passed=1' if name in ('normal','repeat') else 'passed=0') in text,'emutls result '+name)
     for c in r['commands']:require(c['returncode']==0,'command '+c['label'])
     raw=(out/'production-title.log').read_bytes();check_title(raw)
     for token in EVENTS:
@@ -37,7 +40,7 @@ def check(out):
         try:check_title(raw.replace(old.encode(),new.encode()))
         except RuntimeError:pass
         else:raise RuntimeError('corruption accepted')
-    return len(CORE_CASES),len(TITLE_CASES),len(EVENTS)+5
+    return len(CORE_CASES),len(CORE_CASES),len(TITLE_CASES),len(EVENTS)+5
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--reference-root',type=Path);p.add_argument('--output',type=Path);p.add_argument('--check',type=Path);a=p.parse_args()
@@ -48,7 +51,10 @@ def main():
     before={n:sha(ROOT/n) for n in sources};elevation=ref/'.deps/elevation/client'
     inputs={str(elevation/n):sha(elevation/n) for n in ('elevation.hpp','protocol.hpp')}
     compiler=shutil.which('clang++-18');require(compiler,'clang++-18 unavailable')
-    tools={'clang++-18':{'path':compiler,'sha256':sha(compiler)}};commands=[]
+    ccompiler=shutil.which('clang-18');require(ccompiler,'clang-18 unavailable')
+    tools={'clang++-18':{'path':compiler,'sha256':sha(compiler)},'clang-18':{'path':ccompiler,'sha256':sha(ccompiler)}};commands=[]
+    deps=json.loads((ROOT/'dependencies.json').read_text());emutls=ref/'.deps'/('sdk-source-'+deps['sdk']['revision'])/'libc/emutls.c'
+    require(sha(emutls)=='86813748aa5668112a0a5891601f5ae36660294a749a013fef7c3bbbd805737c','pinned SDK emutls source changed');inputs[str(emutls)]=sha(emutls)
     env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1:abort_on_error=1',UBSAN_OPTIONS='halt_on_error=1')
     def run(label,argv,timeout=90):
         try:completed=subprocess.run(list(map(str,argv)),cwd=ROOT,env=env,capture_output=True,timeout=timeout)
@@ -66,6 +72,10 @@ def main():
     run('compile-test',[*flags,'-c',ROOT/'tests/host_threads_test.cpp','-o',out/'test.o'])
     run('link-core',[*flags,out/'core.o',out/'test.o','-o',out/'core-test'])
     for name in CORE_CASES:run('core-'+name,[out/'core-test',name],12)
+    run('compile-sdk-emutls',[ccompiler,'-std=c11','-O1','-g','-pthread','-fsanitize=address,undefined','-fno-omit-frame-pointer','-c',emutls,'-o',out/'emutls.o'])
+    run('compile-emulated-core',[*flags,*definitions,'-femulated-tls','-c',ROOT/'tools/host_threads.cpp','-o',out/'emulated-core.o'])
+    run('link-emulated-core',[*flags,out/'emulated-core.o',out/'test.o',out/'emutls.o','-o',out/'emulated-core-test'])
+    for name in CORE_CASES:run('emutls-'+name,[out/'emulated-core-test',name],12)
     run('compile-unmodified-core',[*flags,'-c',ROOT/'tools/host_threads.cpp','-o',out/'unmodified-core.o'])
     run('link-unmodified-core',[*flags,out/'unmodified-core.o',out/'test.o','-o',out/'unmodified-core-test'])
     run('unmodified-core',[out/'unmodified-core-test','normal'],12)
@@ -94,6 +104,6 @@ def main():
     require(before=={n:sha(ROOT/n) for n in sources},'source changed')
     require(inputs=={n:sha(n) for n in inputs},'external source changed')
     artifacts={str(f.relative_to(out)):sha(f) for f in sorted(out.rglob('*')) if f.is_file()}
-    receipt={'schema':1,'classification':'actual-pthread-host-proof-pass','native_executed':False,'gpu_executed':False,'sources':before,'inputs':inputs,'tools':tools,'artifacts':artifacts,'commands':commands,'core_cases':list(CORE_CASES),'title_cases':cases,'sanitizers':['address','undefined'],'environment':{k:env[k] for k in ('ASAN_OPTIONS','UBSAN_OPTIONS')},'limits':['Linux actual pthread scheduling and injected API failures; not PS5 execution.','Join itself has no portable timeout; worker waits have one absolute 3 second deadline and each host subprocess has a 12 second outer bound.','Join-error injection really joins then reports failure; unlock-error injection really unlocks then reports failure. Both prove conservative retention without abandoning or stranding Linux workers.','No HIP runtime, AGC, GPU allocation or submission is linked.','Installed system headers/static host runtime are not a hermetic toolchain inventory.']}
+    receipt={'schema':1,'classification':'actual-pthread-host-proof-pass','native_executed':False,'gpu_executed':False,'sources':before,'inputs':inputs,'tools':tools,'artifacts':artifacts,'commands':commands,'core_cases':list(CORE_CASES),'emulated_tls_cases':list(CORE_CASES),'title_cases':cases,'sanitizers':['address','undefined'],'environment':{k:env[k] for k in ('ASAN_OPTIONS','UBSAN_OPTIONS')},'limits':['Linux actual pthread scheduling and injected API failures; not PS5 execution.','Join itself has no portable timeout; worker waits have one absolute 3 second deadline and each host subprocess has a 12 second outer bound.','Join-error injection really joins then reports failure; unlock-error injection really unlocks then reports failure. Both prove conservative retention without abandoning or stranding Linux workers.','No HIP runtime, AGC, GPU allocation or submission is linked.','Installed system headers/static host runtime are not a hermetic toolchain inventory.']}
     (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('Verified core/title/mutations:',check(out))
 if __name__=='__main__':main()
