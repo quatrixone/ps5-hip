@@ -350,7 +350,7 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
     return image;
 }
 
-static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false) {
+static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false, bool geometry = false) {
     if (k.wave_size != 32) return "initial launch supports wave32 only";
     if (flat_call) {
         if (!k.private_bytes || k.properties != 0x429 || k.rsrc2 != 0x91 || !k.hidden_arguments.empty())
@@ -369,7 +369,11 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
         return "unsupported initial user-SGPR contract";
     const uint32_t user_sgprs = (k.rsrc2 >> 1) & 31;
     if (user_sgprs != (flat_call ? 8u : ((k.properties & 1) ? 6u : 2u))) return "user-SGPR count mismatch";
-    if ((k.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80)) return "unsupported system-SGPR/work-item contract";
+    if (geometry) {
+        if (k.rsrc2 != 0x138c || k.properties != 0x409 || k.hidden_arguments.empty() || k.sgpr_spills || k.vgpr_spills)
+            return "unsupported measured XYZ entry contract";
+    } else if ((k.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
+        return "unsupported system-SGPR/work-item contract";
     if (k.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))) return "privileged/debug execution unsupported";
     uint64_t explicit_end = 0;
     for (size_t i = 0; i < k.arguments.size(); ++i) {
@@ -413,5 +417,7 @@ std::string buffer_scratch_launch_rejection(const Kernel &k) { return launch_rej
 std::string lds_launch_rejection(const Kernel &k) { return launch_rejection(k, false, true); }
 
 std::string flat_call_launch_rejection(const Kernel &k) { return launch_rejection(k, true, false, true); }
+
+std::string geometry_launch_rejection(const Kernel &k) { return launch_rejection(k, false, false, false, true); }
 
 } // namespace ps5hip

@@ -76,4 +76,7 @@ std::string lds_launch_rejection(const Kernel &kernel);
 // a bounded call graph, valid private aperture, or safe hardware execution.
 std::string flat_call_launch_rejection(const Kernel &kernel);
 
+// Separate measured XYZ profile, scratch/LDS-free wave32; structural eligibility only.
+std::string geometry_launch_rejection(const Kernel &kernel);
+
 } // namespace ps5hip
