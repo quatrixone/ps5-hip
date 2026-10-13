@@ -1,0 +1,37 @@
+{
+  "classification": "offline-four-legacy-compiler-rebindings",
+  "source_base": "b253c621b8646b5520e8e96c0e3c6d87aeeb34a8",
+  "review_sha256": "d5efc2252bc666efd68d12fdf889daea9fc1baf734ddd25672d988889148452d",
+  "qualification_sha256": "5bde3a45f481d4a0f7c527deb085a6d5cdbcbdb03faf62db0c529c3557bb08b9",
+  "profiles": [
+    {
+      "kind": "generic",
+      "old_authority": "72ebdf154c78d113dea719fb1dd08c7425e34c68ba41e097fa92e59defc35511",
+      "new_authority": "1c2ba52474b8d56705385378d29b108d12583ed093dddd7707f9a97d66756746",
+      "combined_unchanged": "b454e1dc47c7b97aa487fd7ddbf8ca0d3438df2a875853509be6582f7620c5c8"
+    },
+    {
+      "kind": "fill",
+      "old_authority": "a16ce8b890c2a5aaf30291ef981a7f30ebd20141a33a67ec3fb5176dc9feaa17",
+      "new_authority": "24c2b61384e401c15376823b05f4861d686f6241256979aeba01e9536ee6e698",
+      "combined_unchanged": "7d3b52a67ddc6517662eb10b495e776280aae5478ef5c2e599ba7e4952a8e29d"
+    },
+    {
+      "kind": "copy",
+      "old_authority": "96384878823179dce4285a92afdf0908af9f89ac968277771daffe8a714b8a05",
+      "new_authority": "74c5258893d5b7e7586cbdda46a0d5c87cba61c10ca04abaccf7306d176fe641",
+      "combined_unchanged": "69fa078cd767a90cef2b6a5279a25af53a6288eba2caa30b4ba99aa993e3eeb7"
+    },
+    {
+      "kind": "matmul",
+      "old_authority": "d4a9c72cedfec2466ec5f68066f420ff9b6a6f05aa246376b631053805e44733",
+      "new_authority": "82146a2290841da5ae59252d05c5000873e1133378424a67ddb257abfeba8cfd",
+      "combined_unchanged": "9848fed87e57caedc3b0e8cc2dea66b32f1b31f69f99437d5393b9bc2c2437f3"
+    }
+  ],
+  "hardware_executed": false,
+  "limits": [
+    "Compiler and profile admission verified; full native links follow.",
+    "No production runtime, compiler source or device object changed."
+  ]
+}

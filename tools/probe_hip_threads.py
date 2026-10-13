@@ -16,6 +16,8 @@ MODES+=('discovery','discovery-unlock')
 CPU_MODES+=('discovery','discovery-unlock')
 MODES+=('device-copy','blocked-device-copy')
 CPU_MODES+=('device-copy',)
+MODES+=('memory-query','memory-query-unlock')
+CPU_MODES+=('memory-query','memory-query-unlock')
 sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def require(ok,message):
  if not ok:raise RuntimeError(message)
@@ -24,31 +26,56 @@ def validate(text,mode):
  terminal=mode in ('submit','kick','timeout','throw','unknown','postflush','cleanup')
  require(text.splitlines().count('THREAD_MODEL_PASS '+mode+(' retained=true' if terminal else ''))==1,'missing exact mode result')
  if mode not in ('submit','kick','timeout','throw','unknown','postflush','cleanup'):
-  expected=mode not in ('lock','unlock','key','registration-oom','setspecific','uncertain-install','clear','destructor-lock','destructor-unlock','duplicate','abandoned','live-finish','finish-wait','no-finish','reject-unregister','finish-clear','state-oom','discovery-unlock')
+  expected=mode not in ('lock','unlock','key','registration-oom','setspecific','uncertain-install','clear','destructor-lock','destructor-unlock','duplicate','abandoned','live-finish','finish-wait','no-finish','reject-unregister','finish-clear','state-oom','discovery-unlock','memory-query-unlock')
   require(text.count('THREAD_MODEL_FINAL finalized='+str(int(expected))+' ')==1,'finalizer result')
   if not expected:require('VECTOR_FINAL ' not in text,'unsafe automatic State destruction')
   if expected:
    count=2 if mode=='blocked-launch' else int(mode in ('ownership','blocked-free','blocked-sync','blocked-copy','blocked-memset','blocked-device-copy'))
    require(text.splitlines().count(f'VECTOR_FINAL registered=1 removed=1 completed={count} active=0 terminal=0 main_finished=1 hardware_validated=false')==1,'exact complete State destructor')
    require(text.splitlines().count('THREAD_MODEL_FINAL finalized=1 live=0')==1,'complete backing closure')
-  elif mode in ('unlock','finish-wait'):
+  elif mode in ('unlock','finish-wait','memory-query-unlock'):
    require(text.splitlines().count('THREAD_MODEL_FINAL finalized=0 live=1')==1,'retained data owner')
  else:require('VECTOR_FINAL ' not in text and 'THREAD_MODEL_FINAL ' not in text,'terminal process falsely finalized')
  if mode=='discovery':require(text.splitlines().count('DISCOVERY_EARLY state_attempts=0 backend_attempts=0 worker_joined=true')==1,'pre-registration discovery missing')
+def source_files():
+ files=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_threads.hip',ROOT/'tests/hip_threads_model.cpp',pathlib.Path(__file__),ROOT/'tests/hip_threads_recipe_test.py',ROOT/'docs/HIP_HOST_THREADS.md',*list((ROOT/'include/ps5hip').glob('*.h'))]
+ return files+[ROOT/n for n in ('tools/probe_hip_routes.py','tools/probe_hip_generic.py','tools/probe_hipify_client.py','tools/probe_host_registration.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py','tests/native_import_libraries_test.py','tests/native_agc_imports_test.py')]
+
+def check_inventory(r):
+ require(r.get('schema')==1 and r.get('sanitizer') in ('thread','address,undefined'),'schema/sanitizer')
+ modes=CPU_MODES if r['sanitizer']=='thread' else MODES
+ require(tuple(r['modes'])==modes,'mode inventory')
+ require(set(r['sources'])=={str(p.relative_to(ROOT)) for p in source_files()},'source inventory')
+ labels=['hip-compile','metadata','isa','host-isa','runtime-compile','model-link',*('run-'+m for m in modes)]
+ require([c['label'] for c in r['commands']]==labels and all(c['exit_code']==0 for c in r['commands']),'command inventory')
+ artifacts={'commands.json','threads.o','threads.bundle','threads.hsaco','runtime.o','linux.ld','threads'}
+ artifacts.update(label+'.'+ext for label in labels for ext in ('stdout','stderr'))
+ require(set(r['artifacts'])==artifacts,'artifact inventory')
+ require(bool(r['inputs']),'input inventory')
+
 def check(out):
  r=json.loads((out/'receipt.json').read_text());require(r['classification']=='checked-threaded-runtime-host-model-pass','scope')
+ check_inventory(r)
  for n,h in r['sources'].items():require(sha(ROOT/n)==h,'source '+n)
+ paths=[x.split('=',1)[1] for x in r['commands'][0]['argv'] if x.startswith('--hip-path=')]
+ require(len(paths)==1,'HIP path inventory');stage=pathlib.Path(paths[0]);require(stage.is_absolute() and stage.name=='package-stage','HIP path')
+ ref=stage.parents[3]
+ _,actual_stage,_,expected=prepared_inputs(ref);require(stage==actual_stage,'HIP stage')
+ lock=json.loads((ROOT/'dependencies.json').read_text());platform=ref/'.deps'/('sdk-source-'+lock['sdk']['revision'])/'platform/include'
+ expected.update({str(f):sha(f) for f in platform.rglob('*.h') if f.is_file()})
+ for name in ('clang++-18','ld.lld-18','llvm-readobj-18','llvm-objdump-18'):
+  tool=shutil.which(name);require(tool is not None,'missing tool '+name);expected[tool]=sha(tool)
+ require(r['inputs']==expected,'complete input inventory')
  for n,h in r['inputs'].items():require(sha(n)==h,'input '+n)
  for n,h in r['artifacts'].items():require(sha(out/n)==h,'artifact '+n)
- require(tuple(r['modes'])==(CPU_MODES if r['sanitizer']=='thread' else MODES),'mode inventory')
+ require(json.loads((out/'commands.json').read_text())==r['commands'],'bound command record')
  for mode in r['modes']:validate((out/('run-'+mode+'.stdout')).read_text()+(out/('run-'+mode+'.stderr')).read_text(),mode)
  print('Checked',len(r['modes']),'deterministic threaded modes')
 def main():
  p=argparse.ArgumentParser();p.add_argument('--reference-root',type=pathlib.Path);p.add_argument('--output',type=pathlib.Path);p.add_argument('--check',type=pathlib.Path);p.add_argument('--sanitizer',choices=('address,undefined','thread'),default='address,undefined');a=p.parse_args()
  if a.check:check(a.check.resolve());return
  require(a.reference_root and a.output,'reference/output required');ref=a.reference_root.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=False)
- files=[ROOT/'src'/n for n in CORE]+[ROOT/'src/hip_launch_profile.cpp',ROOT/'tests/hip_threads.hip',ROOT/'tests/hip_threads_model.cpp',pathlib.Path(__file__),ROOT/'tests/hip_threads_recipe_test.py',ROOT/'docs/HIP_HOST_THREADS.md',*list((ROOT/'include/ps5hip').glob('*.h'))]
- files += [ROOT/n for n in ('tools/probe_hip_routes.py','tools/probe_hip_generic.py','tools/probe_hipify_client.py','tools/probe_host_registration.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py','tests/native_import_libraries_test.py','tests/native_agc_imports_test.py')]
+ files=source_files()
  before={str(f.relative_to(ROOT)):sha(f) for f in files};commands=[]
  def run(label,argv,extra=None):
   env=dict(os.environ,LLVM_CONFIG=shutil.which('llvm-config-18'),ASAN_OPTIONS='protect_shadow_gap=0:detect_leaks=0');env.update(extra or {})

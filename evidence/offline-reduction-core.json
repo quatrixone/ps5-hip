@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "classification": "offline-bounded-upstream-reduction-admission",
+  "base_commit": "85f05551b0fbc07f16b8abcaf3f3b565dfc1e9d6",
+  "source_inventory": {
+    "CMakeLists.txt": "9396a8516701cbf4682b54c4b8a275cbf28edea7d5ed4c8bccb3e07f2fbb8ffb",
+    "docs/HIP_REDUCTION.md": "7bbf7e26adc6d9f81b2d5fb71477e353f8eda642ac3923ce22853ece3dce76f8",
+    "include/ps5hip/code_object.h": "f4074cf43ca689046a57d55024647a5a6a1a41cece9471a0936e5339e39910e1",
+    "include/ps5hip/launch.h": "d0bde3084aadd3eda348d6c974841a133417cff90624c8cd4e6bc9718186cbf2",
+    "src/code_object.cpp": "bdebfa8e928d2d6ad5a827d1d64f22352148ccbb79d55f769a2d40d8b7ddec1a",
+    "src/hip_launch_profile.cpp": "4c15b41ef6b2dd0e8c0409fdb19b39a95271ed543cb2c95b63b5eb67e8ae89d5",
+    "src/host_launch.cpp": "3e7e6a0bcea0afcf388e66883f9950baa9c3bd5e9b1c25a5fe8b082b84e3d986",
+    "src/launch.cpp": "ccd2f979ffc699caa6eecebeb0b36580d73ae3db0948e9d277028e94c631e612",
+    "src/native_launch.cpp": "4eb4bf3070be85830cab519124e709b8e7ce556bb1467e5ed5218e2968a69539",
+    "tests/reduction_compiler_test.py": "28e323abb2dd3834b9d1825e3093fe6a704ee60ac99d6d837ac797df09b0fa05",
+    "tests/reduction_launch_test.cpp": "0ed9506e23d375690a49414918a83145fbb62f0f08b9dea70e6551435f9e1518",
+    "tests/upstream-reduction/popcount.hpp": "b4e6b1a97e3ba38d68132ea15b5b6da72f7ec2641ed060d9824416def44471fe",
+    "tests/upstream-reduction/source.json": "f34dcdff51d432fe116103f10f0187b3acbeda930820086343215f54167037a2",
+    "tests/upstream-reduction/warp_size_reduction.hip": "42ffe47b3d8dfdd59d2c8ebaabcf7ae6451c97f1055fe9ca6fafebdcc274a57a",
+    "tools/probe_hip_reduction.py": "baac3ba8d3b38e9776f4b1a1a02709f7c0e008a3000871792898509fcb919ea0"
+  },
+  "independent_review": {
+    "path": "results/reduction-core-independent-review-v1/review.json",
+    "sha256": "595c55384f529eac9361937d4c347ffa215e987f3b8084cdf8a910d3c503583f"
+  },
+  "qualification": {
+    "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g4-reduction/results/reduction-core-qualification-v2/receipt.json",
+    "sha256": "ccf692df471a925811b9baf91036c2a776a912dd4eead15d79ab814ac8b42df7"
+  },
+  "compiler": {
+    "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g4-reduction/results/reduction-compiler-v3/receipt.json",
+    "sha256": "8cfc7008a5d93abbd09f0d88bfe754dabf06d3e79415860199dee9416696267b"
+  },
+  "resource_derivation": {
+    "path": "results/reduction-resource-policy-v1/receipt.json",
+    "sha256": "29fa70d5e4cbb18093b133b0c14795ce7cbcc02c50f7ac31ac22007e8373b594"
+  },
+  "observed": {
+    "CTest_passed": 53,
+    "packet_metadata_mutations": 345,
+    "compiler_inventory_omissions": 22,
+    "threads": [
+      1024,
+      1,
+      1
+    ],
+    "dynamic_lds_bytes": 4096,
+    "resource_limits": 4194304
+  },
+  "hardware_executed": false,
+  "runtime_kernel_oracle_executed": false,
+  "full_g4_complete": false,
+  "limits": [
+    "Exact original upstream kernel/source and selected LLVM18 compiler ABI; local host-only popcount companion explicitly identified.",
+    "Bounded exact register allocation profile; no generic1024-thread hardware capability claim.",
+    "Actual-runtime host oracle, deterministic companion, native packaging and GPU execution remain separate work."
+  ]
+}

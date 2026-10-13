@@ -1,0 +1,34 @@
+{
+  "classification": "offline-multi-query-client-compiler-pass",
+  "proofs": {
+    "results/client-v3/receipt.json": "993e463a8c9bdbc712aec5e1bbb0a2861c09ab61eb4f47c2ce6e744be72e0f11",
+    "results/compiler-v3/receipt.json": "e5f43a822caab0d997c27eb18a208c71548db8d23f11b6a7c7cdbea5b7d8bfe7"
+  },
+  "independent_reviews": {
+    "results/native-multi-query-client-independent-review-v3/review.json": "06d7b5b396ea35b7dd85bf6548fc4eab8dd021e14f2ca5dd3ee761927a7c112c",
+    "results/native-multi-query-compiler-independent-review-v1/review.json": "894b6e0a3935534b3200432c6564f5fbb76e23994e4c20a653507717dd597c09"
+  },
+  "sources": {
+    "tools/hip_multi_query_client.cpp": "a737fbeb1580955e1668e95b7e39f66ff35d15ac0f640c559f7dcb3c2dce0600",
+    "tools/hip_multi_query_client.h": "a7abf96dcd174e506ec4815e9255cb75f85d7617c0921fc50b8f952a63fbd016",
+    "tests/hip_multi_query_model.cpp": "a80017b99caf09c7a5547b8b94ebcc9fe3a564ca7aee28008b2cf3ba45150a79",
+    "tests/hip_multi_query_client_test.py": "8b00ac8929213be1c2e2536bd079aca87ee1ffe0ceb5c4e824b7810f84bbc923",
+    "tools/probe_hip_multi_compiler.py": "4bfef8d09ae2ee7465bc902438047474c90d1425e6f19a1ece3019fda17000da"
+  },
+  "counts": {
+    "asan_client_cases": 32,
+    "transcript_mutations": 96,
+    "compiler_objects": 4,
+    "dispatches": 3,
+    "successful_queries": 32,
+    "rejected_queries": 8,
+    "exact_values": 219,
+    "comparisons": 522,
+    "guards": 84
+  },
+  "limits": [
+    "Synthetic transport; no native multi-module run or full native link yet.",
+    "Complete kernarg size280 includes compiler-hidden layout; explicit client fields use20 bytes.",
+    "Title/profile/build work remains separate and unqualified."
+  ]
+}

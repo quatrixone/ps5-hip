@@ -1,5 +1,5 @@
 // One fixed HIP title; startup/exit follow the existing finite shell lifecycle.
-#if defined(PS5HIP_MEMORY_FILL_TITLE) || defined(PS5HIP_DEVICE_COPY_TITLE)
+#if defined(PS5HIP_MEMORY_FILL_TITLE) || defined(PS5HIP_DEVICE_COPY_TITLE) || defined(PS5HIP_MULTI_QUERY_TITLE)
 #define PS5HIP_GENERIC_TITLE 1
 #endif
 #include "native_runtime.h"
@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <fstream>
 
-#if defined(PS5HIP_ROUTES_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_REDUCTION_TITLE) || defined(PS5HIP_ROUTES_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
 #include "ps5hip/hip_runtime_control.h"
 #define ps5hip_vector_title_registration ps5hip_runtime_registration_ready
 #define ps5hip_vector_title_ready ps5hip_runtime_ready
@@ -17,10 +17,15 @@
 #include "hip_workers_client.h"
 #include "hip_workers_agc.h"
 #define ps5hip_vector_client_main ps5hip_workers_client_main
+#elif defined(PS5HIP_REDUCTION_TITLE)
+#define ps5hip_vector_client_main ps5hip_reduction_companion_main
 #elif defined(PS5HIP_HIPIFY_TITLE)
 #define ps5hip_vector_client_main hipify_client_main
 #elif defined(PS5HIP_MATMUL_TITLE)
 #define ps5hip_vector_client_main ps5hip_matmul_client_main
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+#include "hip_multi_query_client.h"
+#define ps5hip_vector_client_main ps5hip_multi_query_client_main
 #elif defined(PS5HIP_DEVICE_COPY_TITLE)
 #define ps5hip_vector_client_main ps5hip_device_copy_client_main
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
@@ -35,7 +40,9 @@ extern "C" bool ps5hip_vector_title_registration() noexcept;
 extern "C" bool ps5hip_vector_title_ready() noexcept;
 extern "C" bool ps5hip_vector_title_finalized() noexcept;
 extern "C" bool ps5hip_vector_terminal();
-#ifdef PS5HIP_HIPIFY_TITLE
+#if defined(PS5HIP_REDUCTION_TITLE)
+extern "C" int ps5hip_vector_client_main();
+#elif defined(PS5HIP_HIPIFY_TITLE)
 int ps5hip_vector_client_main();
 #else
 int ps5hip_vector_client_main(int,char**);
@@ -67,11 +74,15 @@ void finalized() {
         (void)ps5hip_canary::sync_log();
         for(;;) ::sleep(1);
     }
-#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_REDUCTION_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
 #if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
     constexpr unsigned expected_completed=ps5hip_workers::expected_dispatches;
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+    constexpr unsigned expected_completed=3;
 #elif defined(PS5HIP_DEVICE_COPY_TITLE)
     constexpr unsigned expected_completed=24;
+#elif defined(PS5HIP_REDUCTION_TITLE)
+    constexpr unsigned expected_completed=3;
 #elif defined(PS5HIP_HIPIFY_TITLE) || defined(PS5HIP_MEMORY_FILL_TITLE)
     constexpr unsigned expected_completed=6;
 #elif defined(PS5HIP_MATMUL_TITLE)
@@ -100,8 +111,12 @@ void finalized() {
 extern "C" void ps5hip_install_vector_title_finalizer() {
     finalizer_installed=std::atexit(finalized)==0;
 }
+#ifdef PS5HIP_REDUCTION_TITLE
+extern "C" int ps5hip_reduction_title_main(int,char**);
+#define main ps5hip_reduction_title_main
+#endif
 int main(int argc,char **argv) {
-#ifdef PS5HIP_HIPIFY_TITLE
+#if defined(PS5HIP_HIPIFY_TITLE) || defined(PS5HIP_REDUCTION_TITLE)
     (void)argc;(void)argv;
 #endif
     try {
@@ -120,12 +135,16 @@ int main(int argc,char **argv) {
         if(elevation::request(elevation::Capability::filesystem,"/app0/lapy.elf")!=elevation::Status::ok) return 2;
 #if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
         const auto log=directory+(ps5hip_workers::worker_initializes ? "/ps5-hip-gfx1013-hip_workers_init.log":"/ps5-hip-gfx1013-hip_workers_main.log");
+#elif defined(PS5HIP_REDUCTION_TITLE)
+        const auto log=directory+"/ps5-hip-gfx1013-hip_reduction.log";
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hipify.log";
 #elif defined(PS5HIP_MATMUL_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hip_matmul.log";
 #elif defined(PS5HIP_DEVICE_COPY_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hip_device_copy.log";
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+        const auto log=directory+"/ps5-hip-gfx1013-hip_multi_query.log";
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
         const auto log=directory+"/ps5-hip-gfx1013-hip_memory_fill.log";
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -138,12 +157,16 @@ int main(int argc,char **argv) {
         if(!ps5hip_canary::redirect_log(log.c_str())) return 2;
 #if defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE)
         std::puts(ps5hip_workers::worker_initializes ? "PS5HIP START target=gfx1013 kernel=hip_workers_init":"PS5HIP START target=gfx1013 kernel=hip_workers_main");
+#elif defined(PS5HIP_REDUCTION_TITLE)
+        std::puts("PS5HIP START target=gfx1013 kernel=hip_reduction");
 #elif defined(PS5HIP_HIPIFY_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hipify");
 #elif defined(PS5HIP_MATMUL_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hip_matmul");
 #elif defined(PS5HIP_DEVICE_COPY_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hip_device_copy");
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+        std::puts("PS5HIP START target=gfx1013 kernel=hip_multi_query");
 #elif defined(PS5HIP_MEMORY_FILL_TITLE)
         std::puts("PS5HIP START target=gfx1013 kernel=hip_memory_fill");
 #elif defined(PS5HIP_GENERIC_TITLE)
@@ -154,14 +177,19 @@ int main(int argc,char **argv) {
         std::puts("PS5HIP START target=gfx1013 kernel=hip_vector");
 #endif
         if(!finalizer_installed || !ps5hip_vector_title_registration()) quarantine("registration");
-#if defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
-#if defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_REDUCTION_TITLE) || defined(PS5HIP_GENERIC_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
+#if defined(PS5HIP_REDUCTION_TITLE) || defined(PS5HIP_MATMUL_TITLE) || defined(PS5HIP_HIPIFY_TITLE) || (defined(PS5HIP_WORKERS_MAIN_TITLE) || defined(PS5HIP_WORKERS_INIT_TITLE))
         constexpr unsigned expected_functions=1;
 #else
         constexpr unsigned expected_functions=2;
 #endif
+#ifdef PS5HIP_MULTI_QUERY_TITLE
+        constexpr unsigned expected_modules=2;
+#else
+        constexpr unsigned expected_modules=1;
+#endif
         const auto registered=ps5hip_runtime_observation();
-        if(registered.modules!=1 || registered.functions!=expected_functions || registered.completed || registered.backend_attempted)quarantine("registration-observation");
+        if(registered.modules!=expected_modules || registered.functions!=expected_functions || registered.completed || registered.backend_attempted)quarantine("registration-observation");
         std::printf("HIP_TITLE REGISTRATION observed_after_redirect=true modules=%zu functions=%zu constructor_gpu_calls=0\n",registered.modules,registered.functions);
 #elif defined(PS5HIP_ROUTES_TITLE)
         std::puts("HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=4 constructor_gpu_calls=0");
@@ -178,6 +206,15 @@ int main(int argc,char **argv) {
            workers.template_comparisons!=ps5hip_workers::expected_words || workers.phase_checks!=17 || (ps5hip_workers::worker_initializes&&!workers.prebackend_verified))quarantine("worker-counts");
         if(!ps5hip_workers::validate_agc_trace())quarantine("worker-agc-attribution");
         ps5hip_runtime_finish();
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+        const int status=ps5hip_vector_client_main(argc,argv);
+        const auto &multi=ps5hip_multi_query::report();
+        if(status || !multi.passed || !multi.cleanup_complete || multi.dispatches!=3 || multi.active_values!=219 ||
+           multi.comparisons!=522 || multi.guards!=84 || multi.queries!=32 || multi.rejections!=8 || multi.allocated!=2 || multi.freed!=2)
+            quarantine("multi-client-or-ownership");
+        ps5hip_runtime_finish();
+#elif defined(PS5HIP_REDUCTION_TITLE)
+        const int status=ps5hip_vector_client_main(); // Companion owns its one finish.
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const int status=ps5hip_vector_client_main();
         if(!status)ps5hip_runtime_finish();
@@ -189,6 +226,14 @@ int main(int argc,char **argv) {
         const auto completed=ps5hip_runtime_observation();
         if(completed.completed!=ps5hip_workers::expected_dispatches)quarantine("completion-observation");
         std::printf("HIP_TITLE COMPUTE complete=true dispatches=%u exact_values=%u word_comparisons=%u template_comparisons=%u created=2 joined=2 finalization=pending\n",workers.dispatches,workers.active_values,workers.word_comparisons,workers.template_comparisons);
+#elif defined(PS5HIP_MULTI_QUERY_TITLE)
+        const auto completed=ps5hip_runtime_observation();
+        if(completed.completed!=3 || completed.modules!=2 || completed.functions!=2)quarantine("completion-observation");
+        std::puts("HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=219 comparisons=522 guards=84 queries=32 rejected=8 finalization=pending");
+#elif defined(PS5HIP_REDUCTION_TITLE)
+        const auto completed=ps5hip_runtime_observation();
+        if(completed.completed!=3)quarantine("completion-observation");
+        std::puts("HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=48 guards=72 finalization=pending");
 #elif defined(PS5HIP_HIPIFY_TITLE)
         const auto completed=ps5hip_runtime_observation();
         if(completed.completed!=6)quarantine("completion-observation");

@@ -5,7 +5,7 @@
 namespace ps5hip {
 // Fixed diagnostics may constrain counts; reusable operation never depends on an oracle.
 // Neither mode advertises unrestricted runtime or device capabilities.
-enum class HipRuntimeMode { FixedDiagnostic, ReusableSingleModule };
+enum class HipRuntimeMode { FixedDiagnostic, ReusableSingleModule, ReusableModules };
 struct HipRuntimeContract {
     unsigned expected_functions, expected_completions;
     bool vector_compatibility;

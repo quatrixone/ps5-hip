@@ -1,0 +1,11 @@
+{
+  "classification": "offline-single-module-null-span-link-fix",
+  "source_base": "cf47f8a1c10884b6d4c38299d69576bb4f80342f",
+  "review_sha256": "828ccb693dbf8195b70169e38026aadc3e915fa2ac2a9551c0021642ce1132d6",
+  "qualification_sha256": "7b8f0fa8809d7d764eea8a23c1368c7037bd2d733b8395ae36f44c25b57516ab",
+  "hardware_executed": false,
+  "limits": [
+    "Actual runtime raw-PIE null GOT checked; corrected converted/native link audit follows.",
+    "Runtime and converter unchanged; original cf47 failed reduction conversion preserved."
+  ]
+}

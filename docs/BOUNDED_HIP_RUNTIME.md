@@ -6,8 +6,10 @@ or fixed completion counts. The separately linked vector and routes diagnostic
 adapters retain their existing fixed contracts. The same runtime, ownership,
 argument capture, submission and teardown code serves both modes.
 
-The reusable profile is one trusted compiler-generated module on one serialized
-thread. It supports up to 256 registered functions, unused functions, and zero or
+The reusable profile serializes trusted compiler-generated callers. Links with
+an exact module span table admit up to 32 modules and 64 MiB of aggregate bundle
+bytes; legacy links retain one module. See `HIP_MULTI_MODULE.md` for the bounded
+registration and retirement contract. It supports up to 256 registered functions, unused functions, and zero or
 more blocking launches. The bound limits resources; it is not an expected count.
 The accepted classes are the existing 64-thread 1D initial, LDS and buffer-scratch
 routes, plus the measured 8x8x1 and 8x4x2 geometry routes. The separate

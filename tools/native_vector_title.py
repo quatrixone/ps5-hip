@@ -58,15 +58,15 @@ GENERIC_PROFILE = {
     "combined_object_sha256": "b454e1dc47c7b97aa487fd7ddbf8ca0d3438df2a875853509be6582f7620c5c8",
     "bundle_sha256": "07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974",
     "code_sha256": "793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7", "code_bytes": 4664,
-    "compiler_receipt_sha256": "72ebdf154c78d113dea719fb1dd08c7425e34c68ba41e097fa92e59defc35511",
+    "compiler_receipt_sha256": "1c2ba52474b8d56705385378d29b108d12583ed093dddd7707f9a97d66756746",
     "sequence_launches": [0, 1, 3, 7], "dispatches": 11,
     "per_sequence_sizes": [1, 63, 64, 65, 127, 193, 257], "static_lds_bytes": 256,
     "zero_sequence_scope": "prebackend state within this process; not zero-work finalization",
 }
 
-MEMORY_FILL_PROFILE = {'target': 'gfx1013', 'kernel_names': ['affine_words', 'block_sum'], 'client_entry': '_Z30ps5hip_memory_fill_client_mainiPPc', 'combined_object_sha256': '7d3b52a67ddc6517662eb10b495e776280aae5478ef5c2e599ba7e4952a8e29d', 'bundle_sha256': '07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974', 'code_sha256': '793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7', 'code_bytes': 4664, 'compiler_receipt_sha256': 'a16ce8b890c2a5aaf30291ef981a7f30ebd20141a33a67ec3fb5176dc9feaa17', 'dispatches': 6, 'exact_values': 662, 'output_words': 746, 'input_words': 746, 'fills': 24, 'sizes': [1, 73, 257], 'rounds': 2, 'guard_words': 7}
+MEMORY_FILL_PROFILE = {'target': 'gfx1013', 'kernel_names': ['affine_words', 'block_sum'], 'client_entry': '_Z30ps5hip_memory_fill_client_mainiPPc', 'combined_object_sha256': '7d3b52a67ddc6517662eb10b495e776280aae5478ef5c2e599ba7e4952a8e29d', 'bundle_sha256': '07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974', 'code_sha256': '793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7', 'code_bytes': 4664, 'compiler_receipt_sha256': '24c2b61384e401c15376823b05f4861d686f6241256979aeba01e9536ee6e698', 'dispatches': 6, 'exact_values': 662, 'output_words': 746, 'input_words': 746, 'fills': 24, 'sizes': [1, 73, 257], 'rounds': 2, 'guard_words': 7}
 
-DEVICE_COPY_PROFILE = {'target': 'gfx1013', 'kernel_names': ['affine_words', 'block_sum'], 'client_entry': '_Z30ps5hip_device_copy_client_mainiPPc', 'combined_object_sha256': '69fa078cd767a90cef2b6a5279a25af53a6288eba2caa30b4ba99aa993e3eeb7', 'bundle_sha256': '07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974', 'code_sha256': '793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7', 'code_bytes': 4664, 'compiler_receipt_sha256': '96384878823179dce4285a92afdf0908af9f89ac968277771daffe8a714b8a05', 'dispatches': 24, 'copies': 12, 'copied_words': 1324, 'copied_bytes': 5296, 'exact_values': 2648, 'readback_words': 5926, 'guard_comparisons': 630, 'allocations': 21, 'frees': 21, 'sizes': [1, 73, 257], 'rounds': 2, 'topologies': ['distinct', 'combined'], 'guard_words': 7}
+DEVICE_COPY_PROFILE = {'target': 'gfx1013', 'kernel_names': ['affine_words', 'block_sum'], 'client_entry': '_Z30ps5hip_device_copy_client_mainiPPc', 'combined_object_sha256': '69fa078cd767a90cef2b6a5279a25af53a6288eba2caa30b4ba99aa993e3eeb7', 'bundle_sha256': '07875fab8b8df55f64404db805757ce45ccf11103583c6c5f67dc28727831974', 'code_sha256': '793bea3aa8cdf8e0fbeb530f046dfedb3850bdde3533d2d5dd6a081c2b171ef7', 'code_bytes': 4664, 'compiler_receipt_sha256': '74c5258893d5b7e7586cbdda46a0d5c87cba61c10ca04abaccf7306d176fe641', 'dispatches': 24, 'copies': 12, 'copied_words': 1324, 'copied_bytes': 5296, 'exact_values': 2648, 'readback_words': 5926, 'guard_comparisons': 630, 'allocations': 21, 'frees': 21, 'sizes': [1, 73, 257], 'rounds': 2, 'topologies': ['distinct', 'combined'], 'guard_words': 7}
 
 HIPIFY_PROFILE = {
     "target": "gfx1013", "kernel_names": ["translated_add"],
@@ -89,7 +89,7 @@ MATMUL_PROFILE = {'target': 'gfx1013',
  'bundle_sha256': '0995fde75b6909239847ac68ffb1290cfc5d208ba64c267016e9ecfc3c5ab0db',
  'code_sha256': '7b862ae012fcde99802191b5588e35057b3f8c92a5f7f4808d859611062613f6',
  'code_bytes': 4528,
- 'compiler_receipt_sha256': 'd4a9c72cedfec2466ec5f68066f420ff9b6a6f05aa246376b631053805e44733',
+ 'compiler_receipt_sha256': '82146a2290841da5ae59252d05c5000873e1133378424a67ddb257abfeba8cfd',
  'dispatches': 8,
  'cases': 4,
  'rounds': 2,
@@ -104,7 +104,13 @@ MATMUL_PROFILE = {'target': 'gfx1013',
  'guard_words': 16}
 
 
+REDUCTION_PROFILE = {'target': 'gfx1013', 'kernel_names': ['_Z12block_reducePiPmS_m'], 'client_entry': 'ps5hip_reduction_companion_main', 'combined_object_sha256': '4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6', 'bundle_sha256': 'e456dfe0a15898ba15dc0531bc97e5454bfc82359c46dbb090e88bb031bd1409', 'code_sha256': '807b46dfaef2fbcb16be270fb76fe9b596fd3da96b0cf390e4da67ccebc7229a', 'code_bytes': 4488, 'compiler_receipt_sha256': '522722d6cd2eb21bd544e27b5b2d7f7a76a7985c2b4186b5a2d4d512bf30c1a8', 'dispatches': 3, 'exact_values': 48, 'guard_comparisons': 72, 'threads': [1024, 1, 1], 'groups': [16, 1, 1], 'dynamic_lds_bytes': 4096, 'kernarg_bytes': 288}
+
 def profile_for(kernel):
+    if kernel == "hip_multi_query":
+        from native_multi_query import PROFILE as MULTI_PROFILE
+        return MULTI_PROFILE
+    if kernel == "hip_reduction":return REDUCTION_PROFILE
     if kernel in ("hip_workers_main", "hip_workers_init"):
         return WORKERS_INIT_PROFILE if kernel == "hip_workers_init" else WORKERS_PROFILE
     if kernel == "hip_vector":
@@ -126,8 +132,10 @@ def profile_for(kernel):
 
 
 def provenance_files(kernel):
+    if kernel == "hip_multi_query":
+        return PROVENANCE_FILES | {"multi-a.o","multi-b.o","compiler-receipt.json"}
     profile_for(kernel)
-    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
+    return PROVENANCE_FILES | ({"routes-combined.o", "compiler-receipt.json"} if kernel in ("hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") else set()) | ({"workers-agc-disassembly.stdout"} if kernel in ("hip_workers_main", "hip_workers_init") else set())
 
 
 def validate_fself(container, elf):
@@ -195,14 +203,15 @@ def validate_profile(receipt, source_root):
             receipt.get("shutdown_mode") != "shell-request-probe" or
             receipt.get("hardware_validated") is not False or
             json.dumps(receipt.get(kernel + "_profile"), sort_keys=True) != json.dumps(selected, sort_keys=True) or
-            not all(selected.get(n) for n in ("combined_object_sha256", "bundle_sha256", "code_sha256", "code_bytes")) or
+            not (len(selected.get("modules",[]))==2 if kernel=="hip_multi_query" else all(selected.get(n) for n in ("combined_object_sha256", "bundle_sha256", "code_sha256", "code_bytes"))) or
             set(receipt.get("artifacts", {})) != {"eboot.bin", "lapy.elf", "sce_module/libc.prx"}):
         raise ValueError("genuine HIP vector title profile mismatch")
     sources = receipt.get("source_sha256", {})
     required = ["tools/build_native_vector_title.py", "tools/native_vector_title.py",
                 "tools/hip_vector_title.cpp", "src/hip_runtime.cpp", "include/ps5hip/hip_runtime_control.h",
                 "tools/native_shell_exit_probe.cpp", "tools/native_runtime.h", "evidence/offline-compatible-hip-headers.json"]
-    required += (["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
+    required += (["src/hip_launch_profile.cpp"] if kernel=="hip_multi_query" else ["src/hip_launch_profile.cpp", "tests/reduction_companion.hip", "tools/probe_reduction_companion_compiler.py", "tests/reduction_companion_model.cpp", "tools/probe_reduction_companion_runtime.py", "tests/reduction_title_model.cpp", "tests/reduction_title_test.py", "tests/reduction_native_title_test.py", "tests/reduction_title_saved_test.py", "CMakeLists.txt", "tools/check_canary_log.py", "tools/stage_native_title.py", "tools/verify_native_case.py", "docs/HIP_REDUCTION_TITLE.md"] if kernel == "hip_reduction" else
+                 ["tools/hip_vector_control.cpp", "tests/hip_vector_client.cpp"] if kernel == "hip_vector" else
                  ["src/hip_launch_profile.cpp", "tests/hip_threads.hip", "tools/hip_workers_client.cpp", "tools/hip_workers_client.h", "tools/hip_workers_agc.cpp", "tools/hip_workers_agc.h", "tools/probe_hip_workers_compiler.py", "tests/hip_workers_title_test.py", "tests/hip_workers_title_model.cpp", "docs/HIP_WORKERS_TITLE.md"] if kernel in ("hip_workers_main", "hip_workers_init") else
                  ["src/hip_launch_profile.cpp", "tests/cuda_vector_add.cu", "tools/probe_hipify_client.py", "tools/probe_hip_routes.py", "docs/HIPIFY_NATIVE_BUILD.md", "tests/hipify_native_title_test.py"] if kernel == "hipify" else
                  ["src/hip_launch_profile.cpp", "tests/hip_generic.hip", "tests/hip_device_copy_client.h", "tools/probe_hip_generic.py", "docs/HIP_DEVICE_COPY_TITLE.md"] if kernel == "hip_device_copy" else
@@ -211,6 +220,9 @@ def validate_profile(receipt, source_root):
                  ["src/hip_launch_profile.cpp", "tests/hip_tiled_matmul_blockdim.hip", "tools/probe_hip_matmul.py", "docs/HIP_MATMUL_TITLE.md"] if kernel == "hip_matmul" else
                  ["tools/hip_routes_control.cpp", "tests/hip_routes.hip", "tools/probe_hip_routes.py", "docs/HIP_ROUTES_COMPILER.md"])
     if kernel in ("hip_memory_fill","hip_device_copy"):required += ['tests/hip_generic_model.cpp', 'tests/hip_generic_title_model.cpp', 'tests/hip_generic_title_test.py', 'tests/hip_generic_title_profile_test.py', 'tools/check_canary_log.py', 'tools/stage_native_title.py', 'tools/verify_native_case.py', 'CMakeLists.txt']
+    if kernel=="hip_multi_query":
+        from native_multi_query import SOURCES
+        required += SOURCES + ["tools/check_canary_log.py","tools/stage_native_title.py","tools/verify_native_case.py","CMakeLists.txt"]
     for name in required:
         if sources.get(name) != hashlib.sha256((source_root / name).read_bytes()).hexdigest():
             raise ValueError("genuine HIP vector title source provenance mismatch: " + name)
@@ -221,7 +233,7 @@ def validate_profile(receipt, source_root):
     audits = receipt.get("vector_audits" if kernel == "hip_vector" else "routes_audits", {})
     if (set(audits) != ({"raw_pie", "converted_eboot", "startup", "fself_roundtrip"} | ({"workers_agc"} if kernel in ("hip_workers_main", "hip_workers_init") else set())) or
             any(audits[k].get("bundle_sha256") != selected["bundle_sha256"] for k in ("raw_pie", "converted_eboot")) or
-            audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "main"] or
+            audits["startup"].get("install_order") != ["shell", "vector_finalizer", "_init", "reduction_title" if kernel == "hip_reduction" else "main"] or
             audits["startup"].get("compiler_atexit_unregister") is not True or
             audits["fself_roundtrip"].get("matches_except_unmapped_sie_note") is not True):
         raise ValueError("genuine HIP vector title embedded bundle/lifecycle audit missing")
@@ -230,6 +242,31 @@ def validate_profile(receipt, source_root):
         for suffix, key in ((".o", "combined_object_sha256"), (".hsaco", "code_sha256")):
             if authority["raw_file_hashes"]["ps5-vector-add-gfx1013-device-wchar4" + suffix]["sha256"] != selected[key]:
                 raise ValueError("genuine HIP vector fixture authority changed")
+
+
+def validate_reduction_compiler(raw_receipt, combined, source_root):
+    from probe_hip_routes import section
+    selected=REDUCTION_PROFILE
+    if hashlib.sha256(raw_receipt).hexdigest()!=selected['compiler_receipt_sha256'] or hashlib.sha256(combined).hexdigest()!=selected['combined_object_sha256']:
+        raise ValueError('reduction compiler authority changed')
+    report=json.loads(raw_receipt)
+    if report.get('classification')!='bound-declaration-only-reduction-companion-compiler' or report.get('native_linked') is not False or report.get('hardware_executed') is not False:
+        raise ValueError('reduction compiler scope changed')
+    from pathlib import Path
+    normalized={}
+    for name,digest in report['sources'].items():
+        path=Path(name).resolve()
+        if not path.is_relative_to(source_root.resolve()) or hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('reduction source changed')
+        normalized[str(path.relative_to(source_root.resolve()))]=digest
+    if not normalized or not report['inputs'] or set(report['tools'])!={'clang++','ld.lld','llvm-readobj','llvm-objdump','llvm-nm','llvm-config'}:raise ValueError('reduction dependency inventory')
+    for name,digest in report['inputs'].items():
+        if hashlib.sha256(Path(name).read_bytes()).hexdigest()!=digest:raise ValueError('reduction input changed')
+    for tool in report['tools'].values():
+        if hashlib.sha256(Path(tool['path']).read_bytes()).hexdigest()!=tool['sha256']:raise ValueError('reduction tool changed')
+    if hashlib.sha256(section(combined,b'.hip_fatbin')).hexdigest()!=selected['bundle_sha256']:raise ValueError('reduction bundle changed')
+    # Return a relative view for the existing builder's source confinement check.
+    report['sources']=normalized
+    return report
 
 
 def validate_compiler_dependencies(report, source_root, expected_sources=None):
@@ -443,11 +480,16 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
         path = provenance / name
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("genuine HIP vector linked artifact changed: " + name)
-    if kernel in ("hip_workers_main", "hip_workers_init"):
+    if kernel=="hip_multi_query":
+        from native_multi_query import validate_compiler
+        validate_compiler((provenance/"compiler-receipt.json").read_bytes(),[(provenance/("multi-"+m+".o")).read_bytes() for m in "ab"],source_root)
+    elif kernel in ("hip_workers_main", "hip_workers_init"):
         validate_workers_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                   (provenance / "routes-combined.o").read_bytes(), source_root)
         if audit_workers_agc((provenance / "workers-agc-disassembly.stdout").read_text(), provenance / "llvm-pie.elf") != audits["workers_agc"]:
             raise ValueError("workers AGC call redirection changed")
+    elif kernel == "hip_reduction":
+        validate_reduction_compiler((provenance / "compiler-receipt.json").read_bytes(), (provenance / "routes-combined.o").read_bytes(), source_root)
     elif kernel == "hip_routes":
         validate_routes_compiler((provenance / "compiler-receipt.json").read_bytes(),
                                  (provenance / "routes-combined.o").read_bytes(), source_root)
@@ -492,14 +534,20 @@ def validate_build(receipt, source_root, provenance=None, signed=None):
     if hashlib.sha256(bundle).hexdigest() != selected["bundle_sha256"]:
         raise ValueError("genuine HIP vector linked bundle changed")
     for key, name, native in (("raw_pie", "llvm-pie.elf", False), ("converted_eboot", "eboot.elf", True)):
-        if audit_image(provenance / name, symbols, bundle, native=native) != audits[key]:
+        if kernel=="hip_multi_query":
+            from native_multi_query import audit_modules
+            from fat_binary_fixture_test import section
+            actual=audit_modules(provenance/name,symbols,[section((provenance/("multi-"+m+".o")).read_bytes(),b".hip_fatbin") for m in "ab"],(provenance/"startup-disassembly.stdout").read_text(),native=native)
+        else:
+            actual=audit_image(provenance/name,symbols,bundle,native=native)
+        if actual != audits[key]:
             raise ValueError("genuine HIP vector recomputed image audit differs")
     if audit_startup((provenance / "startup-disassembly.stdout").read_text(), provenance / "llvm-pie.elf", kernel) != audits["startup"]:
         raise ValueError("genuine HIP vector startup audit differs")
     native_expected = json.loads((source_root / "evidence/offline-lds-native-readiness.json").read_text())["profiles"][0]["native_tool_source_sha256"]
     for name, patch in (("app_crt.cpp", patch_startup), ("ps5-pie.ld", patch_linker)):
         original = provenance / ("original-" + name)
-        patched = patch(original.read_text(), kernel) if name == "app_crt.cpp" else patch(original.read_text())
+        patched = patch(original.read_text(), kernel)
         if (hashlib.sha256(original.read_bytes()).hexdigest() != native_expected[name] or
                 patched != (provenance / name).read_text()):
             raise ValueError("genuine HIP vector private native patch binding mismatch")

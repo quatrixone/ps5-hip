@@ -10,9 +10,9 @@ import math_native_fixture as math_fixture
 def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False):
     if shutdown_probe and kernel != "runtime":
         raise ValueError("shutdown probe belongs to the CPU runtime case")
-    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"):
+    if target not in ("gfx1013", "gfx1030") or kernel not in ("runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_multi_query"):
         raise ValueError("unsupported canary profile")
-    if kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") and (target != "gfx1013" or not shell_exit_probe):
+    if kernel in ("hip_vector", "hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_multi_query") and (target != "gfx1013" or not shell_exit_probe):
         raise ValueError("HIP vector requires the measured gfx1013 shell-managed profile")
     if len(data) > 65536:
         raise ValueError("canary log exceeds bounded result size")
@@ -34,6 +34,12 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                              f"ROUTES_COMPLETE round={round} route={route} blocking=true full_guards=true inputs=unchanged"]
         expected += ["ROUTES_CLIENT_PASS sequences=2 dispatches=8 changed_inputs=true full_guards=true",
                      "HIP_TITLE COMPUTE complete=true dispatches=8 word_comparisons=393216 finalization=pending"]
+    elif kernel == "hip_reduction":
+        expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0")
+        expected.append("REDUCTION_DISCOVERY devices=1 wave=32 backend_attempted=false")
+        for index,logical in enumerate((16384,16384,16377)):
+            expected += [f"RUNTIME_COMPLETE sequence={index+1} kernel=_Z12block_reducePiPmS_m blocking=true", f"REDUCTION_ROUND index={index} logical={logical} outputs=16 input_unchanged=true masks_unchanged=true guards=true"]
+        expected += ["REDUCTION_CLIENT_PASS dispatches=3 exact_values=48 guards=72 allocations=9 frees=9", "HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=48 guards=72 finalization=pending"]
     elif kernel == "hip_matmul":
         expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0")
         completed=0
@@ -44,6 +50,14 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                              f"MATMUL_COMPLETE shape={index} round={round} m={m} n={n} k={k} exact=true guards=true inputs=unchanged"]
         expected += ["MATMUL_CLIENT_PASS cases=4 rounds=2 dispatches=8 values=982 exact_fp32_integer_oracle=true",
                      "HIP_TITLE COMPUTE complete=true dispatches=8 cases=4 rounds=2 exact_values=982 finalization=pending"]
+    elif kernel == "hip_multi_query":
+        expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=2 functions=2 constructor_gpu_calls=0")
+        expected += ["MULTI_QUERY REGISTERED modules=2 functions=2 completed=0 backend=false"]
+        expected += ["VECTOR_ERROR pointer is not in a live logical data allocation"]*4
+        for i,m in enumerate("aba"):
+            expected += [f"RUNTIME_COMPLETE sequence={i+1} kernel=multi_{m} blocking=true",f"MULTI_QUERY STEP index={i} module={m.upper()} count=73 exact=true source=true guards=true"]
+        expected += ["VECTOR_ERROR pointer is not in a live logical data allocation"]*4
+        expected += ["MULTI_QUERY QUERIES success=32 rejected=8 logical_bytes=348","MULTI_QUERY CLIENT_PASS dispatches=3 exact_values=219 comparisons=522 guards=84 allocated=2 freed=2","HIP_TITLE COMPUTE complete=true dispatches=3 exact_values=219 comparisons=522 guards=84 queries=32 rejected=8 finalization=pending"]
     elif kernel == "hip_device_copy":
         expected.insert(1,"HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=2 constructor_gpu_calls=0")
         index=0
@@ -122,6 +136,8 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
             expected += ["VECTOR_UNREGISTER after_main=true active=0",
                          "VECTOR_FINAL registered=1 removed=1 completed=8 active=0 terminal=0 main_finished=1 hardware_validated=false",
                          "HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=8"]
+        elif kernel == "hip_reduction":
+            expected += ["VECTOR_UNREGISTER after_main=true active=0", "VECTOR_FINAL registered=1 removed=1 completed=3 active=0 terminal=0 main_finished=1 hardware_validated=false", "HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=3"]
         elif kernel == "hip_generic":
             expected += ["VECTOR_UNREGISTER after_main=true active=0",
                          "VECTOR_FINAL registered=1 removed=1 completed=11 active=0 terminal=0 main_finished=1 hardware_validated=false",
@@ -130,6 +146,8 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
             expected += ["VECTOR_UNREGISTER after_main=true active=0",
                          f"VECTOR_FINAL registered=1 removed=1 completed={dispatches} active=0 terminal=0 main_finished=1 hardware_validated=false",
                          f"HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches={dispatches}"]
+        elif kernel == "hip_multi_query":
+            expected += ["VECTOR_UNREGISTER after_main=true active=1","VECTOR_UNREGISTER after_main=true active=0","VECTOR_FINAL registered=2 removed=2 completed=3 active=0 terminal=0 main_finished=1 hardware_validated=false","HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=3"]
         elif kernel == "hip_device_copy":
             expected += ["VECTOR_UNREGISTER after_main=true active=0","VECTOR_FINAL registered=1 removed=1 completed=24 active=0 terminal=0 main_finished=1 hardware_validated=false","HIP_TITLE FINAL compiler_unregister=observed state_destroyed=true allocations=closed dispatches=24"]
         elif kernel in ("hipify", "hip_memory_fill"):
@@ -140,8 +158,11 @@ def check_log(data, target, kernel, shutdown_probe=False, shell_exit_probe=False
                      "PS5HIP SHELL_EXIT request-return=0"]
     if any("QUARANTINED" in line for line in lines):
         result = "quarantined"
+    elif kernel == "hip_multi_query" and data == ("\n".join(expected)+"\n").encode("utf-8"):
+        # Eight deliberate metadata rejections have exact, positioned diagnostics.
+        result = "application-pass"
     elif any("PS5HIP FAIL" in line or "PS5HIP mismatch" in line or
-             (kernel in ("hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init") and line.startswith(("WORKERS_CLIENT_FAIL", "VECTOR_ERROR", "VECTOR_CLIENT_REJECT", "ROUTES_CLIENT_REJECT", "GENERIC_CLIENT_FAILURE", "FILL_CLIENT_FAILURE", "COPY_CLIENT_FAILURE", "TRANSLATED_CLIENT_FAIL", "MATMUL_CLIENT_FAILURE", "VECTOR_CLEANUP_FAILURE", "HIP_TITLE FAIL")))
+             (kernel in ("hip_vector", "hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_multi_query") and line.startswith(("REDUCTION_CLIENT_FAILURE", "MULTI_QUERY CLIENT_FAIL", "WORKERS_CLIENT_FAIL", "VECTOR_ERROR", "VECTOR_CLIENT_REJECT", "ROUTES_CLIENT_REJECT", "GENERIC_CLIENT_FAILURE", "FILL_CLIENT_FAILURE", "COPY_CLIENT_FAILURE", "TRANSLATED_CLIENT_FAIL", "MATMUL_CLIENT_FAILURE", "VECTOR_CLEANUP_FAILURE", "HIP_TITLE FAIL")))
              for line in lines):
         result = "failed"
     elif data == ("\n".join(expected) + "\n").encode("utf-8"):
@@ -159,7 +180,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", type=pathlib.Path, required=True)
     parser.add_argument("--target", choices=["gfx1013", "gfx1030"], required=True)
-    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init"], required=True)
+    parser.add_argument("--kernel", choices=["runtime", "indexed_store", "vector_add", "vector_add_twice", "wave_full", "wave_partial", "fp32_math", "hip_vector", "hip_routes", "hip_reduction", "hip_generic", "hip_memory_fill", "hip_device_copy", "hip_matmul", "hipify", "hip_workers_main", "hip_workers_init", "hip_multi_query"], required=True)
     parser.add_argument("--shutdown-probe", action="store_true")
     parser.add_argument("--shell-exit-probe", action="store_true")
     args = parser.parse_args()

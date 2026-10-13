@@ -15,6 +15,8 @@
 #include <new>
 #include <atomic>
 #include <pthread.h>
+#include <array>
+#include <algorithm>
 
 #ifdef PS5HIP_THREAD_MODEL
 extern "C" bool ps5hip_thread_model_fail(unsigned point) noexcept;
@@ -24,6 +26,8 @@ extern "C" {
 extern const uint8_t __ps5hip_wrappers_begin[], __ps5hip_wrappers_end[];
 extern const uint8_t __ps5hip_bundle_begin[], __ps5hip_bundle_end[];
 extern const uint8_t __ps5hip_names_begin[], __ps5hip_names_end[];
+extern const uint8_t __ps5hip_module_spans_begin[] __attribute__((weak));
+extern const uint8_t __ps5hip_module_spans_end[] __attribute__((weak));
 }
 namespace {
 struct Configuration { dim3 grid, block; size_t shared; hipStream_t stream; };
@@ -146,13 +150,17 @@ struct DestructionSentinel { ~DestructionSentinel() { final_observation.destroye
 struct State {
 
     DestructionSentinel destruction_sentinel; // First member is destroyed last.
-    ps5hip::HostRegistration registration;
+    ps5hip::HostRegistration registration{ps5hip::hip_runtime_contract().mode==ps5hip::HipRuntimeMode::ReusableModules ? 32u : 1u};
     ps5hip::NativeDataRegistry data;
     std::unique_ptr<ps5hip::SubmissionBackend> backend;
     std::unique_ptr<ps5hip::SubmissionQueue> queue; // Destroyed before its backend.
     void *handle = nullptr;
     const void *host_token = nullptr;
-    std::vector<std::pair<std::string,const void *>> tokens;
+    struct Token { std::string name; const void *host; void *owner; };
+    struct Module { void *handle=nullptr; bool callback=false; };
+    std::array<Module,32> modules{};
+    std::vector<Token> tokens;
+    bool work_started=false, registration_complete=false;
     unsigned function_attempts=0;
     bool terminal = false, init_attempted = false, partial = false, main_finished = false;
     unsigned registered = 0, removed = 0, completed = 0;
@@ -160,7 +168,7 @@ struct State {
 
         try {
             final_observation.snapshot={registration.active_modules(),registration.active_functions(),completed,init_attempted};
-            final_observation.checked = registered==1 && removed==1 && completion_expected(completed) &&
+            final_observation.checked = registration_complete && registered>0 && removed==registered && completion_expected(completed) &&
                 !registration.active_modules() && !registration.active_functions() && !partial && !terminal && !data.poisoned() &&
                 data.ranges().empty() && !gate.pending && !gate.contexts && !gate.abandoned && !gate.registration_failed && main_finished &&
                 (queue ? !queue->poisoned() : (!fixed_diagnostic() && !init_attempted));
@@ -184,7 +192,7 @@ struct StateOwner {
         if (!infrastructure_fault.load() && owner && !gate.contexts && !gate.pending && state_pointer) {
             try {
                 safe = gate.lifetime == Lifetime::Closing && !gate.abandoned && !gate.registration_failed &&
-                    state_pointer->main_finished && state_pointer->registered == 1 && state_pointer->removed == 1 &&
+                    state_pointer->main_finished && state_pointer->registration_complete && state_pointer->registered > 0 && state_pointer->removed == state_pointer->registered &&
                     !state_pointer->registration.active_modules() && !state_pointer->registration.active_functions() &&
                     completion_expected(state_pointer->completed) && !state_pointer->partial &&
                     !state_pointer->terminal && !state_pointer->data.poisoned() &&
@@ -240,6 +248,7 @@ template<class F> hipError_t checked(F action, bool submission_boundary = false)
         auto &s = state();
         if (s.terminal || s.data.poisoned()) return record(hipErrorUnknown);
         if (s.partial || gate.registration_failed) return record(hipErrorInvalidDeviceFunction);
+        s.work_started=true;
         action();
         return record(hipSuccess);
     } catch (const ps5hip::NativeDataError &error) {
@@ -293,30 +302,46 @@ void initialize_backend() {
 #endif
     s.queue = std::make_unique<ps5hip::SubmissionQueue>(*s.backend);
 }
+void unwind_registration(State &s) noexcept {
+    s.partial=true;
+    if(!s.terminal && !s.data.poisoned())
+        for(unsigned i=0;i<s.registered;++i)
+            try { s.registration.unregister_module(s.modules[i].handle); } catch (...) {}
+    s.tokens.clear(); s.host_token=nullptr;
+}
+ps5hip::HostModuleSpan module_spans(const void *wrapper) {
+    const auto wrappers=extent(__ps5hip_wrappers_begin,__ps5hip_wrappers_end);
+    const auto bundles=extent(__ps5hip_bundle_begin,__ps5hip_bundle_end);
+    if(__ps5hip_module_spans_begin || __ps5hip_module_spans_end) {
+        if(ps5hip::hip_runtime_contract().mode!=ps5hip::HipRuntimeMode::ReusableModules ||
+           !__ps5hip_module_spans_begin || !__ps5hip_module_spans_end)
+            throw ps5hip::ObjectError("unsupported module span table");
+        return ps5hip::select_host_module(wrapper,extent(__ps5hip_module_spans_begin,__ps5hip_module_spans_end),wrappers,bundles);
+    }
+    return {wrappers,bundles};
+}
 }
 static void **__hipRegisterFatBinary_locked(const void *wrapper) {
     try {
         if (gate.registration_failed) { (void)record(hipErrorInvalidDeviceFunction); return nullptr; }
         auto &s = create_state();
-        if(s.terminal || s.partial || gate.registration_failed || s.registered || s.removed)
+        if(s.terminal || s.partial || gate.registration_failed || s.work_started || s.removed || s.registered>=s.modules.size())
             throw ps5hip::ObjectError("registration blocked by lifecycle");
-        s.handle = s.registration.register_module(wrapper, extent(__ps5hip_wrappers_begin,__ps5hip_wrappers_end),
-            extent(__ps5hip_bundle_begin,__ps5hip_bundle_end), "gfx1013");
+        const auto spans=module_spans(wrapper);
+        auto *handle=s.registration.register_module(wrapper,spans.wrapper,spans.bundle,"gfx1013");
+        s.modules[s.registered].handle=handle;
+        s.handle=s.registered ? nullptr : handle;
         ++s.registered;
         std::puts("VECTOR_REGISTER owned=true gpu_calls=0");
-        return reinterpret_cast<void **>(s.handle);
+        return reinterpret_cast<void **>(handle);
     } catch (const std::bad_alloc &) {
         if (!fixed_diagnostic() && state_pointer) {
-            auto &s=*state_pointer; s.partial=true;
-            try { if(!s.terminal && !s.data.poisoned() && s.registration.active_modules()) s.registration.unregister_module(s.handle); } catch (...) {}
-            s.tokens.clear();
+            unwind_registration(*state_pointer);
         }
         (void)record(hipErrorOutOfMemory); return nullptr;
     } catch (...) {
         if(!fixed_diagnostic() && state_pointer) {
-            auto &s=state(); s.partial=true;
-            try { if(!s.terminal && !s.data.poisoned() && s.registration.active_modules()) s.registration.unregister_module(s.handle); } catch (...) {}
-            s.tokens.clear();
+            unwind_registration(*state_pointer);
         }
         (void)record(hipErrorInvalidValue); return nullptr;
     }
@@ -326,7 +351,7 @@ static void __hipRegisterFunction_locked(void **handle, const void *host, char *
     if (!state_pointer) { (void)record(hipErrorInvalidDeviceFunction); return; }
     try {
         auto &s = state();
-        if(s.terminal || s.partial || gate.registration_failed || s.removed || handle!=s.handle || !s.handle)
+        if(s.terminal || s.partial || gate.registration_failed || s.work_started || s.removed || !handle)
             throw ps5hip::ObjectError("function registration blocked by lifecycle");
         ++s.function_attempts;
         if (limit != UINT32_MAX || tid || bid || block || grid || warp || name_string(function) != name_string(name))
@@ -339,25 +364,25 @@ static void __hipRegisterFunction_locked(void **handle, const void *host, char *
         s.registration.register_function(handle, host, name_string(name));
         if(s.registration.active_functions()>(fixed_diagnostic() ? ps5hip::hip_runtime_contract().expected_functions : 256u))
             throw ps5hip::ObjectError("too many registered functions");
-        s.tokens.emplace_back(name_string(name),host);
+        s.tokens.push_back({name_string(name),host,handle});
         s.host_token = host;
         std::puts("VECTOR_FUNCTION bound=true");
     } catch (...) {
-        auto &s = state(); s.partial = true; (void)record(hipErrorInvalidDeviceFunction);
-        try { if(!s.terminal && !s.data.poisoned() && s.registration.active_modules()) s.registration.unregister_module(s.handle); } catch (...) {}
-        s.tokens.clear();
+        auto &s = state(); (void)record(hipErrorInvalidDeviceFunction); unwind_registration(s);
     }
 }
 static void __hipUnregisterFatBinary_locked(void **handle) {
     auto &s = state();
     try {
-        if (s.terminal || s.removed || !s.main_finished || handle != s.handle || gate.pending || gate.contexts || gate.abandoned)
+        auto module=std::find_if(s.modules.begin(),s.modules.begin()+s.registered,[&](const State::Module &m){return m.handle==handle;});
+        if (s.terminal || !s.main_finished || module==s.modules.begin()+s.registered || module->callback || gate.pending || gate.contexts || gate.abandoned)
             throw ps5hip::ObjectError("unregister blocked by lifecycle or terminal failure");
         if (!s.partial) s.registration.unregister_module(handle);
         else if (s.registration.active_modules()) throw ps5hip::ObjectError("partial registration not unwound");
-        s.tokens.clear();
+        s.tokens.erase(std::remove_if(s.tokens.begin(),s.tokens.end(),[&](const State::Token &t){return t.owner==handle;}),s.tokens.end());
+        module->callback=true;
         ++s.removed;
-        std::puts("VECTOR_UNREGISTER after_main=true active=0");
+        std::printf("VECTOR_UNREGISTER after_main=true active=%zu\n",s.registration.active_modules());
     } catch (...) { (void)record(hipErrorUnknown); std::puts("VECTOR_UNREGISTER rejected=true"); }
 }
 static hipError_t __hipPushCallConfiguration_locked(dim3 grid, dim3 block, size_t shared, hipStream_t stream) {
@@ -382,12 +407,13 @@ static hipError_t hipLaunchKernel_locked(const void *host, dim3 grid, dim3 block
     auto &s=state();
     if (s.terminal || s.data.poisoned()) return record(hipErrorUnknown);
     if(stream) return record(hipErrorNotSupported);
-    if(s.partial || gate.registration_failed || !functions_ready(s.registration.active_functions()))
+    if(s.partial || gate.registration_failed || !s.registration.modules_ready() || !functions_ready(s.registration.active_functions()))
         return record(hipErrorInvalidDeviceFunction);
     std::vector<ps5hip::LaunchArgument> values;
     const ps5hip::Kernel *kernel=nullptr;
+    void *owner=nullptr;
     ps5hip::NativeLaunchRequest request;
-    try { kernel=&s.registration.lookup(host); }
+    try { const auto found=s.registration.lookup_owned(host); kernel=&found.kernel; owner=found.owner; }
     catch (const std::bad_alloc &) { return record(hipErrorOutOfMemory); }
     catch (...) { return record(hipErrorInvalidValue); }
     try {
@@ -410,8 +436,8 @@ static hipError_t hipLaunchKernel_locked(const void *host, dim3 grid, dim3 block
     catch (...) { return record(hipErrorInvalidValue); }
     return checked([&] {
         auto launch=ps5hip::hip_runtime_contract().vector_compatibility ?
-            ps5hip::prepare_native_vector(s.registration.module(s.handle),*kernel,values,s.data) :
-            ps5hip::prepare_native_launch(s.registration.module(s.handle),*kernel,values,s.data,request);
+            ps5hip::prepare_native_vector(s.registration.module(owner),*kernel,values,s.data) :
+            ps5hip::prepare_native_launch(s.registration.module(owner),*kernel,values,s.data,request);
         auto close_temporaries = [&] {
             try { ps5hip::close_native_launch_temporaries(launch,s.data); }
             catch (...) { s.terminal=true;throw; }
@@ -522,6 +548,30 @@ extern "C" hipError_t hipMalloc(void **pointer, size_t bytes) {
     if (pointer) *pointer=nullptr;
     return call([&] { return hipMalloc_locked(pointer,bytes); });
 }
+static hipError_t allocation_query(void *pointer, void **base, size_t *bytes, hipError_t missing) {
+    void *found=nullptr; size_t length=0;
+    const auto result=call([&] {
+        const auto status=checked([&] {
+            using S=ps5hip::NativeDataStatus;
+            if(!base || !bytes)throw ps5hip::NativeDataError(S::InvalidValue,"null allocation query output");
+            if(!pointer)throw ps5hip::NativeDataError(S::InvalidPointer,"null allocation query pointer");
+            const auto hold=state().data.resolve(pointer,1);
+            found=reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(pointer)-hold.offset);
+            length=hold.offset+hold.remaining;
+        });
+        return record(status==hipErrorInvalidDevicePointer ? missing : status);
+    });
+    // An unlock failure must not publish apparently successful query results.
+    if(result==hipSuccess) { *base=found; *bytes=length; }
+    return result;
+}
+extern "C" hipError_t hipMemPtrGetInfo(void *pointer, size_t *bytes) {
+    void *base=nullptr;
+    return allocation_query(pointer,&base,bytes,hipErrorInvalidValue);
+}
+extern "C" hipError_t hipMemGetAddressRange(hipDeviceptr_t *base, size_t *bytes, hipDeviceptr_t pointer) {
+    return allocation_query(pointer,base,bytes,hipErrorNotFound);
+}
 extern "C" hipError_t hipFree(void *pointer) { return call([&] { return hipFree_locked(pointer); }); }
 extern "C" hipError_t hipMemset(void *pointer, int value, size_t bytes) {
     return call([&] {
@@ -569,6 +619,7 @@ extern "C" const char *hipGetErrorString(hipError_t e) {
     case hipErrorNotReady:return "data GPU-owned";case hipErrorNotSupported:return "unmeasured operation";
     case hipErrorDeinitialized:return "runtime closed";
     case hipErrorInvalidDevice:return "invalid device ordinal";
+    case hipErrorNotFound:return "allocation not found";
     case hipErrorOutOfMemory:return "host allocation failed";default:return "native/control failure";}
 }
 extern "C" void ps5hip_runtime_finish() {
@@ -585,7 +636,12 @@ extern "C" void ps5hip_runtime_finish() {
                 state_pointer->data.ranges().empty() && (!state_pointer->queue || !state_pointer->queue->poisoned());
         } catch (...) { clean = false; }
         if (clean) clean = clear_current_context();
-        if (clean && state_pointer) state_pointer->main_finished = true;
+        if (clean && state_pointer) {
+            state_pointer->main_finished = true;
+            state_pointer->registration_complete=state_pointer->registered>0 &&
+                state_pointer->registration.active_modules()==state_pointer->registered &&
+                state_pointer->registration.modules_ready() && functions_ready(state_pointer->registration.active_functions());
+        }
         else gate.abandoned = true;
     }
     (void)release_gate();
@@ -595,7 +651,7 @@ extern "C" bool ps5hip_runtime_terminal() {
         gate.abandoned || (state_pointer && state_pointer->terminal); });
 }
 extern "C" const void *ps5hip_runtime_token() {
-    return observe<const void *>(nullptr, [] { return gate.lifetime == Lifetime::Open && state_pointer ? state_pointer->host_token : nullptr; });
+    return observe<const void *>(nullptr, [] { return gate.lifetime == Lifetime::Open && state_pointer && state_pointer->registered==1 ? state_pointer->host_token : nullptr; });
 }
 extern "C" void **ps5hip_runtime_handle() {
     return observe<void **>(nullptr, [] { return gate.lifetime == Lifetime::Open && state_pointer ? reinterpret_cast<void **>(state_pointer->handle) : nullptr; });
@@ -609,18 +665,20 @@ extern "C" const void *ps5hip_runtime_token_for(const char *name) {
         if (!name || gate.lifetime != Lifetime::Open || !state_pointer) return nullptr;
         const auto &s = *state_pointer;
         if(s.partial || s.terminal || s.removed) return nullptr;
-        for(const auto &item:s.tokens) if(item.first==name) {
-            (void)s.registration.lookup(item.second); return item.second;
+        const void *found=nullptr;
+        for(const auto &item:s.tokens) if(item.name==name) {
+            if(found) return nullptr;
+            (void)s.registration.lookup(item.host); found=item.host;
         }
-        return nullptr;
+        return found;
     });
 }
 extern "C" bool ps5hip_runtime_registration_ready() noexcept {
     return observe(false, [] {
         if(gate.lifetime != Lifetime::Open || !state_pointer) return false;
         const auto &s = *state_pointer;
-        if(s.registered!=1 || !s.host_token || s.partial || gate.abandoned || gate.registration_failed ||
-           s.registration.active_modules()!=1 || !functions_ready(s.registration.active_functions()) || s.terminal || s.data.poisoned() ||
+        if(!s.registered || !s.host_token || s.partial || gate.abandoned || gate.registration_failed ||
+           s.registration.active_modules()!=s.registered || !s.registration.modules_ready() || !functions_ready(s.registration.active_functions()) || s.terminal || s.data.poisoned() ||
            !s.data.ranges().empty() || s.backend || s.queue || s.init_attempted) return false;
         if(ps5hip::hip_runtime_contract().vector_compatibility)
             std::puts("HIP_TITLE REGISTRATION observed_after_redirect=true modules=1 functions=1 constructor_gpu_calls=0");
@@ -631,11 +689,11 @@ extern "C" bool ps5hip_runtime_ready() noexcept {
     return observe(false, [] {
         if(gate.lifetime != Lifetime::Closing || !state_pointer) return false;
         const auto &s = *state_pointer;
-        return s.registered==1 && !s.partial && !s.removed && completion_expected(s.completed) && s.main_finished &&
+        return s.registered>0 && !s.partial && !s.removed && completion_expected(s.completed) && s.main_finished &&
             !s.terminal && !s.data.poisoned() && s.data.ranges().empty() &&
             !gate.pending && !gate.contexts && !gate.abandoned && !gate.registration_failed &&
             (s.queue ? !s.queue->poisoned() : (!fixed_diagnostic() && !s.init_attempted)) &&
-            s.registration.active_modules()==1 && functions_ready(s.registration.active_functions());
+            s.registration.active_modules()==s.registered && s.registration.modules_ready() && functions_ready(s.registration.active_functions());
     });
 }
 extern "C" bool ps5hip_runtime_finalized() noexcept {

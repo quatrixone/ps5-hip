@@ -17,6 +17,32 @@ uint64_t little(const uint8_t *p, unsigned count) {
     return result;
 }
 }
+HostModuleSpan select_host_module(const void *wrapper, ReadableSpan table,
+                                 ReadableSpan wrappers, ReadableSpan bundles) {
+    checked_span(table); const auto wb=checked_span(wrappers), bb=checked_span(bundles);
+    require(table.size && table.size%32==0 && table.size/32<=32, "invalid module span table");
+    HostModuleSpan selected{}; unsigned matches=0;
+    auto pair = [&](size_t at, unsigned offset, uintptr_t base, size_t size) {
+        const auto lo=little(table.data+at+offset,8), hi=little(table.data+at+offset+8,8);
+        require(hi>=lo && hi<=size, "module outside trusted image");
+        return ReadableSpan{reinterpret_cast<const uint8_t *>(base+lo),size_t(hi-lo)};
+    };
+    for(size_t at=0;at<table.size;at+=32) {
+        const auto w=pair(at,0,wb,wrappers.size), b=pair(at,16,bb,bundles.size);
+        require(w.size==24 && b.size>=32 && b.size<=64u*1024u*1024u,"invalid module extents");
+        const uintptr_t wl=reinterpret_cast<uintptr_t>(w.data), bl=reinterpret_cast<uintptr_t>(b.data);
+        require(wl+w.size<=bl || bl+b.size<=wl,"overlapping module spans");
+        for(size_t prior=0;prior<at;prior+=32) {
+            const auto pw=pair(prior,0,wb,wrappers.size), pb=pair(prior,16,bb,bundles.size);
+            for(auto x:{w,b}) for(auto y:{pw,pb}) {
+                const auto a=reinterpret_cast<uintptr_t>(x.data), c=reinterpret_cast<uintptr_t>(y.data);
+                require(a+x.size<=c || c+y.size<=a,"duplicate or overlapping module spans");
+            }
+        }
+        if(w.data==wrapper) { selected={w,b}; ++matches; }
+    }
+    require(matches==1,"wrapper absent from module span table"); return selected;
+}
 BundledCodeObject read_single_host_wrapper(const void *wrapper, ReadableSpan wrappers,
                                           ReadableSpan bundle, const std::string &target) {
     static_assert(sizeof(uintptr_t) == 8, "measured HIP wrapper is a 64-bit host ABI");
@@ -36,11 +62,15 @@ BundledCodeObject read_single_host_wrapper(const void *wrapper, ReadableSpan wra
 }
 HostRegistration::Handle HostRegistration::register_module(const void *wrapper, ReadableSpan wrappers,
                                                           ReadableSpan bundle, const std::string &target) {
-    require(active_modules() == 0, "single-module control already registered");
+    require(limit_ && limit_<=32 && active_modules()<limit_ && modules_.size()<32, "module limit exceeded");
+    for(const auto &module:modules_) require(!module->active || module->wrapper!=wrapper,"duplicate module wrapper");
+    require(bundle.size<=64u*1024u*1024u-admitted_bytes_,"aggregate module bytes exceeded");
     auto entry = std::make_unique<Module>();
+    entry->wrapper=wrapper;
     entry->code = read_single_host_wrapper(wrapper, wrappers, bundle, target);
     const auto handle = entry.get();
     modules_.push_back(std::move(entry));
+    admitted_bytes_+=bundle.size;
     return handle;
 }
 HostRegistration::Module &HostRegistration::find(Handle handle) const {
@@ -50,6 +80,9 @@ HostRegistration::Module &HostRegistration::find(Handle handle) const {
 void HostRegistration::register_function(Handle handle, const void *token, const std::string &name) {
     auto &entry = find(handle);
     require(token != nullptr, "null host function token");
+    require(active_functions()<256,"global function limit exceeded");
+    for(const auto &module:modules_) if(module->active)
+        for(const auto &binding:module->bindings) require(binding.token!=token,"duplicate global host token");
     bool found = false;
     for (const auto &kernel : entry.code.object.kernels) if (kernel.name == name) found = true;
     require(found, "registered device symbol is not a kernel");
@@ -57,13 +90,14 @@ void HostRegistration::register_function(Handle handle, const void *token, const
         require(binding.token != token && binding.name != name, "duplicate kernel binding");
     entry.bindings.push_back({token, name});
 }
-const Kernel &HostRegistration::lookup(const void *token) const {
+HostRegistration::Lookup HostRegistration::lookup_owned(const void *token) const {
     for (const auto &entry : modules_) if (entry->active)
         for (const auto &binding : entry->bindings) if (binding.token == token)
             for (const auto &kernel : entry->code.object.kernels)
-                if (kernel.name == binding.name) return kernel;
+                if (kernel.name == binding.name) return {entry.get(),kernel};
     throw ObjectError("unregistered host function token");
 }
+const Kernel &HostRegistration::lookup(const void *token) const { return lookup_owned(token).kernel; }
 const BundledCodeObject &HostRegistration::module(Handle handle) const { return find(handle).code; }
 void HostRegistration::unregister_module(Handle handle) {
     auto &entry = find(handle);
@@ -76,5 +110,10 @@ size_t HostRegistration::active_modules() const {
 }
 size_t HostRegistration::active_functions() const {
     size_t count = 0; for (const auto &entry : modules_) if (entry->active) count += entry->bindings.size(); return count;
+}
+bool HostRegistration::modules_ready() const {
+    if(!active_modules()) return false;
+    for(const auto &entry:modules_) if(entry->active && entry->bindings.empty()) return false;
+    return true;
 }
 }

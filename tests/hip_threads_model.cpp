@@ -69,6 +69,7 @@ void discovery_ok(){int value=713;
  check(hipDeviceGetAttribute(&value,hipDeviceAttributeWarpSize,0)==hipSuccess&&value==32);
 }
 void closed(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases;void*p=nullptr;unsigned v=0;
+ size_t bytes=713;void *base=reinterpret_cast<void*>(713);check(hipMemPtrGetInfo(nullptr,&bytes)==hipErrorDeinitialized&&bytes==713);check(hipMemGetAddressRange(&base,&bytes,nullptr)==hipErrorDeinitialized&&base==reinterpret_cast<void*>(713)&&bytes==713);
  discovery_error(hipErrorDeinitialized);
  check(hipMemset(nullptr,0,0)==hipErrorDeinitialized);
  check(hipMemcpy(nullptr,nullptr,0,hipMemcpyDeviceToDevice)==hipErrorDeinitialized);
@@ -76,6 +77,7 @@ void closed(){const auto a=allocations.size();const auto b=backends,s=submits,r=
  check(a==allocations.size()&&b==backends&&s==submits&&r==releases);
 }
 void poison(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases,c=contexts.load(),st=state_attempts.load();void*p=nullptr;check(hipMalloc(&p,0)==hipErrorUnknown&&!p&&hipDeviceSynchronize()==hipErrorUnknown&&hipFree(nullptr)==hipErrorUnknown);
+ size_t bytes=713;void *base=reinterpret_cast<void*>(713);check(hipMemPtrGetInfo(nullptr,&bytes)==hipErrorUnknown&&bytes==713);check(hipMemGetAddressRange(&base,&bytes,nullptr)==hipErrorUnknown&&base==reinterpret_cast<void*>(713)&&bytes==713);
  discovery_error(hipErrorUnknown);
  check(hipMemset(nullptr,0,0)==hipErrorUnknown);
  check(hipMemcpy(nullptr,nullptr,0,hipMemcpyDeviceToDevice)==hipErrorUnknown);
@@ -153,6 +155,30 @@ int main(int argc,char**argv){
   expect_final=false;int value=713;fault=4;
   check(hipGetDeviceCount(&value)==hipErrorUnknown&&value==713);poison();
   std::puts("THREAD_MODEL_PASS discovery-unlock");return 0;
+ }else if(!std::strcmp(mode,"memory-query")){
+  check(!std::strcmp(hipGetErrorString(hipErrorNotFound),"allocation not found"));
+  unsigned char *p=nullptr;check(hipMalloc(reinterpret_cast<void**>(&p),37)==hipSuccess);
+  auto valid=[&](void *address){void *base=nullptr;size_t size=0;check(hipMemGetAddressRange(&base,&size,address)==hipSuccess&&base==p&&size==37);size=0;check(hipMemPtrGetInfo(address,&size)==hipSuccess&&size==37);};
+  valid(p);valid(p+1);valid(p+36);
+  void *base=reinterpret_cast<void*>(713);size_t size=713;
+  for(void *address:{static_cast<void*>(nullptr),static_cast<void*>(p+37),static_cast<void*>(p+38),static_cast<void*>(&size),reinterpret_cast<void*>(UINTPTR_MAX)}){
+   check(hipMemGetAddressRange(&base,&size,address)==hipErrorNotFound&&base==reinterpret_cast<void*>(713)&&size==713);
+   check(hipMemPtrGetInfo(address,&size)==hipErrorInvalidValue&&size==713);
+  }
+  check(hipMemGetAddressRange(nullptr,&size,p)==hipErrorInvalidValue&&size==713);
+  check(hipMemGetAddressRange(&base,nullptr,p)==hipErrorInvalidValue&&base==reinterpret_cast<void*>(713));
+  check(hipMemPtrGetInfo(p,nullptr)==hipErrorInvalidValue);
+  std::thread worker([&]{check(hipPeekAtLastError()==hipSuccess);valid(p+17);});worker.join();
+  check(hipPeekAtLastError()==hipErrorInvalidValue);
+  check(hipFree(p)==hipSuccess);
+  check(hipMemGetAddressRange(&base,&size,p)==hipErrorNotFound&&base==reinterpret_cast<void*>(713)&&size==713);
+  check(hipMemPtrGetInfo(p,&size)==hipErrorInvalidValue&&size==713);
+  check(!backends&&!submits);
+ }else if(!std::strcmp(mode,"memory-query-unlock")){
+  unsigned char *p=nullptr;check(hipMalloc(reinterpret_cast<void**>(&p),37)==hipSuccess);
+  expect_final=false;void *base=reinterpret_cast<void*>(713);size_t bytes=713;fault=4;
+  check(hipMemGetAddressRange(&base,&bytes,p)==hipErrorUnknown&&base==reinterpret_cast<void*>(713)&&bytes==713);
+  poison();std::puts("THREAD_MODEL_PASS memory-query-unlock");return 0;
  }else if(!std::strcmp(mode,"device-copy")){
   unsigned char *p=nullptr,*q=nullptr;check(hipMalloc(reinterpret_cast<void**>(&p),37)==hipSuccess&&hipMalloc(reinterpret_cast<void**>(&q),41)==hipSuccess);
   unsigned char source[37],expected[41],after[41];for(unsigned i=0;i<37;++i)source[i]=static_cast<unsigned char>(i*7+3);

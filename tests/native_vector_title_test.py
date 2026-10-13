@@ -28,6 +28,17 @@ def digest(data):
 
 
 class VectorTitleTests(unittest.TestCase):
+    def test_optional_module_table_is_null_only_for_single_module_link(self):
+        source = '    .rodata : { *(.rodata .rodata.*) } : ro\n        *(.data.rel.ro .data.rel.ro.*)\n'
+        for kernel in ('hip_vector', 'hip_reduction', 'hip_generic', 'hip_device_copy'):
+            linked = recipe.patch_linker(source, kernel)
+            for name in ('begin', 'end'):
+                self.assertEqual(linked.count(f'HIDDEN(__ps5hip_module_spans_{name} = 0);'), 1)
+        multi = recipe.patch_linker(source, 'hip_multi_query')
+        self.assertNotIn('__ps5hip_module_spans_begin = 0', multi)
+        self.assertIn('HIDDEN(__ps5hip_module_spans_begin = .);', multi)
+        self.assertEqual(multi.count('QUAD('), 8)
+
     def setUp(self):
         # These staging fixtures test the caller contract, not ELF qualification.
         self.validator = mock.patch.object(profile, "validate_build", side_effect=lambda r, s, *args: profile.validate_profile(r, s))

@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "classification": "offline-bounded-multi-module-runtime-pass",
+  "base_commit": "9d5de314a876a3ba98ab1fa60ae665aa0bad61df",
+  "sources": {
+    "CMakeLists.txt": "b45abf5681dc000fd20c458e4c31321cd966fc4cb88c7a9259150d0bd191fbc3",
+    "docs/BOUNDED_HIP_RUNTIME.md": "b7e0029382d5e7e7e229fff8c60a7aad116f1ac5564d4fae933c74a0a3e039fa",
+    "docs/HIP_MULTI_MODULE.md": "83a0015d4a1e6021f94439007c994e7cf9e02fde591e5e08317742c5e7103f6b",
+    "include/ps5hip/hip_launch_profile.h": "120723e91852fb5bde754a858d5bcb91edd23b261edbbbb4272942cb6012e5cd",
+    "include/ps5hip/hip_runtime_control.h": "ba38873e62ce3d60f1f95162174207123fb315cc616c86f69ab15d042bf65688",
+    "include/ps5hip/host_registration.h": "5cdc7708bcbd83341a3b559609c8b789abb84a2a1fd9f90754999d77810b4bef",
+    "src/hip_launch_profile.cpp": "21d203035ca2aca2582898cd109cbdabac2183be5c94d59dacc415415fc4bffc",
+    "src/hip_runtime.cpp": "1e084d3222ad30d45165a36c9fe55f2ec31501353b5fbfd1ced53fec6cbe75b1",
+    "src/host_registration.cpp": "808020d4212824ff55fb4233057aaabbc494a275c29d7f1313e658aadf95bbcd",
+    "tests/hip_launch_profile_test.cpp": "a83b83d102cbb6a1a07a4e286699090fa5f7ddd7bde78642901b3147cd3d2d6e",
+    "tests/hip_multi_a.hip": "508c542e840002d19f3c7e6dd9eec1d13e521afb5dfc5ee2f20b5bc7187977b1",
+    "tests/hip_multi_b.hip": "82e05556a14185150b5f1428306128e084c55855912b0f4be930fa7e36a7c313",
+    "tests/hip_multi_link_test.py": "4ca850d8833f994fb1cd7bb93ff9b30b90fedda63284d12afda52eb6de4b7c35",
+    "tests/hip_multi_model.cpp": "d9db46e1f058abbc08efefdaaeaf27fe36963f13c87ab21aca6a288a36e41ff8",
+    "tests/hip_multi_recipe_test.py": "29b3d7b286c5045a54cb514b9c46c0a2b3e18319be7031f58acc413c7c2ace0a",
+    "tests/host_multi_registration_test.cpp": "4b2b77bb9401f69caf6c929e96b616d54903b0793a5dbb32ef4dd227ea8cd40f",
+    "tools/probe_hip_multi.py": "56d531e9046307d89eed00ca71570ad77ad4b96930eda403cfff954df2ecb4ef"
+  },
+  "qualification": {
+    "path": "results/multi-qualification-v1/receipt.json",
+    "sha256": "9748e318c2b63661f43d0e5e2701a23b2fe7822356726e5933524b31dc4f7178"
+  },
+  "independent_review": {
+    "workspace_root_relative_path": "results/multi-module-independent-review-v1/review.json",
+    "sha256": "8532fd06a9db94908e108ea682aeb50b06d293b6aa5894776cc3948cf1bbb998"
+  },
+  "proofs": {
+    "multi-final-v1": {
+      "path": "results/multi-final-v1/receipt.json",
+      "sha256": "b72ffebb158db5e75c46f7a5c40353352f5db0b6396c607a9675bbcaee62b08a"
+    },
+    "ps5-pie-v4": {
+      "path": "results/ps5-pie-v4/receipt.json",
+      "sha256": "b4351932fad514b3d59406aede4cb41b6b12835cbcec6233d08ee8c8e28755b7"
+    },
+    "legacy-generic-v2": {
+      "path": "results/legacy-generic-v2/receipt.json",
+      "sha256": "8c7a0536a06fee36583dd83870f58429bb81ae0cae2e40e8fe82a66960eafcce"
+    },
+    "legacy-vector-v1": {
+      "path": "results/legacy-vector-v1/receipt.json",
+      "sha256": "edaf09557b78f52bcc432fb50b547b443fdc7d8a4b351e4b8e379ca643fa6f12"
+    },
+    "threads-multi-v1": {
+      "path": "results/threads-multi-v1/receipt.json",
+      "sha256": "a50cefe5d21e01a98379bd4c06028e7b8d6049df960f1a539679a9849d05fe12"
+    },
+    "threads-multi-tsan-v1": {
+      "path": "results/threads-multi-tsan-v1/receipt.json",
+      "sha256": "1a31fdb039aed803fc81bcf20754c920e17fba4eba44f2208eaa164c8fe0b14b"
+    },
+    "cmake-fixtures-v1": {
+      "path": "results/cmake-fixtures-v1/receipt.json",
+      "sha256": "29275ada25857a3188a52b1d540d3e2e83bd8a8561f5f96d74fde6911f821aa7"
+    }
+  },
+  "counts": {
+    "genuine_compiler_objects": 4,
+    "two_module_models": 24,
+    "registry_allocation_failure_points": 145,
+    "function_allocation_rollback": 1,
+    "transcript_mutations": 72,
+    "inventory_omissions": 248,
+    "legacy_generic_models": 24,
+    "legacy_vector_models": 26,
+    "threaded_asan_models": 40,
+    "cpu_tsan_models": 20,
+    "cmake_tests": 41,
+    "affected_ctest_rerun": 11,
+    "ps5_diagnostic_pie_orders": 2
+  },
+  "scope": "Exact relative module-span tables, globally unique host tokens, module-owned A/B/A code selection, bounded metadata, partial-registration rollback and all-module retirement.",
+  "hardware_executed": false,
+  "native_title_linked": false,
+  "full_g4_complete": false,
+  "limits": [
+    "PS5 diagnostic PIE allows unresolved host imports; no full updated runtime/provider/startup/native package proof.",
+    "Table section SHF_WRITE is absent; actual native load/mapping protection remains to be verified.",
+    "Host backend checks materialized owner image/entry and actual buffer arithmetic, not GPU ISA execution.",
+    "No RDC, dynamic load/unload, device globals, framework readiness or full G4 claim."
+  ],
+  "next": "Combine separately reviewed query/checker changes, qualify merged host runtime and prepare a genuine two-module native title with full runtime/import/startup/link audit."
+}

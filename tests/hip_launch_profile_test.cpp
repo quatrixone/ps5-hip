@@ -34,7 +34,7 @@ int main(int argc,char **argv) {
     }
    }
   }
-  check(hip_runtime_contract().mode==HipRuntimeMode::ReusableSingleModule);
+  check(hip_runtime_contract().mode==HipRuntimeMode::ReusableModules);
   std::cout<<"generic profile actual kernels="<<kernels<<" names_independent=true negative_resources_shapes_layouts=pass\n";
  }catch(const std::exception &e){std::cerr<<e.what()<<'\n';return 1;}
 }

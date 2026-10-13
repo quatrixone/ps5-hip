@@ -1,0 +1,5 @@
+#include <hip/hip_runtime.h>
+extern "C" __global__ __launch_bounds__(64) void multi_b(const unsigned *in,unsigned *out,unsigned n) {
+    unsigned i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n)out[i]=in[i]*3u+11u;
+}
+extern "C" void launch_b(const unsigned *in,unsigned *out,unsigned n) {multi_b<<<(n+63)/64,64>>>(in,out,n);}

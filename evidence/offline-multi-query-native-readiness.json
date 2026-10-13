@@ -1,0 +1,42 @@
+{
+  "classification": "offline-host-qualified-native-multi-query-candidate",
+  "sources": {
+    "CMakeLists.txt": "deee3f5aa4401f6a81ce5d4d2b1ced857d7794e1d009168b53aadf63b0e3b6cc",
+    "docs/HIP_MULTI_QUERY_TITLE.md": "139da24f7a267ecd119faddb2285b2a93d184a238d59c612f833d833fc69ee29",
+    "tests/hip_multi_native_profile_test.py": "acc44e62bf31be68663d04b8d2131468f57dbbf0846746e96e8ffcaae578a63e",
+    "tests/hip_multi_query_title_model.cpp": "39b5190d4f7c0539e18c8700fe1e92380020497dbeee8375b48d4d89c615d401",
+    "tests/hip_multi_query_title_receipt_test.py": "102372ed21c508eaab0f11ea0444eca417317d46d06c9a1219ee53f7bc38d80d",
+    "tests/hip_multi_query_title_test.py": "1e4124508780ed1ca3bd74744d298875750fbedb8f2f3074db2de311c76ca4da",
+    "tools/build_native_vector_title.py": "5b874250f45ff3050874995bdbd0bf3ee10ea4e4d0ec84c4e36a98560f5041a0",
+    "tools/check_canary_log.py": "5b5d83a5e28574af13bf6a9046f68217f1d65a066f129856b7eaaca822f3b165",
+    "tools/hip_vector_title.cpp": "4a6f9543647373ac9d29e435bc6e2b14b29fc40cc938cdc785c0f8c5158e03cf",
+    "tools/native_multi_query.py": "6d0b16524e89da5f48ea4307fe552b14d2ce21b452de7086769771323d474991",
+    "tools/native_vector_title.py": "e7c6175d3884644fb17d2964cb231cf61116260074229edacf663cb62d8416aa",
+    "tools/stage_native_title.py": "25c488752dd13277c8f0cfbbf6d4a891dead6990d0836592d6b532e329c57834",
+    "tools/verify_native_case.py": "00316e397e1f5765c8fd17c7ba40305bd3761216df89bcda35b63c498d36cf21"
+  },
+  "proofs": {
+    "results/native-draft-checks-v3/receipt.json": "65afe7bcd80b8927536119cfd28f514b0b0141b7c25c1442865252ba2424afa6",
+    "results/title-v2/receipt.json": "08ddd6dd2631d1a828d32e562a8b777ffcf27e06056338ce509d3db4138c83ad",
+    "results/client-v3/receipt.json": "993e463a8c9bdbc712aec5e1bbb0a2861c09ab61eb4f47c2ce6e744be72e0f11",
+    "results/compiler-v3/receipt.json": "e5f43a822caab0d997c27eb18a208c71548db8d23f11b6a7c7cdbea5b7d8bfe7"
+  },
+  "independent_review": {
+    "root_relative_path": "results/native-multi-query-title-independent-review-v1/review.json",
+    "sha256": "8f98da9738cc54e6832bf89728872cce32a1b3a834b4efa11f3260dffa417920"
+  },
+  "counts": {
+    "title_cases": 30,
+    "transcript_mutations": 69,
+    "inventory_omissions": 431,
+    "client_cases": 32,
+    "client_mutations": 96,
+    "native_compiler_modules": 2
+  },
+  "native_linked": false,
+  "hardware_executed": false,
+  "limits": [
+    "Actual full native link/provider/ELF table/startup audit is the next gate.",
+    "No two-module native execution or framework readiness claim."
+  ]
+}

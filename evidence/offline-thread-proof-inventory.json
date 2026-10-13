@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "classification": "offline-thread-proof-inventory-pass",
+  "base_commit": "454893ada27a57082326726860eb782706c0a39c",
+  "sources": {
+    "tests/hip_threads_recipe_test.py": "a977bf04a4ba0d462a3abb4bd9654cc6baa01e5d5feb11de148cccfb2b6b77c6",
+    "tools/probe_hip_threads.py": "4551d2bc0aaca898d07008ad2bb6b633a77158783b9e4c21225a665301e1e692"
+  },
+  "review": {
+    "path": "results/thread-proof-check-independent-review-v1/review.json",
+    "sha256": "87c7d4a7e73cca98d4e95a141da00615d25d459673242e99973a469d14e664ba"
+  },
+  "proofs": {
+    ".local/g4-thread-proof-check/results/thread-inventory-asan-v1/receipt.json": "1cf5f5f6b226c9cff82bab75c88d31dd013586e996123b0271cb0c6b187365ef",
+    ".local/g4-thread-proof-check/results/thread-inventory-tsan-v1/receipt.json": "21d9b052656d1615bff1592458ad6f505405982c8994e54be2b5b1fe84a0f8ba",
+    ".local/g4-thread-proof-check/results/inventory-negative-v1/receipt.json": "02737b8f6420c3491de3f8da3ca8582fbce99bb930fc0598e347bcc780d24849"
+  },
+  "observed": {
+    "ASan_UBSan_modes": 42,
+    "CPU_TSAN_modes": 22,
+    "unit_tests": 3,
+    "negative_cli_cases": 13
+  },
+  "scope": [
+    "Exact source and output artifact inventories prevent empty maps and unbound logs",
+    "Exact prepared HIP/platform/tool input reconstruction rejects essential input omissions",
+    "Command labels/zero exit statuses and hashed commands.json equality are required",
+    "Actual populated ASan42 and CPU-TSAN22 proofs independently rehashed and replayed; runtime and tests unchanged from memory-query candidate"
+  ],
+  "limits": [
+    "This is provenance validation, not cryptographic authenticity of a maliciously rewritten entire proof.",
+    "Original historical populated proofs remain unchanged and are not retroactively invalidated."
+  ],
+  "hardware_executed": false,
+  "root_integration_pending": true
+}

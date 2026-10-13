@@ -1,0 +1,37 @@
+{
+  "classification": "offline-integrated-multi-query-and-reduction",
+  "hardware_executed": false,
+  "native_linked": false,
+  "base_commit": "9d5de314a876a3ba98ab1fa60ae665aa0bad61df",
+  "source_checkpoint": "a6029a29099807f8317b6d380bef2e59b23a516b",
+  "inputs": {
+    "multi_query_commit": "831fd876851a35df8651fbd76dae56c4c5172d66",
+    "reduction_commit": "7b41b242cde4a42160d2509740feb445e5606c93"
+  },
+  "review_sha256": "ca5d6e1521fedc969716bedd67e67133e8e6e9aa5ee8b71383d1664a909337f2",
+  "qualification_sha256": "edee06ff3927826b001f2954f1d7feccdb3940b2d960f3f17737fb405ac1a226",
+  "counts": {
+    "multi_runtime": 24,
+    "thread_asan": 42,
+    "thread_tsan": 22,
+    "multi_client": 32,
+    "multi_title": 30,
+    "reduction_upstream": 4,
+    "reduction_companion": 12,
+    "reduction_title": 19,
+    "legacy_vector": 26,
+    "legacy_generic": 24,
+    "cmake_unique_union": 61
+  },
+  "compiler_objects_equal": {
+    "multi_a": "aa8959ba60f768c94abe2398a3ccaf05acc2b9d867ebe54806aff7fcbb445df3",
+    "multi_b": "876aff255be5c82b771bc4949d313e6b929569f5f1732adcba77d90fac6f7407",
+    "reduction_companion": "4380b8cc4b2f0820ce4d57c32131882b34b732d8a4f4bad894066ddc29c6d6c6"
+  },
+  "limits": [
+    "CPU transport is not GPU ISA emulation.",
+    "Frozen original compiler/native observations remain historical; merged images require their own native link audits.",
+    "CMake60 passing tests retained; checkout-bound local reduction compiler refresh plus packet test passed separately.",
+    "Initial reduction title missing compiler alias and CMake external-root authority mismatch preserved; no production fix was needed."
+  ]
+}

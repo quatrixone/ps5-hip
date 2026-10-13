@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "classification": "offline-tracked-memory-query-pass",
+  "base_commit": "9d5de314a876a3ba98ab1fa60ae665aa0bad61df",
+  "sources": {
+    "docs/HIP_MEMORY_QUERIES.md": "76c8486704c8f981a540aa174d8cc39d510ede9dc60280e319ae42732c39b1e8",
+    "src/hip_runtime.cpp": "3cd5087b6511de6039d756030b461d09e7f0d1e9e91ca39fb0dcc57443cb483e",
+    "tests/hip_threads_model.cpp": "b87c4fd12e13ef8c28c3bfe17e22e067f83c5881b5e0089997a644313c2519a0",
+    "tools/probe_hip_threads.py": "a53692ab8da13b2838e3c204ef2428801368370ce816267e21bf1f8926ee0a68"
+  },
+  "review": {
+    "path": "results/memory-query-independent-review-v1/review.json",
+    "sha256": "25b5cf13f3254e916077d0408654e12631464567d9b724b947a8b08a0c966eaf"
+  },
+  "proofs": {
+    "memory-query-asan-v2": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g4-memory-query/results/memory-query-asan-v2/receipt.json",
+      "sha256": "e65027e043aa67b36a69f7f3704cc81092e7930a2c002ed9b4ecce654c8c8377",
+      "modes": 42
+    },
+    "memory-query-tsan-v1": {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/g4-memory-query/results/memory-query-tsan-v1/receipt.json",
+      "sha256": "e0e4c1713adb07a45808f7e657edb76ad6b1f5cde318b491aae046860759de99",
+      "modes": 22
+    }
+  },
+  "observed": {
+    "ASan_UBSan_modes": 42,
+    "CPU_TSAN_modes": 22
+  },
+  "hardware_executed": false,
+  "root_integration_pending": true,
+  "full_g4_complete": false,
+  "scope": "Whole logical allocation base/size queries over the existing live registry; outputs published only after successful unlock.",
+  "limits": [
+    "No pointer attributes or physical/free-memory reporting.",
+    "No native API execution claim; CPU-owned tracked allocations only."
+  ]
+}

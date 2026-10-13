@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "classification": "clear-offline-reduction-title-source-and-lifecycle",
+  "base_commit": "a03f1f74f1a51d1d83a15a7dd7e4ad895f0a4a44",
+  "sources": {
+    "CMakeLists.txt": "829eecb3b9e26a8e3a2f4be24041ea1c860f0a067fcea72d88801c23b0dc3943",
+    "docs/HIP_REDUCTION_TITLE.md": "1dcaf5310120feab3761d84a5b6c29f52de9ae701d4164e9d0bb83a92356fdaa",
+    "tests/reduction_native_title_test.py": "e467aae24d7b0442afc3f83216269f52e86b92cbeaa62cc1a248250898848f14",
+    "tests/reduction_title_inventory_test.py": "3969058d5c1891361feaf09c0dc0ca6685cc0a51cc139614f884343866c1aa01",
+    "tests/reduction_title_model.cpp": "b03b9081766863b7ec78bab63371bd0ab2297d0861de57468744b37f9dce33c5",
+    "tests/reduction_title_saved_test.py": "7de7c4e54d6e91cdcc58a436a7bb137c045cfc92852159dbbc73dbba6f03ba36",
+    "tests/reduction_title_test.py": "0ad0bc143e923757b4ac1713d18a97a7b1b92a51e68fcfffc96fd24fecd28adc",
+    "tools/build_native_vector_title.py": "816bd0724b858f60a285bde501d7298cf5eeefb3f3f9d349ea77b0a3e7b9500e",
+    "tools/check_canary_log.py": "33711bcdb1db647a553aa134048f4febac53eb223e0101b28038e2fde8cd95c0",
+    "tools/hip_vector_title.cpp": "e53d9abe3613bf97fc9108fe2c62bf46d83a2ad832aae67e6842908e6cac1cf9",
+    "tools/native_vector_title.py": "367b9f7f1e2b3c76df8bd35ad372182b3443609009402d8e4c3d8107dd3fa053",
+    "tools/stage_native_title.py": "13970bff890ac02dc5abde5264e5797343f6db68cb6a1b7f3b5f7749ebe84f9f",
+    "tools/verify_native_case.py": "2245d49bc6254d1cf9ff14b1a926f3a2dc0d118f6788146b509a59bb953f633c"
+  },
+  "proof": {
+    "path": ".local/g4-reduction-companion/results/title-v3/receipt.json",
+    "sha256": "e28ed8a8648814dd9a4e56f0533b06df7b44a5feb1a9f690c11555bc44758ada"
+  },
+  "review": {
+    "path": "results/reduction-title-independent-review-v1/review.json",
+    "sha256": "10d35a43174f4ead6722b87dcb139e1e6eecb8680efe97f0e0197685b06e2260"
+  },
+  "observed": {
+    "lifecycle_cases": 19,
+    "transcript_mutations": 49,
+    "inventory_rejections": 15,
+    "profile_tests": 4
+  },
+  "hardware_executed": false,
+  "native_linked": false,
+  "root_integration_pending": true,
+  "limits": [
+    "Offline actual-runtime CPU transport only; no GPU ISA execution",
+    "Full PS5 link/startup/provider/import/FSELF/package audit required before console use"
+  ]
+}
