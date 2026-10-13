@@ -32,4 +32,66 @@ InitialLaunch prepare_initial_launch(const CodeObject &object, const std::string
 // compute drain/completion, bounded waiting and ownership. Never submit alone.
 std::vector<uint32_t> encode_initial_dispatch(const InitialLaunch &launch);
 
+struct BufferScratchPlan {
+    GpuRange storage;
+    uint32_t private_bytes, bytes_per_wave, ring_bytes, tmpring_size;
+    std::array<uint32_t, 4> descriptor;
+};
+
+// Offline GFX10 wave32 plan: fixed 1280-slot conservative Mesa-derived capacity,
+// 1 KiB wave stride granularity, 4 KiB base alignment. No allocation/submission.
+uint32_t buffer_scratch_ring_bytes(uint32_t private_bytes);
+BufferScratchPlan plan_buffer_scratch(uint32_t private_bytes, GpuRange storage);
+
+struct BufferScratchLaunch {
+    InitialLaunch dispatch;
+    BufferScratchPlan scratch;
+};
+
+// Experimental six-user-SGPR buffer-scratch contract, 64x1x1 threads.
+// Caller must retain storage in SubmissionQueue's resources until completion;
+// timeout/failure retains it in quarantine. These functions cannot prove ownership.
+BufferScratchLaunch prepare_buffer_scratch_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch);
+std::vector<uint32_t> encode_buffer_scratch_dispatch(const BufferScratchLaunch &launch);
+
+struct LdsPlan {
+    uint32_t static_bytes, dynamic_bytes, allocated_bytes, rsrc2_lds;
+};
+
+// PS5 Mesa GFX10.3 allocation policy: 1 KiB allocation granularity, 512-byte
+// register units, at most 64 KiB per group. No backing allocation is needed.
+LdsPlan plan_lds(uint32_t static_bytes, uint32_t dynamic_bytes);
+struct LdsLaunch {
+    InitialLaunch dispatch;
+    LdsPlan lds;
+};
+
+// Experimental explicit-argument 64x1x1 wave32 contract. Dynamic bytes reserve
+// capacity only: shared-pointer/hidden dynamic-size argument ABIs are unsupported.
+LdsLaunch prepare_lds_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes = 0);
+std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch);
+
+struct FlatCallLaunch {
+    InitialLaunch dispatch; // First six user words; the selected route requires count eight.
+    BufferScratchPlan scratch;
+    std::array<uint32_t, 2> flat_init;
+};
+
+// OFFLINE experimental absolute-flat-scratch entry, 64x1x1 wave32. Reuses the
+// cumulative private-size ring plan; raw base words follow the six-word prefix.
+// Structural checks do not certify shader/call-graph bounds or private aperture.
+// This planner supplies no ownership, aperture setup or execution qualification;
+// the separate private304 fixture binds an independently audited compiler graph.
+FlatCallLaunch prepare_flat_call_launch(
+    const CodeObject &object, const std::string &name, GpuRange module,
+    GpuRange kernarg_storage, uint32_t groups_x,
+    const std::vector<LaunchArgument> &arguments, const BufferScratchPlan &scratch);
+std::vector<uint32_t> encode_flat_call_dispatch(const FlatCallLaunch &launch);
+
 } // namespace ps5hip

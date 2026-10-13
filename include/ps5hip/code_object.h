@@ -64,4 +64,16 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size);
 // profile. An empty string means structurally eligible, never hardware-qualified.
 std::string initial_launch_rejection(const Kernel &kernel);
 
+// Experimental explicit-argument wave32 buffer scratch; no flat initialization,
+// dynamic stack, LDS or additional entry state. Structural eligibility only.
+std::string buffer_scratch_launch_rejection(const Kernel &kernel);
+
+// Experimental explicit-argument wave32 LDS allocation; descriptor LDS bits
+// remain zero, with no scratch or implicit/dynamic-pointer entry state.
+std::string lds_launch_rejection(const Kernel &kernel);
+
+// Experimental structural eight-slot flat-call entry only. Metadata cannot prove
+// a bounded call graph, valid private aperture, or safe hardware execution.
+std::string flat_call_launch_rejection(const Kernel &kernel);
+
 } // namespace ps5hip
