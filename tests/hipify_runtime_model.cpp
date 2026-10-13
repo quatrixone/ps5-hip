@@ -32,7 +32,7 @@ Allocation &containing(uint64_t address,size_t bytes){
 void dispose(Allocation &a){if(a.cpu){check(munmap(a.cpu,a.bytes)==0);a.cpu=nullptr;}}
 uint64_t read(const uint8_t*p,unsigned bytes){uint64_t value=0;for(unsigned i=0;i<bytes;++i)value|=uint64_t(p[i])<<(8*i);return value;}
 void put(uint8_t*p,uint64_t value,unsigned bytes){for(unsigned i=0;i<bytes;++i)p[i]=uint8_t(value>>(8*i));}
-bool terminal_mode(){return mode=="submit"||mode=="kick"||mode=="timeout"||mode=="throw"||mode=="unknown"||mode=="postflush"||mode=="cleanup";}
+[[maybe_unused]] bool terminal_mode(){return mode=="submit"||mode=="kick"||mode=="timeout"||mode=="throw"||mode=="unknown"||mode=="postflush"||mode=="cleanup";}
 struct Audit {~Audit(){
  const auto observation=ps5hip_runtime_observation();
  std::printf("HIPIFY_MODEL_FINAL live=%zu backends=%u submits=%u releases=%u completed=%u modules=%zu functions=%zu finalized=%u model_only=true\n",allocations.size(),backends,submits,releases,observation.completed,observation.modules,observation.functions,unsigned(ps5hip_runtime_finalized()));
@@ -71,8 +71,10 @@ public:
   const auto*a=reinterpret_cast<const unsigned*>(ap),*b=reinterpret_cast<const unsigned*>(bp);auto*out=reinterpret_cast<unsigned*>(cp);
   for(unsigned i=0;i<n;++i){check(a[i]==UINT32_MAX-i*17u-round*101u);check(b[i]==i*31u+round*701u+9u);check(out[i]==poison);}
   for(auto pointer:{a,b,static_cast<const unsigned*>(out)})for(unsigned i=0;i<guard;++i)check(pointer[int(i)-int(guard)]==poison&&pointer[n+i]==poison);
+#ifndef PS5HIP_HIPIFY_TITLE
   const auto prior_releases=releases;unsigned dummy=0;
   check(hipDeviceSynchronize()==hipErrorNotReady&&hipFree(reinterpret_cast<void*>(bases[2]))==hipErrorNotReady&&hipMemcpy(&dummy,out,4,hipMemcpyDeviceToHost)==hipErrorNotReady&&releases==prior_releases);
+#endif
   if(mode=="submit")return -7;if(mode=="throw")throw std::runtime_error("submit");if(mode=="unknown")throw 42;
   std::vector<unsigned> values(n);for(unsigned i=0;i<n;++i)values[i]=unsigned((uint64_t(a[i])+b[i])&0xffffffffu);
   if(mode=="stale-second"&&submits==2){check(previous.size()==n);std::memcpy(out,previous.data(),n*4);}
@@ -98,6 +100,21 @@ void duplicate_binding(){
  (void)hipGetLastError();
 }
 }
+#ifdef PS5HIP_HIPIFY_TITLE
+extern "C" void ps5hip_hipify_model_configure(const char*s){check(!allocation_calls&&!backends&&!submits);mode=s;}
+extern "C" unsigned ps5hip_hipify_model_live(){return unsigned(allocations.size());}
+extern "C" unsigned ps5hip_hipify_model_submits(){return submits;}
+extern "C" unsigned ps5hip_hipify_model_backends(){return backends;}
+extern "C" void ps5hip_hipify_model_duplicate(){duplicate_binding();}
+extern "C" void ps5hip_hipify_model_no_retry(){
+ const auto live=allocations.size(),freed=size_t(releases);const auto backend=backends,calls=allocation_calls,submitted=submits;
+ unsigned word=0;void*p=nullptr;(void)hipGetLastError();
+ check(ps5hip_runtime_terminal()&&hipMalloc(&p,0)==hipErrorUnknown&&!p&&hipFree(nullptr)==hipErrorUnknown&&hipFree(reinterpret_cast<void*>(current_data[0]))==hipErrorUnknown);
+ check(hipMemcpy(&word,reinterpret_cast<void*>(current_data[0]),4,hipMemcpyDeviceToHost)==hipErrorUnknown&&hipDeviceSynchronize()==hipErrorUnknown&&hipLaunchKernel(ps5hip_runtime_token(),dim3(1),dim3(64),nullptr,0,nullptr)==hipErrorUnknown);
+ check(allocations.size()==live&&releases==freed&&backends==backend&&allocation_calls==calls&&submits==submitted&&submitted==1);
+ std::printf("HIPIFY_TITLE_RETENTION live=%zu releases=%u unresolved=%u submits=%u no_retry=true model_only=true\n",live,releases,unsigned(ps5hip_runtime_gpu_unresolved()),submits);
+}
+#endif
 std::unique_ptr<ps5hip::SubmissionBackend> ps5hip_runtime_model_backend(){++backends;if(mode=="init")throw std::runtime_error("init");return std::make_unique<Backend>();}
 extern "C" int64_t sceKernelGetDirectMemorySize(){return int64_t(12)<<30;}
 extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t bytes,size_t alignment,int type,int64_t*physical){
@@ -114,6 +131,7 @@ extern "C" int32_t sceKernelMapDirectMemory(void**pointer,size_t bytes,int prote
 }
 extern "C" int32_t sceKernelMunmap(void*pointer,size_t bytes){for(auto&entry:allocations)if(entry.second.cpu==pointer){check(entry.second.bytes==bytes);if(mode=="cleanup"&&entry.first==6)return -1;dispose(entry.second);return 0;}return -1;}
 extern "C" int32_t sceKernelReleaseDirectMemory(int64_t physical,size_t bytes){check(allocations.at(physical).bytes==bytes);allocations.erase(physical);++releases;return 0;}
+#ifndef PS5HIP_HIPIFY_TITLE
 int main(int argc,char**argv){
  try{
   check(argc==2);mode=argv[1];std::printf("HIPIFY_MODEL_BEGIN mode=%s model_only=true\n",mode.c_str());check(allocations.empty()&&!backends&&!submits&&ps5hip_runtime_registration_ready());
@@ -139,3 +157,4 @@ int main(int argc,char**argv){
   std::printf("HIPIFY_EXPECTED_REJECT mode=%s result=%d completed=%u\n",mode.c_str(),result,ps5hip_runtime_observation().completed);return 20;
  }catch(const std::exception&e){std::fprintf(stderr,"HIPIFY_MODEL_FAILURE %s\n",e.what());std::fflush(nullptr);std::_Exit(99);}
 }
+#endif
