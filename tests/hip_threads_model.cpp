@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
+#include <climits>
 #include <stdexcept>
 extern "C" void threads_launch(unsigned*,unsigned,unsigned);
 extern "C" void __real___hipUnregisterFatBinary(void**);
@@ -54,12 +55,27 @@ class Backend final:public ps5hip::SubmissionBackend{
  int32_t kick()override{return !std::strcmp(mode,"kick")?-8:0;}
  uint64_t now_ns()override{return clock;}void sleep_us(unsigned us)override{clock+=uint64_t(us)*1000;}
 };
+void discovery_error(hipError_t expected){int value=713;
+ check(hipInit(UINT_MAX)==expected&&hipSetDevice(-1)==expected&&hipGetDeviceCount(nullptr)==expected&&hipGetDevice(nullptr)==expected&&hipDeviceGetAttribute(nullptr,hipDeviceAttributeWarpSize,-1)==expected);
+ check(hipInit(0)==expected&&hipSetDevice(0)==expected);
+ check(hipGetDeviceCount(&value)==expected&&value==713);
+ check(hipGetDevice(&value)==expected&&value==713);
+ check(hipDeviceGetAttribute(&value,hipDeviceAttributeWarpSize,0)==expected&&value==713);
+}
+void discovery_ok(){int value=713;
+ check(hipInit(0)==hipSuccess&&hipInit(0)==hipSuccess);
+ check(hipGetDeviceCount(&value)==hipSuccess&&value==1);
+ check(hipSetDevice(0)==hipSuccess&&hipGetDevice(&value)==hipSuccess&&value==0);
+ check(hipDeviceGetAttribute(&value,hipDeviceAttributeWarpSize,0)==hipSuccess&&value==32);
+}
 void closed(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases;void*p=nullptr;unsigned v=0;
+ discovery_error(hipErrorDeinitialized);
  check(hipMemset(nullptr,0,0)==hipErrorDeinitialized);
  check(hipMalloc(&p,4)==hipErrorDeinitialized&&!p&&hipFree(nullptr)==hipErrorDeinitialized&&hipMemcpy(&v,&v,0,hipMemcpyHostToHost)==hipErrorDeinitialized&&hipDeviceSynchronize()==hipErrorDeinitialized&&hipPeekAtLastError()==hipErrorDeinitialized&&hipGetLastError()==hipErrorDeinitialized);
  check(a==allocations.size()&&b==backends&&s==submits&&r==releases);
 }
 void poison(){const auto a=allocations.size();const auto b=backends,s=submits,r=releases,c=contexts.load(),st=state_attempts.load();void*p=nullptr;check(hipMalloc(&p,0)==hipErrorUnknown&&!p&&hipDeviceSynchronize()==hipErrorUnknown&&hipFree(nullptr)==hipErrorUnknown);
+ discovery_error(hipErrorUnknown);
  check(hipMemset(nullptr,0,0)==hipErrorUnknown);
  // Transport poison may create a virgin caller's error context. Infrastructure
  // and abandoned-lifecycle faults reject before any context or State access.
@@ -82,12 +98,21 @@ extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t n,size_t
 extern "C" int32_t sceKernelMapDirectMemory(void**p,size_t n,int,int,int64_t id,size_t alignment){address=(address+alignment-1)&~(uint64_t(alignment)-1);void*v=mmap(reinterpret_cast<void*>(address),n,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0);if(v==MAP_FAILED)return -1;address+=n;allocations.at(id).cpu=v;*p=v;return 0;}
 extern "C" int32_t sceKernelMunmap(void*p,size_t n){if(!std::strcmp(mode,"cleanup")&&p==code_pointer)return -1;return munmap(p,n);}
 extern "C" int32_t sceKernelReleaseDirectMemory(int64_t id,size_t){allocations.erase(id);++releases;return 0;}
+__attribute__((constructor(101))) static void discovery_before_registration(){
+ if(!std::getenv("PS5HIP_DISCOVERY_EARLY"))return;
+ check(state_attempts==0&&backends==0&&submits==0);
+ std::thread worker([]{int count=713;check(hipGetDeviceCount(&count)==hipSuccess&&count==1);discovery_ok();});worker.join();
+ discovery_ok();
+ check(state_attempts==0&&backends==0&&submits==0);
+ std::puts("DISCOVERY_EARLY state_attempts=0 backend_attempts=0 worker_joined=true");
+}
 int main(int argc,char**argv){
  check(argc==2);mode=argv[1];
  if(!std::strcmp(mode,"key")){expect_final=false;poison();check(!ps5hip_runtime_registration_ready());std::puts("THREAD_MODEL_PASS key");return 0;}
  if(!std::strcmp(mode,"state-oom")){
   expect_final=false;check(state_attempts==1&&!ps5hip_runtime_registration_ready());const auto c=contexts.load();
   for(unsigned round=0;round<2;++round){
+   discovery_error(hipErrorInvalidDeviceFunction);
    void*p=nullptr;check(hipMalloc(&p,4)==hipErrorInvalidDeviceFunction&&!p&&hipFree(nullptr)==hipErrorInvalidDeviceFunction&&hipDeviceSynchronize()==hipErrorInvalidDeviceFunction);
    check(__hipRegisterFatBinary(__ps5hip_wrappers_begin)==nullptr&&!ps5hip_runtime_registration_ready());(void)hipGetLastError();
    check(state_attempts==1&&contexts==c&&allocations.empty()&&!backends&&!submits&&!releases);unsetenv("PS5HIP_STATE_FAULT");
@@ -103,6 +128,29 @@ int main(int argc,char**argv){
   expect_final=false;std::thread t([]{check(hipFree(nullptr)==hipSuccess);fault=!std::strcmp(mode,"destructor-lock")?3:4;});t.join();poison();check(!ps5hip_runtime_ready()&&allocations.empty());std::printf("THREAD_MODEL_PASS %s\n",mode);return 0;
  }else if(!std::strcmp(mode,"finish-clear")){
   expect_final=false;check(hipFree(nullptr)==hipSuccess);fault=6;ps5hip_runtime_finish();check(!ps5hip_runtime_ready());poison();check(allocations.empty()&&releases==0);std::puts("THREAD_MODEL_PASS finish-clear");return 0;
+ }else if(!std::strcmp(mode,"discovery")){
+  check(std::getenv("PS5HIP_DISCOVERY_EARLY")&&state_attempts==1);
+  discovery_ok();
+  for(unsigned flags:{1u,UINT_MAX})check(hipInit(flags)==hipErrorInvalidValue);
+  check(hipGetDeviceCount(nullptr)==hipErrorInvalidValue&&hipGetDevice(nullptr)==hipErrorInvalidValue);
+  for(int device:{-1,1,INT_MIN,INT_MAX}){
+   int value=713;check(hipSetDevice(device)==hipErrorInvalidDevice);
+   check(hipDeviceGetAttribute(&value,hipDeviceAttributeWarpSize,device)==hipErrorInvalidDevice&&value==713);
+   check(hipGetDevice(&value)==hipSuccess&&value==0);
+  }
+  for(auto attr:{hipDeviceAttributeMaxThreadsPerBlock,static_cast<hipDeviceAttribute_t>(30000)}){
+   int value=713;check(hipDeviceGetAttribute(&value,attr,0)==hipErrorInvalidValue&&value==713);
+  }
+  check(hipDeviceGetAttribute(nullptr,hipDeviceAttributeWarpSize,1)==hipErrorInvalidValue);
+  check(hipInit(1)==hipErrorInvalidValue);
+  std::thread worker([]{discovery_ok();check(hipSetDevice(1)==hipErrorInvalidDevice&&hipPeekAtLastError()==hipErrorInvalidDevice);check(hipGetLastError()==hipErrorInvalidDevice&&hipPeekAtLastError()==hipSuccess);});worker.join();
+  check(hipPeekAtLastError()==hipErrorInvalidValue);discovery_ok();
+  std::thread recovering([]{int value=713;fault=1;check(hipGetDeviceCount(&value)==hipErrorOutOfMemory&&value==713);check(hipPeekAtLastError()==hipErrorOutOfMemory);check(hipGetDeviceCount(&value)==hipSuccess&&value==1);discovery_ok();});recovering.join();
+  check(!backends&&!submits&&allocations.empty());
+ }else if(!std::strcmp(mode,"discovery-unlock")){
+  expect_final=false;int value=713;fault=4;
+  check(hipGetDeviceCount(&value)==hipErrorUnknown&&value==713);poison();
+  std::puts("THREAD_MODEL_PASS discovery-unlock");return 0;
  }else if(!std::strcmp(mode,"memset")){
   unsigned char*p=nullptr;check(hipMalloc(reinterpret_cast<void**>(&p),17)==hipSuccess);
   check(hipMemset(p,0xa5,17)==hipSuccess);

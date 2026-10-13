@@ -12,6 +12,8 @@ MODES+=('finish-clear','state-oom')
 CPU_MODES+=('finish-clear','state-oom')
 MODES+=('memset','blocked-memset')
 CPU_MODES+=('memset',)
+MODES+=('discovery','discovery-unlock')
+CPU_MODES+=('discovery','discovery-unlock')
 sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def require(ok,message):
  if not ok:raise RuntimeError(message)
@@ -20,7 +22,7 @@ def validate(text,mode):
  terminal=mode in ('submit','kick','timeout','throw','unknown','postflush','cleanup')
  require(text.splitlines().count('THREAD_MODEL_PASS '+mode+(' retained=true' if terminal else ''))==1,'missing exact mode result')
  if mode not in ('submit','kick','timeout','throw','unknown','postflush','cleanup'):
-  expected=mode not in ('lock','unlock','key','registration-oom','setspecific','uncertain-install','clear','destructor-lock','destructor-unlock','duplicate','abandoned','live-finish','finish-wait','no-finish','reject-unregister','finish-clear','state-oom')
+  expected=mode not in ('lock','unlock','key','registration-oom','setspecific','uncertain-install','clear','destructor-lock','destructor-unlock','duplicate','abandoned','live-finish','finish-wait','no-finish','reject-unregister','finish-clear','state-oom','discovery-unlock')
   require(text.count('THREAD_MODEL_FINAL finalized='+str(int(expected))+' ')==1,'finalizer result')
   if not expected:require('VECTOR_FINAL ' not in text,'unsafe automatic State destruction')
   if expected:
@@ -30,6 +32,7 @@ def validate(text,mode):
   elif mode in ('unlock','finish-wait'):
    require(text.splitlines().count('THREAD_MODEL_FINAL finalized=0 live=1')==1,'retained data owner')
  else:require('VECTOR_FINAL ' not in text and 'THREAD_MODEL_FINAL ' not in text,'terminal process falsely finalized')
+ if mode=='discovery':require(text.splitlines().count('DISCOVERY_EARLY state_attempts=0 backend_attempts=0 worker_joined=true')==1,'pre-registration discovery missing')
 def check(out):
  r=json.loads((out/'receipt.json').read_text());require(r['classification']=='checked-threaded-runtime-host-model-pass','scope')
  for n,h in r['sources'].items():require(sha(ROOT/n)==h,'source '+n)
@@ -71,6 +74,7 @@ HIDDEN(__init_array_start = ADDR(.init_array)); HIDDEN(__init_array_end = ADDR(.
   modes=CPU_MODES if a.sanitizer=='thread' else MODES
   for mode in modes:
    extra={'PS5HIP_KEY_FAULT':'1'} if mode=='key' else {'PS5HIP_CONTEXT_FAULT':'1'} if mode=='registration-oom' else {'PS5HIP_STATE_FAULT':'1'} if mode=='state-oom' else None
+   if mode=='discovery':extra={'PS5HIP_DISCOVERY_EARLY':'1'}
    stdout,stderr=run('run-'+mode,[binary,mode],extra);validate(stdout+stderr,mode);print(mode+' PASS',flush=True)
   require(all(sha(ROOT/n)==h for n,h in before.items()),'source drift');require(all(sha(n)==h for n,h in inputs.items()),'input drift')
   r={'schema':1,'classification':'checked-threaded-runtime-host-model-pass','sources':before,'inputs':inputs,'commands':commands,'audit':audit,'registration':registration,'modes':list(MODES),'hardware_executed':False,'limits':['Synthetic transport checks packets and ownership, not AMD ISA or native scheduler/AGC affinity.','ASan fixed shader window requires protect_shadow_gap=0. Leak checking disabled for deliberately retained fault-state processes.','Fault unlock really unlocks then reports failure; no stuck-lock recovery claim.','TSAN qualification is separate.'],'artifacts':{str(f.relative_to(out)):sha(f) for f in out.rglob('*') if f.is_file()}}
