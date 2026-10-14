@@ -4,7 +4,7 @@ import argparse, hashlib, json, shutil, subprocess
 if not __debug__:
     raise RuntimeError('Validation requires ordinary Python')
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
-C=Path(__file__).resolve().parents[1];R=C.parents[1];O=a.output.resolve()
+C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';O=a.output.resolve()
 assert not O.exists()
 h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 base=json.loads((C/'ports/clr/manifest.json').read_text())

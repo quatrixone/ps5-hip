@@ -184,7 +184,8 @@ public:
             groups[i]=n/t;threads[i]=t;
         }
         auto request=select_hip_launch_profile(k->native,groups,threads,0);
-        if(request.route!=NativeLaunchRoute::Initial)throw ObjectError("unqualified CLR launch route");
+        if(request.route!=NativeLaunchRoute::Initial && request.route!=NativeLaunchRoute::GeometryLds)
+            throw ObjectError("unqualified CLR launch route");
         const auto& signature=k->signature();std::vector<const void*> addresses;std::vector<ReadableSpan> spans;
         for(size_t i=0;i<k->native.arguments.size();++i){const auto& a=k->native.arguments[i];const auto& d=signature.at(i);
             if(d.offset_!=a.offset||d.size_!=a.size||d.offset_>signature.paramsSize()||d.size_>signature.paramsSize()-d.offset_)throw ObjectError("captured signature mismatch");
