@@ -1,0 +1,50 @@
+{
+    "classification":  "inert-native-clr-gemm-execution",
+    "activation_forbidden":  true,
+    "candidate_package":  "dist/PPSA99014/gfx1013-clr-gemm-832962dca512",
+    "source_commit":  "b00dac10adcc1ba45d9e2407b9a41f3c6c513c69",
+    "image_sha256":  "9c229e4221570716ec1cc2ee9bea08d41299bd6b433aad46a30ebf121f5777e4",
+    "stage_manifest_sha256":  "f15f40572e3fe23b17ec5ac1a1208ac8e92c7d70ccccbf466e905bcfc26f700e",
+    "admission_review_sha256":  "8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc",
+    "independent_package_review":  null,
+    "deployment_binding":  null,
+    "baseline":  {
+                     "prior_image_sha256":  "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+                     "prior_image_bytes":  5636096,
+                     "prior_log":  "/data/ps5-hip/results/ps5-hip-clr-gpu.log",
+                     "prior_log_sha256":  "5c91d896f50ec94b7092b90ed30faa84e9b69f3c84e9a7819c5850f3772edc0e",
+                     "prior_log_bytes":  870,
+                     "new_log":  "/data/ps5-hip/results/ps5-hip-clr-gemm.log",
+                     "new_log_must_be_absent":  true,
+                     "host":  "192.168.4.40",
+                     "title":  "PPSA99014"
+                 },
+    "direct_sha256":  {
+                          "tools/clr_gemm_control_guard.py":  "cfa4e76f3e8eea7f48ba7c748c0dd5cc54e8758b588744935bd3c697cd79c2cd",
+                          "evidence/offline-clr-gemm-package.json":  "5fbb4d1b11c2d3f75752b4cc9681a5b38ea01e6efa0ceaca086cdfe291cdef29",
+                          "results/gemm-independent-review-v1/review.json":  "8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc",
+                          "dist/PPSA99014/gfx1013-clr-gemm-832962dca512/manifest.json":  "f15f40572e3fe23b17ec5ac1a1208ac8e92c7d70ccccbf466e905bcfc26f700e",
+                          "dist/PPSA99014/gfx1013-clr-gemm-832962dca512/package-receipt.json":  "7388ec5ca8f41188905ae2071006601c8b5fa11a19c81da7b71aa59690853a13",
+                          "dist/PPSA99014/gfx1013-clr-gemm-832962dca512/PPSA99014.ffpkg":  "9c229e4221570716ec1cc2ee9bea08d41299bd6b433aad46a30ebf121f5777e4",
+                          "results/clr-gemm-controls-v1/deployment/run.py":  "2b414c108f6438513c83dc172382e5506f4d850765b3ff0c3626928013b0c9fd",
+                          "results/clr-gemm-controls-v1/deployment/prior-backups.json":  "a300737ea2c33e4297ada9eafdc258b0f3592e64c7c8872bce9ec584bc4c9451",
+                          "results/clr-gemm-controls-v1/execution/run.py":  "5ffe985de5a2f3c3fd0b9e4ea54cb707477b8dace93c6825419a482d4bee4b00",
+                          "results/clr-gemm-controls-v1/execution/acceptance.py":  "8de8c7e29c5a2fa149cdd81b4cd90977cc314396cf130281e181a145cd6b30af",
+                          "results/clr-gemm-controls-v1/execution/check_log.py":  "064b87d00777b1f0990040e8d37919ec364f527821d393404e3678edeea044e1",
+                          "tools/test_clr_gemm_controls.py":  "1eb8d5a31741c14d25c6cfc947ceb2db1e704deeed1b73df821310bc73ef1c14"
+                      },
+    "hardware_validated":  false,
+    "external_sha256":  {
+                            "build/controllers/PPSA99014/receipt.json":  "a2c01897d9e49da40bf7e0e00ae9ffd890c24294f46f4a3f025cc56b218592f5",
+                            "build/controllers/PPSA99014/launch.elf":  "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+                            "build/controllers/PPSA99014/close.elf":  "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+                            "evidence/offline-controllers.json":  "83e122665be7abd8700eacf0fd510e41aac9aeb76b7d6dc0c1307415472e6b09",
+                            "results/deploy-private-buffer-milestone-v2.py":  "84749602456ade3cd82c1ba7954343fcf8f6256b6a4022874f4ddb8291c8d5cf",
+                            "results/teardown-console-control-v3-initial-focus/run.py":  "1753ecf4edb4c0243bea398e703cf0697f5983b5fa24ae29469eb6dea7e07e59",
+                            "results/arithmetic-prospective-cycle2/acceptance.py":  "4c5d72a664bcae17b70e229f61087e8097e9260e2cf9f2ac2806bc209168b71e",
+                            "results/visibility-bounded-lifecycle-v1/lifecycle.py":  "a58c7441346678761081ac97e719f6d8eab91b566090381782babcfdd68f8fae",
+                            ".local/teardown-snapshot-v3/build/teardown-qualified-v3/teardown-snapshot.elf":  "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93",
+                            ".local/g5-clr-gpu-startup/dist/PPSA99014/gfx1013-clr-gpu-b21b9c51dc42/PPSA99014.ffpkg":  "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+                            "results/clr-gpu-startup-controls-v1/execution/observation-20261014T012336.331568Z/application.log":  "5c91d896f50ec94b7092b90ed30faa84e9b69f3c84e9a7819c5850f3772edc0e"
+                        }
+}
