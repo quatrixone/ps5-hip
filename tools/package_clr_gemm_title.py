@@ -5,6 +5,7 @@ import hashlib,json,shutil,subprocess
 
 C=Path(__file__).resolve().parents[1]
 R=C.parent/'ps5-hip'
+G=['git','--git-dir='+str(C/'.git' if (C/'.git').is_dir() else R/'.git/worktrees'/C.name),'--work-tree='+str(C)]
 H=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 J=lambda p:json.loads(Path(p).read_text())
 
@@ -12,8 +13,8 @@ def main():
     review=C/'results/gemm-independent-review-v1/review.json'
     assert H(review)=='8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc'
     q=J(review);assert q['decision']=='CLEAR_FOR_OFFLINE_PACKAGING_ONLY'
-    assert not subprocess.check_output(['git','status','--porcelain'],cwd=C).strip()
-    subprocess.run(['git','merge-base','--is-ancestor',q['candidate_commit'],'HEAD'],cwd=C,check=True)
+    assert not subprocess.check_output(G+['status','--porcelain'],cwd=C).strip()
+    subprocess.run(G+['merge-base','--is-ancestor',q['candidate_commit'],'HEAD'],cwd=C,check=True)
     evidence=C/'evidence/offline-clr-gemm-admission-repair.json';e=J(evidence)
     for key,label in [('address_model_39_units','admission_model'),('native_build_46_units','native_build'),
                       ('fself_conversion','conversion'),('native_admission_172_imports','native_admission')]:
