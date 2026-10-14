@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "classification": "offline-native-clr-gemm-admission-repair-candidate",
+  "source_commit": "8e61f1db49766aec4734630d7340f4e0f6e94d45",
+  "qualified_commit": "0fa166ba54be03ede197ae51fe09e8218bc4fd56",
+  "supersedes": "evidence/offline-clr-gemm-candidate.json",
+  "admission_model": {
+    "receipt_path": "results/gemm-admission-address-v3/receipt.json",
+    "receipt_sha256": "cd69b6a62b9142989b263fea14dbf744c9126f95ddee9d039ab9412edca42be7",
+    "sanitizer": "address,undefined",
+    "source_units": 39,
+    "cases": {
+      "normal": "Prior Initial code object dispatch completes through synthetic transport.",
+      "gemm-admit": "Genuine GEMM GeometryLds code object adds, loads and exposes ps5hip_sgemm_nn; no launch.",
+      "lds-deny": "Existing gfx1013 code object has only structurally Initial or LDS kernels and at least one LDS kernel; no GeometryLds kernel; program load cannot succeed."
+    }
+  },
+  "native_build": {
+    "receipt_path": "results/native-title-v2/receipt.json",
+    "receipt_sha256": "6bf922dc3037e71bc3bf788ecb10f427c48c54fac7bec5a9dc3ee70d0871631e",
+    "fresh_units": 46,
+    "strict_link": true,
+    "raw_elf_sha256": "5c62888cf44c0c8f851667e694e57081da28dee27e5089c0edf4cb12855b2b44"
+  },
+  "conversion": {
+    "receipt_path": "results/native-conversion-v2/receipt.json",
+    "receipt_sha256": "aaf0dde6290c83cbbb0f800bb60db99bb0787575af0d96227f74d424632e17a5",
+    "fself_sha256": "832962dca512cd32f5d363f0a5d5d7fb0288e2c887575779d8d2bc9a0b1b35db"
+  },
+  "native_admission": {
+    "receipt_path": "results/native-admission-v2/receipt.json",
+    "receipt_sha256": "14540b90f2b8b600a9347f05e559d0619781b952c3fa47c0df5d6516ed1b300f",
+    "import_count": 172,
+    "embedded_gfx1013_hsaco_sha256": "f1f0fd6c22101893117030818ff88c109827db1775347b5ef3942e35aa689100"
+  },
+  "console_executed": false,
+  "g6_accepted": false,
+  "limits": [
+    "The corrected package has not been independently reviewed, built or run on PS5.",
+    "The focused model proves GEMM program admission, not GEMM GPU dispatch or arithmetic.",
+    "The title uses ROCclr directly; public HIP and library coverage remain unproved."
+  ]
+}

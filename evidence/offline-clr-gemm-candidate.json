@@ -1,6 +1,11 @@
 {
   "schema": 1,
-  "classification": "offline-native-clr-gemm-numerical-candidate",
+  "classification": "rejected-offline-native-clr-gemm-candidate",
+  "independent_review": {
+    "sha256": "0b253c52ccfbd4660031ef75b7767850b99e2cdf1a5d37c113da325e677c92d6",
+    "finding": "Program::setKernels admitted only the Initial route, so the GeometryLds GEMM object could not load."
+  },
+  "superseded_by": "evidence/offline-clr-gemm-admission-repair.json",
   "source_commit": "f68c7995ab2eb8a1f7364ca1d68164695bbf0184",
   "toolchain_and_source_receipt": {
     "path": "results/source-v1/receipt.json",
@@ -38,7 +43,7 @@
   "console_executed": false,
   "g6_accepted": false,
   "limits": [
-    "The PS5 native title has not been packaged, independently reviewed or run.",
+    "Independent review rejected this candidate before packaging or console use.",
     "The exact numerical oracle applies to this bounded integer-input/dyadic-scalar case only.",
     "This uses ROCclr directly, not the public HIP API or a rocBLAS library."
   ]
