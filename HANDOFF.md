@@ -48,7 +48,7 @@ about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Integrated baseline | `development/offline-bringup` / `0d2f049` documentation handoff | repository root | Published to the private GitHub remote. |
+| Integrated baseline | `development/offline-bringup` / current remote HEAD | repository root | Documentation handoff published to the private GitHub remote. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
