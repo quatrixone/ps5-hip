@@ -1,0 +1,36 @@
+{
+  "classification": "passed-public-hip-bootstrap-registration-only",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "candidate_branch": "development/g5-hip-native-link",
+  "candidate_commit": "3ac8385ae599385308ccdd3f7da6264231e0524e",
+  "source_commit": "ea37055286903f680e43b049d70730743ffa2358",
+  "image_sha256": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+  "deployment_receipt": {
+    "path": ".local/g5-hip-native-link/tools/public_hip_controls/deployment/deployment-20261014T025025.424073Z/deployment.json",
+    "sha256": "d665cf262827764cc0babc7ba645cbad3d61cb00cf20f2658bbca3f44afdf532",
+    "tracked": false
+  },
+  "independent_deployment_review": {
+    "path": ".local/g5-hip-native-link/results/public-hip-bootstrap-deployment-independent-review-v1/review.json",
+    "sha256": "2295552024df10e0f8cab93e1bf8494b1c9e9f57c104e949a810f338b9fdc3fe",
+    "classification": "clear-live-public-HIP-bootstrap-deployment-D",
+    "tracked": false
+  },
+  "observed": {
+    "registered": true,
+    "launched": false,
+    "mounted_eboot_sha256": "19107f50782257e80a8eb3405978d83bc0b8742f0e37d71b36b3735d629174fe",
+    "mounted_libc_sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "previous_gpu_image_and_log_preserved": true,
+    "historical_backup_count_preserved": 34,
+    "title_idle_after_deployment": true,
+    "services_2121_3232_9021_reachable_after_deployment": true,
+    "owned_locks_released": true
+  },
+  "public_hip_startup_qualified": false,
+  "public_hip_api_qualified": false,
+  "public_hip_gpu_qualified": false,
+  "g5_accepted": false,
+  "next_gate": "Bind and independently review one-use E against the exact D receipt and review; E remains inert."
+}

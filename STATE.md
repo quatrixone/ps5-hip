@@ -1,8 +1,29 @@
 # Current state
 
-Updated: 2026-10-13, America/New_York.
+Updated: 2026-10-14, America/New_York. See `HANDOFF.md` for the exact
+resume point, branch map, and evidence identities.
 
 ## Actual status
+
+- **Public HIP bootstrap package registered on .40; execution has not begun:**
+  the independently reviewed, clean 74-object native bootstrap image
+  (`836c10c6...`) was installed and registered as PPSA99014 by a one-use D
+  control. Independent D review found the mounted EBOOT/libc bytes matched the
+  package, the previous GPU image/log and 34 historical backups were preserved,
+  and the title remained idle with services healthy and owned locks released.
+  The D receipt and review are bound in
+  `evidence/native-public-hip-bootstrap-deployment.json`. The public HIP E
+  control remains inert and unbound: there is **no** public HIP startup, API,
+  allocation, or GPU result on the console. Do not replay consumed D phases.
+
+- **Next native candidates remain offline:** a strict native public HIP
+  allocation/free title passed 74 fresh-object build, package, and independent
+  review on `development/g5-native-public-memory` (`1f969f6`); a ROCclr FP32
+  GEMM title passed corrected GeometryLds admission, 39-unit sanitizer model,
+  46-unit native link/package, and independent control review on
+  `development/gemm-native-bridge` (`a0af56e`). Neither was launched. Their
+  current controls must be checked against the now-registered bootstrap image
+  before any console use. See `HANDOFF.md`.
 
 - **Genuine GPU-backed ROCclr dispatch passed on .40:** frozen `e79bd63`
   (integrated at `08ba1ad`) completed one A-write/B-copy/A-kernel/B-read
@@ -939,6 +960,16 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
+First bind and independently review a new, single-use public HIP bootstrap E
+execution control to the exact accepted D receipt/review, repairing its current
+review-classification check. Confirm .40 is idle and all authority, service,
+lock, and result-freshness gates before any activation. Do not use .30. A clean
+bootstrap E result would then determine whether the native public memory title
+can be considered for its own separately reviewed controls. The GEMM candidate
+also needs its baseline refreshed after the bootstrap registration. Full details
+and hashes are in `HANDOFF.md`.
+
+Earlier G3/G4 work remains qualified only to its declared bounds:
 Continue unified-runtime integration after the fixed genuine HIP vector client pass.
 Both wave32 and both measured geometry fixtures have passed.
 Preserve the installed HIP image/result, retained 3D image/result and earlier evidence, including
@@ -1175,6 +1206,9 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-14 | public HIP bootstrap D | `3ac8385` | .40: exact candidate registered, never launched; installed/mounted bytes, old image/log, 34 backups, idle/services/locks independently reviewed | `evidence/native-public-hip-bootstrap-deployment.json` | bind and review one-use E; G5 open
+- 2026-10-14 | native public memory and ROCclr GEMM | `1f969f6` / `a0af56e` | offline native packages and independent reviews passed; no console runs | `HANDOFF.md` | refresh controls after bootstrap registration
 
 - 2026-10-13 | G3 visibility | a049853 | .40:771 exact outputs; recovered result and delayed cleanup audited, original cycle inconclusive | evidence/native-visibility-computation.json | wave32 next
 - 2026-10-13 | G3 wave32 offline | c3972cb | refreshed cleanup,38 sanitizer tests,8 object checks,both packages verified | evidence/offline-wave32-current-readiness.json | hardware pending

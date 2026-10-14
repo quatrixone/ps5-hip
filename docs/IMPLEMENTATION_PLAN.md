@@ -1,6 +1,6 @@
 # Native HIP and ROCm capabilities on PlayStation 5
 
-Updated: 2026-10-13, America/New_York.
+Updated: 2026-10-14, America/New_York.
 
 Status: G1 passed its offline acceptance; G2 passed for the declared arithmetic
 fixture in `../evidence/native-g2-acceptance.json`. G3 has one exact private-call
@@ -29,8 +29,15 @@ natural teardown; see `../evidence/native-clr-gpu-dispatch-success.json`.
 An upstream public HIP allocation/free bridge now also passes a bounded
 69-unit Linux sanitizer model; see
 `../evidence/offline-hip-public-memory-bridge.json`. It has not run through
-the public HIP API on the console. This does not complete broad G4, public HIP
-GPU support or G5. G5-G12 remain
+the public HIP API on the console. A clean 74-object native public HIP
+bootstrap package has since been registered as PPSA99014 on .40, with exact
+mounted bytes and preservation independently reviewed; its one-use execution
+control remains inert. Separately, native public HIP allocation/free and
+ROCclr FP32 GEMM titles are packaged and independently reviewed offline,
+without console execution. See `../HANDOFF.md` and
+`../evidence/native-public-hip-bootstrap-deployment.json` for the exact
+candidate, receipt, and resume point. This does not complete broad G4, public
+HIP GPU support or G5. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
