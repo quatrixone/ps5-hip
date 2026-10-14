@@ -1,0 +1,52 @@
+{
+  "classification": "offline-strict-native-public-hip-allocation-candidate",
+  "source_commit": "891cb8e",
+  "bootstrap_source": "5c74043",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "composition": {
+    "path": "results/native-memory-source-v2/native-memory-composition.json",
+    "sha256": "87806bb98ae0119e5cb11e1ec627bf1bea758a617db6bdc8060663d37eddce3e",
+    "patch": "ports/clr/ps5-public-memory.patch",
+    "patch_sha256": "e12744ddeab27cc4ea390c7eca063ac02277724892ff5838a94bc10c3c41b23a"
+  },
+  "title_source_sha256": "ce198db36d82edde411d357e4226fef2550cf4a8ccae571dd16f16a0f0a238ba",
+  "strict_link": {
+    "path": "results/native-memory-console-link-v1/receipt.json",
+    "sha256": "d5a2a10b9f6e17c3c7ea2a34aec5807672c05d8ee05cab364206421118bca405",
+    "source_units": 74,
+    "freshly_compiled_objects": 74,
+    "reused_objects": 0,
+    "no_undefined_native_link": true
+  },
+  "conversion_verification": {
+    "path": "results/native-memory-console-convert-v1/receipt.json",
+    "sha256": "5b97c3745b8f6f4b2ea26ec483668c5d95a0bd377062e5a1e166008289969103",
+    "fself_roundtrip_except_unmapped_sie_note": true,
+    "hip_init_count_malloc_free_symbols_present": true
+  },
+  "package": {
+    "path": "dist/PPSA99014/gfx1013-public-memory-929cc2d6b804",
+    "manifest_sha256": "ab48d1c9fdf88f42a6b2b7f30f8c92436e5a7ee720285191c4d190b7725d43f0",
+    "receipt_sha256": "0a21e67c5c4f173de774894663da3f04a7d86f8b8efb619d222cf4acafc37e98",
+    "ffpkg_sha256": "4a4ea8e14543e074b2324badf55f3138f35ddc418677547df716bea5c0c15818",
+    "ufs2_fsck": "passed",
+    "extracted_file_inventory": "exact byte match"
+  },
+  "intended_native_checks": [
+    "hipInit and one-device discovery",
+    "two genuine hipMalloc backing allocations of 257 and 4097 bytes",
+    "interior-pointer hipFree rejected without retirement",
+    "two genuine hipFree retirements and double-free rejection",
+    "watchdog join, application finalization and natural title exit"
+  ],
+  "native_executed": false,
+  "public_hip_memory_qualified": false,
+  "public_hip_gpu_qualified": false,
+  "g5_accepted": false,
+  "limits": [
+    "Strict compilation, link, conversion and package checks cannot establish runtime behavior on the console.",
+    "The title has not been independently reviewed or deployed; no .40 experiment was consumed.",
+    "No public HIP module load, kernel launch, copied-input GPU computation, concurrent streams or graphs."
+  ]
+}
