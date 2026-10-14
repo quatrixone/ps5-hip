@@ -10,13 +10,13 @@ event, reset-rejection and failed-join checks.
 `tools/compose_hip_memory.py` verifies the exact admission source and both
 follow-on patch hashes before producing `results/source-v3`. The qualifier
 binds the composed source, compiler-discovered headers, tools and link inputs.
-Its full ASan/UBSan receipt is under `results/asan-memory-v4`. The 69-unit
-TSan closure compiled and linked, but its intentional failed-join case printed
-the expected final ownership line and then timed out during process exit.
-The previously qualified TSan binary also stalls at that point under the
-current WSL environment. A separate receipt under
-`results/tsan-memory-targeted-v1` binds a passing TSan run of the new public
-allocation case; full TSan qualification remains inconclusive.
+Fresh full receipts are under `results/asan-memory-v5` and
+`results/tsan-memory-v3`, each covering 69 upstream units and ten modes.
+TSan leak-report symbolization stalled intermittently during the intentionally
+failed-join cases. The TSan harness disables symbolization but still requires
+exit 66, exactly one thread-leak warning, the finished unjoined worker line,
+and no data-race warning for each such case. Both failed joins and all other
+modes passed in the fresh closure.
 
 The transport is synthetic and this is a Linux model. It does not prove native
 public HIP startup, GPU execution, module loading, launch, copied input

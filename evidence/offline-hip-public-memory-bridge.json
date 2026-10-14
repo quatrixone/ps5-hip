@@ -8,16 +8,19 @@
     "sha256": "6b12f10398e57976434ceaf9c164a98ed80449672e8ac628ffe77ff89d69d9e2"
   },
   "asan_ubsan": {
-    "path": "results/asan-memory-v4/receipt.json",
-    "sha256": "0e67274954f2a4d9a65a726f8175feb381098aaa530093f385ad76bec1c664f5",
+    "path": "results/asan-memory-v5/receipt.json",
+    "sha256": "cfa23071e2c349e94d4aec6d27046778c3195b10d3072b3aa0e622e741f77703",
     "actual_source_units": 69,
     "passed_modes": 10
   },
-  "targeted_tsan": {
-    "path": "results/tsan-memory-targeted-v1/receipt.json",
-    "sha256": "e8e2e60d3a0a932f0d6cb4c04e0ceb93c5ea1a7edd27032eb2790f39858e48c2",
-    "mode": "memory",
-    "full_qualification": false
+  "tsan": {
+    "path": "results/tsan-memory-v3/receipt.json",
+    "sha256": "c7b8ce136b0cd9fe8c565f9888447604a9fccda08cdf6211d753cb06d97aae2e",
+    "actual_source_units": 69,
+    "passed_modes": 10,
+    "intentional_failed_join_modes": 2,
+    "expected_exit_code": 66,
+    "single_leak_warning_per_failed_join": true
   },
   "public_api_checked": [
     "hipInit and hipGetDeviceCount",
@@ -27,11 +30,16 @@
   ],
   "limits": [
     "Linux model transport only; no native public HIP link or GPU execution.",
-    "Full TSan run is inconclusive: the intentional failed-join model timed out on exit; the prior qualified binary stalls at the same point in the current WSL environment.",
+    "TSan stack symbolization is disabled for deterministic intentional-leak diagnostics; the warning and ownership checks remain required.",
     "No public module load, kernel launch, copied-input GPU computation or G5 acceptance.",
     "One-device zero-flags allocation profile is bounded to 64 MiB."
   ],
   "public_hip_gpu_accepted": false,
   "g5_accepted": false,
-  "independent_review": "pending"
+  "prior_independent_review": {
+    "path": "../../results/public-memory-bridge-review-v1/review.json",
+    "sha256": "681bd9400a106ca361ff413794fd7dd533fe70e79b41fff0c2913a8c5943f161",
+    "scope": "bounded allocation model before full TSan harness repair"
+  },
+  "full_tsan_review": "pending"
 }

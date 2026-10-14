@@ -72,7 +72,11 @@ for library in sorted(libraries):
 run('link',link)
 modes=['normal','default','tls','init-fail','create-fail','join-fail','self-destroy','reset','reset-join-fail','memory']
 for mode in modes:
- env=dict(os.environ);env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1';env['TSAN_OPTIONS']='halt_on_error=1';env['ASAN_OPTIONS']='halt_on_error=1:detect_leaks='+('0' if mode in ('join-fail','self-destroy','reset-join-fail') else '1')
+ env=dict(os.environ);env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1'
+ if a.sanitizer=='thread':
+  env.pop('ASAN_OPTIONS',None);env['TSAN_OPTIONS']='halt_on_error=1:symbolize=0'
+ else:
+  env.pop('TSAN_OPTIONS',None);env['ASAN_OPTIONS']='halt_on_error=1:detect_leaks='+('0' if mode in ('join-fail','self-destroy','reset-join-fail') else '1')
  expected=66 if a.sanitizer=='thread' and mode in ('join-fail','reset-join-fail') else 0
  z=run(mode,[str(out/'model'),mode],env,expected);assert 'HIP_PUBLIC_PASS mode='+mode in z.stdout
  if expected:
