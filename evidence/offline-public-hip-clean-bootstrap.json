@@ -1,0 +1,50 @@
+{
+  "classification": "offline-native-public-hip-clean-bootstrap-candidate",
+  "source_commit": "ea37055286903f680e43b049d70730743ffa2358",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "review_trigger_sha256": "7a1df91e03d3f2c5d4551d7c4b4be7545f0d6e61629ede8e28e78b7c54d4274c",
+  "prior_defect": "The previous 74-object link reused 36 ROCclr/backend objects from a different source build.",
+  "clean_closure": {
+    "selected_units": 74,
+    "direct_sources": 74,
+    "successful_compiles": 74,
+    "reused_prior_objects": 0,
+    "per_unit_source_and_object_hashes": "results/native-hip-console-clean-link-v2/receipt.json:units",
+    "strict_link": true,
+    "receipt_sha256": "d89ee9c79df2b7d164c022e8f838e632673b21fbed47e15a6884be373b0bc6a6",
+    "raw_pie_sha256": "ec97c43b7a04a072dfa3cf19fdd1668d35a1afa6d15f584d5c81019ef756d8d5"
+  },
+  "conversion": {
+    "converter_receipt_sha256": "5da21fe076b4a95bc1a3236135ae5e643eccae4eca56933534c0aecc586320bc",
+    "independent_verification_receipt_sha256": "415b9e1c578ec9a2bec7360273d14485a84baa1e137efe0d72172cb9a79ff17a",
+    "fself_roundtrip_except_unmapped_sie_note": true,
+    "public_hip_init_and_device_count_symbols_present": true,
+    "thread_local_destructor_hook_resolved": true
+  },
+  "package": {
+    "directory": "dist/PPSA99014/gfx1013-public-bootstrap-19107f507822",
+    "manifest_sha256": "60e793da1f1d91b166641d5575ab941ff602a5d002eb9969832ed5099d24d0be",
+    "receipt_sha256": "9f354b6df99d8d7c74488ff67270b379e43436cdc2252cf31799472d7b5177ff",
+    "ffpkg_sha256": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+    "ffpkg_bytes": 9437184,
+    "ufs2_fsck": "passed",
+    "extracted_file_inventory": "exact byte match"
+  },
+  "title_lifecycle_audit": {
+    "entry": "_start registers loader teardown, _fini, shell-exit probe and title finalizer before _init, then calls main and exit.",
+    "tls": "The title forwards __cxa_thread_atexit_impl to the SDK ps5___cxa_thread_atexit_impl; the rebuilt ROCclr pthread-key adapter owns and destroys each adopted current-thread object.",
+    "watchdog": "A 30-second watchdog spans hipInit and hipGetDeviceCount and is joined before the PASS record.",
+    "finalizer": "The finalizer checks successful main completion, nonterminal device state, balanced allocations and queues, and destroyed gate after upstream static teardown.",
+    "exit": "The existing shell-exit probe checks main return, callback/static-destructor order, application _fini, flushed log, and a single shell-exit request; a failed check quarantines the title for controller close.",
+    "results": "The title reads /app0/results-dir.txt, requests the bundled Lapy filesystem capability, and writes an exclusive result log under the configured directory."
+  },
+  "native_executed": false,
+  "public_hip_bootstrap_qualified": false,
+  "public_hip_gpu_qualified": false,
+  "limits": [
+    "Offline link, conversion, package and source audits cannot prove pre-main behavior or the public API result on PS5.",
+    "The title remains an isolated candidate; a separate independent review and fresh one-use D/E controls are required before .40.",
+    "This package does not include the separate public SVM memory bridge or prove public HIP allocation, stream, or kernel calls."
+  ]
+}
