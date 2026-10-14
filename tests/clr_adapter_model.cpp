@@ -126,6 +126,10 @@ int main(int argc,char**argv){
  if(!std::strcmp(mode,"lds-deny")){
   const auto object=ps5hip::inspect_code_object(reinterpret_cast<const uint8_t*>(binary.data()),binary.size());
   check(std::any_of(object.kernels.begin(),object.kernels.end(),[](const auto& k){return ps5hip::lds_launch_rejection(k).empty();}));
+  check(std::all_of(object.kernels.begin(),object.kernels.end(),[](const auto& k){
+   return ps5hip::initial_launch_rejection(k).empty()||ps5hip::lds_launch_rejection(k).empty();
+  }));
+  check(std::all_of(object.kernels.begin(),object.kernels.end(),[](const auto& k){return !ps5hip::geometry_lds_launch_rejection(k).empty();}));
   const int admission=program->addDeviceProgram(*device,binary.data(),binary.size(),true);
   check(admission==CL_INVALID_BINARY||(admission==CL_SUCCESS&&!program->load()));
   check(!backend_calls&&!submits&&allocations.empty());
