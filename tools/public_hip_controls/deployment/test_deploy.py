@@ -22,6 +22,11 @@ class Clock:
         return min(maximum,deadline-self.now)
 
 class Tests(unittest.TestCase):
+    def test_baseline_log_matches_reviewed_gpu_run(self):
+        run=r.ROOT/'results/clr-gpu-startup-controls-v1/execution/observation-20261014T012336.331568Z'
+        self.assertEqual(r.LOG_SHA,r.sha((run/'application.log').read_bytes()))
+        self.assertEqual(r.LOG_SHA,json.loads((run/'receipt.json').read_text())['raw_sha256']['application.log'])
+
     def test_local_failure_precedes_remote_work(self):
         with patch.object(r,'verify_local',side_effect=RuntimeError('local rejection')) as local,patch.object(r,'deploy') as remote:
             with self.assertRaisesRegex(RuntimeError,'local rejection'):activated_main()
