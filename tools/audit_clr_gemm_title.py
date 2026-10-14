@@ -1,7 +1,7 @@
 if not __debug__: raise RuntimeError("optimized Python disables required native admission assertions")
 from pathlib import Path
 import hashlib,json,struct,importlib.util,shlex
-C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';B=C/'results/native-title-v1';V=C/'results/native-conversion-v1';O=C/'results/native-admission-v1';O.mkdir(exist_ok=False);h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();read=lambda p:json.loads(Path(p).read_text());inputs={str(Path(__file__)):h(Path(__file__))}
+C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';B=C/'results/native-title-v2';V=C/'results/native-conversion-v2';O=C/'results/native-admission-v2';O.mkdir(exist_ok=False);h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();read=lambda p:json.loads(Path(p).read_text());inputs={str(Path(__file__)):h(Path(__file__))}
 for proof in [B/'receipt.json',V/'receipt.json']:
  inputs[str(proof)]=h(proof)
  for n,z in read(proof)['inputs'].items():assert h(n)==z,n;inputs[n]=z

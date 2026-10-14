@@ -2,7 +2,7 @@ if not __debug__: raise RuntimeError("Validation requires ordinary Python")
 """Strict native adapter link from independently qualified real CLR and SDK objects."""
 from pathlib import Path
 import hashlib,json,subprocess,shlex,shutil,functools,concurrent.futures,threading
-C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';O=C/'results/native-title-v1';O.mkdir(parents=True,exist_ok=False)
+C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';O=C/'results/native-title-v2';O.mkdir(parents=True,exist_ok=False)
 A=R/'.local/g5-clr-ps5-adapter';S=C/'results/source-v1/source'
 P=R/'.local/g4-clr-cpu-lifetime/results/native-title-lifetime-v1';Q=R/'results/clr-adapter-native-compile-v1'
 F=R/'.local/g4-native-workers/results/workers-compiler-v2'

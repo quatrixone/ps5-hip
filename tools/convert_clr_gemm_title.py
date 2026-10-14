@@ -1,7 +1,7 @@
 if not __debug__: raise RuntimeError("Validation requires ordinary Python")
 from pathlib import Path
 import hashlib,json,subprocess,re,struct,ast
-C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';B=C/'results/native-title-v1';O=C/'results/native-conversion-v1';O.mkdir(exist_ok=False);N=R/'.local/g4-multi-reduction-integration/build/native/gfx1013-hip_multi_query-integration-v2';h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();read=lambda p:json.loads(Path(p).read_text());inputs={};commands=[]
+C=Path(__file__).resolve().parents[1];R=C.parent/'ps5-hip';B=C/'results/native-title-v2';O=C/'results/native-conversion-v2';O.mkdir(exist_ok=False);N=R/'.local/g4-multi-reduction-integration/build/native/gfx1013-hip_multi_query-integration-v2';h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();read=lambda p:json.loads(Path(p).read_text());inputs={};commands=[]
 for proof in [B/'receipt.json',N/'receipt.json']:
  inputs[str(proof)]=h(proof)
 b=read(B/'receipt.json');n=read(N/'receipt.json')
