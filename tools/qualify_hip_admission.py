@@ -67,10 +67,10 @@ for library in sorted(libraries):
   for value in re.findall(r'/[^\s()]+',selected.read_text()):
    if Path(value).is_file():bind(value)
 run('link',link)
-modes=['normal','default','tls','init-fail','create-fail','join-fail','self-destroy']
+modes=['normal','default','tls','init-fail','create-fail','join-fail','self-destroy','reset','reset-join-fail']
 for mode in modes:
- env=dict(os.environ);env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1';env['TSAN_OPTIONS']='halt_on_error=1';env['ASAN_OPTIONS']='halt_on_error=1:detect_leaks='+('0' if mode in ('join-fail','self-destroy') else '1')
- expected=66 if a.sanitizer=='thread' and mode=='join-fail' else 0
+ env=dict(os.environ);env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1';env['TSAN_OPTIONS']='halt_on_error=1';env['ASAN_OPTIONS']='halt_on_error=1:detect_leaks='+('0' if mode in ('join-fail','self-destroy','reset-join-fail') else '1')
+ expected=66 if a.sanitizer=='thread' and mode in ('join-fail','reset-join-fail') else 0
  z=run(mode,[str(out/'model'),mode],env,expected);assert 'HIP_PUBLIC_PASS mode='+mode in z.stdout
  if expected:
   # An intentionally unconsumed join must remain observable, not suppressed.
@@ -78,7 +78,7 @@ for mode in modes:
   assert 'finished) created by main thread' in z.stderr and 'data race' not in z.stderr
  if mode!='init-fail':
   n=1 if mode=='create-fail' else 4 if mode in ('default','tls') else 3
-  retained=mode in ('join-fail','self-destroy')
+  retained=mode in ('join-fail','self-destroy','reset-join-fail')
   assert f'HIP_PUBLIC_FINAL queues={n} retired={2 if mode=="self-destroy" else n} gate_destroyed={int(not retained)} retained={int(retained)}' in z.stdout
  print(mode,'PASS',flush=True)
 assert all(h(p)==v for p,v in inputs.items()),'source/header/tool drift'

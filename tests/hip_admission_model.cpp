@@ -45,11 +45,12 @@ static void self_destroy(void* p){self_result.store(int(hipStreamDestroy(static_
 static void ok(hipError_t e){if(e!=hipSuccess){std::fprintf(stderr,"HIP_ADMISSION_ERROR %d\n",int(e));std::abort();}}
 int main(int argc,char** argv){
  const std::string mode=argc>1?argv[1]:"normal";
+ const bool reset_case=mode=="reset"||mode=="reset-join-fail";
  if(mode=="init-fail"){
   init_failure=true;checked(hipInit(0)==hipErrorInvalidDevice,__LINE__);checked(hipInit(0)==hipErrorInvalidDevice,__LINE__);
   std::puts("HIP_PUBLIC_PASS mode=init-fail gpu_execution=false");return 0;
  }
- final_kind=mode=="create-fail"?2:((mode=="tls"||mode=="default")?3:(mode=="join-fail"?4:(mode=="self-destroy"?5:1)));
+ final_kind=mode=="create-fail"?2:((mode=="tls"||mode=="default")?3:((mode=="join-fail"||mode=="reset-join-fail")?4:(mode=="self-destroy"?5:1)));
  ok(hipInit(0));int count=0;ok(hipGetDeviceCount(&count));checked(count==1,__LINE__);
  hipMemPool_t pool=nullptr;ok(hipDeviceGetDefaultMemPool(&pool,0));checked(pool!=nullptr,__LINE__);
  // Warm the genuine auxiliary thread setup before narrowly arming a queue fault.
@@ -64,9 +65,20 @@ int main(int argc,char** argv){
  auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
  while(!callback_entered.load(std::memory_order_acquire)&&std::chrono::steady_clock::now()<deadline)std::this_thread::yield();
  checked(callback_entered&&hipEventQuery(consumer)==hipErrorNotReady,__LINE__);
+ if(reset_case){
+  const auto queues=public_observed.queues.load(),retired=public_observed.retired_queues.load();
+  fail_join=true;
+  checked(hipDeviceReset()==hipErrorNotSupported,__LINE__);
+  checked(hipDeviceReset()==hipErrorNotSupported,__LINE__);
+  checked(fail_join&&rejected_join==0&&!amd::Runtime::quarantined(),__LINE__);
+  hipMemPool_t same=nullptr;ok(hipDeviceGetDefaultMemPool(&same,0));checked(same==pool,__LINE__);
+  checked(public_observed.queues==queues&&public_observed.retired_queues==retired,__LINE__);
+  checked(hipEventQuery(consumer)==hipErrorNotReady,__LINE__);
+  fail_join=false;
+ }
  callback_resume.store(true,std::memory_order_release);ok(hipEventSynchronize(consumer));ok(hipStreamSynchronize(a));ok(hipStreamSynchronize(b));
  ok(hipEventDestroy(producer));ok(hipEventDestroy(consumer));ok(hipStreamDestroy(b));
- if(mode=="join-fail"){
+ if(mode=="join-fail"||mode=="reset-join-fail"){
   fail_join=true;checked(hipStreamDestroy(a)==hipErrorUnknown,__LINE__);checked(rejected_join==1&&amd::Runtime::quarantined(),__LINE__);
   checked(hipStreamSynchronize(a)==hipErrorUnknown,__LINE__);checked(hipStreamDestroy(a)==hipErrorUnknown&&rejected_join==1,__LINE__);
  }else if(mode=="self-destroy"){

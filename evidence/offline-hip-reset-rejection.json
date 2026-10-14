@@ -1,0 +1,28 @@
+{
+  "classification": "bounded-public-hip-reset-rejection-offline",
+  "base_commit": "c453837ceee7520eae9602a8514303d2598e8d26",
+  "sources": {
+    "docs/HIP_PUBLIC_ADMISSION.md": "2ee34da57965eb36798b4f0f4e6d1866ee8ad99dac33616dbaddcb7db39b3ee9",
+    "ports/clr/ps5-public-hip.json": "5e4762711f5fb22d439093d97632ec8c1cd27b0711bd4503c5a0b9c503fde24e",
+    "ports/clr/ps5-public-hip.patch": "88e3a385803abd3645d481b6dec199b0541f52ed7a543cbc52d7200c0a85942a",
+    "tests/hip_admission_model.cpp": "3448144ac9da68e1a6dc5e155d9083ab1f859323086904048d0e68cfaf75ba08",
+    "tools/prepare_hip_admission.py": "09817ef5511df5abfd315021561cf20f43ad5c29ccab624812d3769849e12799",
+    "tools/qualify_hip_admission.py": "feba2139513112e846f92313e374b6995e538e9f4cda37c11983740377e324d8"
+  },
+  "proofs": {
+    "results/address-v2/receipt.json": "8c19c943213916c68efed4f0525721208f312ec15585445dc3c9615ff4927fcd",
+    "results/thread-v2/receipt.json": "f9140b4011de74f933884f25f2562f53a047fc7ad7da79494c17d447fee050fc",
+    "results/roundtrip-v1/public-hip-preparation.json": "7d14c1d41bce1d273999b197b48bcb3714eb13737725faa1a3308f60045b50e3"
+  },
+  "cases_each_sanitizer": 9,
+  "fresh_units_each": 69,
+  "scope": "Public dispatch rejects reset before pool/stream mutation; pending dependency preserved and subsequent normal/failed-join teardown checked.",
+  "limitations": [
+    "Synthetic transport; no GPU execution or native startup claim.",
+    "TSan failed-join modes deliberately retain one unjoined-thread report, not suppressed.",
+    "Process-global destructor safety with retained live workers remains unqualified."
+  ],
+  "preserved_failure": "v1 test compile: atomic snapshot copied instead of loaded; fixed test only.",
+  "qualification_receipt_sha256": "b6c7d3224e7c5497e8e50782fe8710b92989b74b8a8dfb95608a960b8221a569",
+  "review_status": "Independent final review pending; parent authorized source freeze only."
+}

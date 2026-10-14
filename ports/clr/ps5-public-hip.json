@@ -2,7 +2,7 @@
   "schema": 1,
   "base_adapter_commit": "169a118a2e61b505b606b0725f62bb0cfcd1471f",
   "base_clr_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
-  "patch_sha256": "7821a092685d832c2e1cd04801628ab9e15f39efd16780f2a35e6e64748972dc",
+  "patch_sha256": "88e3a385803abd3645d481b6dec199b0541f52ed7a543cbc52d7200c0a85942a",
   "files": {
     "rocclr/device/device.cpp": {
       "base_sha256": "a95926acf4bf78fde0cb8f8307398e9b5bb6eb129116fc31433804cddd5df500",
@@ -51,6 +51,10 @@
     "hipamd/src/hip_context.cpp": {
       "base_sha256": "5b1e43da8133d7458d58cbdcb17d3bd1325c6e7cae63c03011e338e3e4e0041e",
       "result_sha256": "1568b19b430f4d2483e784de0cc4620f2770e68e3b86850d10552f545713a31f"
+    },
+    "hipamd/src/hip_device_runtime.cpp": {
+      "base_sha256": "d4a53d9c44089fbcd672f9da2c3a0379e169fac2c59de463dae15a2b6754ea44",
+      "result_sha256": "2d6ecd6cd2a3eaa29d84033af4322bee47e51b2ae8c2224deb1df41873d58f8e"
     }
   },
   "scope": "Linux public HIP admission over genuine ROCclr queues; no native or GPU acceptance"

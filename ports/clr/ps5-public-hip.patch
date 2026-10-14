@@ -437,3 +437,18 @@
  
  std::vector<hip::Device*> g_devices ROCCLR_INIT_PRIORITY(101);
  thread_local TlsAggregator tls;
+--- a/hipamd/src/hip_device_runtime.cpp
++++ b/hipamd/src/hip_device_runtime.cpp
+@@ -568,7 +568,12 @@
+ hipError_t hipDeviceReset(void) {
+   HIP_INIT_API(hipDeviceReset);
+ 
++#if defined(PS5HIP_PUBLIC_HIP)
++  // Reset cannot retire live queues safely in the bounded public profile.
++  HIP_RETURN(hipErrorNotSupported);
++#else
+   hip::getCurrentDevice()->Reset();
++#endif
+ 
+   HIP_RETURN(hipSuccess);
+ }

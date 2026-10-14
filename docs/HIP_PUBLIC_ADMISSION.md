@@ -44,10 +44,12 @@ described as successful cleanup. Ordinary modes require leak detection.
 
 Apply `ports/clr/ps5-public-hip.patch` with `tools/prepare_hip_admission.py` to the
 qualified adapter CLR source tree and pinned HIP source. The manifest requires
-exact old and new bytes for all twelve changed upstream files. Adapter and TLS
+exact old and new bytes for all thirteen changed upstream files. Adapter and TLS
 support sources remain in `ports/clr`.
 
 `tools/qualify_hip_admission.py` rebuilds the complete real closure with source,
 compiler-discovered header, tool and selected link-library bindings. ASan/UBSan
 and TSan use separate output directories. These are Linux model proofs, not a
 hermetic operating-system build or a native package qualification.
+
+Device reset is explicitly unsupported in this bounded profile. The public dispatch returns hipErrorNotSupported before Device::Reset can release pools or destroy streams. Repeated reset while a host callback holds a cross-stream event dependency preserves the pool identity, live queues and pending event; dependency completion and normal/failed-join shutdown are tested separately. This does not establish process-global destructor safety for retained live workers.

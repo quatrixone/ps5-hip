@@ -19,7 +19,7 @@ def main():
     manifest_path = root / 'ports/clr/ps5-public-hip.json'
     manifest = json.loads(manifest_path.read_text())
     assert sha(patch) == manifest['patch_sha256']
-    assert len(manifest['files']) == 12
+    assert len(manifest['files']) == 13
     inputs = {str(patch): sha(patch), str(manifest_path): sha(manifest_path),
               str(Path(__file__).resolve()): sha(__file__)}
     for name, record in manifest['files'].items():
