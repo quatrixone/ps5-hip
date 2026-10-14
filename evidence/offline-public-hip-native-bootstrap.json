@@ -1,0 +1,34 @@
+{
+  "classification": "offline-native-upstream-public-hip-bootstrap-candidate",
+  "source_commit": "288fbcdb74aa5f381981c76f30e7ad6f575a2c1a",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "source_preparation_receipt_sha256": "2c8ea8dcc943434c941ef254dee0017179afe3bd9f8347584679a6b4c982d55d",
+  "upstream_hip_native_compile_receipt_sha256": "651696f6e5d7da5c5baf91391e8d710a0e93d67aa587b30749ea49ea68eed286",
+  "upstream_hip_native_units_passed": 30,
+  "minimal": {
+    "native_link_receipt_sha256": "22858a4a623f50a01e8099b96e4b0adeb3b801c4c6c235dd780bbaca6bddedda",
+    "native_pie_sha256": "1654cd43035a7ec8cc97f06549c59c68d1d387a68f6cf205c1fd1eab66d3190a",
+    "conversion_verification_receipt_sha256": "eac792cc950dd8f76cfeea6e564261c04a1ea1da189f58c3a747bc69819da54b"
+  },
+  "console_candidate": {
+    "native_link_receipt_sha256": "a19bf45f3937bbbd143d0a4d7a23a430cc5856fb7aa83bec350b76a07a916708",
+    "native_pie_sha256": "5a671fc365a354f64585ceb3719bf7baac59c4e6634c0322065fdc25dd220417",
+    "conversion_verification_receipt_sha256": "f86488f70f81e428f9f4c107bb3d0255bfd7924ed6493b2d2cdd2be90b9370a6",
+    "package_manifest_sha256": "b5835293da31ebeae3de3438d6c73b88ac0899bd96694ad9773b5917d92cb1a3",
+    "package_receipt_sha256": "27da7375b63c975274840c4cff5a980dec8ca58a17f9039557201eed61326b49",
+    "image_sha256": "165a53a372774c092e7e0ef44549b9f932a95d75ebcbc12d2bbc570d10f60b02",
+    "image_bytes": 9437184,
+    "filesystem_check": "passed",
+    "extracted_files_match": true
+  },
+  "native_executed": false,
+  "public_hip_bootstrap_qualified": false,
+  "public_hip_gpu_qualified": false,
+  "limits": [
+    "Upstream HIP and patched ROCclr units strictly link, convert and sign for PS5; no native call result exists.",
+    "Unchanged GPU ROCclr and backend objects were reused from the prior title; full clean native closure rebuild and independent startup/teardown review remain required before hardware.",
+    "The candidate does not include the public SVM memory patch or qualify public allocation, streams, kernel launch, graphics or GPU results.",
+    "The console candidate is packaged offline but has no reviewed one-use deployment/execution controls."
+  ]
+}
