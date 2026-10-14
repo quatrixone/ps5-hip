@@ -48,14 +48,16 @@ about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Integrated baseline | `development/offline-bringup` / `07053e3` before this handoff | repository root | Clean before documentation edit; six commits ahead of its private remote tracking branch. |
+| Integrated baseline | `development/offline-bringup` / `0d2f049` documentation handoff | repository root | Published to the private GitHub remote. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
 | ROCclr GEMM title | `development/gemm-native-bridge` / `a0af56e` | `../ps5-hip-gemm-bridge` | Reviewed offline; stale console baseline, no native run. |
 
-Nested worktree `origin` remotes point to other **local** checkouts, not GitHub.
-Use the private GitHub remote explicitly when publishing a reviewed branch.
+All three reviewed candidate branches above were published to the private
+GitHub remote alongside the integrated branch. Nested worktree `origin` remotes
+still point to other **local** checkouts, not GitHub; use the private GitHub
+remote explicitly when publishing later work.
 Do not assume an isolated branch has been merged into the integrated baseline.
 The fresh native memory package SHA-256 is
 `4a4ea8e14543e074b2324badf55f3138f35ddc418677547df716bea5c0c15818`;
@@ -86,7 +88,10 @@ hash, before remote mutation. The corrected D passed; **do not repeat either D**
 
 The D worktree also contains four untracked `*-consumed.json` phase markers under
 `tools/public_hip_controls/deployment/`. Keep those and the raw receipt in place;
-do not clean the worktree or replay a consumed phase. The E manifest at
+they are local-only and are not included in a fresh GitHub clone. A new agent
+working from a fresh clone needs this preserved workspace evidence before
+binding E; do not fabricate or replay D to replace it. Do not clean the
+worktree or replay a consumed phase. The E manifest at
 `.local/g5-hip-native-link/tools/public_hip_controls/execution/manifest.json`
 has `deployment_binding: null`; `run.py` still raises `INERT` at its activation
 point. Its `verify_local()` currently expects D review classification `clear`,
