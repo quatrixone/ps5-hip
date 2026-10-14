@@ -88,6 +88,13 @@ public:
     }
     uint64_t virtualAddress()const override{return reinterpret_cast<uintptr_t>(base_);}
 };
+NativeLaunchRoute admitted_route(const ps5hip::Kernel& kernel){
+    if(initial_launch_rejection(kernel).empty())return NativeLaunchRoute::Initial;
+    if(geometry_lds_launch_rejection(kernel).empty()&&
+       select_hip_launch_profile(kernel,{1,1,1},{8,8,1},0).route==NativeLaunchRoute::GeometryLds)
+        return NativeLaunchRoute::GeometryLds;
+    throw ObjectError("unqualified CLR kernel route");
+}
 class Program;
 class Kernel final:public amd::device::Kernel {
 public:
@@ -112,9 +119,7 @@ public:
             if(candidate.object.target!="gfx1013"||candidate.object.kernels.empty())return false;
             candidate.bundle_target="hip-amdgcn-amd-amdhsa--gfx1013";
             for(const auto& k:candidate.object.kernels){
-                // First adapter deliberately admits only measured scratch/LDS-free ABI.
-                if(!initial_launch_rejection(k).empty())return false;
-                validate_capture_layout(k,NativeLaunchRoute::Initial);
+                validate_capture_layout(k,admitted_route(k));
             }
             object=std::move(candidate);
             std::vector<std::unique_ptr<Kernel>> pending;
@@ -184,7 +189,7 @@ public:
             groups[i]=n/t;threads[i]=t;
         }
         auto request=select_hip_launch_profile(k->native,groups,threads,0);
-        if(request.route!=NativeLaunchRoute::Initial && request.route!=NativeLaunchRoute::GeometryLds)
+        if(request.route!=admitted_route(k->native))
             throw ObjectError("unqualified CLR launch route");
         const auto& signature=k->signature();std::vector<const void*> addresses;std::vector<ReadableSpan> spans;
         for(size_t i=0;i<k->native.arguments.size();++i){const auto& a=k->native.arguments[i];const auto& d=signature.at(i);

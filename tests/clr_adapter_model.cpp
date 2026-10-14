@@ -1,6 +1,7 @@
 // Actual ROCclr/PS5 adapter, modeled direct memory and packet transport only.
 // This model's arithmetic is NOT GPU execution or an ISA emulator.
 #include "ps5-device.hpp"
+#include "ps5hip/hip_launch_profile.h"
 #include "platform/command.hpp"
 #include "platform/commandqueue.hpp"
 #include "platform/context.hpp"
@@ -12,6 +13,7 @@
 #include <sys/mman.h>
 #include <fstream>
 #include <map>
+#include <algorithm>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
@@ -111,6 +113,25 @@ int main(int argc,char**argv){
  }
  std::ifstream in(argv[1],std::ios::binary);std::vector<char> binary((std::istreambuf_iterator<char>(in)),{});check(!binary.empty());
  auto* program=new amd::Program(*context);
+ if(!std::strcmp(mode,"gemm-admit")){
+  const auto object=ps5hip::inspect_code_object(reinterpret_cast<const uint8_t*>(binary.data()),binary.size());
+  check(object.kernels.size()==1&&object.kernels[0].name=="ps5hip_sgemm_nn"&&
+        ps5hip::select_hip_launch_profile(object.kernels[0],{2,2,1},{8,8,1},0).route==ps5hip::NativeLaunchRoute::GeometryLds);
+  check(program->addDeviceProgram(*device,binary.data(),binary.size(),true)==CL_SUCCESS);
+  check(program->load()&&program->findSymbol("ps5hip_sgemm_nn"));
+  check(!backend_calls&&!submits&&allocations.empty());
+  program->release();context->release();device.reset();check(observed.gate_destroyed);
+  std::puts("CLR_PS5_ADAPTER_MODEL_PASS mode=gemm-admit gpu_execution=false route=GeometryLds");return 0;
+ }
+ if(!std::strcmp(mode,"lds-deny")){
+  const auto object=ps5hip::inspect_code_object(reinterpret_cast<const uint8_t*>(binary.data()),binary.size());
+  check(std::any_of(object.kernels.begin(),object.kernels.end(),[](const auto& k){return ps5hip::lds_launch_rejection(k).empty();}));
+  const int admission=program->addDeviceProgram(*device,binary.data(),binary.size(),true);
+  check(admission==CL_INVALID_BINARY||(admission==CL_SUCCESS&&!program->load()));
+  check(!backend_calls&&!submits&&allocations.empty());
+  program->release();context->release();device.reset();check(observed.gate_destroyed);
+  std::puts("CLR_PS5_ADAPTER_MODEL_PASS mode=lds-deny gpu_execution=false rejected=true");return 0;
+ }
  if(!std::strcmp(mode,"truncated")){
   for(size_t length: {size_t(0),size_t(1),size_t(2),size_t(3),size_t(63),size_t(64)}){
    std::unique_ptr<char[]> tiny(new char[length?length:1]);std::memcpy(tiny.get(),binary.data(),length);
