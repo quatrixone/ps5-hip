@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "offline-native-clr-gemm-numerical-candidate",
+  "source_commit": "f68c7995ab2eb8a1f7364ca1d68164695bbf0184",
+  "toolchain_and_source_receipt": {
+    "path": "results/source-v1/receipt.json",
+    "sha256": "92e8cb7929e3dc4244e70679e1bf8de912d353ae7299ae1902267567bcab986f"
+  },
+  "native_build": {
+    "units": 46,
+    "strict_link": true,
+    "receipt_path": "results/native-title-v1/receipt.json",
+    "receipt_sha256": "d0495dec3d413b32eae6ba0ef8d25933a7a27b613afbd5b97efd8cd6bd5dd3f5",
+    "raw_elf_sha256": "80900b20913193cb2a9e6035018ebfaec6d6100c3714cb4cd80865fa254354d7"
+  },
+  "conversion": {
+    "receipt_path": "results/native-conversion-v1/receipt.json",
+    "receipt_sha256": "943fda443c9a9e3f82c3e888d99736ead77887a91b9b55e4e2bdc788ae551082",
+    "fself_sha256": "1fcb3f1ea73e9068fb1562bf5d5a156792ecc2d967cd7416f7e393a3aad653e5"
+  },
+  "native_admission": {
+    "receipt_path": "results/native-admission-v1/receipt.json",
+    "receipt_sha256": "fb34921630dde726b1212c1f7fb9a32241426acbc5781e05aeba7ddffe85baaf",
+    "embedded_gfx1013_hsaco_sha256": "f1f0fd6c22101893117030818ff88c109827db1775347b5ef3942e35aa689100"
+  },
+  "expected_hardware_case": {
+    "shape_mnk": [9, 11, 13],
+    "row_strides": [16, 16, 16],
+    "alpha": 1.25,
+    "beta": -0.5,
+    "active_values_exact": 99,
+    "padding_guards_exact": 45,
+    "launches": 1,
+    "allocations": 3,
+    "frees": 3,
+    "queues_joined": 1
+  },
+  "console_executed": false,
+  "g6_accepted": false,
+  "limits": [
+    "The PS5 native title has not been packaged, independently reviewed or run.",
+    "The exact numerical oracle applies to this bounded integer-input/dyadic-scalar case only.",
+    "This uses ROCclr directly, not the public HIP API or a rocBLAS library."
+  ]
+}
