@@ -1,0 +1,32 @@
+{
+  "classification": "offline-inert-deployment-rollback-repair",
+  "source_commit": "9002d07a4ec9afe34151521041c9b43f6ba78b1a",
+  "trigger_review_sha256": "e13915973e4639dcd0dc77871983f43c130a55f47ef08ec2bed63d70acbb0342",
+  "candidate_image_sha256": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+  "deployment_manifest_sha256": "ead61006a20a25e9ba83c8afdb78e3c17a262cd229ee2e7d4784ae8c2ed20163",
+  "execution_manifest_sha256": "ead61006a20a25e9ba83c8afdb78e3c17a262cd229ee2e7d4784ae8c2ed20163",
+  "deployment_control_sha256": "0c00b272c5616b391a57c412ee3f324d1cb948d582768b62f8d39d4811532cd8",
+  "prior_gpu_image_sha256": "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+  "prior_gpu_log_sha256": "5c91d896f50ec94b7092b90ed30faa84e9a7819c5850f3772edc0e",
+  "title_id": "PPSA99014",
+  "behavior": {
+    "known_safe_failure": "quarantine candidate, await title-specific release, restore exact old GPU image and log, verify title registration, mounted bytes and prior backup history",
+    "uncertain_failure": "retain preserved image and log for read-only diagnosis; do not restore with uncertain FTP or mount state",
+    "controls_inert": true,
+    "console_contacted": false,
+    "github_pushed": false
+  },
+  "offline_validation": {
+    "deployment_tests": "11 passed",
+    "execution_tests": "29 passed",
+    "network_denied_inert_test": "1 passed",
+    "deployment_manifest_closure": "passed after source commit",
+    "execution_manifest_closure": "passed after source commit",
+    "negative_modes": ["release_timeout", "promote_error", "stale_registration", "mounted_old", "mounted_libc", "mounted_helper", "mounted_config", "rollback_release_timeout"]
+  },
+  "limitations": [
+    "No console deployment or runtime launch was attempted.",
+    "Promotion or transfer errors with uncertain FTP state require manual read-only diagnosis; automatic rollback is deliberately blocked.",
+    "The rollback success model relies on title-specific release and registration log events, which must be reviewed against live ShadowMount behavior before activation."
+  ]
+}
