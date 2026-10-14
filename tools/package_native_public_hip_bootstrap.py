@@ -25,9 +25,9 @@ checkout = Path(__file__).resolve().parents[1]
 root = checkout.parents[1]
 assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=checkout).strip()
 commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=checkout, text=True).strip()
-converted = checkout / 'results/native-hip-console-convert-v1'
+converted = checkout / 'results/native-hip-console-clean-convert-v2'
 receipt = converted / 'conversion.json'
-link = checkout / 'results/native-hip-console-link-v1/receipt.json'
+link = checkout / 'results/native-hip-console-clean-link-v2/receipt.json'
 assert json.loads(receipt.read_text())['console_title'] is True
 assert json.loads(link.read_text())['console_title'] is True
 image = converted / 'eboot.bin'

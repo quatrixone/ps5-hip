@@ -19,8 +19,10 @@ all 1,542 values under the unchanged contract on .40, with complete natural
 teardown and independent audit; see `../evidence/native-math-exp-corrected.json`.
 Broader G3 qualification remains open. G4's fixed genuine HIP vector and
 shared four-route clients have passed bounded native cycles with complete
-compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
-planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
+compiler/runtime cleanup; broader client qualification remains open. G5 has a
+bounded GPU-backed upstream ROCclr dispatch observation, while actual public HIP
+startup and GPU calls remain unproven. G6-G12 remain planned. The four-route title
+`67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
 including immutable inputs and guards; they are not an active shader output count.

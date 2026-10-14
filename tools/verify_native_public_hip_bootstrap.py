@@ -17,9 +17,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--console-title', action='store_true')
 args = parser.parse_args()
 root = checkout.parents[1]
-link = checkout / ('results/native-hip-console-link-v1' if args.console_title
+link = checkout / ('results/native-hip-console-clean-link-v2' if args.console_title
                    else 'results/native-hip-link-v4')
-converted = checkout / ('results/native-hip-console-convert-v1' if args.console_title
+converted = checkout / ('results/native-hip-console-clean-convert-v2' if args.console_title
                         else 'results/native-hip-convert-v4')
 raw = converted / 'eboot.elf'
 extracted = converted / 'extracted.elf'
@@ -34,6 +34,10 @@ receipt = json.loads((link / 'receipt.json').read_text())
 assert receipt['native_linked'] and not receipt['native_executed']
 assert all(command['exit_code'] == 0 for command in receipt['commands'])
 assert receipt['object_count'] == (74 if args.console_title else 71), receipt['object_count']
+assert receipt['clean_closure'] and len(receipt['units']) == receipt['object_count']
+assert all(u['exit_code'] == 0 and sha(u['source']) == u['source_sha256']
+           and sha(u['object']) == u['object_sha256'] for u in receipt['units'])
+assert all(Path(u['object']).parent == link for u in receipt['units'])
 assert receipt['console_title'] is args.console_title
 assert converted_receipt['console_title'] is args.console_title
 assert all(sha(path) == digest for path, digest in receipt['bindings'].items())
@@ -70,7 +74,7 @@ report = {'classification': 'offline-native-public-hip-bootstrap-link-and-conver
           'public_hip_bootstrap_qualified': False,
           'limits': ['No package or console execution; this is a strict link and conversion proof.',
                      'The target uses the reviewed HIP admission source plus an isolated no-GL guard.',
-                     'Unchanged GPU ROCclr base objects were reused; clean full-closure rebuild is required before hardware.',
+                     'All 74 selected native objects were rebuilt from bound source; console execution remains required.',
                      'GPU-backed public HIP initialization, teardown, memory and launch remain unverified.']}
 (converted / 'receipt.json').write_text(json.dumps(report, indent=2) + '\n')
 print(sha(converted / 'receipt.json'))
