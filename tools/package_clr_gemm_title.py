@@ -13,7 +13,8 @@ def main():
     review=C/'results/gemm-independent-review-v1/review.json'
     assert H(review)=='8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc'
     q=J(review);assert q['decision']=='CLEAR_FOR_OFFLINE_PACKAGING_ONLY'
-    assert not subprocess.check_output(G+['status','--porcelain'],cwd=C).strip()
+    changes=set(subprocess.check_output(G+['status','--porcelain'],cwd=C).splitlines())
+    assert changes<={b'?? .deps'} and (C/'.deps').is_dir() and (R/'.deps').is_dir()
     subprocess.run(G+['merge-base','--is-ancestor',q['candidate_commit'],'HEAD'],cwd=C,check=True)
     evidence=C/'evidence/offline-clr-gemm-admission-repair.json';e=J(evidence)
     for key,label in [('address_model_39_units','admission_model'),('native_build_46_units','native_build'),
