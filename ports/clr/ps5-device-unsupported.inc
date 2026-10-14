@@ -7,8 +7,6 @@ bool unbindExternalDevice( uint flags, void* const pDevice[], void* pContext, bo
 bool globalFreeMemory(size_t* freeMemory ) const override { return false; }
 bool importExtSemaphore(void** extSemaphore, const amd::Os::FileDesc& handle, amd::ExternalSemaphoreHandleType sem_handle_type) override { return false; }
 void DestroyExtSemaphore(void* extSemaphore) override { state_->observed.terminal=true; }
-void* svmAlloc(Context& context, size_t size, size_t alignment, cl_svm_mem_flags flags, void* svmPtr) const override { return nullptr; }
-void svmFree(void* ptr) const override { state_->observed.terminal=true; }
 void* virtualAlloc(void* addr, size_t size, size_t alignment) override { return nullptr; }
 bool SetMemAccess(void* va_addr, size_t va_size, VmmAccess access_flags) override { return false; }
 bool GetMemAccess(void* va_addr, VmmAccess* access_flags_ptr) override { return false; }

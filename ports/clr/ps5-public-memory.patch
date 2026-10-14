@@ -1,0 +1,49 @@
+--- a/rocclr/platform/memory.cpp
++++ b/rocclr/platform/memory.cpp
+@@ -1532,13 +1532,24 @@
+     return nullptr;
+   }
+   uintptr_t ret_u = reinterpret_cast<uintptr_t>(ret);
++#if defined(WITH_PS5_DEVICE)
++  try { Add(ret_u, ret_u + size); }
++  catch (...) { context.svmFree(ret); return nullptr; }
++#else
+   Add(ret_u, ret_u + size);
++#endif
+   return ret;
+ }
+ 
+ void SvmBuffer::free(const Context& context, void* ptr) {
++#if defined(WITH_PS5_DEVICE)
++  context.svmFree(ptr);
++  // A failed or still-referenced device allocation remains live and tracked.
++  if (MemObjMap::FindMemObj(ptr) == nullptr) Remove(reinterpret_cast<uintptr_t>(ptr));
++#else
+   Remove(reinterpret_cast<uintptr_t>(ptr));
+   context.svmFree(ptr);
++#endif
+ }
+ 
+ void SvmBuffer::memFill(void* dst, const void* src, size_t srcSize, size_t times) {
+--- a/hipamd/src/hip_memory.cpp
++++ b/hipamd/src/hip_memory.cpp
+@@ -74,6 +74,9 @@
+   size_t offset = 0;
+   amd::Memory* memory_object = getMemoryObject(ptr, offset);
+   if (memory_object != nullptr) {
++#if defined(WITH_PS5_DEVICE)
++    if (offset != 0) return hipErrorInvalidValue;
++#endif
+     // Wait on the device, associated with the current memory object during allocation
+     auto device_id = memory_object->getUserData().deviceId;
+     g_devices[device_id]->SyncAllStreams();
+@@ -86,6 +89,9 @@
+         memory_object->release();
+       } else {
+         amd::SvmBuffer::free(memory_object->getContext(), ptr);
++#if defined(WITH_PS5_DEVICE)
++        if (amd::MemObjMap::FindMemObj(ptr) != nullptr) return hipErrorUnknown;
++#endif
+       }
+     }
+     return hipSuccess;
