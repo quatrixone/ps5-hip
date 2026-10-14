@@ -7,7 +7,8 @@ host scheduler and exports no new public HIP success path.
 
 Reproduction starts with the pinned CLR checkout and existing `ps5-platform.patch`
 documented in `README.md`. Apply `ps5-lifetime.patch`, `ps5-device-aot.patch`,
-`ps5-affinity.patch`, then `ps5-executable-path.patch`,
+`ps5-affinity.patch`, `ps5-executable-path.patch`, `ps5-public-memory.patch`,
+then `ps5-hip-correlation.patch`,
 using `git apply --check` before each application. `adapter-manifest.json` records
 the order and exact original/adapted hashes. The standalone lifetime patch also
 serves the CPU diagnostic; it does not depend on the AOT adapter or ignored
@@ -34,6 +35,33 @@ The admitted slice is deliberately bounded: ordinary buffers, synchronous read,
 write and tracked device copy, markers, and the existing scratch/LDS-free initial
 launch route. Unsupported commands receive an error event. Other factories and
 capability queries fail explicitly. This is not a complete ROCclr or HIP port.
+
+The public-memory prerequisite implements the genuine upstream
+`SvmBuffer::malloc/free` → `Context::svmAlloc/svmFree` → PS5 device allocation path.
+Its `amd::Buffer` owns a real `NativeDataRegistry` allocation and is registered in
+the upstream memory-object map. Only a single-device context, zero allocation
+flags, at most 64 MiB, and power-of-two alignment up to 64 KiB are admitted.
+This 64 MiB ceiling is an initial policy, not a measurement of available VRAM.
+Host/imported, fine-grained, atomic and multi-device allocations are rejected.
+The coarse-buffer SVM bit lets the upstream context select this allocation path;
+it does not qualify OpenCL SVM mapping commands, which remain unsupported.
+
+Free requires the sole allocation-owner reference. Pending commands retain that
+owner, so early free leaves both the allocation and trackers intact. Successful
+native retirement removes both trackers and releases the owner. Native retirement
+failure retains ownership and makes the device terminal; later allocations fail.
+The PS5-only upstream `ihipFree` overlay rejects interior pointers and reports an
+error when retirement leaves an allocation live. Other device profiles preserve
+their upstream behavior. The correlation overlay redirects the two real HIP
+profiling writers through the platform's existing thread-local reference accessor.
+As with HIP itself, callers must not race new use against
+free; public `ihipFree` synchronizes streams before retirement.
+
+The model exercises genuine SVM allocations through upstream write, copy, kernel
+capture/dispatch and read commands, including early free and native allocation/free
+faults. It still uses synthetic platform providers and transport. Public HIP device
+initialization, complete `hip_memory.cpp` linkage, and execution of `hipMalloc` and
+`hipFree` on PS5 remain separate gates; this prerequisite is not public GPU support.
 
 Uncertain native submission, poisoned registry or failed teardown retains the
 whole device state. A failed queue join also requires retaining its enclosing

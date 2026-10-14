@@ -41,9 +41,9 @@ public:using amd::HostQueue::HostQueue;
 int ps5hip_clr_model_destroy(pthread_mutex_t* gate)noexcept{return !std::strcmp(mode,"destroy")?EBUSY:pthread_mutex_destroy(gate);}
 static void live(uint64_t p,size_t n){for(const auto&a:allocations){auto b=uint64_t(a.second.p);if(p>=b&&p-b<=a.second.n&&n<=a.second.n-(p-b))return;}check(false);}
 extern "C" int64_t sceKernelGetDirectMemorySize(){return int64_t(12)<<30;}
-extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t n,size_t,int,int64_t* p){*p=serial++;allocations.emplace(*p,Allocation{nullptr,n});return 0;}
+extern "C" int32_t sceKernelAllocateDirectMemory(int64_t,int64_t,size_t n,size_t,int,int64_t* p){if(!std::strcmp(mode,"svm-alloc-fail"))return -12;*p=serial++;allocations.emplace(*p,Allocation{nullptr,n});return 0;}
 extern "C" int32_t sceKernelMapDirectMemory(void**p,size_t n,int,int,int64_t id,size_t align){next_address=(next_address+align-1)&~(align-1);check(next_address>=0x200040000&&next_address<0x300000000&&n<=0x300000000-next_address);void*v=mmap(reinterpret_cast<void*>(next_address),n,PROT_READ|PROT_WRITE,model_map_flags,-1,0);if(v==MAP_FAILED){std::fprintf(stderr,"MODEL_MAP_FAILED address=%llx errno=%d\n",static_cast<unsigned long long>(next_address),errno);return -1;}next_address+=n;allocations.at(id).p=v;*p=v;return 0;}
-extern "C" int32_t sceKernelMunmap(void* p,size_t n){if(!std::strcmp(mode,"cleanup")&&p==code)return -1;return munmap(p,n);}
+extern "C" int32_t sceKernelMunmap(void* p,size_t n){if((!std::strcmp(mode,"cleanup")&&p==code)||!std::strcmp(mode,"svm-free-fail"))return -1;return munmap(p,n);}
 extern "C" int32_t sceKernelReleaseDirectMemory(int64_t id,size_t){allocations.erase(id);++releases;return 0;}
 class Transport final:public ps5hip::SubmissionBackend{
  uint64_t clock=0;
@@ -79,6 +79,36 @@ int main(int argc,char**argv){
  std::unique_ptr<amd::Device> device(ps5hip::clr::create_device(backend,observed));check(bool(device));
  amd::Context::Info info{};check(amd::Context::checkProperties(nullptr,&info)==CL_SUCCESS);
  auto* context=new amd::Context({device.get()},info);check(context->create(nullptr)==CL_SUCCESS);
+ if(!std::strncmp(mode,"svm-",4)&&std::strcmp(mode,"svm-launch")){
+  check(context->svmDevices().size()==1);
+  for(auto flags:{cl_svm_mem_flags(CL_MEM_SVM_FINE_GRAIN_BUFFER),cl_svm_mem_flags(CL_MEM_SVM_ATOMICS),cl_svm_mem_flags(CL_MEM_USE_HOST_PTR)})
+   check(!amd::SvmBuffer::malloc(*context,flags,256,65536));
+  check(!amd::SvmBuffer::malloc(*context,0,0,65536));
+  check(!amd::SvmBuffer::malloc(*context,0,64u*1024u*1024u+1,65536));
+  check(!amd::SvmBuffer::malloc(*context,0,256,3));
+  check(!amd::SvmBuffer::malloc(*context,0,256,131072));
+  check(allocations.empty()&&observed.allocations==0);
+  auto* pointer=amd::SvmBuffer::malloc(*context,0,256,65536);
+  if(!std::strcmp(mode,"svm-alloc-fail")){check(!pointer&&allocations.empty()&&!observed.terminal);context->release();device.reset();check(observed.gate_destroyed);}
+  else {
+   check(pointer&&reinterpret_cast<uintptr_t>(pointer)%65536==0&&amd::SvmBuffer::malloced(pointer));
+   auto* owner=amd::MemObjMap::FindMemObj(pointer);check(owner&&owner->getSvmPtr()==pointer&&owner->getSize()==256);
+   check(!device->svmAlloc(*context,256,65536,0,pointer));
+   device->svmFree(static_cast<char*>(pointer)+1);check(observed.frees==0&&amd::MemObjMap::FindMemObj(pointer)==owner);
+   owner->retain();amd::SvmBuffer::free(*context,pointer);check(observed.frees==0&&amd::SvmBuffer::malloced(pointer));owner->release();
+   amd::SvmBuffer::free(*context,pointer);
+   if(!std::strcmp(mode,"svm-free-fail")){
+    check(observed.terminal&&observed.frees==0&&allocations.size()==1&&releases==0);
+    check(amd::SvmBuffer::malloced(pointer)&&amd::MemObjMap::FindMemObj(pointer)==owner);
+    check(!amd::SvmBuffer::malloc(*context,0,128,65536));device.release();
+   }else{
+    check(!amd::SvmBuffer::malloced(pointer)&&!amd::MemObjMap::FindMemObj(pointer));
+    check(observed.frees==1&&allocations.empty());amd::SvmBuffer::free(*context,pointer);check(observed.frees==1);
+    context->release();device.reset();check(observed.gate_destroyed);
+   }
+  }
+  std::printf("CLR_PS5_ADAPTER_MODEL_PASS mode=%s gpu_execution=false actual_upstream_svm=true\n",mode);return 0;
+ }
  std::ifstream in(argv[1],std::ios::binary);std::vector<char> binary((std::istreambuf_iterator<char>(in)),{});check(!binary.empty());
  auto* program=new amd::Program(*context);
  if(!std::strcmp(mode,"truncated")){
@@ -102,7 +132,12 @@ int main(int argc,char**argv){
  auto* kernel=new amd::Kernel(*program,*symbol,"thread_words");program->release();
  auto* a=new CheckedQueue(*context,*device,0);auto*b=new CheckedQueue(*context,*device,0);check(a->create()&&b->create());
  constexpr size_t words=81;unsigned input[words],output[words];for(unsigned i=0;i<words;++i){input[i]=0xa5000000u+i;output[i]=0xdeadbeef;}
- auto*x=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));auto*y=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));check(x->create()&&y->create());
+ const bool svmLaunch=!std::strcmp(mode,"svm-launch");void*svmX=nullptr;void*svmY=nullptr;
+ amd::Buffer*x=nullptr;amd::Buffer*y=nullptr;
+ if(svmLaunch){
+  svmX=amd::SvmBuffer::malloc(*context,0,sizeof(input),65536);svmY=amd::SvmBuffer::malloc(*context,0,sizeof(input),65536);check(svmX&&svmY);
+  x=dynamic_cast<amd::Buffer*>(amd::MemObjMap::FindMemObj(svmX));y=dynamic_cast<amd::Buffer*>(amd::MemObjMap::FindMemObj(svmY));check(x&&y);
+ }else{x=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));y=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));check(x->create()&&y->create());}
  if(!std::strcmp(mode,"unsupported")){
   unsigned pattern=7;auto* fill=new amd::FillMemoryCommand(*a,CL_COMMAND_FILL_BUFFER,{},*x,&pattern,4,amd::Coord3D(0),amd::Coord3D(sizeof(input)),amd::Coord3D(sizeof(input)));
   auto* denied=new amd::ReadMemoryCommand(*b,CL_COMMAND_READ_BUFFER,{fill},*x,amd::Coord3D(0),amd::Coord3D(sizeof(output)),output);
@@ -122,14 +157,18 @@ int main(int argc,char**argv){
  if(!std::strcmp(mode,"callback"))check(launch->setCallback(CL_COMPLETE,callback,context));
  auto*read=new amd::ReadMemoryCommand(*b,CL_COMMAND_READ_BUFFER,{launch},*y,amd::Coord3D(0),amd::Coord3D(sizeof(output)),output);
  check(write->validateMemory()&&copy->validateMemory()&&read->validateMemory());
- salt=999;kernel->parameters().set(2,4,&salt);kernel->release();x->release();y->release();
+ salt=999;kernel->parameters().set(2,4,&salt);kernel->release();
+ if(svmLaunch){amd::SvmBuffer::free(*context,svmX);amd::SvmBuffer::free(*context,svmY);check(amd::SvmBuffer::malloced(svmX)&&amd::SvmBuffer::malloced(svmY));}
+ else{x->release();y->release();}
  check(observed.allocations==2&&observed.frees==0);
  write->enqueue();copy->enqueue();launch->enqueue();read->enqueue();
  {std::unique_lock<std::mutex> lock(mutex);check(changed.wait_for(lock,std::chrono::seconds(5),[]{return entered;}));check(observed.frees==0&&observed.launches==0);for(auto v:output)check(v==0xdeadbeef);resume=true;changed.notify_all();}
- const bool success=!std::strcmp(mode,"normal")||!std::strcmp(mode,"callback")||!std::strcmp(mode,"noop")||!std::strcmp(mode,"corrupt")||!std::strcmp(mode,"destroy");check(read->awaitCompletion()==success);a->finish(true);b->finish(true);
+ const bool success=svmLaunch||!std::strcmp(mode,"normal")||!std::strcmp(mode,"callback")||!std::strcmp(mode,"noop")||!std::strcmp(mode,"corrupt")||!std::strcmp(mode,"destroy");check(read->awaitCompletion()==success);a->finish(true);b->finish(true);
  if(success){for(unsigned i=0;i<words;++i)if(output[i]!=(i<count?i*17+19:input[i])){std::fprintf(stderr,"CLR_OUTPUT_ORACLE_REJECT mode=%s index=%u\n",mode,i);std::abort();}check(observed.launches==1);}
  else {check(launch->status()<CL_COMPLETE&&read->status()==CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST);for(auto v:output)check(v==0xdeadbeef);check(observed.terminal);}
- write->release();copy->release();launch->release();read->release();a->release();b->release();check(joined_queues==2);context->release();device.reset();
+ write->release();copy->release();launch->release();read->release();a->release();b->release();check(joined_queues==2);
+ if(svmLaunch){check(observed.frees==0);amd::SvmBuffer::free(*context,svmX);amd::SvmBuffer::free(*context,svmY);check(!amd::SvmBuffer::malloced(svmX)&&!amd::SvmBuffer::malloced(svmY));check(!amd::MemObjMap::FindMemObj(svmX)&&!amd::MemObjMap::FindMemObj(svmY));}
+ context->release();device.reset();
  if(success){unsigned expected=!std::strcmp(mode,"callback")?3:2;check(observed.allocations==expected&&observed.frees==expected&&allocations.empty());check(observed.gate_destroyed==bool(std::strcmp(mode,"destroy")));if(!std::strcmp(mode,"destroy"))check(observed.terminal);}
  else {check(observed.frees==0);const bool uncertain=std::strcmp(mode,"cleanup");check(observed.uncertain==uncertain);check(allocations.size()==(uncertain?6:3)&&releases==(uncertain?0:3));}
  check(observed.queues==2&&observed.retired_queues==2);

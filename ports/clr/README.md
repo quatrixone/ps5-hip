@@ -35,7 +35,8 @@ unchanged, hash-verified native objects; no native execution is claimed. A futur
 executable-memory route needs an owned, qualified native provider.
 
 The port currently covers an internal ROCclr compute profile. Public HIP
-correlation writers and initialization need additional work. Inherited process,
+initialization and complete linkage need additional work; the memory prerequisite
+and profiling TLS writer overlay are documented in `ADAPTER.md`. Inherited process,
 `/proc` and dynamic-loader services are not qualified. The native shared-ELF
 link uses the SDK's C++ runtime and actual unwind-section bounds; optional weak
 SDK loader hooks need explicit treatment before application conversion/startup.

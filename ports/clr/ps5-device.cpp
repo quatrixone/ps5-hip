@@ -7,6 +7,7 @@
 #include "platform/commandqueue.hpp"
 #include "platform/program.hpp"
 #include "platform/kernel.hpp"
+#include "platform/context.hpp"
 #include "device/device.hpp"
 #include "device/devprogram.hpp"
 #include "device/devkernel.hpp"
@@ -73,10 +74,17 @@ public:
         if(state_->operation([&]{base_=state_->data.allocate(owner.getSize());})!=CL_SUCCESS)
             throw ObjectError("buffer allocation failed");
         ++state_->observed.allocations;
+        if(owner.getSvmPtr()==reinterpret_cast<void*>(amd::Memory::MemoryType::kSvmMemoryPtr))
+            owner.setSvmPtr(base_);
     }
     ~Memory(){
-        if(state_->operation([&]{state_->data.free(base_);})==CL_SUCCESS)++state_->observed.frees;
+        if(base_)retire();
         // Terminal State is retained. Never throw or pretend a failed free worked.
+    }
+    bool retire() noexcept {
+        if(!base_)return false;
+        if(state_->operation([&]{state_->data.free(base_);base_=nullptr;})!=CL_SUCCESS)return false;
+        ++state_->observed.frees;return true;
     }
     uint64_t virtualAddress()const override{return reinterpret_cast<uintptr_t>(base_);}
 };
@@ -201,7 +209,10 @@ public:
     Device(BackendFactory factory,Observation& observed):state_(std::make_shared<State>(factory,observed)){
         settings_=new amd::device::Settings();settings_->waitCommand_=false;
         info_.queueProperties_=0;info_.type_=CL_DEVICE_TYPE_GPU;info_.available_=true;
-        info_.localMemSize_=0;info_.svmCapabilities_=0;info_.minDataTypeAlignSize_=8;
+        info_.localMemSize_=0;info_.svmCapabilities_=CL_DEVICE_SVM_COARSE_GRAIN_BUFFER;info_.minDataTypeAlignSize_=8;
+        // Bounded device-buffer policy, not a claim about total physical memory.
+        info_.maxMemAllocSize_=64u*1024u*1024u;info_.memBaseAddrAlign_=0x10000;
+        info_.maxPhysicalMemAllocSize_=0;
         const auto* isa=amd::Isa::findIsa("amdgcn-amd-amdhsa--gfx1013");
         if(!factory||!isa||!amd::Device::create(*isa))throw ObjectError("PS5 CLR device creation");
         state_->retained=state_;
@@ -221,6 +232,34 @@ public:
     amd::device::Program* createProgram(amd::Program& p,amd::option::Options*)override{try{return new Program(*this,p);}catch(...){return nullptr;}}
     amd::device::Memory* createMemory(amd::Memory& m)const override{try{return new Memory(m,state_);}catch(...){return nullptr;}}
     amd::device::VirtualDevice* createVirtualDevice(amd::CommandQueue*)override{try{return new Virtual(*this,state_);}catch(...){return nullptr;}}
+    void* svmAlloc(amd::Context& context,size_t size,size_t alignment,cl_svm_mem_flags flags,void* existing)const override {
+        if(existing||!size||size>info_.maxMemAllocSize_||flags||
+           (alignment&&(alignment>info_.memBaseAddrAlign_||(alignment&(alignment-1))))||
+           context.devices().size()!=1||context.devices()[0]!=this||state_->observed.terminal)
+            return nullptr;
+        amd::Memory* owner=nullptr;
+        try {
+            owner=new(context) amd::Buffer(context,0,size,
+                reinterpret_cast<void*>(amd::Memory::MemoryType::kSvmMemoryPtr));
+            if(!owner||!owner->create(nullptr)){if(owner)owner->release();return nullptr;}
+            auto* memory=dynamic_cast<Memory*>(owner->getDeviceMemory(*this,false));
+            if(!memory||!owner->getSvmPtr()||owner->getSvmPtr()!=reinterpret_cast<void*>(memory->virtualAddress()))
+                throw ObjectError("SVM buffer ownership mismatch");
+            amd::MemObjMap::AddMemObj(owner->getSvmPtr(),owner);
+            return owner->getSvmPtr();
+        }catch(...){if(owner)owner->release();return nullptr;}
+    }
+    void svmFree(void* pointer)const override {
+        auto* owner=amd::MemObjMap::FindMemObj(pointer);
+        if(!owner||owner->getSvmPtr()!=pointer||owner->getContext().devices().size()!=1||
+           owner->getContext().devices()[0]!=this)return;
+        // Public hipFree synchronizes streams first. Direct SVM callers may not
+        // retire storage still retained by an upstream command.
+        if(owner->referenceCount()!=1)return;
+        auto* memory=dynamic_cast<Memory*>(owner->getDeviceMemory(*this,false));
+        if(!memory||!memory->retire())return;
+        amd::MemObjMap::RemoveMemObj(pointer);owner->release();
+    }
     bool validateKernel(const amd::Kernel& k,const amd::device::VirtualDevice* v,bool cooperative)override{
         const auto* selected=dynamic_cast<const Kernel*>(k.getDeviceKernel(*this));
         return !state_->observed.terminal&&v&&&v->device()==this&&!cooperative&&selected&&k.parameters().check();

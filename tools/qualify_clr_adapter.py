@@ -12,6 +12,8 @@ def bind(p,expected=None):
  return p
 native=json.loads(bind(old/'receipt.json').read_text());linux=json.loads(bind(B/'results/clr-combined-workload-v1/receipt.json').read_text())
 prepared=json.loads(bind(P/'preparation.json').read_text())
+bind(R/'tools/prepare_clr_public_memory.py',prepared['public_memory_preparer_sha256'])
+bind(R/'ports/clr/ps5-public-memory.patch',prepared['public_memory_patch_sha256'])
 bind(R/'tools/patch_clr_lifetime.py',prepared['lifetime_generator_sha256'])
 bind(R/'tools/patch_clr_lifetime_v6.py',prepared['lifetime_v6_sha256'])
 bind(R/'tools/patch_clr_lifetime_v7.py',prepared['lifetime_v7_sha256'])
@@ -49,12 +51,12 @@ def compile_one(pair):
  run(label,flags+['-c',str(source),'-o',str(O/(label+'.o'))])
 with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:list(pool.map(compile_one,sources))
 run('link',flags+['-fuse-ld=lld-18']+[str(O/(label+'.o')) for label,_ in sources]+['-Wl,-z,defs','-o',str(O/'model')])
-modes=['normal','callback','badbinary','truncated','unsupported','destroy','submit','throw','kick','timeout','postflush','cleanup','noop','corrupt']
+modes=['svm-basic','svm-alloc-fail','svm-free-fail','svm-launch','normal','callback','badbinary','truncated','unsupported','destroy','submit','throw','kick','timeout','postflush','cleanup','noop','corrupt']
 for mode in modes:
  env=dict(os.environ)
  # Deliberate quarantine is checked with exact ownership counts, not leak silence.
  if a.sanitizer=='address':
-  env['ASAN_OPTIONS']='protect_shadow_gap=0:detect_leaks='+('1' if mode in ('normal','callback','badbinary','truncated','unsupported') else '0')
+  env['ASAN_OPTIONS']='protect_shadow_gap=0:detect_leaks='+('1' if mode in ('svm-basic','svm-alloc-fail','svm-launch','normal','callback','badbinary','truncated','unsupported') else '0')
   env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1'
  result=run(mode,[str(O/'model'),str(artifact),mode],expected=1 if mode in ('noop','corrupt') else 0,env=env)
  if mode not in ('noop','corrupt'):assert 'CLR_PS5_ADAPTER_MODEL_PASS mode='+mode+' gpu_execution=false' in result.stdout

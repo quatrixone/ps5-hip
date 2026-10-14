@@ -7,13 +7,17 @@
     "ps5-lifetime.patch",
     "ps5-device-aot.patch",
     "ps5-affinity.patch",
-    "ps5-executable-path.patch"
+    "ps5-executable-path.patch",
+    "ps5-public-memory.patch",
+    "ps5-hip-correlation.patch"
   ],
   "patches": {
     "ps5-affinity.patch": "fa5475d243051c4257f7890065bcea7111d75d60e76dba54182d92dcced77e87",
     "ps5-executable-path.patch": "3006a0e9ee129e5d10c30fc9c9a15964e907c2c96b1cf5a4630b81a81399a092",
     "ps5-device-aot.patch": "3d2bb402d6beaff2427d3ae199911cf035169ecda9913476e99b3b520571afa7",
-    "ps5-lifetime.patch": "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b"
+    "ps5-lifetime.patch": "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b",
+    "ps5-public-memory.patch": "e12744ddeab27cc4ea390c7eca063ac02277724892ff5838a94bc10c3c41b23a",
+    "ps5-hip-correlation.patch": "959b04dbd7779e285e36e26ed93c378c9b39d963e8505836cf1cd8348ea860cb"
   },
   "files": {
     "rocclr/device/devprogram.cpp": {
@@ -67,6 +71,18 @@
     "rocclr/platform/command.cpp": {
       "base_sha256": "c3e2cc01e37786db0a935edc5994fdd8850b0e9ea0658627b85f9312f67836e8",
       "adapted_sha256": "06f0f9fdbd828a77b06007da53f3fcdad0eaee6ce3ff21f10aea54c815415b18"
+    },
+    "rocclr/platform/memory.cpp": {
+      "base_sha256": "fe9384d6a8a7e763238164ecbf9e0c7cf0b42e0d09f511ec5a975395723e40b8",
+      "adapted_sha256": "7cb0364bb313e3fb60292511dbeca5dae6375a6aa5e4d3d0429c2b8633b4f215"
+    },
+    "hipamd/src/hip_memory.cpp": {
+      "base_sha256": "833ff2bf952d77cdea083751022d4b9989c0d5e17e566213c95e92369674cb4b",
+      "adapted_sha256": "897238c92852724fa84f126090a10b4129c3a8848a85243383af3ee85927f75f"
+    },
+    "hipamd/src/hip_prof_api.h": {
+      "base_sha256": "1f91d5bb347d228b60490785b09ce7724078e005f48b87616402cfdd6a1afaa0",
+      "adapted_sha256": "57a603b91235d4cf2e9d1683190316952cbe3b3b9bc57339e9dfdaa5f70094ed"
     }
   },
   "defines": [

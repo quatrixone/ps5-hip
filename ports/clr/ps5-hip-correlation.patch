@@ -1,0 +1,20 @@
+--- a/hipamd/src/hip_prof_api.h
++++ b/hipamd/src/hip_prof_api.h
+@@ -54,7 +54,7 @@
+             amd::activity_prof::report_activity.load(std::memory_order_relaxed);
+         function && (enabled_ = function(ACTIVITY_DOMAIN_HIP_API, operation_id,
+                                          &trace_data_) == 0)) {
+-      amd::activity_prof::correlation_id = trace_data_.api_data.correlation_id;
++      amd::activity_prof::correlationId() = trace_data_.api_data.correlation_id;
+ 
+       if (trace_data_.phase_enter != nullptr) {
+         init_cb_args_data(trace_data_.api_data);
+@@ -66,7 +66,7 @@
+   ~api_callbacks_spawner_t() {
+     if (enabled_) {
+       if (trace_data_.phase_exit != nullptr) trace_data_.phase_exit(operation_id, &trace_data_);
+-      amd::activity_prof::correlation_id = 0;
++      amd::activity_prof::correlationId() = 0;
+     }
+   }
+ 
