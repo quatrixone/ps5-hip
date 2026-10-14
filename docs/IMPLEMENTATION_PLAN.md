@@ -26,7 +26,11 @@ see `../evidence/native-clr-cpu-path-success.json`. It is a CPU prerequisite,
 not public HIP acceptance. A subsequent genuine ROCclr GPU title passed one
 bounded AgcBackend dispatch with 73 exact outputs, eight copied guards and
 natural teardown; see `../evidence/native-clr-gpu-dispatch-success.json`.
-This does not complete broad G4, public HIP GPU support or G5. G5-G12 remain
+An upstream public HIP allocation/free bridge now also passes a bounded
+69-unit Linux sanitizer model; see
+`../evidence/offline-hip-public-memory-bridge.json`. It has not run through
+the public HIP API on the console. This does not complete broad G4, public HIP
+GPU support or G5. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,

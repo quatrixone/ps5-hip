@@ -10,8 +10,10 @@ event, reset-rejection and failed-join checks.
 `tools/compose_hip_memory.py` verifies the exact admission source and both
 follow-on patch hashes before producing `results/source-v3`. The qualifier
 binds the composed source, compiler-discovered headers, tools and link inputs.
-Fresh full receipts are under `results/asan-memory-v5` and
-`results/tsan-memory-v3`, each covering 69 upstream units and ten modes.
+Fresh full receipts are under `.local/g5-public-hip-bridge/results/asan-memory-v5`
+and `.local/g5-public-hip-bridge/results/tsan-memory-v3`, each covering 69
+upstream units and ten modes. Independent review is recorded in
+`results/public-memory-bridge-full-review-v1/review.json`.
 TSan leak-report symbolization stalled intermittently during the intentionally
 failed-join cases. The TSan harness disables symbolization but still requires
 exit 66, exactly one thread-leak warning, the finished unjoined worker line,

@@ -18,6 +18,16 @@ Updated: 2026-10-13, America/New_York.
   public HIP GPU support, concurrency, performance, full G4 or G5. See
   `evidence/native-clr-gpu-dispatch-success.json`.
 
+- **Genuine public HIP allocation bridge qualified offline:** upstream
+  `hipMalloc`/`hipFree` now run through the ROCclr SVM and PS5 modeled native
+  registry in a 69-unit linked closure. All ten ASan/UBSan and ten TSan model
+  modes passed, including interior/double-free rejection and the strict
+  intentional failed-join leak checks. Independent review cleared this bounded
+  model at `results/public-memory-bridge-full-review-v1/review.json`; the
+  integrated patch stack is at `209664d` through `debf465`. Native public HIP
+  startup, allocation and GPU launch remain unproven. See
+  `evidence/offline-hip-public-memory-bridge.json`.
+
 - **Public HIP allocation prerequisite integrated offline:** isolated `70b2c19`
   adds bounded upstream `SvmBuffer` allocation/free through the PS5 device and
   native registry, retaining ownership on live-command or failed-unmap paths and
@@ -39,8 +49,8 @@ Updated: 2026-10-13, America/New_York.
   bounded **CPU** ROCclr startup/command/lifecycle prerequisite; it makes no GPU
   or public HIP claim. The exact affinity and path patches are integrated at
   `88d497c` with a passing pinned-upstream roundtrip and focused sanitizer test.
-  See `evidence/native-clr-cpu-path-success.json`. Next: rebuild a genuine
-  GPU-backed ROCclr candidate using these repairs and validate its dispatch.
+  See `evidence/native-clr-cpu-path-success.json`. The follow-on GPU candidate
+  has since passed the bounded dispatch above.
 
 - **Native ROCclr startup advanced, then trapped in `AppProfile` on .40:**
   independently reviewed affinity-repaired image `f63a8f3` registered with the

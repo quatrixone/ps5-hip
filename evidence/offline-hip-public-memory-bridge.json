@@ -4,17 +4,17 @@
   "admission_import": "71701ab",
   "reset_import": "f0960be",
   "source_composition": {
-    "path": "results/source-v3/hip-memory-composition.json",
+    "path": ".local/g5-public-hip-bridge/results/source-v3/hip-memory-composition.json",
     "sha256": "6b12f10398e57976434ceaf9c164a98ed80449672e8ac628ffe77ff89d69d9e2"
   },
   "asan_ubsan": {
-    "path": "results/asan-memory-v5/receipt.json",
+    "path": ".local/g5-public-hip-bridge/results/asan-memory-v5/receipt.json",
     "sha256": "cfa23071e2c349e94d4aec6d27046778c3195b10d3072b3aa0e622e741f77703",
     "actual_source_units": 69,
     "passed_modes": 10
   },
   "tsan": {
-    "path": "results/tsan-memory-v3/receipt.json",
+    "path": ".local/g5-public-hip-bridge/results/tsan-memory-v3/receipt.json",
     "sha256": "c7b8ce136b0cd9fe8c565f9888447604a9fccda08cdf6211d753cb06d97aae2e",
     "actual_source_units": 69,
     "passed_modes": 10,
@@ -37,9 +37,13 @@
   "public_hip_gpu_accepted": false,
   "g5_accepted": false,
   "prior_independent_review": {
-    "path": "../../results/public-memory-bridge-review-v1/review.json",
+    "path": "results/public-memory-bridge-review-v1/review.json",
     "sha256": "681bd9400a106ca361ff413794fd7dd533fe70e79b41fff0c2913a8c5943f161",
     "scope": "bounded allocation model before full TSan harness repair"
   },
-  "full_tsan_review": "pending"
+  "full_tsan_review": {
+    "path": "results/public-memory-bridge-full-review-v1/review.json",
+    "sha256": "605e37a20e3069d133975d4fc2674fae1bccc11170904174b82eba3b45e42c51",
+    "decision": "clear-bounded-offline-allocation-bridge"
+  }
 }
