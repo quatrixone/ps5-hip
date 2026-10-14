@@ -1,0 +1,20 @@
+{
+  "classification": "failed-deployment-preflight-no-mutation",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "activation_review_sha256": "fd3c6220402896ea81ba42bf551f9d8ee350af20113fed93e9e94685b43a2f60",
+  "deployment_receipt": {
+    "path": ".local/g5-hip-native-link/tools/public_hip_controls/deployment/deployment-20261014T024552.989895Z/deployment.json",
+    "sha256": "b83359e74571d4d7bfb4fd31005df06175f4607831e7c45f6b79bfdad877b314"
+  },
+  "observed": {
+    "registered": false,
+    "launched": false,
+    "remote_mutation_phases_attempted": 0,
+    "preflight_error": "baseline GPU log digest mismatch",
+    "services_healthy_after": true,
+    "both_owned_locks_released": true
+  },
+  "diagnosis": "The D control omitted eight hex digits from its frozen GPU log SHA-256. The prior reviewed GPU execution receipt and its preserved 870-byte application.log both give 5c91d896f50ec94b7092b90ed30faa84e9b69f3c84e9a7819c5850f3772edc0e. The preflight failed before any upload, rename or registration; it was not replayed.",
+  "next_action": "Freeze a corrected D control with a test against the prior reviewed raw log, independently review its manifest closure, then run one new deployment case. E remains inert."
+}
