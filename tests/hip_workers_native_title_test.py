@@ -43,8 +43,12 @@ int init() asm("_ZN6ps5hip10AgcBackendC2Ev");int submit() asm("_ZN6ps5hip10AgcBa
 int init(){return sceAgcInit(8);}int submit(){return sceAgcDriverSubmitDcb(nullptr);}int kick(){return sceAgcSuspendPoint();}}
 namespace ps5hip_workers {unsigned actor() noexcept{return 0;}}int main(){return init()+submit()+kick();}''')
             # Actual wrapper implementation and SDK signatures, with harmless Linux providers.
-            sdk=ROOT.parent.parent/'.deps/sdk-source-95c08f27386fc698f6bbe21dde3030140a41d10b/platform/include'
-            def run(*cmd):return subprocess.check_output(list(map(str,cmd)),stderr=subprocess.STDOUT,text=True)
+            sdk=ROOT/'.deps/sdk-source-95c08f27386fc698f6bbe21dde3030140a41d10b/platform/include'
+            def run(*cmd):
+                try:
+                    return subprocess.check_output(list(map(str,cmd)),stderr=subprocess.STDOUT,text=True)
+                except subprocess.CalledProcessError as exc:
+                    self.fail(f'{exc.cmd} failed:\n{exc.output}')
             run('clang++-18','-shared','-fPIC',t/'imports.cpp','-o',t/'libmock.so')
             run('clang++-18','-std=c++17','-O0','-fPIE','-pie','-I',sdk,'-I',ROOT/'tools',t/'fixture.cpp',ROOT/'tools/hip_workers_agc.cpp','-Wl,--wrap=sceAgcInit,--wrap=sceAgcDriverSubmitDcb,--wrap=sceAgcSuspendPoint',t/'libmock.so','-o',t/'fixture')
             dis=run('llvm-objdump-18','-d','--no-show-raw-insn',t/'fixture');result=profile.audit_workers_agc(dis,t/'fixture');self.assertEqual(len(result['calls']),3)
