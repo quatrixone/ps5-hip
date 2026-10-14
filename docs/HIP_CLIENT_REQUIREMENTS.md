@@ -1,5 +1,11 @@
 # HIP client requirements for G4 and G7
 
+Scope update (2026-10-14): ProsperoAI integration is no longer a project
+requirement. References below retain historical research provenance. Refresh
+client-specific requirements against the standalone G7 client selected in
+`IMPLEMENTATION_PLAN.md`; do not treat the old application ABI or model list as
+acceptance gates.
+
 Offline source inventory, 2026-10-11. This is input to the G4 runtime decision,
 not an implemented API list or GPU qualification. G1-G3 remain prerequisites.
 
@@ -145,8 +151,8 @@ contract; these client symbols alone do not require it.
 The decisive build spike must resolve native host linkage, CMake package targets,
 hipBLAS/rocBLAS execution and device-library/header versions as well as kernel
 compilation. The current ggml static-link rejection needs an explicit PS5 build
-decision; removing that check alone is not library compatibility. Retain Vulkan
-as the ProsperoAI control and preserve its shared ggml ABI while qualifying HIP.
+decision; removing that check alone is not library compatibility. Refresh this
+inventory for the pinned standalone G7 client and use a matched qualified control.
 
 No client build, native execution, performance gain or G4/G7 completion is proved
 by this inventory. No console was accessed and no source dependency was changed.

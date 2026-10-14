@@ -1,5 +1,11 @@
 # G4 runtime architecture: bounded offline comparison
 
+Scope update (2026-10-14): ProsperoAI integration is no longer a project
+requirement. References below retain historical research provenance. Refresh
+client-specific requirements against the standalone G7 client selected in
+`IMPLEMENTATION_PLAN.md`; do not treat the old application ABI or model list as
+acceptance gates.
+
 Recommendation: select a small native HIP compatibility runtime as the main G4 implementation, using the real ROCm 6.2.4 headers/compiler ABI and existing checked loader, memory and submission substrate. Keep the standalone launch harness as a diagnostic control. Do not start a second production CLR backend or HSA runtime now. This is a development decision, not HIP/GPU/framework qualification; G2/G3 and native teardown prerequisites remain open.
 
 ## Measured comparison

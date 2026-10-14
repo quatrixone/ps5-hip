@@ -1,5 +1,11 @@
 # Research baseline
 
+Scope update (2026-10-14): ProsperoAI integration is no longer a project
+requirement. References below retain historical research provenance. Refresh
+client-specific requirements against the standalone G7 client selected in
+`IMPLEMENTATION_PLAN.md`; do not treat the old application ABI or model list as
+acceptance gates.
+
 Recorded 2026-10-11. These are research inputs, not ps5-hip validation results.
 References to `main`, `develop` or `latest` can move; use the recorded commits for
 the initial investigation and record any replacement before comparing results.

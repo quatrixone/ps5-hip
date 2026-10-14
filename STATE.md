@@ -3,6 +3,12 @@
 Updated: 2026-10-14, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Current scope
+
+As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalone
+inference client and SDK preview. All other compute, library, framework and training
+gates remain open as previously recorded; historical evidence is unchanged.
+
 ## Actual status
 
 - **Public HIP bootstrap package registered on .40; execution has not begun:**

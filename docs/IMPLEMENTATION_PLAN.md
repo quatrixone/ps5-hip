@@ -144,13 +144,14 @@ kernels, performance and broader G4 remain open.
 
 Build a native PS5 compute platform that lets developers bring real HIP software
 to the console, reuse selected ROCm libraries, and execute useful inference and
-training workloads. Make the runtime reusable beyond ProsperoAI and understandable
+training workloads. Make the runtime reusable across applications and understandable
 enough that another developer can reproduce it without the original workstation.
 
 The most ambitious core demonstration is **native PyTorch on PS5 performing a
 forward pass, backward pass, optimizer update and checkpoint/resume, followed by
-a useful bounded fine-tuning experiment**. The inference milestone is an actual
-ProsperoAI HIP backend with model parity and measured tradeoffs against Vulkan.
+a useful bounded fine-tuning experiment**. The inference milestone is a standalone
+ggml/llama HIP client with model parity and measured tradeoffs against a qualified
+control.
 The platform milestone is a versioned SDK, reliable resource ownership, declared
 capabilities and reproducible evidence.
 
@@ -163,7 +164,7 @@ change the implementation based on evidence.
 | --- | --- | --- |
 | Native execution proof | Qualified HIP-compiled code executes with correct launch and compute semantics | G1-G3 |
 | Usable HIP development preview | Real HIP C++ programs, streams/events and graph replay work within documented limits | G4-G5 |
-| Application SDK | Useful libraries and a ProsperoAI integration build from pinned dependencies | G6-G7 |
+| Application SDK | Useful libraries and a standalone inference client build from pinned dependencies | G6-G7 |
 | Ambitious core platform | Native framework inference and training, measured performance and sustained reliability | G8-G10 |
 | Frontier research | Native compilation/graph compilation and multi-console compute experiments | G11-G12 |
 
@@ -174,10 +175,10 @@ goal is infeasible; report its precise boundary instead of claiming full ROCm.
 ## 2. Baseline and project requirements
 
 The [research baseline](RESEARCH_BASELINE.md) records the initial source revisions.
-The current ProsperoAI reference is its shared Prism llama/ggml Vulkan runtime,
-not the older architecture-specific AGC inference path. Its existing GPU capability
-is our control. We are seeking broader software reuse and measurable improvements
-on that baseline.
+Historical application findings remain research inputs. Select and pin standalone
+client and benchmark revisions for G7; compare identical workloads against a
+qualified Vulkan or CPU control. ProsperoAI integration was removed from scope
+on 2026-10-14 at the owner's request. This change does not pass any existing gate.
 
 ### Functional requirements
 
@@ -191,8 +192,8 @@ on that baseline.
   including correct errors for unsupported functions and features.
 - **R5: Libraries.** Run useful BLAS and other selected library entrypoints with
   validated kernels and appropriate fallbacks.
-- **R6: Inference.** Integrate with ggml/ProsperoAI without losing its model-format,
-  tokenizer, numerical or session behavior.
+- **R6: Inference.** Run a standalone ggml/llama HIP client with qualified model-format,
+  tokenizer, numerical and KV-cache behavior.
 - **R7: Frameworks.** Run native framework inference and autograd/optimizer workloads.
 - **R8: Developer experience.** Supply a reproducible SDK, examples, capability query,
   diagnostics and enough evidence for another developer to reproduce results.
@@ -207,7 +208,7 @@ on that baseline.
   hashes, exact commands and compact evidence with each accepted milestone.
 - **N4: Honest measurements.** Compare the same workload, context, cache state and
   numerical contract. Count CPU fallback, memory and teardown costs.
-- **N5: Isolation.** Separate this SDK, ProsperoAI integration and graphics-driver
+- **N5: Isolation.** Separate this SDK, standalone clients and graphics-driver
   changes. Existing working installations and user data are preserved.
 - **N6: Maintainability.** Reuse existing public components; make narrow upstreamable
   patches. Add abstractions only when they serve an implemented client.
@@ -236,7 +237,7 @@ flowchart TD
         D[PS5 host cross compiler]
     end
     subgraph Console[Native PS5 title]
-        E[Application: examples, ProsperoAI or framework]
+        E[Application: examples, standalone inference or framework]
         E --> F[HIP runtime and selected libraries]
         F --> G[Validated kernel loader and dispatch state]
         G --> H[Memory, command submission, fences and cache visibility]
@@ -334,7 +335,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
-| G7 | ProsperoAI HIP integration and SDK preview | G5-G6 | planned |
+| G7 | Standalone inference client and SDK preview | G5-G6 | planned |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
 | G9 | Autograd, training and bounded LoRA | G8 | planned |
 | G10 | Competitive performance and sustained reliability | G7-G9 | planned |
@@ -633,50 +634,40 @@ or error-path correctness.
 Decision: retain libraries that reduce application work or provide useful kernels.
 Avoid carrying an enormous tuned-kernel database that the console cannot use.
 
-## 11. G7 — Integrate ProsperoAI and deliver an SDK preview
+## 11. G7 — Standalone inference client and SDK preview
 
-**Objective:** prove that the platform is useful in the existing application.
-Advances R6 and R8. Integration changes belong on a ProsperoAI development branch.
+**Objective:** prove that developers can use the SDK for native inference without
+an application-specific integration. Advances R6 and R8. ProsperoAI integration,
+its UI, routing, model aliases and shared Prism ABI are outside this roadmap.
 
-Start by building a standalone ggml/llama HIP client against ps5-hip. Inventory
-the API and kernels it actually uses. Then connect the same implementation to
-ProsperoAI's pinned Prism ggml ABI. Quantized formats, including its ternary Bonsai
-path, require actual kernel support; a working dense GEMM does not provide them.
+Build a standalone ggml/llama HIP client against ps5-hip from a pinned upstream
+revision. Inventory its actual APIs, kernels and library dependencies; refresh the
+historical client inventory against that revision before selecting coverage.
 
 Qualification ladder:
 
-1. One small dense model with deterministic token/logit comparison and CPU fallback
-   accounting, followed by a representative quantized model.
-2. Current Mistral and Qwen paths, prefill/decode separation, multi-turn KV reuse,
-   context changes and model switching. Measure memory use after every transition.
-3. Exact supported Prism/Bonsai format coverage, including its tokenizer and current
-   generation modes. Do not silently dequantize the entire model to exceed the
-   available memory budget or change the model being compared.
-4. SD-Turbo, Stable Audio and Kokoro through the shared application runtime where
-   supported. Attribute remaining CPU operators, allocations and uploads explicitly.
-5. Application lifecycle: cancellation, out-of-memory behavior, loading failure,
-   repeat requests, return to text after media, session preservation and clean exit.
+1. Run a small dense model with reference-checked logits and deterministic token
+   fixtures, followed by a representative quantized model. Record model formats,
+   tokenizer behavior, precision and every CPU or alternate-backend fallback.
+2. Qualify prefill/decode, multi-turn KV reuse, context changes and model switching.
+   Measure memory after each transition and preserve the selected numerical contract.
+3. Exercise cancellation, allocation failure, invalid model loading, repeated
+   requests and clean shutdown. Quantized kernels must implement the named format;
+   do not silently dequantize an entire model beyond the available memory budget.
+4. Compare matched workloads with a pinned qualified Vulkan or CPU control,
+   including initialization, steady-state latency, output correctness and peak memory.
 
-Keep Vulkan selectable and default during qualification. Inference routing belongs
-to ProsperoAI; ps5-hip supplies the compute dependency and its capability report.
-Separate functional fallback from a benchmark: a supposedly GPU result must disclose
-all CPU work and any operations routed through another backend.
-
-Acceptance: a frozen native application candidate passes representative text and
-media fixtures using a pinned ps5-hip SDK, with supported model coverage stated
-precisely. Text checks include logits/tolerance and deterministic token fixtures;
-where floating-point differences alter argmax, investigate and evaluate quality
-rather than hiding the mismatch or assuming all text must be bit-identical.
-Media checks use fixed seeds, numerical comparisons, valid artifacts and inspection.
-No loss of saved sessions, legacy model aliases or normal launcher behavior.
+Acceptance: a frozen standalone native client passes the dense and quantized
+fixtures using a pinned ps5-hip SDK, with precise supported-model coverage and
+bounded teardown. Investigate floating-point differences that change argmax;
+report quality and numerical results rather than hiding mismatches.
 
 The SDK preview includes headers/library artifacts, versioned capability metadata,
-compiler requirements, a minimal application template and instructions reproducible
+compiler requirements, a minimal application template and instructions verified
 from a clean host. Repository privacy and release publication remain owner decisions.
 
-Decision: a preview can be valuable for new capability even without a speed win.
-Changing ProsperoAI's default requires the corresponding correctness, stability and
-benefit gates; it is not an automatic consequence of reaching G7.
+Decision: a preview may deliver useful capability without a speed win. Record the
+measured tradeoffs and retain explicit errors for unsupported client features.
 
 ## 12. G8 — Native LibTorch and Python/PyTorch inference
 
@@ -1071,7 +1062,7 @@ they are not reasons to stop autonomous offline work within an authorized task.
 ## 22. Ambition without unsupported claims
 
 Aim for the complete chain: an ordinary HIP program, a reusable SDK, real math
-libraries, ProsperoAI, native PyTorch, then learning workloads. Explore native
+libraries, standalone inference, native PyTorch, then learning workloads. Explore native
 compilation and multiple consoles after the single-console platform earns trust.
 
 The meaningful achievement is another developer compiling a useful program,

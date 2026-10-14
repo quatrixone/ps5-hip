@@ -3,8 +3,8 @@
 An experimental native HIP compute platform for PlayStation 5 homebrew.
 
 The ambition is to make the PS5 a programmable GPU compute machine: compile real
-HIP C++ kernels, reuse useful ROCm libraries, accelerate applications such as
-ProsperoAI, and ultimately run native PyTorch inference and training.
+HIP C++ kernels, reuse useful ROCm libraries, support standalone inference clients,
+and ultimately run native PyTorch inference and training.
 
 **Status: a bounded native HIP runtime now executes genuine compiler-registered
 clients on PS5 firmware 12.70. G3/G4 remain incomplete; frameworks and application
@@ -88,7 +88,8 @@ The repository is private.
    verified arithmetic, memory, synchronization and register-spill behavior.
 2. Developers build useful HIP applications against a documented PS5 SDK, with
    supported operations working and unsupported operations failing explicitly.
-3. Selected ROCm libraries and ProsperoAI use the runtime successfully, with
+3. Selected ROCm libraries and standalone inference clients use the runtime
+   successfully, with
    measured correctness, performance and memory use against existing implementations.
 4. Native PyTorch performs inference, backward propagation, optimizer steps and
    checkpoint/resume on the console. Small-model training and bounded LoRA
@@ -97,15 +98,13 @@ The repository is private.
 The later goals explore on-console compilation, graph compilers and collaboration
 between multiple consoles. These are planned research directions, not capabilities.
 
-## Relationship to ProsperoAI
+## Standalone SDK scope
 
-[ProsperoAI](https://github.com/blackbearreloaded/ProsperoAI) is the first intended
-application and integration benchmark. It owns models, inference routing and the
-user experience. This repository owns the reusable compute runtime, compiler
-configuration, library integration and validation.
-
-ProsperoAI's current Vulkan runtime is the integration baseline. HIP adoption is
-gated on a demonstrated capability or performance benefit and stable operation.
+This repository owns the reusable compute runtime, compiler configuration,
+library integration and validation. G7 delivers a standalone ggml/llama inference
+client and a reproducible SDK preview. ProsperoAI integration is out of scope.
+Historical application research remains provenance, not an integration requirement.
+Benchmark controls must use pinned, matched workloads and qualified backends.
 
 ## Technical direction
 

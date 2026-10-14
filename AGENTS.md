@@ -6,8 +6,9 @@ the entire workspace, dependency trees or historical logs by default.
 
 ## Project boundaries
 
-- This is a separate compute SDK. Keep ProsperoAI UI/model work and graphics-driver
-  changes in their own repositories; consume pinned revisions here.
+- This is a separate compute SDK. ProsperoAI integration is out of scope.
+  Keep application UI/model work and
+  graphics-driver changes in their own repositories; consume pinned revisions here.
 - The plan is ambitious. Do not declare the project complete after an early
   canary, rename a failed gate as success, or reduce acceptance silently.
 - Implement the smallest complete step that advances the active gate. Planned

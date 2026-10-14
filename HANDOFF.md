@@ -108,6 +108,13 @@ ignored `.local/ENVIRONMENT.md`. The user permits .40 proof-of-concept tests whe
 useful, but wants candidates finished and reviewed offline first. Preserve the
 installed image, old GPU image/log, backups, and any user data.
 
+## Scope update — 2026-10-14
+
+The owner removed ProsperoAI integration. G7 now targets a standalone ggml/llama
+inference client and SDK preview; application-specific ABI, UI and model coverage
+are no longer acceptance requirements. Historical source/evidence records remain
+provenance. No implementation gate is closed by this scope change.
+
 ## Next work, in order
 
 1. In the bootstrap branch, create a new E-only binding to the exact D receipt
@@ -125,7 +132,8 @@ installed image, old GPU image/log, backups, and any user data.
    keep the corrected GeometryLds source frozen, and independently review before
    a numerical `.40` run. No GEMM GPU success is presently claimed.
 4. Continue G5 public HIP GPU launch and the later stream/event/library,
-   ProsperoAI, framework, training, performance, on-console compilation, and
+   standalone inference/SDK, framework, training, performance, on-console
+   compilation, and
    multi-console gates in `docs/IMPLEMENTATION_PLAN.md`.
 
 Before any hardware experiment, follow `AGENTS.md` and
