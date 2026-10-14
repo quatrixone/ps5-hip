@@ -1,0 +1,34 @@
+{
+  "classification": "offline-real-clr-svm-allocation-prerequisite",
+  "isolated_source_commit": "70b2c19b2012c35d52999520cd7665eacfd7ac95",
+  "integrated_commit": "937a946651ecbe467dd5752f958ae11b5580bf64",
+  "aggregate_receipt": {
+    "path": ".local/g5-clr-public-memory/results/svm-frozen-v1/receipt.json",
+    "sha256": "1e42e90a0a2e8aa14bb48a6109906ccf094e650856de7f5f7fe5f318a3c0f2b9"
+  },
+  "independent_review": {
+    "path": "results/clr-public-memory-independent-review-v1/review.json",
+    "sha256": "09465bce1408afe130d313f8048e80b4ab51d14a8e5b3c951bffe1f26558342c"
+  },
+  "qualification": {
+    "real_source_units": 39,
+    "asan_ubsan_modes": 18,
+    "tsan_modes": 18,
+    "actual_upstream_svm_queue_chain": "write-copy-kernel-read, model transport",
+    "native_compiled": ["PS5 Device", "upstream memory.cpp", "complete hip_memory.cpp"],
+    "patch_roundtrip": "pass"
+  },
+  "implemented": [
+    "Bounded SvmBuffer/Context/Device allocation over NativeDataRegistry and MemObjMap",
+    "Ownership retention when live commands or native unmap failure prevent free",
+    "Interior free rejection and PS5 HIP free error propagation instead of false success"
+  ],
+  "limits": [
+    "No complete public HIP link, bootstrap, stream/device integration or HIP TLS qualification.",
+    "No native public hipMalloc/hipFree call or GPU execution; sanitizer transport/providers are synthetic.",
+    "The source-reviewed, native-compiled hipFree error path has not run through the full public HIP runtime.",
+    "The supported allocation profile is one device, zero flags, up to 64 MiB; other SVM modes remain unsupported."
+  ],
+  "public_hip_accepted": false,
+  "gpu_hardware_gate_passed": false
+}

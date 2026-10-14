@@ -4,6 +4,16 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Public HIP allocation prerequisite integrated offline:** isolated `70b2c19`
+  adds bounded upstream `SvmBuffer` allocation/free through the PS5 device and
+  native registry, retaining ownership on live-command or failed-unmap paths and
+  rejecting false-success free. It is imported at `937a946`. An independent
+  review cleared 18 ASan/UBSan and 18 TSan modes on 39 actual units, a genuine
+  upstream SVM queue model, native Device/memory/HIP-memory compilation, and
+  exact patch reproduction. Full public HIP bootstrap/link, real public API
+  execution and GPU transport remain open; see
+  `evidence/offline-clr-public-memory.json`.
+
 - **Native upstream ROCclr CPU workload passed on .40:** frozen executable-path
   repair `3f4b885` was packaged, independently reviewed, registered and launched
   once as PPSA99014. PID 398/app `0x8018` completed eight computed outputs,
