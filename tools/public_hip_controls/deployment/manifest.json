@@ -9,6 +9,10 @@
     "path": ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json",
     "sha256": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348"
   },
+  "prior_control_review": {
+    "path": ".local/g5-hip-native-link/results/public-hip-bootstrap-controls-independent-review-v1/review.json",
+    "sha256": "e13915973e4639dcd0dc77871983f43c130a55f47ef08ec2bed63d70acbb0342"
+  },
   "deployment_binding": null,
   "prior_backups": {
     "/data/homebrew/PPSA99014.ffpkg.atomic-current.sha256-14e07323b96c081c040ab65babc412da985fe36b10fd73dfe27ba4293f178498.preserved": {
@@ -150,6 +154,7 @@
   },
   "files_sha256": {
     ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348",
+    ".local/g5-hip-native-link/results/public-hip-bootstrap-controls-independent-review-v1/review.json": "e13915973e4639dcd0dc77871983f43c130a55f47ef08ec2bed63d70acbb0342",
     "results/clr-gpu-startup-controls-v1/deployment/deployment-20261014T011917.375604Z/deployment.json": "7cae44d6878ecda9eae6ad2e6fcf496f1db8894d12a7ca0d78f46d677a4e6fc4",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/manifest.json": "60e793da1f1d91b166641d5575ab941ff602a5d002eb9969832ed5099d24d0be",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/package-receipt.json": "9f354b6df99d8d7c74488ff67270b379e43436cdc2252cf31799472d7b5177ff",
@@ -164,15 +169,15 @@
     "build/controllers/PPSA99014/close.elf": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
     ".local/teardown-snapshot-v3/build/teardown-qualified-v3/teardown-snapshot.elf": "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93",
     ".local/ENVIRONMENT.md": "ec17ac4ccd4dca80ce49efd73a848480365daacb9ea4717674be44438b9650a5",
-    ".local/g5-hip-native-link/tools/public_hip_controls/prepare_manifests.py": "5d984a552079e890f54082c41699f4fee30d78fc0f5f4a1e0f3bb76cb0ed06d9",
+    ".local/g5-hip-native-link/tools/public_hip_controls/prepare_manifests.py": "6e4db768b246ecc0a3d27065c166a5a511d2bf93026314a6f68cc4ce380130a6",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/eboot.bin": "19107f50782257e80a8eb3405978d83bc0b8742f0e37d71b36b3735d629174fe",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
-    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "7dda8bd3c028a0bb2c51ea5d0c51bf5a5301e898c68b11e75c3e969f5404e68f",
-    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "a917f0fc9f65e9e87e455a01981d238571b208097d9e60fc520628604693b3a8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "0c00b272c5616b391a57c412ee3f324d1cb948d582768b62f8d39d4811532cd8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "64d28b633f9f3e3fb3493b2fa7933615fd5d54a7d37cd9f6a1cf597800f29d22",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/acceptance.py": "921151f3c39ad013ece4d16ea3d15e8ad3fc15ff4c267bbabd5188ddabe0a6c0",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/check_log.py": "73a43f6ad0e5d53d5fd8d923fd4bdcb4433c7130349bfb82ec97f3dfe3ab7d6d",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/run.py": "79ba76ac6854598a3f5935602c2689359c4911e1cedc102fc1e229b08f68318a",
@@ -182,12 +187,13 @@
   },
   "direct_sha256": {
     ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348",
+    ".local/g5-hip-native-link/results/public-hip-bootstrap-controls-independent-review-v1/review.json": "e13915973e4639dcd0dc77871983f43c130a55f47ef08ec2bed63d70acbb0342",
     ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/PPSA99014.ffpkg": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
     "build/controllers/PPSA99014/receipt.json": "a2c01897d9e49da40bf7e0e00ae9ffd890c24294f46f4a3f025cc56b218592f5",
     "build/controllers/PPSA99014/launch.elf": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
     "build/controllers/PPSA99014/close.elf": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
-    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "7dda8bd3c028a0bb2c51ea5d0c51bf5a5301e898c68b11e75c3e969f5404e68f",
-    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "a917f0fc9f65e9e87e455a01981d238571b208097d9e60fc520628604693b3a8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "0c00b272c5616b391a57c412ee3f324d1cb948d582768b62f8d39d4811532cd8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "64d28b633f9f3e3fb3493b2fa7933615fd5d54a7d37cd9f6a1cf597800f29d22",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/acceptance.py": "921151f3c39ad013ece4d16ea3d15e8ad3fc15ff4c267bbabd5188ddabe0a6c0",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/check_log.py": "73a43f6ad0e5d53d5fd8d923fd4bdcb4433c7130349bfb82ec97f3dfe3ab7d6d",
     ".local/g5-hip-native-link/tools/public_hip_controls/execution/run.py": "79ba76ac6854598a3f5935602c2689359c4911e1cedc102fc1e229b08f68318a",

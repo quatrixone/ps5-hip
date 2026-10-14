@@ -73,6 +73,9 @@ class Tests(unittest.TestCase):
 
     def model(self,mode):
         tmp=tempfile.TemporaryDirectory();self.addCleanup(tmp.cleanup);out=Path(tmp.name);stage=out/'stage';(stage/'app/sce_sys').mkdir(parents=True);(stage/'app/sce_module').mkdir()
+        prior=out/'prior';(prior/'sce_sys').mkdir(parents=True);(prior/'sce_module').mkdir()
+        old_files={'eboot.bin':b'oldelf','sce_module/libc.prx':b'oldcode','lapy.elf':b'oldhelper','results-dir.txt':b'/oldresults','sce_sys/param.json':b'param'}
+        for name,data in old_files.items():(prior/name).write_bytes(data)
         payload=b'n'*9437184;old=b'oldimage';log=b'L'*870;eboot=b'newelf';code=b'newcode';clock=Clock();ops=[];health=[]
         for name,data in [('PPSA99014.ffpkg',payload),('app/eboot.bin',eboot),('app/sce_module/libc.prx',code),('app/lapy.elf',b'helper'),('app/results-dir.txt',b'/results'),('app/sce_sys/param.json',b'param')]: (stage/name).write_bytes(data)
         old_sha=r.sha(old);log_sha=r.sha(log);new_sha=r.sha(payload)
@@ -88,17 +91,23 @@ class Tests(unittest.TestCase):
         if mode=='oldlog':files[r.OLD_LOG]=b'X'*870
         if mode=='conflict':files[backup]=b'conflict'
         if mode=='private_exists':files[private]=b'old private'
-        history=b'IDLE\n';released=False;promoted=False
+        history=b'IDLE\n';released=False;promoted=False;candidate_released=False;restored=False;candidate_registered=False;old_registered=False
         def fetch(ftp,path,limit=4194304,deadline=None,command='RETR'):
-            nonlocal history,released
+            nonlocal history,released,candidate_released,candidate_registered,old_registered
             if command=='LIST':return ''.join(f'-rw-r--r-- 1 user group {len(v)} Oct 13 00:00 {Path(p).name}\n' for p,v in files.items() if str(PurePosixPath(p).parent)==path).encode()
             if path.endswith('debug.log'):
                 if mode=='busy':return b'BUSY\n'
                 if mode=='reset' and 'upload' in rec['attempted']:return b'RESET\n'
                 if r.FINAL not in files and not released and mode!='release_timeout':
                     history+=('[IMG][LVD] unmount complete: source='+r.FINAL+' mount='+r.MOUNT+' unit=2\n').encode();released=True
-                if promoted and not b'Mounting image' in history and mode!='stale_registration':
+                if promoted and r.FINAL not in files and released and not candidate_released and mode!='rollback_release_timeout':
+                    history+=('[IMG][LVD] unmount complete: source='+r.FINAL+' mount='+r.MOUNT+' unit=3\n').encode();candidate_released=True
+                if promoted and r.FINAL in files and not candidate_registered and mode!='stale_registration':
                     history+=('[IMG] Mounting image (ufs): '+r.FINAL+' -> '+r.MOUNT+'\n[IMG][LVD] Mounted (ufs) /dev/lvd2 -> '+r.MOUNT+'\n[LINK] mount.lnk created: /user/app/'+r.TITLE+'/mount.lnk -> '+r.MOUNT+'\n').encode()
+                    candidate_registered=True
+                if restored and not old_registered:
+                    history+=('[IMG] Mounting image (ufs): '+r.FINAL+' -> '+r.MOUNT+'\n[IMG][LVD] Mounted (ufs) /dev/lvd4 -> '+r.MOUNT+'\n[LINK] mount.lnk created: /user/app/'+r.TITLE+'/mount.lnk -> '+r.MOUNT+'\n').encode()
+                    old_registered=True
                 return history
             if mode=='upload_bad' and path==temporary:return b'corrupt'
             if path not in files:raise OSError('absent '+path)
@@ -107,7 +116,7 @@ class Tests(unittest.TestCase):
             ops.append(('upload',command));files[command[5:]]=stream.read()
             if mode=='upload_error':raise OSError('uncertain upload')
         def rename(source,dest):
-            nonlocal promoted
+            nonlocal promoted,restored
             ops.append(('rename',source,dest))
             if source==temporary:
                 self.assertTrue(released,'promotion cannot precede passive unmount')
@@ -116,9 +125,13 @@ class Tests(unittest.TestCase):
                 if mode!='mounted_old':
                     files[r.MOUNT+'/eboot.bin']=eboot;files[r.MOUNT+'/sce_module/libc.prx']=code
                     files[r.MOUNT+'/lapy.elf']=b'helper';files[r.MOUNT+'/results-dir.txt']=b'/results'
-                    if mode=='mounted_libc':files[r.MOUNT+'/sce_module/libc.prx']=b'wrong'
+                    if mode in ('mounted_libc','rollback_release_timeout'):files[r.MOUNT+'/sce_module/libc.prx']=b'wrong'
                     if mode=='mounted_helper':files[r.MOUNT+'/lapy.elf']=b'wrong'
                     if mode=='mounted_config':files[r.MOUNT+'/results-dir.txt']=b'wrong'
+            if source==backup and dest==r.FINAL:
+                restored=True
+                for name,data in old_files.items():
+                    if name!='sce_sys/param.json':files[r.MOUNT+'/'+name]=data
             self.assertNotIn(dest,files);files[dest]=files.pop(source)
         class Transfer:
             def __init__(self,data):self.data=data
@@ -144,7 +157,7 @@ class Tests(unittest.TestCase):
         h=SimpleNamespace(fetch=fetch,parse_listing=helper.parse_listing,bounded=lambda *x:contextlib.nullcontext(),remaining=clock.remaining,title_registered=helper.title_registered)
         rec={'baseline_image_bytes':len(old),'stage':'local-verified','registered':False,'attempted':[]}
         with contextlib.ExitStack() as stack:
-            for obj,name,value in [(r,'PRESERVED_BACKUPS',atomic),(r,'HERE',out),(r,'STAGE',stage),(r,'OLD_IMAGE',old_sha),(r,'LOG_SHA',log_sha),(r,'IMAGE',new_sha),(r,'verify_direct',lambda:None),(r.ftplib,'FTP',lambda:ftp),(r.time,'monotonic',clock.monotonic),(r.time,'sleep',clock.sleep)]:stack.enter_context(patch.object(obj,name,value))
+            for obj,name,value in [(r,'PRESERVED_BACKUPS',atomic),(r,'HERE',out),(r,'STAGE',stage),(r,'PRIOR_APP',prior),(r,'OLD_IMAGE',old_sha),(r,'LOG_SHA',log_sha),(r,'IMAGE',new_sha),(r,'verify_direct',lambda:None),(r.ftplib,'FTP',lambda:ftp),(r.time,'monotonic',clock.monotonic),(r.time,'sleep',clock.sleep)]:stack.enter_context(patch.object(obj,name,value))
             r.deploy(out,rec,(h,guards,{'expected_log':private,'image_bytes':len(payload)}))
         self.assertEqual(files[historic],b'untouched');self.assertEqual(files[atomic_path],b'wrong' if mode=='atomic_changed' else b'atomicbackup');self.assertEqual(len(health),0 if mode=='lockbusy' else 2);self.assertTrue(rec['owned_locks_released'])
         return rec,ops,files,backup,logbackup,payload,old,log
@@ -167,13 +180,37 @@ class Tests(unittest.TestCase):
         self.assertFalse(rec['registered'] and rec['owned_locks_released'] and not any(rec.get(k) for k in ('error','idle_error','health_error','ftp_close_error','lock_errors','local_final_error')))
 
     def test_uncertain_upload_hash_history_and_deadlines_stop(self):
-        for mode in ('upload_error','upload_bad','reset','release_timeout','promote_error','stale_registration','mounted_old','mounted_libc','mounted_helper','mounted_config'):
+        for mode in ('upload_error','upload_bad','reset','release_timeout','promote_error','stale_registration','mounted_old','mounted_libc','mounted_helper','mounted_config','rollback_release_timeout'):
             with self.subTest(mode=mode):
                 rec,ops,*_=self.model(mode);self.assertFalse(rec['registered']);self.assertIn('error',rec)
                 self.assertEqual(len(rec['attempted']),len(set(rec['attempted'])))
                 if mode in ('upload_error','upload_bad','reset'):self.assertEqual(len(ops),1)
                 if mode=='release_timeout':self.assertNotIn('promote',rec['attempted'])
                 if mode.startswith('mounted_'):self.assertIn('mounted candidate bytes mismatch',rec['error'])
+
+    def test_post_preservation_rollback_restores_verified_gpu_package(self):
+        for mode in ('stale_registration','mounted_old','mounted_libc','mounted_helper','mounted_config'):
+            with self.subTest(mode=mode):
+                rec,ops,files,backup,logbackup,payload,old,log=self.model(mode)
+                self.assertEqual(rec['rollback']['status'],'old-gpu-restored')
+                self.assertEqual(files[r.FINAL],old);self.assertEqual(files[r.OLD_LOG],log)
+                self.assertNotIn(backup,files);self.assertNotIn(logbackup,files)
+                self.assertEqual(files[rec['temporary']],payload)
+                self.assertTrue(rec['rollback']['registered'])
+                self.assertTrue(rec['rollback']['mounted_old_bytes_verified'])
+                self.assertEqual(rec['prior_backups_unchanged']['before'],rec['prior_backups_unchanged']['rollback'])
+                self.assertIn('restore-image',rec['attempted']);self.assertIn('restore-log',rec['attempted'])
+
+    def test_uncertain_post_preservation_state_preserves_backups(self):
+        for mode in ('release_timeout','promote_error','rollback_release_timeout'):
+            with self.subTest(mode=mode):
+                rec,ops,files,backup,logbackup,payload,old,log=self.model(mode)
+                self.assertEqual(rec['rollback']['status'],'unverified-hold')
+                self.assertTrue(rec['rollback']['backups_must_remain'])
+                self.assertTrue(rec['rollback']['manual_read_only_diagnosis'])
+                self.assertEqual(files[backup],old);self.assertEqual(files[logbackup],log)
+                self.assertNotIn(r.FINAL,files)
+                self.assertNotIn('restore-image',rec['attempted'])
 
 
 
