@@ -1,0 +1,48 @@
+{
+  "classification": "inert-one-use-public-hip-bootstrap-controls",
+  "control_commit": "70061c8fe899ce19637c5e98ef2ab34a33bb51e6",
+  "source_commit": "ea37055286903f680e43b049d70730743ffa2358",
+  "title_id": "PPSA99014",
+  "console": "192.168.4.40",
+  "clean_package_review": {
+    "path": ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json",
+    "sha256": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348"
+  },
+  "candidate_image": {
+    "sha256": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+    "bytes": 9437184
+  },
+  "control_manifest_sha256": "6ac8e772cd41900ae42c95f0eb1a006a57fb2ded30690561978a5d56af579ec7",
+  "deployment_run_sha256": "7dda8bd3c028a0bb2c51ea5d0c51bf5a5301e898c68b11e75c3e969f5404e68f",
+  "execution_run_sha256": "79ba76ac6854598a3f5935602c2689359c4911e1cedc102fc1e229b08f68318a",
+  "deployment_expectations": {
+    "old_gpu_image_sha256": "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+    "old_gpu_log_sha256": "5c91d896f50ec94b7092b90ed30faa84e9a7819c5850f3772edc0e",
+    "old_gpu_log_bytes": 870,
+    "historical_backups_to_preserve": 34,
+    "phases": ["upload", "preserve-image", "preserve-log", "promote"],
+    "launch_in_deployment": false
+  },
+  "execution_expectations": {
+    "phases": ["pre-snapshot", "launch", "post-snapshot", "close"],
+    "public_call": "hipInit(0) and hipGetDeviceCount(&count)==1",
+    "watchdog_ms": 30000,
+    "application_log": "/data/ps5-hip/results/ps5-hip-public-bootstrap.log",
+    "natural_stop_and_matching_visible_mount_rows_required": true
+  },
+  "offline_checks": {
+    "deployment_negative_tests_passed": 9,
+    "acceptance_negative_tests_passed": 8,
+    "execution_negative_tests_passed": 21,
+    "separate_inert_entry_test_passed": 1,
+    "post_commit_hash_closure_verified": true,
+    "post_commit_ftp_and_socket_denial_verified": true,
+    "git_diff_check": "passed"
+  },
+  "activation_forbidden": true,
+  "deployment_binding": null,
+  "console_contacted": false,
+  "hardware_validated": false,
+  "future_fix": "Before enabling host-context options, repair hip_context.cpp create failure by releasing hContext, setting *status=false, and returning; the exact zero-flag/null-property bootstrap cannot reach that branch absent corruption.",
+  "next": "Independent D/E control review, then parent-controlled activation and one .40 cycle."
+}
