@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "classification": "offline-native-clr-gemm-package",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "kernel": "clr_gemm",
+  "source_commit": "b00dac10adcc1ba45d9e2407b9a41f3c6c513c69",
+  "admission_review_sha256": "8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc",
+  "stage": "dist/PPSA99014/gfx1013-clr-gemm-832962dca512",
+  "manifest_sha256": "f15f40572e3fe23b17ec5ac1a1208ac8e92c7d70ccccbf466e905bcfc26f700e",
+  "package_receipt_sha256": "7388ec5ca8f41188905ae2071006601c8b5fa11a19c81da7b71aa59690853a13",
+  "image_sha256": "9c229e4221570716ec1cc2ee9bea08d41299bd6b433aad46a30ebf121f5777e4",
+  "image_bytes": 5636096,
+  "prior_gpu_image_sha256": "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+  "files": {
+    "eboot.bin": "832962dca512cd32f5d363f0a5d5d7fb0288e2c887575779d8d2bc9a0b1b35db",
+    "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071"
+  },
+  "ufs2_fsck_read_only": "passed",
+  "extracted_files_match": true,
+  "hardware_validated": false,
+  "independent_package_review": null
+}
