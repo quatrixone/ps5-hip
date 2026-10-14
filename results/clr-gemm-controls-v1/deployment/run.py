@@ -80,6 +80,13 @@ def fetch_self_evidence(ftp,path,expected_bytes,destination,helper):
         return bytes(data)
     finally:destination.write_bytes(data)
 
+def verify_fresh_listing(entries,logs,expected_log,backup,temporary,log_backup,image_bytes):
+    require(TITLE not in entries and TITLE+'.ffpfsc' not in entries,'conflicting install')
+    require(entries.get(TITLE+'.ffpkg')=={'type':'-','bytes':image_bytes},'baseline image entry changed')
+    require(Path(backup).name not in entries and Path(temporary).name not in entries,'backup/upload conflict')
+    require(logs.get(Path(OLD_LOG).name)=={'type':'-','bytes':870} and Path(log_backup).name not in logs,'baseline GPU log entry/conflict')
+    require(Path(expected_log).name not in logs,'GEMM ROCclr result already exists')
+
 
 def deploy(out,record,deps):
     helper,guards,case=deps;locked=False;owned=[];token='clr-gemm-deployment-v1|'+str(uuid.uuid4());ftp=None;history=None;broken=False
@@ -118,11 +125,7 @@ def deploy(out,record,deps):
         record.setdefault('prior_backups_unchanged',{})[label]=actual
     def preconditions(label):
         entries=listing('/data/homebrew',label+'-homebrew');logs=listing('/data/ps5-hip/results',label+'-results')
-        require(TITLE not in entries and TITLE+'.ffpfsc' not in entries,'conflicting install')
-        require(entries.get(TITLE+'.ffpkg')=={'type':'-','bytes':record['baseline_image_bytes']},'baseline image entry changed')
-        require(Path(backup).name not in entries and Path(temporary).name not in entries,'backup/upload conflict')
-        require(logs.get(Path(OLD_LOG).name)=={'type':'-','bytes':870} and Path(log_backup).name not in logs,'baseline GPU log entry/conflict')
-        require(Path(case['expected_log']).name not in logs,'GEMM ROCclr result already exists')
+        verify_fresh_listing(entries,logs,case['expected_log'],backup,temporary,log_backup,record['baseline_image_bytes'])
         require(fetch('/user/appmeta/'+TITLE+'/param.json',65536)==(STAGE/'app/sce_sys/param.json').read_bytes(),'installed metadata mismatch')
         require(fetch('/user/app/'+TITLE+'/mount.lnk',1024)==MOUNT.encode(),'installed mount link mismatch')
         old=fetch(FINAL,record['baseline_image_bytes']);require(len(old)==record['baseline_image_bytes'] and sha(old)==OLD_IMAGE,'baseline image digest mismatch')

@@ -33,6 +33,25 @@ def verify_variant(original, change, label):
 def main():
     frozen, package = guard.verify_package(ROOT)
     assert frozen['kernel'] == 'clr_gemm' and package['filesystem_check'] == 'passed'
+    deployment_path = ROOT / 'results/clr-gemm-controls-v1/deployment/run.py'
+    spec = importlib.util.spec_from_file_location('gemm_deployment', deployment_path)
+    deployment = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(deployment)
+    backup = 'PPSA99014.ffpkg.clr-gpu-success.sha256-' + deployment.OLD_IMAGE + '.preserved'
+    temporary = '.PPSA99014.clr-gemm-' + deployment.IMAGE + '.upload'
+    log_backup = 'ps5-hip-clr-gpu.log.clr-gpu-success-PID407-appa018.sha256-' + deployment.LOG_SHA
+    entries = {'PPSA99014.ffpkg': {'type': '-', 'bytes': 5636096}}
+    logs = {'ps5-hip-clr-gpu.log': {'type': '-', 'bytes': 870}}
+    args = [frozen['expected_log'], backup, temporary, log_backup, 5636096]
+    deployment.verify_fresh_listing(entries, logs, *args)
+    denied(lambda: deployment.verify_fresh_listing(entries, {**logs,
+        'ps5-hip-clr-gemm.log': {'type': '-', 'bytes': 1}}, *args), 'stale GEMM result')
+    denied(lambda: deployment.verify_fresh_listing(entries, {**logs,
+        'ps5-hip-clr-gpu.log': {'type': '-', 'bytes': 869}}, *args), 'wrong prior log size')
+    denied(lambda: deployment.verify_fresh_listing({**entries, backup:
+        {'type': '-', 'bytes': 5636096}}, logs, *args), 'preservation conflict')
+    denied(lambda: deployment.verify_fresh_listing({**entries, 'PPSA99014.ffpkg':
+        {'type': '-', 'bytes': 1}}, logs, *args), 'wrong prior image size')
     for phase in ('deployment', 'execution'):
         directory = ROOT / 'results/clr-gemm-controls-v1' / phase
         manifest = json.loads((directory / 'manifest.json').read_text())
