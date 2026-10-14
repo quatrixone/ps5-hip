@@ -19,7 +19,11 @@ all 1,542 values under the unchanged contract on .40, with complete natural
 teardown and independent audit; see `../evidence/native-math-exp-corrected.json`.
 Broader G3 qualification remains open. G4's fixed genuine HIP vector and
 shared four-route clients have passed bounded native cycles with complete
-compiler/runtime cleanup; broader client qualification remains open. G5-G12 remain
+compiler/runtime cleanup; broader client qualification remains open. An authentic
+upstream ROCclr CPU command workload now also passed on .40 after affinity and
+executable-path startup repairs, with natural finalization and independent review;
+see `../evidence/native-clr-cpu-path-success.json`. It is a CPU prerequisite,
+not GPU-backed ROCclr or public HIP acceptance. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
@@ -43,16 +47,16 @@ for the current evidence and next experiment.
 
 ## 1. Mission and completion levels
 
-The isolated native ROCclr CPU title is now frozen, packaged and independently
-reviewed. Its genuine upstream queue workload, repaired exception lifetimes,
-watchdog, native link/conversion and six-file UFS package pass offline checks;
-see `../evidence/offline-clr-cpu-native-package.json`. Native startup and shutdown
-still require console execution. This CPU-only case does not establish a GPU
-backend or public HIP initialization and does not complete G5.
-After registered-only deployment, fully instrumented adapter tests exposed shared
+The isolated native ROCclr CPU title completed one independently reviewed .40
+cycle: genuine upstream queue commands, watchdog, repaired exception lifetimes,
+finalization and natural stop; see `../evidence/native-clr-cpu-path-success.json`.
+This CPU-only case does not establish a GPU backend or public HIP initialization
+and does not complete G5.
+In an earlier registered-only deployment, fully instrumented adapter tests exposed shared
 upstream thread-state and queue-teardown races. The CPU launch is held: its
-termination path has the same missing join evidence. A corrected, independently
-qualified thread-lifetime implementation and new candidate are required.
+termination path had the same missing join evidence. A corrected, independently
+qualified thread-lifetime implementation subsequently enabled the successful
+CPU cycle above.
 
 The integrated multi-module/query candidate produced correct A/B/A results and
 natural shutdown on .40, but its collector expired before the post-run snapshot.

@@ -4,6 +4,20 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Native upstream ROCclr CPU workload passed on .40:** frozen executable-path
+  repair `3f4b885` was packaged, independently reviewed, registered and launched
+  once as PPSA99014. PID 398/app `0x8018` completed eight computed outputs,
+  eight unchanged failed-dependency sentinels, four memory and queue retirements,
+  watchdog join, application finalization and a natural title stop. Independent
+  deployment and execution reviews verify exact installed image and mounted bytes,
+  pre/post matching mount rows, absent prior CPU log, preserved old image plus 33
+  historical artifacts, healthy services and owned lock release. This clears the
+  bounded **CPU** ROCclr startup/command/lifecycle prerequisite; it makes no GPU
+  or public HIP claim. The exact affinity and path patches are integrated at
+  `88d497c` with a passing pinned-upstream roundtrip and focused sanitizer test.
+  See `evidence/native-clr-cpu-path-success.json`. Next: rebuild a genuine
+  GPU-backed ROCclr candidate using these repairs and validate its dispatch.
+
 - **Native ROCclr startup advanced, then trapped in `AppProfile` on .40:**
   independently reviewed affinity-repaired image `f63a8f3` registered with the
   diagnostic image and all 32 earlier artifacts preserved. Its one-use CPU

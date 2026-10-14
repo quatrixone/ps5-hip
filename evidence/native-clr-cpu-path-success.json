@@ -1,0 +1,51 @@
+{
+  "classification": "passed-native-rocclr-cpu-commands",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "source_commit": "3f4b885ff11d40c868b92234ba798ec9162267f7",
+  "integrated_port_commit": "88d497c915c27a3ffb52f942a53ed65f886f573e",
+  "image_sha256": "0429d4d98d421719a4cfd6e3458caed081b5f46288f92962dc668e4793e5def0",
+  "integrated_port_check": {
+    "command": "python3 tests/clr_startup_port_test.py --upstream results/g4-runtime-architecture-v1/sources/clr-65d174c3e35423bf25c9c369513780c9d9ca760c",
+    "result": "pass: exact patch hashes and roundtrip; seven native affinity modes and three executable-path profiles under ASan/UBSan"
+  },
+  "deployment_receipt": {
+    "path": "results/clr-path-controls-v1/deployment/deployment-20261014T003557.771142Z/deployment.json",
+    "sha256": "4fddf4a0646f11038aedccf48876871c45c6918fa0602e67079e2568e920bf98"
+  },
+  "deployment_review": {
+    "path": "results/clr-path-controls-v1/deployment/deployment-20261014T003557.771142Z-independent-review.json",
+    "sha256": "7bf13eb2367e654d92f92a7500b36f4386e680be8c95d337d498df952b02f015"
+  },
+  "execution_receipt": {
+    "path": "results/clr-path-controls-v1/execution/observation-20261014T003934.021352Z/receipt.json",
+    "sha256": "559a79e1bf6e54d96b40fef83ec02d9fc0713f9884bfbdafbc52b81e3db19efa"
+  },
+  "execution_review": {
+    "path": "results/clr-path-controls-v1/execution/observation-20261014T003934.021352Z-independent-review.json",
+    "sha256": "cec2639494902918e31fc1bc270bef3133cd8ed75b94c138fd5931314e1c8765"
+  },
+  "observed": {
+    "pid": 398,
+    "app_id": "0x00008018",
+    "computed_outputs": 8,
+    "unchanged_failed_dependency_sentinels": 8,
+    "memory_and_queue_retirements": 4,
+    "watchdog_joined": true,
+    "application_fini_completed": true,
+    "natural_title_stop": true,
+    "matching_mount_rows_equal_pre_post": true,
+    "declared_services_healthy": true,
+    "owned_locks_released": true,
+    "prior_image_and_33_older_artifacts_preserved_during_deployment": true
+  },
+  "cpu_workload_accepted": true,
+  "gpu_hardware_gate_passed": false,
+  "public_hip_accepted": false,
+  "limits": [
+    "This is an authentic upstream ROCclr CPU command and lifecycle success, with no GPU calls.",
+    "Pre/post matching mount rows do not establish global namespace completeness.",
+    "The execution review relies on the immediately preceding deployment review for the 34-artifact preservation inventory; it does not refetch all backups."
+  ],
+  "next_action": "Integrate the qualified affinity and executable-path patches, then build a new GPU-backed ROCclr/HIP candidate and validate actual GPU dispatch."
+}
