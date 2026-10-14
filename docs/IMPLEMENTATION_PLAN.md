@@ -23,7 +23,10 @@ compiler/runtime cleanup; broader client qualification remains open. An authenti
 upstream ROCclr CPU command workload now also passed on .40 after affinity and
 executable-path startup repairs, with natural finalization and independent review;
 see `../evidence/native-clr-cpu-path-success.json`. It is a CPU prerequisite,
-not GPU-backed ROCclr or public HIP acceptance. G5-G12 remain
+not public HIP acceptance. A subsequent genuine ROCclr GPU title passed one
+bounded AgcBackend dispatch with 73 exact outputs, eight copied guards and
+natural teardown; see `../evidence/native-clr-gpu-dispatch-success.json`.
+This does not complete broad G4, public HIP GPU support or G5. G5-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
@@ -52,6 +55,11 @@ cycle: genuine upstream queue commands, watchdog, repaired exception lifetimes,
 finalization and natural stop; see `../evidence/native-clr-cpu-path-success.json`.
 This CPU-only case does not establish a GPU backend or public HIP initialization
 and does not complete G5.
+The follow-on genuine ROCclr adapter title then passed a bounded native GPU
+dispatch and two-queue dependency cycle; see
+`../evidence/native-clr-gpu-dispatch-success.json`. Its active outputs use
+scalar/index arithmetic, with copied guard words checking data propagation.
+Public HIP GPU allocation/launch, broader streams/graphs and G5 remain open.
 In an earlier registered-only deployment, fully instrumented adapter tests exposed shared
 upstream thread-state and queue-teardown races. The CPU launch is held: its
 termination path had the same missing join evidence. A corrected, independently

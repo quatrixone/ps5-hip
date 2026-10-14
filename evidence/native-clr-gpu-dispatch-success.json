@@ -1,0 +1,60 @@
+{
+  "classification": "passed-native-rocclr-gpu-dispatch",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "isolated_source_commit": "e79bd63dc3ff05c6846dea1fdd4662a0abc01efc",
+  "integrated_source_commit": "08ba1ade8ebaed113937b3130a7ced11892f9ae9",
+  "image_sha256": "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+  "offline_candidate_review": {
+    "path": "results/clr-gpu-startup-candidate-independent-review-v1/review.json",
+    "sha256": "09e46696fb366c5547f9f8d9c89de41202fc2e73c49585c2476ef2f617cf4105"
+  },
+  "package_review": {
+    "path": "results/clr-gpu-startup-package-independent-review-v1/review.json",
+    "sha256": "8b6756b91e3e3e67813e996a26735414a4e6de263a78863464b5757f330dd4f1"
+  },
+  "deployment_receipt": {
+    "path": "results/clr-gpu-startup-controls-v1/deployment/deployment-20261014T011917.375604Z/deployment.json",
+    "sha256": "7cae44d6878ecda9eae6ad2e6fcf496f1db8894d12a7ca0d78f46d677a4e6fc4"
+  },
+  "deployment_review": {
+    "path": "results/clr-gpu-startup-controls-v1/deployment/deployment-20261014T011917.375604Z-independent-review.json",
+    "sha256": "fa0d19475a12be0964c83913b2f38dc1119dcda5cff58892fdf36fa3bf8b8cf2"
+  },
+  "execution_receipt": {
+    "path": "results/clr-gpu-startup-controls-v1/execution/observation-20261014T012336.331568Z/receipt.json",
+    "sha256": "fbb3e6a8530ef957f25307d7dbb819b040fe8624d9dcc858540f0738b3e450c1"
+  },
+  "execution_review": {
+    "path": "results/clr-gpu-startup-controls-v1/execution/observation-20261014T012336.331568Z-independent-review.json",
+    "sha256": "bbe04ef6e54d402ee8b9697c974d848d0df63b3578fdfe446c2b2f128503354e"
+  },
+  "observed": {
+    "pid": 407,
+    "app_id": "0x0000a018",
+    "genuine_agc_dispatches": 1,
+    "ordered_rocclr_chain": "A write, B copy, A kernel, B read",
+    "exact_active_values": 73,
+    "readback_words": 81,
+    "preserved_copied_guards": 8,
+    "checked_queue_joins": 2,
+    "buffer_frees": 2,
+    "watchdog_joined": true,
+    "application_fini_completed": true,
+    "natural_title_stop": true,
+    "matching_mount_rows_equal_pre_post": true,
+    "declared_services_healthy": true,
+    "owned_locks_released": true,
+    "cpu_passing_image_and_log_plus_34_prior_artifacts_preserved_at_deployment": true
+  },
+  "native_gpu_dispatch_verified": true,
+  "broad_hardware_gate_passed": false,
+  "public_hip_accepted": false,
+  "g5_accepted": false,
+  "limits": [
+    "The 73 active outputs depend on scalar/index arithmetic; eight guards independently check write/copy/read propagation. This does not prove copy-engine DMA or GPU concurrency.",
+    "This is bounded GPU-backed ROCclr adapter execution, not public HIP GPU support, G5 streams/graphs, performance, or full ROCm.",
+    "Pre/post matching mount rows do not establish global namespace completeness.",
+    "Preservation of 36 prior artifacts is established by the deployment review; execution does not refetch every backup."
+  ]
+}

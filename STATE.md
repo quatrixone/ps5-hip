@@ -4,6 +4,20 @@ Updated: 2026-10-13, America/New_York.
 
 ## Actual status
 
+- **Genuine GPU-backed ROCclr dispatch passed on .40:** frozen `e79bd63`
+  (integrated at `08ba1ad`) completed one A-write/B-copy/A-kernel/B-read
+  upstream ROCclr cycle through the PS5 AgcBackend. PID 407/app `0xa018`
+  reported 73 exact active values, 81 readback words with eight preserved
+  copied guards, two checked queue joins, two buffer frees, watchdog join,
+  application finalization and natural title stop. Independent reviews bind
+  source/native/package bytes and deployment/execution raw evidence; pre/post
+  matching mounts, installed bytes, services and lock release passed. The
+  CPU-passing image and log plus 34 historical artifacts were preserved.
+  Active outputs use scalar/index arithmetic; the guards check copy
+  propagation. This establishes a bounded native ROCclr GPU path, **not**
+  public HIP GPU support, concurrency, performance, full G4 or G5. See
+  `evidence/native-clr-gpu-dispatch-success.json`.
+
 - **Public HIP allocation prerequisite integrated offline:** isolated `70b2c19`
   adds bounded upstream `SvmBuffer` allocation/free through the PS5 device and
   native registry, retaining ownership on live-command or failed-unmap paths and
