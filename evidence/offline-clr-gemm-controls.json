@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "classification": "inert-native-clr-gemm-deployment-execution-controls",
+  "candidate_commit": "ff71d14",
+  "title_id": "PPSA99014",
+  "target": "gfx1013",
+  "kernel": "clr_gemm",
+  "package_image_sha256": "9c229e4221570716ec1cc2ee9bea08d41299bd6b433aad46a30ebf121f5777e4",
+  "admission_review_sha256": "8423e584b5414980dc1384dff2d97c8e2dbb9413f84f0a2f20089333ebe0a5cc",
+  "deployment_manifest_sha256": "8eda187897edec5bef2ec8affaf66e88fc0b4472d4cbc9c0fd1980b9cd1c58d3",
+  "execution_manifest_sha256": "0add701d7d6bb7458d79221b89bb57689f267856ad0e0c168bb9e8c39f8e69d6",
+  "deployment_script_sha256": "b811981afc22fc6c8e5a033475778b69db809db7699bcd2923623cf7c5da7b89",
+  "execution_script_sha256": "5ffe985de5a2f3c3fd0b9e4ea54cb707477b8dace93c6825419a482d4bee4b00",
+  "execution_acceptance_sha256": "8de8c7e29c5a2fa149cdd81b4cd90977cc314396cf130281e181a145cd6b30af",
+  "execution_log_checker_sha256": "064b87d00777b1f0990040e8d37919ec364f527821d393404e3678edeea044e1",
+  "shared_guard_sha256": "cfa4e76f3e8eea7f48ba7c748c0dd5cc54e8758b588744935bd3c697cd79c2cd",
+  "negative_tests_sha256": "1f6698e0ece17f9ae4410ceaad8f0e37978ce2ff80c482b07892d40429469363",
+  "offline_tests": {
+    "command": "python3 tools/test_clr_gemm_controls.py",
+    "result": "passed",
+    "coverage": [
+      "exact package and six-file identity",
+      "unbound independent package review refused",
+      "wrong image or source refused",
+      "activation flag refused",
+      "wrong prior GPU log and stale GEMM log refused",
+      "wrong prior image size and preservation conflict refused",
+      "changed guard refused",
+      "corrupt or truncated GEMM transcript refused",
+      "both control entrypoints abort before network"
+    ]
+  },
+  "prior_gpu_image_sha256": "84e52f366b9c7e598d81c3d37197ff8e71d548ebe6cfe933176639066abcc8da",
+  "prior_gpu_log_sha256": "5c91d896f50ec94b7092b90ed30faa84e9b69f3c84e9a7819c5850f3772edc0e",
+  "prior_preserved_backups": 36,
+  "independent_package_review": null,
+  "deployment_binding": null,
+  "network_contacts": 0,
+  "hardware_validated": false
+}
