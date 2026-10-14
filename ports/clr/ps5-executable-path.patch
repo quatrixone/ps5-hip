@@ -1,0 +1,22 @@
+--- a/rocclr/os/os_posix.cpp
++++ b/rocclr/os/os_posix.cpp
+@@ -852,6 +852,11 @@
+ }
+ 
+ void Os::getAppPathAndFileName(std::string& appName, std::string& appPathAndName) {
++#if defined(PS5HIP_CLR_PLATFORM) && !defined(__linux__)
++  // PS5 has no admitted executable-path provider; preserve the unavailable contract.
++  appName.clear();
++  appPathAndName.clear();
++#else
+   std::unique_ptr<char[]> buff(new char[FILE_PATH_MAX_LENGTH]());
+ 
+   if (readlink("/proc/self/exe", buff.get(), FILE_PATH_MAX_LENGTH) > 0) {
+@@ -864,6 +869,7 @@
+     appPathAndName = "";
+   }
+   return;
++#endif
+ }
+ 
+ bool Os::GetURIFromMemory(const void* image, size_t image_size, std::string& uri) {

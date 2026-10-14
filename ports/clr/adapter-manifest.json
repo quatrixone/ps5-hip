@@ -5,9 +5,13 @@
   "apply_after": "ps5-platform.patch",
   "patch_order": [
     "ps5-lifetime.patch",
-    "ps5-device-aot.patch"
+    "ps5-device-aot.patch",
+    "ps5-affinity.patch",
+    "ps5-executable-path.patch"
   ],
   "patches": {
+    "ps5-affinity.patch": "fa5475d243051c4257f7890065bcea7111d75d60e76dba54182d92dcced77e87",
+    "ps5-executable-path.patch": "3006a0e9ee129e5d10c30fc9c9a15964e907c2c96b1cf5a4630b81a81399a092",
     "ps5-device-aot.patch": "3d2bb402d6beaff2427d3ae199911cf035169ecda9913476e99b3b520571afa7",
     "ps5-lifetime.patch": "03a315866c57cc54d54601875f73f8411d7e4daa7d37cb7394eefc461436bf3b"
   },
@@ -26,7 +30,7 @@
     },
     "rocclr/os/os_posix.cpp": {
       "base_sha256": "0693ec41b159be4a01b898b7daaf98a7484f2fde72c997d8c1d8ea3f756c0db2",
-      "adapted_sha256": "403b815cc5d8063a5fd4ac582000a063a2048dec5e1096dea16c846366b2060a"
+      "adapted_sha256": "d10c1a06aba73a4bdd04505e899c0afe412759a88598cc9ba30ae933f40185d2"
     },
     "rocclr/platform/commandqueue.cpp": {
       "base_sha256": "4b13ee86b691fee88744345632bc5e2682f68fc09d385164a75feb7c52385cd4",

@@ -2,8 +2,9 @@
 
 This patch contains the actual platform changes used by the qualified native
 27-unit ROCclr compile and link experiment. It does not replace ps5-hip's current
-HIP runtime. Public HIP initialization, a PS5 GPU backend, application startup and
-console behavior remain unqualified.
+HIP runtime. Public HIP initialization and the PS5 GPU backend's native behavior
+remain unqualified. The later startup overlays and their bounded
+CPU-only native validation are described in `ADAPTER.md`.
 
 Apply `ps5-platform.patch` to a clean ROCm/clr checkout at the revision in
 `manifest.json`, using `git apply --check` before `git apply`. Build with the two
@@ -15,7 +16,10 @@ file matched the tested native source byte for byte.
 
 The changes provide pthread-key thread/correlation storage, BSD affinity and
 stack queries, checked native OS initialization, SDK-compatible environment/PID
-queries, and explicit rejection of unsupported graphics sharing. Linux remains
+queries, and explicit rejection of unsupported graphics sharing. Apply the
+startup overlays in `adapter-manifest.json` as documented in `ADAPTER.md` before
+native application use: the base patch alone retains two failed startup paths.
+Linux remains
 available for the actual upstream queue/command regression workload. Native
 SIGFPE instruction repair is unsupported; physical-memory queries report zero
 when the OS query fails. The TLS helper aborts on infrastructure/allocation

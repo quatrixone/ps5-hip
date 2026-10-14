@@ -1,0 +1,56 @@
+--- a/rocclr/os/os_posix.cpp
++++ b/rocclr/os/os_posix.cpp
+@@ -142,6 +142,22 @@
+ 
+ #endif
+ 
++// PS5 libkernel scePthreadGetaffinity/Setaffinity pass 16-byte cpusets.
++// Keep the SDK's larger backing type; never truncate nonzero unsupported bits.
++#if defined(PS5HIP_CLR_PLATFORM) && !defined(__linux__)
++static constexpr size_t nativeAffinityBytes = 16;
++static_assert(sizeof(NativeCpuSet) >= nativeAffinityBytes, "affinity backing too small");
++#else
++static constexpr size_t nativeAffinityBytes = sizeof(NativeCpuSet);
++#endif
++static bool nativeAffinityFits(const NativeCpuSet& mask) {
++  const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&mask);
++  for (size_t i = nativeAffinityBytes; i < sizeof(mask); ++i) {
++    if (bytes[i] != 0) return false;
++  }
++  return true;
++}
++
+ typedef int (*pthread_setaffinity_fn)(pthread_t, size_t, const NativeCpuSet*);
+ static pthread_setaffinity_fn pthread_setaffinity_fptr;
+ 
+@@ -188,8 +204,8 @@
+   const long pages = ::sysconf(_SC_PAGESIZE);
+   const long processors = ::sysconf(_SC_NPROCESSORS_CONF);
+   if (pages <= 0 || processors <= 0) return false;
+-  NativeCpuSet mask;
+-  if (pthread_getaffinity_np(pthread_self(), sizeof(mask), &mask) != 0) return false;
++  NativeCpuSet mask{};
++  if (pthread_getaffinity_np(pthread_self(), nativeAffinityBytes, &mask) != 0) return false;
+   pageSize_ = static_cast<size_t>(pages);
+   processorCount_ = processors;
+   nativeMask_ = mask;
+@@ -507,7 +523,8 @@
+ 
+ void Os::setThreadAffinity(const void* handle, const Os::ThreadAffinityMask& mask) {
+   if (pthread_setaffinity_fptr != NULL) {
+-    if (pthread_setaffinity_fptr((pthread_t)handle, sizeof(NativeCpuSet), &mask.mask_) != 0) {
++    if (!nativeAffinityFits(mask.mask_) ||
++        pthread_setaffinity_fptr((pthread_t)handle, nativeAffinityBytes, &mask.mask_) != 0) {
+       fatal("pthread_setaffinity_np() failed");
+     }
+   }
+@@ -516,7 +533,8 @@
+ bool Os::setThreadAffinityToMainThread() {
+   if (AMD_CPU_AFFINITY) {
+     ClPrint(amd::LOG_INFO, amd::LOG_INIT, "Setting Affinity to the main thread's affinity");
+-    if (pthread_setaffinity_np(pthread_self(), sizeof(NativeCpuSet), &nativeMask_) != 0) return false;
++    if (!nativeAffinityFits(nativeMask_) ||
++        pthread_setaffinity_np(pthread_self(), nativeAffinityBytes, &nativeMask_) != 0) return false;
+   }
+   return true;
+ }

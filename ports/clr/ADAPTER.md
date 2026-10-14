@@ -6,12 +6,22 @@ argument capture, launch preparation and submission queue. It has no replacement
 host scheduler and exports no new public HIP success path.
 
 Reproduction starts with the pinned CLR checkout and existing `ps5-platform.patch`
-documented in `README.md`. Apply `ps5-lifetime.patch`, then `ps5-device-aot.patch`,
+documented in `README.md`. Apply `ps5-lifetime.patch`, `ps5-device-aot.patch`,
+`ps5-affinity.patch`, then `ps5-executable-path.patch`,
 using `git apply --check` before each application. `adapter-manifest.json` records
 the order and exact original/adapted hashes. The standalone lifetime patch also
 serves the CPU diagnostic; it does not depend on the AOT adapter or ignored
 preparation scripts. Build the adapter with the manifest's three defines, existing
 TLS helper, native substrate and an explicitly selected backend factory.
+
+The startup overlays use a 16-byte native affinity argument with zeroed 32-byte
+SDK backing storage and reject unsupported upper mask bits. Native executable-path
+discovery reports unavailable through empty outputs; Linux retains its existing
+`/proc/self/exe` query. The CPU-only diagnostic completed a native console cycle
+with these overlays. That result does not validate the GPU adapter or its provider
+calls. Reproduce patch composition and focused native/Linux behavior with
+`python3 tests/clr_startup_port_test.py --upstream /path/to/pinned/clr` from the
+repository root (Git and Clang with ASan/UBSan are required).
 
 An AOT executable enters through upstream `addDeviceProgram`, `load` and
 `setKernels`. The adapter owns the validated code object and device kernels;
