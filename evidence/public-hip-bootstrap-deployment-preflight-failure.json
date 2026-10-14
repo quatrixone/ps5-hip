@@ -4,7 +4,7 @@
   "title_id": "PPSA99014",
   "activation_review_sha256": "fd3c6220402896ea81ba42bf551f9d8ee350af20113fed93e9e94685b43a2f60",
   "deployment_receipt": {
-    "path": ".local/g5-hip-native-link/tools/public_hip_controls/deployment/deployment-20261014T024552.989895Z/deployment.json",
+    "path": ".local/g5-hip-native-link/results/public-hip-bootstrap-deployment-preflight-v1/deployment.json",
     "sha256": "b83359e74571d4d7bfb4fd31005df06175f4607831e7c45f6b79bfdad877b314"
   },
   "observed": {
