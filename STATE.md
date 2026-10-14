@@ -9,6 +9,14 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Fresh-checkout preparation
+
+The known bootstrap deployment-review classification mismatch is fixed at
+`98a6887` on `codex/public-hip-bootstrap-resume` in `.local/g5-hip-native-link`.
+Seven binding regressions and the inert-entry test pass under WSL. Execution is
+still disabled pending recovery of original local evidence and independent review;
+see `HANDOFF.md`. No console was contacted during this continuation.
+
 ## Actual status
 
 - **Public HIP bootstrap package registered on .40; execution has not begun:**

@@ -115,6 +115,22 @@ inference client and SDK preview; application-specific ABI, UI and model coverag
 are no longer acceptance requirements. Historical source/evidence records remain
 provenance. No implementation gate is closed by this scope change.
 
+## Fresh-checkout continuation — 2026-10-14
+
+This checkout is on `codex/standalone-sdk-scope`. An isolated bootstrap checkout
+at `.local/g5-hip-native-link` is on `codex/public-hip-bootstrap-resume`, commit
+`98a6887`. It fixes the known D-review classification mismatch and adds seven
+binding tests; these and the inert-entry test pass under WSL. Execution remains
+inert and unbound, with independent control review still pending.
+
+The owner identified the original workspace as
+`C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip`. Both Windows and WSL report
+that path absent on this host. The raw deployment receipt/review, consumed markers,
+frozen package and local controller/helper dependencies have not been recovered.
+The new nested checkout contains source only; do not mistake it for the original
+preserved workspace or replay deployment. Obtain the actual workspace location,
+verify its evidence hashes, and continue the E binding from those artifacts.
+
 ## Next work, in order
 
 1. In the bootstrap branch, create a new E-only binding to the exact D receipt
