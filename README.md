@@ -49,6 +49,8 @@ The repository is private.
 - [Current state](STATE.md): the next action and completed milestones.
 - [Agent handoff](HANDOFF.md): exact branches, reviewed evidence, console state,
   and the safe resume point for the public HIP bootstrap.
+- [Source-only rebuild](docs/SOURCE_ONLY_REBUILD.md): fresh-clone build inputs,
+  final-stage recipe, and the generated-prerequisite gap still to close.
 - [Runtime architecture](docs/RUNTIME_ARCHITECTURE.md): measured CLR comparison,
   selected native HIP approach and the threshold for reconsidering upstream CLR.
 - [Compiler launch capture](docs/HIP_HOST_LAUNCH_CAPTURE.md): owned arguments,

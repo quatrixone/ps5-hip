@@ -4,6 +4,9 @@ Updated: 2026-10-14, America/New_York. This is the resume point for the private
 `ps5-hip` repository. Read `AGENTS.md`, `STATE.md`, and the active goal in
 `docs/IMPLEMENTATION_PLAN.md` before working. The mission is a native PS5 HIP /
 ROCm compute stack; a bounded result does not close a broader acceptance gate.
+For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
+the exact bootstrap package is not yet reproducible end-to-end from a clean
+clone, and historical D evidence cannot be built from source.
 
 ## What is done
 
