@@ -16,7 +16,10 @@ old=root/'.local/g5-clr-ps5-adapter/results/asan-v7';proof=json.loads(bind(old/'
 assert h(old/'receipt.json')=='61717102ab598b9aa7563eadf7b7dcd431e3785f7920b600605a5c67fb2dfd59'
 command=next(c['argv'] for c in proof['commands'] if c['label']=='adapter')
 flags=command[:command.index('-c')]
-base=root/'.local/g5-clr-ps5-adapter';source=r/'results/source-v1'
+base=root/'.local/g5-clr-ps5-adapter';source=r/'results/source-v3'
+composition=json.loads(bind(source/'hip-memory-composition.json').read_text())
+assert composition['classification']=='exact-public-hip-memory-composition'
+for name,record in composition['changed_sources'].items():assert h(source/name)==record['after'],name
 flags=[x.replace(str(base/'results/clr-source-v7/source'),str(source)).replace(str(base/'include'),str(r/'include')).replace(str(base/'ports/clr'),str(r/'ports/clr')) for x in flags]
 flags+=['-DPS5HIP_PUBLIC_HIP','-D__HIP_PLATFORM_AMD__','-DDISABLE_DIRECT_DISPATCH','-ffunction-sections','-fdata-sections','-I'+str(source/'hipamd/src'),'-I'+str(root/'results/hip-host-abi-spike/rocm-6.2.4/package-stage/include'),'-I'+str(root/'results/hip-host-abi-spike/rocm-6.2.4/package-build/include')]
 flags=[x.replace('-fsanitize=address,undefined','-fsanitize=thread') if a.sanitizer=='thread' else x for x in flags]
@@ -28,10 +31,10 @@ sources=[]
 for c in proof['commands']:
  if '-c' not in c['argv']:continue
  label=c['label'];s=c['argv'][c['argv'].index('-c')+1]
- s=s.replace(str(root/'.local/g5-clr-ps5-adapter/results/clr-source-v7/source'),str(r/'results/source-v1')).replace(str(root/'.local/g5-clr-ps5-adapter'),str(r))
+ s=s.replace(str(root/'.local/g5-clr-ps5-adapter/results/clr-source-v7/source'),str(source)).replace(str(root/'.local/g5-clr-ps5-adapter'),str(r))
  if label=='model':s=str(r/'tests/hip_admission_model.cpp')
  sources.append((label,Path(s)))
-sources += [(s.stem,s) for s in sorted((r/'results/source-v1/hipamd/src').glob('*.cpp')) if s.name not in ('hip_runtime.cpp','fixme.cpp')]
+sources += [(s.stem,s) for s in sorted((source/'hipamd/src').glob('*.cpp')) if s.name not in ('hip_runtime.cpp','fixme.cpp')]
 for _,s in sources:bind(s)
 def run(label,argv,env=None,expected=0):
  z=subprocess.run(argv,capture_output=True,text=True,timeout=120,env=env);(out/(label+'.stdout')).write_text(z.stdout);(out/(label+'.stderr')).write_text(z.stderr)
@@ -67,7 +70,7 @@ for library in sorted(libraries):
   for value in re.findall(r'/[^\s()]+',selected.read_text()):
    if Path(value).is_file():bind(value)
 run('link',link)
-modes=['normal','default','tls','init-fail','create-fail','join-fail','self-destroy','reset','reset-join-fail']
+modes=['normal','default','tls','init-fail','create-fail','join-fail','self-destroy','reset','reset-join-fail','memory']
 for mode in modes:
  env=dict(os.environ);env['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1';env['TSAN_OPTIONS']='halt_on_error=1';env['ASAN_OPTIONS']='halt_on_error=1:detect_leaks='+('0' if mode in ('join-fail','self-destroy','reset-join-fail') else '1')
  expected=66 if a.sanitizer=='thread' and mode in ('join-fail','reset-join-fail') else 0
@@ -77,7 +80,7 @@ for mode in modes:
   assert z.stderr.count('WARNING: ThreadSanitizer:')==1 and 'WARNING: ThreadSanitizer: thread leak' in z.stderr
   assert 'finished) created by main thread' in z.stderr and 'data race' not in z.stderr
  if mode!='init-fail':
-  n=1 if mode=='create-fail' else 4 if mode in ('default','tls') else 3
+  n=1 if mode in ('create-fail','memory') else 4 if mode in ('default','tls') else 3
   retained=mode in ('join-fail','self-destroy','reset-join-fail')
   assert f'HIP_PUBLIC_FINAL queues={n} retired={2 if mode=="self-destroy" else n} gate_destroyed={int(not retained)} retained={int(retained)}' in z.stdout
  print(mode,'PASS',flush=True)

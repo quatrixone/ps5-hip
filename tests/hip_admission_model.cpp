@@ -16,10 +16,11 @@ struct FinalObserver {
   if(final_kind==0)return;
   const bool retained=final_kind==4||final_kind==5;
   checked(public_observed.gate_destroyed==!retained,__LINE__);
-  const unsigned expected=final_kind==2?1:(final_kind==3?4:3);
+  const unsigned expected=(final_kind==2||final_kind==6)?1:(final_kind==3?4:3);
   checked(public_observed.queues==expected,__LINE__);
   checked(public_observed.retired_queues==(final_kind==5?2:expected),__LINE__);
-  checked(public_observed.allocations==0&&public_observed.frees==0,__LINE__);
+  const unsigned expected_allocations=final_kind==6?1:0;
+  checked(public_observed.allocations==expected_allocations&&public_observed.frees==expected_allocations,__LINE__);
   std::printf("HIP_PUBLIC_FINAL queues=%u retired=%u gate_destroyed=%d retained=%d\n",unsigned(public_observed.queues),unsigned(public_observed.retired_queues),bool(public_observed.gate_destroyed),retained);
  }
 };
@@ -50,11 +51,24 @@ int main(int argc,char** argv){
   init_failure=true;checked(hipInit(0)==hipErrorInvalidDevice,__LINE__);checked(hipInit(0)==hipErrorInvalidDevice,__LINE__);
   std::puts("HIP_PUBLIC_PASS mode=init-fail gpu_execution=false");return 0;
  }
- final_kind=mode=="create-fail"?2:((mode=="tls"||mode=="default")?3:((mode=="join-fail"||mode=="reset-join-fail")?4:(mode=="self-destroy"?5:1)));
+ final_kind=mode=="create-fail"?2:((mode=="tls"||mode=="default")?3:((mode=="join-fail"||mode=="reset-join-fail")?4:(mode=="self-destroy"?5:(mode=="memory"?6:1))));
  ok(hipInit(0));int count=0;ok(hipGetDeviceCount(&count));checked(count==1,__LINE__);
  hipMemPool_t pool=nullptr;ok(hipDeviceGetDefaultMemPool(&pool,0));checked(pool!=nullptr,__LINE__);
  // Warm the genuine auxiliary thread setup before narrowly arming a queue fault.
  hipStream_t warm=nullptr;ok(hipStreamCreate(&warm));ok(hipStreamDestroy(warm));
+ if(mode=="memory"){
+  void* pointer=nullptr;
+  checked(hipMalloc(nullptr,256)==hipErrorInvalidValue,__LINE__);
+  ok(hipMalloc(&pointer,256));
+  checked(pointer&&public_observed.allocations==1&&allocations.size()==1,__LINE__);
+  checked(hipFree(static_cast<char*>(pointer)+1)==hipErrorInvalidValue,__LINE__);
+  checked(public_observed.frees==0&&allocations.size()==1,__LINE__);
+  ok(hipFree(pointer));
+  checked(public_observed.frees==1&&allocations.empty(),__LINE__);
+  checked(hipFree(pointer)==hipErrorInvalidValue,__LINE__);
+  checked(!backend_calls&&!submits,__LINE__);
+  std::puts("HIP_PUBLIC_PASS mode=memory gpu_execution=false");return 0;
+ }
  if(mode=="create-fail"){
   fail_create=true;hipStream_t failed=nullptr;checked(hipStreamCreate(&failed)!=hipSuccess&&failed==nullptr,__LINE__);checked(!fail_create,__LINE__);
   std::puts("HIP_PUBLIC_PASS mode=create-fail gpu_execution=false");return 0;
