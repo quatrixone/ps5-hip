@@ -1,0 +1,198 @@
+{
+  "classification": "inert-public-hip-bootstrap-controls",
+  "activation_forbidden": true,
+  "candidate_package": ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822",
+  "source_commit": "ea37055286903f680e43b049d70730743ffa2358",
+  "image_sha256": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+  "stage_manifest_sha256": "60e793da1f1d91b166641d5575ab941ff602a5d002eb9969832ed5099d24d0be",
+  "independent_package_review": {
+    "path": ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json",
+    "sha256": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348"
+  },
+  "deployment_binding": null,
+  "prior_backups": {
+    "/data/homebrew/PPSA99014.ffpkg.atomic-current.sha256-14e07323b96c081c040ab65babc412da985fe36b10fd73dfe27ba4293f178498.preserved": {
+      "bytes": 3637248,
+      "sha256": "14e07323b96c081c040ab65babc412da985fe36b10fd73dfe27ba4293f178498"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-atomic_suite.log.atomic-current-PID231-appe018.sha256-bccfb21af8a5de24f2bd1e88b20a941fb96bd629e5bf877ebe03c55b50de310c": {
+      "bytes": 1904,
+      "sha256": "bccfb21af8a5de24f2bd1e88b20a941fb96bd629e5bf877ebe03c55b50de310c"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.math-failed.sha256-54f5703f60d13c384725ed50cb3bae87f1286da518f50c024c8d1995054a7364.preserved": {
+      "bytes": 3637248,
+      "sha256": "54f5703f60d13c384725ed50cb3bae87f1286da518f50c024c8d1995054a7364"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-fp32_math.log.math-failed-PID240-app18.sha256-5a90708f1bc3fbdd7bccc88cfede65f9bdea166ba6182ee1f045c29157329a5f": {
+      "bytes": 373,
+      "sha256": "5a90708f1bc3fbdd7bccc88cfede65f9bdea166ba6182ee1f045c29157329a5f"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.hip-generic.sha256-c8de4c7a59d7f7d73b706dc1a367e1c278993312b9ee203ca9255c123b98a8b6.preserved": {
+      "bytes": 3670016,
+      "sha256": "c8de4c7a59d7f7d73b706dc1a367e1c278993312b9ee203ca9255c123b98a8b6"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_generic.log.hip-generic-PID248-app2018.sha256-49118f7351f10dfee2a3cbd637bbe52a34dc72b4aee739fe0ae5977aa2a28e14": {
+      "bytes": 1842,
+      "sha256": "49118f7351f10dfee2a3cbd637bbe52a34dc72b4aee739fe0ae5977aa2a28e14"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.math-exp-corrected.sha256-28581ca2a1ca2cdf94ebe902923195efffcf98f85128a013edcfc257fb307d82.preserved": {
+      "bytes": 3637248,
+      "sha256": "28581ca2a1ca2cdf94ebe902923195efffcf98f85128a013edcfc257fb307d82"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-fp32_math.log.math-exp-corrected-PID257-app4018.sha256-6db4b87ea5fbf3afb22f99c7cc70ddce0b5ff4d8ce3572cd52efea743b996c33": {
+      "bytes": 625,
+      "sha256": "6db4b87ea5fbf3afb22f99c7cc70ddce0b5ff4d8ce3572cd52efea743b996c33"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.hip-matmul.sha256-cb1b0c39d36a73ecdabd05ef3185ef5c17ba662c7ac361e69bab235b809d532e.preserved": {
+      "bytes": 3670016,
+      "sha256": "cb1b0c39d36a73ecdabd05ef3185ef5c17ba662c7ac361e69bab235b809d532e"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_matmul.log.hip-matmul-PID266-app6018.sha256-d183ca0d03804c20a8d02005b64217f12caca886db68299d63a9ef632644190f": {
+      "bytes": 2049,
+      "sha256": "d183ca0d03804c20a8d02005b64217f12caca886db68299d63a9ef632644190f"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.hipify.sha256-ead66563443612b713afe668dfe76dd3b974fb8f5c9575dacb23b799f52f32cb.preserved": {
+      "bytes": 3670016,
+      "sha256": "ead66563443612b713afe668dfe76dd3b974fb8f5c9575dacb23b799f52f32cb"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hipify.log.hipify-PID275-app8018.sha256-fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4": {
+      "bytes": 1253,
+      "sha256": "fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.cpu-host-threads.sha256-28f76350b682a2c47d20dc05d459d0d3cdf3793b1b70488267e10986e88f826f.preserved": {
+      "bytes": 3473408,
+      "sha256": "28f76350b682a2c47d20dc05d459d0d3cdf3793b1b70488267e10986e88f826f"
+    },
+    "/data/ps5-hip/results/ps5-hip-host_threads.log.cpu-host-threads-PID300-appe018.sha256-ffc24ede0a06643676ad86655a2df2046d7a4161fe569de98e1a9bef28ca3bc2": {
+      "bytes": 663,
+      "sha256": "ffc24ede0a06643676ad86655a2df2046d7a4161fe569de98e1a9bef28ca3bc2"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.threaded-hipify.sha256-635ef1c675174a3e950763212e05084cc6f9c3dc5f552fc3a12f5e378ca2bcf6.preserved": {
+      "bytes": 3670016,
+      "sha256": "635ef1c675174a3e950763212e05084cc6f9c3dc5f552fc3a12f5e378ca2bcf6"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hipify.log.threaded-hipify-PID309-app18.sha256-fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4": {
+      "bytes": 1253,
+      "sha256": "fc305204d5b2f1b36e5dd3a1c15b466c57b2ccffc9419318acba957e3d8fa5a4"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.workers-main.sha256-4a4d969be9cd8187eacc0081d328977f7ac1b0f95b5d6f919a0b21878771265f.preserved": {
+      "bytes": 3670016,
+      "sha256": "4a4d969be9cd8187eacc0081d328977f7ac1b0f95b5d6f919a0b21878771265f"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_workers_main.log.workers-main-PID318-app2018.sha256-7eff115bc3050e3833a71055ff3a928df06e4e78796d17ee5f1af8f15b3a426b": {
+      "bytes": 2419,
+      "sha256": "7eff115bc3050e3833a71055ff3a928df06e4e78796d17ee5f1af8f15b3a426b"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.workers-init.sha256-330b3a7205e076b5b9f873627a7084d1e5c27939e5b4dbf8787bcbd7c6a03cb4.preserved": {
+      "bytes": 3670016,
+      "sha256": "330b3a7205e076b5b9f873627a7084d1e5c27939e5b4dbf8787bcbd7c6a03cb4"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_workers_init.log.workers-init-PID327-app4018.sha256-433c0f6cf2733994b0a54f2e714fc103e173cf77fb08acbbc54c4238a225e84e": {
+      "bytes": 2206,
+      "sha256": "433c0f6cf2733994b0a54f2e714fc103e173cf77fb08acbbc54c4238a225e84e"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.contention.sha256-57c92907f9f01ef58b58bfab99849a9390db3a4cdbd3816fc9a3d1962cee932c.preserved": {
+      "bytes": 3670016,
+      "sha256": "57c92907f9f01ef58b58bfab99849a9390db3a4cdbd3816fc9a3d1962cee932c"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_contend_main.log.contention-PID336-app6018.sha256-460938f09a63357c222d2f609673b02f34911d39cde4235b37a3fd6eed15164c": {
+      "bytes": 1901,
+      "sha256": "460938f09a63357c222d2f609673b02f34911d39cde4235b37a3fd6eed15164c"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.memory-fill.sha256-cca66888e3233a84c8ef72a1f0c0dd7eab3a9f66ad51b9a057682a94fee83caf.preserved": {
+      "bytes": 3670016,
+      "sha256": "cca66888e3233a84c8ef72a1f0c0dd7eab3a9f66ad51b9a057682a94fee83caf"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_memory_fill.log.memory-fill-PID345-app8018.sha256-217bb46f3303c01cada00fa434e00a83724650ef9fb5d573bd6929c3cbe74105": {
+      "bytes": 1843,
+      "sha256": "217bb46f3303c01cada00fa434e00a83724650ef9fb5d573bd6929c3cbe74105"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.device-copy.sha256-45311e46b536f7a65fb519ba45f44e1fbbd96492573df7483aa96f3e1d3a3134.preserved": {
+      "bytes": 3670016,
+      "sha256": "45311e46b536f7a65fb519ba45f44e1fbbd96492573df7483aa96f3e1d3a3134"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_device_copy.log.device-copy-PID354-appa018.sha256-10cdda626fdad484b1b7a5ef718d2156f7b61296b65fddb9f7b75d7b80515a94": {
+      "bytes": 3602,
+      "sha256": "10cdda626fdad484b1b7a5ef718d2156f7b61296b65fddb9f7b75d7b80515a94"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.reduction.sha256-6b8487e6b4c66bdd0a8ae5aa79b5fa4627a5f7fd296ed6e89d96216c1340c2ff.preserved": {
+      "bytes": 3702784,
+      "sha256": "6b8487e6b4c66bdd0a8ae5aa79b5fa4627a5f7fd296ed6e89d96216c1340c2ff"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_reduction.log.reduction-PID363-appc018.sha256-8efabb57772a1524f55ab0de56b3bf847d9a6a7ce789a455b76c2717f5eed97a": {
+      "bytes": 1448,
+      "sha256": "8efabb57772a1524f55ab0de56b3bf847d9a6a7ce789a455b76c2717f5eed97a"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.multi-query.sha256-5266e6b0c1c85029613e698639000ff53d6f889005d46d47800ec08063269151.preserved": {
+      "bytes": 3702784,
+      "sha256": "5266e6b0c1c85029613e698639000ff53d6f889005d46d47800ec08063269151"
+    },
+    "/data/ps5-hip/results/ps5-hip-gfx1013-hip_multi_query.log.multi-query-PID372-appe018.sha256-b055f5d3b5abc82c14869b9ff1e2b36d4983cfeeeced004537a0f13eb0bb3842": {
+      "bytes": 1991,
+      "sha256": "b055f5d3b5abc82c14869b9ff1e2b36d4983cfeeeced004537a0f13eb0bb3842"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.cpu-clr-unlaunched.sha256-e78490b0e0d58757aecbd0abc67157c80ba7db5d7ff119477e40f305c9b951ba.preserved": {
+      "bytes": 5144576,
+      "sha256": "e78490b0e0d58757aecbd0abc67157c80ba7db5d7ff119477e40f305c9b951ba"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.cpu-clr-failed-startup.sha256-8b2a8c8b1ce2e2d3713f88283b8402482aeebaf2210c555ed86cb1f16891fb91.preserved": {
+      "bytes": 5144576,
+      "sha256": "8b2a8c8b1ce2e2d3713f88283b8402482aeebaf2210c555ed86cb1f16891fb91"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.cpu-clr-os-init-diagnostic.sha256-cb9a134795672010b128dfeab17cdfd1fd5095d5ccbf2f26be1acc5c620c4a77.preserved": {
+      "bytes": 5144576,
+      "sha256": "cb9a134795672010b128dfeab17cdfd1fd5095d5ccbf2f26be1acc5c620c4a77"
+    },
+    "/data/homebrew/PPSA99014.ffpkg.cpu-clr-path-query-failure.sha256-f63a8f3922d69e0689b6a3d99e57fe3980fb91dc5a7fbc6dbd53d73716e42e66.preserved": {
+      "bytes": 5144576,
+      "sha256": "f63a8f3922d69e0689b6a3d99e57fe3980fb91dc5a7fbc6dbd53d73716e42e66"
+    }
+  },
+  "files_sha256": {
+    ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348",
+    "results/clr-gpu-startup-controls-v1/deployment/deployment-20261014T011917.375604Z/deployment.json": "7cae44d6878ecda9eae6ad2e6fcf496f1db8894d12a7ca0d78f46d677a4e6fc4",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/manifest.json": "60e793da1f1d91b166641d5575ab941ff602a5d002eb9969832ed5099d24d0be",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/package-receipt.json": "9f354b6df99d8d7c74488ff67270b379e43436cdc2252cf31799472d7b5177ff",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/PPSA99014.ffpkg": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+    "results/deploy-private-buffer-milestone-v2.py": "84749602456ade3cd82c1ba7954343fcf8f6256b6a4022874f4ddb8291c8d5cf",
+    "results/teardown-console-control-v3-initial-focus/run.py": "1753ecf4edb4c0243bea398e703cf0697f5983b5fa24ae29469eb6dea7e07e59",
+    "results/arithmetic-prospective-cycle2/acceptance.py": "4c5d72a664bcae17b70e229f61087e8097e9260e2cf9f2ac2806bc209168b71e",
+    "results/visibility-bounded-lifecycle-v1/lifecycle.py": "a58c7441346678761081ac97e719f6d8eab91b566090381782babcfdd68f8fae",
+    "evidence/offline-controllers.json": "83e122665be7abd8700eacf0fd510e41aac9aeb76b7d6dc0c1307415472e6b09",
+    "build/controllers/PPSA99014/receipt.json": "a2c01897d9e49da40bf7e0e00ae9ffd890c24294f46f4a3f025cc56b218592f5",
+    "build/controllers/PPSA99014/launch.elf": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+    "build/controllers/PPSA99014/close.elf": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+    ".local/teardown-snapshot-v3/build/teardown-qualified-v3/teardown-snapshot.elf": "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93",
+    ".local/ENVIRONMENT.md": "ec17ac4ccd4dca80ce49efd73a848480365daacb9ea4717674be44438b9650a5",
+    ".local/g5-hip-native-link/tools/public_hip_controls/prepare_manifests.py": "5d984a552079e890f54082c41699f4fee30d78fc0f5f4a1e0f3bb76cb0ed06d9",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/eboot.bin": "19107f50782257e80a8eb3405978d83bc0b8742f0e37d71b36b3735d629174fe",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/app/sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "7dda8bd3c028a0bb2c51ea5d0c51bf5a5301e898c68b11e75c3e969f5404e68f",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "a917f0fc9f65e9e87e455a01981d238571b208097d9e60fc520628604693b3a8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/acceptance.py": "921151f3c39ad013ece4d16ea3d15e8ad3fc15ff4c267bbabd5188ddabe0a6c0",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/check_log.py": "73a43f6ad0e5d53d5fd8d923fd4bdcb4433c7130349bfb82ec97f3dfe3ab7d6d",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/run.py": "79ba76ac6854598a3f5935602c2689359c4911e1cedc102fc1e229b08f68318a",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/test_acceptance.py": "f9ff80d0e5633258aa0ce37ef6e6e1101ec3699b19838cc5641034293f25b06d",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/test_runner.py": "54ea1776d8271dd8325963240f1312a08018818fd150b253dc6d0bfa64a57c7a",
+    ".local/g5-hip-native-link/tools/public_hip_controls/test_inert.py": "5f5e195c6726a2048bc5358eb5b59c24d6cea3ed1ae5c3dd380545ce805c8b7d"
+  },
+  "direct_sha256": {
+    ".local/g5-hip-native-link/results/public-hip-clean-bootstrap-independent-review-v1/review.json": "b76e9437deb47bd054410f93e579acc1c1b1d51263f99803b35e4f51a96dc348",
+    ".local/g5-hip-native-link/dist/PPSA99014/gfx1013-public-bootstrap-19107f507822/PPSA99014.ffpkg": "836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8",
+    "build/controllers/PPSA99014/receipt.json": "a2c01897d9e49da40bf7e0e00ae9ffd890c24294f46f4a3f025cc56b218592f5",
+    "build/controllers/PPSA99014/launch.elf": "c4e06564dc93ddb29ca9e6a135e3f426461cf32b1355eb0d6c0eea1ae3b6dbff",
+    "build/controllers/PPSA99014/close.elf": "9b6841c10ae0e45298c663b6d83cc7057d743199b34eff0fc32fee0aea3060dd",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/run.py": "7dda8bd3c028a0bb2c51ea5d0c51bf5a5301e898c68b11e75c3e969f5404e68f",
+    ".local/g5-hip-native-link/tools/public_hip_controls/deployment/test_deploy.py": "a917f0fc9f65e9e87e455a01981d238571b208097d9e60fc520628604693b3a8",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/acceptance.py": "921151f3c39ad013ece4d16ea3d15e8ad3fc15ff4c267bbabd5188ddabe0a6c0",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/check_log.py": "73a43f6ad0e5d53d5fd8d923fd4bdcb4433c7130349bfb82ec97f3dfe3ab7d6d",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/run.py": "79ba76ac6854598a3f5935602c2689359c4911e1cedc102fc1e229b08f68318a",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/test_acceptance.py": "f9ff80d0e5633258aa0ce37ef6e6e1101ec3699b19838cc5641034293f25b06d",
+    ".local/g5-hip-native-link/tools/public_hip_controls/execution/test_runner.py": "54ea1776d8271dd8325963240f1312a08018818fd150b253dc6d0bfa64a57c7a"
+  },
+  "hardware_validated": false
+}

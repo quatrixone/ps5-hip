@@ -2,7 +2,8 @@
 
 This isolated candidate links genuine upstream `hipInit(0)` and
 `hipGetDeviceCount` against the PS5 AgcBackend and ROCclr port. It proves an
-offline host-binary boundary only. It has not been packaged or run on a PS5.
+offline host-binary boundary only. The clean 74-object PPSA99014 package is
+frozen and independently reviewed; it has not run on a PS5.
 
 The reviewed public HIP admission patch applies exactly to the GPU-qualified
 ROCclr source. Its profiling header needs the existing
@@ -37,21 +38,22 @@ python3 .local/g5-hip-native-link/tools/guard_native_hip_gl.py \
 python3 .local/g5-hip-native-link/tools/probe_native_public_hip_link.py \
   --output .local/g5-hip-native-link/results/native-hip-compile-all-v2 --all
 python3 .local/g5-hip-native-link/tools/link_native_public_hip_bootstrap.py \
-  --output .local/g5-hip-native-link/results/native-hip-link-v4
+  --output .local/g5-hip-native-link/results/native-hip-console-clean-link-v2 --console-title
 python3 .local/g5-hip-native-link/tools/convert_native_public_hip_bootstrap.py \
-  --output .local/g5-hip-native-link/results/native-hip-convert-v4
-python3 .local/g5-hip-native-link/tools/verify_native_public_hip_bootstrap.py
+  --link .local/g5-hip-native-link/results/native-hip-console-clean-link-v2 \
+  --output .local/g5-hip-native-link/results/native-hip-console-clean-convert-v2 --console-title
+python3 .local/g5-hip-native-link/tools/verify_native_public_hip_bootstrap.py --console-title
 ```
 
 The converter step uses the pinned `ps5-native-tool` and SDK/AGC stubs. The
 verifier checks the resulting FSELF against the converter's known unmapped
 24-byte SIE note.
 
-The link reuses unchanged ROCclr and backend objects from the prior GPU title;
-five patched ROCclr units, the pthread TLS helper, adapter, startup and public
-HIP units are rebuilt. A clean full-closure rebuild and native startup/teardown
-review are required before a console experiment. This candidate does not include
-the public SVM memory patch and does not establish GPU-backed public HIP work.
+The link rebuilds all 74 selected ROCclr, backend, startup and public HIP
+objects and binds each direct source and object hash in its receipt. The clean
+package and startup/teardown source path passed independent offline review.
+This candidate does not include the separate public SVM memory bridge or
+establish GPU-backed public HIP work.
 
 The separate PPSA99014 title variant adds the existing Lapy elevation flow,
 configurable result directory, exclusive log creation, bounded watchdog,
@@ -59,17 +61,18 @@ application finalizer and natural shell-exit probe. It records only public
 initialization and one discovered device. Its offline build is:
 
 ```sh
-python3 .local/g5-hip-native-link/tools/link_native_public_hip_bootstrap.py \
-  --output .local/g5-hip-native-link/results/native-hip-console-link-v1 --console-title
-python3 .local/g5-hip-native-link/tools/convert_native_public_hip_bootstrap.py \
-  --link .local/g5-hip-native-link/results/native-hip-console-link-v1 \
-  --console-title --output .local/g5-hip-native-link/results/native-hip-console-convert-v1
-python3 .local/g5-hip-native-link/tools/verify_native_public_hip_bootstrap.py --console-title
 python3 .local/g5-hip-native-link/tools/package_native_public_hip_bootstrap.py \
   --results-dir-source .local/g5-clr-gpu-startup/dist/PPSA99014/gfx1013-clr-gpu-b21b9c51dc42/app/results-dir.txt
 ```
 
 Packaging requires a clean committed source tree and makes a new package with
 verified UFS2 extraction. It never deploys or launches the image. Independent
-review must check the title's complete source closure, startup and teardown,
-package and one-use controls before any console validation.
+review must check the one-use controls before any console validation. The
+reviewed image SHA-256 is
+`836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8`.
+
+Future context-option work must repair upstream `hip_context.cpp`'s failed
+host-context creation branch: release `hContext`, set `*status=false`, and
+return. The frozen bootstrap passes zero flags and null properties under
+`PS5HIP_CLR_NO_GRAPHICS`, so independent review found that branch unreachable
+for this exact case absent memory corruption.
