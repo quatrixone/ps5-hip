@@ -1,0 +1,52 @@
+{
+  "classification": "offline-native-clr-gpu-startup-source-freeze",
+  "base_commit": "bd5138b57308f9aa07af7ddc94197de95f3fe904",
+  "candidate_receipt_sha256": "a30a30f6ecd6ca380c9ea55989eaf08c87f8f54281e6410e360f229f6f765903",
+  "sources": {
+    "docs/CLR_NATIVE_GPU.md": "5b1b71efc0c1bb159dca10abb6aeb1a48ba098a24f1b0a7c39bd83dc06dddaae",
+    "tools/prepare_clr_gpu_source.py": "cf2982b487b6266e654c12c5d7ce0eb22bd79bdf58f632ba7eb416bc759e673f",
+    "tools/qualify_clr_gpu_adapter.py": "c3178c602e59c82e6f2fb50a6559c677ac4c2ce360be3aaace508c7957134f16",
+    "tools/probe_clr_gpu_client.py": "467b9594b6403fce979ad9bb38d3d053ca0c34f0682ddd9ef0445ef34ad26604",
+    "tools/build_clr_gpu_title.py": "4bb38bd0fe25a4d03d91b5e489051eb96da70a1abb04b764277842bac143866b",
+    "tools/convert_clr_gpu_title.py": "8605f4e540c2d5cd33424fe187efe6fc64957101da333ab7e9e04a2944226fed",
+    "tools/audit_clr_gpu_title.py": "7dbe1ad96405ca3eda5de5f5d6b3ce129256935cc57f954ca893f5a35225b0c9",
+    "tools/package_clr_gpu_title.py": "8abb9ab880edc78ed3b9aa1c8eb8ef138732d12856ab56d19eb888919efd1ea1",
+    "tools/record_clr_gpu_candidate.py": "f641a2c3faab9c8eb0ec1333c71db1352168f59483c02cea626530d37989d14f",
+    "tools/clr_gpu_title.cpp": "58742d488df0e81f5d7c3774edd20d271ed05061711fe919b07c36eca2371db0",
+    "tests/clr_gpu/client_model.cpp": "87d7bace49a139b15de362f2b0ba7f7767f5b34a23fa743e7fbdcd3b4a5f00de",
+    "tools/clr_gpu/client.cpp": "c2a4a93942891eb1df026c12f7561adb851be983e6e946b57a3d926cb9a2d40e",
+    "tools/clr_gpu/client.h": "0488fa4b671d99d675bfc1011d91a8b767da811675a2885a3b12d9b50ea1ba35",
+    "tools/clr_gpu/watchdog.cpp": "d487f08f95a54ce4113b7132ed71e378bde9d6292167950f631a39ddee349508",
+    "tools/clr_gpu/watchdog.h": "3c944fa035d229eb775e4cd8e6908421b302a71c5be8b400bec017be7f3b8d41"
+  },
+  "proofs": {
+    "results/source-v1/receipt.json": "a340e648c1a2fdb5456b78d2b15f7ed3de99a7629857eb5d0d5ea4f8b559c77e",
+    "results/adapter-address-v1/receipt.json": "22f17d43eb20acb9aaa09cb63990cce35631f17b9a4ddb2d5082cf8ea32d7a61",
+    "results/adapter-thread-v1/receipt.json": "59f7859c2c30cd21eac9752e36db58dae739465e2dd399a581973e174f054bc9",
+    "results/client-address-v2/receipt.json": "699dd9046c43defd1f52b0b8e2f89c9e214d6de39a4e6e46b672747e0d94624a",
+    "results/client-thread-v2/receipt.json": "43124fce5a98e66e3e65e06c9f8a3784df0d7a1012779a04e247f9a3bd505644",
+    "results/native-title-v1/receipt.json": "f939d6d3d45bb0ac04d37f12be931e154a2b4c22bce1e1fcd661f60174b55898",
+    "results/native-conversion-v1/receipt.json": "7a612742981f765ad861c74e2c5b1d2a55ea1a3002630096de90c0493edc74c3",
+    "results/native-admission-v1/receipt.json": "18ce752301e2a11eecaee12d62d594a0adf533ea3f924464d9969b63f8029afc"
+  },
+  "native": {
+    "fself_sha256": "b21b9c51dc42c639b90fef1d86fdcb134699097043d141b7964e7d7ee9f35390",
+    "raw_elf_sha256": "3a07d5d329288222b06a5effae1259502c05e0bd84486858a282437a779434e7"
+  },
+  "expected": {
+    "dispatches": 1,
+    "exact_values": 73,
+    "readback_words": 81,
+    "guards": 8,
+    "allocations": 2,
+    "frees": 2,
+    "queues_joined": 2
+  },
+  "limits": [
+    "No console execution or public HIP/G5 acceptance.",
+    "Model transport arithmetic is synthetic; native image uses real AgcBackend.",
+    "Active arithmetic uses captured scalar/index; guard words observe copied input.",
+    "Normal teardown requires positive joins; uncertainty quarantines without normal owner/global teardown.",
+    "Independent final source/native review and package validation pending."
+  ]
+}
