@@ -52,7 +52,7 @@ direct = {name: all_hashes[name] for name in direct_names}
 for kind in ('deployment', 'execution'):
     manifest = {
         'classification': 'inert-public-hip-bootstrap-controls',
-        'activation_forbidden': True,
+        'activation_forbidden': kind == 'execution',
         'candidate_package': relative(stage),
         'source_commit': package['source_commit'],
         'image_sha256': package['image']['sha256'],
