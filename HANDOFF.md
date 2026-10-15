@@ -16,7 +16,27 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Joined capture and allocation lifetime qualified offline
+## Native joined capture passed
+
+The two-stream producer/kernel-to-consumer-copy capture passed on .40, including
+event rejoin, event reuse in eager execution, four dispatches, 292 exact values,
+32 guards, six disabled-copy replays and eight callbacks. All four queues and
+both allocations retired; the title exited naturally. Post-run installed files
+matched, idle mounts matched, services stayed healthy and both locks released.
+This proves the bounded producer/consumer topology, not concurrent GPU dispatch.
+See `evidence/console40-copy-joined-success.json`.
+
+Installed image: `6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5`.
+Current log: `cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79`.
+Both phases of `results/source-public-copy-joined-console-v1` are consumed.
+Next: share the host allocation-lifetime cases with the CPU-only copy title,
+qualify offline, then validate native allocation/worker retirement. Keep static
+callback state/buffers for quarantine safety, checked thread lifecycle and bounded
+waits. Expected added coverage is six allocations/frees and three exact 128-byte
+comparisons; integrated queue counts must be measured before native acceptance.
+Native lifetime, sustained replay, memory plateau, performance and G5 remain open.
+
+## Previous offline joined capture and lifetime checkpoint
 
 Full source ASan/UBSan qualification passed 84 compilations, including two-stream
 GPU-producer/copy-consumer capture with event rejoin/reuse, exact dependencies,

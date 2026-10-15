@@ -433,7 +433,8 @@ allocations and four retired queues. The exact transcript is
 `ps5-hip-public-copy_gpu.log`; a fresh frozen candidate and independent review
 are required before a bounded console case. This producer/consumer case does
 not prove concurrent GPU dispatch, general multi-kernel capture or sustained
-replay efficiency. Hardware validation of this joined variant is pending.
+replay efficiency. This bounded joined variant passed on .40 at `a885975`; see
+`../evidence/console40-copy-joined-success.json`. Both candidate phases are consumed.
 
 The source qualifier also checks queued graph copies followed by `hipFree`
 while the executable and stream remain alive, and executable parameter migration

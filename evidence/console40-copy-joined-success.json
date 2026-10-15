@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-joined-copy-capture",
+  "source_commit": "a88597543a8bd38fc55cd02ac9e179a489891379",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5",
+  "manifest_sha256": "4b8537510acb592ed7a8c060943556b8e809482aa441717dc085bf20715c7f0e",
+  "application_log_sha256": "cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79",
+  "process": [
+    [
+      "PPSA99014",
+      "199"
+    ]
+  ],
+  "complete_ftp_reads": 28,
+  "joined_streams": 2,
+  "rejoined": true,
+  "events_reused": true,
+  "capture_recovery_cases": 27,
+  "setter_rejections": 4,
+  "update_handle_rejections": 2,
+  "launches": 4,
+  "exact_values": 292,
+  "guards": 32,
+  "disabled_replays": 6,
+  "callbacks": 8,
+  "allocations": 2,
+  "frees": 2,
+  "queues": 4,
+  "retired_queues": 4,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-copy-joined-console-v1",
+  "raw_evidence": {
+    "manifest.json": "4b8537510acb592ed7a8c060943556b8e809482aa441717dc085bf20715c7f0e",
+    "execution-review.json": "4053efb531b41514c743b026a7415277dd87aeeb0ae9c577ffbda62a69df7ce5",
+    "outcome-review.json": "d61a9b6dcdbe6e8b6685f45a976f910b4dd0913f145dc4d609aaec6eb7657104",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/receipt.json": "b97ef4fabc93bce2ca36b51c0fe2031c06079c17a661b1e092ddd7e20796424b",
+    "execute/application.log": "cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79",
+    "execute/before-launch.log": "0be334d8ec5db285121a9927730a0d16054060f274d5876b7efce5abe0a5766c",
+    "execute/klog.log": "2c9f52ede79b1862441b1a4faaa93905a38686086294c012370352f63499b7b3",
+    "execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "execute/observed.log": "bfdbd2a7fa5ee933b46a8dd7643ad7b7afc7920e742c54d2d05ca89f9b48ff42",
+    "execute/post_snapshot.log": "8f1fefedd02cdc81be7555935962b1f56bdc35a4a178d45cf608b59bdc5aff6f",
+    "execute/snapshot.log": "8f1fefedd02cdc81be7555935962b1f56bdc35a4a178d45cf608b59bdc5aff6f"
+  },
+  "limits": [
+    "Single producer GPU kernel followed by consumer copies and origin rejoin; no simultaneous GPU execution or multi-kernel capture claim.",
+    "Native allocation-lifetime cases, sustained replay, memory plateau and measured performance remain open.",
+    "Missing-rejoin negative and broader graph-update subtype rejection remain host-qualified.",
+    "Prior startup timeout root cause remains unproven; this bounded run does not establish startup reliability or close G5."
+  ]
+}
