@@ -71,9 +71,12 @@ aggregate execution or new console image is claimed. Next: integrate the native
 aggregate title, audit/package it, then freeze and validate a fresh candidate
 on idle .40 before proceeding to real LLM launch resources and operators.
 
-Local next-step draft: `tools/public_hip_aggregate_console_title.cpp` is
-uncommitted and unbuilt. Review it before integration; it is not required to
-reproduce the committed offline qualification or an installed console image.
+The native aggregate title now builds and passes image/package audits:
+`build/public-hip-aggregate-native-v1/link-receipt.json`, package SHA
+`54d880eeb81097f7a9caaacad926a424673a1103b6fb33250d46f7b318c494f7`.
+See `evidence/offline-public-aggregate-native-package.json`. Next: freeze the
+committed candidate and independently review it before a bounded .40 cycle.
+The installed baseline remains the embedded title until a deployment is recorded.
 
 ## Static module failure handling checkpoint
 

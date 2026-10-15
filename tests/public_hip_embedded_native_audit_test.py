@@ -7,12 +7,28 @@ import tempfile
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from audit_public_hip_embedded_native import audit_layout,audit_initializer_order,audit_text
+from audit_public_hip_embedded_native import audit_layout,audit_initializer_order,audit_text,audit_compiler_calls,fixture_contract
 from embedded_module_linker import patch_linker
 from native_multi_query import symbol_values
 from probe_host_registration import load_regions
 
 class NativeAuditTest(unittest.TestCase):
+    def test_explicit_fixture_registration_and_launch_contracts(self):
+        ctor='<__hipRegisterFatBinary> <__hipRegisterFunction>'
+        entry='<__hipPushCallConfiguration> <__hipPopCallConfiguration> <hipLaunchKernel>'
+        audit_compiler_calls(ctor, '', '<launch_public_embedded>', 'embedded')
+        aggregate=ctor+' <__hipRegisterFunction>'
+        audit_compiler_calls(aggregate, entry, '<launch_aggregate_fixture>', 'aggregate')
+        for actual in (ctor, aggregate+' <__hipRegisterFunction>',aggregate+' <__hipRegisterFatBinary>'):
+            with self.assertRaisesRegex(RuntimeError,'registration count'):
+                audit_compiler_calls(actual,entry,'<launch_aggregate_fixture>','aggregate')
+        for symbol in ('__hipPushCallConfiguration','__hipPopCallConfiguration','hipLaunchKernel'):
+            with self.assertRaisesRegex(RuntimeError,'launch chain'):
+                audit_compiler_calls(aggregate,entry.replace('<'+symbol+'>',''),'<launch_aggregate_fixture>','aggregate')
+        with self.assertRaisesRegex(RuntimeError,'pointer aggregate'):
+            audit_compiler_calls(aggregate,entry,'<launch_aggregate_fixture> <launch_pointer_aggregate_fixture>','aggregate')
+        with self.assertRaisesRegex(RuntimeError,'unknown compiler fixture'):fixture_contract('other')
+
     def test_real_layout_and_negative_controls(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);assembly=root/'fixture.s';obj=root/'fixture.o';image=root/'image.elf'

@@ -18,7 +18,27 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def unique_symbols(image):
+FIXTURES = {"embedded": ("launch_public_embedded", 1), "aggregate": ("launch_aggregate_fixture", 2)}
+
+
+def fixture_contract(fixture):
+    require(fixture in FIXTURES, "unknown compiler fixture")
+    return FIXTURES[fixture]
+
+
+def audit_compiler_calls(ctor_text, entry_text, main_text, fixture):
+    launcher, registrations = fixture_contract(fixture)
+    require(ctor_text.count("<__hipRegisterFatBinary>") == 1 and
+            ctor_text.count("<__hipRegisterFunction>") == registrations,
+            "unexpected compiler module/function registration count")
+    require("<" + launcher + ">" in main_text, "title does not call plain compiler launch entry")
+    if fixture == "aggregate":
+        for symbol in ("__hipPushCallConfiguration", "__hipPopCallConfiguration", "hipLaunchKernel"):
+            require(entry_text.count("<" + symbol + ">") == 1, "aggregate compiler launch chain missing: " + symbol)
+        require("<launch_pointer_aggregate_fixture>" not in main_text, "title launches pointer aggregate")
+
+
+def unique_symbols(image, fixture="embedded"):
     values = symbol_values(image.read_bytes())
     def one(name):
         require(name in values and len(values[name]) == 1, 'missing or ambiguous symbol: ' + name)
@@ -29,7 +49,7 @@ def unique_symbols(image):
              '__ps5hip_names_begin', '__ps5hip_names_end', '__init_array_start', '__init_array_end',
              '__hip_module_ctor', '__hip_module_dtor', '__hip_gpubin_handle',
              '_GLOBAL__sub_I_runtime.cpp', '_ZN3amd15RuntimeTearDownD1Ev',
-             'launch_public_embedded', 'main', '_start', 'ps5hip_install_vector_title_finalizer')
+             fixture_contract(fixture)[0], 'main', '_start', 'ps5hip_install_vector_title_finalizer')
     return {name: one(name) for name in names}
 
 
@@ -90,7 +110,8 @@ def audit_text(readers, functions, sizes):
             require(region[1] == 1, 'native audited code must be execute-only')
 
 
-def audit(raw, converted, extracted, compiler_object):
+def audit(raw, converted, extracted, compiler_object, fixture="embedded"):
+    launcher, registrations = fixture_contract(fixture)
     paths = list(map(Path, (raw, converted, extracted, compiler_object)))
     raw, converted, extracted, compiler_object = paths
     root = Path(__file__).resolve().parents[1]
@@ -100,7 +121,7 @@ def audit(raw, converted, extracted, compiler_object):
     objdump = Path(shutil.which('llvm-objdump-18') or '')
     require(objdump.is_file(), 'LLVM18 objdump unavailable')
     identities = {str(p.resolve()): sha(p) for p in [*paths, *helpers, objdump]}
-    symbols = unique_symbols(raw)
+    symbols = unique_symbols(raw, fixture)
     bundle = section(compiler_object.read_bytes(), b'.hip_fatbin')
     require(bundle.startswith(b'__CLANG_OFFLOAD_BUNDLE__'), 'compiler object has no Clang bundle')
     disassembly = subprocess.check_output([str(objdump), '-d', '--no-show-raw-insn', '--print-imm-hex', raw], text=True)
@@ -111,11 +132,9 @@ def audit(raw, converted, extracted, compiler_object):
         return bodies[address][1]
     refs = lambda value: {int(x, 16) for x in re.findall(r'0x([0-9a-f]+)', value)}
     ctor, dtor, handle = (symbols[n] for n in ('__hip_module_ctor', '__hip_module_dtor', '__hip_gpubin_handle'))
-    require(text(ctor).count('<__hipRegisterFatBinary>') == text(ctor).count('<__hipRegisterFunction>') == 1,
-            'expected one genuine compiler module/function registration')
+    audit_compiler_calls(text(ctor), text(symbols[launcher]), text(symbols['main']), fixture)
     require({symbols['__ps5hip_wrappers_begin'], handle, dtor} <= refs(text(ctor)), 'compiler ctor ownership changed')
     require(text(dtor).count('<__hipUnregisterFatBinary>') == 1 and handle in refs(text(dtor)), 'compiler dtor does not retire own handle')
-    require('<launch_public_embedded>' in text(symbols['main']), 'title does not call plain compiler launch entry')
     runtime = symbols['_GLOBAL__sub_I_runtime.cpp']
     visited, pending = set(), [runtime]
     while pending:
@@ -171,27 +190,29 @@ def audit(raw, converted, extracted, compiler_object):
         _, info, _, index, value, size = struct.unpack_from('<IBBHQQ', symtab, offset)
         if index and info & 15 == 2 and size:
             sizes[value] = max(sizes.get(value, 0), size)
-    functions = visited | {ctor, dtor, symbols['main'], symbols['_start'], symbols['launch_public_embedded'],
+    functions = visited | {ctor, dtor, symbols['main'], symbols['_start'], symbols[launcher],
                            symbols['ps5hip_install_vector_title_finalizer']}
     readers = [load_regions(path)[0] for path in (raw, converted, extracted)]
     audit_text(readers, functions, sizes)
     require(all(sha(Path(name)) == digest for name, digest in identities.items()), 'audited artifact changed during audit')
     return {'schema': 1, 'classification': 'offline-public-hip-embedded-native-layout-audit',
+            'fixture': fixture, 'registered_function_count': registrations,
             'inputs': identities, 'stages': stages, 'startup': startup,
             'audited_function_count': len(functions), 'native_executed': False,
             'limits': ['Static compiler call chain/layout audit, not on-console execution.',
                        'Final device backing counters do not prove complete static-module ownership retirement.',
-                       'One compiler module and one registered kernel only; no eager native loading qualification.']}
+                       'One compiler module; only the selected launcher is qualified; no eager native loading qualification.']}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('raw', 'converted', 'extracted', 'compiler-object', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--fixture', choices=tuple(FIXTURES), default='embedded')
     args = parser.parse_args()
     if args.output.exists():
         parser.error('output must be fresh')
-    report = audit(args.raw, args.converted, args.extracted, args.compiler_object)
+    report = audit(args.raw, args.converted, args.extracted, args.compiler_object, args.fixture)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open('x') as stream:
         json.dump(report, stream, indent=2)

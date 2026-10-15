@@ -14,6 +14,7 @@ import tempfile
 from native_vector_title import audit_roundtrip
 from prepare_public_hip_embedded import prepared as embedded_prepared
 from embedded_module_linker import patch_linker as embedded_linker
+from qualify_public_hip_aggregate import compiler_inputs as aggregate_compiler_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPS = ROOT / ".deps"
@@ -56,6 +57,10 @@ def build_inputs():
              "tools/probe_host_registration.py", "tools/native_multi_query.py",
              "tools/build_native_vector_title.py", "tools/native_vector_title.py",
              "tests/fat_binary_fixture_test.py", "tests/public_hip_embedded.hip",
+             "tools/public_hip_aggregate_console_title.cpp", "tools/qualify_public_hip_aggregate.py",
+             "tests/hip_aggregate_fixture.h", "tests/hip_aggregate_fixture.hip",
+             "tests/hip_aggregate_stub_observer.cpp", "tests/hip_aggregate_compiler_test.py",
+             "tests/public_hip_aggregate_qualification_test.py",
              "tests/public_hip_embedded_build_test.py", "tests/public_hip_embedded_native_audit_test.py",
              ".deps/sources/native-tools/tooling/native/ps5-pie.ld",
              "tools/prepare_public_hip_command_stats.py",
@@ -246,6 +251,19 @@ def embedded_fixture_inputs(folder):
             "object": str(folder / name), "object_sha256": report["artifacts"][name]}
 
 
+def compiler_fixture_inputs(folder, fixture):
+    if fixture == "embedded":
+        return embedded_fixture_inputs(folder)
+    if fixture != "aggregate":
+        raise ValueError("compiler objects require embedded or aggregate fixture")
+    folder = Path(folder).resolve()
+    verified = aggregate_compiler_inputs(folder)
+    receipt = folder / "receipt.json"
+    obj = folder / "ps5-fixture.o"
+    return {"receipt": str(receipt), "receipt_sha256": verified[str(receipt)],
+            "object": str(obj), "object_sha256": verified[str(obj)]}
+
+
 def link_title(output, units, fixture="bootstrap", embedded=None):
     sdk = DEPS / "sdk/target/lib"
     static = ["libc++.a", "libc++abi.a", "libunwind.a", "libc.a",
@@ -259,9 +277,9 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
                                "--defsym", "__" + section + "_end=ADDR(." + section + ")+SIZEOF(." + section + ")")]
     linker = ROOT / "ports/clr/ps5-pie.ld"
     extra_objects = []
-    if fixture == "embedded":
+    if fixture in ("embedded", "aggregate"):
         if embedded is None:
-            raise ValueError("embedded title requires a verified compiler fixture")
+            raise ValueError("compiler title requires a verified compiler fixture")
         clean = (DEPS / "sources/native-tools/tooling/native/ps5-pie.ld").read_text()
         optional = linker.read_text().split("/* Audited optional provider absence", 1)
         if len(optional) != 2:
@@ -305,9 +323,10 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
         required += ["hipMemcpyAsync", "hipMemset", "hipGraphAddMemcpyNode1D"]
     if fixture == "graph":
         required += ["hipGraphInstantiate", "hipGraphLaunch", "hipGraphExecHostNodeSetParams", "hipStreamBeginCapture", "hipStreamEndCapture", "hipGraphDestroy", "hipGraphExecDestroy"]
-    if fixture == "embedded":
+    if fixture in ("embedded", "aggregate"):
         required += ["hipMalloc", "hipFree", "hipMemcpy", "hipDeviceSynchronize", "hipLaunchKernel",
-                     "launch_public_embedded", "__hipRegisterFatBinary", "__hipRegisterFunction",
+                     "launch_public_embedded" if fixture == "embedded" else "launch_aggregate_fixture",
+                     "__hipRegisterFatBinary", "__hipRegisterFunction",
                      "__hipUnregisterFatBinary", "__hipPushCallConfiguration", "__hipPopCallConfiguration"]
     for name in required:
         if not any(line.split()[-1:] == [name] and " UND " not in line for line in symbols.splitlines()):
@@ -437,13 +456,13 @@ def package_title(output, image, libc, results_dir, code_object=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded"), default="bootstrap")
-    parser.add_argument("--compiler-fixture", type=Path, help="Freshly verified compiler fixture for embedded title only")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate"), default="bootstrap")
+    parser.add_argument("--compiler-fixture", type=Path, help="Verified compiler fixture required for embedded or aggregate title")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
-    if (args.fixture == "embedded") != (args.compiler_fixture is not None):
-        parser.error("--compiler-fixture is required only for --fixture embedded")
-    embedded = embedded_fixture_inputs(args.compiler_fixture) if args.compiler_fixture else None
+    if (args.fixture in ("embedded", "aggregate")) != (args.compiler_fixture is not None):
+        parser.error("--compiler-fixture is required only for --fixture embedded or aggregate")
+    embedded = compiler_fixture_inputs(args.compiler_fixture, args.fixture) if args.compiler_fixture else None
     initial_inputs = build_inputs()
     validate_results_directory(args.results_dir)
     output = args.output.resolve()
@@ -478,9 +497,11 @@ def main():
                 if sha(output / "embedded-pie.ld") != previous["embedded_linker_sha256"]:
                     raise RuntimeError("cached embedded linker changed")
                 audit = json.loads(audit_path.read_text())
+                if audit.get("fixture", "embedded") != args.fixture:
+                    raise RuntimeError("cached compiler audit fixture differs")
                 if any(sha(name) != digest for name, digest in audit["inputs"].items()):
                     raise RuntimeError("cached embedded audit inputs changed")
-                if embedded_fixture_inputs(args.compiler_fixture) != embedded:
+                if compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded:
                     raise RuntimeError("cached compiler fixture changed")
             print(cached)
             return
@@ -498,18 +519,19 @@ def main():
     image, roundtrip = convert_title(output, tool, args.fixture)
     if embedded is not None:
         run(output, "audit-embedded-native", [sys.executable, ROOT / "tools/audit_public_hip_embedded_native.py",
-            "--raw", output / "title.elf", "--converted", output / "eboot.elf", "--extracted", output / "extracted.elf",
+            "--fixture", args.fixture, "--raw", output / "title.elf", "--converted", output / "eboot.elf", "--extracted", output / "extracted.elf",
             "--compiler-object", embedded["object"], "--output", output / "embedded-native-audit.json"])
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
                                    output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None)
     if embedded is not None:
         audit = json.loads((output / "embedded-native-audit.json").read_text())
-        if (sha(output / "embedded-pie.ld") != linked_script_sha or
+        if (audit.get("fixture", "embedded") != args.fixture or
+                sha(output / "embedded-pie.ld") != linked_script_sha or
                 any(sha(name) != digest for name, digest in audit["inputs"].items())):
             raise RuntimeError("native embedded audit or linker inputs changed before publication")
     if initial_inputs != build_inputs() or (embedded is not None and
-            embedded_fixture_inputs(args.compiler_fixture) != embedded):
+            compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded):
         raise RuntimeError("native build inputs changed before publication")
     if any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
            sha(output / unit["object"]) != unit["object_sha256"] for unit in units):

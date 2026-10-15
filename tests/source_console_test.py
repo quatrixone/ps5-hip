@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, EMBEDDED_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, COPY_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, EMBEDDED_EXPECTED, AGGREGATE_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, COPY_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
 from freeze_source_candidate import validate_embedded_audit, validate_source_inputs
 import json
 
@@ -51,6 +51,15 @@ class TransferAndRecoveryTest(unittest.TestCase):
                        'embedded_compiler': {'object': str(images[3]), 'object_sha256': sha(images[3].read_bytes())}}
             self.assertEqual(validate_embedded_audit(root, receipt), audit)
             with self.assertRaises(ValueError):
+                validate_embedded_audit(root, dict(receipt, fixture='aggregate'))
+            aggregate = json.loads(audit.read_text())
+            aggregate['fixture'] = 'aggregate'
+            audit.write_text(json.dumps(aggregate))
+            receipt.update(fixture='aggregate', embedded_audit_sha256=sha(audit.read_bytes()))
+            self.assertEqual(validate_embedded_audit(root, receipt), audit)
+            with self.assertRaises(ValueError):
+                validate_embedded_audit(root, dict(receipt, fixture='embedded'))
+            with self.assertRaises(ValueError):
                 validate_embedded_audit(root, dict(receipt, compiler_object_count=0))
             with self.assertRaises(ValueError):
                 validate_embedded_audit(root, dict(receipt, title_elf_sha256='0' * 64))
@@ -75,6 +84,21 @@ class TransferAndRecoveryTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'embedded')
+
+    def test_aggregate_transcript_requires_members_guards_and_teardown(self):
+        self.assertEqual(check_log(AGGREGATE_EXPECTED, 'aggregate')['kernel'], 'public_hip_aggregate')
+        self.assertFalse(check_log(AGGREGATE_EXPECTED, 'aggregate')['hardware_gate_passed'])
+        lines = AGGREGATE_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [EMBEDDED_EXPECTED, AGGREGATE_EXPECTED * 2, AGGREGATE_EXPECTED + b'FAIL\n']
+        for before, after in ((b'compiler_stubs=true', b'compiler_stubs=false'),
+                              (b'launches=2', b'launches=0'), (b'member_bytes=320', b'member_bytes=319'),
+                              (b'guard_bytes=64', b'guard_bytes=63'), (b'frees=1', b'frees=0'),
+                              (b'retired=1', b'retired=0'), (b'padding=unspecified', b'padding=checked')):
+            invalid.append(AGGREGATE_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'aggregate')
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

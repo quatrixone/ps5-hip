@@ -32,6 +32,7 @@ def validate_embedded_audit(build, receipt):
         raise ValueError('embedded candidate lacks the exact compiler/layout audit')
     audit = json.loads(path.read_text())
     if (audit.get('classification') != 'offline-public-hip-embedded-native-layout-audit' or
+            audit.get('fixture', 'embedded') != receipt.get('fixture', 'embedded') or
             audit.get('native_executed') is not False or not audit.get('inputs') or
             any(digest(Path(name)) != expected for name, expected in audit['inputs'].items())):
         raise ValueError('embedded audit inputs changed or classification differs')
@@ -75,7 +76,7 @@ def main():
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 76:
         parser.error('not the complete .40 candidate')
     validate_source_inputs(receipt)
-    audit = validate_embedded_audit(args.build, receipt) if fixture == 'embedded' else None
+    audit = validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
         parser.error('commit source before freezing')
     output.mkdir(parents=True, exist_ok=False)
@@ -107,7 +108,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else
+                'hypothesis': ('Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
+                               'Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else
                                'After the existing joined-copy recovery oracle, a two-kernel joined graph alternates eager/captured order over four warmup and sixteen further changed-input rounds. Validate 5840 added values and640guards,84totaldispatches,28callbacks,fourallocations/frees and seven retired queues. Require32post-sync backing samples at32768bytes/twoallocations,128balanced allocations/releases per path,98304accountedpeak and zero final backing. This measures NativeMemory backing only, not process heap, command lifetime or timing.' if fixture == 'copy_gpu' else
                                'Public HIP module kernel capture records a kernel and dependent host callback without dispatch; disabled and changed-argument replay, executable update and source graph destruction preserve146values16guards and clean3queue retirement.' if fixture == 'capture_gpu' else
                                'Explicit public HIP GPU graph owns arguments, updates the executable, survives source destruction, preserves146values16guards across2launches and2disabledreplays with4callbacks, then frees1buffer and retires3queues.' if fixture == 'graph_gpu' else

@@ -26,6 +26,7 @@ help:
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
+	@echo 'make public-hip-aggregate-package Build native aggregate compiler-launch title offline (fresh outputs)'
 	@echo 'make public-hip-embedded-package Build native compiler registration/launch title offline (fresh outputs)'
 	@echo 'make public-hip-embedded-host-test  Build compiler objects and qualify genuine CLR registration (fresh outputs)'
 	@echo 'make public-hip-aggregate-host-test Qualify compiler aggregate arguments through genuine CLR (fresh outputs)'
@@ -218,3 +219,10 @@ EMBEDDED_BUILD_DIR ?= build/public-hip-embedded-native
 public-hip-embedded-package: public-hip-embedded-fixture
 	$(PYTHON) tests/public_hip_embedded_build_test.py
 	$(PYTHON) tools/build_public_hip.py --fixture embedded --compiler-fixture $(EMBEDDED_FIXTURE_DIR) --output $(EMBEDDED_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
+
+AGGREGATE_BUILD_DIR ?= build/public-hip-aggregate-native
+.PHONY: public-hip-aggregate-package
+public-hip-aggregate-package: public-hip-aggregate-fixture
+	$(PYTHON) tests/public_hip_embedded_build_test.py
+	$(PYTHON) tests/public_hip_aggregate_qualification_test.py
+	$(PYTHON) tools/build_public_hip.py --fixture aggregate --compiler-fixture $(AGGREGATE_FIXTURE_DIR) --output $(AGGREGATE_BUILD_DIR) --results-dir "$(RESULTS_DIR)"

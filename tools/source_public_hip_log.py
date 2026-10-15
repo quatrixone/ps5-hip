@@ -35,6 +35,7 @@ LAUNCH_LINES[2] = 'HIP_LAUNCH PASS init=0 count=1 rounds=2 launches=2 values=146
 LAUNCH_LINES[6] = 'HIP_LAUNCH FINAL allocations=1 frees=1 queues=1 retired=1 gate_destroyed=true application_fini=pending'
 LAUNCH_EXPECTED = ('\n'.join(LAUNCH_LINES) + '\n').encode('ascii')
 EMBEDDED_EXPECTED = LAUNCH_EXPECTED.replace(b'public_hip_launch', b'public_hip_embedded').replace(b'HIP_LAUNCH', b'HIP_EMBEDDED').replace(b'rejected=2', b'compiler_stubs=true')
+AGGREGATE_EXPECTED = EMBEDDED_EXPECTED.replace(b'public_hip_embedded', b'public_hip_aggregate').replace(b'HIP_EMBEDDED', b'HIP_AGGREGATE').replace(b'values=146 guards=16', b'member_bytes=320 guard_bytes=64 padding=unspecified')
 FILL_LINES = list(LINES)
 FILL_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_fill'
 FILL_LINES[2] = 'HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=4096 rejected=16 pitched=true padding=true allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending'
@@ -59,11 +60,11 @@ CAPTURE_GPU_EXPECTED = GRAPH_GPU_EXPECTED.replace(b'public_hip_graph_gpu', b'pub
 COPY_GPU_EXPECTED = CAPTURE_GPU_EXPECTED.replace(b'public_hip_capture_gpu', b'public_hip_copy_gpu').replace(b'HIP_CAPTURE_GPU', b'HIP_COPY_GPU').replace(b'launches=2 values=146 guards=16', b'launches=84 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 joined_streams=2 rejoined=true events_reused=true eager_equal=true').replace(b'disabled_replays=2 callbacks=4', b'disabled_replays=6 callbacks=28').replace(b'allocations=1 frees=1', b'allocations=4 frees=4').replace(b'queues=3 retired=3', b'queues=7 retired=7').replace(b'watchdog_joined=true', b'replay_rounds=20 warmup_rounds=4 verification_rounds=16 kernels_per_replay=2 replay_values=5840 replay_guards=640 alternating_order=true watchdog_joined=true')
 COPY_GPU_BACKING = b'HIP_COPY_GPU BACKING samples=32 live_bytes=32768 live_allocations=2 eager_allocations=128 eager_releases=128 graph_allocations=128 graph_releases=128 peak_bytes=98304 final_live_bytes=0\n'
 COPY_GPU_EXPECTED = COPY_GPU_EXPECTED.replace(b'HIP_COPY_GPU PASS ', COPY_GPU_BACKING + b'HIP_COPY_GPU PASS ')
-LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'embedded', 'fill', 'graph', 'stream', 'graph_gpu', 'capture_gpu', 'copy_gpu')}
+LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'embedded', 'aggregate', 'fill', 'graph', 'stream', 'graph_gpu', 'capture_gpu', 'copy_gpu')}
 
 
 def check_log(raw, fixture='bootstrap'):
-    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'embedded': EMBEDDED_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED, 'capture_gpu': CAPTURE_GPU_EXPECTED, 'copy_gpu': COPY_GPU_EXPECTED}.get(fixture)
+    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'embedded': EMBEDDED_EXPECTED, 'aggregate': AGGREGATE_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED, 'capture_gpu': CAPTURE_GPU_EXPECTED, 'copy_gpu': COPY_GPU_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')
     return {'application_result': 'application-pass', 'kernel': 'public_hip_' + fixture,

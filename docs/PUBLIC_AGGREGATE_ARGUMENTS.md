@@ -64,9 +64,24 @@ passing receipt was v2; the final repeat using Git-normalized source bytes is
 
 ## Next native gate
 
-Integrate the aggregate title with the native builder, exact compiler-object
-linking, image audit and fresh console controls. Review emitted ISA and argument
-layout, commit/freeze the candidate, then test on idle .40. The draft native
-title is not a qualified package. No console state changed in this milestone.
+The aggregate title now builds with 76 ordinary objects and one genuine compiler
+object. Raw/converted/extracted image audits verify registration, launch calls,
+protected data, teardown order and exact text bytes. Package extraction and
+41 focused control tests pass. See
+`../evidence/offline-public-aggregate-native-package.json`.
+
+Reproduce with fresh `AGGREGATE_FIXTURE_DIR` and `AGGREGATE_BUILD_DIR` values:
+
+```sh
+make public-hip-aggregate-package \
+  AGGREGATE_FIXTURE_DIR=results/aggregate-native-compiler-new \
+  AGGREGATE_BUILD_DIR=build/aggregate-native-new \
+  RESULTS_DIR=/data/ps5-hip/results
+```
+
+The candidate checks 320 member bytes and 64 guard bytes across two launches.
+The companion pointer-bearing kernel is registered but not launched. Packaging
+does not prove GPU execution: commit/freeze and independently review a fresh
+candidate before testing on idle .40. No console state changed during packaging.
 Geometry/LDS/private-memory exposure, model-scale memory, math/library linkage
 and complete native tensor/client execution remain separate open requirements.

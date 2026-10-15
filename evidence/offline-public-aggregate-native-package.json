@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "classification": "offline-public-aggregate-native-package",
+  "package_sha256": "54d880eeb81097f7a9caaacad926a424673a1103b6fb33250d46f7b318c494f7",
+  "fself_sha256": "6602ba5998b9245ac6a3923569b0fd82bf62c7f42d6c259e0572d0a877028dfc",
+  "raw_evidence": {
+    "build/public-hip-aggregate-native-v1/link-receipt.json": "10c3e79b8ff8daaa4bdf1c884ededc51fbba424b4efec38989d4511b2d5b1742",
+    "build/public-hip-aggregate-native-v1/embedded-native-audit.json": "926cf0109a92d7de1dce3a2757f7c70d507eaf6ed8f25017ca41b2fed599c213",
+    "build/public-hip-aggregate-native-v1/parent-review.json": "74f30110b8b49d0c3fe1e4517177a29cd1a11279856b2c8febc686916a48d7d4",
+    "results/aggregate-native-controls-review-v1/review.json": "32d4bf48a3e2497da1c3e1e34b2f0e9379949eb73a350780588f93e6cb5dfee0",
+    "results/aggregate-native-isa-review-v1/review.json": "5d01def4841874ea5ff3feeff9451728c15ce2caa284c5bb941bac684fd8a7c7",
+    "results/aggregate-native-artifact-review-v1/review.json": "d426443a8d972e69cedfdab7c0534c29d8f436f0ed503c7eb69ca6c3796f6d56",
+    "results/hip-aggregate-fixture-v4/receipt.json": "1eae2c8e14cdabd0647a803ebe589cd7def46f93fcdfa94bcb6e66edfc8d3410"
+  },
+  "source_sha256": {
+    "tools/public_hip_aggregate_console_title.cpp": "cf4ecf6301e107d8fecd0cb7548deecfc5d709cd377734314308f9e8a0ae682d",
+    "tools/build_public_hip.py": "12d62abcf3ec7003808f56462c586b8a4f8f139aa18df8e81ec816f973fc520d",
+    "tools/audit_public_hip_embedded_native.py": "b241e15f62ce5a5f44be69062385418ab4fe3a09f57b157d3bd95b0631909da2",
+    "tools/freeze_source_candidate.py": "433d3ac6524edaa7f156e9387413067c94fdf56efe8dfe95ebc165fbcf0117f4",
+    "tools/source_public_hip_log.py": "cadd5f41d9d86e7c67cad8f3c02fb9410a9de55190fd2b487272fca6768b36b5",
+    "tests/public_hip_embedded_build_test.py": "61fd0ccabea0ae22ab45231754feefb3dde229c9e13423103d331452d18f913f",
+    "tests/public_hip_embedded_native_audit_test.py": "2144d8d7564247c58fc6288381ae864a0e2cd69c7ce72a850cd270e5aa9cee5d",
+    "tests/source_console_test.py": "d9d17dd819677844c9029dc5aacff84e2696dd6b95a4c0c9de905fc3648cb128",
+    "Makefile": "d6dbfee4d8ac902c16aeb90d6f69f9a860fcf8df46083956650e23d9d65c108f"
+  },
+  "ordinary_objects": 76,
+  "compiler_objects": 1,
+  "audited_functions": 10,
+  "registered_kernels": 2,
+  "launched_kernel": "aggregate_shapes",
+  "expected_launches": 2,
+  "expected_member_bytes": 320,
+  "expected_guard_bytes": 64,
+  "focused_tests": 41,
+  "native_executed": false,
+  "console_state_changed": false,
+  "limits": [
+    "No native execution claimed by packaging.",
+    "Companion pointer-bearing aggregate kernel is registered but not launched.",
+    "Internal struct padding unspecified; embedded pointers require caller-managed lifetime.",
+    "Native LLM operators, model execution and full SDK remain incomplete."
+  ]
+}

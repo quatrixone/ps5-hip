@@ -51,6 +51,12 @@ compiler-launch checkpoint below records the current installed image/log.
 
 ## Aggregate arguments qualified offline
 
+The native aggregate package now builds with 76 ordinary objects plus the
+genuine compiler object. Image/layout/teardown audits, package verification
+and 41 focused control tests pass. See
+`evidence/offline-public-aggregate-native-package.json`. Native execution is
+still pending a fresh frozen candidate and .40 cycle.
+
 Genuine HIP compiler stubs now pass 12/16/128-byte by-value arguments through
 CLR in eager and deferred host runs. Caller mutation, compiler offsets, zero
 argument gaps, guards, unsupported-call recovery and clean modeled ownership
