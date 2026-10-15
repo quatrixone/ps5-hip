@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-14",
+  "status": "offline-pass",
+  "scope": "Public HIP runtime-unbundler result error propagation",
+  "change": "Propagate unexpected extraction errors and reject malformed per-device result lists before allocation/indexing.",
+  "tests": [
+    "Actual upstream ExtractFatBinary compiled with ASan/UBSan; mocked extraction errors and valid/invalid result lists.",
+    "Unpatched negative control fails with null-pointer diagnostic.",
+    "Exact patch composition, idempotence and source-drift rejection.",
+    "Native hip_fatbin.cpp translation unit compiles using current PS5 source build flags."
+  ],
+  "independent_review": "No blocking issues; suggested second-slot corruption and all-missing partial-result cases added.",
+  "limits": [
+    "No module-load or kernel-execution qualification.",
+    "Does not enable runtime unbundler or compiler services.",
+    "Extractor and ELF sizing are mocked in host regression; arbitrary image parsing is not qualified.",
+    "Full native package has not been rebuilt with this prerequisite fix.",
+    "No console contact or deployment."
+  ],
+  "input_sha256": {
+    "ports/clr/ps5-public-module-errors.patch": "e2613f9971df6028d4284a0ae7af1ffb47329cf0f80fd4f73e8d74fc8c351b5b",
+    "tools/prepare_public_hip_module.py": "a9337c8b3583d6a287c0b73c8f06321ecb8bbe58d94ab01dbf813c06d4db74d2",
+    "tests/public_hip_module_errors_test.py": "514040fd987698c6de2df1c1a16192bd12ae9b065316dc81a6e9859649932d5e",
+    "tools/build_public_hip.py": "f7b43596df7cf5fc014e9a302e7097ae832a1079ea034a42a081c5684a9ece33",
+    "results/public-module-errors-v1/native.json": "6b7d219fce8fa696eb7a43254c374c2b08e19d3c31039a29976d1de7d8c5cb4f",
+    "results/public-module-errors-v1/ctest.log": "fd9ec3972f8c33ea154d0efb0bd9d3ac7f6849151968352d454e0f78bb1eb076"
+  }
+}

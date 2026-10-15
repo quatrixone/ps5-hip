@@ -18,6 +18,18 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
+The source build now applies an exact module-extraction error guard. Unexpected
+runtime-unbundler errors previously fell through to a null per-device entry;
+the PS5 path now returns those errors and validates the extracted list before
+indexing or allocating programs. The actual function passes sanitizer regression
+tests, its unpatched negative control reproduces the fault, and the modified
+translation unit cross-compiles for PS5. See
+`evidence/offline-public-module-errors.json`. No full package rebuild or console
+run is claimed for this change. Public module loading remains open: compiler
+services are unavailable in the current profile, the runtime-unbundler path is
+not enabled by this fix, and public function enumeration/execution still needs
+qualification. Continue that work offline while .40 connectivity is unavailable.
+
 Latest source milestone, pushed to `main`: `7880705` adds a source-built public
 synchronous HIP copy fixture and propagates failed completion/status as an error
 before releasing the command. All 58 host tests and the 74-object native package

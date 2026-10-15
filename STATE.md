@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Public module-loading prerequisite: extraction failures now propagate instead
+of dereferencing uninitialized device entries. Malformed result lists are rejected
+before indexing. Sanitizer regression, unpatched negative control and native
+translation-unit compilation passed; see `evidence/offline-public-module-errors.json`.
+This does not enable or qualify public module loading/GPU execution.
+
 Latest offline G5 progress: `7880705` builds the public synchronous copy fixture
 with 58 host tests and 74 fresh native objects; independent package/ISA review
 passed. Synchronous completion failures now propagate through `hipMemcpy`.
@@ -1390,3 +1396,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-14 | G5 public copy | 7880705 | offline pass: 58 host tests, 74 objects, independent review; .40 FTP deployment failed, no execution | evidence/offline-source-public-copy.json | connectivity and full image verification before new reviewed deployment
 
 - 2026-10-14 | G5 recovery controls | offline pass: preserved-log verification and FTP diagnostics; 15 unit cases | evidence/offline-source-copy-recovery.json | restore connectivity
+
+- 2026-10-14 | public modules | offline pass: extraction error guard, sanitizers and native object | evidence/offline-public-module-errors.json | module loading and execution

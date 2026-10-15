@@ -1,0 +1,26 @@
+--- a/hipamd/src/hip_fatbin.cpp
++++ b/hipamd/src/hip_fatbin.cpp
+@@ -364,6 +364,23 @@
+     return hipErrorInvalidValue;
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  // Extraction errors must not fall through to uninitialized device entries.
++  if (hip_error != hipSuccess && hip_error != hipErrorInvalidKernelFile &&
++      hip_error != hipErrorNoBinaryForGpu) {
++    return hip_error;
++  }
++  if (hip_error == hipSuccess || hip_error == hipErrorNoBinaryForGpu) {
++    if (code_objs.size() != devices.size()) return hipErrorInvalidImage;
++    for (const auto& entry : code_objs) {
++      if ((entry.first == nullptr) != (entry.second == 0) ||
++          (hip_error == hipSuccess && entry.first == nullptr)) {
++        return hipErrorInvalidImage;
++      }
++    }
++  }
++#endif
++
+   if (hip_error == hipErrorNoBinaryForGpu) {
+     if (fname_.size() > 0) {
+       LogPrintfError("hipErrorNoBinaryForGpu: Couldn't find binary for file: %s", fname_.c_str());
