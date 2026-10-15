@@ -18,43 +18,34 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
-Standard module-kernel stream capture is implemented and independently reviewed offline.
-The full sanitizer qualification, 36 capture-failure recoveries, 74-object Make
-package, cached validation, 25 controls and 62 host regressions passed. See
-`evidence/offline-public-kernel-capture.json`. Native capture remains pending;
-the installed explicit-graph baseline below is unchanged. Next: freeze and review
-the capture candidate, then deploy and run one bounded WSL case on .40.
+- 2026-10-15 | G5 | ede4ced | .40 | pass: bounded native kernel capture | evidence/console40-public-kernel-capture-success.json | next: memory graph nodes
 
-
-- 2026-10-15 | G5 | a80845d | .40 | pass: bounded native explicit GPU graph | evidence/console40-public-gpu-graph-success.json | next: GPU capture/memory nodes
-
-Native explicit GPU graph replay passed on .40 through WSL at `a80845d`.
-Two disabled replays still ran their callbacks; two changed-salt GPU replays
-produced 146 exact values and preserved 16 guards. Arguments remained correct
-after caller mutation and executable update, and replay survived source-graph
-destruction. One allocation was freed and all three queues retired. PID 149
-exited naturally. Independent audit verified all 27 complete reads, installed
-identity, equal mount snapshots, scoped klog, service health and owned-lock release.
-See `evidence/console40-public-gpu-graph-success.json`.
+Standard module-kernel stream capture passed its bounded native test on .40
+through WSL at `ede4ced`. Two disabled replays ran their callbacks; two captured
+GPU launches produced 146 exact values and preserved 16 guards. Owned arguments,
+executable updates and replay after source-graph destruction passed. One allocation
+was freed, all three queues retired, and PID 159 exited naturally. The controller
+recorded 27 complete reads, healthy services and owned-lock release. Independent
+audit verified identity, stable snapshots and scoped klog without a native fault.
+See `evidence/console40-public-kernel-capture-success.json`.
 
 Current installed image:
-`37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2`.
-Current log: `/data/ps5-hip/results/ps5-hip-public-graph_gpu.log`, SHA
-`fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242`
-(not yet SHA-preserved). The previous stream image/log are preserved. Both phases
-in `results/source-public-graph-gpu-console-v1` are consumed; never replay them.
+`c74a8d2d19d3703760b4cab02584076a056da137fa88c4746c50e752477d2ad5`.
+Current log: `/data/ps5-hip/results/ps5-hip-public-capture_gpu.log`, SHA
+`d979e10fcd62d137d650345ef30324a58c8ffe454a62b1983b0d54aa5b274c1e`
+(not yet SHA-preserved). The previous explicit-graph image/log are preserved.
+Both phases in `results/source-public-capture-gpu-console-v1` are consumed;
+never replay them.
 
-The shared host/native oracle, exec-update admission checks and full sanitizer
-suite passed, as did the 74-object Make package, cached validation, 24 controls
-and 62 host regressions. See `evidence/offline-native-gpu-graph-fixture.json`.
-Earlier kernel-graph runtime ownership/failure qualification is recorded in
-`evidence/offline-public-kernel-graph.json`. This bounded native result does not
-qualify GPU stream capture, broader memory graph nodes, resource plateaus,
-concurrent execution or measured graph efficiency.
+Offline qualification includes 36 capture-failure recoveries across three capture
+modes and both graph ownership forms, full sanitizers, a 74-object Make package,
+cached validation, 25 controls and 62 host regressions. See
+`evidence/offline-public-kernel-capture.json`. Failure recovery remains host-model
+evidence; the native result covers the bounded successful single-stream case.
 
-Next: implement and qualify GPU kernel stream capture and required memory graph
-nodes, preserving capture invalidation and resource lifetime contracts, then test
-the shared oracle on .40. G5 and the broader roadmap remain open.
+Next: required memory graph nodes, GPU cross-stream capture and resource lifetime
+qualification, followed by resource plateaus and measured replay efficiency.
+G5 and the broader roadmap remain open.
 
 ## Historical pitched fill and retirement checkpoints
 

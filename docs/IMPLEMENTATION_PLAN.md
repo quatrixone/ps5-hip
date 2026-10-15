@@ -2,19 +2,32 @@
 
 Updated: 2026-10-14, America/New_York.
 
-Standard module-kernel stream capture is implemented and independently reviewed offline.
-The full sanitizer qualification, 36 capture-failure recoveries, 74-object Make
-package, cached validation, 25 controls and 62 host regressions passed. See
-`../evidence/offline-public-kernel-capture.json`. Native capture remains pending;
-the installed explicit-graph baseline below is unchanged. Next: freeze and review
-the capture candidate, then deploy and run one bounded WSL case on .40.
+Standard module-kernel stream capture passed its bounded native test on .40
+through WSL at `ede4ced`. Two disabled replays ran their callbacks; two captured
+GPU launches produced 146 exact values and preserved 16 guards. Owned arguments,
+executable updates and replay after source-graph destruction passed. One allocation
+was freed, all three queues retired, and PID 159 exited naturally. The controller
+recorded 27 complete reads, healthy services and owned-lock release.
+See `../evidence/console40-public-kernel-capture-success.json`.
 
-Current checkpoint (2026-10-15): bounded native explicit GPU graph replay passed
-on .40 at `a80845d`: two disabled replays, four callbacks, two changed-salt launches,
-146 exact values, 16 guards, copied/updated arguments and source-graph destruction.
-Independent audit verified natural exit, all 27 reads, identity/mounts/klog, service
-health and lock release. See `../evidence/console40-public-gpu-graph-success.json`.
-Next: GPU kernel capture and required memory graph nodes; G5 and G6-G12 remain open.
+Current installed image:
+`c74a8d2d19d3703760b4cab02584076a056da137fa88c4746c50e752477d2ad5`.
+Current log: `/data/ps5-hip/results/ps5-hip-public-capture_gpu.log`, SHA
+`d979e10fcd62d137d650345ef30324a58c8ffe454a62b1983b0d54aa5b274c1e`
+(not yet SHA-preserved). The previous explicit-graph image/log are preserved.
+Both phases in `results/source-public-capture-gpu-console-v1` are consumed;
+never replay them.
+
+Offline qualification includes 36 capture-failure recoveries across three capture
+modes and both graph ownership forms, full sanitizers, a 74-object Make package,
+cached validation, 25 controls and 62 host regressions. See
+`../evidence/offline-public-kernel-capture.json`. Failure recovery remains host-model
+evidence; the native result covers the bounded successful single-stream case.
+
+Next: required memory graph nodes, GPU cross-stream capture and resource lifetime
+qualification, followed by resource plateaus and measured replay efficiency.
+G5 and the broader roadmap remain open.
+
 Earlier checkpoint notes below are historical.
 
 Both native module fixtures now use the verified system-visible title mount
@@ -447,7 +460,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
-| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event and explicit GPU graph passes |
+| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event, explicit graph and kernel capture passes |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | Standalone inference client and SDK preview | G5-G6 | planned |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
@@ -674,11 +687,12 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
-Latest native checkpoint: explicit GPU kernel graph replay now passes its bounded
-shared oracle and full console lifecycle audit. See
-`../evidence/console40-public-gpu-graph-success.json`. This supersedes the pending
-native statements below; GPU capture, memory graph nodes, pooling and measured
-replay efficiency still need implementation and qualification.
+Latest native checkpoint: standard module-kernel capture passed its bounded
+single-stream oracle on .40. See
+`../evidence/console40-public-kernel-capture-success.json`. The 36 invalidation
+recoveries remain host-model evidence. Memory graph nodes, GPU cross-stream
+capture, resource plateaus and measured replay efficiency remain open.
+Earlier checkpoint details below retain their historical scope.
 
 The shared native GPU graph fixture now passes full host sanitizer qualification,
 a fresh 74-object Make package, cached validation, 24 console-control tests and
