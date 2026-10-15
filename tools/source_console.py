@@ -239,8 +239,12 @@ class Control:
                 self.capture_errors.append(repr(error))
         worker = threading.Thread(target=capture)
         worker.start()
+        launch_offset = 0
         try:
             self.idle(); self.fresh_log()
+            require(not self.capture_errors and worker.is_alive(), 'klog unavailable before launch')
+            launch_offset = len(self.klog)
+            self.record['klog_launch_offset'] = launch_offset
             self.record['launched'] = True
             self.send('launch')  # This pinned controller prints no result; lifecycle is authoritative.
             deadline = time.monotonic() + 40
@@ -248,7 +252,7 @@ class Control:
                 current = self.history_read('observed')
                 stopped, starts = lifecycle(current[len(baseline):])
                 require(not self.capture_errors and worker.is_alive(), 'klog capture failed')
-                require(b'# exception:' not in self.klog, 'native exception: no automatic retry')
+                require(b'# exception:' not in self.klog[launch_offset:], 'native exception: no automatic retry')
                 if stopped:
                     self.record['natural_stop'] = True
                     break
@@ -285,7 +289,7 @@ class Control:
             self.stop.set(); worker.join(timeout=2); sock.close()
             (self.out / 'klog.log').write_bytes(self.klog)
             require(not worker.is_alive(), 'klog collector did not stop')
-            require(not self.capture_errors and b'# exception:' not in self.klog, 'klog failed or exception during postchecks')
+            require(not self.capture_errors and b'# exception:' not in self.klog[launch_offset:], 'klog failed or exception during postchecks')
 
     def run(self):
         try:
