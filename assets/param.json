@@ -1,0 +1,33 @@
+{
+  "ageLevel": {
+    "default": 0
+  },
+  "applicationCategoryType": 0,
+  "applicationDrmType": "free",
+  "attribute": 0,
+  "attribute2": 0,
+  "attribute3": 0,
+  "conceptId": "99014",
+  "contentBadgeType": 1,
+  "contentId": "UP9000-PPSA99014_00-PS5HIPCOMPUTE001",
+  "contentVersion": "01.000.000",
+  "downloadDataSize": 0,
+  "gameIntent": {
+    "permittedIntents": [
+      {
+        "intentType": "launchActivity"
+      }
+    ]
+  },
+  "localizedParameters": {
+    "defaultLanguage": "en-US",
+    "en-US": {
+      "titleName": "ps5-hip Compute Lab"
+    }
+  },
+  "masterVersion": "01.00",
+  "requiredSystemSoftwareVersion": "0x0000000000000000",
+  "sdkVersion": "0x0000000000000000",
+  "titleId": "PPSA99014",
+  "versionFileUri": ""
+}

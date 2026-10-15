@@ -25,6 +25,7 @@ def sources():
         "sdk": deps["sdk"],
         "ufs2tool": deps["ufs2tool"],
         "native-tools": deps["native_tools"],
+        "hip-headers": deps["hip_headers"],
         "eden": elevation["client"],
         "lapy": elevation["helper"],
         "ps5log": elevation["logging_source"],

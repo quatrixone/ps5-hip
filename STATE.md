@@ -5,12 +5,14 @@ resume point, branch map, and evidence identities.
 
 ## Actual status
 
-- **Source-only dependency foundation:** the root Makefile fetches verified
+- **Source-only public HIP package:** the root Makefile fetches verified
   public inputs, builds the SDK, zlib, UFS2Tool, exact-title Lapy helper and
-  launch/close controllers, runs the host suite, and cross-compiles the native
-  core. ProsperoEden and the protocol are locked snapshots of public `main`.
-  This does not yet recreate the 74-object public HIP bootstrap from a clean
-  clone; see `docs/SOURCE_ONLY_REBUILD.md`. No new console result was taken.
+  launch/close controllers, runs the host suite, cross-compiles the native
+  core, and builds a new 74-object public HIP bootstrap with checked FSELF
+  roundtrip and six-file UFS extraction. ProsperoEden and the protocol are
+  locked snapshots of public `main`. The new package is offline only and is
+  distinct from the registered image; see `docs/SOURCE_ONLY_REBUILD.md`.
+  No new console result was taken.
 
 - **Public HIP bootstrap package registered on .40; execution has not begun:**
   the independently reviewed, clean 74-object native bootstrap image

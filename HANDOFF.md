@@ -5,11 +5,12 @@ Updated: 2026-10-14, America/New_York. This is the resume point for the private
 `docs/IMPLEMENTATION_PLAN.md` before working. The mission is a native PS5 HIP /
 ROCm compute stack; a bounded result does not close a broader acceptance gate.
 For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
-the exact bootstrap package is not yet reproducible end-to-end from a clean
-clone, and historical D evidence cannot be built from source.
+`make` builds a new public HIP package from source on `main`. The historical
+installed image and D evidence cannot be recreated by Make.
 
 The root `Makefile` now fetches locked public inputs and builds the SDK,
-zlib, UFS2Tool, Lapy helper, controllers, host suite, and native core. The
+zlib, UFS2Tool, Lapy helper, controllers, host suite, native core, and a
+74-object public HIP bootstrap package. The
 ProsperoEden and protocol locks refer to their public `main` snapshots; old
 local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
@@ -43,6 +44,10 @@ one-use E control remains inert pending revised lifecycle checks and review.
   backups, idle title, healthy services, and owned-lock release. **It was not
   launched.** The compact record is
   `evidence/native-public-hip-bootstrap-deployment.json`.
+- A relocatable source-only recipe on `main` independently builds a new
+  74-object bootstrap package with verified FSELF and UFS2 extraction. This
+  package is an offline candidate, not the registered image above; it has not
+  been deployed or executed.
 - Native public HIP allocation/free and native ROCclr FP32 GEMM candidates have
   passed offline native package and independent review. Neither was run on a
   console. The allocation title includes real `hipInit`/count/malloc/free symbols
@@ -54,17 +59,18 @@ one-use E control remains inert pending revised lifecycle checks and review.
 Overall progress is roughly **20–22% of the twelve-goal ambition**, a judgment
 about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
-## Exact branches and local material
+## Historical branches and local material
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Integrated baseline | `main` and `development/offline-bringup` / current remote HEAD | repository root | Source and dependency build foundation published to the private GitHub remote. |
+| Supported source build | `main` / current remote HEAD | repository root | Fetches dependencies and builds a new bootstrap package offline. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
 | ROCclr GEMM title | `development/gemm-native-bridge` / `a0af56e` | `../ps5-hip-gemm-bridge` | Reviewed offline; stale console baseline, no native run. |
 
-All three reviewed candidate branches above were published to the private
+These branches preserve historical reviewed candidates; the supported
+source-only bootstrap build needs only `main`. All three reviewed candidate branches above were published to the private
 GitHub remote alongside the integrated branch. Nested worktree `origin` remotes
 still point to other **local** checkouts, not GitHub; use the private GitHub
 remote explicitly when publishing later work.

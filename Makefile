@@ -4,8 +4,13 @@ CTEST ?= ctest
 UFS_REV := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies.json"))["ufs2tool"]["revision"])')
 ZLIB_VERSION := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies.json"))["host_zlib"]["version"])')
 TITLE_ID := $(shell $(PYTHON) -c 'import json; print(json.load(open("title.json"))["title_id"])')
+RESULTS_DIR ?= /user/homebrew/ps5-hip
+export RESULTS_DIR
+.DEFAULT_GOAL := all
 
-.PHONY: help deps-fetch deps-check deps-build device-fixtures host-test native-core clean-build
+.PHONY: all help deps-fetch deps-check deps-build device-fixtures host-test native-core public-hip-package clean-build
+
+all: host-test native-core public-hip-package
 
 help:
 	@echo 'make deps-fetch  Fetch and verify locked upstream sources and archives'
@@ -13,6 +18,8 @@ help:
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make native-core Cross-compile the native core library'
+	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
+	@echo 'make           Run all of the above; set RESULTS_DIR to the intended console results path'
 
 deps-fetch:
 	$(PYTHON) tools/fetch_locked_deps.py --fetch
@@ -54,5 +61,11 @@ native-core: .deps/sdk/.ps5-sdk-revision
 	$(CMAKE) -S . -B build/native -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps5-toolchain.cmake -DBUILD_TESTING=OFF
 	$(CMAKE) --build build/native --target ps5hip_native_memory
 
+build/public-hip/link-receipt.json: dependencies.json elevation-inputs.json controller-inputs.json title.json assets/param.json assets/icon0.png tools/build_public_hip.py tools/prepare_clr_gpu_source.py tools/prepare_hip_admission.py tools/guard_native_hip_gl.py ports/clr/manifest.json ports/clr/adapter-manifest.json ports/clr/ps5-public-hip.json ports/clr/ps5-pie.ld ports/hip/hip/hip_version.h | deps-build
+	$(PYTHON) tools/build_public_hip.py --output build/public-hip
+
+public-hip-package: build/public-hip/link-receipt.json
+	$(PYTHON) tools/build_public_hip.py --output build/public-hip
+
 clean-build:
-	$(CMAKE) -E rm -rf build/host build/native
+	$(CMAKE) -E rm -rf build/host build/native build/public-hip

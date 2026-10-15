@@ -4,12 +4,12 @@ import argparse, hashlib, json, shutil, subprocess
 if not __debug__:
     raise RuntimeError('Validation requires ordinary Python')
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
-C=Path(__file__).resolve().parents[1];R=C.parents[1];O=a.output.resolve()
+C=Path(__file__).resolve().parents[1];O=a.output.resolve()
 assert not O.exists()
 h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 base=json.loads((C/'ports/clr/manifest.json').read_text())
 adapter=json.loads((C/'ports/clr/adapter-manifest.json').read_text())
-S=R/'results/g4-runtime-architecture-v1/sources'/('clr-'+base['upstream_revision'])
+S=C/'.deps/sources/clr'
 assert adapter['upstream_revision']==base['upstream_revision']
 inputs={str(p):h(p) for p in [Path(__file__),C/'ports/clr/manifest.json',C/'ports/clr/adapter-manifest.json']}
 for name,entry in base['files'].items():

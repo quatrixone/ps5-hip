@@ -43,13 +43,13 @@ The repository is private.
 ## Start here
 
 For a fresh WSL/Linux checkout, install Python 3, GNU Make, CMake, Ninja,
-LLVM/LLD 18.1.8 and .NET SDK 10.0.112, then run `make deps-build` to fetch and
-build the locked public dependencies. `make host-test` runs the host suite and
-`make native-core` cross-compiles the core library. The upstream ProsperoEden
-and ps5-homebrew-dev-protocol inputs are snapshots of their public `main`
-branches; their hashes make a build repeatable, not dependent on unpublished
-side branches. The 74-object public HIP bootstrap package still lacks a clean
-source-only build target; see the [rebuild status](docs/SOURCE_ONLY_REBUILD.md).
+LLVM/LLD 18.1.8 and .NET SDK 10.0.112, then run `make` to fetch the locked
+public dependencies, run host tests, cross-compile the native core, and build
+the 74-object public HIP bootstrap package offline. Set `RESULTS_DIR` to the
+intended console results path. ProsperoEden and ps5-homebrew-dev-protocol are
+snapshots of their public `main` branches; no unpublished dependency branch is
+needed. See the [source-only build](docs/SOURCE_ONLY_REBUILD.md) for outputs
+and the distinction between a new package and the image already installed.
 
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): architecture, twelve goals,
   acceptance gates, performance targets, risks and the first implementation tasks.
@@ -58,8 +58,8 @@ source-only build target; see the [rebuild status](docs/SOURCE_ONLY_REBUILD.md).
 - [Current state](STATE.md): the next action and completed milestones.
 - [Agent handoff](HANDOFF.md): exact branches, reviewed evidence, console state,
   and the safe resume point for the public HIP bootstrap.
-- [Source-only rebuild](docs/SOURCE_ONLY_REBUILD.md): fresh-clone build inputs,
-  final-stage recipe, and the generated-prerequisite gap still to close.
+- [Source-only rebuild](docs/SOURCE_ONLY_REBUILD.md): fresh-clone build command,
+  outputs, and package limits.
 - [Runtime architecture](docs/RUNTIME_ARCHITECTURE.md): measured CLR comparison,
   selected native HIP approach and the threshold for reconsidering upstream CLR.
 - [Compiler launch capture](docs/HIP_HOST_LAUNCH_CAPTURE.md): owned arguments,
