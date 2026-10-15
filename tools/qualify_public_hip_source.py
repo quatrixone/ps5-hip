@@ -158,11 +158,13 @@ def main():
                UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1', HIP_USE_RUNTIME_UNBUNDLER='0')
     result = run('launch-normal', [output / 'launch-model', launch_code, 'normal'], env)
     if result.splitlines() != [
+        'PUBLIC_NULL_LAUNCH_PASS packed_null=true count=0 user_allocations=0 retained=0 gpu_execution=false',
         'PUBLIC_LAUNCH_PASS values=73 guards=8 captured_args=true gpu_execution=false',
         'PUBLIC_LAUNCH_FINAL ownership=clean gpu_execution=false']:
         raise RuntimeError('public launch output/lifetime contract differs')
     result = run('launch-events', [output / 'launch-model', launch_code, 'events'], env)
     if result.splitlines() != [
+        'PUBLIC_NULL_LAUNCH_PASS packed_null=true count=0 user_allocations=0 retained=0 gpu_execution=false',
         'PUBLIC_EVENT_PASS pending_then_complete=true values=73 guards=8 captured_args=true gpu_execution=false',
         'PUBLIC_LAUNCH_FINAL ownership=clean gpu_execution=false']:
         raise RuntimeError('public event completion/ownership contract differs')
@@ -541,7 +543,7 @@ def main():
                'fill_model_sha256': sha(output / 'fill-model'),
                'fill_cases': ['patterns-offsets-guards-admission', 'pitched-2d-3d-padding-admission'],
                'launch_fixture_sha256': launch_code_hash,
-               'launch_cases': ['normal', 'events-pending-then-complete', 'noop-output-rejected', 'corrupt-output-rejected'],
+               'launch_cases': ['nullable-zero-count-then-live', 'normal', 'events-pending-then-complete', 'noop-output-rejected', 'corrupt-output-rejected'],
                'wrong_target_fixture_sha256': wrong_target_hash,
                'leak_detection_disabled_modes': ['join-fail', 'self-destroy', 'reset-join-fail'],
                'gpu_executed': False, 'native_executed': False,

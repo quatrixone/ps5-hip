@@ -49,6 +49,26 @@ Historical next-step paragraphs below are superseded by this release priority.
 The planning milestone itself made no console change. The subsequent native
 compiler-launch checkpoint below records the current installed image/log.
 
+## Nullable kernel pointers qualified offline
+
+Optional null global-pointer values now survive public HIP capture and native
+argument preparation as zero values with zero extent, without a fake allocation
+or retained buffer. Nonnull live-extent checks, argument-storage validation and
+the strict vector path remain enforced. This is required for unused RMSNorm
+multiply/add inputs, not permission for kernels to dereference null.
+
+The full genuine CLR host qualification passes 87 compilations with ASan/UBSan,
+including a zero-count nullable launch followed by the original live-output
+launch and negative controls. The 32 configured core regressions, direct HIP
+profile checks and independent source review pass. See
+`evidence/offline-public-nullable-arguments.json`. Root qualification session
+76756 terminated successfully; `results/source-public-nullable-v1/receipt.json`
+is its local receipt. No new console run or native numerical result.
+
+Next: extend bounded ReductionLds metadata/resource handling for the unchanged
+upstream RMSNorm kernel, then public module admission and shared-memory routing.
+Use the frozen CPU oracle below; preserve existing rejection and ownership tests.
+
 ## CPU RMSNorm numerical oracle qualified offline
 
 `make llm-rmsnorm-reference` now reproduces the genuine upstream CPU operator
@@ -59,8 +79,7 @@ matches the independently reviewed reference. The three oracle tests, CTest
 registration, CPU prerequisite checks and artifact/input rehashes pass.
 See `evidence/offline-llm-rmsnorm-reference.json` and `docs/LLM_V1_PROFILE.md`.
 
-The proposed GPU tolerance is frozen, not hardware-qualified. Next: complete
-nullable optional-pointer qualification and actual RMSNorm launch resources
+The proposed GPU tolerance is frozen, not hardware-qualified. Nullable optional-pointer qualification now passes above. Next: actual RMSNorm launch resources
 (1024 threads, 128 dynamic LDS bytes), then validate the unchanged upstream
 operator against these tensors on .40. No console change in this milestone;
 aggregate-launch evidence remains the installed baseline.

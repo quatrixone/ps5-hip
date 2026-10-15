@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "classification": "offline-nullable-public-hip-kernel-arguments",
+  "source_sha256": {
+    "include/ps5hip/launch.h": "622f68e1cb1885193017aeb77be6505e09cb957eb17462f8ae57b302293f5335",
+    "src/launch.cpp": "707fd7798a795da132143c3b8a1b3233b72cfbf2f8df3e4a0fc9c08c3a2035a2",
+    "src/host_launch.cpp": "c190298dba9774336585b19f08995821802247be2041a38f7bb69d17c1bc5569",
+    "src/native_launch.cpp": "355d564b8c2d356ce8241d870b5c4d9eb61aca0d9c2f426473a3f9b146795e11",
+    "src/hip_launch_profile.cpp": "32e90f67d8c4db450e2a805b964f478e1c6cf7e2465fb24f82eead1a1ec88950",
+    "tests/host_launch_test.cpp": "f143878023598105c13a8e4e57c648a9c91967d74f7c4415ba1ce648fcbf0b17",
+    "tests/native_routes_test.cpp": "769fd493cd8931f4e19438be1dbfa520deb0606976940fe2011d9fd7c138491d",
+    "tests/hip_launch_profile_test.cpp": "8f0de45449522c5e4939f11861ea36e7d59f55828b034063652509c401ae102f",
+    "tests/public_hip_launch_model.cpp": "303d9b0b558c939a0c69c1d69bbc07b4d61c9b49697f135415aae4e34a0993cd",
+    "tests/clr_adapter_model.cpp": "d9b2dd86558eb3bd1c6d95b70c5f3a80b6485a5fb839d81a5a9bb1f8d7aec266",
+    "tools/qualify_public_hip_source.py": "3fd6cf84b125693e884e7bbac669240e1f3c67df0b70732d3aada0738f86aa90"
+  },
+  "raw_evidence": {
+    "results/source-public-nullable-v1/receipt.json": "859efb29275fc257ce6d9d9f9982f2e37755ef2c4fbf11cb21dc8dd0467ce8df",
+    "results/nullable-source-review-v1/review.json": "52862e07a27749ad8078d7123cac84662a2dac8c7eacbba9076bc87af89771d1",
+    "build/nullable-core-v2/results.json": "65e68ba8fb9ad5b8218ef801fcd1468e701d819e7a5d9bc327a1597f8fec79a0",
+    "results/source-public-nullable-v1/launch-normal.stdout": "9218bcad5a74247937a2326e39b117c0a9ebd33f30e91cd356e28d726c2395da",
+    "results/source-public-nullable-v1/launch-events.stdout": "bb48a41a64928fd17e67df7cc27b3d22d6828b8007411d0d0d6525f2e6226f4e"
+  },
+  "contract": [
+    "A global pointer value of zero requires zero extent and no aggregate bytes.",
+    "Nonzero pointer values require validated live extents; native ownership resolves and retains them.",
+    "Null pointer values are packed as eight zero bytes without fake allocation or retention.",
+    "Argument-storage pointers remain nonnull and validated; strict vector launch still requires actual buffers.",
+    "Dereferencing a null kernel pointer remains the caller responsibility."
+  ],
+  "validation": {
+    "total_compilations": 87,
+    "sanitizer": "address,undefined",
+    "core_ctest_passed": 32,
+    "direct_hip_profile_passed": true,
+    "launch_cases": [
+      "nullable-zero-count-then-live",
+      "normal",
+      "events-pending-then-complete",
+      "noop-output-rejected",
+      "corrupt-output-rejected"
+    ],
+    "independent_source_review": "PASS",
+    "full_qualification_exit_code": 0
+  },
+  "gpu_executed": false,
+  "native_executed": false,
+  "limits": [
+    "The genuine CLR regression uses a host packet transport with count zero, not console execution.",
+    "No actual RMSNorm GPU kernel, broader public resource admission or end-to-end inference is proven.",
+    "Combined geometry/LDS and standalone reduction fixtures were not configured in the 32-test core run."
+  ]
+}

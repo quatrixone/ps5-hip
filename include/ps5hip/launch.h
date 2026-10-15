@@ -12,6 +12,7 @@ struct GpuRange { uint64_t address, bytes; };
 
 // Scalars carry their raw bits and zero buffer_bytes; pointers carry the bytes
 // accessible from their value. The native allocator must supply those extents.
+// A null kernel pointer has zero extent and no allocation to retain.
 struct LaunchArgument {
     uint64_t value = 0, buffer_bytes = 0;
     // Opaque by-value storage; embedded pointers are not discovered or retained.

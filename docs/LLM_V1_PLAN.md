@@ -173,6 +173,9 @@ real operator launch-resource, math/library and full-client-link blockers,
 then use the verified CPU token/logit references to qualify required operators.
 Aggregate arguments now pass both offline genuine compiler/CLR qualification
 and bounded native execution on .40; see `PUBLIC_AGGREGATE_ARGUMENTS.md`.
+The CPU RMSNorm oracle and optional null-pointer handling now pass offline; see
+`../evidence/offline-llm-rmsnorm-reference.json` and
+`../evidence/offline-public-nullable-arguments.json`.
 The next proposed operator gate is genuine 2048-column RMSNorm with its actual
 1024-thread/128-byte LDS contract and frozen CPU numerical reference; see
 `../evidence/llm-next-runtime-gate.json`.

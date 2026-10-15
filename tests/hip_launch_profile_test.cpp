@@ -18,6 +18,16 @@ int main(int argc,char **argv) {
     const std::array<uint32_t,3> groups=geometry?std::array<uint32_t,3>{5,3,1}:std::array<uint32_t,3>{7,1,1};
     const std::array<uint32_t,3> threads=geometry?std::array<uint32_t,3>{8,8,1}:std::array<uint32_t,3>{64,1,1};
     auto r=select_hip_launch_profile(k,groups,threads,0);auto renamed=k;renamed.name="arbitrary_other_kernel";check(select_hip_launch_profile(renamed,groups,threads,0).route==r.route);
+    std::vector<LaunchArgument> null_values(k.arguments.size());
+    for(size_t i=0;i<k.arguments.size();++i)
+     if(k.arguments[i].kind=="by_value" && k.arguments[i].size>8)null_values[i].bytes.resize(k.arguments[i].size);
+    hip_runtime_validate_arguments(k,r,null_values);
+    for(size_t i=0;i<k.arguments.size();++i)if(k.arguments[i].kind=="global_buffer") {
+     auto wrong=null_values;wrong[i].buffer_bytes=1;
+     reject([&]{hip_runtime_validate_arguments(k,r,wrong);});
+     wrong=null_values;wrong[i].value=0x4000008000;
+     reject([&]{hip_runtime_validate_arguments(k,r,wrong);});
+    }
     for(unsigned mutation=0;mutation<6;++mutation){auto bad=k;
      if(mutation==0)bad.properties=0x429;else if(mutation==1)bad.rsrc2^=0x40;else if(mutation==2)bad.rsrc3=1;
      else if(mutation==3)bad.preload=1;else if(mutation==4)bad.wave_size=64;else{bad.private_bytes=304;bad.properties=0x429;bad.rsrc2=0x91;}

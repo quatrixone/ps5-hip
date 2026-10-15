@@ -29,7 +29,8 @@ void check_geometry(const GeometryShape &shape) {
 
 void validate_launch_argument(const KernelArgument &layout, const LaunchArgument &arg) {
     if (layout.kind == "global_buffer") {
-        require(layout.size == 8 && arg.bytes.empty(), "invalid pointer argument representation");
+        require(layout.size == 8 && arg.bytes.empty() &&
+                ((arg.value == 0) == (arg.buffer_bytes == 0)), "invalid pointer argument representation");
     } else if (layout.kind == "by_value" && layout.size > 8) {
         require(layout.size <= detail::max_by_value_bytes && arg.bytes.size() == layout.size &&
                 arg.value == 0 && arg.buffer_bytes == 0, "invalid aggregate argument representation");
@@ -105,7 +106,7 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
         validate_launch_argument(layout, arg);
         require(layout.offset <= result.kernargs.size() && layout.size <= result.kernargs.size() - layout.offset,
                 "argument outside kernarg storage");
-        if (layout.kind == "global_buffer") {
+        if (layout.kind == "global_buffer" && arg.value) {
             GpuRange buffer{arg.value, arg.buffer_bytes};
             check_range(buffer);
             require(!scratch || !overlaps(buffer, scratch->storage), "argument buffer aliases scratch");

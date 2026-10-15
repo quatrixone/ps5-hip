@@ -82,6 +82,18 @@ int main(int argc,char **argv) {
                 reject([&]{queue.submit_and_wait(launch.commands,launch.resources,1);});
             }
             check(backend.submits==14);
+            // Packing a null pointer must not retain a substitute live allocation.
+            // No ISA is executed here: the caller decides whether a kernel may dereference it.
+            for (const auto &c : cases) {
+                const auto &k=named(*c.bundle,c.name);auto args=buffers.args(k,c.request);
+                args[0]={0,0};
+                auto launch=prepare_native_launch(*c.bundle,k,args,buffers.data,c.request);
+                const auto original=buffers.data.resolve(buffers.bases[0],262144).memory;
+                check(std::find(launch.resources.begin(),launch.resources.end(),original)==launch.resources.end());
+                check(get(static_cast<const uint8_t*>(launch.temporaries[1]->cpu())+k.arguments[0].offset,8)==0);
+                close_native_launch_temporaries(launch,buffers.data);
+                check(allocations.size()==3 && !buffers.data.poisoned());
+            }
             const auto before=allocate_calls;
             for(const auto &c:cases) {
                 const auto &k=named(*c.bundle,c.name);auto args=buffers.args(k,c.request);
@@ -91,6 +103,8 @@ int main(int argc,char **argv) {
                 if(c.request.route!=NativeLaunchRoute::Lds){bad=c.request;bad.dynamic_lds_bytes=256;reject([&]{prepare_native_launch(*c.bundle,k,args,buffers.data,bad);});}
                 auto wrong=args;--wrong[0].buffer_bytes;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
                 wrong=args;wrong[0].value=UINT64_MAX;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
+                wrong=args;wrong[0].value=0;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
+                wrong=args;wrong[0].buffer_bytes=0;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
                 // Mixed scalar/global and aggregate representations reject before allocation.
                 for (size_t i = 0; i < args.size(); ++i) {
                     wrong=args;wrong[i].bytes.push_back(0);

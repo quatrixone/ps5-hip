@@ -129,7 +129,21 @@ int main(int argc, char **argv) {
         auto wide_expected = expected; put(wide_expected, 24, scalar64, 8);
         check(wide_launch.kernargs == wide_expected);
         addresses = original_addresses; slots[3] = scalar_slot;
-        for (uint64_t invalid : {uint64_t(0), buffers[0].address - 1, buffers[0].address + buffers[0].bytes,
+        pointers[0] = 0;
+        auto nullable = capture();
+        check(nullable[0].value == 0 && nullable[0].buffer_bytes == 0 && nullable[0].bytes.empty());
+        pointers = original_pointers;
+        auto null_launch = ps5hip::prepare_initial_launch(owned.object, kernel.name, module, kernarg, 2, nullable);
+        auto null_expected = expected; put(null_expected, 0, 0, 8);
+        check(null_launch.kernargs == null_expected && nullable[0].value == 0);
+        for (unsigned mutation = 0; mutation < 3; ++mutation) {
+            auto malformed = nullable;
+            if (mutation == 0) malformed[0].buffer_bytes = 1;
+            if (mutation == 1) malformed[0].value = original_pointers[0];
+            if (mutation == 2) malformed[0].bytes.push_back(0);
+            reject([&] { ps5hip::prepare_initial_launch(owned.object, kernel.name, module, kernarg, 2, malformed); });
+        }
+        for (uint64_t invalid : {buffers[0].address - 1, buffers[0].address + buffers[0].bytes,
                                  uint64_t(1) << 47, UINT64_MAX}) {
             pointers[0] = invalid; reject(capture);
         }

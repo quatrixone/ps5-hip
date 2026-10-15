@@ -36,6 +36,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 prerequisite | offline CPU only | genuine RMSNorm reference, six cases/81920 values, independent review and fresh Make reproduction pass | evidence/offline-llm-rmsnorm-reference.json | next: actual operator resource admission and native numerical gate
 
+- 2026-10-15 | V1.2 prerequisite | offline | nullable optional kernel pointers, 87-compilation CLR sanitizer qualification and 32 core regressions pass | evidence/offline-public-nullable-arguments.json | next: actual RMSNorm resource contract
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1.2 prerequisite | 55a6197 | .40 | pass: aggregate compiler launches,320memberbytes64guards,clean lifecycle | evidence/console40-public-aggregate-success.json | next: real RMSNorm resources/oracle

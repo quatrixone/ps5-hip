@@ -82,7 +82,8 @@ std::vector<LaunchArgument> capture_launch_arguments(
         } else {
             std::memcpy(&value.value, reinterpret_cast<const void *>(address), layout.size);
         }
-        if (layout.kind == "global_buffer") {
+        // Null is a kernel value, not a live allocation; dereferencing it is the caller's error.
+        if (layout.kind == "global_buffer" && value.value) {
             bool found = false;
             for (const auto range : buffers)
                 if (value.value >= range.address && value.value - range.address < range.bytes) {

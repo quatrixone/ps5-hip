@@ -110,7 +110,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     // logical extents, including interior offsets, never caller-invented sizes.
     for (size_t i = 0; i < values.size(); ++i) {
         validate_launch_argument(k.arguments[i], values[i]);
-        if (k.arguments[i].kind != "global_buffer") {
+        if (k.arguments[i].kind != "global_buffer" || values[i].value == 0) {
             continue;
         }
         auto hold = data.resolve(reinterpret_cast<const void *>(values[i].value), values[i].buffer_bytes);
