@@ -18,6 +18,10 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+The GPU graph candidate `results/source-public-graph-gpu-console-v1` is frozen
+at `a80845d` and independently approved for one deployment. See
+`evidence/offline-frozen-native-gpu-graph.json`; execution needs exact-receipt review.
+
 The shared native GPU graph fixture now passes full host sanitizer qualification,
 a fresh 74-object Make package, cached validation, 24 console-control tests and
 62 host regressions. Independent source/package reviews and a pre-exit retirement

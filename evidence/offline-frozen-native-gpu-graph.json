@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-frozen-gpu-graph-deployment-review",
+  "source_commit": "a80845dee0fc5b5dd440809e7b4275f9f0d59e87",
+  "manifest_sha256": "c2605e66c8033e5aa3ef8b620b145e2f43c5b51c745aa49f17657eda19c7b45e",
+  "package_sha256": "37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2",
+  "bound_files": 29,
+  "package_files": 7,
+  "committed_inputs": 103,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-graph-gpu-console-v1/manifest.json": "c2605e66c8033e5aa3ef8b620b145e2f43c5b51c745aa49f17657eda19c7b45e",
+    "results/source-public-graph-gpu-console-v1/deployment-review.json": "6d1c09236f52d90ea28b5e01eb910f248eb60a8afd94127d383be53f06704d08",
+    "results/source-public-graph-gpu-console-v1/build-receipt.json": "5d9a2926a1fd66897d5bb12ed7ee3f72c70152e8e919053e4e3076bcecf4870f"
+  },
+  "limits": [
+    "One deployment only; separate successful exact-receipt review before execution.",
+    "No native GPU graph result yet."
+  ]
+}
