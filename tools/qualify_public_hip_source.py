@@ -37,7 +37,7 @@ def main():
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp',
-                 'tests/public_hip_retirement_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -274,6 +274,20 @@ def main():
             raise RuntimeError('retirement ordering/ownership differs: ' + mode)
         retirement_models[mode] = sha(binary)
         print('public retirement ' + mode + ' PASS', flush=True)
+    rect_source = ROOT / 'tests/public_hip_rect_copy_model.cpp'
+    source_hashes[str(rect_source.relative_to(ROOT))] = sha(rect_source)
+    rect_object = compile_one((len(units) + 8, rect_source))
+    rect_objects = [rect_object if unit.name == 'hip_admission_model.cpp' else obj
+                    for unit, obj in zip(units, objects)]
+    run('rect-copy-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *rect_objects, '-o', output / 'rect-copy-model'])
+    result = run('rect-copy', [output / 'rect-copy-model'], env)
+    if result.splitlines() != [
+        'PUBLIC_RECT_COPY_PASS compared_bytes=4096 rounds=2 padding=true rejected=31 synchronous_failure=true gpu_execution=false',
+        'PUBLIC_STREAM_COPY_FINAL queues=3 retired=3 allocations=3 frees=3 ownership=clean gpu_execution=false']:
+        raise RuntimeError('rectangular copy data/ownership contract differs')
+    print('public rectangular copy PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -294,7 +308,8 @@ def main():
                'stream_model_sha256': sha(output / 'stream-model'),
                'stream_cases': ['event-ordered', 'bypass-early-consumer-detected',
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data'],
-               'total_compilations': len(units) + 8,
+               'total_compilations': len(units) + 9,
+               'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,
                'fill_allocation_failure_models': fill_failure_models,

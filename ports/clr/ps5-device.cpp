@@ -148,6 +148,7 @@ class Virtual final:public amd::device::VirtualDevice {
     void* pointer(amd::Memory& m,size_t offset){
         auto* mem=dynamic_cast<Memory*>(m.getDeviceMemory(device(),false));
         if(!mem)throw ObjectError("wrong memory owner");
+        if(offset>m.getSize()||offset>UINTPTR_MAX-mem->virtualAddress())throw ObjectError("invalid buffer address");
         return reinterpret_cast<void*>(mem->virtualAddress()+offset);
     }
     template<class F> void execute(amd::Command& c,F f)noexcept {
@@ -177,6 +178,21 @@ public:
         region(c.source(),c.origin(),c.size());state_->data.copy_from_device(c.destination(),pointer(c.source(),c.origin()[0]),c.size()[0]);
     });}
     void submitCopyMemory(amd::CopyMemoryCommand& c)override{execute(c,[&]{
+        if(c.type()==CL_COMMAND_COPY_BUFFER_RECT){
+            auto validate=[&](amd::Memory& memory,const amd::BufferRect& rect){
+                FillLayout layout{};
+                if(!memory.asBuffer()||rect.start_>memory.getSize()||!rect.rowPitch_||
+                   rect.slicePitch_%rect.rowPitch_||
+                   !checked_fill_layout(c.size()[0],c.size()[1],c.size()[2],rect.rowPitch_,
+                                        rect.slicePitch_/rect.rowPitch_,memory.getSize()-rect.start_,layout))
+                    throw ObjectError("invalid rectangular copy span");
+            };
+            validate(c.source(),c.srcRect());validate(c.destination(),c.dstRect());
+            state_->data.copy_device_rect(pointer(c.destination(),c.dstRect().start_),
+                c.dstRect().rowPitch_,c.dstRect().slicePitch_,pointer(c.source(),c.srcRect().start_),
+                c.srcRect().rowPitch_,c.srcRect().slicePitch_,c.size()[0],c.size()[1],c.size()[2]);
+            return;
+        }
         if(c.type()!=CL_COMMAND_COPY_BUFFER)throw ObjectError("unsupported copy");
         region(c.source(),c.srcOrigin(),c.size());region(c.destination(),c.dstOrigin(),c.size());
         state_->data.copy_device(pointer(c.destination(),c.dstOrigin()[0]),pointer(c.source(),c.srcOrigin()[0]),c.size()[0]);

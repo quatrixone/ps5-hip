@@ -1,0 +1,184 @@
+--- a/hipamd/src/hip_memory.cpp
++++ b/hipamd/src/hip_memory.cpp
+@@ -1756,6 +1756,33 @@
+     return hipErrorInvalidValue;
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  auto checkedRect = [&](amd::Memory* memory, size_t offset, const amd::Coord3D& origin,
++                         size_t row, size_t slice, amd::BufferRect& rect) {
++    const size_t width = copyRegion[0], height = copyRegion[1], depth = copyRegion[2];
++    if (!memory->asBuffer() || !width || !height || !depth || offset > memory->getSize()) return false;
++    if (!row) row = width;
++    if (row < width || height > SIZE_MAX / row) return false;
++    if (!slice) slice = row * height;
++    if (slice < row * height || slice % row) return false;
++    if (origin[0] > row - width || origin[1] > slice / row - height) return false;
++    size_t remaining = memory->getSize() - offset;
++    if (origin[2] > remaining / slice) return false;
++    const size_t z = origin[2] * slice; remaining -= z;
++    if (origin[1] > remaining / row) return false;
++    const size_t y = origin[1] * row; remaining -= y;
++    if (origin[0] > remaining) return false;
++    remaining -= origin[0];
++    ps5hip::FillLayout layout{};
++    if (!ps5hip::checked_fill_layout(width, height, depth, row, slice / row, remaining, layout)) return false;
++    rect.rowPitch_ = row; rect.slicePitch_ = slice;
++    rect.start_ = offset + z + y + origin[0]; rect.end_ = layout.span;
++    return true;
++  };
++  if (!checkedRect(srcMemory, srcOffset, srcOrigin, srcRowPitch, srcSlicePitch, srcRect) ||
++      !checkedRect(dstMemory, dstOffset, dstOrigin, dstRowPitch, dstSlicePitch, dstRect))
++    return hipErrorInvalidValue;
++#else
+   if (!srcRect.create(static_cast<size_t*>(srcOrigin), static_cast<size_t*>(copyRegion),
+                       srcRowPitch, srcSlicePitch)) {
+     return hipErrorInvalidValue;
+@@ -1779,6 +1806,7 @@
+   if (!dstMemory->validateRegion(dstStart, dstSize)) {
+     return hipErrorInvalidValue;
+   }
++#endif
+   return hipSuccess;
+ }
+ 
+@@ -2315,6 +2343,13 @@
+   hipMemoryType dstMemoryType;
+   ihipCopyMemParamSet(pCopy, srcMemoryType, dstMemoryType);
+ 
++#if defined(WITH_PS5_DEVICE)
++  if (srcMemoryType != hipMemoryTypeDevice || dstMemoryType != hipMemoryTypeDevice)
++    return hipErrorNotSupported;
++  if ((pCopy->srcHeight && pCopy->srcPitch > SIZE_MAX / pCopy->srcHeight) ||
++      (pCopy->dstHeight && pCopy->dstPitch > SIZE_MAX / pCopy->dstHeight))
++    return hipErrorInvalidValue;
++#endif
+   amd::Coord3D srcOrigin = {pCopy->srcXInBytes, pCopy->srcY, pCopy->srcZ};
+   amd::Coord3D dstOrigin = {pCopy->dstXInBytes, pCopy->dstY, pCopy->dstZ};
+   amd::Coord3D copyRegion = {pCopy->WidthInBytes, pCopy->Height, pCopy->Depth};
+@@ -2375,6 +2410,9 @@
+     if (!command->awaitCompletion()) {
+       status = hipErrorUnknown;
+     }
++#if defined(WITH_PS5_DEVICE)
++    if (command->status() != CL_COMPLETE) status = hipErrorUnknown;
++#endif
+   }
+   command->release();
+   return status;
+@@ -2388,6 +2426,11 @@
+   if (!hip::isValid(stream)) {
+     return hipErrorContextIsDestroyed;
+   }
++#if defined(WITH_PS5_DEVICE)
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   if (pCopy->WidthInBytes == 0 || pCopy->Height == 0 || pCopy->Depth == 0) {
+     LogPrintfInfo("Either Width :%d or Height: %d and Depth: %d is zero", pCopy->WidthInBytes,
+                   pCopy->Height, pCopy->Depth);
+@@ -2397,6 +2440,10 @@
+   hipMemoryType dstMemoryType;
+   ihipCopyMemParamSet(pCopy, srcMemoryType, dstMemoryType);
+ 
++#if defined(WITH_PS5_DEVICE)
++  if (srcMemoryType != hipMemoryTypeDevice || dstMemoryType != hipMemoryTypeDevice)
++    return hipErrorNotSupported;
++#endif
+   if ((srcMemoryType == hipMemoryTypeHost) && (dstMemoryType == hipMemoryTypeHost)) {
+     amd::Coord3D srcOrigin = {pCopy->srcXInBytes, pCopy->srcY, pCopy->srcZ};
+     amd::Coord3D dstOrigin = {pCopy->dstXInBytes, pCopy->dstY, pCopy->dstZ};
+@@ -2425,8 +2472,10 @@
+       isAsync = false;
+     } else if ((pCopy->srcMemoryType == hipMemoryTypeDevice) &&
+                (pCopy->dstMemoryType == hipMemoryTypeDevice)) {
++#if !defined(WITH_PS5_DEVICE)
+       // Device to Device copies dont need to wait for host synchronization
+       isAsync = true;
++#endif
+     }
+     return ihipMemcpyCmdEnqueue(command, isAsync);
+   }
+@@ -2435,6 +2484,7 @@
+ hipError_t ihipMemcpyParam2D(const hip_Memcpy2D* pCopy,
+                              hipStream_t stream,
+                              bool isAsync = false) {
++  if (pCopy == nullptr) return hipErrorInvalidValue;
+   HIP_MEMCPY3D desc = hip::getDrvMemcpy3DDesc(*pCopy);
+ 
+   return ihipMemcpyParam3D(&desc, stream, isAsync);
+@@ -2555,6 +2605,12 @@
+ hipError_t hipMemcpy2DAsync(void* dst, size_t dpitch, const void* src, size_t spitch, size_t width,
+                             size_t height, hipMemcpyKind kind, hipStream_t stream) {
+   HIP_INIT_API(hipMemcpy2DAsync, dst, dpitch, src, spitch, width, height, kind, stream);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemcpy2DAsync, stream, dst, dpitch, src, spitch, width, height, kind);
+   HIP_RETURN_DURATION(hipMemcpy2D_common(dst, dpitch, src, spitch, width, height, kind, stream, true));
+ }
+@@ -2563,6 +2619,12 @@
+                             size_t height, hipMemcpyKind kind, hipStream_t stream) {
+   HIP_INIT_API(hipMemcpy2DAsync, dst, dpitch, src, spitch, width, height, kind, stream);
+   PER_THREAD_DEFAULT_STREAM(stream);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemcpy2DAsync, stream, dst, dpitch, src, spitch, width, height, kind);
+   HIP_RETURN_DURATION(hipMemcpy2D_common(dst, dpitch, src, spitch, width, height, kind, stream, true));
+ }
+@@ -3050,6 +3112,9 @@
+ 
+ hipError_t ihipMemcpy3DCommand(amd::Command*& command, const hipMemcpy3DParms* p,
+                                hip::Stream* stream) {
++#if defined(WITH_PS5_DEVICE)
++  return hipErrorNotSupported;
++#endif
+   const HIP_MEMCPY3D desc = hip::getDrvMemcpy3DDesc(*p);
+   return ihipGetMemcpyParam3DCommand(command, &desc, stream);
+ }
+@@ -3080,6 +3145,12 @@
+ }
+ 
+ hipError_t hipMemcpy3DAsync_common(const hipMemcpy3DParms* p, hipStream_t stream) {
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemcpy3DAsync, stream, p);
+   return ihipMemcpy3D(p, stream, true);
+ }
+@@ -4166,6 +4237,12 @@
+ hipError_t hipMemcpyParam2DAsync(const hip_Memcpy2D* pCopy,
+                                  hipStream_t stream) {
+   HIP_INIT_API(hipMemcpyParam2DAsync, pCopy);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemcpyParam2DAsync, stream, pCopy);
+   HIP_RETURN(ihipMemcpyParam2D(pCopy, stream, true));
+ }
+--- a/hipamd/src/hip_graph.cpp
++++ b/hipamd/src/hip_graph.cpp
+@@ -118,6 +118,9 @@
+ hipError_t ihipGraphAddMemcpyNode(hip::GraphNode** pGraphNode, hip::Graph* graph,
+                                   hip::GraphNode* const* pDependencies, size_t numDependencies,
+                                   const hipMemcpy3DParms* pCopyParams, bool capture = true) {
++#if defined(WITH_PS5_DEVICE)
++  return hipErrorNotSupported;
++#endif
+   if (pGraphNode == nullptr || graph == nullptr ||
+       (numDependencies > 0 && pDependencies == nullptr) || pCopyParams == nullptr) {
+     return hipErrorInvalidValue;

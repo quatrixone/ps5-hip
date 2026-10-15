@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-rectangular-d2d-pass",
+  "source_base": "021797af114ca080760bc06eb6285a9d89cf2802",
+  "source_identity": "Fresh receipt binds changed inputs and generated source bytes before commit.",
+  "total_compilations": 78,
+  "strict_links": 9,
+  "host_tests_passed": 62,
+  "control_tests_passed": 18,
+  "native_translation_units_compiled": 3,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-rect-copy-source-v2/receipt.json": "84695980f8a22b2f04109a90d90838a5df43fe71d832b76ccea8baeaa54f6c90",
+    "results/public-rect-copy-source-v2/independent-review.json": "4053e7f550760c6db1eaa638fa99b5103741cd85da61fbcaf18606b7473deb0a",
+    "results/public-rect-copy-source-v2/rect-copy.json": "a28bd21b73f504fdee92825ba2ff709ddb24f671b546bd14e44e8756489087d6",
+    "results/public-rect-copy-source-v2/rect-copy.stdout": "2aa8e4f0c0996dabb951662a78acb8e310673a5195b64a89f1a07bdc4d93970b",
+    "results/public-rect-copy-source-v2/rect-copy.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-rect-copy-native-v1/receipt.json": "1a77354fdcec0c285478e2238c1960d95896c3a902ca62daef306f227438e048",
+    "results/public-rect-prerequisite-review-v1/review.json": "e72230aaf50c376263e0c1b79efca6757633d0ce00120e6cc2fb6974fd8b85df",
+    "results/public-rect-copy-host-test.log": "e60308e4c9155e127bf4a9bb2a9d73f6bb74e911952227b4ec8955bfdf914418",
+    "results/public-rect-copy-controls.log": "e29bb455a905f6275184962359899c807ce2ebdab01bdf7ee9ec6de877ca17fe"
+  },
+  "accepted_scope": [
+    "Synchronous2D and asynchronous3D D2D copy exact payload and preserve source/row/slice padding across2changedrounds4096bytecomparisons.",
+    "Checked pitch/origin/extent and remaining logical span reject invalid bounds and overflow before command creation.",
+    "Adapter revalidates memory spans and checked addresses; native owner resolves both allocations and rejects row overlap before writes.",
+    "Synchronous callers retain completion intent and receive hipErrorUnknown for command rejection instead of false success.",
+    "31rejections cover bounds/shape/overflow, unsupported D2H rectangle, overlap, invalid async streams, null2Ddescriptors, capture including driver path and directgraph creation.",
+    "Preparation applies and repeats idempotently; changed memory/graph/SVM and patch prerequisites reject.",
+    "All existing qualifier cases retain expected outcomes."
+  ],
+  "preserved_failures": [
+    "results/public-rect-copy-diagnostic-v1",
+    "results/public-rect-copy-source-v1"
+  ],
+  "limits": [
+    "Host modeled providers only; no native rectangular-copy acceptance.",
+    "Only D2D rectangles are implemented; host/array rectangles and capture/graph routes remain unsupported.",
+    "Async execution-time failure reporting beyond explicit synchronization is not newly qualified.",
+    "No fresh full native package or console run at this milestone.",
+    "Initial v1 used changed inputs and preguard source; it failed an origin-shape assertion and is diagnostic only."
+  ],
+  "independent_review": {
+    "path": "results/public-rect-copy-source-v2/independent-review.json",
+    "sha256": "4053e7f550760c6db1eaa638fa99b5103741cd85da61fbcaf18606b7473deb0a",
+    "deployment_approved": false
+  }
+}

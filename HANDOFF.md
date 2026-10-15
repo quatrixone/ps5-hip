@@ -18,19 +18,26 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Public rectangular D2D copying now passes fresh qualification: 78 compilations,
+nine links, 4,096 compared bytes over two changed rounds and 31 rejection checks.
+Checked origin/span admission, adapter dispatch and synchronous failure propagation
+fix the reproduced false-success path. Host/array rectangles and capture/graph
+routes remain unqualified and reject on tested entry paths. See
+`evidence/offline-public-rect-copy.json`; 62 host tests, 18 control tests and three
+changed PS5 translation units also pass. No new package or console run is claimed.
+
 The native memory owner now implements rectangular D2D copying with checked
 spans, padding preservation and exact row-overlap rejection. All 62 host tests,
 PS5 native-core compilation and independent code/overlap review pass. See
-`evidence/offline-native-rect-copy-core.json`. Next: public layout admission,
-adapter dispatch and synchronous error propagation. The public false-success bug
-below remains open; this primitive alone does not qualify public pitched copies.
+`evidence/offline-native-rect-copy-core.json`. The public integration is now qualified in the newer checkpoint above; this
+core-only evidence remains scoped to the primitive.
 
-**Open correctness bug:** public `hipMemcpy2D` D2D can return success without
+**Historical bug, now fixed in the qualified D2D path above:** public `hipMemcpy2D` could return success without
 copying any requested bytes. Independent sanitizer reproduction observed 0/32
 bytes copied for an 8-by-4 region with 16-byte pitches. The adapter rejects the
 rectangular command while upstream forces asynchronous enqueue. See
-`evidence/public-rect-copy-false-success.json`. Next work is checked rectangular
-D2D support and synchronous failure propagation; do not advertise pitched copies.
+`evidence/public-rect-copy-false-success.json`. The failing baseline is preserved; the newer rectangular-copy checkpoint
+records the fix and its bounded acceptance.
 
 Public asynchronous D2D dataflow now passes event-ordering and stale-data bypass
 cases in the fresh 77-compilation/eight-link qualifier. Both verify 128 bytes,

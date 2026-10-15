@@ -192,8 +192,8 @@ gate, `stream-normal` requires no dependent consumer progress within one second.
 `stream-bypass` omits the event wait and requires early consumer progress within
 that deadline. Both cases release the producer and verify two retired queues with
 no allocation or GPU submission. This bounded test is scheduler-dependent; it
-qualifies neither native events nor GPU concurrency. The qualifier builds 77
-translation units in total: 69 base units, four alternate client harnesses,
+qualifies neither native events nor GPU concurrency. The qualifier builds 78
+translation units in total: 69 base units, five alternate client harnesses,
 two independently fault-injected memory units and two retirement adapter copies.
 
 The stream client also tests actual asynchronous D2D dataflow. A held producer
@@ -204,6 +204,16 @@ output starts at a different value, so an omitted copy cannot pass either oracle
 Both streams synchronize before readback and each buffer is freed once before
 stream destruction. These cases retain the bounded scheduling caveat above and
 do not establish native asynchronous transfer or GPU concurrency.
+
+The rectangular-copy client checks public synchronous 2D and asynchronous 3D D2D
+copies with changed data, interior pointers, nonzero origins and different row/slice
+pitches. Two rounds compare 4,096 bytes including padding and source preservation.
+Admission rejects invalid origin/extent geometry and overflow before command creation;
+synchronous command failure propagates as `hipErrorUnknown`. Host rectangles, arrays,
+capture and graph rectangles remain unsupported and explicitly reject on the qualified
+entry paths. Invalid async streams and null 2D descriptors reject without dereference.
+The native memory owner checks complete spans and actual row overlap before writes.
+This is host qualification plus targeted PS5 compilation, not native copy acceptance.
 
 The retirement client holds a completed fill before worker batch release. The
 fixed adapter must keep synchronization pending during a 500 ms observation,
