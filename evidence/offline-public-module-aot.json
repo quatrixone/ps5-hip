@@ -7,7 +7,16 @@
       "units": 69,
       "modes_passed": 12,
       "included_files": 681,
-      "path": "results/public-module-aot-model-v1",
+      "path": "results/public-module-aot-model-v2",
+      "source_commit": "a12d18df4f3ba31143a9431f5ef81a53898e6fb2",
+      "expanded_checks": [
+        "actual gfx1030 rejection",
+        "simultaneous module isolation",
+        "effective runtime-unbundler settings",
+        "owned image survives source-file unlink",
+        "malformed/size rejection and unsupported pointer-only images",
+        "descriptor balance and exact final teardown"
+      ],
       "sanitizers": "ASan/UBSan; leak detection except three intentional retention modes with exact ownership checks"
     },
     "extended_model": {
@@ -26,10 +35,16 @@
     "host_tests_passed": 61,
     "failure_injection": "Actual extractor with modeled parser/destructors: read/close errors, three allocation sites, parser errors, repeated attempts, invalid devices, no pointer dereference",
     "native": "Modified hip_fatbin.cpp cross-compiled; no full package claimed",
-    "independent_review": "Clear for scoped offline source milestone; fresh v2 artifact audit pending"
+    "independent_review": "Fresh expanded v2 artifact audit passed: all bound inputs,681 headers,four tools,69 compiles,strict link,12 exact mode outcomes and both fixture hashes verified; no console approval.",
+    "prior_fresh_source_model": {
+      "units": 69,
+      "modes_passed": 12,
+      "included_files": 681,
+      "path": "results/public-module-aot-model-v1",
+      "sanitizers": "ASan/UBSan; leak detection except three intentional retention modes with exact ownership checks"
+    }
   },
   "limits": [
-    "Fresh expanded full-source v2 run is still pending.",
     "Host platform providers and packet transport are modeled; no GPU or console execution.",
     "Pointer-only images remain NotSupported; filename-backed raw code objects only.",
     "Native module package and console acceptance remain open.",
@@ -52,6 +67,11 @@
     "results/public-module-aot-host-test.log": "fcaa52e73da0ccb17821fc8ea3a1d1f567f993fe823861764ba2679ad7bf3ec9",
     "results/public-module-aot-native-v1/command.json": "3b7f63574371565366ea61a92953ea6c9b223e1c1ffc8facdb4192a1cd40fba5",
     "results/public-module-aot-native-v1/hip_fatbin.o": "2633cbd586800ab23357de288ff2ba231b67ef20a72c851360ecff5b1ce5da09",
-    "results/public-module-aot-model-v1/independent-review.json": "abc946024a1cda615d52f07720f0ae42ed5a272657cefbcf53a2d5078e737b34"
+    "results/public-module-aot-model-v1/independent-review.json": "abc946024a1cda615d52f07720f0ae42ed5a272657cefbcf53a2d5078e737b34",
+    "results/public-module-aot-model-v2/receipt.json": "42d1559aea66d605857566e3b49b22d89cee78d8666e874b75d05db18a929a9d",
+    "results/public-module-aot-model-v2/model": "704993bc2c8364d2f9c84637f3e3caf5163122105891a9f3fd50d205d18619d0",
+    "results/public-module-aot-model-v2/module.json": "e81508bd9b6bdf07cebe198fca5e7a2461c3919d92e2d9abff97aaee15e6d6e6",
+    "results/public-module-aot-model-v2/module-unbundler.json": "10d4ebbe5cbd986eb2c5afbf1d0aa20fb2756198680d19e52ab711752d2879e4",
+    "results/public-module-aot-model-v2/independent-review.json": "c20c8a826b714fecd4b8f35dd6786d405e4dbca86eb169ab5a863807041fa01d"
   }
 }

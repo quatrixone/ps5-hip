@@ -24,19 +24,21 @@ before publication, keeps bytes stable through program destruction, and uses
 images return NotSupported without dereference. Single-device admission and
 one extraction attempt are explicit. See `evidence/offline-public-module-aot.json`.
 
-Fresh source model `results/public-module-aot-model-v1` passed all twelve cases
-under ASan/UBSan across 69 genuine HIP/ROCclr units. Its original model/runner
-inputs are archived beside the receipt. `results/public-module-aot-extended-check`
-relinked only the updated model against those objects and passed both module
-modes with real gfx1030 rejection, simultaneous modules and effective unbundler
-flag assertions. All 61 host tests passed; native hip_fatbin.cpp compiled.
-The focused actual-extractor harness injects read/close/allocation/parser failures
-and repeated attempts; independent review found no ownership defect.
+Fresh source model `results/public-module-aot-model-v2` passed all twelve cases
+under ASan/UBSan across 69 genuine HIP/ROCclr units, binding 681 included files.
+The complete fresh run includes real gfx1030 rejection, simultaneous modules,
+owned-file unlink, malformed/size errors and effective unbundler flag assertions.
+It supersedes the earlier v1 and incremental extension as current acceptance;
+those raw results remain preserved. All 61 host tests passed; native
+hip_fatbin.cpp compiled. The focused actual-extractor harness injects
+read/close/allocation/parser failures and repeated attempts.
 
-`results/public-module-aot-model-v2` is a fresh full-source rerun of the expanded
-suite (session 69856 at handoff); poll its existing handle before any restart.
-Do not claim this run passed until its receipt and exact mode results are checked.
-The implementation and model inputs must remain unchanged while it runs.
+The native module package and console controls are being built in the isolated
+WSL worktree `/home/denis/ps5-hip-module-package`, branch
+`codex/public-module-package`. Its 61 host tests and16 control tests pass;
+Make package build session5447 is still active. Poll before restarting.
+Merge validated changes back to main before freezing a candidate.
+
 An untracked local draft of the next native module client is in
 `tools/public_hip_module_console_title.cpp` and its v2 native object compiles;
 it is not packaged or console-qualified. Its loader-only backend factory rejects
