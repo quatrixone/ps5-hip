@@ -16,6 +16,14 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Next offline implementation: Q4_0 inference path
+
+Read `docs/LLM_Q4_PATH.md`: selected Q8_1 LLVM extraction links without fake
+printf services, and an actual hipBLAS-major-version client adaptation passes
+three backend syntax targets with official modern headers. Both are diagnostic
+proofs; source-only integration, runtime resources and numerical gates remain
+open. The console baseline below is unchanged.
+
 ## Native RMSNorm numerical run completed
 
 The six-case upstream RMSNorm run on .40 completed successfully: 81,920

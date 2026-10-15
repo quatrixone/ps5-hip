@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-selected-q8-activation-compiler-probe",
+  "gpu_executed": false,
+  "source_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "symbol": "_ZL13quantize_q8_1PKfPvlllllj15HIP_vector_typeIjLj3EE",
+  "selection": "llvm-extract-18 --recursive --func=<exact symbol> from unchanged full upstream quantize.cu compiled to LLVM bitcode",
+  "kernel_body_unchanged": true,
+  "kernel_count": 1,
+  "undefined_symbols": [],
+  "resources": {
+    "kernarg_bytes": 328,
+    "max_flat_workgroup_size": 256,
+    "wavefront_size": 32,
+    "static_lds_bytes": 0,
+    "private_segment_bytes": 0
+  },
+  "negative_control": {
+    "path": "results/llm-q8-quantize-link-v1",
+    "result": "full translation-unit link fails on real device printf imports from unsupported-format no_device_code path"
+  },
+  "raw_directory": "results/llm-q8-selected-ir-v1",
+  "artifacts": {
+    "bitcode.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bitcode.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "commands.json": "badaad62fde5e5676bd7d71f727d74731ea1f8fa40138b2ccfafd44a71802ba8",
+    "extract.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "extract.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ir.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ir.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes.stdout": "128208534df4c2fd101a345790975a6c40519519fe749814a505ae8e6826aae5",
+    "object.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "object.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "quantize.bc": "8020ee880e35a1e40d10cee0b2f8d860950282421de0b67a7ae7165543138b33",
+    "quantize.ll": "aba9d381b824267e337ca0929e49df213addd4b93241c18aa9d6a47a87ae87ca",
+    "selected-isa.txt": "b624c2e89804483df11b73982dc3714e64c1b896cafb38c720813fdd42e1b280",
+    "selected.bc": "0caab97a520ea633968f06413719fc28044ace235453117bdcce3ca9a9f48273",
+    "selected.hsaco": "8f85a6c063c5e03ea6319c316fe4eef134a954aae7a2dd73a075f8e5c97bdd29",
+    "selected.ll": "727b8246af3c70e1022f1905eeb0076f1d8da7be89018308ce92924c62e65550",
+    "selected.o": "70593bd0fab745004d3999365725631a3930397e2c78eaf1773182452d56008d",
+    "undefined.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "undefined.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "baseline_receipt_sha256": "303cd1c88d2b20794210094b101c9ce6897e2318a3232a48b4248dab1954059d",
+  "source_sha256": "ff7a578d98937554775931f696e25d171eec9d763c445115fc6ef0b119601a0a",
+  "limits": [
+    "Diagnostic existing HIP6.2/hipBLAS2.2 inputs only; source-only Make integration remains open.",
+    "No GPU numerical, ISA safety, runtime admission or full-client link proof.",
+    "Selected module excludes other kernels; final host registration/dispatch must reflect this explicit supported subset."
+  ]
+}

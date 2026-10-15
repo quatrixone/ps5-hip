@@ -48,6 +48,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 bounded operator | 6265eda | .40 | pass: upstream RMSNorm, six cases/81920 values, raw-buffer verification and clean lifecycle | evidence/console40-public-rmsnorm-success.json | next: client-required Q4_0 multiplication/link blockers, layer integration, full-model inference
 
+- 2026-10-15 | V1.1/V1.3 integration probe | offline | selected Q8_1 links and modern hipBLAS interface syntax passes | docs/LLM_Q4_PATH.md | next: source-only integration and real Q4_0 resource/numerical gates
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1.2 prerequisite | 55a6197 | .40 | pass: aggregate compiler launches,320memberbytes64guards,clean lifecycle | evidence/console40-public-aggregate-success.json | next: real RMSNorm resources/oracle

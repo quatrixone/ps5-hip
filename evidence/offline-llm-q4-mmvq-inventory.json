@@ -1,0 +1,331 @@
+{
+  "classification": "locked-upstream-q4-0-batch1-source-and-legacy-artifact-inventory",
+  "client_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "inputs": {
+    "llm-inputs.json": "0e2e537b0e2b6d76356108df5a0df633f6b8eb11fde3a0a4b0552ba51fbbfc5f",
+    "evidence/offline-llm-hip-compile-probe.json": "4d6aa08314456b9ef7f63e7e4e1464fbb4481118538c1266341c68c57d67d2f9",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/ggml-cuda.cu": "572e5facba2c6b2ce2f7c6a4c43566d5a719d6e984f7265f1895410cc82d31ec",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/mmvq.cu": "248a109a2daeb55e4c227ac12087c96d33f5498196dd842a40cf432922633538",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/mmvq.cuh": "b37f8359f519ba90ddecd9cb3ca5f8c2ae05685bfae6813d435d75763c2bb006",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/quantize.cu": "ff7a578d98937554775931f696e25d171eec9d763c445115fc6ef0b119601a0a",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/quantize.cuh": "112e190a096e1fa68d4c72ca2a450cb202586e3f2919c884f3e3316a8d5c57cd",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/common.cuh": "01ec28a5866346886a5ddd74efc1703b86cacdc31990522733d79ea035ace86b",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/vendors/hip.h": "db9b1142727f3eaf037d888da133029cd21d9fbe15cfc707be7b9633ae080323",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/vecdotq.cuh": "200dad1a94624716460b019d7f2bb38777d7e1348109a5cc623d03ce69ba275a",
+    ".deps/sources/llama-client/ggml/src/ggml-common.h": "0061131b615c5721fc88a78feeb22c1f8c450f1c2646a317d80796a653bf595c",
+    "results/llm-hip-probe-report-v1/mmvq.notes": "085997494a654d16ee5d0e1f8ce6f462b72aed0fa2839a4100b6fea42850fe43",
+    "results/llm-hip-probe-v13/mmvq.hsaco": "3f5d3f1781e247e9b55eb74276d352a4969cd8fdd5cba09a85e305509c86fc98",
+    "results/llm-hip-probe-v13/commands.json": "30be8488b7ddb3ed1997098f97db54f88f3d09d664445a5dd941e39ba26d3e9f",
+    "results/llm-q8-quantize-link-v1/commands.json": "bcd8c30d1d2ed36779e754ad08abc41816df62a138533c903aeb40b89e9ed787",
+    "results/llm-q8-quantize-link-v1/link.stderr": "4783dfb3b7905816c8526af3c8873aef9037632c6bf9ec3d8eeac5414a841817",
+    "models/tinyllama-gguf/tinyllama-q4_0.gguf": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "results/llm-q8-selected-ir-v1/commands.json": "badaad62fde5e5676bd7d71f727d74731ea1f8fa40138b2ccfafd44a71802ba8",
+    "results/llm-q8-selected-ir-v1/notes.stdout": "128208534df4c2fd101a345790975a6c40519519fe749814a505ae8e6826aae5",
+    "results/llm-q8-selected-ir-v1/selected.hsaco": "8f85a6c063c5e03ea6319c316fe4eef134a954aae7a2dd73a075f8e5c97bdd29",
+    "results/llm-q8-selected-ir-v1/selected.ll": "727b8246af3c70e1022f1905eeb0076f1d8da7be89018308ce92924c62e65550",
+    "results/llm-q8-selected-ir-v1/undefined.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "selected_kernel": "_ZL13mul_mat_vec_qIL9ggml_type2ELi1ELb0ELb0ELb0EEvPKvS2_PKi31ggml_cuda_mm_fusion_args_devicePfj15HIP_vector_typeIjLj3EEjjjS8_jjjS8_jjjj",
+  "template": "mul_mat_vec_q<GGML_TYPE_Q4_0,1,false,false,false>",
+  "arguments": [
+    {
+      "name": "vx_ptr",
+      "offset": 0,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "name": "vy_ptr",
+      "offset": 8,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "name": "ids_ptr",
+      "offset": 16,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "name": "fusion",
+      "offset": 24,
+      "size": 80,
+      "kind": "by_value"
+    },
+    {
+      "name": "dst_ptr",
+      "offset": 104,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "name": "ncols_x",
+      "offset": 112,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "nchannels_y",
+      "offset": 116,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_row_x",
+      "offset": 128,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_col_y",
+      "offset": 132,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_col_dst",
+      "offset": 136,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "channel_ratio",
+      "offset": 140,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_channel_x",
+      "offset": 152,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_channel_y",
+      "offset": 156,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_channel_dst",
+      "offset": 160,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "sample_ratio",
+      "offset": 164,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_sample_x",
+      "offset": 176,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_sample_y",
+      "offset": 180,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "stride_sample_dst",
+      "offset": 184,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "name": "ids_stride",
+      "offset": 188,
+      "size": 4,
+      "kind": "by_value"
+    }
+  ],
+  "legacy_descriptor": {
+    "static_lds": 384,
+    "private": 0,
+    "kernarg": 192,
+    "rsrc1": "0x60af00c3",
+    "rsrc2": "0xb8c",
+    "properties": "0x409"
+  },
+  "legacy_limits": "Existing v13 object is diagnostic prior build evidence, not a fresh source-only reproduction or admitted runtime proof. Refresh using current authenticated library order before relying on resources.",
+  "selection": {
+    "source": "ggml-cuda.cu:1951-2002; mmvq.cu:318-427,1089-1218,1280-1306",
+    "condition": "ordinary nonfused Q4_0 weights, F32 input/output, no bad-padding view, batch/ne11=1; MMVQ threshold8",
+    "architecture": "gfx1013 not enumerated RDNA1 device macro (hip.h:236); device and host tables both GENERIC for host AMDcc0x1013; do not label RDNA2 or inject macro silently",
+    "block": [
+      32,
+      4,
+      1
+    ],
+    "grid": "[M,1,1] for ordinary matrix-vector",
+    "dynamic_lds": 0,
+    "static_lds_legacy": 384,
+    "private_legacy": 0,
+    "rows_per_block": 1,
+    "nwarps": 4,
+    "small_k": false,
+    "halve_iters": false
+  },
+  "activation": {
+    "source": "mmvq.cu:1528-1563;quantize.cu:54-102,557-571;quantize.cuh:7",
+    "kernel": "quantize_q8_1",
+    "arguments": [
+      "x_ptr",
+      "vy_ptr",
+      "ne00",
+      "s01",
+      "s02",
+      "s03",
+      "ne0",
+      "ne1",
+      "ne2(uint3)"
+    ],
+    "block": [
+      256,
+      1,
+      1
+    ],
+    "grid": "[ceil(pad512(K)/256),1,1]",
+    "dynamic_lds": 0,
+    "format": "Q8_1 blocks32 values:half d,half sum,int8 qs[32];36bytes/block. d=maxabs/127,qs=roundf(x/d),zero-block handled,sum=input values; paddedinput treated0.",
+    "K2048": {
+      "input_bytes": 8192,
+      "q8_bytes": 2304,
+      "grid_x": 8
+    },
+    "K5632": {
+      "input_bytes": 22528,
+      "q8_bytes": 6336,
+      "grid_x": 22
+    },
+    "link_blocker": "Actual unchanged quantize.cu link failed __ockl_printf_begin/__ockl_printf_append_string_n/__ockl_printf_append_args from unrelated no_device_code helpers; selected Q8_1 kernel contains no printf. Need honest reachability-based internalization+DCE with preserved selected body/provenance or genuine printf implementation, not stubs.",
+    "compiled_resources": "Root selected-IR diagnostic now establishes selected Q8_1 resources; whole-TU link remains blocked by unrelated device printf.",
+    "selected_ir_diagnostic": {
+      "path": "results/llm-q8-selected-ir-v1",
+      "resources": {
+        "kernarg_segment_size": 328,
+        "group_segment_fixed_size": 0,
+        "private_segment_fixed_size": 0,
+        "max_flat_workgroup_size": 256,
+        "wavefront_size": 32
+      },
+      "undefined_symbols": [],
+      "limits": "Root diagnostic selected-kernel IR extraction succeeds; not yet reusable source-only tooling or runtime admission. Full-TU unresolved printf blocker still documented above."
+    }
+  },
+  "model_tensors": [
+    {
+      "name": "output.weight",
+      "shape": [
+        2048,
+        32000
+      ],
+      "type": 2,
+      "bytes": 36864000
+    },
+    {
+      "name": "token_embd.weight",
+      "shape": [
+        2048,
+        32000
+      ],
+      "type": 2,
+      "bytes": 36864000
+    },
+    {
+      "name": "blk.0.attn_k.weight",
+      "shape": [
+        2048,
+        256
+      ],
+      "type": 2,
+      "bytes": 294912
+    },
+    {
+      "name": "blk.0.attn_norm.weight",
+      "shape": [
+        2048
+      ],
+      "type": 0,
+      "bytes": 8192
+    },
+    {
+      "name": "blk.0.attn_output.weight",
+      "shape": [
+        2048,
+        2048
+      ],
+      "type": 2,
+      "bytes": 2359296
+    },
+    {
+      "name": "blk.0.attn_q.weight",
+      "shape": [
+        2048,
+        2048
+      ],
+      "type": 2,
+      "bytes": 2359296
+    },
+    {
+      "name": "blk.0.attn_v.weight",
+      "shape": [
+        2048,
+        256
+      ],
+      "type": 2,
+      "bytes": 294912
+    },
+    {
+      "name": "blk.0.ffn_down.weight",
+      "shape": [
+        5632,
+        2048
+      ],
+      "type": 2,
+      "bytes": 6488064
+    },
+    {
+      "name": "blk.0.ffn_gate.weight",
+      "shape": [
+        2048,
+        5632
+      ],
+      "type": 2,
+      "bytes": 6488064
+    },
+    {
+      "name": "blk.0.ffn_norm.weight",
+      "shape": [
+        2048
+      ],
+      "type": 0,
+      "bytes": 8192
+    },
+    {
+      "name": "blk.0.ffn_up.weight",
+      "shape": [
+        2048,
+        5632
+      ],
+      "type": 2,
+      "bytes": 6488064
+    }
+  ],
+  "next_gate": [
+    "Reproduce selected Q4_0 MMVQ and Q8_1 preparation kernel from unchanged locked TUs with authenticated LLVM18/libs; bind IR reachability selection if used and reject remaining unresolved symbols.",
+    "Audit actual metadata/descriptor/ISA, including integer dot fallback, multidimensional local IDs,static LDS/barriers and full argument layout. Do not reuse RMSNorm-only admission or flatten block dimensions.",
+    "Freeze real small Q4_0 matrix slice and F32 activations with independently executed CPU references before numerical tests; separately validate Q8_1 bytes then MMVQ values and guards.",
+    "Extend existing genuine runtime admission only for measured required semantics; then host packet/lifetime negative controls and one bounded native validation. No substitute runtime."
+  ],
+  "limits": [
+    "No console use, no native/GPU execution, no inference claim.",
+    "Nonfused candidate is a first operator gate; full TinyLlama graph can select fused gate/up path in ggml-cuda.cu:4224-4234, requiring has_fusion=true and nested gate pointer lifetime within80-byte aggregate.",
+    "Source-level no-fusion80-byte aggregate has eight pointer fields allnull for this gate; generic byte capture does not establish nonnull nestedpointer retention.",
+    "Model tensor shapes verified by GGUF metadata; actual runtime graph routing not executed."
+  ]
+}

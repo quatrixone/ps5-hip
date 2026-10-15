@@ -184,6 +184,12 @@ correct inference path works. Training is a separately scoped follow-up release.
 
 ## Immediate next action
 
+The next measured blockers and proposed build strategy are recorded in
+[LLM_Q4_PATH.md](LLM_Q4_PATH.md): genuine Q8_1 activation preparation, Q4_0
+multidimensional/static-LDS routing and coherent current hipBLAS interfaces.
+Source-only integration and native numerical validation remain required.
+
+
 Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now
 passes and five real device translation units link. Resolve demonstrated
 real operator launch-resource, math/library and full-client-link blockers,
