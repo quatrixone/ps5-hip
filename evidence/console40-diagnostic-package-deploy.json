@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-diagnostic-package-deployment",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "package_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+  "manifest_sha256": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+  "complete_ftp_reads": 21,
+  "maximum_image_read_seconds": 33.9210312969999,
+  "healthy_after": true,
+  "lock_released": true,
+  "launched": false,
+  "preserved_image": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459.preserved",
+  "preserved_log": "/data/ps5-hip/results/ps5-hip-public-launch.log.c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae.preserved",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-diagnostic-console-v2/manifest.json": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+    "results/source-public-launch-diagnostic-console-v2/deploy/receipt.json": "77de8e50b905780b6a242252e44b30cd5173409657b40eb2b6a0823ea912118e",
+    "results/source-public-launch-diagnostic-console-v2/deployment-review.json": "320ad3207db83a013ab6e7b36776b91199117058f00c492e4fff737b1d7acb01",
+    "results/source-public-launch-diagnostic-console-v2/execution-authorization.json": "be6191993b260d2f24b214d153a38c2855f23f7608ae624c97cc0670d23324e2",
+    "results/source-public-launch-diagnostic-console-v2/deploy/previous-application.log": "c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae",
+    "results/source-public-launch-diagnostic-console-v2/deploy/snapshot.log": "1cde57df7daea9516b9448d57fb1e03f4864274ecb2b339ad021817549d3a674",
+    "results/source-public-launch-diagnostic-console-v2/deploy/post_snapshot.log": "d3031b9437cb677d19a29b55922948d46f5f8b450cc4ac866aae023c31b087e4"
+  },
+  "limits": [
+    "Deploy consumed; one execute approved against exact receipt.",
+    "No new module status or GPU result yet."
+  ]
+}

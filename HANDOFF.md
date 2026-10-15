@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The diagnostic v2 deployment passed: 21 complete FTP reads, exact seven mounted
+files, preservation, idle state, healthy services and lock release. Its longest
+image read took 33.921 seconds, validating the longer image-only deadline. See
+`evidence/console40-diagnostic-package-deploy.json`. Deploy is consumed; independent
+review permits one execute against its exact receipt. No new GPU result yet.
+
 The unchanged diagnostic package is revalidated and frozen with corrected
 controls at `ad02169` in `results/source-public-launch-diagnostic-console-v2`.
 Independent deployment-only review permits one retry of the pre-upload transport
