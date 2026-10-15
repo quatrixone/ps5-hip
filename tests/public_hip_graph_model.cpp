@@ -30,10 +30,36 @@ static void noop(void* ptr){++static_cast<Values*>(ptr)->produced;}
 static void alternate(void* ptr){auto& v=*static_cast<Values*>(ptr);v.middle=v.seed*7; ++v.produced;}
 static void consume(void* ptr){auto& v=*static_cast<Values*>(ptr);v.output=v.middle+5; ++v.consumed;}
 int main(int argc,char**argv){
- checked(argc==2&&(std::strcmp(argv[1],"explicit")==0||std::strcmp(argv[1],"capture")==0||std::strcmp(argv[1],"explicit-noop")==0),__LINE__);
- const bool capture=std::strcmp(argv[1],"capture")==0;
+ checked(argc==2&&(std::strcmp(argv[1],"explicit")==0||std::strcmp(argv[1],"capture")==0||std::strcmp(argv[1],"explicit-noop")==0||std::strcmp(argv[1],"recover")==0),__LINE__);
+ const bool recover=std::strcmp(argv[1],"recover")==0;
+ const bool capture=std::strcmp(argv[1],"capture")==0||recover;
  HIP_OK(hipInit(0));
  hipStream_t stream=nullptr;HIP_OK(hipStreamCreateWithFlags(&stream,hipStreamNonBlocking));
+ if(recover){
+  unsigned callbacks=0;
+  for(auto mode:{hipStreamCaptureModeGlobal,hipStreamCaptureModeThreadLocal,hipStreamCaptureModeRelaxed}){
+   for(bool external:{false,true}){
+    hipGraph_t supplied=nullptr;
+    if(external){
+     HIP_OK(hipGraphCreate(&supplied,0));
+     HIP_OK(hipStreamBeginCaptureToGraph(stream,supplied,nullptr,nullptr,0,mode));
+    }else HIP_OK(hipStreamBeginCapture(stream,mode));
+    HIP_OK(hipLaunchHostFunc(stream,[](void* p){++*static_cast<unsigned*>(p);},&callbacks));
+    checked(hipStreamSynchronize(stream)==hipErrorStreamCaptureUnsupported,__LINE__);
+    hipStreamCaptureStatus status;
+    HIP_OK(hipStreamIsCapturing(stream,&status));checked(status==hipStreamCaptureStatusInvalidated,__LINE__);
+    checked(hipStreamBeginCapture(stream,mode)==hipErrorIllegalState,__LINE__);
+    hipGraph_t failed=reinterpret_cast<hipGraph_t>(0x12345);
+    checked(hipStreamEndCapture(stream,&failed)==hipErrorStreamCaptureInvalidated&&failed==nullptr,__LINE__);
+    HIP_OK(hipStreamIsCapturing(stream,&status));checked(status==hipStreamCaptureStatusNone,__LINE__);
+    failed=reinterpret_cast<hipGraph_t>(0x12345);
+    checked(hipStreamEndCapture(stream,&failed)==hipErrorIllegalState&&failed==nullptr,__LINE__);
+    HIP_OK(hipStreamSynchronize(stream));checked(callbacks==0,__LINE__);
+    if(external){size_t count=0;HIP_OK(hipGraphGetNodes(supplied,nullptr,&count));checked(count==1,__LINE__);HIP_OK(hipGraphDestroy(supplied));}
+   }
+  }
+  std::puts("PUBLIC_CAPTURE_RECOVERY_PASS invalidations=6 modes=3 external_graphs=3 callbacks=0 stream_reusable=true");
+ }
  Values original,updated;
  hipGraph_t graph=nullptr;hipGraphNode_t first=nullptr,second=nullptr;
  hipHostNodeParams a{std::strcmp(argv[1],"explicit-noop")==0?noop:produce,&original},b{consume,&original};

@@ -11,6 +11,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Invalidated capture cleanup now resets the stream, releases internally owned
+graphs and preserves caller-owned graphs. A reproduced baseline left status
+invalidated after end-capture. Six origin-stream regression cases cover all three
+capture modes and both ownership forms, then reuse the same stream for successful
+capture and replay. See `evidence/offline-public-capture-recovery.json` for fresh
+qualification, source-preparation drift checks, native compilation and independent
+review. Child/event recovery and other rejected API invalidation remain open.
+The previously frozen rectangular-copy package does not contain this runtime fix;
+a fresh native package is required to test it on .40 after recovery.
+
 Host-node graph construction and thread-local capture now pass fresh source
 qualification: each replays 16 changing inputs, updates callback functions and
 user-data pointers, and survives source-graph destruction with exact 32 callbacks

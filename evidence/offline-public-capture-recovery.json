@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-capture-recovery-pass",
+  "source_base": "dd82998cc40e56b708b7979fec3458686672445c",
+  "source_identity": "Exact hashes bind then-uncommitted implementation and harness; base commit alone is insufficient.",
+  "compilations": 79,
+  "strict_links": 10,
+  "native_translation_units": 3,
+  "host_tests_passed": 62,
+  "control_tests_passed": 19,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-capture-recovery-source-v2/receipt.json": "97882bcf9e516d24b700cb18d8cf1750a5784f75f98074478379b938b48f0926",
+    "results/public-capture-recovery-native-v1/receipt.json": "c7f6098bbd5832f345557e4a0b94bacc97833e88e84ec47d8723aa3794b53621",
+    "results/public-capture-preparation-v1/receipt.json": "1dd26592a2bfc3fb67f9c45363cdc04be9b6c8217ada9fb47dc914e4780c83e5",
+    "results/public-capture-preparation-v1/full-repeat.json": "7119aa9b7673085fc768d72d104d9bc5a88374b5117ded3fd6267badd9352746",
+    "tests/public_hip_graph_model.cpp": "2d13c07624cb25f74a9cadd12d1d0864e2fc8debb92565ddb0df8abaa1c37c45",
+    "ports/clr/ps5-public-capture.patch": "c20346f68319496edbe6e95ec1fe225cb0efb03a09a6860097b150d228d9b31d",
+    "ports/clr/ps5-public-capture.json": "0683136d6da29c7887562dc373e4d1d006a03c4bfc23f450cd949d996b82c54b",
+    "tools/prepare_public_hip_capture.py": "a4a35bd744c7ba8722bdecca944aee1241e5a0670e2f85f45ded771f5048be49",
+    "tools/prepare_public_hip_rect.py": "d2d4c8f2022d1e4eec77ee516217fe97c148a6d3fb6c0c6b26425dbaceb5541d",
+    "results/public-capture-recovery-review/review.json": "943d133f060ff77d21822a512a8fd483f5a40f9137f0d423411fdccf20ea9a8d",
+    "results/public-capture-recovery-host.log": "29dfdc6b480268bd075def1cca7c69f9de1517a6775bad5cd54e1aa425163613",
+    "results/public-capture-recovery-controls.log": "57d8674590f306a4bd05147d1e063c544463870a7876ca9e17435a6a08b7cdc4",
+    "results/public-capture-recovery-source-v2.log": "438bc770a8d003b992509fead941210591df711f30599d4a63a81d7ad75ecc5e",
+    "results/public-capture-recovery-source-v2/graph-recover.stdout": "9cc4fc1ba85c7cf803bf82e887a2902f1cfa551fc7508496c95ac8a74bfb3ebf",
+    "results/public-capture-recovery-source-v2/graph-recover.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-capture-recovery-source-v2/graph-recover.json": "f89979b0b5235770ec79fb2fea0153bab5feebdc1fafdd722fdd5a1e3329e990",
+    "results/public-capture-invalidation-diagnostic-v1/diagnostic.cpp": "129a88a6efb29e722e27062a7e6811ded678ee821ee73fad43e2bbc67ea8f19e",
+    "results/public-capture-invalidation-diagnostic-v1/run.stdout": "678be26fcb9c8d4dd07c2e37558d700608ca8091cb2b065184e58979f0a51488",
+    "results/public-capture-invalidation-diagnostic-v1/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-capture-invalidation-diagnostic-v1/compile.json": "81eecdb5b9a07d9238ab626a8f5e9cdaff4d74af98039c612edc0e91917cacd2",
+    "results/public-capture-invalidation-diagnostic-v1/link.json": "6c4ffc1416d145ab54160a1b0f08f964ab3a52abf732b80267b9ca7ba80c0e63"
+  },
+  "independent_review": {
+    "path": "results/public-capture-recovery-review/review.json",
+    "sha256": "943d133f060ff77d21822a512a8fd483f5a40f9137f0d423411fdccf20ea9a8d",
+    "deployment_approved": false
+  },
+  "baseline_failure": {
+    "sync_error": 900,
+    "end_error": 901,
+    "returned_graph_null": true,
+    "capture_status_after_end": 2,
+    "expected_status_after_end": 0,
+    "cleanup_qualified": false,
+    "note": "Diagnostic exits immediately after state observation, without finalization acceptance."
+  },
+  "accepted_scope": [
+    "All current input, prepared-source, header and tool identities verified",
+    "All binaries, compile/link records and existing sanitizer/runtime outcomes match expected contracts",
+    "Six origin-stream invalidations cover global/local/relaxed and internally-owned/caller-owned graphs",
+    "Exact recovery transcript proves zero captured callback execution, status reset, repeated-end rejection and subsequent successful sixteen-replay capture",
+    "Three PS5 compilation records and source/header/object hashes verified",
+    "Preparation receipts record full repeat with79sources/693headers unchanged and isolated three-file/patch drift rejection",
+    "Host62/control19 passing logs inspected"
+  ],
+  "limits": [
+    "Single-origin capture cleanup only; child/event-fork recovery not qualified",
+    "Earlier baseline failure and intentionally stopped v1 remain diagnostic, not accepted runs",
+    "No native package, console execution or deployment authorization",
+    "Other rejected APIs are not yet required by this patch to invalidate capture."
+  ],
+  "preserved_diagnostics": [
+    "results/public-capture-invalidation-diagnostic-v1",
+    "results/public-capture-recovery-source-v1"
+  ],
+  "stopped_v1_reason": "Source-preparation cache fix changed a bound input after the run started; explicitly terminated, confirmed terminal, and replaced with fresh v2."
+}

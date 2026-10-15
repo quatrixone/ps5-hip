@@ -318,6 +318,13 @@ def main():
             'PUBLIC_GRAPH_FINAL queues=3 retired=3 allocations=0 frees=0 ownership=clean gpu_execution=false']:
             raise RuntimeError('host graph replay/update/ownership differs: ' + mode)
         print('public host graph ' + mode + ' PASS', flush=True)
+    result = run('graph-recover', [output / 'graph-model', 'recover'], env)
+    if result.splitlines() != [
+        'PUBLIC_CAPTURE_RECOVERY_PASS invalidations=6 modes=3 external_graphs=3 callbacks=0 stream_reusable=true',
+        'PUBLIC_GRAPH_PASS mode=capture replays=16 callbacks=32 parameter_update=true source_destroyed=true gpu_execution=false',
+        'PUBLIC_GRAPH_FINAL queues=3 retired=3 allocations=0 frees=0 ownership=clean gpu_execution=false']:
+        raise RuntimeError('capture invalidation cleanup/reuse contract differs')
+    print('public capture invalidation recovery PASS', flush=True)
     run('graph-explicit-noop', [output / 'graph-model', 'explicit-noop'], env,
         expected_output_failure=True, failure_marker='PUBLIC_GRAPH_OUTPUT_MISMATCH round=0')
     print('public host graph no-op output control PASS', flush=True)
@@ -346,7 +353,8 @@ def main():
                'total_compilations': len(units) + 10,
                'graph_model_sha256': sha(output / 'graph-model'),
                'graph_cases': ['explicit-host-replay-update-source-destroy',
-                               'captured-host-replay-update-source-destroy', 'noop-output-rejected'],
+                               'captured-host-replay-update-source-destroy', 'noop-output-rejected',
+                               'capture-invalidation-cleanup-and-reuse'],
                'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,

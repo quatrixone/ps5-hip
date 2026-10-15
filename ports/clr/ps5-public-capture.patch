@@ -1,0 +1,79 @@
+--- a/hipamd/src/hip_graph.cpp
++++ b/hipamd/src/hip_graph.cpp
+@@ -905,9 +905,16 @@
+   }
+   hip::Stream* s = reinterpret_cast<hip::Stream*>(stream);
+   // It can be initiated if the stream is not already in capture mode
++#if defined(WITH_PS5_DEVICE)
++  if (s->GetCaptureStatus() != hipStreamCaptureStatusNone) {
++#else
+   if (s->GetCaptureStatus() == hipStreamCaptureStatusActive) {
++#endif
+     return hipErrorIllegalState;
+   }
++#if defined(WITH_PS5_DEVICE)
++  s->SetCaptureGraphOwned(graph == nullptr);
++#endif
+   if(graph == nullptr) {
+     s->SetCaptureGraph(new hip::Graph(s->GetDevice()));
+   } else {
+@@ -976,6 +983,9 @@
+   if (pGraph == nullptr) {
+     return hipErrorInvalidValue;
+   }
++#if defined(WITH_PS5_DEVICE)
++  *pGraph = nullptr;
++#endif
+   if (stream == nullptr) {
+     return hipErrorIllegalState;
+   }
+@@ -1012,6 +1022,14 @@
+   // If capture was invalidated, due to a violation of the rules of stream capture
+   if (s->GetCaptureStatus() == hipStreamCaptureStatusInvalidated) {
+     *pGraph = nullptr;
++#if defined(WITH_PS5_DEVICE)
++    // Save ownership before EndCapture clears origin, event and child-stream state.
++    hip::Graph* failed = s->GetCaptureGraph();
++    const bool owned = s->OwnsCaptureGraph();
++    hipError_t cleanup = s->EndCapture();
++    if (owned) delete failed;
++    if (cleanup != hipSuccess) return cleanup;
++#endif
+     return hipErrorStreamCaptureInvalidated;
+   }
+ 
+--- a/hipamd/src/hip_internal.hpp
++++ b/hipamd/src/hip_internal.hpp
+@@ -306,6 +306,9 @@
+     hipStreamCaptureStatus captureStatus_;
+     /// Graph that is constructed with capture
+     hip::Graph* pCaptureGraph_;
++#if defined(WITH_PS5_DEVICE)
++    bool ownsCaptureGraph_ = false;
++#endif
+     /// Based on mode stream capture places restrictions on API calls that can be made within or
+     /// concurrently
+     hipStreamCaptureMode captureMode_{hipStreamCaptureModeGlobal};
+@@ -374,6 +377,10 @@
+     void SetOriginStream() { originStream_ = true; }
+     /// Returns captured graph
+     hip::Graph* GetCaptureGraph() const { return pCaptureGraph_; }
++#if defined(WITH_PS5_DEVICE)
++    bool OwnsCaptureGraph() const { return ownsCaptureGraph_; }
++    void SetCaptureGraphOwned(bool owned) { ownsCaptureGraph_ = owned; }
++#endif
+     /// Returns last captured graph node
+     const std::vector<hip::GraphNode*>& GetLastCapturedNodes() const { return lastCapturedNodes_; }
+     /// Set last captured graph node
+--- a/hipamd/src/hip_stream.cpp
++++ b/hipamd/src/hip_stream.cpp
+@@ -57,6 +57,9 @@
+   }
+   captureStatus_ = hipStreamCaptureStatusNone;
+   pCaptureGraph_ = nullptr;
++#if defined(WITH_PS5_DEVICE)
++  ownsCaptureGraph_ = false;
++#endif
+   originStream_ = false;
+   parentStream_ = nullptr;
+   lastCapturedNodes_.clear();

@@ -229,6 +229,16 @@ retire exactly, with no device allocation or GPU submission. ASan leak detection
 covers normal cleanup. This does not qualify kernel/memory graph nodes, capture
 invalidation, concurrent graph updates, host-memory plateau or GPU replay speed.
 
+Capture recovery also tests the error path after forbidden stream synchronization.
+Ending an invalidated capture clears stream state, discards its internally owned
+graph and returns a null graph with `hipErrorStreamCaptureInvalidated`. A graph
+supplied by the caller remains caller-owned. Starting over before ending the failed
+capture is rejected, and repeated end calls produce a deterministic null output.
+The regression covers six origin-stream cases across global, thread-local and
+relaxed modes, then successfully captures and replays on the same stream. Borrowed
+graphs remain queryable and are destroyed by the client. Forked child/event capture
+recovery and invalidation of other rejected APIs remain unqualified.
+
 The rectangular-copy client checks public synchronous 2D and asynchronous 3D D2D
 copies with changed data, interior pointers, nonzero origins and different row/slice
 pitches. Two rounds compare 4,096 bytes including padding and source preservation.

@@ -19,7 +19,15 @@ def prepare(source):
         raise ValueError('rectangular SVM or copy prerequisite changed')
     if digest(target) == spec['after']:
         if digest(graph) != spec['graph_after']:
-            raise ValueError('rectangular graph output differs')
+            # A later, independently hash-bound stage repairs capture cleanup.
+            # Accept only its complete output, never a lone matching graph file.
+            capture = json.loads((ROOT / 'ports/clr/ps5-public-capture.json').read_text())
+            capture_patch = ROOT / 'ports/clr/ps5-public-capture.patch'
+            if (digest(capture_patch) != capture['patch_sha256'] or
+                capture['files']['hipamd/src/hip_graph.cpp']['before'] != spec['graph_after'] or
+                any(digest(source / name) != row['after']
+                    for name, row in capture['files'].items())):
+                raise ValueError('rectangular graph output differs')
         return
     if digest(graph) != spec['graph_before']:
         raise ValueError('rectangular graph prerequisite changed')

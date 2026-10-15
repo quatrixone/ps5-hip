@@ -57,7 +57,7 @@ def build_inputs():
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
              "tools/public_hip_fill_console_title.cpp", "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
              "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
-             "tools/prepare_public_hip_fill.py", "tools/prepare_public_hip_rect.py", "tools/prepare_public_hip_aot.py", "tools/prepare_public_hip_launch.py", "tools/public_hip_module_console_title.cpp", "tools/public_hip_launch_console_title.cpp",
+             "tools/prepare_public_hip_capture.py", "tools/prepare_public_hip_fill.py", "tools/prepare_public_hip_rect.py", "tools/prepare_public_hip_aot.py", "tools/prepare_public_hip_launch.py", "tools/public_hip_module_console_title.cpp", "tools/public_hip_launch_console_title.cpp",
              "kernels/thread_words.hip",
              "tools/build_canaries.py", "kernels/canary.hip"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
@@ -110,6 +110,7 @@ def source_tree(output, fixture="bootstrap"):
     run(output, "prepare-symbols", [sys.executable, ROOT / "tools/prepare_public_hip_symbols.py", public])
     run(output, "prepare-rect", [sys.executable, ROOT / "tools/prepare_public_hip_rect.py", public])
     run(output, "prepare-launch", [sys.executable, ROOT / "tools/prepare_public_hip_launch.py", public])
+    run(output, "prepare-capture", [sys.executable, ROOT / "tools/prepare_public_hip_capture.py", public])
     return public
 
 
