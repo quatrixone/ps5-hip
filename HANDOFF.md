@@ -16,7 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Current offline copy-capture checkpoint
+## Current offline 1D copy-setter checkpoint
+
+The two 1D memcpy-node setters now reject invalid executable handles and wrong
+node representations before dereferencing or casting them. UBSan reproduced the
+previous empty-node type confusion. Full source ASan/UBSan qualification passed
+public wrong-node, internal 3D/symbol subtype, foreign/stale handle and subsequent
+valid copy-update/replay checks. A 74-object native package build and cached
+revalidation passed. See `evidence/offline-copy-setter-safety.json`.
+
+This is offline validation only. The native package uses the existing copy_gpu
+fixture, not a targeted rejection case; the installed .40 image is unchanged.
+Next: fix generic hipGraphExecUpdate subtype handling, then prepare and validate
+a shared failure/recovery fixture on .40. Allocation lifetime, cross-stream GPU
+capture, sustained replay and performance remain open.
+
+## Previous offline copy-capture checkpoint
 
 Rejected asynchronous 1D copies now invalidate the PS5 capture session instead
 of leaving a partial graph replayable. Full source ASan/UBSan qualification

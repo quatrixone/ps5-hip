@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-1d-copy-setter-handle-and-type-safety",
+  "source_base_commit": "be6bbeb36c4efc4d588c0ca3f4b7d43ce59177ae",
+  "source_compilations": 83,
+  "native_objects": 74,
+  "native_package_sha256": "3a52fd085e8bbdfd2e8efeb9d69323bcd0ceee4dafe62078816df75ce6827a73",
+  "native_results_dir": "/user/homebrew/ps5-hip",
+  "gpu_executed": false,
+  "native_executed": false,
+  "regression": "UBSan reports a GraphEmptyNode used as GraphMemcpyNode1D by hipGraphMemcpyNodeSetParams1D.",
+  "fix": [
+    "Require registered executable before dereference.",
+    "Require registered source node before exact dynamic-type inspection.",
+    "Require exact GraphMemcpyNode1D type for source and cloned nodes; reject 3D and symbol representations."
+  ],
+  "qualification": [
+    "Two public wrong node types (empty and host) rejected by both setters, including members of an instantiated graph.",
+    "Internally constructed 3D and both symbol-copy node types rejected; these are type-boundary fixtures, not public creation or execution claims.",
+    "Invalid, foreign and destroyed handles rejected; subsequent valid offset/guard replay and parameter update tests pass.",
+    "ASan/UBSan full source qualification and native 74-object package build/cached revalidation pass; no console execution."
+  ],
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/copy-setter-reproduction-v3/before.json": "0fd3a5bccad2bd78c4294f627f6c8eb2928a3f1d4a10b0497ef97b76ca7997de",
+    "results/copy-setter-reproduction-v3/before.stderr": "7ee26843f7ac2142bf68d61631bbb27821a1ff44b6ab39fbd2433e9118d93eb0",
+    "results/copy-setter-qualified-v1/receipt.json": "7bda1c0fd30f60df4c0baea077288c29a01cfdabe4b0edb02f37c38c2a22c7d7",
+    "build/public-hip-copy-setter-v1/link-receipt.json": "4d56ef1f71a0206abb4214488554b41a50976b35ef8910ca362df12aa9774e14",
+    "results/copy-setter-review-v1/review.json": "b84123f693eaae5dc27b0bc868b55b0fdb5c6c0bf6a42bf5bde3cf47584d8522",
+    "results/copy-setter-qualified-v1/copy-graph-explicit.json": "9f3084c8e8057d9a33a431cb7c172a0db0686af54896c8df727352d4522f3eee",
+    "results/copy-setter-qualified-v1/copy-graph-explicit.stdout": "010b75a5989e58fe217b0de9b94e6fce5c2ce322b75c4414ef094c78878a11e1",
+    "results/copy-setter-qualified-v1/copy-graph-capture.json": "e2514f36e99f44a36b829fa87ae3ceacf63dc60a6e512b952e2943d962e07801",
+    "results/copy-setter-qualified-v1/copy-graph-capture.stdout": "010b75a5989e58fe217b0de9b94e6fce5c2ce322b75c4414ef094c78878a11e1",
+    "results/copy-setter-qualified-v1/copy-graph-parallel.json": "aa4ca758754886f72b5baf3c8a2dffcfb120e2e92cc785ef05c8cc24b7020623",
+    "results/copy-setter-qualified-v1/copy-graph-parallel.stdout": "d4a9ee48379dc80f9e0eded9d88a009e58a0a19587de79a094b4ded3d20ff871",
+    "results/copy-setter-review-v1/final.json": "f2af5b5bf0bcec4a0857b1d6200d6e3c8823b8ef8b46227b95ba66c7c44a0827"
+  },
+  "limits": [
+    "Generic hipGraphExecUpdate still has a separate same-enum/different-subtype hazard; this milestone covers only the two 1D setters.",
+    "Internal 3D/symbol nodes are not members of the executable; their executable calls also fail foreign-node lookup. Source-setter tests directly exercise exact subtype rejection.",
+    "Extra serial graph fixture creates one queue; 4/4 or 6/6 queues retire.",
+    "Initial reproduction v1 stopped at unsupported graph-node setup and is not defect evidence; fixed-v1 stopped at outdated expected queue count.",
+    "Native artifact uses existing copy_gpu fixture and default results directory; it is link/package evidence only and must not be deployed as a targeted rejection test.",
+    "No new console contact; installed .40 baseline unchanged. G5 and SDK roadmap remain open."
+  ]
+}

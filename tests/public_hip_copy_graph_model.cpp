@@ -5,6 +5,7 @@
 #undef check
 #include <hip/hip_runtime.h>
 #include "hip_internal.hpp"
+#include "hip_graph_internal.hpp"
 static ps5hip::clr::Observation observed;
 static bool completed=false,parallel_case=false;
 struct Final {
@@ -12,7 +13,7 @@ struct Final {
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
   checked(observed.allocations==2&&observed.frees==2&&observed.launches==0&&backend_calls==0,__LINE__);
   std::fprintf(stderr,"COPY_GRAPH_QUEUES %u %u\n",unsigned(observed.queues),unsigned(observed.retired_queues));
-  checked(observed.queues==(parallel_case?5:3)&&observed.retired_queues==observed.queues&&allocations.empty(),__LINE__);
+  checked(observed.queues==(parallel_case?6:4)&&observed.retired_queues==observed.queues&&allocations.empty(),__LINE__);
   std::puts("PUBLIC_COPY_GRAPH_FINAL queues_retired=true ownership=clean gpu_execution=false");
  }
 };
@@ -24,6 +25,39 @@ extern "C" int __wrap_pthread_create(pthread_t* p,const pthread_attr_t* a,void*(
 extern "C" int __wrap_pthread_join(pthread_t p,void** v){return __real_pthread_join(p,v);}
 static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(stderr,"PUBLIC_COPY_GRAPH_ERROR line=%d status=%d\n",line,int(status));std::abort();}}
 #define HIP_OK(x) ok(x,__LINE__)
+static void setter_errors(hipGraphExec_t exec,hipGraphNode_t copy,void* a,void* b){
+ hipGraph_t graph=nullptr;HIP_OK(hipGraphCreate(&graph,0));
+ hipGraphNode_t wrong[2]{};
+ HIP_OK(hipGraphAddEmptyNode(&wrong[0],graph,nullptr,0));
+ hipHostNodeParams host{[](void*){},nullptr};
+ HIP_OK(hipGraphAddHostNode(&wrong[1],graph,&wrong[0],1,&host));
+ hipGraphExec_t other=nullptr;HIP_OK(hipGraphInstantiate(&other,graph,nullptr,nullptr,0));
+ for(auto node:wrong){
+  checked(hipGraphMemcpyNodeSetParams1D(node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+  checked(hipGraphExecMemcpyNodeSetParams1D(other,node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ }
+ // Public 3D-node creation is unsupported; exercise its registered internal type.
+ hipMemcpy3DParms params{};
+ hip::GraphMemcpyNode three_d(&params);
+ hip::GraphMemcpyNodeFromSymbol from_symbol(b,a,128,0,hipMemcpyDeviceToDevice);
+ hip::GraphMemcpyNodeToSymbol to_symbol(a,b,128,0,hipMemcpyDeviceToDevice);
+ for(hip::GraphNode* internal:{static_cast<hip::GraphNode*>(&three_d),static_cast<hip::GraphNode*>(&from_symbol),static_cast<hip::GraphNode*>(&to_symbol)}){
+  auto node=reinterpret_cast<hipGraphNode_t>(internal);
+  checked(hipGraphMemcpyNodeSetParams1D(node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+  checked(hipGraphExecMemcpyNodeSetParams1D(exec,node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ }
+ auto fake_node=reinterpret_cast<hipGraphNode_t>(uintptr_t(1));
+ checked(hipGraphMemcpyNodeSetParams1D(fake_node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecMemcpyNodeSetParams1D(exec,fake_node,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ auto fake_exec=reinterpret_cast<hipGraphExec_t>(uintptr_t(1));
+ checked(hipGraphExecMemcpyNodeSetParams1D(fake_exec,copy,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecMemcpyNodeSetParams1D(other,copy,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ HIP_OK(hipGraphExecDestroy(other));
+ checked(hipGraphExecMemcpyNodeSetParams1D(other,copy,b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ HIP_OK(hipGraphDestroy(graph));
+ checked(hipGraphMemcpyNodeSetParams1D(wrong[1],b,a,128,hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ std::puts("PUBLIC_COPY_SETTER_ERRORS_PASS public_wrong_types=2 internal_subtypes=3 foreign_and_stale_handles=true gpu_execution=false");
+}
 static void fork_join(hipStream_t stream,void* a,void* b){
  struct State {std::mutex mutex;std::condition_variable cv;bool entered=false,release=false;unsigned joined=0;} state;
  hipGraph_t g=nullptr;HIP_OK(hipGraphCreate(&g,0));hipGraphNode_t gate,copy,other,join;
@@ -118,6 +152,7 @@ int main(int argc,char**argv){
   HIP_OK(hipGraphAddMemcpyNode1D(&nodes[2],graph,&nodes[1],1,output,b,128,hipMemcpyDeviceToHost));
  }
  hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
+ setter_errors(exec,nodes[1],a,b);
  for(unsigned disabled=0;disabled<3;++disabled){
   HIP_OK(hipGraphNodeSetEnabled(exec,nodes[disabled],0));
   for(unsigned round=0;round<2;++round){
