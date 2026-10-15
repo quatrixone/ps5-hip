@@ -14,9 +14,12 @@ were released. Their 100 ms scheduling observation does not prove runtime entry.
 A fresh 74-object native joined package and 26 control tests passed offline.
 See `../evidence/offline-joined-capture-lifetime.json`.
 
-Next: freeze/review the joined candidate and validate it once on idle .40.
-The installed image and log remain the native recovery baseline below. Native
-allocation-lifetime validation, sustained replay and performance remain open.
+The joined package deployed and verified on .40; its prior image/log are
+preserved, services healthy and both locks released. Installed image:
+`6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5`.
+See `../evidence/console40-copy-joined-deployment.json`.
+Next: receipt-bound review, then one bounded execution. Native allocation-lifetime
+validation, sustained replay and performance remain open.
 Neither host modeling nor this one producer/consumer topology completes G5.
 
 ## Native copy recovery passed
