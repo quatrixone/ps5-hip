@@ -25,13 +25,19 @@ ownership. See `evidence/offline-public-event-query.json`. This narrow claim doe
 not independently prove blocking synchronization; a later device sync still
 protects readback. All twelve base modes and launch oracle controls also passed.
 
-Cross-stream diagnostics remain unqualified. `results/public-stream-dependency-probe-v1`
-can pass through scheduling coincidence; v2's missing-wait control aborts waiting
-for the consumer callback while producer holds the shared adapter gate. Do not
-report these as event-dependency acceptance. Next isolation approach: hold a
-producer host callback outside the adapter gate, record an event after it, and
-prove the consumer callback cannot pass that event; a missing-wait control must
-progress independently. This tests logical ordering, not GPU concurrency.
+Logical stream ordering is now qualified separately in
+`results/public-stream-source-v1`: 69 base units plus launch and stream harnesses,
+all twelve base cases, four launch cases and two stream cases pass ASan/UBSan.
+See `evidence/offline-public-stream-order.json`. The producer host callback is
+held outside the adapter gate. The normal case observes no dependent consumer
+progress within one second; the omitted-wait case detects early consumer progress
+within the same deadline. Both release the producer and retire both queues.
+This bounded observation is scheduler-dependent and does not prove GPU concurrency,
+native event behavior, timestamps, re-recording or graph semantics.
+
+Earlier `public-stream-dependency-probe-v1/v2` remain diagnostic only: GPU-held
+adapter serialization confounded their missing-wait control. The new logical
+probe avoids that confound without changing production runtime code.
 
 ## Frozen launch candidate
 

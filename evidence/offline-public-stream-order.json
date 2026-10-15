@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-logical-stream-order-pass",
+  "source_base": "bb6c10a16f137e065e4553205f54b11fd1aca328",
+  "source_identity": "Exact test and qualifier bytes bound by fresh receipt; production runtime unchanged.",
+  "base_translation_units": 69,
+  "total_compilations": 71,
+  "included_files": 684,
+  "base_modes": [
+    "normal",
+    "default",
+    "tls",
+    "init-fail",
+    "create-fail",
+    "join-fail",
+    "self-destroy",
+    "reset",
+    "reset-join-fail",
+    "memory",
+    "module",
+    "module-unbundler"
+  ],
+  "launch_cases": [
+    "normal",
+    "events-pending-then-complete",
+    "noop-output-rejected",
+    "corrupt-output-rejected"
+  ],
+  "stream_cases": [
+    "event-ordered",
+    "bypass-early-consumer-detected"
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-stream-source-v1/receipt.json": "736ed20f33dcad01b2dc366975f0e3442cf42a8b1f04092ace93d99f05b660ab",
+    "results/public-stream-source-v1/independent-review.json": "cfbd6cc7eb5cb6b315cf5bbeec07286d7821c931b4be3486da17a562f792b10b",
+    "results/public-stream-source-v1/stream-normal.json": "4a73e460d611dbc789bc54c539569b63650f439f7dd14d683f5c9530cb7fec71",
+    "results/public-stream-source-v1/stream-normal.stdout": "847644de06c6816d9d40333102eeacedc61dceea73611727201fca16480b8ba9",
+    "results/public-stream-source-v1/stream-normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-stream-source-v1/stream-bypass.json": "74c168d859f7740956a4b879556b5657c281fe7c3eba621c07bbb9abf49ac86f",
+    "results/public-stream-source-v1/stream-bypass.stdout": "cce77e666352cc0f09ed7e625cfa2f1df5e1fdd0b52b499b2e682c6be4c95824",
+    "results/public-stream-source-v1/stream-bypass.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Timing-disabled event between two nonblocking streams; producer host callback held outside adapter gate.",
+    "Dependent consumer makes no progress within one-second observation window while producer is held.",
+    "Omitting the wait allows early consumer progress within the same deadline, detected by the oracle.",
+    "Both cases release producer, synchronize and destroy event/streams; exactly two queues retired, no allocations or GPU submissions."
+  ],
+  "limits": [
+    "Bounded and scheduler-dependent; an overloaded host can fail the bypass deadline.",
+    "No native event, GPU concurrency, timing, re-recording or graph acceptance.",
+    "Full streams/events objective remains open."
+  ],
+  "independent_review": {
+    "verdict": "pass-bounded-logical-ordering",
+    "path": "results/public-stream-source-v1/independent-review.json",
+    "sha256": "cfbd6cc7eb5cb6b315cf5bbeec07286d7821c931b4be3486da17a562f792b10b",
+    "deployment_approved": false
+  }
+}

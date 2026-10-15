@@ -11,10 +11,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Logical cross-stream event ordering now passes the fresh 71-compilation sanitizer
+qualifier: a held producer blocks the dependent consumer, while omitting the wait
+allows early consumer progress; both cases retire two queues cleanly. See
+`evidence/offline-public-stream-order.json`. This is bounded, scheduler-dependent
+host-model evidence, not GPU concurrency or native event acceptance.
+
 Timing-disabled public HIP events now pass a fresh host-model query/lifetime
 case: NotReady during held dispatch, success after release, event destruction
 and clean ownership. See `evidence/offline-public-event-query.json`. Independent
-blocking semantics, cross-stream ordering, timestamps and native event behavior
+blocking event synchronization, timestamps and native event behavior
 remain unqualified; the full streams/events gate stays open.
 
 The launch candidate is frozen at `6f5167e` and independently verified offline:

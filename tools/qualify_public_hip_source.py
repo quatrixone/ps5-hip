@@ -35,7 +35,8 @@ def main():
                           'version': subprocess.check_output([path, '--version'], text=True)}
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
-                 'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp', 'kernels/thread_words.hip',
+                 'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
+                 'tests/public_hip_stream_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -167,6 +168,22 @@ def main():
     if sha(launch_code) != launch_code_hash:
         raise RuntimeError('launch fixture changed during qualification')
     print('public launch and both output negative controls PASS', flush=True)
+    stream_source = ROOT / 'tests/public_hip_stream_model.cpp'
+    source_hashes[str(stream_source.relative_to(ROOT))] = sha(stream_source)
+    stream_object = compile_one((len(units) + 1, stream_source))
+    stream_objects = [stream_object if unit.name == 'hip_admission_model.cpp' else obj
+                      for unit, obj in zip(units, objects)]
+    run('stream-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *stream_objects, '-o', output / 'stream-model'])
+    for mode, marker in (
+        ('normal', 'PUBLIC_STREAM_PASS event_ordered=true gpu_execution=false'),
+        ('bypass', 'PUBLIC_STREAM_BYPASS early_consumer_detected=true gpu_execution=false')):
+        result = run('stream-' + mode, [output / 'stream-model', mode], env)
+        if result.splitlines() != [marker,
+            'PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
+            raise RuntimeError('public stream ordering/ownership contract differs: ' + mode)
+        print('public stream ' + mode + ' PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -184,6 +201,9 @@ def main():
                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                'module_fixture_sha256': code_hash,
                'launch_model_sha256': sha(output / 'launch-model'),
+               'stream_model_sha256': sha(output / 'stream-model'),
+               'stream_cases': ['event-ordered', 'bypass-early-consumer-detected'],
+               'total_compilations': len(units) + 2,
                'launch_fixture_sha256': launch_code_hash,
                'launch_cases': ['normal', 'events-pending-then-complete', 'noop-output-rejected', 'corrupt-output-rejected'],
                'wrong_target_fixture_sha256': wrong_target_hash,

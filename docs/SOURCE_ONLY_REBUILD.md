@@ -170,6 +170,15 @@ synchronization/query and destruction with clean ownership. It retains device
 synchronization before readback, so it does not independently qualify blocking
 event synchronization, timestamps or cross-stream ordering.
 
+A separate stream harness tests two nonblocking logical streams with a
+timing-disabled event. While a producer host callback is held outside the adapter
+gate, `stream-normal` requires no dependent consumer progress within one second.
+`stream-bypass` omits the event wait and requires early consumer progress within
+that deadline. Both cases release the producer and verify two retired queues with
+no allocation or GPU submission. This bounded test is scheduler-dependent; it
+qualifies neither native events nor GPU concurrency. The qualifier builds 71
+translation units in total: 69 base units and two alternate client harnesses.
+
 The current public adapter admits 64x1x1 blocks, one-dimensional grids and no
 shared memory. Packed launch buffers and kernel graph/capture routes return an
 explicit unsupported error pending their implementation and qualification. These

@@ -1,0 +1,67 @@
+// Logical public HIP stream/event ordering; no GPU submission.
+#define main adapter_unused_main
+#include "clr_adapter_model.cpp"
+#undef main
+#undef check
+#include <hip/hip_runtime.h>
+#include "hip_internal.hpp"
+static ps5hip::clr::Observation observed;
+static bool completed=false;
+static std::mutex ordering_mutex;
+static std::condition_variable ordering_changed;
+static bool producer_entered=false,release_producer=false,producer_finished=false;
+static bool consumer_finished=false,consumer_early=false;
+struct Final {
+ ~Final(){
+  checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
+  checked(observed.allocations==0&&observed.frees==0&&observed.launches==0&&backend_calls==0,__LINE__);
+  checked(observed.queues==2&&observed.retired_queues==2&&allocations.empty(),__LINE__);
+  std::puts("PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false");
+ }
+};
+__attribute__((init_priority(101))) static Final final;
+extern "C" bool ps5hip_clr_admit_device(){return ps5hip::clr::register_runtime_device(backend,observed);}
+extern "C" int __real_pthread_create(pthread_t*,const pthread_attr_t*,void*(*)(void*),void*);
+extern "C" int __real_pthread_join(pthread_t,void**);
+extern "C" int __wrap_pthread_create(pthread_t* p,const pthread_attr_t* a,void*(*f)(void*),void* d){return __real_pthread_create(p,a,f,d);}
+extern "C" int __wrap_pthread_join(pthread_t p,void** v){return __real_pthread_join(p,v);}
+static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(stderr,"PUBLIC_STREAM_ERROR line=%d status=%d\n",line,int(status));std::abort();}}
+#define HIP_OK(x) ok(x,__LINE__)
+int main(int argc,char**argv){
+ checked(argc==2,__LINE__);
+ checked(std::strcmp(argv[1],"normal")==0||std::strcmp(argv[1],"bypass")==0,__LINE__);
+ const bool bypass=std::strcmp(argv[1],"bypass")==0;
+ HIP_OK(hipInit(0));hipStream_t producer=nullptr,consumer=nullptr;
+ HIP_OK(hipStreamCreateWithFlags(&producer,hipStreamNonBlocking));
+ HIP_OK(hipStreamCreateWithFlags(&consumer,hipStreamNonBlocking));
+ hipEvent_t event=nullptr;HIP_OK(hipEventCreateWithFlags(&event,hipEventDisableTiming));
+ HIP_OK(hipLaunchHostFunc(producer,[](void*){
+  std::unique_lock<std::mutex> lock(ordering_mutex);producer_entered=true;ordering_changed.notify_all();
+  checked(ordering_changed.wait_for(lock,std::chrono::seconds(5),[]{return release_producer;}),__LINE__);
+  producer_finished=true;ordering_changed.notify_all();
+ },nullptr));
+ HIP_OK(hipEventRecord(event,producer));
+ {
+  std::unique_lock<std::mutex> lock(ordering_mutex);
+  checked(ordering_changed.wait_for(lock,std::chrono::seconds(5),[]{return producer_entered;}),__LINE__);
+ }
+ checked(hipEventQuery(event)==hipErrorNotReady,__LINE__);
+ if(!bypass)HIP_OK(hipStreamWaitEvent(consumer,event,0));
+ HIP_OK(hipLaunchHostFunc(consumer,[](void*){
+  std::lock_guard<std::mutex> lock(ordering_mutex);consumer_early=!producer_finished;
+  consumer_finished=true;ordering_changed.notify_all();
+ },nullptr));
+ {
+  std::unique_lock<std::mutex> lock(ordering_mutex);
+  // Both cases use the same bounded wait; bypass wakes early on consumer progress.
+  const bool progressed=ordering_changed.wait_for(lock,std::chrono::seconds(1),[]{return consumer_finished;});
+  checked(progressed==bypass&&!producer_finished,__LINE__);
+  if(bypass)checked(consumer_early,__LINE__);
+  release_producer=true;ordering_changed.notify_all();
+ }
+ HIP_OK(hipStreamSynchronize(consumer));
+ {std::lock_guard<std::mutex> lock(ordering_mutex);checked(consumer_finished&&consumer_early==bypass,__LINE__);}
+ HIP_OK(hipEventSynchronize(event));HIP_OK(hipEventQuery(event));
+ HIP_OK(hipEventDestroy(event));HIP_OK(hipStreamDestroy(consumer));HIP_OK(hipStreamDestroy(producer));completed=true;
+ std::puts(bypass?"PUBLIC_STREAM_BYPASS early_consumer_detected=true gpu_execution=false":"PUBLIC_STREAM_PASS event_ordered=true gpu_execution=false");
+}
