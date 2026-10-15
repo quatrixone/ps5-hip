@@ -130,3 +130,15 @@ klog and application evidence, compares read-only mount snapshots, and uses
 only the exact-title close controller if cleanup is necessary. It never
 replays historical D/E controls. Review and current environment/lock checks
 remain required; these commands are deliberately outside the Make build.
+
+For full public HIP host-runtime qualification, run
+`make public-hip-host-test QUALIFICATION_DIR=results/public-hip-host-v1`.
+Use a new results directory for each run. This builds 69 genuine HIP/ROCclr and
+adapter translation units from the pinned sources, with ASan/UBSan, then runs
+ten separate initialization, thread-lifetime, shutdown and allocation cases.
+It needs Linux Clang/LLD 18 and no historical workspace receipts or binaries.
+The runner verifies dependencies, records included files and toolchain hashes,
+and preserves each compile/run log. Leak detection is enabled for normal cases;
+the three intentional retention cases instead check exact retained ownership.
+Platform providers and packet transport are modeled: this does not qualify PS5
+execution, real GPU work, public module loading or the pending console copy case.

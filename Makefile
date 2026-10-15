@@ -17,6 +17,7 @@ help:
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
+	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
@@ -58,6 +59,12 @@ host-test: deps-build device-fixtures
 	$(CMAKE) -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Debug
 	$(CMAKE) --build build/host
 	$(CTEST) --test-dir build/host --output-on-failure
+
+# A separate fresh directory preserves every sanitizer run's evidence.
+QUALIFICATION_DIR ?= results/public-hip-host
+.PHONY: public-hip-host-test
+public-hip-host-test: deps-fetch
+	$(PYTHON) tools/qualify_public_hip_source.py --output $(QUALIFICATION_DIR)
 
 native-core: .deps/sdk/.ps5-sdk-revision
 	$(CMAKE) -S . -B build/native -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps5-toolchain.cmake -DBUILD_TESTING=OFF

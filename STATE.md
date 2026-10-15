@@ -1,6 +1,6 @@
 # Current state
 
-Updated: 2026-10-14, America/New_York. See `HANDOFF.md` for the exact
+Updated: 2026-10-15, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
 ## Current scope
@@ -10,6 +10,12 @@ inference client and SDK preview. All other compute, library, framework and trai
 gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
+
+Full public HIP host-runtime qualification now builds directly from pinned source
+with `make public-hip-host-test`: 69 translation units and ten ASan/UBSan cases
+passed, including exact cleanup/retention outcomes. No historical workspace
+receipts are needed. See `evidence/offline-public-hip-source-model.json`.
+This is a host model with simulated providers/transport, not console acceptance.
 
 Public function discovery now exposes the validated AOT kernel table after load,
 with atomic output publication and explicit invalid-state failures. Sixty host
@@ -1408,3 +1414,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-14 | public modules | offline pass: loaded kernel discovery, 60 host tests, native object | evidence/offline-public-module-symbols.json | qualify real module loading
 
 - 2026-10-14 | parser portability | offline pass: Clang18/libstdc++15 recursive metadata type, 60 host tests, PS5 object | evidence/offline-parser-portability.json | full-runtime sanitizer build
+
+- 2026-10-15 | public HIP | offline pass: source-only 69-unit runtime, ten sanitizer cases | evidence/offline-public-hip-source-model.json | real module-loading qualification

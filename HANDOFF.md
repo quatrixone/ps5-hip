@@ -1,6 +1,6 @@
 # ps5-hip agent handoff
 
-Updated: 2026-10-14, America/New_York. This is the resume point for the private
+Updated: 2026-10-15, America/New_York. This is the resume point for the private
 `ps5-hip` repository. Read `AGENTS.md`, `STATE.md`, and the active goal in
 `docs/IMPLEMENTATION_PLAN.md` before working. The mission is a native PS5 HIP /
 ROCm compute stack; a bounded result does not close a broader acceptance gate.
@@ -17,6 +17,26 @@ controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
+
+The full public HIP host-runtime qualifier is now source-only:
+`make public-hip-host-test QUALIFICATION_DIR=results/<new-directory>` builds
+69 genuine HIP/ROCclr, adapter and model units without old workspace receipts.
+The fresh v3 run passed all ten ASan/UBSan cases (initialization, default/TLS
+streams, creation/join/self-destruction/reset failures, and public allocation).
+It binds 678 included files and compiler/linker identities; intentional retention
+cases disable leak detection and check exact retained ownership instead.
+See `evidence/offline-public-hip-source-model.json`. Transport and platform
+providers are modeled; public module loading, GPU work and console copies remain
+unqualified. The parser portability fix needed for Clang18/libstdc++15 is pushed
+at `66c3ee6`; it also passed all 60 host tests and PS5 cross-compilation.
+
+Next loader implementation: use a bounded owned file read for raw AOT bytes,
+validate the complete copy before publishing module state, and keep its storage
+stable until all device programs are destroyed. The current file helpers have
+stale-descriptor and failed-mapping output hazards; do not borrow their output
+ownership on failure. Skip the upstream compiler build only for validated AOT,
+using the existing `addDeviceProgram`/`load` path. Qualify real public
+load/lookup/unload through the new host runner before preparing a console case.
 
 Public module function discovery now enumerates the validated, loaded PS5 AOT
 kernel table instead of returning success with an empty list when COMGR is

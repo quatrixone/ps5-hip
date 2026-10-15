@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-pass",
+  "classification": "source-only-genuine-public-hip-host-model",
+  "source_head_at_run": "66c3ee6271f4f00a46fd4533768d99e6eb09d2ca",
+  "recipe_bound_by_sha256": true,
+  "source_units": 69,
+  "included_files": 678,
+  "modes": [
+    "normal",
+    "default",
+    "tls",
+    "init-fail",
+    "create-fail",
+    "join-fail",
+    "self-destroy",
+    "reset",
+    "reset-join-fail",
+    "memory"
+  ],
+  "model_sha256": "777d0565d069c4084c3fa1ba45f73174724819cc32ceb9c6cfaf4d47add4a340",
+  "sanitizers": "address,undefined",
+  "leak_detection_disabled_modes": [
+    "join-fail",
+    "self-destroy",
+    "reset-join-fail"
+  ],
+  "reproduction": "make public-hip-host-test QUALIFICATION_DIR=results/<new-directory>",
+  "limits": [
+    "Host platform providers and transport are modeled; no GPU or console execution.",
+    "Public module loading, kernel execution and console copies remain unqualified.",
+    "Source HEAD at run is the base revision; the then-uncommitted recipe is separately hash-bound.",
+    "Intentional retention cases check exact resource counts with leak detection disabled."
+  ],
+  "artifacts_sha256": {
+    "tools/qualify_public_hip_source.py": "36f97a2f2f1d2953a286fa34aa5b551d155a9a48a53a706ea0fdc4d0d22bf46a",
+    "Makefile": "bf0ddf7ba5c3bd02d9bcabdab17d9400d2c580885b349bb876115c16fce8e508",
+    "results/public-hip-source-model-v3/receipt.json": "16b8f3bdd991e6a11b9e3fe1bccb906de2187a173cb6fda66e4c63127016f43a",
+    "results/public-hip-source-model-v3.log": "7f29cde889cae2667308dd7ad9bf878b4eba3739ba778f8ba6d74e69904d13da"
+  },
+  "independent_review": {
+    "status": "pass",
+    "path": "results/public-hip-source-model-v3/independent-review.json",
+    "sha256": "61c086008f4846ee000d18a1d65092b213e98963e58b7284a7fe597842e7d01f"
+  }
+}

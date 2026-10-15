@@ -1,0 +1,149 @@
+"""Build and run genuine HIP/ROCclr host qualification from pinned sources only.
+
+Platform providers and packet transport are modeled; this proves no GPU execution.
+"""
+import argparse
+import concurrent.futures
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import shutil
+import shlex
+import threading
+
+from build_public_hip import ROOT, DEPS, SOURCE_UNITS, source_tree, compiler_flags, sha, build_inputs
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    output = args.output.resolve()
+    if not output.is_relative_to(ROOT / 'results'):
+        parser.error('output must be under results/')
+    output.mkdir(parents=True, exist_ok=False)
+    dependency_check = subprocess.run([sys.executable, ROOT / 'tools/fetch_locked_deps.py'],
+                                      cwd=ROOT, capture_output=True, text=True, timeout=300)
+    (output / 'dependency-check.log').write_text(dependency_check.stdout + dependency_check.stderr)
+    dependency_check.check_returncode()
+    toolchain = {}
+    for name in ('clang++-18', 'ld.lld-18'):
+        path = Path(shutil.which(name))
+        toolchain[name] = {'path': str(path), 'resolved_path': str(path.resolve()), 'sha256': sha(path),
+                          'version': subprocess.check_output([path, '--version'], text=True)}
+    inputs = build_inputs()
+    for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
+                 'tests/clr_adapter_model.cpp'):
+        inputs[name] = sha(ROOT / name)
+    source = source_tree(output, 'copy')
+    flags = [str(p) for p in compiler_flags(source)[1:]]
+    flags = [p for p in flags if p not in ('-DPS5HIP_CLR_GPU_TITLE=1',
+                                          '-DPS5HIP_SHELL_EXIT_PROBE=1', '-DPS5HIP_WITH_ELEVATION=1')]
+    flags += ['--driver-mode=g++', '-DPS5HIP_CLR_MODEL', '-I' + str(DEPS / 'sources/sdk/platform/include'),
+              '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+    units = [source / name for name in SOURCE_UNITS]
+    units += [ROOT / name for name in ('ports/clr/ps5-clr-tls.cpp', 'ports/clr/ps5-device.cpp',
+                                      'tests/hip_admission_model.cpp')]
+    units += [ROOT / 'src' / (name + '.cpp') for name in (
+        'code_object', 'fat_binary', 'host_launch', 'launch', 'native_memory',
+        'native_data', 'native_launch', 'submission', 'hip_launch_profile')]
+    units += [p for p in sorted((source / 'hipamd/src').glob('*.cpp'))
+              if p.stem not in ('fixme', 'hip_runtime')]
+    if len(units) != 69:
+        raise RuntimeError('unexpected public HIP source closure')
+    source_hashes = {str(p.relative_to(ROOT)): sha(p) for p in units}
+    header_hashes = {}
+    header_lock = threading.Lock()
+
+    def run(label, argv, env=None):
+        command = [str(p) for p in argv]
+        try:
+            process = subprocess.run(command, cwd=ROOT, capture_output=True,
+                                     text=True, timeout=300, env=env)
+        except subprocess.TimeoutExpired as error:
+            for suffix, value in (('stdout', error.stdout), ('stderr', error.stderr)):
+                (output / (label + '.' + suffix)).write_bytes(
+                    value.encode() if isinstance(value, str) else value or b'')
+            (output / (label + '.json')).write_text(json.dumps(
+                {'argv': command, 'timed_out': True, 'deadline_seconds': 300}, indent=2) + '\n')
+            raise
+        (output / (label + '.stdout')).write_text(process.stdout)
+        (output / (label + '.stderr')).write_text(process.stderr)
+        record = {'argv': [str(p) for p in argv], 'exit_code': process.returncode}
+        if env:
+            record['sanitizer_environment'] = {key: env.get(key) for key in ('ASAN_OPTIONS', 'UBSAN_OPTIONS')}
+        (output / (label + '.json')).write_text(json.dumps(record, indent=2) + '\n')
+        if process.returncode:
+            raise RuntimeError(label + ': ' + process.stderr[-2500:])
+        return process.stdout
+
+    def compile_one(pair):
+        index, path = pair
+        extra = (['-include', 'hip/hip_runtime.h', '-include', 'hip/hip_deprecated.h',
+                  '-include', 'hip/amd_detail/amd_hip_gl_interop.h']
+                 if path.stem in ('hip_api_trace', 'hip_table_interface', 'hip_table_interface_c') else [])
+        obj = output / (str(index) + '.o')
+        compiler = toolchain['clang++-18']['path']
+        dep = output / (str(index) + '.d')
+        run('headers-' + str(index), [compiler, *flags, *extra, '-M', path, '-MF', dep])
+        paths = [Path(p).resolve() for p in shlex.split(dep.read_text().replace('\\\n', ' ').split(':', 1)[1])]
+        before = {str(p): sha(p) for p in paths}
+        with header_lock:
+            for name, digest in before.items():
+                if name in header_hashes and header_hashes[name] != digest:
+                    raise RuntimeError('header changed between translation units: ' + name)
+                header_hashes[name] = digest
+        run('compile-' + str(index), [compiler, *flags, *extra, '-c', path, '-o', obj])
+        if any(sha(p) != expected for p, expected in before.items()):
+            raise RuntimeError('header changed during compilation: ' + str(path))
+        return obj
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        objects = list(pool.map(compile_one, enumerate(units)))
+    run('link', [toolchain['clang++-18']['path'], *flags, '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+                 '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *objects, '-o', output / 'model'])
+    modes = ['normal', 'default', 'tls', 'init-fail', 'create-fail', 'join-fail',
+             'self-destroy', 'reset', 'reset-join-fail', 'memory']
+    for mode in modes:
+        retained = mode in ('join-fail', 'self-destroy', 'reset-join-fail')
+        env = dict(os.environ, ASAN_OPTIONS='protect_shadow_gap=0:halt_on_error=1:detect_leaks=' +
+                   ('0' if retained else '1'), UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+        text = run(mode, [output / 'model', mode], env)
+        lines = text.splitlines()
+        passed = 'HIP_PUBLIC_PASS mode=' + mode + ' gpu_execution=false'
+        if mode not in ('init-fail', 'memory', 'create-fail'):
+            passed += ' quarantine=' + str(int(retained))
+        if lines.count(passed) != 1 or sum(line.startswith('HIP_PUBLIC_PASS ') for line in lines) != 1:
+            raise RuntimeError('missing qualification marker: ' + mode)
+        if mode != 'init-fail':
+            queues = 1 if mode in ('create-fail', 'memory') else 4 if mode in ('default', 'tls') else 3
+            expected = f'HIP_PUBLIC_FINAL queues={queues} retired={2 if mode == "self-destroy" else queues} gate_destroyed={int(not retained)} retained={int(retained)}'
+            if lines.count(expected) != 1 or sum(line.startswith('HIP_PUBLIC_FINAL ') for line in lines) != 1:
+                raise RuntimeError('missing exact lifetime result: ' + mode)
+        elif any(line.startswith('HIP_PUBLIC_FINAL ') for line in lines):
+            raise RuntimeError('unexpected finalizer after initialization failure')
+        print(mode + ' PASS', flush=True)
+    for name, expected in {**inputs, **source_hashes}.items():
+        if sha(ROOT / name) != expected:
+            raise RuntimeError('input changed during qualification: ' + name)
+    for name, expected in header_hashes.items():
+        if sha(name) != expected:
+            raise RuntimeError('header changed during qualification: ' + name)
+    for record in toolchain.values():
+        if sha(record['path']) != record['sha256']:
+            raise RuntimeError('toolchain changed during qualification')
+    receipt = {'classification': 'source-only-genuine-public-hip-model', 'source_units': len(units),
+               'inputs': inputs, 'prepared_sources': source_hashes, 'modes': modes,
+               'included_files': header_hashes, 'toolchain': toolchain,
+               'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+               'leak_detection_disabled_modes': ['join-fail', 'self-destroy', 'reset-join-fail'],
+               'gpu_executed': False, 'native_executed': False,
+               'sanitizer': 'address,undefined', 'model_sha256': sha(output / 'model')}
+    (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    print(output / 'receipt.json')
+
+
+if __name__ == '__main__':
+    main()
