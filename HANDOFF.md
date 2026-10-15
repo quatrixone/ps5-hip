@@ -18,6 +18,15 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+A replacement native copy package includes the capture cleanup at `50a2361`:
+`build/public-hip-copy-capture-v1` passed the full 74-object Make build and cached
+verification. Its frozen candidate is `results/source-copy-capture-console-v1`;
+see `evidence/offline-native-copy-capture-runtime.json` for artifact review and
+identities. The unchanged copy title checks 7,168 bytes and 16 rejections; it does
+not exercise capture cleanup. Recovery confirmation, fresh baseline verification
+and operational review remain required before .40 deployment. No console contact
+occurred; older candidates and diagnostics are preserved.
+
 Invalidated capture cleanup now resets the stream, releases internally owned
 graphs and preserves caller-owned graphs. A reproduced baseline left status
 invalidated after end-capture. Six origin-stream regression cases cover all three
@@ -26,7 +35,8 @@ capture and replay. See `evidence/offline-public-capture-recovery.json` for fres
 qualification, source-preparation drift checks, native compilation and independent
 review. Child/event recovery and other rejected API invalidation remain open.
 The previously frozen rectangular-copy package does not contain this runtime fix;
-a fresh native package is required to test it on .40 after recovery.
+the replacement package above now includes it, but a capture-specific native
+fixture and console acceptance remain pending.
 
 Host-node graph construction and thread-local capture now pass fresh source
 qualification: each replays 16 changing inputs, updates callback functions and
@@ -47,7 +57,7 @@ retirement and successful post-synchronization queries are required. See
 native default-stream behavior, per-thread defaults and GPU concurrency remain
 unqualified. The frozen rectangular-copy candidate is unchanged.
 
-The rectangular-copy console candidate is frozen at `27ebfd4` in
+Historical rectangular-copy candidate: frozen at `27ebfd4` in
 `results/source-rect-copy-console-v1`. Independent offline review verified all
 28 bound files, six package files and 94 committed build inputs, plus the exact
 7,168-comparison/16-rejection oracle. Both deployment and execution fail before

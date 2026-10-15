@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-copy-capture-runtime-and-freeze-pass",
+  "source_commit": "50a23612d74c3bd8371e2e4b669c6a221e05fba2",
+  "native_objects": 74,
+  "committed_build_inputs": 97,
+  "bound_files": 28,
+  "package_files": 6,
+  "package_sha256": "f79818dd227580e1f7b295f4e51351f1bdbcaa4932093bee428cea5aea18bc87",
+  "manifest_sha256": "a111b3a3ab18a7724390507ba29c14195434c56109b3fb666139ac9410bcfe7d",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "a14210709985dc5f982809f7d71b889bd9cf3fe6a4494695c43ceebab2e6ffbb",
+    "extracted_sha256": "96abff17130b9db395f846fbb1abc66ad192e1ac0491fff0b383d909d14fe859",
+    "omitted_note": {
+      "offset": 5426096,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500f9a7c74de97d39ab",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-copy-capture-console-v1/build-receipt.json": "0ec92f819bdf7003b3aa41e462644c07fede4e82cdaf4ef9ccfd32944591ee70",
+    "results/public-copy-capture-package-review/review.json": "000aaff1b0ebff81f6a1c59918912bd7ebccf2e326b0c5e21597ed417861151b",
+    "results/public-copy-capture-build-v1.log": "55db52bdb5a3974fea9fef551cf298d46b39bfd739947458896fde6f6dde282a",
+    "results/public-copy-capture-revalidate-v1.log": "55db52bdb5a3974fea9fef551cf298d46b39bfd739947458896fde6f6dde282a",
+    "results/public-copy-capture-package-review/capture-cleanup-isa.log": "52848e9b4ef705eea6521a9c0600628407903f9cabb75759538c06518d19fd0b",
+    "results/source-copy-capture-console-v1/manifest.json": "a111b3a3ab18a7724390507ba29c14195434c56109b3fb666139ac9410bcfe7d",
+    "results/source-copy-capture-console-v1/offline-review.json": "eba8f5f9fbe0dd95797b6c445eadb48a3749a2ab7ef529a4fe3525ab03c5a6c3",
+    "results/source-copy-capture-console-v1/checkpoint.json": "382a116542c9a6ba5a4edf11e84eac9aa53c4dd8be5b99a1e30fc5c2f47ae062"
+  },
+  "independent_review": {
+    "path": "results/source-copy-capture-console-v1/offline-review.json",
+    "sha256": "eba8f5f9fbe0dd95797b6c445eadb48a3749a2ab7ef529a4fe3525ab03c5a6c3",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "All source/object and current build-input identities match",
+    "Prepared rectangular memory and all three capture files match exact final patch outputs",
+    "Serialized SCE symbol hashes and exact shell provider pass strict no-GPU policy",
+    "Public allocation, contiguous/2D/3D copy, synchronization and free symbols present in main ISA",
+    "Independent FSELF extraction matches except unmapped 24-byte SIE note",
+    "Independent UFS fsck and exact six-file extraction match receipt",
+    "Pinned libc digest and configured results directory match",
+    "Source oracle validates 7168 full-buffer bytes, 16 rejections, row/slice padding and sources over two changed rounds",
+    "Exact transcript requires no GPU execution and two frees/one retired queue",
+    "All three capture outputs including new Stream header layout match final patch hashes; every translation unit source/object matches receipt",
+    "All manifest files and complete build-input map match frozen git commit",
+    "Snapshot and controller identities equal prior rectangular candidate",
+    "Both deploy and execute reject absent operational review before socket access and phase directory creation",
+    "Exact7168/16 transcript unchanged",
+    "Linked ELF retains hip::hipStreamEndCapture_common at0x131590 and hip::Stream::EndCapture at0x321070; full function ISA saved"
+  ],
+  "limits": [
+    "Title exercises contiguous and rectangular copying, not capture cleanup; capture runtime is bundled only",
+    "FSELF roundtrip omits only24-byte unmapped SIE note as recorded",
+    "Historical baseline hashes are future admission requirements, not current remote observations",
+    "Console recovery and installed image remain unverified",
+    "No operational approval, deployment or native execution",
+    "Retained capture-cleanup machine code is not called by rectangular-copy title; retention does not establish console execution"
+  ]
+}
