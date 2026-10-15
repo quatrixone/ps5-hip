@@ -231,7 +231,90 @@
    HIP_RETURN(hipSuccess);
  }
  
-@@ -2466,7 +2564,7 @@
+@@ -2396,6 +2494,35 @@
+   HIP_RETURN(reinterpret_cast<hip::GraphHostNode*>(clonedNode)->SetParams(pNodeParams));
+ }
+ 
++#if defined(WITH_PS5_DEVICE)
++static hipGraphExecUpdateResult ps5GraphUpdateTypes(
++    const std::vector<hip::GraphNode*>& oldNodes,
++    const std::vector<hip::GraphNode*>& newNodes, hipGraphNode_t* errorNode) {
++  if (oldNodes.size() != newNodes.size()) {
++    *errorNode = nullptr;
++    return hipGraphExecUpdateErrorTopologyChanged;
++  }
++  for (size_t i = 0; i < newNodes.size(); ++i) {
++    auto* oldNode = oldNodes[i];
++    auto* newNode = newNodes[i];
++    if (oldNode->GetType() != newNode->GetType() || typeid(*oldNode) != typeid(*newNode)) {
++      *errorNode = reinterpret_cast<hipGraphNode_t>(newNodes[i]);
++      return hipGraphExecUpdateErrorNodeTypeChanged;
++    }
++    if (newNodes[i]->GetType() == hipGraphNodeTypeGraph) {
++      // ChildGraphNode::SetParams pairs children in insertion order.
++      auto result = ps5GraphUpdateTypes(oldNodes[i]->GetChildGraph()->GetNodes(),
++                                       newNodes[i]->GetChildGraph()->GetNodes(), errorNode);
++      if (result != hipGraphExecUpdateSuccess) {
++        *errorNode = reinterpret_cast<hipGraphNode_t>(newNodes[i]);
++        return result;
++      }
++    }
++  }
++  return hipGraphExecUpdateSuccess;
++}
++#endif
++
+ hipError_t hipGraphExecUpdate(hipGraphExec_t hGraphExec, hipGraph_t hGraph,
+                               hipGraphNode_t* hErrorNode_out,
+                               hipGraphExecUpdateResult* updateResult_out) {
+@@ -2406,10 +2533,25 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::GraphExec::isGraphExecValid(reinterpret_cast<hip::GraphExec*>(hGraphExec)) ||
++      !hip::Graph::isGraphValid(reinterpret_cast<hip::Graph*>(hGraph))) {
++    HIP_RETURN(hipErrorInvalidValue);
++  }
++#endif
++
+   std::vector<hip::GraphNode*> newGraphNodes;
+   reinterpret_cast<hip::Graph*>(hGraph)->TopologicalOrder(newGraphNodes);
+   std::vector<hip::GraphNode*>& oldGraphExecNodes =
+       reinterpret_cast<hip::GraphExec*>(hGraphExec)->GetNodes();
++#if defined(WITH_PS5_DEVICE)
++  // Check every representation before SetParams can mutate any executable node.
++  auto typeResult = ps5GraphUpdateTypes(oldGraphExecNodes, newGraphNodes, hErrorNode_out);
++  if (typeResult != hipGraphExecUpdateSuccess) {
++    *updateResult_out = typeResult;
++    HIP_RETURN(hipErrorGraphExecUpdateFailure);
++  }
++#endif
+   if (newGraphNodes.size() != oldGraphExecNodes.size()) {
+     *updateResult_out = hipGraphExecUpdateErrorTopologyChanged;
+     *hErrorNode_out = nullptr;
+@@ -2429,6 +2571,20 @@
+         }
+       }
+ 
++#if defined(WITH_PS5_DEVICE)
++      auto* newNode = newGraphNodes[i];
++      if (typeid(*newNode) == typeid(hip::GraphDrvMemcpyNode)) {
++        HIP_MEMCPY3D newParams{}, oldParams{};
++        static_cast<hip::GraphDrvMemcpyNode*>(newGraphNodes[i])->GetParams(&newParams);
++        static_cast<hip::GraphDrvMemcpyNode*>(oldGraphExecNodes[i])->GetParams(&oldParams);
++        if (newParams.srcMemoryType != oldParams.srcMemoryType ||
++            newParams.dstMemoryType != oldParams.dstMemoryType) {
++          *hErrorNode_out = reinterpret_cast<hipGraphNode_t>(newGraphNodes[i]);
++          *updateResult_out = hipGraphExecUpdateErrorParametersChanged;
++          HIP_RETURN(hipErrorGraphExecUpdateFailure);
++        }
++      } else
++#endif
+       if (newGraphNodes[i]->GetType() == hipGraphNodeTypeMemcpy) {
+         // Checks if the memcpy node's parameters are same
+         const hip::GraphMemcpyNode* newMemcpyNode =
+@@ -2466,7 +2622,7 @@
            *updateResult_out = hipGraphExecUpdateErrorNotSupported;
          }
          HIP_RETURN(hipErrorGraphExecUpdateFailure);

@@ -35,6 +35,6 @@ int main(int argc,char**argv){
   if(!std::strcmp(mode,"copy-d2h"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[3],0));
  });
  checked(submits==4&&backend_calls==1,__LINE__);completed=true;
- std::puts("PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false");
+ std::puts("PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false");
  return 0;
 }

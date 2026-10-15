@@ -215,6 +215,9 @@ class ConsoleContractTest(unittest.TestCase):
     def test_copy_gpu_transcript_requires_eager_and_retirement(self):
         self.assertEqual(check_log(COPY_GPU_EXPECTED, 'copy_gpu')['kernel'], 'public_hip_copy_gpu')
         for raw in (CAPTURE_GPU_EXPECTED, COPY_GPU_EXPECTED * 2,
+                    COPY_GPU_EXPECTED.replace(b'recovery_cases=27 ', b''),
+                    COPY_GPU_EXPECTED.replace(b'setter_rejections=4', b'setter_rejections=0'),
+                    COPY_GPU_EXPECTED.replace(b'update_rejections=2', b'update_rejections=0'),
                     COPY_GPU_EXPECTED.replace(b'eager_equal=true', b'eager_equal=false'),
                     COPY_GPU_EXPECTED.replace(b'values=292', b'values=146'),
                     COPY_GPU_EXPECTED.replace(b'disabled_replays=6', b'disabled_replays=2'),

@@ -1,5 +1,6 @@
 // Shared host/native copy/kernel graph oracle. Caller provides checked and HIP_OK.
 #pragma once
+#include "public_hip_copy_recovery_fixture.h"
 namespace copy_gpu_fixture {
 inline void run(const char* path,bool capture,
                 void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr){
@@ -7,6 +8,7 @@ inline void run(const char* path,bool capture,
  hipFunction_t function=nullptr;HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
  hipStream_t stream=nullptr;HIP_OK(hipStreamCreateWithFlags(&stream,hipStreamNonBlocking));
  void *a=nullptr,*b=nullptr;HIP_OK(hipMalloc(&a,81*sizeof(unsigned)));HIP_OK(hipMalloc(&b,81*sizeof(unsigned)));
+ copy_recovery::capture_errors(stream,a,b,81*sizeof(unsigned));
  static unsigned input[81],output[81],eager[81],callbacks;callbacks=0;
  for(unsigned i=0;i<81;++i)input[i]=0x12340000u+i;
  unsigned count=73,salt=19;void* args[]={&a,&count,&salt};
@@ -35,6 +37,16 @@ inline void run(const char* path,bool capture,
  }
  count=0;salt=999;
  hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
+ checked(hipGraphMemcpyNodeSetParams1D(nodes[4],b,a,sizeof(input),hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecMemcpyNodeSetParams1D(exec,nodes[4],b,a,sizeof(input),hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ auto fake_node=reinterpret_cast<hipGraphNode_t>(uintptr_t(1));
+ auto fake_exec=reinterpret_cast<hipGraphExec_t>(uintptr_t(1));
+ checked(hipGraphMemcpyNodeSetParams1D(fake_node,b,a,sizeof(input),hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecMemcpyNodeSetParams1D(fake_exec,nodes[2],b,a,sizeof(input),hipMemcpyDeviceToDevice)==hipErrorInvalidValue,__LINE__);
+ hipGraphNode_t error=nullptr;hipGraphExecUpdateResult update=hipGraphExecUpdateSuccess;
+ checked(hipGraphExecUpdate(fake_exec,graph,&error,&update)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecUpdate(exec,reinterpret_cast<hipGraph_t>(uintptr_t(1)),&error,&update)==hipErrorInvalidValue,__LINE__);
+ HIP_OK(hipGraphExecUpdate(exec,graph,&error,&update));checked(update==hipGraphExecUpdateSuccess,__LINE__);
  HIP_OK(hipGraphNodeSetEnabled(exec,nodes[1],0));
  for(unsigned disabled:{0u,2u,3u}){
   HIP_OK(hipGraphNodeSetEnabled(exec,nodes[disabled],0));

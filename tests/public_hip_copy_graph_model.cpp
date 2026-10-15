@@ -13,7 +13,7 @@ struct Final {
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
   checked(observed.allocations==2&&observed.frees==2&&observed.launches==0&&backend_calls==0,__LINE__);
   std::fprintf(stderr,"COPY_GRAPH_QUEUES %u %u\n",unsigned(observed.queues),unsigned(observed.retired_queues));
-  checked(observed.queues==(parallel_case?6:4)&&observed.retired_queues==observed.queues&&allocations.empty(),__LINE__);
+  checked(observed.queues==(parallel_case?8:6)&&observed.retired_queues==observed.queues&&allocations.empty(),__LINE__);
   std::puts("PUBLIC_COPY_GRAPH_FINAL queues_retired=true ownership=clean gpu_execution=false");
  }
 };
@@ -25,6 +25,41 @@ extern "C" int __wrap_pthread_create(pthread_t* p,const pthread_attr_t* a,void*(
 extern "C" int __wrap_pthread_join(pthread_t p,void** v){return __real_pthread_join(p,v);}
 static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(stderr,"PUBLIC_COPY_GRAPH_ERROR line=%d status=%d\n",line,int(status));std::abort();}}
 #define HIP_OK(x) ok(x,__LINE__)
+#include "public_hip_nested_update_fixture.h"
+static void graph_updates(hipGraphExec_t exec,hipGraph_t original,hipStream_t stream,
+                          void* a,void* b,unsigned char* input,unsigned char* output){
+ unsigned char alternate[128],target[128];std::memset(alternate,0x79,128);std::memset(target,0xdd,128);
+ hipGraph_t replacement=nullptr;HIP_OK(hipGraphCreate(&replacement,0));hipGraphNode_t nodes[3]{};
+ HIP_OK(hipGraphAddMemcpyNode1D(&nodes[0],replacement,nullptr,0,a,alternate,128,hipMemcpyHostToDevice));
+ HIP_OK(hipGraphAddMemcpyNode1D(&nodes[1],replacement,&nodes[0],1,b,a,128,hipMemcpyDeviceToDevice));
+ hipMemcpy3DParms params{};params.srcPtr=make_hipPitchedPtr(b,128,128,1);
+ params.dstPtr=make_hipPitchedPtr(target,128,128,1);params.extent=make_hipExtent(128,1,1);params.kind=hipMemcpyDeviceToHost;
+ // The public 3D constructor is unsupported; retain its actual internal representation.
+ auto* three_d=new hip::GraphMemcpyNode(&params);
+ reinterpret_cast<hip::Graph*>(replacement)->AddNode(three_d);
+ reinterpret_cast<hip::GraphNode*>(nodes[1])->AddEdge(three_d);
+ nodes[2]=reinterpret_cast<hipGraphNode_t>(three_d);
+ hipGraphNode_t error=nullptr;hipGraphExecUpdateResult result=hipGraphExecUpdateSuccess;
+ checked(hipGraphExecUpdate(exec,replacement,&error,&result)==hipErrorGraphExecUpdateFailure,__LINE__);
+ checked(result==hipGraphExecUpdateErrorNodeTypeChanged&&error==nodes[2],__LINE__);
+ HIP_OK(hipGraphLaunch(exec,stream));HIP_OK(hipStreamSynchronize(stream));
+ checked(std::memcmp(input,output,128)==0,__LINE__);
+ for(auto v:target)checked(v==0xdd,__LINE__);
+ // Replace only the incompatible representation, then prove compatible update/replay.
+ HIP_OK(hipGraphDestroyNode(nodes[2]));
+ HIP_OK(hipGraphAddMemcpyNode1D(&nodes[2],replacement,&nodes[1],1,target,b,128,hipMemcpyDeviceToHost));
+ HIP_OK(hipGraphExecUpdate(exec,replacement,&error,&result));checked(result==hipGraphExecUpdateSuccess,__LINE__);
+ HIP_OK(hipGraphLaunch(exec,stream));HIP_OK(hipStreamSynchronize(stream));
+ checked(std::memcmp(alternate,target,128)==0,__LINE__);
+ auto fake_exec=reinterpret_cast<hipGraphExec_t>(uintptr_t(1));
+ auto fake_graph=reinterpret_cast<hipGraph_t>(uintptr_t(1));
+ checked(hipGraphExecUpdate(fake_exec,replacement,&error,&result)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecUpdate(exec,fake_graph,&error,&result)==hipErrorInvalidValue,__LINE__);
+ HIP_OK(hipGraphExecUpdate(exec,original,&error,&result));
+ HIP_OK(hipGraphDestroy(replacement));
+ checked(hipGraphExecUpdate(exec,replacement,&error,&result)==hipErrorInvalidValue,__LINE__);
+ std::puts("PUBLIC_GRAPH_EXEC_UPDATE_PASS late_type_rejection_preserved=true compatible_replay=true invalid_handles=true gpu_execution=false");
+}
 static void setter_errors(hipGraphExec_t exec,hipGraphNode_t copy,void* a,void* b){
  hipGraph_t graph=nullptr;HIP_OK(hipGraphCreate(&graph,0));
  hipGraphNode_t wrong[2]{};
@@ -90,50 +125,14 @@ static void fork_join(hipStream_t stream,void* a,void* b){
  HIP_OK(hipGraphExecDestroy(exec));HIP_OK(hipGraphDestroy(g));
  std::puts("PUBLIC_COPY_GRAPH_JOIN_PASS rounds=2 dependency_preserved=true gpu_execution=false");
 }
-static void capture_errors(hipStream_t stream,void* a,void* b){
- unsigned char input[128]{};
- unsigned cases=0;
- for(auto capture_mode:{hipStreamCaptureModeGlobal,hipStreamCaptureModeThreadLocal,hipStreamCaptureModeRelaxed}){
-  for(unsigned api=0;api<4;++api){
-   for(unsigned fault=0;fault<(api==0?3u:2u);++fault){
-    HIP_OK(hipStreamBeginCapture(stream,capture_mode));
-    HIP_OK(hipMemcpyAsync(a,input,128,hipMemcpyHostToDevice,stream));
-    const size_t bytes=fault==1?129:128;
-    hipError_t status;
-    switch(api){
-     case 0:status=hipMemcpyAsync(fault==0?nullptr:a,input,bytes,fault==2?static_cast<hipMemcpyKind>(99):hipMemcpyHostToDevice,stream);break;
-     case 1:status=hipMemcpyHtoDAsync(fault==0?nullptr:a,input,bytes,stream);break;
-     case 2:status=hipMemcpyDtoDAsync(fault==0?nullptr:b,a,bytes,stream);break;
-     default:status=hipMemcpyDtoHAsync(fault==0?nullptr:input,a,bytes,stream);break;
-    }
-    checked(status==(fault==2?hipErrorInvalidMemcpyDirection:hipErrorInvalidValue),__LINE__);
-    hipStreamCaptureStatus capture_status=hipStreamCaptureStatusNone;
-    HIP_OK(hipStreamIsCapturing(stream,&capture_status));
-    checked(capture_status==hipStreamCaptureStatusInvalidated,__LINE__);
-    checked(hipMemcpyAsync(a,input,128,hipMemcpyHostToDevice,stream)==hipErrorStreamCaptureInvalidated,__LINE__);
-    checked(hipStreamBeginCapture(stream,capture_mode)==hipErrorIllegalState,__LINE__);
-    hipGraph_t failed=reinterpret_cast<hipGraph_t>(uintptr_t(1));
-    checked(hipStreamEndCapture(stream,&failed)==hipErrorStreamCaptureInvalidated&&failed==nullptr,__LINE__);
-    HIP_OK(hipStreamIsCapturing(stream,&capture_status));checked(capture_status==hipStreamCaptureStatusNone,__LINE__);
-    // A clean subsequent capture must contain only its new copy.
-    HIP_OK(hipStreamBeginCapture(stream,capture_mode));
-    HIP_OK(hipMemcpyAsync(a,input,128,hipMemcpyHostToDevice,stream));
-    hipGraph_t recovered=nullptr;HIP_OK(hipStreamEndCapture(stream,&recovered));
-    size_t count=0;HIP_OK(hipGraphGetNodes(recovered,nullptr,&count));checked(count==1,__LINE__);
-    HIP_OK(hipGraphDestroy(recovered));++cases;
-   }
-  }
- }
- checked(cases==27,__LINE__);
- std::puts("PUBLIC_COPY_CAPTURE_ERRORS_PASS cases=27 modes=3 aliases=4 partial_graph_rejected=true stream_reused=true gpu_execution=false");
-}
-
+#include "public_hip_copy_recovery_fixture.h"
 int main(int argc,char**argv){
  mode="normal";resume=true;parallel_case=argc==2&&!std::strcmp(argv[1],"parallel");
  checked(argc==2,__LINE__);const bool capture=!std::strcmp(argv[1],"capture");
  HIP_OK(hipInit(0));hipStream_t stream=nullptr;HIP_OK(hipStreamCreateWithFlags(&stream,hipStreamNonBlocking));
  void *a=nullptr,*b=nullptr;HIP_OK(hipMalloc(&a,128));HIP_OK(hipMalloc(&b,128));
- capture_errors(stream,a,b);
+ copy_recovery::capture_errors(stream,a,b);
+ std::puts("PUBLIC_COPY_CAPTURE_ERRORS_PASS cases=27 modes=3 aliases=4 partial_graph_rejected=true stream_reused=true gpu_execution=false");
  unsigned char input[128],output[128];std::memset(input,0x31,128);std::memset(output,0xa5,128);
  HIP_OK(hipMemset(b,0xa5,128));
  hipGraph_t graph=nullptr;hipGraphNode_t nodes[3]{};
@@ -153,6 +152,8 @@ int main(int argc,char**argv){
  }
  hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
  setter_errors(exec,nodes[1],a,b);
+ graph_updates(exec,graph,stream,a,b,input,output);
+ nested_updates(stream,a,b);
  for(unsigned disabled=0;disabled<3;++disabled){
   HIP_OK(hipGraphNodeSetEnabled(exec,nodes[disabled],0));
   for(unsigned round=0;round<2;++round){

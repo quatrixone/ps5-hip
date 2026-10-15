@@ -413,7 +413,11 @@ make public-hip-copy-gpu-package COPY_GPU_BUILD_DIR=build/public-hip-copy-gpu-v2
 ```
 
 The host/native shared oracle captures H2D, kernel, D2D, D2H and a dependent
-callback. Six preliminary replays disable each copy direction while the kernel
+callback. It first checks 27 failed-copy capture/recovery cases across three
+capture modes, four invalid setter calls and two invalid generic-update handles.
+The same helper runs in the source qualifier and the native title; the transcript
+requires these counts. A compatible generic graph update must also succeed.
+Six preliminary replays disable each copy direction while the kernel
 is disabled, checking distinct sentinels. Two changing-input rounds compare
 eager and graph execution against exact values and guards, including owned
 arguments, executable kernel update and replay after source-graph destruction.

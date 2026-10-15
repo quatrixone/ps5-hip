@@ -38,7 +38,7 @@ def main():
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
-                 'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'tests/public_hip_copy_gpu_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'tests/public_hip_nested_update_fixture.h', 'tests/public_hip_copy_gpu_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -268,7 +268,7 @@ def main():
     for mode in ('explicit', 'capture'):
         result = run('copy-gpu-' + mode, [output / 'copy-gpu-model', launch_code, mode], env)
         if result.splitlines() != [
-            'PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false',
+            'PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false',
             'PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=2 frees=2 ownership=clean gpu_execution=false']:
             raise RuntimeError('shared copy/kernel graph oracle differs')
     for negative in ('noop', 'corrupt'):
@@ -288,7 +288,7 @@ def main():
         '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *copy_graph_objects, '-o', output / 'copy-graph-model'])
     for mode in ('explicit', 'capture', 'parallel'):
         result = run('copy-graph-' + mode, [output / 'copy-graph-model', mode], env)
-        expected = ['PUBLIC_COPY_CAPTURE_ERRORS_PASS cases=27 modes=3 aliases=4 partial_graph_rejected=true stream_reused=true gpu_execution=false', 'PUBLIC_COPY_SETTER_ERRORS_PASS public_wrong_types=2 internal_subtypes=3 foreign_and_stale_handles=true gpu_execution=false', 'PUBLIC_COPY_GRAPH_UPDATE_PASS source_isolated=true offsets=true guards=true rejected_update_preserved=true gpu_execution=false'] + (['PUBLIC_COPY_GRAPH_JOIN_PASS rounds=2 dependency_preserved=true gpu_execution=false'] if mode == 'parallel' else []) + [
+        expected = ['PUBLIC_COPY_CAPTURE_ERRORS_PASS cases=27 modes=3 aliases=4 partial_graph_rejected=true stream_reused=true gpu_execution=false', 'PUBLIC_COPY_SETTER_ERRORS_PASS public_wrong_types=2 internal_subtypes=3 foreign_and_stale_handles=true gpu_execution=false', 'PUBLIC_GRAPH_EXEC_UPDATE_PASS late_type_rejection_preserved=true compatible_replay=true invalid_handles=true gpu_execution=false', 'PUBLIC_NESTED_UPDATE_PASS child_type_and_size_rejected=true compatible_child_replay=true internal_driver_update=true driver_kind_rejected=true gpu_execution=false', 'PUBLIC_COPY_GRAPH_UPDATE_PASS source_isolated=true offsets=true guards=true rejected_update_preserved=true gpu_execution=false'] + (['PUBLIC_COPY_GRAPH_JOIN_PASS rounds=2 dependency_preserved=true gpu_execution=false'] if mode == 'parallel' else []) + [
             'PUBLIC_COPY_GRAPH_PASS rounds=4 bytes=512 disabled_replays=6 source_destroyed=true gpu_execution=false',
             'PUBLIC_COPY_GRAPH_FINAL queues_retired=true ownership=clean gpu_execution=false']
         if result.splitlines() != expected:
@@ -459,7 +459,7 @@ def main():
                'copy_gpu_model_sha256': sha(output / 'copy-gpu-model'),
                'copy_gpu_cases': ['explicit', 'capture', 'eager-equality', 'six-disabled-directions', 'update-source-destroy', 'noop-rejected', 'corrupt-rejected', 'h2d-omitted-rejected', 'd2d-omitted-rejected', 'd2h-omitted-rejected'],
                'copy_graph_model_sha256': sha(output / 'copy-graph-model'),
-               'copy_graph_cases': ['explicit', 'capture', 'changing-input', 'disabled-reenabled', 'source-destroyed', 'allocation-retirement', 'copy-capture-invalidation-27-cases', 'copy-setter-handle-and-exact-subtype-rejection', 'source-update-isolation', 'exec-update-offsets-guards', 'rejected-update-preserves-parameters'],
+               'copy_graph_cases': ['explicit', 'capture', 'changing-input', 'disabled-reenabled', 'source-destroyed', 'allocation-retirement', 'copy-capture-invalidation-27-cases', 'copy-setter-handle-and-exact-subtype-rejection', 'generic-update-type-preflight-and-compatible-replay', 'source-update-isolation', 'exec-update-offsets-guards', 'rejected-update-preserves-parameters'],
                'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),
                'graph_gpu_cases': ['module-kernel-capture', '36-capture-failure-recoveries', 'shared-native-oracle', 'exec-update-handle-type-rejections', 'owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
                'stream_gpu_model_sha256': sha(output / 'stream-gpu-model'),

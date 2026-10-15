@@ -89,7 +89,7 @@ int main() {
        observed.launches!=4) ps5hip_clr_gpu_fail("public-retire");
     ps5hip_clr_gpu::watchdog_finish();
     completed=true;
-    std::puts("HIP_COPY_GPU PASS init=0 count=1 rounds=2 launches=4 values=292 guards=32 eager_equal=true captured=true owned_args=true updated=true source_destroyed=true disabled_replays=6 callbacks=8 allocations=2 frees=2 watchdog_joined=true finalization=pending");
+    std::puts("HIP_COPY_GPU PASS init=0 count=1 rounds=2 launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 eager_equal=true captured=true owned_args=true updated=true source_destroyed=true disabled_replays=6 callbacks=8 allocations=2 frees=2 watchdog_joined=true finalization=pending");
     if(!ps5hip_canary::sync_log())ps5hip_clr_gpu_fail("result-log");
     return 0;
   }catch(...){ps5hip_clr_gpu_fail("exception");}

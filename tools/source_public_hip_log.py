@@ -55,7 +55,7 @@ GRAPH_GPU_LINES[2] = 'HIP_GRAPH_GPU PASS init=0 count=1 rounds=2 launches=2 valu
 GRAPH_GPU_LINES[6] = 'HIP_GRAPH_GPU FINAL allocations=1 frees=1 queues=3 retired=3 gate_destroyed=true application_fini=pending'
 GRAPH_GPU_EXPECTED = ('\n'.join(GRAPH_GPU_LINES) + '\n').encode('ascii')
 CAPTURE_GPU_EXPECTED = GRAPH_GPU_EXPECTED.replace(b'public_hip_graph_gpu', b'public_hip_capture_gpu').replace(b'HIP_GRAPH_GPU', b'HIP_CAPTURE_GPU').replace(b'owned_args=true', b'captured=true owned_args=true')
-COPY_GPU_EXPECTED = CAPTURE_GPU_EXPECTED.replace(b'public_hip_capture_gpu', b'public_hip_copy_gpu').replace(b'HIP_CAPTURE_GPU', b'HIP_COPY_GPU').replace(b'launches=2 values=146 guards=16', b'launches=4 values=292 guards=32 eager_equal=true').replace(b'disabled_replays=2 callbacks=4', b'disabled_replays=6 callbacks=8').replace(b'allocations=1 frees=1', b'allocations=2 frees=2')
+COPY_GPU_EXPECTED = CAPTURE_GPU_EXPECTED.replace(b'public_hip_capture_gpu', b'public_hip_copy_gpu').replace(b'HIP_CAPTURE_GPU', b'HIP_COPY_GPU').replace(b'launches=2 values=146 guards=16', b'launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 eager_equal=true').replace(b'disabled_replays=2 callbacks=4', b'disabled_replays=6 callbacks=8').replace(b'allocations=1 frees=1', b'allocations=2 frees=2')
 LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream', 'graph_gpu', 'capture_gpu', 'copy_gpu')}
 
 

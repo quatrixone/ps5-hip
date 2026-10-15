@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-generic-update-preflight-and-shared-recovery",
+  "source_base_commit": "825a31dfb8904038584ad7f118577b993af72104",
+  "source_compilations": 83,
+  "native_objects": 74,
+  "package_sha256": "dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b",
+  "control_tests": 26,
+  "gpu_executed": false,
+  "native_executed": false,
+  "regression": "UBSan reports a 3D node cast as GraphMemcpyNode1D during generic executable update.",
+  "changes": [
+    "Validate graph/executable registries and recursively preflight exact representations and child counts before parameter mutation.",
+    "Handle matching driver-copy nodes without an unrelated C++ base-class cast.",
+    "Share27 copy-capture recovery cases between host and native fixtures; native also rejects4 setter calls and2 invalid update handles before compatible update and GPU replay."
+  ],
+  "qualification": [
+    "Late subtype rejection preserves previous executable output; compatible updates replay exact bytes.",
+    "Nested type/count rejection preserves output; compatible child and internal driver-copy updates replay, driver-kind change rejected.",
+    "Full ASan/UBSan source qualification and native Make build/cached validation passed.",
+    "Independent artifact audit verifies74 source/object pairs,7-file extracted UFS, imports, FSELF and unchanged bounded gfx1013 kernel ISA."
+  ],
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/graph-update-reproduction-v3/before.json": "701985bbeabdf7d5da77d0a5613b4f8745a5cd7f6ce04245ca9b337554999da6",
+    "results/graph-update-reproduction-v3/before.stderr": "dd05c47ab32ad3cd6d666b9c2b1c6d35ac08ca1b4e0e29b53209bf0c8d3e19f2",
+    "results/graph-update-qualified-v1/receipt.json": "86e9d6e6b0964f731d5af99293b6fdbce3576293e1280a6c9689dba5407283ab",
+    "build/public-hip-copy-recovery-v1/link-receipt.json": "414cd8f134fbf60ba0c047278282b8f8c62e3a8bf155d83d3008dff1dd36040e",
+    "results/copy-recovery-independent-review-v1/review.json": "40e42493ed1ace6b45e9b7d944924649358344ca1d0cd76debf90c1aa5f0c246",
+    "results/graph-update-qualified-v1/copy-graph-explicit.json": "c631dfde14c48fa57cce1b7293d381c76f7c6fc7f6352caa1940fe118bfb24dc",
+    "results/graph-update-qualified-v1/copy-graph-explicit.stdout": "ed54ac861cb14dfe2f6efe96672d1a43f8a04547f868b1889f967f429566bb79",
+    "results/graph-update-qualified-v1/copy-graph-capture.json": "22e471bd5dd4918732a54dd717e13771923b5d81170a609494fad9378d44fb49",
+    "results/graph-update-qualified-v1/copy-graph-capture.stdout": "ed54ac861cb14dfe2f6efe96672d1a43f8a04547f868b1889f967f429566bb79",
+    "results/graph-update-qualified-v1/copy-graph-parallel.json": "6d4b77cd1bb6c2932a02c96eaa65ea7ba5c5a83e9f6cb20ca15b34ec9b98dc66",
+    "results/graph-update-qualified-v1/copy-graph-parallel.stdout": "28b559ea5be3e92cd48512fd4851b8e32b6c76f3cd10bf4a376850800bd1338f"
+  },
+  "limits": [
+    "No console execution yet; installed .40 baseline unchanged.",
+    "Subtype, nested and driver representation tests are host-model internal fixtures; native targets public failure/recovery plus bounded GPU oracle.",
+    "Other later parameter/dependency errors can still partially update earlier nodes. Nested topology/kind/device compatibility remains incomplete; no general transactional update claim.",
+    "Direct child-node setter safety is separate from generic update preflight.",
+    "Allocation lifetime, cross-stream GPU capture, sustained replay and efficiency remain open."
+  ]
+}

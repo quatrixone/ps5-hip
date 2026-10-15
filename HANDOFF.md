@@ -16,7 +16,24 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Current offline 1D copy-setter checkpoint
+## Current generic-update and recovery candidate
+
+Generic executable updates now validate handles and preflight exact node types
+and nested child counts before mutation. Full ASan/UBSan source qualification
+passed late/nested mismatch rejection, preserved-output checks and compatible
+copy/child/driver replay. A shared native fixture now checks 27 copy-capture
+recoveries, four rejected setters and two invalid update handles before its
+existing four-dispatch GPU oracle. The 74-object package, Make revalidation,
+26 controls and independent extracted-artifact/ISA audit passed.
+See `evidence/offline-graph-update-recovery.json`.
+
+Native recovery execution is pending; the installed .40 baseline below is
+unchanged. Next: freeze and review this candidate, then one bounded .40 cycle.
+Other parameter/dependency failures can still partly mutate an executable;
+nested compatibility and direct child-setter safety remain separate gaps.
+This does not close G5 or the SDK roadmap.
+
+## Previous offline 1D copy-setter checkpoint
 
 The two 1D memcpy-node setters now reject invalid executable handles and wrong
 node representations before dereferencing or casting them. UBSan reproduced the

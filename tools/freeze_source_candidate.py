@@ -69,7 +69,7 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Captured H2D/kernel/D2D/D2H graph matches eager execution across2changed-input rounds,6disabled-copy replays,292values32guards8callbacks and clean2allocation3queue retirement.' if fixture == 'copy_gpu' else
+                'hypothesis': ('After27copy-capture recoveries,4setter rejections and2update-handle rejections, captured H2D/kernel/D2D/D2H graph matches eager execution across2changed-input rounds,6disabled-copy replays,292values32guards8callbacks and clean2allocation3queue retirement.' if fixture == 'copy_gpu' else
                                'Public HIP module kernel capture records a kernel and dependent host callback without dispatch; disabled and changed-argument replay, executable update and source graph destruction preserve146values16guards and clean3queue retirement.' if fixture == 'capture_gpu' else
                                'Explicit public HIP GPU graph owns arguments, updates the executable, survives source destruction, preserves146values16guards across2launches and2disabledreplays with4callbacks, then frees1buffer and retires3queues.' if fixture == 'graph_gpu' else
                                'Public HIP producer GPU launch records an event; a nonblocking consumer waits before D2D copy, preserving146outputs16guards and source over2changedrounds with event reuse and3retiredqueues.' if fixture == 'stream' else
