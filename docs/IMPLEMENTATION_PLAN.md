@@ -9,6 +9,9 @@ for the first release: one native standalone Llama-family inference client,
 Q4_0, batch one and a bounded 512-token context. Start client/model profiling,
 then implement only the runtime and tensor capabilities that it demonstrates
 are required. V1.1-V1.5 define implementation order and acceptance evidence.
+Apply the v1 scope rule: every new capability must address a demonstrated client
+blocker or release acceptance check. Full ROCm libraries and SDK coverage are
+not prerequisites for this release.
 
 General command-retirement diagnostics and G5 optimization are deferred unless
 needed by that client. Do not require complete G5 or broad G6 coverage before

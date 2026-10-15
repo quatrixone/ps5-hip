@@ -41,6 +41,27 @@ inference with a synthetic kernel demonstration.
 
 ## Implementation order and exit evidence
 
+### Scope rule for the first release
+
+Useful GPU inference is the release deliverable; a complete ROCm SDK is not a
+prerequisite. Accept new runtime or library work into v1 only when it closes a
+demonstrated client blocker or satisfies the validation contract below. Record
+the affected client call, tensor operation or acceptance check before expanding
+coverage. Keep broader SDK work on its existing roadmap.
+
+The required stack is the offline compiler/device-library subset, native HIP
+allocation/copy/launch/synchronization and module loading, the model's tensor
+operators, and the standalone inference client. Implement only the math-library
+operations that the selected backend actually calls; complete hipBLAS/rocBLAS,
+TheRock, Python and PyTorch ports are not release prerequisites. Preserve explicit
+unsupported errors and existing correctness regressions.
+
+Prioritize a working path through the whole model before optional throughput
+optimization. CPU reference fixtures and kernel canaries are prerequisites, not
+a substitute for native model inference. The v1 exit is V1.1-V1.5 below, including
+repeatable generation and measured performance; no broader SDK percentage can
+stand in for those checks.
+
 | Milestone | Work | Required evidence |
 | --- | --- | --- |
 | V1.1 Client and model profile | Lock upstream llama.cpp, model/tokenizer/converter and Q4_0 outputs; inventory active HIP APIs, library calls, emitted kernel features, tensor shapes and total memory | Reproducible CPU reference, exact inputs, operator/API coverage table, compiler/link blocker report and proposed console memory budget |
