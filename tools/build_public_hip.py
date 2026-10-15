@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,8 @@ from prepare_public_hip_resources import prepared as resources_prepared
 from prepare_public_hip_embedded import prepared as embedded_prepared
 from embedded_module_linker import patch_linker as embedded_linker
 from qualify_public_hip_aggregate import compiler_inputs as aggregate_compiler_inputs
+from qualify_public_hip_rmsnorm import fixture_inputs as rmsnorm_fixture_inputs, checked_inputs, checked_tools
+import build_llm_rmsnorm_reference as rms_reference
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPS = ROOT / ".deps"
@@ -52,6 +55,9 @@ def sha(path):
 def build_inputs():
     names = {"dependencies.json", "elevation-inputs.json", "controller-inputs.json",
              "title.json", "assets/param.json", "assets/icon0.png",
+             "tools/public_hip_rmsnorm_console_title.cpp", "tools/qualify_public_hip_rmsnorm.py",
+             "tools/build_llm_rmsnorm_fixture.py", "tools/build_llm_rmsnorm_reference.py",
+             "tests/public_hip_rmsnorm_build_test.py", "tests/rmsnorm_dump_test.py",
              "tools/build_public_hip.py", "tools/prepare_clr_gpu_source.py",
              "tools/public_hip_embedded_console_title.cpp", "tools/embedded_module_linker.py",
              "tools/audit_public_hip_embedded_native.py", "tools/build_public_hip_embedded_fixture.py",
@@ -269,6 +275,158 @@ def compiler_fixture_inputs(folder, fixture):
             "object": str(obj), "object_sha256": verified[str(obj)]}
 
 
+RMSNORM_CPU_IMPLEMENTATIONS = ("ggml/src/ggml.c", "ggml/src/ggml-cpu/ggml-cpu.c",
+    "ggml/src/ggml-cpu/ggml-cpu.cpp", "ggml/src/ggml-cpu/ops.cpp", "ggml/src/ggml-cpu/vec.cpp")
+
+
+def rmsnorm_cpu_provenance(cpu, commands, model_digest):
+    """Bind current model/source/tool bytes; not independent historical build proof."""
+    identity = cpu.get("identity", {})
+    inputs = checked_inputs(identity, "inputs", [ROOT / n for n in
+        ("llm-inputs.json", "tools/build_llm_cpu_reference.py", "tools/fetch_locked_deps.py")])
+    inputs.update(checked_tools(identity, "tools", ("cmake", "ninja", "clang-18", "clang++-18")))
+    runs = [c.get("argv") for c in commands if c.get("label") in ("run1", "run2")]
+    if (len(runs) != 2 or any(not isinstance(a,list) or len(a) != 4 for a in runs) or
+            runs[0][:3] != runs[1][:3] or not Path(runs[0][1]).is_absolute()):
+        raise ValueError("CPU model invocation identity missing")
+    model = Path(runs[0][1]).resolve()
+    if sha(model) != model_digest:
+        raise ValueError("CPU model bytes differ")
+    inputs[str(model)] = model_digest
+    client = ROOT / ".deps/sources/llama-client"
+    git = shutil.which("git")
+    if not git:
+        raise ValueError("git required to verify CPU implementation")
+    inputs[str(Path(git).resolve())] = sha(git)
+    def query(*args):
+        return subprocess.check_output([git,"-C",str(client),*args],text=True).strip()
+    if query("rev-parse","HEAD") != cpu["source_revision"] or query("status","--porcelain","--untracked-files=no"):
+        raise ValueError("CPU implementation tree changed")
+    tracked = set(query("ls-files").splitlines())
+    for name in RMSNORM_CPU_IMPLEMENTATIONS:
+        if name not in tracked:
+            raise ValueError("CPU implementation source missing")
+        path = client / name
+        inputs[str(path)] = sha(path)
+    return inputs
+
+
+def rmsnorm_reference_inputs(folder):
+    """Authenticate frozen CPU assets and their source/profile closure before packaging."""
+    folder = Path(folder).resolve()
+    receipt = folder / "receipt.json"
+    report = json.loads(receipt.read_text())
+    if (report.get("classification") != "host-cpu-rmsnorm-reference" or
+            report.get("gpu_executed") is not False or report.get("fresh_repeats_bitwise_equal") is not True or
+            report.get("negative_controls") != ["noop rejected", "single-element corruption rejected"]):
+        raise ValueError("unqualified CPU RMSNorm reference")
+    required = ["tools/build_llm_rmsnorm_reference.py", "tests/llm_rmsnorm_reference.cpp",
+                "tests/llm_rmsnorm_reference_test.py", "llm-inputs.json",
+                "evidence/offline-llm-model-conversion.json", "tests/fixtures/llm-reference-prompts.json"]
+    inputs = checked_inputs(report, "identities", [ROOT / n for n in required])
+    inputs[str(receipt)] = sha(receipt)
+    lock = json.loads((ROOT / "llm-inputs.json").read_text())
+    conversion = json.loads((ROOT / "evidence/offline-llm-model-conversion.json").read_text())
+    if (report.get("source_revision") != lock["client"]["revision"] or
+            report.get("model_sha256") != conversion["outputs"]["tinyllama-q4_0.gguf"]["sha256"]):
+        raise ValueError("reference source/model identity differs")
+    cpu_receipts = [(Path(n), json.loads(Path(n).read_text())) for n in inputs if Path(n).name == "receipt.json" and n != str(receipt)]
+    cpu_receipts = [(p, j) for p, j in cpu_receipts if j.get("classification") == "host-cpu-reference-tools-built"]
+    if len(cpu_receipts) != 1:
+        raise ValueError("one bound CPU build receipt required")
+    cpu_path, cpu = cpu_receipts[0]
+    if (cpu.get("identity", {}).get("source_revision") != report["source_revision"] or
+            cpu.get("identity", {}).get("source_url") != lock["client"]["source_url"]):
+        raise ValueError("CPU build source identity differs")
+    flags = cpu.get("identity", {}).get("flags", [])
+    if cpu.get("source_revision") != report["source_revision"] or not all(f in flags for f in (
+            "-DGGML_BACKEND_DL=OFF", "-DGGML_CPU=ON", "-DGGML_HIP=OFF", "-DGGML_CUDA=OFF", "-DGGML_BLAS=OFF")):
+        raise ValueError("CPU reference backend differs")
+    if not cpu.get("artifacts"):
+        raise ValueError("CPU build artifacts missing")
+    for name, digest in cpu["artifacts"].items():
+        path = (cpu_path.parent / name).resolve()
+        if Path(name).is_absolute() or not path.is_relative_to(cpu_path.parent) or inputs.get(str(path)) != digest:
+            raise ValueError("CPU artifact identity missing")
+    for name in ("libggml.so", "libggml-cpu.so", "libggml-base.so"):
+        if str((cpu_path.parent / "cmake/bin" / name).resolve()) not in inputs:
+            raise ValueError("CPU runtime library identity missing")
+    for path in (Path("/usr/bin/clang++-18").resolve(), Path(sys.executable).resolve()):
+        if str(path) not in inputs:
+            raise ValueError("CPU reference tool identity missing")
+    artifacts = report.get("artifacts")
+    required_artifacts = {"fixture", "fixture.d", "declared-profile.json", "tokens.txt", "commands.json",
+                          "run1.stdout", "run2.stdout", "noop-rejection.txt", "corrupt-rejection.txt"}
+    if not isinstance(artifacts, dict) or not required_artifacts <= artifacts.keys():
+        raise ValueError("CPU reference artifacts missing")
+    for name, digest in artifacts.items():
+        path = (folder / name).resolve()
+        if Path(name).is_absolute() or not path.is_relative_to(folder) or sha(path) != digest:
+            raise ValueError("CPU reference artifact changed")
+        inputs[str(path)] = digest
+    for name in shlex.split((folder / "fixture.d").read_text().replace(chr(92)+chr(10), " ").split(":", 1)[1]):
+        if str(Path(name).resolve()) not in inputs:
+            raise ValueError("CPU reference header identity missing")
+    profile_tokens = json.loads((ROOT / "tests/fixtures/llm-reference-prompts.json").read_text())
+    tokens = list(dict.fromkeys(t for c in profile_tokens["cases"] for t in c["tokens"]))[:17]
+    profile = dict(width=2048, epsilon_f32=rms_reference.EPSILON, row_counts=[1,2,17],
+                   embedding_tokens=tokens, threads=1, operator="GGML_OP_RMS_NORM unfused F32",
+                   tolerance=rms_reference.TOLERANCE)
+    if (len(tokens) != 17 or profile_tokens["model_revision"] != conversion["model_revision"] or
+            report.get("profile") != profile or json.loads((folder / "declared-profile.json").read_text()) != profile or
+            (folder / "tokens.txt").read_text() != " ".join(map(str,tokens))+"\n"):
+        raise ValueError("frozen RMSNorm profile differs")
+    commands = json.loads((folder / "commands.json").read_text())
+    if ([c.get("label") for c in commands] != ["dependencies", "compile", "runtime-libraries", "run1", "run2"] or
+            any(c.get("exit_code") != 0 or c.get("timed_out") for c in commands)):
+        raise ValueError("CPU reference commands incomplete")
+    provenance = rmsnorm_cpu_provenance(cpu, commands, report["model_sha256"])
+    for name, digest in provenance.items():
+        if name in inputs and inputs[name] != digest:
+            raise ValueError("CPU provenance changed during validation")
+        inputs[name] = digest
+    for run in (1,2):
+        if (folder / ("run%d.stdout" % run)).read_text().strip() != "GGML_RMS_NORM_CPU_PASS cases=6 width=2048 threads=1 gpu_execution=false":
+            raise ValueError("CPU reference transcript differs")
+    cases = report.get("cases", [])
+    expected = [(family+"-"+str(rows),rows) for family in ("stress","embedding") for rows in (1,2,17)]
+    if [(c.get("name"), c.get("rows")) for c in cases] != expected:
+        raise ValueError("CPU reference cases differ")
+    assets = {}
+    for case in cases:
+        name, rows = case["name"], case["rows"]
+        for kind in ("input", "cpu"):
+            relative = "run1/"+name+"."+kind+".f32le"
+            path = folder / relative
+            other = folder / ("run2/"+name+"."+kind+".f32le")
+            if (artifacts.get(relative) != case[kind+"_sha256"] or
+                    artifacts.get(str(other.relative_to(folder))) != case[kind+"_sha256"] or
+                    path.stat().st_size != rows*2048*4 or other.read_bytes() != path.read_bytes()):
+                raise ValueError("CPU reference tensor identity/size differs")
+            rms_reference.read_f32(path, rows*2048)
+            assets["rmsnorm/"+path.name] = str(path)
+        fp64 = name+".fp64le"
+        values = rms_reference.read_f32(folder / ("run1/"+name+".input.f32le"), rows*2048)
+        reference = rms_reference.fp64_reference(values)
+        import struct
+        if artifacts.get(fp64) != case["fp64_sha256"] or (folder/fp64).read_bytes() != struct.pack("<"+"d"*len(reference),*reference):
+            raise ValueError("independent FP64 reference differs")
+        actual = rms_reference.read_f32(folder / ("run1/"+name+".cpu.f32le"), rows*2048)
+        metrics = rms_reference.compare(actual, reference)
+        if metrics != case["metrics"] or metrics["maximum_budget_fraction"] > 1/32:
+            raise ValueError("CPU reference accuracy differs")
+    return dict(receipt=str(receipt), receipt_sha256=inputs[str(receipt)], inputs=inputs, assets=assets,
+                provenance_limit="Current locked source tree, tools, model and CPU artifacts are bound; this does not independently prove historical CPU build inputs.")
+
+
+def rmsnorm_assets(fixture, reference):
+    inputs = rmsnorm_fixture_inputs(fixture)
+    reference = rmsnorm_reference_inputs(reference)
+    module = str(Path(fixture).resolve() / "norm.hsaco")
+    return dict(module_inputs=inputs, reference=reference,
+                assets={"rmsnorm/norm.hsaco":module, **reference["assets"]})
+
+
 def link_title(output, units, fixture="bootstrap", embedded=None):
     sdk = DEPS / "sdk/target/lib"
     static = ["libc++.a", "libc++abi.a", "libunwind.a", "libc.a",
@@ -309,6 +467,9 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
         required += ["hipMemcpy"]
     if fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
+    if fixture == "rmsnorm":
+        required += ["hipMalloc", "hipFree", "hipMemcpy", "hipModuleLoad", "hipModuleGetFunction",
+                     "hipModuleUnload", "hipModuleLaunchKernel", "hipDeviceSynchronize"]
     if fixture == "launch":
         required += ["hipModuleLaunchKernel", "hipDeviceSynchronize"]
     if fixture == "stream":
@@ -407,7 +568,7 @@ def validate_results_directory(results_dir):
         raise ValueError("results directory must be a bounded absolute console path")
 
 
-def package_title(output, image, libc, results_dir, code_object=None):
+def package_title(output, image, libc, results_dir, code_object=None, extra_assets=None):
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
     validate_results_directory(results_dir)
     stage = output / "package"
@@ -419,6 +580,10 @@ def package_title(output, image, libc, results_dir, code_object=None):
         "sce_sys/param.json": ROOT / "assets/param.json",
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
+    for name, path in (extra_assets or {}).items():
+        if not name.startswith("rmsnorm/") or ".." in Path(name).parts or Path(name).is_absolute():
+            raise ValueError("invalid RMSNorm asset destination")
+        sources[name] = Path(path)
     if code_object is not None:
         sources[code_object.name] = code_object
     if app.exists():
@@ -461,13 +626,19 @@ def package_title(output, image, libc, results_dir, code_object=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate", "rmsnorm"), default="bootstrap")
     parser.add_argument("--compiler-fixture", type=Path, help="Verified compiler fixture required for embedded or aggregate title")
+    parser.add_argument("--rmsnorm-fixture", type=Path)
+    parser.add_argument("--rmsnorm-reference", type=Path)
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     if (args.fixture in ("embedded", "aggregate")) != (args.compiler_fixture is not None):
         parser.error("--compiler-fixture is required only for --fixture embedded or aggregate")
     embedded = compiler_fixture_inputs(args.compiler_fixture, args.fixture) if args.compiler_fixture else None
+    if ((args.fixture == "rmsnorm") != (args.rmsnorm_fixture is not None) or
+            (args.fixture == "rmsnorm") != (args.rmsnorm_reference is not None)):
+        parser.error("--rmsnorm-fixture and --rmsnorm-reference are required only for rmsnorm")
+    rmsnorm = rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) if args.fixture == "rmsnorm" else None
     initial_inputs = build_inputs()
     validate_results_directory(args.results_dir)
     output = args.output.resolve()
@@ -484,6 +655,8 @@ def main():
             raise RuntimeError("cached fixture differs; use a fresh output")
         if previous.get("embedded_compiler") != embedded:
             raise RuntimeError("cached compiler fixture differs; use a fresh output")
+        if previous.get("rmsnorm") != rmsnorm:
+            raise RuntimeError("cached RMSNorm assets differ; use a fresh output")
         units = previous["units"]
         if (len(units) != 76 or previous["title_elf_sha256"] != sha(output / "title.elf") or
                 any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
@@ -495,6 +668,12 @@ def main():
                     sha(output / "package" / (json.loads((ROOT / "title.json").read_text())["title_id"] + ".ffpkg")) != previous["package_sha256"] or
                     inventory(output / "package/app") != previous["package_files"]):
                 raise RuntimeError("cached package differs from current inputs; use a fresh output")
+            if rmsnorm is not None:
+                expected_assets = {name: sha(path) for name, path in rmsnorm["assets"].items()}
+                if {n: d for n, d in previous["package_files"].items() if n.startswith("rmsnorm/")} != expected_assets:
+                    raise RuntimeError("cached RMSNorm package inventory differs")
+                if rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) != rmsnorm:
+                    raise RuntimeError("cached RMSNorm inputs changed")
             if embedded is not None:
                 audit_path = output / "embedded-native-audit.json"
                 if sha(audit_path) != previous["embedded_audit_sha256"]:
@@ -528,13 +707,16 @@ def main():
             "--compiler-object", embedded["object"], "--output", output / "embedded-native-audit.json"])
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
-                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None)
+                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None,
+                                   extra_assets=rmsnorm["assets"] if rmsnorm else None)
     if embedded is not None:
         audit = json.loads((output / "embedded-native-audit.json").read_text())
         if (audit.get("fixture", "embedded") != args.fixture or
                 sha(output / "embedded-pie.ld") != linked_script_sha or
                 any(sha(name) != digest for name, digest in audit["inputs"].items())):
             raise RuntimeError("native embedded audit or linker inputs changed before publication")
+    if rmsnorm is not None and rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) != rmsnorm:
+        raise RuntimeError("RMSNorm assets changed before publication")
     if initial_inputs != build_inputs() or (embedded is not None and
             compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded):
         raise RuntimeError("native build inputs changed before publication")
@@ -548,6 +730,8 @@ def main():
                "package_sha256": sha(package), "package_files": files,
                "input_sha256": build_inputs(), "results_dir": args.results_dir,
                "native_executed": False}
+    if rmsnorm is not None:
+        receipt["rmsnorm"] = rmsnorm
     if embedded is not None:
         receipt.update(embedded_compiler=embedded, compiler_object_count=1, total_linked_object_count=len(units)+1,
                        embedded_linker_sha256=sha(output / "embedded-pie.ld"),

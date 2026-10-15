@@ -64,6 +64,27 @@ symbols, two focused tests, CTest registration and independent review pass.
 See `evidence/offline-rmsnorm-source-fixture.json` and `docs/LLM_V1_PROFILE.md`.
 Root Make session 42388 terminated successfully. Use a fresh output per run.
 
+## Native RMSNorm numerical package qualified offline
+
+The 76-object native numerical title now builds with the unchanged module and
+twelve authenticated CPU input/reference tensors. Independent package extraction
+matches all 19 files, including the 13 RMSNorm assets. Startup, actual imports,
+finalizer registration and 15 critical functions pass the three-image audit.
+Nine focused CTests, 31 existing control tests and independent reviews pass.
+See `evidence/offline-native-public-rmsnorm-package.json` and `docs/HIP_REDUCTION.md`.
+
+The candidate checks six cases/81,920 values and retains twelve full raw buffers.
+Freeze controls require the image audit, frozen CPU oracle and fresh output names;
+acceptance also requires independent raw numerical/guard checks and matching
+transcript metrics. Synthetic raw-verifier tests do not establish GPU execution.
+
+Native build session 59484 terminated with exit 0. Build receipt and image audit
+are in `build/public-hip-rmsnorm-native-v1/`. Package SHA256:
+`9daf89bf558e55c5fc0be0e8abe344162eafdaa02d50548a433ff78711e93877`.
+Next: commit/freeze this candidate, obtain independent manifest review, then run
+one bounded .40 experiment under both owned locks. No console execution is
+claimed in this checkpoint; the aggregate package remains the installed baseline.
+
 ## Public CLR RMSNorm resources qualified offline
 
 The genuine public HIP runtime now loads the unchanged mixed norm module and

@@ -99,3 +99,42 @@ python3 tools/qualify_public_hip_rmsnorm.py --base results/source-public-rmsnorm
 Every output directory must be fresh. Native numerical packaging must include
 the verified module and frozen CPU tensors, retain complete GPU readbacks and
 use reviewed lifecycle controls before testing on .40.
+
+## Native RMSNorm numerical candidate
+
+The native title uses the unchanged module and six frozen CPU cases. It requests
+1024 threads and 128 dynamic LDS bytes, initializes active output to NaN, and
+checks 81,920 F32 values against `2e-5 + 2e-4 * abs(reference)`. Both allocations
+include guards; inactive output and every input byte must remain unchanged.
+This candidate is an operator test, not an inference client.
+
+From a prepared source-only build environment, the complete optional workflow is:
+
+```sh
+make public-hip-rmsnorm-package RESULTS_DIR=/data/ps5-hip/results \
+  RMSNORM_BUILD_DIR=build/public-hip-rmsnorm-new \
+  LLM_RMSNORM_FIXTURE_DIR=results/llm-rmsnorm-fixture-new \
+  LLM_RMSNORM_REFERENCE_DIR=results/llm-rmsnorm-reference-new
+```
+
+This fetches the locked model, converts Q4_0 weights, prepares CPU references and
+device code, builds the title and audits the linked images. Fresh fixture and
+reference directories preserve earlier evidence. To package already verified
+fixtures, invoke `tools/build_public_hip.py --fixture rmsnorm` with explicit
+`--rmsnorm-fixture`, `--rmsnorm-reference`, `--output` and `--results-dir`, then
+run `tools/audit_public_hip_rmsnorm_native.py` on its three ELF images. Neither
+command deploys or launches a console title.
+
+The title saves twelve exclusive raw files in its configured results directory:
+`rmsnorm-{stress,embedding}-{1,2,17}.{output,input-readback}.raw`. Each is
+139,296 bytes; active F32 payload starts at byte 16 and contains `rows * 2048`
+little-endian floats. Existing files cause rejection rather than overwrite.
+Partial files remain diagnostic evidence. A new console experiment must preserve
+old results and establish fresh names before launch.
+
+The freeze/control path binds the exact module, CPU oracle and verifier, checks
+freshness, and collects all raw files. `tools/verify_public_hip_rmsnorm.py`
+independently checks their values, guards and input preservation before acceptance.
+Its passing receipt alone cannot prove GPU origin: installed-image identity,
+the observed run, natural teardown, service health and owned-lock cleanup must
+also pass. Synthetic verifier tests are never native execution evidence.

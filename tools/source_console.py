@@ -21,6 +21,11 @@ LOG = '/data/ps5-hip/results/ps5-hip-public-bootstrap.log'
 HISTORY = '/data/shadowmount/debug.log'
 LOCK = Path('/mnt/c/Users/Denis/Documents/PS5/lock.txt')
 
+RMSNORM_RAW_BYTES = 139296
+RMSNORM_RAW_NAMES = tuple('rmsnorm-%s-%d.%s.raw' % (family, rows, kind)
+    for family in ('stress', 'embedding') for rows in (1, 2, 17)
+    for kind in ('output', 'input-readback'))
+
 def native_fault(raw):
     lower = bytes(raw).lower()
     return any(marker in lower for marker in (b'# exception:', b'receives a fatal signal', b'kernel panic', b'panic:'))
@@ -91,6 +96,15 @@ class Control:
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
         self.verify()
+        if self.fixture == 'rmsnorm':
+            from build_public_hip import rmsnorm_reference_inputs
+            bound = self.manifest.get('rmsnorm', {})
+            reference = (ROOT / bound.get('reference', '')).resolve()
+            require(reference.is_relative_to(candidate.resolve()) and
+                    self.manifest['files'].get(str((reference/'receipt.json').relative_to(ROOT))) ==
+                    bound.get('reference_receipt_sha256'), 'RMSNorm reference not frozen')
+            require(rmsnorm_reference_inputs(reference)['receipt_sha256'] ==
+                    bound['reference_receipt_sha256'], 'RMSNorm reference identity changed')
         self.out = candidate / phase
         self.out.mkdir(exist_ok=False)
         self.record = {'phase': phase, 'host': HOST, 'title_id': TITLE, 'accepted': False, 'launched': False,
@@ -247,6 +261,53 @@ class Control:
     def fresh_log(self):
         require(not any(row.endswith(' ' + Path(self.log).name) for row in self.listing(str(Path(self.log).parent))), 'result log already exists')
 
+    def fresh_rmsnorm_dumps(self):
+        if self.fixture != 'rmsnorm':
+            return
+        directory = self.manifest['results_dir']
+        rows = self.listing(directory)
+        for name in RMSNORM_RAW_NAMES:
+            require(not any(row.endswith(' ' + name) for row in rows),
+                    'RMSNorm dump already exists: ' + name)
+        self.record['rmsnorm_raw_absent_before_launch'] = list(RMSNORM_RAW_NAMES)
+
+    def collect_rmsnorm_dumps(self, partial=False):
+        if self.fixture != 'rmsnorm':
+            return
+        folder = self.out/'raw'
+        folder.mkdir(exist_ok=True)
+        records = self.record.setdefault('rmsnorm_raw_files', {})
+        for name in RMSNORM_RAW_NAMES:
+            if name in records:
+                require(sha((folder/name).read_bytes()) == records[name]['sha256'], 'collected dump changed')
+                continue
+            try:
+                raw = self.fetch(self.manifest['results_dir']+'/'+name, RMSNORM_RAW_BYTES)
+                with (folder/name).open('xb') as stream:
+                    stream.write(raw)
+                require(len(raw) == RMSNORM_RAW_BYTES, 'RMSNorm dump length: '+name)
+                records[name] = {'bytes':len(raw), 'sha256':sha(raw)}
+            except Exception as error:
+                if not partial:
+                    raise
+                self.record.setdefault('rmsnorm_raw_capture_errors', {})[name] = repr(error)
+        if not partial:
+            require(set(records) == set(RMSNORM_RAW_NAMES), 'incomplete RMSNorm readbacks')
+
+    def verify_rmsnorm_dumps(self):
+        if self.fixture != 'rmsnorm':
+            return
+        self.verify()
+        from verify_public_hip_rmsnorm import verify
+        result = verify(ROOT/self.manifest['rmsnorm']['reference'], self.out/'raw', self.out/'numerical')
+        require(result.get('status') == 'PASS', 'RMSNorm raw numerical verification failed')
+        metrics = {'max_abs':float(format(max(c['maximum_absolute_error'] for c in result['cases']), '.9g')),
+                   'max_budget_fraction':float(format(max(c['maximum_budget_fraction'] for c in result['cases']), '.9g'))}
+        require(self.record.get('application', {}).get('reported_metrics') == metrics,
+                'RMSNorm transcript metrics differ from raw readbacks')
+        self.record['rmsnorm_numerical'] = {'status':'PASS',
+            'receipt_sha256':sha((self.out/'numerical/receipt.json').read_bytes())}
+
     def deploy(self):
         self.idle()
         snapshot(self.send('snapshot'))
@@ -305,7 +366,7 @@ class Control:
                 deployment.get('lock_released') is True and deployment.get('phase') == 'deploy' and
                 deployment.get('manifest_sha256') == self.manifest_sha and
                 deployment.get('package_sha256') == self.record['package_sha256'], 'fresh deployment not complete')
-        self.idle(); self.installed(); self.fresh_log()
+        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps()
         before = snapshot(self.send('snapshot'))
         baseline = self.history_read('before-launch')
         sock = socket.create_connection((HOST, 3232), timeout=3)
@@ -325,7 +386,7 @@ class Control:
         worker.start()
         launch_offset = 0
         try:
-            self.idle(); self.fresh_log()
+            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps()
             require(not self.capture_errors and worker.is_alive(), 'klog unavailable before launch')
             launch_offset = len(self.klog)
             self.record['klog_launch_offset'] = launch_offset
@@ -345,8 +406,10 @@ class Control:
             self.idle()
             application = self.fetch(self.log, 65536)
             (self.out / 'application.log').write_bytes(application)
+            self.collect_rmsnorm_dumps()
             from source_public_hip_log import check_log
             self.record['application'] = check_log(application, self.fixture)
+            self.verify_rmsnorm_dumps()
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
             require(before == after, 'matching title mounts changed')
@@ -371,6 +434,11 @@ class Control:
                 except Exception as error:
                     self.record['safety_close_error'] = repr(error)
             self.stop.set(); worker.join(timeout=2); sock.close()
+            if self.fixture == 'rmsnorm' and not self.record.get('rmsnorm_numerical'):
+                try:
+                    self.collect_rmsnorm_dumps(partial=True)
+                except Exception as error:
+                    self.record['rmsnorm_raw_capture_error'] = repr(error)
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:

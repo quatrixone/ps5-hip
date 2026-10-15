@@ -1,5 +1,7 @@
 """Strict public HIP bootstrap transcript; freshness and lifecycle are separate."""
 import hashlib
+import math
+import re
 
 LINES = (
     'PS5HIP START target=gfx1013 kernel=public_hip_bootstrap',
@@ -61,9 +63,59 @@ COPY_GPU_EXPECTED = CAPTURE_GPU_EXPECTED.replace(b'public_hip_capture_gpu', b'pu
 COPY_GPU_BACKING = b'HIP_COPY_GPU BACKING samples=32 live_bytes=32768 live_allocations=2 eager_allocations=128 eager_releases=128 graph_allocations=128 graph_releases=128 peak_bytes=98304 final_live_bytes=0\n'
 COPY_GPU_EXPECTED = COPY_GPU_EXPECTED.replace(b'HIP_COPY_GPU PASS ', COPY_GPU_BACKING + b'HIP_COPY_GPU PASS ')
 LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'embedded', 'aggregate', 'fill', 'graph', 'stream', 'graph_gpu', 'capture_gpu', 'copy_gpu')}
+LOG_NAMES['rmsnorm'] = 'ps5-hip-public-rmsnorm.log'
+
+
+def check_rmsnorm_lines(raw):
+    lines = raw.decode('ascii').splitlines()
+    if raw != ('\n'.join(lines) + '\n').encode('ascii') or len(lines) != 22:
+        raise ValueError('RMSNorm transcript framing')
+    expected = [LINES[0].replace('bootstrap', 'rmsnorm'), LINES[1]]
+    errors, fractions = [], []
+    number = r'([0-9]+(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?)'
+    for family in ('stress', 'embedding'):
+        for rows in (1, 2, 17):
+            expected.append(f'HIP_RMSNORM DUMP family={family} rows={rows} output_bytes=139296 input_readback_bytes=139296 exclusive=true synced=true')
+            pattern = (f'HIP_RMSNORM CASE family={family} rows={rows} values={rows*2048} '
+                       + 'max_abs=' + number + ' max_budget_fraction=' + number
+                       + ' input_unchanged=true guards=true inactive=true')
+            line = lines[len(expected)]
+            match = re.fullmatch(pattern, line)
+            if not match:
+                raise ValueError('RMSNorm case transcript')
+            error, fraction = map(float, match.groups())
+            if not math.isfinite(error) or not math.isfinite(fraction) or not 0 <= fraction <= 1:
+                raise ValueError('RMSNorm reported numerical error')
+            errors.append(error); fractions.append(fraction); expected.append(line)
+    pattern = ('HIP_RMSNORM PASS cases=6 launches=6 values=81920 guard_bytes=192 inactive_bytes=507904 input_bytes=835776 max_abs='
+               + number + ' max_budget_fraction=' + number
+               + ' allocations=2 frees=2 module_unloaded=true watchdog_joined=true finalization=pending')
+    match = re.fullmatch(pattern, lines[14])
+    if not match or tuple(map(float, match.groups())) != (max(errors), max(fractions)):
+        raise ValueError('RMSNorm aggregate metrics differ')
+    expected.append(lines[14])
+    expected.extend(LINES[3:6])
+    expected.append('HIP_RMSNORM FINAL allocations=2 frees=2 queues=1 retired=1 gate_destroyed=true application_fini=pending')
+    expected.extend(LINES[7:])
+    if lines != expected:
+        raise ValueError('RMSNorm lifecycle or dump transcript differs')
+    return {'max_abs': max(errors), 'max_budget_fraction': max(fractions)}
 
 
 def check_log(raw, fixture='bootstrap'):
+    if not isinstance(raw, bytes) or len(raw) > 65536:
+        raise ValueError('public HIP transcript type or size')
+    if fixture == 'rmsnorm':
+        try:
+            metrics = check_rmsnorm_lines(raw)
+        except (UnicodeError, IndexError) as error:
+            raise ValueError('RMSNorm transcript invalid') from error
+        return {'application_result': 'application-pass', 'kernel': 'public_hip_rmsnorm',
+                'target': 'gfx1013', 'log_sha256': hashlib.sha256(raw).hexdigest(),
+                'bytes': len(raw), 'hardware_gate_passed': False, 'reported_metrics': metrics,
+                'unproven': ['independent raw-buffer numerical validation', 'freshness',
+                             'installed identity', 'native process lifecycle', 'visible mount state',
+                             'service health', 'owned lock cleanup']}
     expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'embedded': EMBEDDED_EXPECTED, 'aggregate': AGGREGATE_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED, 'capture_gpu': CAPTURE_GPU_EXPECTED, 'copy_gpu': COPY_GPU_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')

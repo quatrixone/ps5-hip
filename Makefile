@@ -29,6 +29,7 @@ help:
 	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
 	@echo 'make public-hip-aggregate-package Build native aggregate compiler-launch title offline (fresh outputs)'
+	@echo 'make public-hip-rmsnorm-package Build native RMSNorm numerical title and verified model/reference assets (fresh outputs)'
 	@echo 'make public-hip-embedded-package Build native compiler registration/launch title offline (fresh outputs)'
 	@echo 'make public-hip-embedded-host-test  Build compiler objects and qualify genuine CLR registration (fresh outputs)'
 	@echo 'make public-hip-aggregate-host-test Qualify compiler aggregate arguments through genuine CLR (fresh outputs)'
@@ -239,3 +240,14 @@ public-hip-aggregate-package: public-hip-aggregate-fixture
 	$(PYTHON) tests/public_hip_embedded_build_test.py
 	$(PYTHON) tests/public_hip_aggregate_qualification_test.py
 	$(PYTHON) tools/build_public_hip.py --fixture aggregate --compiler-fixture $(AGGREGATE_FIXTURE_DIR) --output $(AGGREGATE_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
+
+RMSNORM_BUILD_DIR ?= build/public-hip-rmsnorm-native
+.PHONY: public-hip-rmsnorm-package
+public-hip-rmsnorm-package: deps-build llm-rmsnorm-fixture
+	$(MAKE) llm-model-fetch
+	$(MAKE) llm-model-convert
+	$(MAKE) llm-rmsnorm-reference
+	$(PYTHON) tests/public_hip_rmsnorm_build_test.py
+	$(PYTHON) tests/rmsnorm_dump_test.py
+	$(PYTHON) tools/build_public_hip.py --fixture rmsnorm --rmsnorm-fixture $(LLM_RMSNORM_FIXTURE_DIR) --rmsnorm-reference $(LLM_RMSNORM_REFERENCE_DIR) --output $(RMSNORM_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
+	$(PYTHON) tools/audit_public_hip_rmsnorm_native.py --raw $(RMSNORM_BUILD_DIR)/title.elf --converted $(RMSNORM_BUILD_DIR)/eboot.elf --extracted $(RMSNORM_BUILD_DIR)/extracted.elf --output $(RMSNORM_BUILD_DIR)/rmsnorm-native-audit.json

@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "classification": "offline-native-public-rmsnorm-package",
+  "source_sha256": {
+    "tools/public_hip_rmsnorm_console_title.cpp": "08c25d936d497aa0d6c5e9b7e5dabe83cffefb0efccf9273a5dce267e81e77de",
+    "tools/build_llm_rmsnorm_reference.py": "e7b65925c1328928ae1bd42d3cee31543206d4899f31869571d504fa9c0bf171",
+    "tests/llm_rmsnorm_reference.cpp": "f22dae3aaf3f7d8416c9599fb564e987cdfc09cb2a7ad2c6bf4d643cb8608bb6",
+    "tools/native_runtime.h": "4a02753d8687d7c9ce85b42e440a87a916e730423c43040a6a7e85948d754cfd",
+    "tools/clr_gpu/watchdog.cpp": "d487f08f95a54ce4113b7132ed71e378bde9d6292167950f631a39ddee349508",
+    "tools/public_hip_app_crt.cpp": "495398965c7b2b78868e0af3efd370bf1587facbe4e13c9a1ce46473ec03ce84",
+    "title.json": "34cdf2c8f60eef2537861aac0545f802c302750ce58af4c58db7b18e5287fae2",
+    "tools/build_public_hip.py": "000d6ecc54cb8408c709630d54669df2018eef65e6becff47fe4c5cd77f87e79",
+    "tools/qualify_public_hip_rmsnorm.py": "f62ce2a3950878373b172b78e7a84d53abef409ffc40c0b9d81423d2a4564583",
+    "tools/build_llm_rmsnorm_fixture.py": "861360e6c8ecca02815c5ad80cc01272a1c4ac1fe88e370bb51684c26da2c234",
+    "tools/audit_public_hip_rmsnorm_native.py": "0b3a5a1e2a68b1dce1bd51342eefa032526ba97c00612fbfe70831fc2648cc0b",
+    "tests/public_hip_rmsnorm_build_test.py": "9619fe46d8a86473164f2408dc69357393c8cc5624ba2a8543bd7c61093040bb",
+    "tools/source_public_hip_log.py": "2d8f28dec8d7d05ed428338336d746380eb400e43c77b676903b78bdfc49ebfa",
+    "tests/public_hip_rmsnorm_log_test.py": "e00f30c790dd27b0807937708ba41d8c03cd17b7e5930312cd1f63b2d4ee2fed",
+    "tests/public_hip_rmsnorm_native_audit_test.py": "2bf5e4dbc09b70fe857957c92c91423975c295d9f755368a6300dfb387d4b7f6",
+    "tools/freeze_source_candidate.py": "a5ac975121e199378796948277714fcffc820f1db1a4250d623f1baa7ff41ac2",
+    "tools/source_console.py": "fc337636822c257d9e9f47b7368bdbd62811698107ba0bdf6c9ad42854223dc1",
+    "tests/source_rmsnorm_console_test.py": "4feaa332bf5b7275cdb4be27aeec357921d54678bdc33896d862d1ffd8bb6e19",
+    "tests/source_console_test.py": "d9d17dd819677844c9029dc5aacff84e2696dd6b95a4c0c9de905fc3648cb128",
+    "tools/verify_public_hip_rmsnorm.py": "bfa795efb1c0afc215fc1afb233ac3499aa27056cfa33b1535a76b3e6fcc4a4f",
+    "tests/public_hip_rmsnorm_readback_test.py": "4e3072e779d8a0a1b0c6fe3897c456222abe72345378d3ef4adf7ce48d0025fa",
+    "Makefile": "fa0e6c7f5287a99848f08af224ed623858eea1c4c757f79eb44e33fb81ed9551",
+    "CMakeLists.txt": "388965813b07f39ac2a65cfe1480525f65ac000acc3c60c894897bf289a40b8b",
+    "tests/rmsnorm_dump_test.py": "023828b73e1500e82cadc8e89f1982555879a3d442a9ff0beb06fb495dc1cdda"
+  },
+  "raw_evidence": {
+    "build/public-hip-rmsnorm-native-v1/link-receipt.json": "d57260a3799caa7a4e061d30cb8a5b82e2f7b44dd871f206f01e25d2bba937fa",
+    "build/public-hip-rmsnorm-native-v1/rmsnorm-native-audit.json": "957ed2af0e2fdf9cc42cd97d98cf46f14716f180b971444629559f0e05035229",
+    "results/native-rmsnorm-title-review-v2/review.json": "31e4b5eb28a7e385b0cce28eb4b581c311aa1cb74f3c0debc0e0ad6ee75d5260",
+    "results/rmsnorm-builder-source-review-v1/review.json": "89111d9dfb753c8f5577c098c28e59050f12b5fac50a9092ff3586dfab321290",
+    "results/rmsnorm-log-source-review-v1/review.json": "7632d1c3b3e1131b239900696b6129097b07e6b6a295da9185af1fac122a33d1",
+    "results/rmsnorm-final-controls-review-v1/review.json": "4fcfd72c16aaececb742e30adfb8b22638d495119c3af36e7ac4704e34be4e12",
+    "results/rmsnorm-native-package-review-v1/review.json": "e5683918611ae0e06dc13b5387ab7abe216c667f6b907f4c96d9ba8b2665045f",
+    "results/native-rmsnorm-isa-review-v1/review.json": "7a189701fe5524c68da33353532ae150b10ae8878021b9528172380dc8bc6c0f",
+    "results/rmsnorm-readback-synthetic-verification-v2/receipt.json": "3a72e7bdbc082a175abe16acd1723584ed20de6ae2410b9ef865c2494e7145d5",
+    "build/rmsnorm-native-controls-v1/Testing/Temporary/LastTest.log": "5cb2052723e2f28b3d8b76326239399d0bda9c05183718a424cb7283153581d1"
+  },
+  "artifacts": {
+    "package_sha256": "9daf89bf558e55c5fc0be0e8abe344162eafdaa02d50548a433ff78711e93877",
+    "fself_sha256": "f84d18fe69e41a6dc4555fda5142b03d2930a70cff8015e5aa56337a758f6480",
+    "module_sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5",
+    "packaged_rmsnorm_assets": {
+      "rmsnorm/embedding-1.cpu.f32le": "a75689d6fba09271e989f1939c8a6749fb7dfe11419bb4cc2296b773043ebc72",
+      "rmsnorm/embedding-1.input.f32le": "2ff11a01bef9f84c1790ecf24c773569b993660458365a1c267bdb7d626243c5",
+      "rmsnorm/embedding-17.cpu.f32le": "ce4cd0ee5183f15c1dba6df10da0a280d8b735ea09e9d948c2c1365d911ef2de",
+      "rmsnorm/embedding-17.input.f32le": "a5c7c5c89bcda7d350af47e1fdbfc95bfe643547b832c87737d1554c7546e9fa",
+      "rmsnorm/embedding-2.cpu.f32le": "5e21f74689e6802bd6e8f3e01bd28bd66835223820c4bf25a3c663490c44d644",
+      "rmsnorm/embedding-2.input.f32le": "15636967fa101542e823d748f828ed75f68c1ec0f9c54d0b33204e17bc9c233e",
+      "rmsnorm/norm.hsaco": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5",
+      "rmsnorm/stress-1.cpu.f32le": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+      "rmsnorm/stress-1.input.f32le": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+      "rmsnorm/stress-17.cpu.f32le": "9ff5ffff763e07ec0fa7e04bd1e494f074caef8e89837f163843f421b4487b2b",
+      "rmsnorm/stress-17.input.f32le": "b01914da564d4a64f184bf6a412401e5a0beb640c2f1404a1fcceb1909281dd1",
+      "rmsnorm/stress-2.cpu.f32le": "f732c9f2fd4eab3612994df9fd16edb13073a409a2a2d29bd41c331628a14fee",
+      "rmsnorm/stress-2.input.f32le": "1b11f139979ecdacad85d61c4c17424786837922957acfcb92064bd2871aa404"
+    }
+  },
+  "validation": {
+    "native_objects": 76,
+    "image_audited_functions": 15,
+    "focused_ctests": 9,
+    "existing_source_console_tests": 31,
+    "independent_reviews": "PASS",
+    "make_workflow": "dry-run checked; underlying native builder executed successfully",
+    "synthetic_readback_verification": "PASS; CPU-copied synthetic output is not GPU evidence"
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "contract": {
+    "cases": 6,
+    "values": 81920,
+    "raw_files": 12,
+    "bytes_per_raw_file": 139296,
+    "absolute_tolerance": 2e-05,
+    "relative_tolerance": 0.0002
+  },
+  "limits": [
+    "No console execution or native numerical accuracy claim.",
+    "Native runtime currently qualified only for the selected resource profiles; full inference remains open.",
+    "Current CPU model/source/tool/artifact identities verified; consumer checks do not independently prove historical compilation provenance."
+  ]
+}

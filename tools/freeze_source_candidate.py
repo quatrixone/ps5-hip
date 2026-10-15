@@ -48,6 +48,67 @@ def validate_embedded_audit(build, receipt):
     return path
 
 
+def validate_rmsnorm_audit(build, receipt):
+    path = build/'rmsnorm-native-audit.json'
+    audit = json.loads(path.read_text())
+    if (audit.get('status') != 'PASS' or
+            audit.get('classification') != 'offline-public-hip-rmsnorm-native-image-audit' or
+            audit.get('native_executed') is not False or not isinstance(audit.get('inputs'), dict) or
+            not audit['inputs']):
+        raise ValueError('RMSNorm native image audit missing or unqualified')
+    for name, expected in audit['inputs'].items():
+        if digest(Path(name)) != expected:
+            raise ValueError('RMSNorm image audit input changed: '+name)
+    roundtrip = receipt.get('fself_roundtrip', {})
+    required = {str((build/'title.elf').resolve()): receipt.get('title_elf_sha256'),
+                str((build/'eboot.elf').resolve()): roundtrip.get('elf_sha256'),
+                str((build/'extracted.elf').resolve()): roundtrip.get('extracted_sha256')}
+    for name in ('tools/audit_public_hip_rmsnorm_native.py', 'tools/audit_public_hip_embedded_native.py',
+                 'tools/probe_host_registration.py', 'tools/native_multi_query.py',
+                 'tests/fat_binary_fixture_test.py', 'tests/native_import_libraries_test.py',
+                 'tools/build_native_vector_title.py', 'tools/public_hip_rmsnorm_console_title.cpp',
+                 'tools/public_hip_app_crt.cpp', 'tests/public_hip_rmsnorm_native_audit_test.py'):
+        required[str((ROOT/name).resolve())] = digest(ROOT/name)
+    if any(expected is None or audit['inputs'].get(name) != expected for name, expected in required.items()):
+        raise ValueError('RMSNorm image audit does not bind candidate images and implementation')
+    return path
+
+
+def freeze_rmsnorm_reference(build, receipt, output):
+    from build_public_hip import rmsnorm_assets, rmsnorm_reference_inputs
+    bound = receipt.get('rmsnorm', {})
+    reference = bound.get('reference', {})
+    original = Path(reference.get('receipt', '')).resolve()
+    module = Path(bound.get('assets', {}).get('rmsnorm/norm.hsaco', '')).resolve()
+    if (not original.is_file() or not module.is_file() or
+            rmsnorm_assets(module.parent, original.parent) != bound):
+        raise ValueError('RMSNorm build inputs no longer match')
+    for name, source in bound['assets'].items():
+        expected = digest(Path(source))
+        if receipt['package_files'].get(name) != expected or digest(build/'package/app'/name) != expected:
+            raise ValueError('RMSNorm packaged oracle or module differs')
+    report = json.loads(original.read_text())
+    destination = output/'rmsnorm-reference'
+    destination.mkdir()
+    shutil.copyfile(original, destination/'receipt.json')
+    total = 0
+    for name, expected in report['artifacts'].items():
+        source = (original.parent/name).resolve()
+        if Path(name).is_absolute() or not source.is_relative_to(original.parent):
+            raise ValueError('invalid reference artifact path')
+        total += source.stat().st_size
+        if total > 16*1024*1024 or digest(source) != expected:
+            raise ValueError('reference artifact bound or identity changed')
+        target = destination/name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+    copied = rmsnorm_reference_inputs(destination)
+    if copied['receipt_sha256'] != reference['receipt_sha256']:
+        raise ValueError('frozen reference receipt differs')
+    return {'reference': str(destination.relative_to(ROOT)),
+            'reference_receipt_sha256': copied['receipt_sha256']}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
@@ -76,7 +137,8 @@ def main():
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 76:
         parser.error('not the complete .40 candidate')
     validate_source_inputs(receipt)
-    audit = validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None
+    audit = (validate_rmsnorm_audit(args.build, receipt) if fixture == 'rmsnorm' else
+             validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None)
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
         parser.error('commit source before freezing')
     output.mkdir(parents=True, exist_ok=False)
@@ -92,10 +154,24 @@ def main():
     for name, expected in receipt['package_files'].items():
         if digest(output / 'package/app' / name) != expected:
             parser.error('package stage hash mismatch: ' + name)
+    rmsnorm = freeze_rmsnorm_reference(args.build, receipt, output) if fixture == 'rmsnorm' else None
     files = {str(path.relative_to(ROOT)): digest(path) for path in output.rglob('*') if path.is_file()}
     for name in ('tools/source_console.py', 'tools/source_public_hip_log.py', 'tools/freeze_source_candidate.py',
                  'dependencies.json', 'elevation-inputs.json', 'controller-inputs.json', 'title.json'):
         files[name] = digest(ROOT / name)
+    if rmsnorm is not None:
+        for name, expected in json.loads(audit.read_text())['inputs'].items():
+            path = Path(name).resolve()
+            if path.is_relative_to(ROOT):
+                files[str(path.relative_to(ROOT))] = expected
+        for name in ('tools/verify_public_hip_rmsnorm.py', 'tools/build_public_hip.py',
+                     'tools/qualify_public_hip_rmsnorm.py', 'tools/build_llm_rmsnorm_reference.py',
+                     'tests/public_hip_rmsnorm_readback_test.py'):
+            files[name] = digest(ROOT/name)
+        for name, expected in receipt['rmsnorm']['reference']['inputs'].items():
+            path = Path(name).resolve()
+            if path.is_relative_to(ROOT):
+                files[str(path.relative_to(ROOT))] = expected
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_image_sha256': args.baseline_image_sha256,
@@ -108,7 +184,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
+                'hypothesis': ('Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
+                               'Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
                                'Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else
                                'After the existing joined-copy recovery oracle, a two-kernel joined graph alternates eager/captured order over four warmup and sixteen further changed-input rounds. Validate 5840 added values and640guards,84totaldispatches,28callbacks,fourallocations/frees and seven retired queues. Require32post-sync backing samples at32768bytes/twoallocations,128balanced allocations/releases per path,98304accountedpeak and zero final backing. This measures NativeMemory backing only, not process heap, command lifetime or timing.' if fixture == 'copy_gpu' else
                                'Public HIP module kernel capture records a kernel and dependent host callback without dispatch; disabled and changed-argument replay, executable update and source graph destruction preserve146values16guards and clean3queue retirement.' if fixture == 'capture_gpu' else
@@ -124,6 +201,8 @@ def main():
                 'expected': 'Exact ' + fixture + ' transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
                 'reject': 'Any identity, log, mount, lifecycle, timeout, exception, or health failure; never retry automatically.',
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}
+    if rmsnorm is not None:
+        manifest['rmsnorm'] = rmsnorm
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 

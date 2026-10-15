@@ -44,6 +44,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.2 prerequisite | offline | public CLR RMSNorm resource routing, eager/deferred packet oracle, 87-compilation sanitizer suite and native aggregate cross-build pass | evidence/offline-public-clr-rmsnorm-resources.json | next: native numerical package and .40 validation
 
+- 2026-10-15 | V1.3 candidate | offline | native RMSNorm package, image/asset audit and independent raw numerical controls pass | evidence/offline-native-public-rmsnorm-package.json | next: frozen .40 numerical validation
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1.2 prerequisite | 55a6197 | .40 | pass: aggregate compiler launches,320memberbytes64guards,clean lifecycle | evidence/console40-public-aggregate-success.json | next: real RMSNorm resources/oracle
