@@ -1,0 +1,66 @@
+--- a/hipamd/src/hip_module.cpp
++++ b/hipamd/src/hip_module.cpp
+@@ -223,9 +223,9 @@
+ #if defined(WITH_PS5_DEVICE)
+   // Reject unsupported public adapter geometry before argument capture/enqueue.
+   // In particular, do not let an asynchronous route rejection poison the device.
+-  if (blockDimX != 64 || blockDimY != 1 || blockDimZ != 1 ||
+-      globalWorkSizeY != 1 || globalWorkSizeZ != 1 || globalWorkSizeX % 64 != 0 ||
+-      sharedMemBytes != 0) {
++  if ((blockDimX != 64 && blockDimX != 1024) || blockDimY != 1 || blockDimZ != 1 ||
++      globalWorkSizeY != 1 || globalWorkSizeZ != 1 || globalWorkSizeX % blockDimX != 0 ||
++      sharedMemBytes > 65536) {
+     return hipErrorInvalidValue;
+   }
+ #endif
+@@ -257,6 +257,14 @@
+   if (!kernel->getDeviceKernel(*device)) {
+     return hipErrorInvalidDevice;
+   }
++#if defined(WITH_PS5_DEVICE)
++  // Per-kernel admission must reject before capture or asynchronous submission.
++  const auto* ps5Info = kernel->getDeviceKernel(*device)->workGroupInfo();
++  if (blockDimX != ps5Info->size_ || sharedMemBytes > ps5Info->availableLDSSize_ ||
++      (blockDimX == 1024 && sharedMemBytes == 0)) {
++    return hipErrorInvalidValue;
++  }
++#endif
+   // Make sure the launch params are not larger than if specified launch_bounds
+   // If it exceeds, then return a failure
+   if (blockDimX * blockDimY * blockDimZ >
+@@ -482,7 +490,7 @@
+                                     hipStream_t hStream, void** kernelParams, void** extra,
+                                     hipEvent_t startEvent, hipEvent_t stopEvent, uint32_t flags) {
+ #if defined(WITH_PS5_DEVICE)
+-  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++  if (sharedMemBytes > 65536) return hipErrorInvalidValue;
+ #endif
+ 
+   HIP_INIT_API(hipExtModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
+@@ -514,7 +522,7 @@
+                                     size_t sharedMemBytes, hipStream_t hStream, void** kernelParams,
+                                     void** extra, hipEvent_t startEvent, hipEvent_t stopEvent) {
+ #if defined(WITH_PS5_DEVICE)
+-  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++  if (sharedMemBytes > 65536) return hipErrorInvalidValue;
+ #endif
+ 
+   HIP_INIT_API(hipHccModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
+@@ -705,7 +713,7 @@
+                                              void** args, size_t sharedMemBytes,
+                                              hipStream_t stream) {
+ #if defined(WITH_PS5_DEVICE)
+-  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++  if (sharedMemBytes > 65536) return hipErrorInvalidValue;
+ #endif
+ 
+ #if defined(WITH_PS5_DEVICE)
+@@ -736,7 +744,7 @@
+                                          void** args, size_t sharedMemBytes, hipStream_t stream,
+                                          hipEvent_t startEvent, hipEvent_t stopEvent, int flags) {
+ #if defined(WITH_PS5_DEVICE)
+-  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++  if (sharedMemBytes > 65536) return hipErrorInvalidValue;
+ #endif
+ 
+   HIP_INIT_API(hipExtLaunchKernel, hostFunction, gridDim, blockDim, args, sharedMemBytes,

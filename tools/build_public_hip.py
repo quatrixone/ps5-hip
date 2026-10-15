@@ -12,6 +12,7 @@ import sys
 import tempfile
 
 from native_vector_title import audit_roundtrip
+from prepare_public_hip_resources import prepared as resources_prepared
 from prepare_public_hip_embedded import prepared as embedded_prepared
 from embedded_module_linker import patch_linker as embedded_linker
 from qualify_public_hip_aggregate import compiler_inputs as aggregate_compiler_inputs
@@ -63,7 +64,7 @@ def build_inputs():
              "tests/public_hip_aggregate_qualification_test.py",
              "tests/public_hip_embedded_build_test.py", "tests/public_hip_embedded_native_audit_test.py",
              ".deps/sources/native-tools/tooling/native/ps5-pie.ld",
-             "tools/prepare_public_hip_command_stats.py",
+             "tools/prepare_public_hip_resources.py", "tools/prepare_public_hip_command_stats.py",
              "tools/prepare_public_hip_static_module.py", "tools/prepare_public_hip_embedded.py",
              "tools/prepare_hip_admission.py", "tools/guard_native_hip_gl.py",
              "tools/native_runtime.h", "tools/native_shell_exit_probe.cpp",
@@ -126,6 +127,9 @@ def source_tree(output, fixture="bootstrap"):
         guard.write_text(sha(public / "hipamd/src/hip_gl.cpp") + "\n")
     if guard.read_text().strip() != sha(public / "hipamd/src/hip_gl.cpp"):
         raise RuntimeError("guarded HIP GL source changed")
+    # Restore the exact previous-stage bytes so its existing hash guards also run on reuse.
+    if resources_prepared(public):
+        run(output, "restore-resource-base", [sys.executable, ROOT / "tools/prepare_public_hip_resources.py", public, "--reverse"])
     has_embedded = embedded_prepared(public)
     if not has_embedded:
         run(output, "prepare-module", [sys.executable, ROOT / "tools/prepare_public_hip_aot.py", public])
@@ -137,6 +141,7 @@ def source_tree(output, fixture="bootstrap"):
     if not has_embedded:
         run(output, "prepare-static-module", [sys.executable, ROOT / "tools/prepare_public_hip_static_module.py", public])
     run(output, "prepare-embedded", [sys.executable, ROOT / "tools/prepare_public_hip_embedded.py", public])
+    run(output, "prepare-resources", [sys.executable, ROOT / "tools/prepare_public_hip_resources.py", public])
     return public
 
 

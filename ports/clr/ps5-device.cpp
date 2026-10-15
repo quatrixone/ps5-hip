@@ -112,14 +112,21 @@ public:
             candidate.object=inspect_code_object(candidate.bytes.data(),candidate.bytes.size());
             if(candidate.object.target!="gfx1013"||candidate.object.kernels.empty())return false;
             candidate.bundle_target="hip-amdgcn-amd-amdhsa--gfx1013";
-            for(const auto& k:candidate.object.kernels){
-                // First adapter deliberately admits only measured scratch/LDS-free ABI.
-                if(!initial_launch_rejection(k).empty())return false;
-                validate_capture_layout(k,NativeLaunchRoute::Initial);
+            std::vector<size_t> supported;
+            for(size_t i=0;i<candidate.object.kernels.size();++i){
+                const auto& k=candidate.object.kernels[i];
+                const bool initial=initial_launch_rejection(k).empty();
+                if(!initial && !reduction_lds_launch_rejection(k).empty())continue;
+                const uint32_t threads=initial?64u:1024u;
+                if(k.max_workgroup_size<threads || (k.required_workgroup!=std::array<uint32_t,3>{} &&
+                   k.required_workgroup!=std::array<uint32_t,3>{threads,1,1}))continue;
+                validate_capture_layout(k,initial?NativeLaunchRoute::Initial:NativeLaunchRoute::ReductionLds);
+                supported.push_back(i);
             }
+            if(supported.empty())return false;
             object=std::move(candidate);
             std::vector<std::unique_ptr<Kernel>> pending;
-            for(const auto& k:object.object.kernels)pending.push_back(std::make_unique<Kernel>(device(),*this,k));
+            for(auto i:supported)pending.push_back(std::make_unique<Kernel>(device(),*this,object.object.kernels[i]));
             for(auto& k:pending){if(!kernels().emplace(k->native.name,k.get()).second)throw ObjectError("duplicate kernel");k.release();}
             return true;
         }catch(...){clear();return false;}
@@ -137,7 +144,9 @@ Kernel::Kernel(const amd::Device& d,const Program& p,const ps5hip::Kernel& k)
         else throw ObjectError("unsupported argument kind");
     }
     if(!createSignature(args,args.size(),amd::KernelSignature::ABIVersion_2))throw ObjectError("CLR signature creation");
-    workGroupInfo_.size_=k.max_workgroup_size;workGroupInfo_.wavefrontSize_=k.wave_size;
+    const bool reduction=!initial_launch_rejection(k).empty();
+    workGroupInfo_.size_=std::min(k.max_workgroup_size,reduction?1024u:64u);workGroupInfo_.wavefrontSize_=k.wave_size;
+    workGroupInfo_.availableLDSSize_=reduction?65536:0;
     workGroupInfo_.localMemSize_=k.group_bytes;workGroupInfo_.privateMemSize_=k.private_bytes;
 }
 class Virtual final:public amd::device::VirtualDevice {
@@ -222,14 +231,14 @@ public:
     }
     void submitKernel(amd::NDRangeKernelCommand& c)override{execute(c,[&]{
         const auto* k=dynamic_cast<const Kernel*>(c.kernel().getDeviceKernel(device()));
-        if(!k||!c.parameters()||c.cooperativeGroups()||c.sharedMemBytes()||c.sizes().dimensions()>3)throw ObjectError("invalid selected kernel");
+        if(!k||!c.parameters()||c.cooperativeGroups()||c.sizes().dimensions()>3)throw ObjectError("invalid selected kernel");
         std::array<uint32_t,3> groups{1,1,1},threads{1,1,1};
         for(size_t i=0;i<c.sizes().dimensions();++i){auto n=c.sizes().global()[i],t=c.sizes().local()[i];
             if(c.sizes().offset()[i]||!n||!t||n%t||t>UINT32_MAX||n/t>UINT32_MAX)throw ObjectError("unsupported NDRange");
             groups[i]=n/t;threads[i]=t;
         }
-        auto request=select_hip_launch_profile(k->native,groups,threads,0);
-        if(request.route!=NativeLaunchRoute::Initial)throw ObjectError("unqualified CLR launch route");
+        auto request=select_hip_launch_profile(k->native,groups,threads,c.sharedMemBytes());
+        if(request.route!=NativeLaunchRoute::Initial && request.route!=NativeLaunchRoute::ReductionLds)throw ObjectError("unqualified CLR launch route");
         const auto& signature=k->signature();std::vector<const void*> addresses;std::vector<ReadableSpan> spans;
         for(size_t i=0;i<k->native.arguments.size();++i){const auto& a=k->native.arguments[i];const auto& d=signature.at(i);
             if(d.offset_!=a.offset||d.size_!=a.size||d.offset_>signature.paramsSize()||d.size_>signature.paramsSize()-d.offset_)throw ObjectError("captured signature mismatch");
@@ -261,15 +270,15 @@ public:
     Device(BackendFactory factory,Observation& observed):state_(std::make_shared<State>(factory,observed)){
         settings_=new amd::device::Settings();settings_->waitCommand_=false;
         info_.queueProperties_=0;info_.type_=CL_DEVICE_TYPE_GPU;info_.available_=true;
-        info_.localMemSize_=0;info_.svmCapabilities_=CL_DEVICE_SVM_COARSE_GRAIN_BUFFER;info_.minDataTypeAlignSize_=8;
+        info_.localMemSize_=65536;info_.svmCapabilities_=CL_DEVICE_SVM_COARSE_GRAIN_BUFFER;info_.minDataTypeAlignSize_=8;
         // Bounded device-buffer policy, not a claim about total physical memory.
         info_.maxMemAllocSize_=64u*1024u*1024u;info_.memBaseAddrAlign_=0x10000;
         info_.maxPhysicalMemAllocSize_=0;
-        // Initial public adapter route: one-dimensional blocks of 64, Wave32.
+        // Bounded public routes: one-dimensional blocks of 64 or 1024, Wave32.
         // These are admission limits, not the console's full hardware limits.
-        info_.maxWorkGroupSize_=64;info_.maxWorkItemDimensions_=3;
-        info_.maxWorkItemSizes_[0]=64;info_.maxWorkItemSizes_[1]=1;info_.maxWorkItemSizes_[2]=1;
-        info_.wavefrontWidth_=32;info_.localMemSizePerCU_=0;
+        info_.maxWorkGroupSize_=1024;info_.maxWorkItemDimensions_=3;
+        info_.maxWorkItemSizes_[0]=1024;info_.maxWorkItemSizes_[1]=1;info_.maxWorkItemSizes_[2]=1;
+        info_.wavefrontWidth_=32;info_.localMemSizePerCU_=65536;
 
         const auto* isa=amd::Isa::findIsa("amdgcn-amd-amdhsa--gfx1013");
         if(!factory||!isa||!amd::Device::create(*isa))throw ObjectError("PS5 CLR device creation");

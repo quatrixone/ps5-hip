@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "classification": "offline-public-clr-rmsnorm-resources",
+  "source_sha256": {
+    "ports/clr/ps5-device.cpp": "7123ea852e9eb73eb959b46aa19165344e57c62a78882c5f4c83dafb07b5ee9a",
+    "ports/clr/ps5-public-resources.patch": "f03bfc39a7b5a58f44cf37f9753d7745b101ead2c1de1d1ac7877a1efc7002cd",
+    "ports/clr/ps5-public-resources.json": "9f3fe1676521877ff2075e0424867c26faa06d5cbcc07401e9f13f3f053e0d2b",
+    "tools/prepare_public_hip_resources.py": "357e73d412df8b19cc32c4aa8b6b220735b025b7131983742935ba786e55106f",
+    "tools/build_public_hip.py": "b072af453edfafd79aa29bb9498ec8e8d4740c25929f2c9cf0d2300197e85b2e",
+    "tools/prepare_public_hip_embedded.py": "da7a91697111ee01b44e0be4454f6b6704c5e630ed68ef628344f28963b90b7e",
+    "tools/prepare_public_hip_memory.py": "b3cf1f58e704cf6362d77ec15fa4f6bb0ea808c1dc9fad416b4e98c0a4df0ee8",
+    "tests/public_hip_resources_test.py": "1e34bae54b337849f313f82481e4e753e0abbeedfeee260dd75c297f1794be9c",
+    "src/code_object.cpp": "76293d8e6f97d302fd04e6e414427000eebc68d00e6e1e24974ec7ffb3c9960a",
+    "src/hip_launch_profile.cpp": "c9a61644f4fe8b672ebd2b34758f8575ce21a52ce9bc09462412902c7849839e",
+    "src/host_launch.cpp": "c190298dba9774336585b19f08995821802247be2041a38f7bb69d17c1bc5569",
+    "src/native_launch.cpp": "7829fa799988d70ea1050f419d03c5219932cc47673984fed96f61f9f2bfb2a5",
+    "src/launch.cpp": "ed6d93a2ae1c5d821321df90717c2a33f29dbfe82d38f8eebac9c9749c229c9a",
+    "tests/public_hip_rmsnorm_model.cpp": "baef60a694ecf41f5d1a4536bc89392c80d8902894600b8e0c39a2269a20c981",
+    "tools/qualify_public_hip_rmsnorm.py": "f62ce2a3950878373b172b78e7a84d53abef409ffc40c0b9d81423d2a4564583",
+    "tests/public_hip_rmsnorm_qualification_test.py": "fb4f80b8d584006d9d737b38ab45ce7fa11b34f82376520fce3b7a82a59f6d76",
+    "tests/clr_adapter_model.cpp": "d9b2dd86558eb3bd1c6d95b70c5f3a80b6485a5fb839d81a5a9bb1f8d7aec266",
+    "tools/build_llm_rmsnorm_fixture.py": "861360e6c8ecca02815c5ad80cc01272a1c4ac1fe88e370bb51684c26da2c234",
+    "tools/probe_ocml_math.py": "383d76e4ce0d3ae08eecb5e0d2dc25f61033e68569f204658ac8ba108e124a74",
+    "CMakeLists.txt": "de6af40f64476bff25b18c3885b7d48251107325a6e283571e57d3ba05d6c1da"
+  },
+  "raw_evidence": {
+    "results/source-public-rmsnorm-v1/receipt.json": "ff243b770297d4614ae3ea4c339b9a41c1dacf426a36d49a78942aa881ccc8f4",
+    "results/public-rmsnorm-model-v1/receipt.json": "8dbf2ad553e69b1a248683fe3a2ae31f01d5e25168d2108a9e255ce0e5ea25a4",
+    "build/public-hip-rmsnorm-runtime-native-v1/link-receipt.json": "653c130d3683bc23cde3c29998dc08bb45a09f2381c9e690886955daf4cec8dc",
+    "results/public-rmsnorm-source-review-v1/review.json": "2f5790cc1ed4d6ad7be7f4b6a76addfcdf4dac7f92a43d5820805cbcbe31bda5",
+    "results/public-rmsnorm-model-review-v1/review.json": "b07c4c1649c4a4ac67858d7e71ccbc03529eba6e72baeb5328c21922b28eb0f7",
+    "results/public-rmsnorm-model-v1/commands.json": "6d057a8eb2e377bbb3e7c2215f1be9c31b270ea3fd4dffd081d9d8817116b876",
+    "results/public-rmsnorm-model-v1/deferred.stdout": "3b5ed17eb3ddb0d7a1cea30c96d23e28f3493e6fe0450b217ff7cb8e85eb33e0",
+    "results/public-rmsnorm-model-v1/eager.stdout": "3b5ed17eb3ddb0d7a1cea30c96d23e28f3493e6fe0450b217ff7cb8e85eb33e0",
+    "results/public-rmsnorm-model-v1/mismatch.stderr": "ee80ba1281c41b979fd5538505afcece78811d9ba8d7956800163de800961eb6",
+    "build/rmsnorm-public-tools-v1/Testing/Temporary/LastTest.log": "2a7a5d048eb438f4053c3af6f0a36622f2815d5d12c175504d71ca7d7e14bdf7"
+  },
+  "validation": {
+    "full_clr_compilations": 87,
+    "sanitizer": "address,undefined",
+    "model_cases": [
+      "unchanged-dynamic-module",
+      "26-arguments-488-kernargs",
+      "rows-1-2-17",
+      "1024-threads-128-dynamic-LDS",
+      "optional-null-pointers",
+      "caller-mutation-after-enqueue",
+      "supported-function-attributes",
+      "unsupported-sibling-lookup-repeated",
+      "absent-handle-attribute-rejected",
+      "all-unsupported-and-malformed-modules-rejected",
+      "deferred-and-eager",
+      "packet-mismatch-rejected"
+    ],
+    "native_cross_build_fixture": "aggregate",
+    "native_linked_objects": 77,
+    "focused_ctests_passed": 3,
+    "independent_source_reviews": "PASS"
+  },
+  "contract": [
+    "Mixed modules publish only kernels supported by the bounded Initial or ReductionLds routes.",
+    "Public launch admission validates the selected kernel geometry and shared-memory capacity synchronously.",
+    "Actual RMSNorm packet checks cover rows1/2/17,1024 threads,128 dynamic LDS bytes,26 explicit arguments and488 kernarg bytes.",
+    "Null optional pointers, captured caller bytes, exact shader entry/backing and final ownership are checked.",
+    "Eager/deferred runs pass; deliberate packet mismatch fails the oracle."
+  ],
+  "gpu_executed": false,
+  "native_executed": false,
+  "numerical_executed": false,
+  "limits": [
+    "Packet transport validates selected code backing/entry, arguments and resources only; no numerical output, ISA execution or GPU claim.",
+    "Dynamic module API path, not compiler registration/launch-stub proof.",
+    "Null handle attribute rejection does not query a nonexistent sibling handle.",
+    "Hashes current source-qualified base objects; base receipt does not independently bind every object byte.",
+    "Native aggregate cross-build proves buildability, not native RMSNorm execution.",
+    "Model-scale allocations and complete LLM inference remain unqualified."
+  ]
+}

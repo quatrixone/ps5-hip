@@ -1,0 +1,9 @@
+{
+  "files": {
+    "hipamd/src/hip_module.cpp": {
+      "before": "8c79d014b4b8c4a1732d76e77acc86529ca01a2e32fb58176394211a05f4a533",
+      "after": "45797736b649927ab16adf75b746175133ad9320b0dd46556751c6b72aafdd99"
+    }
+  },
+  "patch_sha256": "f03bfc39a7b5a58f44cf37f9753d7745b101ead2c1de1d1ac7877a1efc7002cd"
+}

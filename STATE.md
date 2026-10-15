@@ -64,14 +64,27 @@ symbols, two focused tests, CTest registration and independent review pass.
 See `evidence/offline-rmsnorm-source-fixture.json` and `docs/LLM_V1_PROFILE.md`.
 Root Make session 42388 terminated successfully. Use a fresh output per run.
 
-The public CLR resource integration is currently uncommitted work, not a passed
-runtime milestone. Root full qualification session 95483 terminated with exit 0
-and wrote `results/source-public-rmsnorm-v1/receipt.json`. The reviewed RMSNorm
-model still needs execution against that base before this milestone can pass.
-Source preparation/reuse passed with 846 identical files (session 90626
-terminated). The new model/qualifier independent review passes; runtime
-execution remains pending. Current native console baseline is still
-the aggregate checkpoint. No RMSNorm numerical GPU execution is claimed.
+## Public CLR RMSNorm resources qualified offline
+
+The genuine public HIP runtime now loads the unchanged mixed norm module and
+admits its supported RMSNorm kernel. Eager/deferred host runs verify rows 1/2/17,
+1024 threads, 128 dynamic LDS bytes, all 488 kernarg bytes, optional null pointers,
+caller mutation capture, exact code backing/entry and clean ownership. Invalid
+geometry/shared sizes reject synchronously; the deliberate packet mismatch fails.
+See `evidence/offline-public-clr-rmsnorm-resources.json` and `docs/HIP_REDUCTION.md`.
+
+The full 87-compilation CLR sanitizer suite, three focused CTests, independent
+reviews and 77-object native aggregate cross-build pass. Root sessions 95483,
+5779 and 36938 all terminated with exit 0. Local receipts are respectively
+`results/source-public-rmsnorm-v1/receipt.json`,
+`results/public-rmsnorm-model-v1/receipt.json` and
+`build/public-hip-rmsnorm-runtime-native-v1/link-receipt.json`.
+
+Next: package the native numerical RMSNorm harness with authenticated module and
+CPU fixtures, retain full readbacks, audit and freeze the candidate, then validate
+on idle .40. The harness draft is not yet packaged or qualified. No native
+RMSNorm math or end-to-end inference is claimed; the installed console baseline
+remains the aggregate checkpoint.
 
 ## Real RMSNorm resource preparation qualified offline
 

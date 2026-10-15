@@ -70,4 +70,32 @@ platform headers available, `native_rmsnorm_prepare`. Both tests explicitly
 report `gpu_execution=false`; diagnostic argument patterns are not numerical
 RMSNorm inputs. Source-only fixture generation now passes through
 `make llm-rmsnorm-fixture`; see `evidence/offline-rmsnorm-source-fixture.json`.
-Public CLR resource routing remains separate work before a native numerical experiment.
+Public CLR resource routing now passes the host qualification below; native
+numerical execution remains the next gate.
+
+## Public CLR RMSNorm resource routing
+
+`evidence/offline-public-clr-rmsnorm-resources.json` records the genuine public
+HIP path loading the unchanged mixed norm module. Unsupported sibling kernels
+remain absent. Selected-kernel geometry and shared-memory limits reject invalid
+requests synchronously; valid 1024-thread, 128-byte LDS launches then succeed
+through the host transport for rows 1/2/17.
+
+The oracle checks the actual shader entry and materialized code, all 488 kernarg
+bytes, two null optional pointers, captured caller aggregates and clean ownership.
+Eager and deferred loading pass; a deliberate packet mismatch is rejected.
+The full 87-compilation CLR sanitizer suite, three focused CTests and a 77-object
+native aggregate cross-build pass. This is packet/runtime evidence, not execution
+of RMSNorm math. Dynamic shared-memory sizing remains the caller's responsibility.
+
+Reproduce with a fresh source-qualified base and authenticated fixture:
+
+```sh
+python3 tools/qualify_public_hip_source.py --output results/source-public-rmsnorm-new
+make llm-rmsnorm-fixture LLM_RMSNORM_FIXTURE_DIR=results/llm-rmsnorm-fixture-new
+python3 tools/qualify_public_hip_rmsnorm.py --base results/source-public-rmsnorm-new --fixture results/llm-rmsnorm-fixture-new --output results/public-rmsnorm-model-new
+```
+
+Every output directory must be fresh. Native numerical packaging must include
+the verified module and frozen CPU tensors, retain complete GPU readbacks and
+use reviewed lifecycle controls before testing on .40.
