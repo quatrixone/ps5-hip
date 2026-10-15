@@ -42,6 +42,15 @@ in the native backing checkpoint below remain the baseline.
 
 ## Static module failure handling qualified offline
 
+The actual native compiler-launch candidate now builds and passes the
+raw/converted/extracted image audit and packaging. See
+`evidence/offline-public-embedded-native-package.json`: 76 ordinary objects plus
+one genuine HIP compiler object; ten audited functions preserve their bytes,
+with native execute-only text and verified registration/teardown ordering.
+All 75 runtime translation units match the previously qualified bootstrap.
+Next commit/freeze this candidate and validate it on idle .40. This is offline
+evidence only; native compiler-stub execution and LLM inference remain open.
+
 Superseded next step: bounded compiler embedded-image registration is now
 qualified offline through genuine CLR, including eager/deferred, two-module,
 reversed-order and missing-kernel-name controls. The full 87-compilation host

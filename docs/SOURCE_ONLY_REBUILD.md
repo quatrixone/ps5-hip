@@ -79,6 +79,28 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+### Compiler-generated embedded HIP launch candidate
+
+Build the genuine compiler-registration fixture and native title offline with
+fresh output directories:
+
+```sh
+make public-hip-embedded-package EMBEDDED_FIXTURE_DIR=build/embedded-compiler-v1 EMBEDDED_BUILD_DIR=build/embedded-native-v1 RESULTS_DIR=/data/ps5-hip/results
+```
+
+This target fetches/builds dependencies, verifies the compiler fixture inputs,
+and links 76 ordinary translation units plus one HIP compiler object. Before
+packaging, it audits module spans, constructor/destructor ordering and exact
+function bytes through ELF/SELF conversion. Raw text must be RX and converted
+native text execute-only, matching the native converter's contract. Changed
+instructions or incorrect permissions fail the audit.
+
+The package is a two-launch arithmetic validation candidate, not an LLM client.
+Successful offline packaging does not prove native execution. Follow
+[the experiment contract](PUBLIC_EMBEDDED_IMAGES.md#next-native-experiment-actual-compiler-launch)
+and freeze the committed candidate before a separately reviewed console run.
+Use a different valid `RESULTS_DIR` for another environment.
+
 `make public-hip-fill-package RESULTS_DIR=/data/ps5-hip/results` builds the
 native contiguous and pitched-fill test in `build/public-hip-fill`; use `FILL_BUILD_DIR` for
 a fresh output directory. The six-file package has no GPU-driver imports. Its

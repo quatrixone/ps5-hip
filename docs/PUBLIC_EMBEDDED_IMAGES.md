@@ -90,3 +90,34 @@ substitute a bootstrap package or the modeled transport for that evidence.
 The public adapter's launch geometry, LDS, argument ABI and model allocations
 remain separate client blockers. Passing registration alone will not qualify
 the LLM backend.
+
+## Next native experiment: actual compiler launch
+
+Planned target: idle `.40`, firmware 12.70, title `PPSA99014`; FTP 2121,
+klog 3232 and ELF loader 9021. This section is a test contract, not a run receipt.
+
+Hypothesis: the genuine compiler constructor can register its bounded linked
+image, and its `<<<>>>` stub can dispatch the already-inspected `thread_words`
+kernel through CLR/AGC, then unregister before CLR runtime teardown. The
+known-good control is the existing file-module launch path; the changed variable
+is compiler registration and launch instead of explicit module APIs.
+
+The candidate must use the generated per-object linker layout, append the HIP
+object after CLR runtime initialization, and pass the raw/converted/extracted
+image audit. Freeze the committed source, compiler receipt, package and all
+installed file hashes before deployment. Use the configured results directory
+and Eden/Lapy helper; preserve the currently installed image/log as baseline.
+
+Acceptance: two actual compiler-stub launches, each with 73 exact arithmetic
+values and eight untouched guard words; one allocation/free; no terminal or
+uncertain submission; one queue retired; device gate destroyed; native finalizer
+and natural title exit observed. The application watchdog is 30 seconds. Console
+observation must have a bounded controller deadline and fresh title-specific
+lifecycle evidence, with installed bytes and services checked after settling.
+
+Reject on any API/output/guard mismatch, missing startup/finalization evidence,
+wrong installed hash, missing title stop, or unhealthy service. A constructor
+failure can precede application logging, so capture klog before launch. Do not
+repeat a suspected panic. Release only owned locks and investigate offline.
+Passing this case permits the next real client compile/operator test; it does
+not prove LLM inference or complete static-registry retirement accounting.

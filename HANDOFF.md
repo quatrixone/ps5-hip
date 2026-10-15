@@ -50,6 +50,16 @@ priority. The installed backing-test image/log remain unchanged.
 
 ## Static module failure handling checkpoint
 
+Latest offline checkpoint: `build/public-hip-embedded-native-v2` contains the
+actual 77-object compiler-launch package and passing layout/startup audit.
+Read `evidence/offline-public-embedded-native-package.json`; parent review
+verified artifact hashes and unchanged sources for all 75 runtime units.
+The earlier v1 audit failed only because it expected RX native text; the
+converter emits execute-only text. The corrected audit keeps exact byte checks
+and rejects incorrect permissions. Failed artifacts remain preserved. Next
+freeze the committed v2 candidate, review it, and run the bounded .40 case.
+No console image has changed at this checkpoint.
+
 Current continuation: genuine CLR embedded registration has passed the full
 87-compilation host suite and actual compiler-stub tests (single/two modules,
 reversed order, eager/deferred loading and repeated missing-name rejection).

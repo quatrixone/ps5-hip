@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "classification": "offline-public-hip-native-compiler-launch-package",
+  "source_sha256": {
+    "tools/build_public_hip.py": "85386ea9f8fb68c94bf6305fe069536a0da4be73781b2f50d455764b88c2e1f8",
+    "tools/audit_public_hip_embedded_native.py": "e02a36aa45f9f6f8a6727005a2ec69d82e40c75e6b32d05836185b2d965e913d",
+    "tools/public_hip_embedded_console_title.cpp": "7568824bb0e86a31d34c65dbc06c7dde31541afc719dcfdd6690c091f676c28f",
+    "tools/freeze_source_candidate.py": "2b248cdfa84bfab32aee45967fb1451dc5193534a9530f4c5bdf01cfecc9e882",
+    "tools/source_public_hip_log.py": "92b2c6c34a1a0aa244d9694c957878c92ae4c0a78865da3b55014c909d4f1046",
+    "tests/public_hip_embedded_build_test.py": "8684990dc3d63bf9a214c4093c38d034e1fddc97b76cad7547a1b6106f1fb7d1",
+    "tests/public_hip_embedded_native_audit_test.py": "40791162fb9d4db1d00cc2b6dab2b8837f3e169d6c6835feadce0a31e46f0dbe",
+    "tests/source_console_test.py": "90f91af164eac8cbbebecc9c1ff452e52a097d11973f143389d602e2f869d2db"
+  },
+  "raw_evidence": {
+    "build/public-hip-embedded-native-v2/link-receipt.json": "a68a54bad9800d8d72d67eaeab2b438d6b364b87eebfe4aef59fe3ee1a9ac928",
+    "build/public-hip-embedded-native-v2/embedded-native-audit.json": "ebe070204b44974a312f522fd019234ff4fb3eab11c574b95199fc301ef33b34",
+    "build/public-hip-embedded-native-v2/parent-review.json": "17cb2ea7b0300981bee50bc15eb5951cdbc47b58ad96a241d9eab7400ab02d1f",
+    "results/embedded-native-title-controls-review-v1/review.json": "0de9cbc096b4883bb4ce6780ea3c393a59470367bbf09a3b3c852a3d8cfd1869",
+    "results/embedded-native-builder-review-v1/review.json": "6c3d078c27ebdeaa01df4b105cb0124713e542ac20ae6f3fc933d9c98dd447d8",
+    "results/embedded-native-text-diagnosis-v1/corrected-audit.json": "abd2a14089b1760bd41569357fa80cb8ed883f33c31b0cba77f9d69af0f3a893"
+  },
+  "ordinary_translation_units": 76,
+  "compiler_objects": 1,
+  "unchanged_runtime_translation_units_from_qualified_bootstrap": 75,
+  "audited_functions": 10,
+  "raw_text_flags": 5,
+  "native_text_flags": 1,
+  "text_bytes_preserved": true,
+  "initializer_order": "CLR initialization before compiler registration; compiler unregister before CLR teardown",
+  "package_sha256": "e3d38022543668343a029d14cc55c1506bd5e1bc026719d3a1bd39c599093359",
+  "image_sha256": "a12a54bfde56b30c0ff6a8640e8dab574aa8e5b870588ea185375455d034e104",
+  "validation": [
+    "Native compile/link/convert/sign/extract/layout audit/package passed.",
+    "30 console-control tests passed.",
+    "Compiler fixture drift and native ELF corruption/permission negative controls passed.",
+    "Parent verified current source, object, audit and package identities."
+  ],
+  "native_executed": false,
+  "limits": [
+    "No console run or native compiler-stub success claimed.",
+    "One compiler module/kernel; deferred native loading only.",
+    "Device backing/queue checks do not prove full static registry retirement.",
+    "LLM inference and broader SDK remain incomplete."
+  ]
+}

@@ -7,10 +7,75 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, COPY_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, EMBEDDED_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, COPY_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
+from freeze_source_candidate import validate_embedded_audit, validate_source_inputs
+import json
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
+    def test_freeze_rejects_stale_source_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / 'title.cpp'
+            source.write_bytes(b'qualified source')
+            receipt = {'input_sha256': {'title.cpp': sha(source.read_bytes())}}
+            with patch('freeze_source_candidate.ROOT', root):
+                validate_source_inputs(receipt)
+                for missing in ({}, {'input_sha256': {}}, {'input_sha256': None}):
+                    with self.assertRaises(ValueError):
+                        validate_source_inputs(missing)
+                with self.assertRaises(ValueError):
+                    validate_source_inputs({'input_sha256': {'../outside': '0' * 64}})
+                source.write_bytes(b'committed but not built')
+                with self.assertRaises(ValueError):
+                    validate_source_inputs(receipt)
+                source.unlink()
+                with self.assertRaises(FileNotFoundError):
+                    validate_source_inputs(receipt)
+
+    def test_embedded_freeze_rejects_stale_or_missing_audit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            images = [root / name for name in ('title.elf', 'eboot.elf', 'extracted.elf', 'compiler.o')]
+            for index, artifact in enumerate(images):
+                artifact.write_bytes(b'candidate' + bytes([index]))
+            artifact = images[0]
+            audit = root / 'embedded-native-audit.json'
+            audit.write_text(json.dumps({'classification': 'offline-public-hip-embedded-native-layout-audit',
+                'native_executed': False, 'inputs': {str(p): sha(p.read_bytes()) for p in images}}))
+            receipt = {'compiler_object_count': 1, 'total_linked_object_count': 77,
+                       'embedded_audit_sha256': sha(audit.read_bytes()),
+                       'title_elf_sha256': sha(images[0].read_bytes()),
+                       'fself_roundtrip': {'elf_sha256': sha(images[1].read_bytes()),
+                                           'extracted_sha256': sha(images[2].read_bytes())},
+                       'embedded_compiler': {'object': str(images[3]), 'object_sha256': sha(images[3].read_bytes())}}
+            self.assertEqual(validate_embedded_audit(root, receipt), audit)
+            with self.assertRaises(ValueError):
+                validate_embedded_audit(root, dict(receipt, compiler_object_count=0))
+            with self.assertRaises(ValueError):
+                validate_embedded_audit(root, dict(receipt, title_elf_sha256='0' * 64))
+            artifact.write_bytes(b'changed')
+            with self.assertRaises(ValueError):
+                validate_embedded_audit(root, receipt)
+            audit.unlink()
+            with self.assertRaises(FileNotFoundError):
+                validate_embedded_audit(root, receipt)
+
+    def test_embedded_transcript_requires_real_stub_results_and_teardown(self):
+        self.assertEqual(check_log(EMBEDDED_EXPECTED, 'embedded')['kernel'], 'public_hip_embedded')
+        self.assertFalse(check_log(EMBEDDED_EXPECTED, 'embedded')['hardware_gate_passed'])
+        lines = EMBEDDED_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [LAUNCH_EXPECTED, EMBEDDED_EXPECTED * 2, EMBEDDED_EXPECTED + b'FAIL\n']
+        for before, after in ((b'compiler_stubs=true', b'compiler_stubs=false'),
+                              (b'launches=2', b'launches=0'), (b'values=146', b'values=145'),
+                              (b'guards=16', b'guards=15'), (b'frees=1', b'frees=0'),
+                              (b'retired=1', b'retired=0')):
+            invalid.append(EMBEDDED_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'embedded')
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

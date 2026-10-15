@@ -34,6 +34,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 ## Static module failure handling qualified offline
 
+- 2026-10-15 | V1 runtime prerequisite | offline | 77-object genuine compiler-launch title builds; native layout/startup/text audit and packaging pass | evidence/offline-public-embedded-native-package.json | next: freeze and validate on .40
+
 - 2026-10-15 | V1 runtime prerequisite | offline | bounded compiler images through genuine CLR; eager/deferred, two-module/reversed order and missing-name rejection; full 87-compilation host suite and 76-object native bootstrap pass | evidence/offline-public-embedded-images.json | next: native compiler-launch title audit and .40 validation
 
 - 2026-10-15 | V1 runtime prerequisite | offline | failed module publication and null consumers fixed; full CLR host qualification passed | evidence/offline-static-module-failure.json | next: bounded embedded-image admission
