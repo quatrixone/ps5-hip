@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -211,6 +211,21 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'stream')
+
+    def test_gpu_graph_transcript_requires_replay_and_cleanup(self):
+        self.assertEqual(check_log(GRAPH_GPU_EXPECTED, 'graph_gpu')['kernel'], 'public_hip_graph_gpu')
+        lines = GRAPH_GPU_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [GRAPH_GPU_EXPECTED * 2, GRAPH_EXPECTED, GRAPH_GPU_EXPECTED + b'FAIL\n']
+        for before, after in ((b'launches=2', b'launches=0'), (b'values=146', b'values=73'),
+                              (b'guards=16', b'guards=0'), (b'owned_args=true', b'owned_args=false'),
+                              (b'updated=true', b'updated=false'), (b'source_destroyed=true', b'source_destroyed=false'),
+                              (b'disabled_replays=2', b'disabled_replays=0'), (b'callbacks=4', b'callbacks=2'),
+                              (b'frees=1', b'frees=0'), (b'retired=3', b'retired=2')):
+            invalid.append(GRAPH_GPU_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'graph_gpu')
 
     def test_graph_transcript_requires_replay_recovery_and_cleanup(self):
         self.assertEqual(check_log(GRAPH_EXPECTED, 'graph')['kernel'], 'public_hip_graph')

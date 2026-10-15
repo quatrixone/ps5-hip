@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-shared-native-gpu-graph-fixture",
+  "source_base_commit": "b6d11b6",
+  "package_sha256": "37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2",
+  "source_compilations": 81,
+  "source_links": 12,
+  "source_inputs": 114,
+  "included_files": 698,
+  "native_objects": 74,
+  "native_inputs": 103,
+  "package_files": 7,
+  "controls_tests": 24,
+  "host_regressions": 62,
+  "changes": [
+    "Validate executable graph membership and kernel-node type before update casts.",
+    "Share host/native two-round GPU graph oracle including disabled replays, owned arguments, parameter update, source graph destruction and exact output/guards.",
+    "Add native graph_gpu Make target, strict transcript and fresh-candidate support."
+  ],
+  "preexit_diagnostic": {
+    "allocations": 1,
+    "frees": 1,
+    "launches": 2,
+    "queues": 3,
+    "retired_before_exit": 2,
+    "retired_after_exit": 3
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-graph-gpu-native-source-v1/receipt.json": "f016d6ded5497aa18a68d0bfbaf3eb02377788971cffc63059a98e46626a69ea",
+    "results/public-graph-gpu-native-source-review-v1/final-source-review.json": "a70416c7c00d0fc141c74628b107b366d5480e28896a5e82d343b6240f321a12",
+    "results/graph-gpu-preexit-diagnostic-v1/receipt.json": "7d5824ef6d0eef7f266ead8d5501d1fe60314d7fe6f80fcf70c1109ef59ca2ed",
+    "results/graph-gpu-preexit-diagnostic-v1/independent-review.json": "e50c4720eebd81ca2852317c15546f982addbe1c28280cb0ba77489309eb84b0",
+    "build/public-hip-graph-gpu-v1/link-receipt.json": "5d9a2926a1fd66897d5bb12ed7ee3f72c70152e8e919053e4e3076bcecf4870f",
+    "results/native-public-graph-gpu-review-v1/review.json": "be0bbb4e2921ff31d3ad59670bfa59434c99fd7b18f5ce99c373e7c450caad74",
+    "results/public-hip-graph-gpu-v1-revalidate.log": "8e06e4fbe022a0f54f5110dac5f950795c808141ff3ff0d6b800c6a27a14e527",
+    "results/public-graph-gpu-controls-v1.log": "32ceef99fb0f07b082c26f6a64cd7319af2f5e409e77e50631b8b0c8e3522bfc",
+    "results/public-graph-gpu-native-host-tests-v1.log": "11ec8ee6f426ef98babb5bec536509f6c9b2aac649c0e77f9c2841c3cda00e05"
+  },
+  "limits": [
+    "No native GPU graph execution yet.",
+    "Pre-exit diagnostic reuses the qualified runtime with only an extra observation assertion; it is still host modeled.",
+    "Module and buffer remain caller-owned and live through synchronized graph teardown.",
+    "Separate frozen-candidate deployment review and successful-receipt execution review required."
+  ]
+}

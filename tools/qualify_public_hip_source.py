@@ -204,6 +204,11 @@ def main():
     for negative in ('noop', 'corrupt'):
         run('graph-gpu-' + negative, [output / 'graph-gpu-model', launch_code, negative], env,
             expected_output_failure=True, failure_marker='PUBLIC_GRAPH_GPU_OUTPUT_MISMATCH round=0 index=0')
+    result = run('graph-gpu-native-oracle', [output / 'graph-gpu-model', launch_code, 'native'], env)
+    if result.splitlines() != [
+        'PUBLIC_GRAPH_GPU_NATIVE_ORACLE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false',
+        'PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false']:
+        raise RuntimeError('shared native GPU graph oracle differs')
     print('public GPU graph replay and two negative controls PASS', flush=True)
     stream_source = ROOT / 'tests/public_hip_stream_model.cpp'
     source_hashes[str(stream_source.relative_to(ROOT))] = sha(stream_source)
@@ -405,7 +410,7 @@ def main():
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
                'total_compilations': len(units) + 12,
                'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),
-               'graph_gpu_cases': ['owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
+               'graph_gpu_cases': ['shared-native-oracle', 'exec-update-handle-type-rejections', 'owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
                'stream_gpu_model_sha256': sha(output / 'stream-gpu-model'),
                'stream_gpu_cases': ['event-ordered-two-rounds', 'bypass-stale-output-rejected', 'noop-output-rejected', 'corrupt-output-rejected'],
                'graph_model_sha256': sha(output / 'graph-model'),

@@ -347,3 +347,21 @@ Disabled kernel nodes become dependency-preserving markers and can be re-enabled
 These cases do not establish general allocation-failure coverage, resource-pool
 plateaus, graph submission efficiency or native GPU graph execution. A shared
 native oracle and a fresh reviewed console candidate are still required.
+
+### Native explicit GPU graph fixture
+
+Build with `make public-hip-graph-gpu-package
+GRAPH_GPU_BUILD_DIR=build/public-hip-graph-gpu-v1
+RESULTS_DIR=/data/ps5-hip/results` (one shell command). The package includes the
+same `thread_words.hsaco` as the previously qualified stream fixture. Host and
+native clients share `tools/public_hip_graph_gpu_fixture.h`: two disabled replays
+must still run their dependent callbacks, then two changed-salt GPU replays must
+produce 146 exact values and preserve 16 guards. Arguments are overwritten after
+graph creation and executable update; the source graph is destroyed before the
+second GPU replay. The native title requires four callbacks, two actual dispatches,
+one freed allocation and three retired queues at finalization.
+
+The new fixture uses `ps5-hip-public-graph_gpu.log`. A fresh frozen candidate and
+independent package, deployment and execution reviews are required; an older
+host-graph package does not exercise GPU graph nodes. The previous .40 stream
+result remains the console baseline until this fixture has been deployed and run.

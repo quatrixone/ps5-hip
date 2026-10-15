@@ -49,11 +49,16 @@ STREAM_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_stream'
 STREAM_LINES[2] = 'HIP_STREAM PASS init=0 count=1 rounds=2 launches=2 values=146 guards=16 source_preserved=true event_reused=true allocations=2 frees=2 watchdog_joined=true finalization=pending'
 STREAM_LINES[6] = 'HIP_STREAM FINAL allocations=2 frees=2 queues=3 retired=3 gate_destroyed=true application_fini=pending'
 STREAM_EXPECTED = ('\n'.join(STREAM_LINES) + '\n').encode('ascii')
-LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream')}
+GRAPH_GPU_LINES = list(LINES)
+GRAPH_GPU_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_graph_gpu'
+GRAPH_GPU_LINES[2] = 'HIP_GRAPH_GPU PASS init=0 count=1 rounds=2 launches=2 values=146 guards=16 owned_args=true updated=true source_destroyed=true disabled_replays=2 callbacks=4 allocations=1 frees=1 watchdog_joined=true finalization=pending'
+GRAPH_GPU_LINES[6] = 'HIP_GRAPH_GPU FINAL allocations=1 frees=1 queues=3 retired=3 gate_destroyed=true application_fini=pending'
+GRAPH_GPU_EXPECTED = ('\n'.join(GRAPH_GPU_LINES) + '\n').encode('ascii')
+LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream', 'graph_gpu')}
 
 
 def check_log(raw, fixture='bootstrap'):
-    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED}.get(fixture)
+    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')
     return {'application_result': 'application-pass', 'kernel': 'public_hip_' + fixture,

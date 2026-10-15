@@ -2,7 +2,7 @@
   "files": {
     "hipamd/src/hip_graph.cpp": {
       "before": "bc4a0da774f6e520be9b01e1596c554512e8d16f4fe36f2f4b802f7aa019be11",
-      "after": "3dc58e141b1cfd10d10d6e035b6b81fa8bd7a3398916bbd2afdd9b9b91100408"
+      "after": "e62674e104831ee7b154d65b17104fa301df54110b95637d6ea1fc2df65baca8"
     },
     "hipamd/src/hip_internal.hpp": {
       "before": "10f18b2298f0032a212bd737928d8db60afe46fadc46c3cfa5b8ebbdbec62a72",
@@ -13,5 +13,5 @@
       "after": "dc544f6101edbd8f61f1d58caa077251283cd64a2bbdc88dfde48e7ef8ad5a39"
     }
   },
-  "patch_sha256": "812a6688ff929d3686c874a87a34ec0ff646688e42c416cd8325f0cc8bccb5a2"
+  "patch_sha256": "67e26283b844af03030cbe7c799624f93d6b435a0096664229b70b83ad8e140e"
 }

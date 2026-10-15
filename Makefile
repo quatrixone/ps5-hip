@@ -22,6 +22,7 @@ help:
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
+	@echo 'make public-hip-graph-gpu-package Build explicit GPU graph replay fixture offline'
 	@echo 'make public-hip-stream-package Build explicit-stream GPU/event ordering fixture offline'
 	@echo 'make public-hip-graph-package Build host graph replay and capture-recovery fixture offline'
 	@echo 'make public-hip-fill-package  Build the public HIP contiguous and pitched fill fixture offline'
@@ -126,3 +127,8 @@ STREAM_BUILD_DIR ?= build/public-hip-stream
 .PHONY: public-hip-stream-package
 public-hip-stream-package: deps-build
 	$(PYTHON) tools/build_public_hip.py --fixture stream --output $(STREAM_BUILD_DIR)
+
+GRAPH_GPU_BUILD_DIR ?= build/public-hip-graph-gpu
+.PHONY: public-hip-graph-gpu-package
+public-hip-graph-gpu-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture graph_gpu --output $(GRAPH_GPU_BUILD_DIR)

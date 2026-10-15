@@ -667,6 +667,13 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
+The shared native GPU graph fixture now passes full host sanitizer qualification,
+a fresh 74-object Make package, cached validation, 24 console-control tests and
+62 host regressions. Independent source/package reviews and a pre-exit retirement
+diagnostic passed; see `../evidence/offline-native-gpu-graph-fixture.json`. The new
+fixture requires two disabled replays, two GPU launches, four callbacks, 146 exact
+values, 16 guards and complete three-queue cleanup. Native execution is pending.
+
 Explicit GPU kernel graph nodes now pass full source sanitizer qualification and
 independent audit: owned arguments, parameter updates, replay after source-graph
 destruction, allocation/command failure recovery, parallel/child cleanup and

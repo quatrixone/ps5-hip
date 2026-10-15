@@ -11,6 +11,13 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
+The shared native GPU graph fixture now passes full host sanitizer qualification,
+a fresh 74-object Make package, cached validation, 24 console-control tests and
+62 host regressions. Independent source/package reviews and a pre-exit retirement
+diagnostic passed; see `evidence/offline-native-gpu-graph-fixture.json`. The new
+fixture requires two disabled replays, two GPU launches, four callbacks, 146 exact
+values, 16 guards and complete three-queue cleanup. Native execution is pending.
+
 The corrected graph runtime also passes a fresh 74-object native Make build,
 cached validation, independent artifact audit and all 62 host regression tests.
 See `evidence/offline-native-kernel-graph-runtime.json`. This package still runs

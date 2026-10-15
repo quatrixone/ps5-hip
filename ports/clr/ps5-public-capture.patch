@@ -109,7 +109,23 @@
    std::vector<hip::GraphNode*> graphNodes;
    if (false == clonedGraph->TopologicalOrder(graphNodes)) {
      return hipErrorInvalidValue;
-@@ -1701,7 +1758,7 @@
+@@ -1688,20 +1745,20 @@
+                                            const hipKernelNodeParams* pNodeParams) {
+   HIP_INIT_API(hipGraphExecKernelNodeSetParams, hGraphExec, node, pNodeParams);
+   hip::GraphNode* n = reinterpret_cast<hip::GraphNode*>(node);
+-  if (hGraphExec == nullptr ||
+-      !hip::GraphNode::isNodeValid(n) ||
++  if (!hip::GraphExec::isGraphExecValid(reinterpret_cast<hip::GraphExec*>(hGraphExec)) ||
++      !hip::GraphNode::isNodeValid(n) || n->GetType() != hipGraphNodeTypeKernel ||
+       pNodeParams == nullptr || pNodeParams->func == nullptr) {
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+   hip::GraphNode* clonedNode = reinterpret_cast<hip::GraphExec*>(hGraphExec)->GetClonedNode(n);
+-  if (clonedNode == nullptr) {
++  if (clonedNode == nullptr || clonedNode->GetType() != hipGraphNodeTypeKernel) {
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+   hipError_t status = reinterpret_cast<hip::GraphKernelNode*>(clonedNode)->SetParams(pNodeParams);
    if(status != hipSuccess) {
      HIP_RETURN(status);
    }

@@ -13,7 +13,8 @@ struct Final {
   std::fprintf(stderr,"PUBLIC_GRAPH_GPU_COUNTS queues=%u retired=%u allocations=%u frees=%u\n",unsigned(observed.queues),unsigned(observed.retired_queues),unsigned(observed.allocations),unsigned(observed.frees));
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
   checked(observed.allocations==1&&observed.frees==1&&observed.launches==2,__LINE__);
-  checked(observed.queues==7&&observed.retired_queues==7&&allocations.empty(),__LINE__);
+  const unsigned queues=!std::strcmp(mode,"native")?3:7;
+  checked(observed.queues==queues&&observed.retired_queues==queues&&allocations.empty(),__LINE__);
   std::puts("PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false");
  }
 };
@@ -25,6 +26,8 @@ extern "C" int __wrap_pthread_create(pthread_t* p,const pthread_attr_t* a,void*(
 extern "C" int __wrap_pthread_join(pthread_t p,void** v){return __real_pthread_join(p,v);}
 static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(stderr,"PUBLIC_GRAPH_GPU_ERROR line=%d status=%d\n",line,int(status));std::abort();}}
 #define HIP_OK(x) ok(x,__LINE__)
+#include "public_hip_graph_gpu_fixture.h"
+static hipGraphExec_t replay_exec=nullptr;
 static int fail_argument = -1;
 static unsigned argument_calls = 0;
 static int fail_command = -1;
@@ -39,6 +42,12 @@ extern "C" hipError_t ps5hip_graph_command_status(){return fail_command>=0&&comm
 static void inject(int at){fail_argument=at;argument_calls=0;}
 int main(int argc,char**argv){
  checked(argc==3,__LINE__);mode=argv[2];resume=true;
+ if(!std::strcmp(mode,"native")){
+  graph_gpu_fixture::run(argv[1]);
+  checked(submits==2&&backend_calls==1,__LINE__);completed=true;
+  std::puts("PUBLIC_GRAPH_GPU_NATIVE_ORACLE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false");
+  return 0;
+ }
  HIP_OK(hipInit(0));
  hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,argv[1]));
  hipFunction_t function=nullptr;HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
@@ -106,6 +115,11 @@ int main(int argc,char**argv){
  }
  count=0;salt=999; // graph must own values, not this caller's argument storage.
  hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
+ checked(hipGraphExecKernelNodeSetParams(nullptr,node,&params)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecKernelNodeSetParams(reinterpret_cast<hipGraphExec_t>(0x1234),node,&params)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecKernelNodeSetParams(exec,host,&params)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecKernelNodeSetParams(exec,nullptr,&params)==hipErrorInvalidValue,__LINE__);
+ checked(hipGraphExecKernelNodeSetParams(exec,reinterpret_cast<hipGraphNode_t>(0x1234),&params)==hipErrorInvalidValue,__LINE__);
  HIP_OK(hipGraphNodeSetEnabled(exec,node,0));
  for(unsigned i=0;i<2;++i){HIP_OK(hipGraphLaunch(exec,stream));HIP_OK(hipStreamSynchronize(stream));}
  checked(submits==0&&callbacks==2,__LINE__);callbacks=0;
@@ -116,28 +130,16 @@ int main(int argc,char**argv){
   inject(at);checked(hipGraphKernelNodeSetParams(node,&params)==hipErrorOutOfMemory,__LINE__);
  }
  inject(-1);count=0;salt=999;
- for(unsigned round=0;round<2;++round){
-  unsigned input[81],output[81];
-  for(unsigned i=0;i<81;++i){input[i]=0xa5000000u+i*7+round*113;output[i]=0xdeadbeef;}
-  HIP_OK(hipMemcpy(buffer,input,sizeof(input),hipMemcpyHostToDevice));
-  if(round==1){
-   count=73;salt=43;HIP_OK(hipGraphExecKernelNodeSetParams(exec,node,&params));
-   count=0;salt=999;
-   HIP_OK(hipGraphDestroy(graph));graph=nullptr;
-  }
-  if(round==1){
-   fail_command=0;command_calls=0;
-   checked(hipGraphLaunch(exec,stream)==hipErrorOutOfMemory,__LINE__);
-   HIP_OK(hipStreamSynchronize(stream));checked(callbacks==1&&submits==1,__LINE__);
-   fail_command=-1;
-  }
-  HIP_OK(hipGraphLaunch(exec,stream));HIP_OK(hipStreamSynchronize(stream));
-  checked(callbacks==round+1,__LINE__);
-  HIP_OK(hipMemcpy(output,buffer,sizeof(output),hipMemcpyDeviceToHost));
-  for(unsigned i=0;i<81;++i)if(output[i]!=(i<73?i*17+19+round*24:input[i])){
-   std::fprintf(stderr,"PUBLIC_GRAPH_GPU_OUTPUT_MISMATCH round=%u index=%u\n",round,i);checked(false,__LINE__);
-  }
- }
+ replay_exec=exec;
+ graph_gpu_fixture::replay(graph,exec,node,stream,buffer,params,count,salt,callbacks,
+  [](unsigned round,hipStream_t stream){
+   if(round==1){
+    fail_command=0;command_calls=0;
+    checked(hipGraphLaunch(replay_exec,stream)==hipErrorOutOfMemory,__LINE__);
+    HIP_OK(hipStreamSynchronize(stream));checked(callbacks==1&&submits==1,__LINE__);
+    fail_command=-1;
+   }
+  });
  HIP_OK(hipGraphExecDestroy(exec));HIP_OK(hipStreamDestroy(stream));
  HIP_OK(hipFree(buffer));HIP_OK(hipModuleUnload(module));
  checked(submits==2&&backend_calls==1,__LINE__);completed=true;

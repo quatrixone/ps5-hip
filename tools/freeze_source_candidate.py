@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--baseline-log-sha256')
     parser.add_argument('--baseline-log-preserved', action='store_true',
                         help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
-    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream'), default='bootstrap')
+    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream', 'graph_gpu'), default='bootstrap')
     args = parser.parse_args()
     if args.baseline_log_preserved and not args.baseline_log_sha256:
         parser.error('--baseline-log-preserved requires --baseline-log-sha256')
@@ -36,7 +36,7 @@ def main():
         parser.error('candidate must be under results/')
     receipt = json.loads((args.build / 'link-receipt.json').read_text())
     fixture = receipt.get('fixture', 'bootstrap')
-    if fixture not in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream'):
+    if fixture not in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph', 'stream', 'graph_gpu'):
         parser.error('unknown fixture')
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 74:
         parser.error('not the complete .40 candidate')
@@ -69,7 +69,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Public HIP producer GPU launch records an event; a nonblocking consumer waits before D2D copy, preserving146outputs16guards and source over2changedrounds with event reuse and3retiredqueues.' if fixture == 'stream' else
+                'hypothesis': ('Explicit public HIP GPU graph owns arguments, updates the executable, survives source destruction, preserves146values16guards across2launches and2disabledreplays with4callbacks, then frees1buffer and retires3queues.' if fixture == 'graph_gpu' else
+                               'Public HIP producer GPU launch records an event; a nonblocking consumer waits before D2D copy, preserving146outputs16guards and source over2changedrounds with event reuse and3retiredqueues.' if fixture == 'stream' else
                                'Public HIP explicit and captured host graphs replay32changed inputs, execute64callbacks, update callback/user data, survive source-graph destruction and recover6invalidations while retaining3caller-owned graphs, then retire5queues without GPU work.' if fixture == 'graph' else
                                'New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.' if fixture == 'bootstrap' else
                                'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.' if fixture == 'memory' else
