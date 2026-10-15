@@ -15,8 +15,11 @@ Descendant event rejoins now preserve the capture parent tree, fixing a reproduc
 EndCapture stack overflow. Fresh source qualification covers 24 canceled rejoins,
 invalidated/invalid-flag wait admission, three rejected cross-session merges and
 eight exact changing-input replays of a successfully rejoined five-node graph.
-See `evidence/offline-public-capture-rejoin.json`. The native rebuild is underway;
-previous frozen packages do not contain this latest fix.
+See `evidence/offline-public-capture-rejoin.json`. The full 74-object native Make
+rebuild and cached validation passed. The replacement candidate is frozen at
+`cf9fafe` in `results/source-graph-rejoin-console-v1`; independent deployment-only
+review passed. See `evidence/offline-native-graph-rejoin-runtime.json`. Execution
+still requires a successful, separately reviewed deployment receipt.
 
 The owner confirmed .40 recovery and WSL-only access. After two failed service
 checks and fresh owner confirmation, a read-only WSL preflight verified all three

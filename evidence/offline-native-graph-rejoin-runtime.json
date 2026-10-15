@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-15",
+  "status": "native-rejoin-runtime-package-frozen-and-reviewed-for-deployment",
+  "frozen_source_commit": "cf9fafe60fe70c08ed429712cbed0cf40f038547",
+  "manifest_sha256": "d982a0426ec5dea45f63c7563b607145b1dfa4f501bf8a4f5ad0a394e32c6886",
+  "package_sha256": "85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4",
+  "objects": 74,
+  "bound_files": 28,
+  "committed_build_inputs": 99,
+  "package_files": 6,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-graph-rejoin-console-v1/manifest.json": "d982a0426ec5dea45f63c7563b607145b1dfa4f501bf8a4f5ad0a394e32c6886",
+    "results/source-graph-rejoin-console-v1/build-receipt.json": "4c3f71cbe18b325fcb5c20351162106103b5d3339be05e642b3ad82fabdce094",
+    "results/source-graph-rejoin-console-v1/deployment-review.json": "1f40ab0a7b8ef7c76ab83f1dd99ae0e5e327d7207a4a26f1aa5d9e81befd2d9b",
+    "results/native-graph-rejoin-review/review.json": "cdeaee409887944c5066f7cad905c99453fadc477b37ed0007c3d89f2cc5b6c0",
+    "results/native-graph-rejoin-build-v2.log": "bf01d84c5b8ebf360c17a383d8a1821135a7a3c759ec3c3dd1ce9dcabca2d2fb",
+    "results/native-graph-rejoin-revalidate-v2.log": "bf01d84c5b8ebf360c17a383d8a1821135a7a3c759ec3c3dd1ce9dcabca2d2fb"
+  },
+  "accepted_scope": [
+    "Full native Make build and cached validation passed.",
+    "Independent import, FSELF, UFS, inventory and retained-code audit passed.",
+    "All committed build inputs and frozen artifacts match.",
+    "Independent deployment-only operational review approved, conditional on fresh locked admission."
+  ],
+  "limits": [
+    "No deployment or native execution yet.",
+    "Title remains the 32-replay, 64-callback, six-single-origin-invalidation fixture; new rejoin matrix remains host-only.",
+    "Execution requires independent review of exact successful deployment receipt."
+  ]
+}
