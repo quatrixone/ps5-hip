@@ -57,11 +57,11 @@ extern "C" void ps5hip_install_vector_title_finalizer() {
 int main() {
   try {
     std::ifstream config("/app0/results-dir.txt", std::ios::binary);
-    char bytes[242]{};
-    config.read(bytes, sizeof(bytes));
+    char config_bytes[242]{};
+    config.read(config_bytes, sizeof(config_bytes));
     const auto length = config.gcount();
     if (!config.eof() || length < 2 || length > 240) return 2;
-    const std::string directory(bytes, static_cast<size_t>(length));
+    const std::string directory(config_bytes, static_cast<size_t>(length));
     if (!ps5hip_canary::valid_results_directory(directory)) return 2;
     if (elevation::request(elevation::Capability::filesystem, "/app0/lapy.elf") != elevation::Status::ok) return 2;
     if (!ps5hip_canary::redirect_log((directory + "/ps5-hip-public-copy.log").c_str())) return 2;

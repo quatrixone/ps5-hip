@@ -164,8 +164,13 @@ def compile_units(output, source, fixture="bootstrap"):
                 "source_sha256": sha(path), "object": str(obj.relative_to(output)),
                 "object_sha256": sha(obj)}
 
+    # Fail quickly on the selected client before spending time on the upstream closure.
+    title_index = units.index(ROOT / ("tools/public_hip_" + fixture + "_console_title.cpp"))
+    title_record = compile_one((title_index, units[title_index]))
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        records = list(pool.map(compile_one, enumerate(units)))
+        records = list(pool.map(compile_one, ((index, path) for index, path in enumerate(units)
+                                              if index != title_index)))
+    records.insert(title_index, title_record)
     if len(records) != 74 or len({record["object"] for record in records}) != 74:
         raise RuntimeError("not a clean 74-object closure")
     return records
