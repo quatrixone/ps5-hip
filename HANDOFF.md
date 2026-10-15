@@ -61,6 +61,22 @@ All older next-step paragraphs below are historical and subordinate to this
 priority. The latest native compiler-launch checkpoint below records the current
 installed image/log; the earlier backing-test image/log are preserved backups.
 
+## CPU RMSNorm numerical oracle qualified offline
+
+`make llm-rmsnorm-reference` now reproduces the genuine upstream CPU operator
+reference. Six width-2048 cases cover stress inputs and real Q4_0 embedding rows
+at 1/2/17 rows. All 81,920 outputs match bit-for-bit across two fresh processes;
+maximum CPU-versus-FP64 absolute error is approximately 2.23e-6. A fresh Make run
+matches the independently reviewed reference. The three oracle tests, CTest
+registration, CPU prerequisite checks and artifact/input rehashes pass.
+See `evidence/offline-llm-rmsnorm-reference.json` and `docs/LLM_V1_PROFILE.md`.
+
+The proposed GPU tolerance is frozen, not hardware-qualified. Next: complete
+nullable optional-pointer qualification and actual RMSNorm launch resources
+(1024 threads, 128 dynamic LDS bytes), then validate the unchanged upstream
+operator against these tensors on .40. No console change in this milestone;
+aggregate-launch evidence remains the installed baseline.
+
 ## Resume: aggregate native gate passed; real operator resources next
 
 Latest native evidence: `evidence/console40-public-aggregate-success.json`.

@@ -196,3 +196,30 @@ registration now pass genuine CLR host qualification; see
 `../evidence/offline-public-embedded-images.json`. GPU transport was modeled.
 The completed bounded native compiler-launch case and remaining limits are documented in
 [PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md).
+
+## CPU RMSNorm operator reference
+
+After the CPU tools and Q4_0 conversion above, run:
+
+```sh
+make llm-rmsnorm-reference LLM_CPU_BUILD_DIR=build/llm-cpu-reference \
+  LLM_RMSNORM_REFERENCE_DIR=results/llm-rmsnorm-reference
+```
+
+The target revalidates CPU tools and runs the network-free tooling tests. It
+requires the converted model; it does not implicitly fetch or convert weights.
+Use a fresh output directory for each run. The harness calls genuine upstream
+`ggml_rms_norm` on contiguous F32 rows of width 2048, epsilon F32(1e-5), with
+one CPU thread. Stress inputs and actual dequantized Q4_0 embedding rows cover
+row counts 1, 2 and 17. It saves input/output tensors from two fresh processes,
+checks bitwise repeatability, and compares against an FP64 diagnostic.
+
+The declared prospective GPU comparison budget is
+`abs(actual-reference) <= 2e-5 + 2e-4 * abs(reference)`. It is frozen before GPU
+evaluation; failures must be investigated, not silently accommodated. CPU
+reference error must consume at most 1/32 of that budget. No-op and corrupted
+output controls must fail. The receipt binds the model, source, compiler,
+CPU build, runtime libraries, declared profile and generated artifacts.
+
+This reference does not qualify native GPU accuracy, strided input, fused
+normalization weights or full-model execution.

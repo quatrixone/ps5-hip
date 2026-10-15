@@ -20,6 +20,7 @@ help:
 	@echo 'make llm-model-fetch  Fetch and verify locked source weights/tokenizer (2.2 GB; fresh receipt required)'
 	@echo 'make llm-conversion-env  Prepare isolated, hash-locked CPU conversion dependencies (Linux x86-64)'
 	@echo 'make llm-model-convert  Convert verified source model to F16 and pure Q4_0 (fresh output required)'
+	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
@@ -91,6 +92,11 @@ LLM_MODEL_RECEIPT ?= results/llm-model-source/receipt.json
 LLM_CONVERSION_ENV ?= .deps/llm-conversion-env
 LLM_GGUF_DIR ?= models/tinyllama-gguf
 LLM_REFERENCE_DIR ?= results/llm-reference
+LLM_RMSNORM_REFERENCE_DIR ?= results/llm-rmsnorm-reference
+.PHONY: llm-rmsnorm-reference
+llm-rmsnorm-reference: llm-cpu-reference
+	$(PYTHON) tools/build_llm_rmsnorm_reference.py --output $(LLM_RMSNORM_REFERENCE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
+
 .PHONY: llm-reference-fixtures
 llm-reference-fixtures: llm-cpu-reference
 	$(PYTHON) tools/build_llm_reference_fixtures.py --output $(LLM_REFERENCE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
@@ -111,6 +117,7 @@ llm-cpu-reference: llm-deps-fetch llm-tool-test
 	$(PYTHON) tools/build_llm_cpu_reference.py --output $(LLM_CPU_BUILD_DIR)
 
 llm-tool-test:
+	$(PYTHON) tests/llm_rmsnorm_reference_test.py
 	$(PYTHON) tests/llm_reference_fixtures_test.py
 	$(PYTHON) tests/llm_conversion_test.py
 	$(PYTHON) tests/fetch_llm_model_test.py

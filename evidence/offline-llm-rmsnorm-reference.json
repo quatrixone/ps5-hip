@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "classification": "offline-genuine-upstream-cpu-rmsnorm-reference",
+  "source_sha256": {
+    "tools/build_llm_rmsnorm_reference.py": "e7b65925c1328928ae1bd42d3cee31543206d4899f31869571d504fa9c0bf171",
+    "tests/llm_rmsnorm_reference.cpp": "f22dae3aaf3f7d8416c9599fb564e987cdfc09cb2a7ad2c6bf4d643cb8608bb6",
+    "tests/llm_rmsnorm_reference_test.py": "0ba6c85e2bda77eca430c59bd56a450a8f5bf7f003dbcbf20066ce5cb66f2ad0",
+    "Makefile": "e84c25f2398fbcb78f8360e9a1148f72035896cdcb9ad24180940197e91c779e",
+    "CMakeLists.txt": "1b788176bfd04d29944d0fca92860a9bed4fe1350a895e32cbd947d15cfae3a8"
+  },
+  "raw_evidence": {
+    "results/llm-rmsnorm-reference-v2/receipt.json": "c6d6a3f31c358439e17bd1ae1465ca793b6895a8dd450bdedd8f7efa8cae9ead",
+    "results/llm-rmsnorm-reference-make-v1/receipt.json": "e9b6afd33f3fdf342b6b9d72a129f581963ba6a2901705b635195468322837b2",
+    "results/llm-rmsnorm-reference-review-v1/review.json": "ac982d92d0ebc066a024c1203f0b9d5013efcd8c1fd024d389250036a40458a2"
+  },
+  "upstream_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "profile": {
+    "width": 2048,
+    "epsilon_f32": 9.999999747378752e-06,
+    "row_counts": [
+      1,
+      2,
+      17
+    ],
+    "embedding_tokens": [
+      1,
+      9038,
+      2501,
+      263,
+      931,
+      29892,
+      297,
+      2319,
+      5720,
+      450,
+      7483,
+      310,
+      3444,
+      338,
+      12027,
+      7420,
+      2020
+    ],
+    "threads": 1,
+    "operator": "GGML_OP_RMS_NORM unfused F32",
+    "tolerance": {
+      "absolute": 2e-05,
+      "relative": 0.0002,
+      "rule": "abs(actual-reference) <= absolute + relative*abs(reference)",
+      "status": "proposed frozen operator acceptance budget; not a GPU accuracy claim",
+      "rationale": "Allows float32 tree/FMA/rsqrt differences from CPU wider accumulation/sqrt; CPU-vs-FP64 baseline must consume at most1/32 of this budget. No GPU result was used to tune it."
+    }
+  },
+  "cases": [
+    {
+      "name": "stress-1",
+      "rows": 1,
+      "input_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+      "cpu_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+      "fp64_sha256": "4fe7b59af6de3b665b67788cc2f99892ab827efae3a467342b3bb4e3bc8e5bfe",
+      "metrics": {
+        "elements": 2048,
+        "maximum_absolute_error": 0.0,
+        "maximum_relative_error": 0.0,
+        "rms_error": 0.0,
+        "maximum_budget_fraction": 0.0
+      }
+    },
+    {
+      "name": "stress-2",
+      "rows": 2,
+      "input_sha256": "1b11f139979ecdacad85d61c4c17424786837922957acfcb92064bd2871aa404",
+      "cpu_sha256": "f732c9f2fd4eab3612994df9fd16edb13073a409a2a2d29bd41c331628a14fee",
+      "fp64_sha256": "dab38c6ffbf8c96e523c526985cdb713774c75254b5ceff8f6e2a719a041e88b",
+      "metrics": {
+        "elements": 4096,
+        "maximum_absolute_error": 6.827787224494841e-09,
+        "maximum_relative_error": 6.8278213633447536e-09,
+        "rms_error": 4.827974646939178e-09,
+        "maximum_budget_fraction": 3.103553754454017e-05
+      }
+    },
+    {
+      "name": "stress-17",
+      "rows": 17,
+      "input_sha256": "b01914da564d4a64f184bf6a412401e5a0beb640c2f1404a1fcceb1909281dd1",
+      "cpu_sha256": "9ff5ffff763e07ec0fa7e04bd1e494f074caef8e89837f163843f421b4487b2b",
+      "fp64_sha256": "c25dd2e5b5addac16b7c4fdf8248aa5b89201e1b94753e9b7e3e833a01b56fdb",
+      "metrics": {
+        "elements": 34816,
+        "maximum_absolute_error": 2.2278370295225614e-06,
+        "maximum_relative_error": 1.4794621348612703e-07,
+        "rms_error": 4.630402696244846e-08,
+        "maximum_budget_fraction": 0.0006737282189110257
+      }
+    },
+    {
+      "name": "embedding-1",
+      "rows": 1,
+      "input_sha256": "2ff11a01bef9f84c1790ecf24c773569b993660458365a1c267bdb7d626243c5",
+      "cpu_sha256": "a75689d6fba09271e989f1939c8a6749fb7dfe11419bb4cc2296b773043ebc72",
+      "fp64_sha256": "608f72f2fe7941d7a9a84ad2f7eeac8de940123384416a354456c861cb7e35a5",
+      "metrics": {
+        "elements": 2048,
+        "maximum_absolute_error": 6.742236968726445e-08,
+        "maximum_relative_error": 6.230467707879391e-08,
+        "rms_error": 1.5733302357795918e-08,
+        "maximum_budget_fraction": 0.0002836529077011147
+      }
+    },
+    {
+      "name": "embedding-2",
+      "rows": 2,
+      "input_sha256": "15636967fa101542e823d748f828ed75f68c1ec0f9c54d0b33204e17bc9c233e",
+      "cpu_sha256": "5e21f74689e6802bd6e8f3e01bd28bd66835223820c4bf25a3c663490c44d644",
+      "fp64_sha256": "cd252c6d4ce31ce9bcf8997360c22a166c7f20e63f9953ce7813dbd658b68c3f",
+      "metrics": {
+        "elements": 4096,
+        "maximum_absolute_error": 3.4526425052305854e-07,
+        "maximum_relative_error": 1.3438874111835167e-07,
+        "rms_error": 5.9354097505338934e-08,
+        "maximum_budget_fraction": 0.0006407205808295445
+      }
+    },
+    {
+      "name": "embedding-17",
+      "rows": 17,
+      "input_sha256": "a5c7c5c89bcda7d350af47e1fdbfc95bfe643547b832c87737d1554c7546e9fa",
+      "cpu_sha256": "ce4cd0ee5183f15c1dba6df10da0a280d8b735ea09e9d948c2c1365d911ef2de",
+      "fp64_sha256": "081dad225040fa8fc72a2b2241314717dc1aec629e33a92060291ab2c736a89a",
+      "metrics": {
+        "elements": 34816,
+        "maximum_absolute_error": 6.34704377056039e-07,
+        "maximum_relative_error": 1.3438874111835167e-07,
+        "rms_error": 4.44045728898906e-08,
+        "maximum_budget_fraction": 0.0006407205808295445
+      }
+    }
+  ],
+  "validation": {
+    "make_target_exit_code": 0,
+    "make_cpu_prerequisites": [
+      "configure",
+      "build",
+      "completion-version",
+      "quantize-fns",
+      "rope"
+    ],
+    "ctest_registration_passed": true,
+    "tooling_unit_tests": 3,
+    "fresh_processes": 2,
+    "fresh_repeats_bitwise_equal": true,
+    "independent_reference_run_cases_match": true,
+    "negative_controls": [
+      "noop rejected",
+      "single-element corruption rejected"
+    ],
+    "inputs_rehashed": 322,
+    "artifacts_rehashed": 47,
+    "independent_review": "PASS"
+  },
+  "gpu_executed": false,
+  "limits": [
+    "CPU operator reference only; no native numerical accuracy, tolerance qualification or model inference claim.",
+    "Proposed tolerance is frozen before GPU evaluation; future rejection must be investigated, not silently relaxed.",
+    "Contiguous rows only; strided input, fused norm weights and nonfinite handling remain separate cases."
+  ]
+}
