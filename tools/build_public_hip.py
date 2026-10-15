@@ -254,13 +254,17 @@ def inventory(folder):
             if path.is_file()}
 
 
-def package_title(output, image, libc, results_dir):
-    title = json.loads((ROOT / "title.json").read_text())["title_id"]
+def validate_results_directory(results_dir):
     parts = results_dir[1:].split("/") if results_dir.startswith("/") else []
-    if (not 2 <= len(results_dir) <= 240 or results_dir.endswith("/") or
+    if (not parts or not 2 <= len(results_dir) <= 240 or results_dir.endswith("/") or
             any(part in ("", ".", "..") for part in parts) or
             any(not 32 <= ord(char) <= 126 or char == "\\" for char in results_dir)):
         raise ValueError("results directory must be a bounded absolute console path")
+
+
+def package_title(output, image, libc, results_dir):
+    title = json.loads((ROOT / "title.json").read_text())["title_id"]
+    validate_results_directory(results_dir)
     stage = output / "package"
     app = stage / "app"
     sources = {
@@ -312,6 +316,7 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
+    validate_results_directory(args.results_dir)
     output = args.output.resolve()
     if not output.is_relative_to((ROOT / "build").resolve()) and not output.is_relative_to((ROOT / ".local").resolve()):
         parser.error("output must stay within build/ or .local/")
