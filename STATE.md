@@ -12,7 +12,10 @@ gates remain open as previously recorded; historical evidence is unchanged.
 ## Active priority: native LLM inference v1
 
 Owner decision on 2026-10-15: prioritize the bounded first release in
-`docs/LLM_V1_PLAN.md`. Start V1.1 client/model profiling, then client-required
+`docs/LLM_V1_PLAN.md`. Its release checklist requires source-only builds, real
+GPU prefill/decode, reference correctness, lifecycle qualification and measured
+performance; full ROCm compatibility and training are not v1 prerequisites.
+Start V1.1 client/model profiling, then client-required
 public HIP launch/memory coverage, tensor operations and end-to-end inference.
 The current upstream inventory baseline is llama.cpp master
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`. CPU reference tools now build and
@@ -62,11 +65,12 @@ See `evidence/offline-rmsnorm-source-fixture.json` and `docs/LLM_V1_PROFILE.md`.
 Root Make session 42388 terminated successfully. Use a fresh output per run.
 
 The public CLR resource integration is currently uncommitted work, not a passed
-runtime milestone. Root full qualification session 95483 owns
-`results/source-public-rmsnorm-v1`; poll that same handle before changing its
-inputs. Source preparation/reuse passed with 846 identical files (session 90626
-terminated). The new model/qualifier require their independent review fixes and
-runtime execution against that base. Current native console baseline is still
+runtime milestone. Root full qualification session 95483 terminated with exit 0
+and wrote `results/source-public-rmsnorm-v1/receipt.json`. The reviewed RMSNorm
+model still needs execution against that base before this milestone can pass.
+Source preparation/reuse passed with 846 identical files (session 90626
+terminated). The new model/qualifier independent review passes; runtime
+execution remains pending. Current native console baseline is still
 the aggregate checkpoint. No RMSNorm numerical GPU execution is claimed.
 
 ## Real RMSNorm resource preparation qualified offline

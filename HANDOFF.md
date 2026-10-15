@@ -26,6 +26,9 @@ then the remaining client-required operators and complete native inference.
 Do not restart completed model preparation or broaden SDK coverage without a
 concrete inference blocker. The release-progress table in the v1 plan separates
 completed prerequisites from the still-open end-to-end release gates.
+Use the release-contract checklist as the shipping gate: reproducible Make
+build, actual GPU prefill/decode, CPU-reference correctness, qualified lifecycle
+and measured performance. Full SDK coverage and training remain later work.
 The inspected upstream master snapshot is
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; local sparse source is ignored at
 `.deps/sources/llama-client` (now a full checkout). Optional Make targets
@@ -74,11 +77,14 @@ See `evidence/offline-rmsnorm-source-fixture.json` and `docs/LLM_V1_PROFILE.md`.
 Root Make session 42388 terminated successfully. Use a fresh output per run.
 
 The public CLR resource integration is currently uncommitted work, not a passed
-runtime milestone. Root full qualification session 95483 owns
-`results/source-public-rmsnorm-v1`; poll that same handle before changing its
-inputs. Source preparation/reuse passed with 846 identical files (session 90626
-terminated). The new model/qualifier require their independent review fixes and
-runtime execution against that base. Current native console baseline is still
+runtime milestone. Root full qualification session 95483 terminated with exit 0
+and wrote `results/source-public-rmsnorm-v1/receipt.json`. Native aggregate
+cross-build session 36938 also terminated with exit 0 and wrote
+`build/public-hip-rmsnorm-runtime-native-v1/link-receipt.json`.
+Source preparation/reuse passed with 846 identical files (session 90626
+terminated). The new model/qualifier independent review passes; execute it
+against the fresh base next. These results do not qualify native RMSNorm math.
+Current native console baseline is still
 the aggregate checkpoint. No RMSNorm numerical GPU execution is claimed.
 
 ## Real RMSNorm resource preparation qualified offline

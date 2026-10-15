@@ -7,6 +7,23 @@ acceptance criteria; completing this release does not complete the SDK.
 
 ## Release contract
 
+The first release is an inference product milestone, not an SDK-completeness
+milestone. The minimum releasable result must satisfy all of these checks:
+
+- A clean GitHub checkout builds the native SDK and example client through Make,
+  fetching documented dependencies and preparing the verified model inputs.
+- TinyLlama 1.1B Q4_0 performs GPU prefill and incremental decode at batch one
+  within the qualified 512-token context, with no silent CPU tensor fallback.
+- Intermediate tensors, logits and deterministic generation pass the frozen
+  CPU-reference checks below; a successful kernel launch alone is insufficient.
+- Repeated requests, cancellation, allocation failure and unload/reload pass
+  the lifecycle contract below, with bounded ownership and clean teardown.
+- The release documents its exact supported configuration, unsupported features,
+  measured memory use and prefill/decode performance. A speedup is not required.
+
+Do not add a full ROCm distribution, general BLAS coverage or a framework port
+to the critical path unless the selected inference client demonstrates a need.
+
 Deliver a standalone native PS5 client that loads a supported GGUF model and
 generates tokens through ps5-hip on the console GPU. Keep it in this repository
 as an SDK example; ProsperoAI integration remains outside scope.
