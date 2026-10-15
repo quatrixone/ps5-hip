@@ -11,6 +11,20 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The first native public HIP GPU-launch attempt failed at the combined module
+load/function-lookup check, before allocation or GPU submission. The watchdog
+fired; the controller closed PID 108 and verified idle state, healthy services
+and lock release. No natural teardown or GPU pass is claimed. See
+`evidence/console40-public-launch-failure.json`; both phases of
+`results/source-public-launch-current-console-v1` are consumed. Next: separate
+module-load and function-lookup diagnostics offline before another reviewed case.
+
+Current installed image: `998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459`.
+Current launch failure log: `c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae`
+(not yet SHA-renamed). The previous graph image and log are now preserved.
+Use this current pair for any future reviewed deployment; older baseline notes
+below are historical.
+
 A fresh 74-object public HIP GPU-launch package at `4acfab2` passed Make,
 cached identity validation and independent package/kernel ISA review. It is frozen
 in `results/source-public-launch-current-console-v1` with deployment-only approval;

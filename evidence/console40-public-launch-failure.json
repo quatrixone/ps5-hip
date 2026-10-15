@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-15",
+  "status": "failed-public-module-stage-before-gpu-dispatch",
+  "source_commit": "4acfab25c1aab60c592926966c9017492995d7d9",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "manifest_sha256": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+  "installed_package_sha256": "998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459",
+  "application_log_sha256": "c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae",
+  "failure": {
+    "reason": "public-module",
+    "load_vs_lookup": "Not distinguished by existing combined condition",
+    "watchdog_timeout": true,
+    "controller_error": "RuntimeError('title observation deadline')",
+    "safety_close_sent": true,
+    "idle_after_safety_close": true,
+    "healthy_after": true,
+    "lock_released": true
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-current-console-v1/manifest.json": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+    "results/source-public-launch-current-console-v1/execute/receipt.json": "fa75935972a822b828ed02a656de671ce59c67367c78bfe5630df81d11e6207e",
+    "results/source-public-launch-current-console-v1/execute/application.log": "c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae",
+    "results/source-public-launch-current-console-v1/execute/klog.log": "63dff0f40974054295b1eca32965be30e843f98f4d65e3ff091a18a4fcb52744",
+    "results/source-public-launch-current-console-v1/execute/before-launch.log": "32d405ce87d16cb1f207dc01c71a7f9b5f961577616ef01859d52db2da9aa7e0",
+    "results/source-public-launch-current-console-v1/execute/observed.log": "6693d4d546f21cf8f2963d2af524bcdeb96ae949f032711724e44f1c35edfb62",
+    "results/source-public-launch-current-console-v1/execute/after-safety-close.log": "890b7f1781b8e4041f65251476f686d33dbb907b971453cbe258281767c16d6b",
+    "results/source-public-launch-current-console-v1/execution-authorization.json": "63dbb983ce28c827e1d6e370e3b0b95ba3c8fbad709a254a019d61b204a0f020",
+    "results/source-public-launch-current-console-v1/execution-review.json": "23e0dc759768b94e3fcbcd29f9c1bd2bf081a6d2146bb050ce2321cdd0a6ddf8"
+  },
+  "next_baseline": {
+    "image_sha256": "998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459",
+    "log_fixture": "launch",
+    "log_sha256": "c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae",
+    "log_preserved": false
+  },
+  "limits": [
+    "No allocation, GPU dispatch or successful natural teardown established.",
+    "Both candidate phases consumed; do not replay.",
+    "No scoped native fault found; exact title stopped after safety close.",
+    "Analyze offline and review a distinct diagnostic candidate before further console work."
+  ]
+}
