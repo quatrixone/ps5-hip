@@ -11,6 +11,14 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The native public HIP module fixture now builds with `make public-hip-module-package`:
+74 fresh native objects, a seven-file package with the compiled AOT canary,
+validated imports and FSELF/package roundtrips. All 62 host tests pass.
+Its loader-only backend rejects GPU creation; the expected console contract
+checks simultaneous module isolation and clean teardown without allocations or
+queues. See `evidence/offline-source-public-module.json`. Console execution
+remains pending the existing .40 recovery hold; this is offline acceptance only.
+
 Public file-backed AOT module loading now passes the genuine HIP host model:
 load, function lookup and unload, copied-file ownership after unlink, malformed
 image rejection, and both runtime-unbundler settings. The fresh 69-unit v2
@@ -19,7 +27,8 @@ simultaneous-module isolation and effective flag checks.
 All 61 host tests and the native loader translation-unit compile passed.
 See `evidence/offline-public-module-aot.json`. Pointer-only module images remain
 explicitly unsupported; no public
-module GPU execution, full native package or console module run is claimed.
+module GPU execution or console module run is claimed. The native package is
+qualified separately above.
 
 Full public HIP host-runtime qualification now builds directly from pinned source
 with `make public-hip-host-test`: 69 translation units; the original ten ASan/UBSan cases
@@ -1290,6 +1299,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | source-built 74-object module package, 62 host tests, loader-only import controls | evidence/offline-source-public-module.json | next: .40 recovery and public launch implementation
 
 - 2026-10-15 | G5 | main | offline AOT load/lookup/unload and failure ownership | evidence/offline-public-module-aot.json | next: native package, .40 recovery
 

@@ -2,6 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
+2026-10-15 update: file-backed public HIP module loading passes the fresh
+69-unit, twelve-mode sanitizer model. The native loader fixture now builds
+74 objects and a seven-file package, with 62 host tests passing. See
+`../evidence/offline-public-module-aot.json` and
+`../evidence/offline-source-public-module.json`. Native module execution and
+public GPU launch remain unqualified; .40 recovery is still required.
+
 Public synchronous copy source at `7880705` passed 58 host tests, a 74-object
 native package and independent review. The .40 deployment failed FTP verification;
 no copy execution occurred, and subsequent connectivity failed. See

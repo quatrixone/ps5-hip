@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, check_log
+from source_public_hip_log import EXPECTED, MODULE_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -153,6 +153,26 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in (EXPECTED[:-1], EXPECTED + EXPECTED, EXPECTED + b'FAIL\n'):
             with self.assertRaises(ValueError):
                 check_log(raw)
+
+    def test_module_transcript_rejects_incomplete_or_wrong_claims(self):
+        result = check_log(MODULE_EXPECTED, 'module')
+        self.assertEqual(result['kernel'], 'public_hip_module')
+        self.assertFalse(result['hardware_gate_passed'])
+        lines = MODULE_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [MODULE_EXPECTED + MODULE_EXPECTED, EXPECTED]
+        for before, after in ((b'loads=4', b'loads=3'), (b'lookups=8', b'lookups=7'),
+                              (b'unloads=4', b'unloads=3'), (b'isolated=true', b'isolated=false'),
+                              (b'gpu_execution=false', b'gpu_execution=true'),
+                              (b'queues=0 retired=0', b'queues=1 retired=1'),
+                              (b'allocations=0 frees=0', b'allocations=1 frees=1')):
+            invalid.append(MODULE_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'module')
+        for fixture in ('bootstrap', 'memory', 'copy', 'unknown'):
+            with self.assertRaises(ValueError):
+                check_log(MODULE_EXPECTED, fixture)
 
     def test_snapshot_requires_positive_mount_evidence(self):
         for raw in (b'', b'PS5HIP TEARDOWN BEGIN\nPS5HIP TEARDOWN END snapshots_stable=1 status_stable=1\n'):

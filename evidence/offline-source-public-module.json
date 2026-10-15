@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-package-pass-console-not-run",
+  "fixture": "public HIP owned AOT module loading",
+  "source_base": "a12d18df4f3ba31143a9431f5ef81a53898e6fb2",
+  "source_identity": "Exact changed build inputs are bound by the raw receipt; source_base predates this implementation commit.",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "package_sha256": "d988b68fcf2c6c64cebcdc9b25e97e05e381199d10053b22cf332a170faa6512",
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "canary.hsaco": "d3962dfa317c6d494b2e81e2c987b4dd3ba238708d61130e5111c15f9a09b49e",
+    "eboot.bin": "d5240cbd38223e24cc66fcf997df9d044fc128b493719697c968ef6c7b797e46",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "a82c19edfc7e2e0a9389afc16fa712d57b62d804ec67f0e0788e0a6d4c834a19",
+    "extracted_sha256": "d3caf07a62ee9249f58228945acfad422ffff031b43cabbcab85fa5474a7eb2c",
+    "omitted_note": {
+      "offset": 5423496,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500f38aa95212e77492",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "evidence": {
+    "build/public-hip-module-v2/link-receipt.json": "de01aa7997ddc57eacdf0f56e7499d1d4e2985c1ae8dfc843aa1b5dc6962cdab",
+    "results/public-module-package-v2.log": "ad4bc6e26a573229c6cb795c3d739733f1a153d4605cbc51bc137fedf11c9c8d",
+    "results/public-module-package-v2-revalidate.log": "e3ee1f2bd67115838dcebef08357785a4b1b8e01b7bff74454414bdffdd292f2",
+    "results/module-host-tests-v2.log": "9a95ccb04ca1cd3b09f3e36be02ae9b84f47fa69dc92a27974533fca57752b13",
+    "results/module-import-real-elf-regression.json": "5f161cc378f5cbb021240fd9367dfa9181d3900ed226ea85162e82bfe27a5ad0"
+  },
+  "expected_console_contract": {
+    "loads": 4,
+    "lookups": 8,
+    "unloads": 4,
+    "simultaneous_module_isolation": true,
+    "gpu_execution": false,
+    "allocations": 0,
+    "queues": 0
+  },
+  "limits": [
+    "No console execution or native module runtime acceptance.",
+    "Loader-only backend rejects GPU creation; no GPU imports are permitted.",
+    "Console .40 remains on hold after prior copy deployment verification/connectivity failure.",
+    "Full G5 and later roadmap gates remain open."
+  ],
+  "prior_failure": "v1 completed native link/conversion but the generic import policy incorrectly required GPU imports. Its raw artifacts remain preserved. v2 is a fresh build with a fixture-specific fail-closed policy.",
+  "independent_review": {
+    "status": "offline-pass",
+    "path": "results/public-module-package-independent-review/v2-review.json",
+    "sha256": "8bee9b523aca1e10a9a2c281dc64f0756d3b0e4faf540fe414c62a8cd98663f9",
+    "console_deployment_approved": false
+  }
+}

@@ -33,17 +33,22 @@ those raw results remain preserved. All 61 host tests passed; native
 hip_fatbin.cpp compiled. The focused actual-extractor harness injects
 read/close/allocation/parser failures and repeated attempts.
 
-The native module package and console controls are being built in the isolated
-WSL worktree `/home/denis/ps5-hip-module-package`, branch
-`codex/public-module-package`. Its 61 host tests and16 control tests pass;
-Make package build session5447 is still active. Poll before restarting.
-Merge validated changes back to main before freezing a candidate.
+The native module package and fixture-specific console controls are complete offline.
+`make public-hip-module-package MODULE_BUILD_DIR=build/public-hip-module-v2
+RESULTS_DIR=/data/ps5-hip/results` built 74 fresh objects and a checked seven-file
+package in `/home/denis/ps5-hip-module-package`. Session18327 exited successfully;
+do not restart it. Cached revalidation and all 62 host tests passed. The v1 build
+failed because the generic import verifier required AGC imports; its artifacts
+remain preserved. The module-specific policy requires the exact shell binding
+and rejects AGC dependencies while retaining serialized import-hash checks.
+See `evidence/offline-source-public-module.json` for artifact identities/review.
 
-An untracked local draft of the next native module client is in
-`tools/public_hip_module_console_title.cpp` and its v2 native object compiles;
-it is not packaged or console-qualified. Its loader-only backend factory rejects
-GPU creation, and its acceptance checks reject launches, allocations and queues.
-Finish the native package/controls and independent review after host acceptance.
+The module client performs two rounds of simultaneous module load/lookup/unload,
+checks survivor isolation, and rejects backend creation, allocations, queues or
+GPU work. No candidate has been frozen, deployed or executed. The .40 hold below
+still applies. Next offline implementation: public launch capability admission;
+the preserved `results/public-launch-probe` diagnostic isolates a zero workgroup
+limit in the public adapter, but its candidate is not production qualification.
 
 The host qualifier is reproducible from source with
 `make public-hip-host-test QUALIFICATION_DIR=results/<new-directory>`; no old

@@ -60,6 +60,18 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+`make public-hip-module-package RESULTS_DIR=/data/ps5-hip/results` builds
+74 fresh native objects and a seven-file package in `build/public-hip-module`.
+The additional `canary.hsaco` is compiled from `kernels/canary.hip` for gfx1013
+and checked byte-for-byte after UFS extraction. The fixture opens two modules
+simultaneously in each of two rounds, checks distinct function handles, unloads
+one module, verifies the survivor, and unloads it. Its backend factory refuses
+GPU backend creation; any queue, allocation, launch or uncertain state fails.
+The strict module transcript requires four loads, eight lookups, four unloads
+and clean finalization. This is a loader ownership test, not kernel execution.
+The package and controls still require exact-candidate review and a separately
+accepted console cycle before native module support is claimed.
+
 `make public-hip-copy-package RESULTS_DIR=/data/ps5-hip/results` builds the
 next synchronous-copy fixture into `build/public-hip-copy`. Its PS5-specific
 HIP patch preserves the caller's synchronous request through D2D queue selection

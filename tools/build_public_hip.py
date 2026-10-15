@@ -57,7 +57,8 @@ def build_inputs():
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
              "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
              "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
-             "tools/prepare_public_hip_aot.py"}
+             "tools/prepare_public_hip_aot.py", "tools/public_hip_module_console_title.cpp",
+             "tools/build_canaries.py", "kernels/canary.hip"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
         names.update(path.relative_to(ROOT).as_posix() for path in (ROOT / folder).rglob("*")
                      if path.is_file() and path.suffix in
@@ -108,7 +109,7 @@ def source_tree(output, fixture="bootstrap"):
     run(output, "prepare-symbols", [sys.executable, ROOT / "tools/prepare_public_hip_symbols.py", public])
     if fixture == "memory":
         run(output, "prepare-memory", [sys.executable, ROOT / "tools/prepare_public_hip_memory.py", public])
-    elif fixture == "copy":
+    elif fixture in ("copy", "module"):
         run(output, "prepare-copy", [sys.executable, ROOT / "tools/prepare_public_hip_copy.py", public])
     return public
 
@@ -219,6 +220,8 @@ def link_title(output, units, fixture="bootstrap"):
         required += ["hipMalloc", "hipFree"]
     if fixture == "copy":
         required += ["hipMemcpy"]
+    if fixture == "module":
+        required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
     for name in required:
         if name not in symbols:
             raise RuntimeError(f"missing public bootstrap symbol {name}")
@@ -258,7 +261,7 @@ def clean_room_libc(output, tool):
     return signed
 
 
-def convert_title(output, tool):
+def convert_title(output, tool, fixture="bootstrap"):
     sdk = DEPS / "sdk/target/lib"
     converted = output / "eboot.elf"
     signed = output / "eboot.bin"
@@ -267,7 +270,8 @@ def convert_title(output, tool):
                             "--stub-dir", sdk, "--stub", output / "libSceAgc.so",
                             "--stub", output / "libSceAgcDriver.so", "--file-name", "eboot.elf",
                             "--import-library", "libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil"])
-    run(output, "verify-sce-imports", [sys.executable, ROOT / "tests/public_hip_imports_test.py", converted])
+    run(output, "verify-sce-imports", [sys.executable, ROOT / "tests/public_hip_imports_test.py", converted,
+                                     *(["--no-gpu-imports"] if fixture == "module" else [])])
     run(output, "sign", [tool, "self", "--sign", "--in", converted, "--out", signed])
     run(output, "extract", [tool, "self", "--extract", "--file", signed,
                             "--out", extracted])
@@ -292,7 +296,7 @@ def validate_results_directory(results_dir):
         raise ValueError("results directory must be a bounded absolute console path")
 
 
-def package_title(output, image, libc, results_dir):
+def package_title(output, image, libc, results_dir, code_object=None):
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
     validate_results_directory(results_dir)
     stage = output / "package"
@@ -304,6 +308,8 @@ def package_title(output, image, libc, results_dir):
         "sce_sys/param.json": ROOT / "assets/param.json",
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
+    if code_object is not None:
+        sources["canary.hsaco"] = code_object
     if app.exists():
         expected = {name: sha(source) for name, source in sources.items()}
         expected["results-dir.txt"] = hashlib.sha256(results_dir.encode()).hexdigest()
@@ -344,7 +350,7 @@ def package_title(output, image, libc, results_dir):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module"), default="bootstrap")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     validate_results_directory(args.results_dir)
@@ -374,13 +380,17 @@ def main():
             print(cached)
             return
     else:
+        if args.fixture == "module":
+            run(output, "build-code-object", [sys.executable, ROOT / "tools/build_canaries.py",
+                                               "--output", output / "canaries"])
         native_stubs(output)
         units = compile_units(output, source, args.fixture)
         link_title(output, units, args.fixture)
     tool = native_tool(output)
     libc = clean_room_libc(output, tool)
-    image, roundtrip = convert_title(output, tool)
-    package, files = package_title(output, image, libc, args.results_dir)
+    image, roundtrip = convert_title(output, tool, args.fixture)
+    package, files = package_title(output, image, libc, args.results_dir,
+                                   output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else None)
     receipt = {"classification": "offline-public-hip-native-link", "source_commit":
                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "fixture": args.fixture, "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),
