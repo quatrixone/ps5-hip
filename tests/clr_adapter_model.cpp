@@ -139,7 +139,7 @@ int main(int argc,char**argv){
   x=dynamic_cast<amd::Buffer*>(amd::MemObjMap::FindMemObj(svmX));y=dynamic_cast<amd::Buffer*>(amd::MemObjMap::FindMemObj(svmY));check(x&&y);
  }else{x=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));y=new(*context)amd::Buffer(*context,CL_MEM_READ_WRITE,sizeof(input));check(x->create()&&y->create());}
  if(!std::strcmp(mode,"unsupported")){
-  unsigned pattern=7;auto* fill=new amd::FillMemoryCommand(*a,CL_COMMAND_FILL_BUFFER,{},*x,&pattern,4,amd::Coord3D(0),amd::Coord3D(sizeof(input)),amd::Coord3D(sizeof(input)));
+  unsigned pattern=7;auto* fill=new amd::FillMemoryCommand(*a,CL_COMMAND_FILL_IMAGE,{},*x,&pattern,4,amd::Coord3D(0),amd::Coord3D(sizeof(input)),amd::Coord3D(sizeof(input)));
   auto* denied=new amd::ReadMemoryCommand(*b,CL_COMMAND_READ_BUFFER,{fill},*x,amd::Coord3D(0),amd::Coord3D(sizeof(output)),output);
   check(fill->validateMemory()&&denied->validateMemory());fill->enqueue();denied->enqueue();check(!denied->awaitCompletion());a->finish(true);b->finish(true);
   check(fill->status()==CL_INVALID_OPERATION&&denied->status()==CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST);

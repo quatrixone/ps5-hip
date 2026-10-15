@@ -1,0 +1,187 @@
+--- a/hipamd/src/hip_memory.cpp
++++ b/hipamd/src/hip_memory.cpp
+@@ -3142,6 +3142,11 @@
+     return hipErrorInvalidValue;
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  if ((valueSize != 1 && valueSize != 2 && valueSize != 4) ||
++      reinterpret_cast<uintptr_t>(dst) % valueSize || sizeBytes % valueSize)
++    return hipErrorInvalidValue;
++#endif
+   size_t offset = 0;
+   amd::Memory* memory = getMemoryObject(dst, offset);
+   if (memory == nullptr) {
+@@ -3156,6 +3161,9 @@
+ }
+ 
+ hipError_t ihipGraphMemsetParams_validate(const hipMemsetParams* pNodeParams) {
++#if defined(WITH_PS5_DEVICE)
++  return hipErrorNotSupported;
++#endif
+   if (pNodeParams == nullptr) {
+     return hipErrorInvalidValue;
+   }
+@@ -3203,6 +3211,10 @@
+ hipError_t ihipMemset(void* dst, int64_t value, size_t valueSize, size_t sizeBytes,
+                       hipStream_t stream, bool isAsync = false) {
+   hipError_t hip_error = hipSuccess;
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  const bool ps5SynchronousFill = !isAsync;
++#endif
+   do {
+     // Nothing to do, fill size is 0. Returns hipSuccess.
+     if (sizeBytes == 0) {
+@@ -3236,9 +3248,16 @@
+ 
+     for (auto command : commands) {
+       command->enqueue();
++#if defined(WITH_PS5_DEVICE)
++      if (ps5SynchronousFill) {
++        if (!command->awaitCompletion() || command->status() != CL_COMPLETE)
++          hip_error = hipErrorUnknown;
++      }
++#else
+       if (!isAsync) {
+         command->awaitCompletion();
+       }
++#endif
+       command->release();
+     }
+   } while (0);
+@@ -3262,6 +3281,12 @@
+ 
+ hipError_t hipMemsetAsync_common(void* dst, int value, size_t sizeBytes, hipStream_t stream) {
+   size_t valueSize = sizeof(int8_t);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemsetAsync, stream, dst, value, valueSize, sizeBytes);
+   return ihipMemset(dst, value, sizeof(int8_t), sizeBytes, stream, true);
+ }
+@@ -3289,12 +3314,21 @@
+   int iValue = value;
+   size_t valueSize = sizeof(int8_t);
+   size_t sizeBytes = count * sizeof(int8_t);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemsetAsync, stream, dst, iValue, valueSize, sizeBytes);
+   HIP_RETURN(ihipMemset(dst, value, valueSize, sizeBytes, stream, true));
+ }
+ 
+ hipError_t hipMemsetD16(hipDeviceptr_t dst, unsigned short value, size_t count) {
+   HIP_INIT_API(hipMemsetD16, dst, value, count);
++#if defined(WITH_PS5_DEVICE)
++  if (count > SIZE_MAX / sizeof(int16_t)) { HIP_RETURN(hipErrorInvalidValue); }
++#endif
+   CHECK_STREAM_CAPTURING();
+   HIP_RETURN(ihipMemset(dst, value, sizeof(int16_t), count * sizeof(int16_t), nullptr));
+ }
+@@ -3302,15 +3336,27 @@
+ hipError_t hipMemsetD16Async(hipDeviceptr_t dst, unsigned short value, size_t count,
+                              hipStream_t stream) {
+   HIP_INIT_API(hipMemsetD16Async, dst, value, count, stream);
++#if defined(WITH_PS5_DEVICE)
++  if (count > SIZE_MAX / sizeof(int16_t)) { HIP_RETURN(hipErrorInvalidValue); }
++#endif
+   int iValue = value;
+   size_t valueSize = sizeof(int16_t);
+   size_t sizeBytes = count * sizeof(int16_t);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemsetAsync, stream, dst, iValue, valueSize, sizeBytes);
+   HIP_RETURN(ihipMemset(dst, value, valueSize, sizeBytes, stream, true));
+ }
+ 
+ hipError_t hipMemsetD32(hipDeviceptr_t dst, int value, size_t count) {
+   HIP_INIT_API(hipMemsetD32, dst, value, count);
++#if defined(WITH_PS5_DEVICE)
++  if (count > SIZE_MAX / sizeof(int32_t)) { HIP_RETURN(hipErrorInvalidValue); }
++#endif
+   CHECK_STREAM_CAPTURING();
+   HIP_RETURN(ihipMemset(dst, value, sizeof(int32_t), count * sizeof(int32_t), nullptr));
+ }
+@@ -3318,9 +3364,18 @@
+ hipError_t hipMemsetD32Async(hipDeviceptr_t dst, int value, size_t count,
+                              hipStream_t stream) {
+   HIP_INIT_API(hipMemsetD32Async, dst, value, count, stream);
++#if defined(WITH_PS5_DEVICE)
++  if (count > SIZE_MAX / sizeof(int32_t)) { HIP_RETURN(hipErrorInvalidValue); }
++#endif
+   int iValue = value;
+   size_t valueSize = sizeof(int32_t);
+   size_t sizeBytes = count * sizeof(int32_t);
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemsetAsync, stream, dst, iValue, valueSize, sizeBytes);
+   HIP_RETURN(ihipMemset(dst, value, valueSize, sizeBytes, stream, true));
+ }
+@@ -3347,6 +3402,12 @@
+ 
+ hipError_t ihipMemset3DCommand(std::vector<amd::Command*> &commands, hipPitchedPtr pitchedDevPtr,
+                                int value, hipExtent extent, hip::Stream* stream, size_t elementSize = 1) {
++#if defined(WITH_PS5_DEVICE)
++  if (extent.height != 1 || extent.depth != 1 || pitchedDevPtr.pitch != extent.width)
++    return hipErrorNotSupported;
++  auto ps5Status = ihipMemset_validate(pitchedDevPtr.ptr, value, elementSize, extent.width);
++  if (ps5Status != hipSuccess) return ps5Status;
++#endif
+   size_t offset = 0;
+   auto sizeBytes = extent.width * extent.height * extent.depth;
+   amd::Memory* memory = getMemoryObject(pitchedDevPtr.ptr, offset);
+@@ -3377,6 +3438,13 @@
+ 
+ hipError_t ihipMemset3D(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent,
+                         hipStream_t stream, bool isAsync = false) {
++#if defined(WITH_PS5_DEVICE)
++  // Only the contiguous one-dimensional route is implemented by this adapter.
++  // Reject before multiplication/enqueue, including pitched requests.
++  if (extent.height != 1 || extent.depth != 1 || pitchedDevPtr.pitch != extent.width)
++    return hipErrorNotSupported;
++  return ihipMemset(pitchedDevPtr.ptr, value, 1, extent.width, stream, isAsync);
++#endif
+   auto sizeBytes = extent.width * extent.height * extent.depth;
+ 
+   if (sizeBytes == 0) {
+@@ -3434,6 +3502,12 @@
+ 
+ hipError_t hipMemset2DAsync_common(void* dst, size_t pitch, int value,
+                             size_t width, size_t height, hipStream_t stream) {
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemset2DAsync, stream, dst, pitch, value, width, height);
+ 
+   return ihipMemset3D({dst, pitch, width, height}, value, {width, height, 1}, stream, true);
+@@ -3469,6 +3543,12 @@
+ }
+ 
+ hipError_t hipMemset3DAsync_common(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream) {
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidHandle;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipMemset3DAsync, stream, pitchedDevPtr, value, extent);
+   return ihipMemset3D(pitchedDevPtr, value, extent, stream, true);
+ }

@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-contiguous-fill-pass",
+  "source_base": "7bfdc250e31adb7d6e4e28077ccd8544246af278",
+  "source_identity": "Changed source, patch and harness bytes bound by fresh receipt before commit.",
+  "base_translation_units": 69,
+  "total_compilations": 72,
+  "included_files": 685,
+  "base_modes": [
+    "normal",
+    "default",
+    "tls",
+    "init-fail",
+    "create-fail",
+    "join-fail",
+    "self-destroy",
+    "reset",
+    "reset-join-fail",
+    "memory",
+    "module",
+    "module-unbundler"
+  ],
+  "launch_cases": [
+    "normal",
+    "events-pending-then-complete",
+    "noop-output-rejected",
+    "corrupt-output-rejected"
+  ],
+  "stream_cases": [
+    "event-ordered",
+    "bypass-early-consumer-detected"
+  ],
+  "fill_cases": [
+    "patterns-offsets-guards-admission"
+  ],
+  "host_tests_passed": 62,
+  "native_compiles": [
+    "ports/clr/ps5-device.cpp",
+    "patched hipamd/src/hip_memory.cpp"
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-fill-source-v1/receipt.json": "8d2087ff62e432a13e84f80a5b7a563892176b8e24743e4ce6783a6d4df4e7e3",
+    "results/public-fill-source-v1/independent-review.json": "a6475ed8a9cce989923c8e45cb93b21d51f037b7c7a64bae375eb3478e6b3ba2",
+    "results/public-fill-source-v1/fill-normal.json": "bc3b9948df359a64ada0d4d110e7dd8099bc79a035b3529dc1cdb40117416f89",
+    "results/public-fill-source-v1/fill-normal.stdout": "dc69eb7dfd644a0149f0f8480723f641a2dc3fae76a54f0523868304c1d1e483",
+    "results/public-fill-source-v1/fill-normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-fill-native-v1/receipt.json": "309fcd223cd44ff5a08d8092939cf5966cb50ecc866257c3e01d055b18993ba9",
+    "results/public-fill-native-v1/independent-review.json": "06732f9385566f1b9b1463cad32fc56f6a8f62782b40ab42941197163d3f60c8",
+    "results/public-fill-independent-prerequisites-v1/results.json": "06660a23148a84c77e9f60465b48dab6603209f69cb781774cd90647f8f938f0",
+    "results/public-fill-host-test.log": "39bcede10c5be26ea8fa74f82c9e681c3fafcf7ed9c774e99f7935a4066e5293",
+    "results/public-fill-failure-probe-v1/run.py": "bc8853db3d6d2c6b2f9a4321a0714901fb8c3fdc33f23849534ef933720e63ca",
+    "results/public-fill-failure-probe-v1/adapter.cpp": "bdfd401a9f97f9b324c75e295105d113ef21e25823d1406e088ea39e0384ebd9",
+    "results/public-fill-failure-probe-v1/fill.json": "1acf84babf63099d530639093337c8c7462b2c30267597729dea153c99a7cd81",
+    "results/public-fill-failure-probe-v1/fill.stdout": "e41c8f886a495eef728638dd217439a92df601da311263453139c111052470f6",
+    "results/public-fill-failure-probe-v1/fill.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Contiguous captured buffer patterns execute under device gate after full logical-range resolution.",
+    "Public 1/2/4-byte pattern fills and interior offsets match all128bytes including guards.",
+    "Invalid alignment, overflowing word counts, pitched/multidimensional requests and unqualified capture/graph routes reject before submission.",
+    "Synchronous command rejection returns hipErrorUnknown and preserves128bytes in separate fault-injection diagnostic.",
+    "Two queues retired and allocation freed; no GPU submission.",
+    "Source preparation is idempotent and rejects changed source/SVM/copy/fill patch prerequisites."
+  ],
+  "limits": [
+    "Host providers modeled; no console fill acceptance.",
+    "No full native package build at this milestone; two changed native translation units compiled.",
+    "Async completion failure propagation beyond explicit synchronization is not newly qualified.",
+    "Pitched/multidimensional fill and graph/capture remain unsupported.",
+    "Previous frozen launch candidate retains old runtime; new source requires distinct native build/candidate."
+  ],
+  "independent_review": {
+    "path": "results/public-fill-source-v1/independent-review.json",
+    "sha256": "a6475ed8a9cce989923c8e45cb93b21d51f037b7c7a64bae375eb3478e6b3ba2",
+    "deployment_approved": false
+  }
+}

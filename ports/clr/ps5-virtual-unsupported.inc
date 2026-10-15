@@ -4,7 +4,6 @@ void submitUnmapMemory(amd::UnmapMemoryCommand& cmd) override { unsupported(cmd)
 void submitNativeFn(amd::NativeFnCommand& cmd) override { unsupported(cmd); }
 void submitAccumulate(amd::AccumulateCommand& cmd) override { unsupported(cmd); }
 void submitExternalSemaphoreCmd(amd::ExternalSemaphoreCmd& cmd) override { unsupported(cmd); }
-void submitFillMemory(amd::FillMemoryCommand& cmd) override { unsupported(cmd); }
 void submitMigrateMemObjects(amd::MigrateMemObjectsCommand& cmd) override { unsupported(cmd); }
 void submitAcquireExtObjects(amd::AcquireExtObjectsCommand& cmd) override { unsupported(cmd); }
 void submitReleaseExtObjects(amd::ReleaseExtObjectsCommand& cmd) override { unsupported(cmd); }

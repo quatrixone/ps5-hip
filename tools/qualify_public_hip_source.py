@@ -36,7 +36,7 @@ def main():
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
-                 'tests/public_hip_stream_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -184,6 +184,20 @@ def main():
             'PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
             raise RuntimeError('public stream ordering/ownership contract differs: ' + mode)
         print('public stream ' + mode + ' PASS', flush=True)
+    fill_source = ROOT / 'tests/public_hip_fill_model.cpp'
+    source_hashes[str(fill_source.relative_to(ROOT))] = sha(fill_source)
+    fill_object = compile_one((len(units) + 2, fill_source))
+    fill_objects = [fill_object if unit.name == 'hip_admission_model.cpp' else obj
+                    for unit, obj in zip(units, objects)]
+    run('fill-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *fill_objects, '-o', output / 'fill-model'])
+    result = run('fill-normal', [output / 'fill-model'], env)
+    if result.splitlines() != [
+        'PUBLIC_FILL_PASS bytes=128 patterns=1,2,4 guards=true gpu_execution=false',
+        'PUBLIC_FILL_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
+        raise RuntimeError('public fill byte/ownership contract differs')
+    print('public fill PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -203,7 +217,9 @@ def main():
                'launch_model_sha256': sha(output / 'launch-model'),
                'stream_model_sha256': sha(output / 'stream-model'),
                'stream_cases': ['event-ordered', 'bypass-early-consumer-detected'],
-               'total_compilations': len(units) + 2,
+               'total_compilations': len(units) + 3,
+               'fill_model_sha256': sha(output / 'fill-model'),
+               'fill_cases': ['patterns-offsets-guards-admission'],
                'launch_fixture_sha256': launch_code_hash,
                'launch_cases': ['normal', 'events-pending-then-complete', 'noop-output-rejected', 'corrupt-output-rejected'],
                'wrong_target_fixture_sha256': wrong_target_hash,

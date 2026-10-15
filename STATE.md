@@ -11,6 +11,14 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Contiguous public HIP buffer fills are implemented through the serialized native
+memory owner. Fresh 72-unit sanitizer qualification checks 1/2/4-byte patterns,
+offsets, guards, rejected alignment/overflow/pitched/capture/graph inputs and
+cleanup. Injected rejection propagates as `hipErrorUnknown` without changing
+bytes; 62 host tests and two PS5-targeted compiles pass. See
+`evidence/offline-public-fill.json`. No fill console execution or new native
+package is claimed; the previously frozen launch package uses the prior runtime.
+
 Logical cross-stream event ordering now passes the fresh 71-compilation sanitizer
 qualifier: a held producer blocks the dependent consumer, while omitting the wait
 allows early consumer progress; both cases retire two queues cleanly. See

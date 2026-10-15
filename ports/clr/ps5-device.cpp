@@ -175,6 +175,22 @@ public:
         region(c.source(),c.srcOrigin(),c.size());region(c.destination(),c.dstOrigin(),c.size());
         state_->data.copy_device(pointer(c.destination(),c.dstOrigin()[0]),pointer(c.source(),c.srcOrigin()[0]),c.size()[0]);
     });}
+    void submitFillMemory(amd::FillMemoryCommand& c)override{
+        if(c.type()!=CL_COMMAND_FILL_BUFFER||c.size()[1]!=1||c.size()[2]!=1){unsupported(c);return;}
+        execute(c,[&]{
+            region(c.memory(),c.origin(),c.size());
+            const size_t pattern=c.patternSize(),bytes=c.size()[0];
+            if(!pattern||pattern>amd::FillMemoryCommand::MaxFillPatterSize||
+               (pattern&(pattern-1))||bytes%pattern||c.origin()[0]%pattern)
+                throw ObjectError("invalid buffer fill pattern or extent");
+            auto hold=state_->data.resolve(pointer(c.memory(),c.origin()[0]),bytes);
+            auto* destination=static_cast<unsigned char*>(hold.memory->cpu())+hold.offset;
+            // The command owns its captured pattern; resolve the complete logical
+            // range before writing and retain the device gate throughout the fill.
+            for(size_t offset=0;offset<bytes;offset+=pattern)
+                std::memcpy(destination+offset,c.pattern(),pattern);
+        });
+    }
     void submitKernel(amd::NDRangeKernelCommand& c)override{execute(c,[&]{
         const auto* k=dynamic_cast<const Kernel*>(c.kernel().getDeviceKernel(device()));
         if(!k||!c.parameters()||c.cooperativeGroups()||c.sharedMemBytes()||c.sizes().dimensions()>3)throw ObjectError("invalid selected kernel");

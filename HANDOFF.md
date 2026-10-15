@@ -16,6 +16,28 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Contiguous fill implementation checkpoint
+
+`results/public-fill-source-v1` passed the fresh 72-compilation qualifier: all
+base, launch, stream and fill cases. `submitFillMemory` now writes captured
+1/2/4-byte patterns (and validated internal power-of-two patterns up to 128 bytes)
+through a fully resolved logical allocation under the device gate. Public
+synchronous calls wait and propagate command failure; asynchronous calls remain
+queued. Alignment and count overflow fail before enqueue. Pitched/multidimensional
+fills and fill graphs/capture explicitly remain unsupported.
+
+See `evidence/offline-public-fill.json` for exact evidence identities. The injected
+unsupported-command probe returns `hipErrorUnknown`, preserves all bytes and
+cleans up. All 62 host tests and the two changed PS5 runtime compiles pass.
+Preserve diagnostic v2's failed byte comparison: it caught an unbraced upstream
+`HIP_RETURN` macro and is superseded by corrected v3/fresh acceptance.
+
+The source builder now applies the fill wrapper (including memory/copy prerequisites)
+to every package fixture. The frozen launch candidate below remains a historical
+prior-runtime candidate; current build-input hashes differ. Build and independently
+review a distinct package/candidate for the new runtime before console deployment.
+The .40 owner recovery question remains pending; no traffic occurred in this work.
+
 ## Offline event checkpoint
 
 Fresh event qualification in `results/public-event-source-v1` completed successfully
