@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-bounded-native-public-hip-stream-event-gpu",
+  "source_commit": "3160818eb183911fe9fe6b9909a049ecd016be24",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "package_sha256": "568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981",
+  "manifest_sha256": "786b716bd56642e72cb19242d4bdefa90201d298e77915b2528ada0a83435689",
+  "application_log_sha256": "15474811376944b1cd161907ebeb99c4bfdbe873b79ddaea23112705cda49130",
+  "qualification": {
+    "rounds": 2,
+    "gpu_dispatches": 2,
+    "exact_destination_values": 146,
+    "tail_guards": 16,
+    "source_preserved": true,
+    "event_reused": true,
+    "allocations": 2,
+    "frees": 2,
+    "queues": 3,
+    "retired_queues": 3,
+    "gate_destroyed": true,
+    "natural_stop": true,
+    "healthy_after": true,
+    "lock_released": true,
+    "complete_ftp_reads": 28,
+    "pid": 139
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-stream-console-v1/manifest.json": "786b716bd56642e72cb19242d4bdefa90201d298e77915b2528ada0a83435689",
+    "results/source-public-stream-console-v1/deploy/receipt.json": "5d8d067932b6f69beeeb3fa62e96eccf2221a656c51ed346457af1e336047123",
+    "results/source-public-stream-console-v1/execution-authorization.json": "0e92d22e588956f6c00b4509358d48bf1069fa00580a1d4d8b1f1680603a1e3a",
+    "results/source-public-stream-console-v1/execution-review.json": "b766390b75fd890468cda8c2ef417b0aae693b684417c36916cceb8e10ccac70",
+    "results/source-public-stream-console-v1/execute/receipt.json": "a1cd4d0f424e88ad898007149fa5a72564cc125b4007abbf0253f4db4c9ebaa6",
+    "results/source-public-stream-console-v1/execute/application.log": "15474811376944b1cd161907ebeb99c4bfdbe873b79ddaea23112705cda49130",
+    "results/source-public-stream-console-v1/execute/klog.log": "c54abb3d47a2abcce18d8a26c2c6093c251d3f581a9da18dd615104fa4491334",
+    "results/source-public-stream-console-v1/execute/before-launch.log": "d25811af2ba5fa6bb48290c8ee3f68c6624acf2f897bdafb1d7eeaa3ae569647",
+    "results/source-public-stream-console-v1/execute/observed.log": "18b83e3b349a3f3b750bf8a34557a276f3a2b2f779e3b154672aaa1f5561c4bf",
+    "results/source-public-stream-console-v1/execute/snapshot.log": "6df9cb7b5a467d5ef312145d10c49ec7dd7852e3a26bf350324396d14c21a8cd",
+    "results/source-public-stream-console-v1/execute/post_snapshot.log": "6df9cb7b5a467d5ef312145d10c49ec7dd7852e3a26bf350324396d14c21a8cd"
+  },
+  "next_baseline": {
+    "image_sha256": "568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981",
+    "log_fixture": "stream",
+    "log_sha256": "15474811376944b1cd161907ebeb99c4bfdbe873b79ddaea23112705cda49130",
+    "log_preserved": false
+  },
+  "limits": [
+    "Fixed scratch/LDS-free gfx1013 kernel, two explicit nonblocking streams, one reused event, two rounds.",
+    "100ms nonprogress check is scheduling bounded; missing-wait host negative control independently proves stale-data oracle sensitivity.",
+    "No concurrent GPU execution, timestamps, GPU graph nodes, long-run resource plateau or full G5 acceptance.",
+    "Standalone transcript parser does not establish hardware acceptance; independent full evidence audit supplies identity/lifecycle/mount/health checks.",
+    "Both candidate phases consumed; never replay."
+  ]
+}

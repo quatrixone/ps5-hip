@@ -18,49 +18,32 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
-The stream package deployment passed all 21 complete reads and seven mounted
-file checks through WSL. The old image/log are preserved; services are healthy
-and the lock is released. Installed image is now
+- 2026-10-15 | G5 | 3160818 | .40 | pass: bounded native stream/event GPU | evidence/console40-public-stream-gpu-success.json | next: GPU graph nodes/lifetime
+
+The native public HIP explicit-stream/event fixture passed on .40 through WSL
+at `3160818`: two changed-input GPU launches, event reuse, 146 exact destination
+values, 16 guards and source preservation. Both buffers were freed, all three
+queues retired and the title exited naturally. The controller accepted all 28
+complete reads, installed identity, stable mounts, service health and owned-lock
+release. Independent final audit passed for PID 139; see
+`evidence/console40-public-stream-gpu-success.json`.
+
+Current installed image:
 `568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981`.
-No stream application log exists yet. See `evidence/console40-stream-package-deploy.json`;
-older installed-image notes below describe the preserved successful baseline.
+Current log: `/data/ps5-hip/results/ps5-hip-public-stream.log`, SHA
+`15474811376944b1cd161907ebeb99c4bfdbe873b79ddaea23112705cda49130`
+(not yet SHA-preserved). The previous successful default-stream image/log are
+preserved. Both phases in `results/source-public-stream-console-v1` are consumed;
+never replay them.
 
-The stream candidate at `3160818` is frozen and independently approved for
-one WSL deployment. All 29 bound files, seven package files and 101 committed
-inputs match. See `evidence/offline-public-stream-deployment.json`; execution
-requires separate review of the exact successful deployment receipt.
+The source-only Make package and shared sanitizer oracle passed independent
+review, including missing-wait, no-write and corrupt-write negative controls.
+See `evidence/offline-public-stream-gpu-fixture.json` and
+`evidence/console40-stream-package-deploy.json` for build/deployment provenance.
 
-The next explicit-stream GPU/event fixture is implemented with a shared
-host/native oracle. Fresh sanitizer qualification passed 80 compilations,
-11 links and all prior cases plus event-ordered, missing-wait, no-write and
-corrupt-write cases. The 74-object native Make package and cached validation
-passed independent review; see `evidence/offline-public-stream-gpu-fixture.json`.
-It requires two changed-input GPU launches, event reuse, exact destination and
-source checks, two freed buffers and three retired queues. Native execution
-is pending; the current successful default-stream baseline below is unchanged.
-
-- 2026-10-15 | G5 | 7207a39 | .40 | pass: bounded native public HIP GPU | evidence/console40-native-public-hip-gpu-success.json | next: stream/event GPU ordering
-
-The public HIP GPU fixture passed on .40 through WSL at `7207a39`: public
-module load/lookup, two real default-stream kernel launches, 146 exact outputs,
-16 guards, two unsupported-geometry rejections, one allocation/free and one
-retired queue. PID 129 exited naturally; independent audit verified installed
-bytes, 27 complete reads, stable mount snapshots, fault-free scoped klog, service
-health and lock release. See `evidence/console40-native-public-hip-gpu-success.json`.
-
-The mounted-title path fixes the earlier file-open failure after elevation. The
-90-second image-read deadline also resolved a proven pre-upload transfer timeout
-without relaxing byte/hash checks. Both phases in
-`results/source-public-launch-mounted-path-console-v1` are consumed.
-
-Current image: `6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8`.
-Current launch log: `8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893`
-(not yet SHA-preserved). These are the only current deployment baseline; all
-earlier images/logs remain preserved and older baseline notes below are historical.
-
-Next: implement and qualify native public HIP explicit-stream/event ordering
-with changed inputs and exact GPU readback, using fresh reviewed controls. This
-fixed scratch/LDS-free kernel result does not close G5 or the broader roadmap.
+Next: implement and qualify required GPU graph nodes and their resource lifetime,
+then changing-input captured replay. This bounded fixed-kernel ordering result
+proves neither concurrent GPU execution nor full G5 acceptance.
 
 ## Historical pitched fill and retirement checkpoints
 

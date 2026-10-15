@@ -2,11 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
-Current checkpoint (2026-10-15): bounded native public HIP GPU execution passed
-on .40 at `7207a39`, including two launches, 146 exact values, 16 guards, rejected
-geometry and natural teardown. See `../evidence/console40-native-public-hip-gpu-success.json`.
-The mounted-title path resolved file-open failure after elevation. Earlier
-checkpoint notes below are historical; G5 and G6-G12 remain open.
+Current checkpoint (2026-10-15): bounded native public HIP explicit-stream/event
+GPU ordering passed on .40 at `3160818`: two changed-input launches, event reuse,
+146 exact destination values, 16 guards, source preservation and natural teardown.
+Independent audit verified all 28 reads, installed identity, stable mounts, scoped
+klog, health and lock release. See `../evidence/console40-public-stream-gpu-success.json`.
+Next: required GPU graph nodes/resource lifetime and changing-input captured replay.
+Earlier checkpoint notes below are historical; G5 and G6-G12 remain open.
 
 Both native module fixtures now use the verified system-visible title mount
 for code objects after filesystem elevation. The two changed title units compile
@@ -438,7 +440,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
-| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded host prerequisites only |
+| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event GPU and host-graph passes |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | Standalone inference client and SDK preview | G5-G6 | planned |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
@@ -665,19 +667,12 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
-The next explicit-stream GPU/event fixture is implemented with a shared
-host/native oracle. Fresh sanitizer qualification passed 80 compilations,
-11 links and all prior cases plus event-ordered, missing-wait, no-write and
-corrupt-write cases. The 74-object native Make package and cached validation
-passed independent review; see `../evidence/offline-public-stream-gpu-fixture.json`.
-It requires two changed-input GPU launches, event reuse, exact destination and
-source checks, two freed buffers and three retired queues. Native execution
-is pending; the current successful default-stream baseline below is unchanged.
-
-The public HIP GPU fixture now passes its bounded two-round native contract: module
-load/lookup,146 outputs,16 guards,2 geometry rejections and complete natural
-teardown. See `../evidence/console40-native-public-hip-gpu-success.json`. Next is
-explicit-stream/event GPU ordering; full G5 criteria below are unchanged.
+The bounded native explicit-stream/event GPU fixture passed: two changed-input
+launches, one reused event, exact producer/consumer readback, two buffers freed
+and three queues retired. See `../evidence/console40-public-stream-gpu-success.json`.
+The shared sanitizer oracle also rejects missing-wait, no-write and corrupt-write
+controls. This is not concurrent GPU execution or full G5 qualification. Next is
+required GPU graph nodes, resource lifetime and changing-input captured replay.
 
 Bounded progress (2026-10-15): source-only public HIP qualification now covers
 logical stream/event ordering, implicit legacy default-stream dependencies,
