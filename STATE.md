@@ -9,7 +9,30 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
-## Fresh-checkout preparation
+## Current native public HIP checkpoint
+
+The public HIP GPU fixture passed on .40 through WSL at `7207a39`: public
+module load/lookup, two real default-stream kernel launches, 146 exact outputs,
+16 guards, two unsupported-geometry rejections, one allocation/free and one
+retired queue. PID 129 exited naturally; independent audit verified installed
+bytes, 27 complete reads, stable mount snapshots, fault-free scoped klog, service
+health and lock release. See `evidence/console40-native-public-hip-gpu-success.json`.
+
+The mounted-title path fixes the earlier file-open failure after elevation. The
+90-second image-read deadline also resolved a proven pre-upload transfer timeout
+without relaxing byte/hash checks. Both phases in
+`results/source-public-launch-mounted-path-console-v1` are consumed.
+
+Current image: `6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8`.
+Current launch log: `8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893`
+(not yet SHA-preserved). These are the only current deployment baseline; all
+earlier images/logs remain preserved and older baseline notes below are historical.
+
+Next: implement and qualify native public HIP explicit-stream/event ordering
+with changed inputs and exact GPU readback, using fresh reviewed controls. This
+fixed scratch/LDS-free kernel result does not close G5 or the broader roadmap.
+
+## Historical source-build checkpoints
 
 The mounted-path package deployment passed through WSL: all 21 reads and
 seven mounted files verified, old image/log preserved, services healthy and lock
@@ -1421,14 +1444,11 @@ bounded arithmetic cycle with fresh pre/post evidence, not another standalone sn
 
 ## Next action
 
-First bind and independently review a new, single-use public HIP bootstrap E
-execution control to the exact accepted D receipt/review, repairing its current
-review-classification check. Confirm .40 is idle and all authority, service,
-lock, and result-freshness gates before any activation. Do not use .30. A clean
-bootstrap E result would then determine whether the native public memory title
-can be considered for its own separately reviewed controls. The GEMM candidate
-also needs its baseline refreshed after the bootstrap registration. Full details
-and hashes are in `HANDOFF.md`.
+Advance G5 from the bounded native public HIP GPU pass to explicit-stream/event
+ordering and resource-lifetime qualification with exact changed-input readback.
+Preserve the current image/log in the checkpoint above, freeze a new candidate,
+and independently review each deployment/execution. Historical bootstrap and
+diagnostic phases are consumed; do not reactivate them. Use only WSL and .40.
 
 Earlier G3/G4 work remains qualified only to its declared bounds:
 Continue unified-runtime integration after the fixed genuine HIP vector client pass.
@@ -1667,6 +1687,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | 7207a39 | .40 | pass: bounded native public HIP GPU | evidence/console40-native-public-hip-gpu-success.json | next: stream/event GPU ordering
 
 - 2026-10-15 | G5 | main | fresh public event pending-query/completion/lifetime model | evidence/offline-public-event-query.json | next: isolate cross-stream event ordering and recover .40
 

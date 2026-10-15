@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-bounded-native-public-hip-gpu-launch",
+  "source_commit": "7207a393d362240e7d675fe2e5976ce7e8c71ea8",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "package_sha256": "6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8",
+  "manifest_sha256": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+  "application_log_sha256": "8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893",
+  "qualification": {
+    "public_module_load": true,
+    "public_function_lookup": true,
+    "rounds": 2,
+    "gpu_dispatches": 2,
+    "exact_active_values": 146,
+    "tail_guards": 16,
+    "invalid_geometry_rejections": 2,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 1,
+    "retired_queues": 1,
+    "gate_destroyed": true,
+    "ordered_stop": true,
+    "natural_stop": true,
+    "healthy_after": true,
+    "lock_released": true,
+    "complete_ftp_reads": 27,
+    "pid": 129
+  },
+  "resolved_failure": "Using the verified system-visible title mount after filesystem elevation resolves the prior301 fopen failure; same kernel and original oracle pass.",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-mounted-path-console-v1/manifest.json": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+    "results/source-public-launch-mounted-path-console-v1/deploy/receipt.json": "0ac68705188ba216223e8ef33c461e81102630ac21212c28a7980ba7435ca659",
+    "results/source-public-launch-mounted-path-console-v1/execute/receipt.json": "8cbe459be9e4d68fb691a6d3e69ca34847fbb50d87196d210ab4f9e4b030d8b5",
+    "results/source-public-launch-mounted-path-console-v1/execute/application.log": "8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893",
+    "results/source-public-launch-mounted-path-console-v1/execute/klog.log": "d77eaaa6dd449686a65b9649d3333c744cb0db874b0f7707e8ec3e776a0c310b",
+    "results/source-public-launch-mounted-path-console-v1/execute/before-launch.log": "dbd014e03fa48aed8f15c333095972ee65efd3158078f7656f5743439c007518",
+    "results/source-public-launch-mounted-path-console-v1/execute/observed.log": "ea3bd4eadfc91b6f7dfa4ca0b8db751f2516aed791fa768dcc4c95a673e70b79",
+    "results/source-public-launch-mounted-path-console-v1/execute/snapshot.log": "7869cea5359a64cc35b2d02e0d62d2f0e5c91c6f948674923881aafe0560e5ff",
+    "results/source-public-launch-mounted-path-console-v1/execute/post_snapshot.log": "8f89657772c02c6790e8cbc2cd5ee7d66f85922eebfc678b394754d096f94433",
+    "results/source-public-launch-mounted-path-console-v1/execution-authorization.json": "2612900ec83bbf36d850f6a3f496a92d373ef2553ba7b0a1a1ba9591e319c077",
+    "results/source-public-launch-mounted-path-console-v1/execution-review.json": "5fb5f8bb7d6ac93e8135c44699423cd986f9edd178520a4cd8fb3a6324f3d7f3"
+  },
+  "next_baseline": {
+    "image_sha256": "6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8",
+    "log_fixture": "launch",
+    "log_sha256": "8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893",
+    "log_preserved": false
+  },
+  "limits": [
+    "Fixed scratch/LDS-free gfx1013 kernel; two default-stream launches with2x64geometry.",
+    "Not general geometry, GPU graphs, explicit cross-stream/event qualification, ROCm library or fullG5 acceptance.",
+    "Standalone transcript parser does not establish hardware acceptance; independent full receipt/lifecycle/identity/mount/health audit supplies those checks.",
+    "Both frozen phases consumed; never replay."
+  ]
+}

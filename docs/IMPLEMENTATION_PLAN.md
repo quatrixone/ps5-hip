@@ -2,6 +2,12 @@
 
 Updated: 2026-10-14, America/New_York.
 
+Current checkpoint (2026-10-15): bounded native public HIP GPU execution passed
+on .40 at `7207a39`, including two launches, 146 exact values, 16 guards, rejected
+geometry and natural teardown. See `../evidence/console40-native-public-hip-gpu-success.json`.
+The mounted-title path resolved file-open failure after elevation. Earlier
+checkpoint notes below are historical; G5 and G6-G12 remain open.
+
 Both native module fixtures now use the verified system-visible title mount
 for code objects after filesystem elevation. The two changed title units compile
 and independent review passed; see `../evidence/offline-native-module-mounted-path.json`.
@@ -659,12 +665,17 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
+The public HIP GPU fixture now passes its bounded two-round native contract: module
+load/lookup,146 outputs,16 guards,2 geometry rejections and complete natural
+teardown. See `../evidence/console40-native-public-hip-gpu-success.json`. Next is
+explicit-stream/event GPU ordering; full G5 criteria below are unchanged.
+
 Bounded progress (2026-10-15): source-only public HIP qualification now covers
 logical stream/event ordering, implicit legacy default-stream dependencies,
 checked rectangular copies and pitched fills. Explicit and captured two-host-node
 graphs replay changing inputs, accept callback/user-data updates and outlive their
 source graph; see `../evidence/offline-public-host-graph.json`. These are sanitizer
-host-model results. Native public GPU execution, device-memory/kernel graph nodes,
+host-model results. Broader native public GPU execution, device-memory/kernel graph nodes,
 broader capture invalidation, graph resource lifetime, memory plateau and measured replay
 performance still require acceptance under the full contract below.
 

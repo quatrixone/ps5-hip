@@ -16,7 +16,32 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Pitched fill and retirement checkpoint
+## Current native public HIP checkpoint
+
+- 2026-10-15 | G5 | 7207a39 | .40 | pass: bounded native public HIP GPU | evidence/console40-native-public-hip-gpu-success.json | next: stream/event GPU ordering
+
+The public HIP GPU fixture passed on .40 through WSL at `7207a39`: public
+module load/lookup, two real default-stream kernel launches, 146 exact outputs,
+16 guards, two unsupported-geometry rejections, one allocation/free and one
+retired queue. PID 129 exited naturally; independent audit verified installed
+bytes, 27 complete reads, stable mount snapshots, fault-free scoped klog, service
+health and lock release. See `evidence/console40-native-public-hip-gpu-success.json`.
+
+The mounted-title path fixes the earlier file-open failure after elevation. The
+90-second image-read deadline also resolved a proven pre-upload transfer timeout
+without relaxing byte/hash checks. Both phases in
+`results/source-public-launch-mounted-path-console-v1` are consumed.
+
+Current image: `6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8`.
+Current launch log: `8e04b322f2ba141b5ecedb8e74601292a1787194110a529013d1f05afdc2b893`
+(not yet SHA-preserved). These are the only current deployment baseline; all
+earlier images/logs remain preserved and older baseline notes below are historical.
+
+Next: implement and qualify native public HIP explicit-stream/event ordering
+with changed inputs and exact GPU readback, using fresh reviewed controls. This
+fixed scratch/LDS-free kernel result does not close G5 or the broader roadmap.
+
+## Historical pitched fill and retirement checkpoints
 
 The mounted-path package deployment passed through WSL: all 21 reads and
 seven mounted files verified, old image/log preserved, services healthy and lock
@@ -720,9 +745,9 @@ the sole lock for this session is `C:/Users/Denis/Documents/PS5/lock.txt`.
 
 1. Keep the supported source pipeline on `main`; preserve both consumed fresh
    cases and their independent reviews. Do not reactivate historical D/E phases.
-2. Implement and qualify the next public HIP data-copy/module/launch path using
-   the current memory image/log baseline. Preserve the bounded memory result;
-   allocation/free does not establish byte correctness or GPU execution.
+2. Implement and qualify native public HIP explicit-stream/event GPU ordering.
+   Use the successful mounted-path GPU image/log baseline recorded above.
+   The two-dispatch result does not establish broader stream or graph semantics.
 3. Refresh GEMM D/E controls against the actual then-installed PPSA99014 image,
    keep the corrected GeometryLds source frozen, and independently review before
    a numerical `.40` run. No GEMM GPU success is presently claimed.
