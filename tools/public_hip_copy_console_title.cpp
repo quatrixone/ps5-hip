@@ -27,7 +27,7 @@ std::unique_ptr<ps5hip::SubmissionBackend> backend() {
 }
 void finalized() {
   if (!completed || observed.terminal || observed.uncertain || observed.launches || backend_requests ||
-      observed.allocations != 2 || observed.frees != 2 || observed.queues != 1 ||
+      observed.allocations != 8 || observed.frees != 8 || observed.queues != 4 ||
       observed.allocations != observed.frees ||
       observed.queues != observed.retired_queues ||
       !observed.gate_destroyed) {
@@ -55,6 +55,16 @@ extern "C" [[noreturn]] void ps5hip_clr_gpu_fail(const char* reason) {
 extern "C" void ps5hip_install_vector_title_finalizer() {
   finalizer_installed = std::atexit(finalized) == 0;
 }
+
+static void checked(bool value,int line){
+  if(!value){std::fprintf(stderr,"HIP_COPY LIFETIME_ERROR line=%d\n",line);ps5hip_clr_gpu_fail("allocation-lifetime");}
+}
+static void lifetime_ok(hipError_t status,int line){
+  if(status!=hipSuccess){std::fprintf(stderr,"HIP_COPY LIFETIME_ERROR line=%d status=%d\n",line,int(status));ps5hip_clr_gpu_fail("allocation-lifetime-api");}
+}
+#define HIP_OK(x) lifetime_ok(x,__LINE__)
+#include "public_hip_allocation_lifetime_fixture.h"
+#undef HIP_OK
 
 int main() {
   try {
@@ -160,9 +170,13 @@ int main() {
         hipFree(first) != hipSuccess || observed.allocations != 2 || observed.frees != 2 ||
         observed.terminal || observed.uncertain || observed.launches || backend_requests)
       ps5hip_clr_gpu_fail("public-retire");
+    allocation_lifetime_fixture::run();
+    if(observed.allocations!=8 || observed.frees!=8 || observed.queues!=4 ||
+       observed.retired_queues!=3 || observed.terminal || observed.uncertain ||
+       observed.launches || backend_requests)ps5hip_clr_gpu_fail("lifetime-retire");
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-    std::puts("HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=7168 bounds_rejected=16 rectangular=true padding=true gpu_execution=false allocations=2 frees=2 watchdog_joined=true finalization=pending");
+    std::puts("HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=7168 bounds_rejected=16 rectangular=true padding=true gpu_execution=false lifetime_cases=2 lifetime_bytes=384 gated_free_observed=true migration=true allocations=8 frees=8 watchdog_joined=true finalization=pending");
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
     return 0;
   } catch (...) { ps5hip_clr_gpu_fail("exception"); }

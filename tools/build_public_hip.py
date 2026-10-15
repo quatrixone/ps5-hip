@@ -55,6 +55,7 @@ def build_inputs():
              "tools/ps5-clangxx", "patches/native-import-libraries.patch",
              "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
+             "tools/public_hip_allocation_lifetime_fixture.h",
              "tools/public_hip_copy_gpu_fixture.h", "tools/public_hip_copy_recovery_fixture.h", "tools/public_hip_copy_gpu_console_title.cpp",
              "tools/public_hip_capture_gpu_console_title.cpp", "tools/public_hip_graph_gpu_fixture.h", "tools/public_hip_graph_gpu_console_title.cpp",
              "tools/public_hip_stream_gpu_fixture.h", "tools/public_hip_stream_console_title.cpp",

@@ -296,7 +296,12 @@ def main():
         'PUBLIC_ALLOCATION_MIGRATION_PASS old_freed=true source_graph_alive=true replay_exact=true gpu_execution=false',
         'PUBLIC_ALLOCATION_LIFETIME_FINAL ownership=clean gpu_execution=false']:
         raise RuntimeError('public allocation lifetime oracle differs')
-    print('public allocation lifetime PASS', flush=True)
+    for operation in ('create', 'join'):
+        run('allocation-thread-' + operation + '-fail',
+            [output / 'allocation-lifetime-model', 'thread-' + operation + '-fail'], env,
+            expected_output_failure=True,
+            failure_marker='PUBLIC_ALLOCATION_THREAD_FAILURE operation=' + operation)
+    print('public allocation lifetime and checked thread failures PASS', flush=True)
     copy_graph_source = ROOT / 'tests/public_hip_copy_graph_model.cpp'
     source_hashes[str(copy_graph_source.relative_to(ROOT))] = sha(copy_graph_source)
     copy_graph_object = compile_one((len(units) + 12, copy_graph_source))
@@ -476,7 +481,7 @@ def main():
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
                'total_compilations': len(units) + 15,
                'allocation_lifetime_model_sha256': sha(output / 'allocation-lifetime-model'),
-               'allocation_lifetime_cases': ['queued-free-before-exec-destroy', 'parameter-migration-free-old-before-replay'],
+               'allocation_lifetime_cases': ['queued-free-before-exec-destroy', 'parameter-migration-free-old-before-replay', 'thread-create-failure-rejected', 'thread-join-failure-rejected'],
                'allocation_lifetime_observation_ms': 100,
                'copy_gpu_model_sha256': sha(output / 'copy-gpu-model'),
                'copy_gpu_cases': ['explicit', 'capture', 'joined', 'missing-join-rejected', 'eager-equality', 'six-disabled-directions', 'update-source-destroy', 'noop-rejected', 'corrupt-rejected', 'h2d-omitted-rejected', 'd2d-omitted-rejected', 'd2h-omitted-rejected'],

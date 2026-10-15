@@ -278,8 +278,12 @@ class ConsoleContractTest(unittest.TestCase):
         for before, after in ((b'rounds=2', b'rounds=1'), (b'compared_bytes=7168', b'compared_bytes=7167'),
                               (b'bounds_rejected=16', b'bounds_rejected=0'),
                               (b'rectangular=true', b'rectangular=false'), (b'padding=true', b'padding=false'),
-                              (b'gpu_execution=false', b'gpu_execution=true'), (b'frees=2', b'frees=1'),
-                              (b'retired=1', b'retired=0')):
+                              (b'lifetime_cases=2', b'lifetime_cases=0'),
+                              (b'lifetime_bytes=384', b'lifetime_bytes=383'),
+                              (b'gated_free_observed=true', b'gated_free_observed=false'),
+                              (b'migration=true', b'migration=false'),
+                              (b'gpu_execution=false', b'gpu_execution=true'), (b'frees=8', b'frees=2'),
+                              (b'retired=4', b'retired=1')):
             invalid.append(COPY_EXPECTED.replace(before, after))
         for raw in invalid:
             with self.assertRaises(ValueError):

@@ -99,7 +99,7 @@ The package and controls still require exact-candidate review and a separately
 accepted console cycle before native module support is claimed.
 
 `make public-hip-copy-package RESULTS_DIR=/data/ps5-hip/results` builds the
-contiguous and rectangular-copy fixture into `build/public-hip-copy`. Its PS5-specific
+contiguous/rectangular-copy and allocation-lifetime fixture into `build/public-hip-copy`. Its PS5-specific
 HIP patch preserves the caller's synchronous request through D2D queue selection
 and returns success only after a successful completion wait and `CL_COMPLETE`.
 An uncertain result must retain all host/device buffers and quarantine; the
@@ -111,7 +111,14 @@ The copy oracle checks two changed rounds of H2D/D2D/D2H copies, 257-byte
 payloads with guards, 2D transfers with distinct pitches and 3D transfers with
 nonzero origins and slice gaps. It compares 7,168 bytes and requires 16 exact
 rejections, including unchanged output after a synchronous overlap error. It
-requires two frees, one retired queue and clean shutdown. The backend factory
+then runs the same allocation-lifetime helper as the sanitizer model: queued
+free while the graph/executable remain alive, and parameter migration to new
+buffers followed by freeing old buffers before replay. Three exact 128-byte
+comparisons add 384 lifetime bytes. Static callback storage, checked pthread
+creation/join and bounded waits preserve failure quarantine. The 100 ms gated
+observation is finite scheduling evidence, not proof of runtime entry.
+The combined title requires eight frees, four retired queues and clean shutdown.
+The backend factory
 denies GPU creation, and package verification requires GPU imports to be absent. The
 completion regression compiles the actual upstream function with mocked
 completion under ASan/UBSan; an unpatched negative control must fail. This is

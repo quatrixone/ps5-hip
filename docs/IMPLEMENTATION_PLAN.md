@@ -2,6 +2,24 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Shared native allocation-lifetime candidate
+
+The CPU-only copy title now uses the same lifetime helper as the sanitizer model:
+queued free while the executable remains alive, and parameter migration followed
+by freeing old allocations before replay. Static callback storage, bounded waits,
+checked pthread creation/join and exception quarantine preserve uncertain work.
+Both injected pthread failures are rejected at the shared check. Full 84-unit
+ASan/UBSan qualification, 26 controls and a fresh 74-object native package passed;
+independent artifact review confirms six package files and no GPU imports.
+See `../evidence/offline-native-lifetime-fixture.json`.
+
+Next: freeze/review `build/public-hip-copy-lifetime-v2` and run once on idle .40.
+Use the joined image/log baseline below; preserve it before deployment. Native
+acceptance requires 7168 existing comparison bytes plus 384 lifetime bytes,
+eight allocations/frees, four retired queues, no GPU submissions and natural
+exit. The 100 ms gate observation cannot prove entry into the freeing call.
+Native lifetime validation, sustained replay, memory plateau and G5 remain open.
+
 ## Native joined capture passed
 
 The two-stream producer/kernel-to-consumer-copy capture passed on .40, including

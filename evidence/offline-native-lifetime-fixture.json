@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-shared-native-allocation-lifetime-candidate",
+  "package_sha256": "dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7",
+  "total_compilations": 84,
+  "native_objects": 74,
+  "shared_header_sha256": "2a7d403c0fa9bb4f9d35e686b0f2482fd066d89dca516f59838ecff8d7510f47",
+  "cases": [
+    "queued-free-before-exec-destroy",
+    "parameter-migration-free-old-before-replay",
+    "thread-create-failure-rejected-at-shared-check",
+    "thread-join-failure-rejected-at-shared-check"
+  ],
+  "native_expected": {
+    "existing_compared_bytes": 7168,
+    "lifetime_compared_bytes": 384,
+    "allocations": 8,
+    "frees": 8,
+    "queues": 4,
+    "retired": 4,
+    "gpu_launches": 0
+  },
+  "model_measured": {
+    "allocations": 6,
+    "frees": 6,
+    "queues": 4,
+    "retired": 4,
+    "gpu_launches": 0
+  },
+  "bounded_free_observation_ms": 100,
+  "control_tests": 26,
+  "native_executed": false,
+  "prior_attempts": {
+    "native_v1": "failed ROCclr memory header include order; corrected through command header",
+    "host_v1": "deliberately terminated before changing inputs; not qualified"
+  },
+  "raw_evidence": {
+    "results/shared-lifetime-qualified-v2/receipt.json": "02b0d77fb6c5d31efdbced569865415d93dd0750796cf41ea6339b143dbc85c1",
+    "build/public-hip-copy-lifetime-v2/link-receipt.json": "c6f9abc144c2fbb710583cd739db27cb755812ef5eb5d97df1b3ed90dcc36e35",
+    "results/copy-lifetime-independent-review-v1/review.json": "274d599a2174dc8814d1ca3d8169b83b6f9dd2d339b2b337b03b2a3155111b80",
+    "build/public-hip-copy-lifetime-v1/compile-42.stderr": "9ed51c985a5469d1158086f98a8bbfb9fc8ab56df36f932f634174436f927617",
+    "results/lifetime-native-include-check-v1/compile-title.stderr": "111cd4dee6202ee87ab47eb305132bca84c4c5b46613f9d84e618edd6d85c0a3",
+    "results/shared-lifetime-qualified-v2/allocation-lifetime.json": "de2db036a9a9058d5d6eabe62c0ea3f428a57591b47e06079d2910fa6db30eca",
+    "results/shared-lifetime-qualified-v2/allocation-lifetime.stdout": "4a2f1b27a422020e84290ea823eaae5434b4afc9c7386b4d4e3dea880d0871a2",
+    "results/shared-lifetime-qualified-v2/allocation-lifetime.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/shared-lifetime-qualified-v2/allocation-thread-create-fail.json": "24bd51171d0fa83304a254c088e1848c8f33ff6561bce96964d80351e6abbb7e",
+    "results/shared-lifetime-qualified-v2/allocation-thread-create-fail.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/shared-lifetime-qualified-v2/allocation-thread-create-fail.stderr": "a0aaea841393d426afd82e5b8b9e8fcef5ac6d529e2bb03afdea8836610a52ef",
+    "results/shared-lifetime-qualified-v2/allocation-thread-join-fail.json": "a506a3e75453258140e1d8382b56776ceec5101e246d3ebf3cbc0205d9871e00",
+    "results/shared-lifetime-qualified-v2/allocation-thread-join-fail.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/shared-lifetime-qualified-v2/allocation-thread-join-fail.stderr": "27a45578d1477e28f4aa2502c47e44dbbb65dd1f9ecb4a8dd9225cd6975edf9f"
+  },
+  "limits": [
+    "Native package built and inspected, not executed.",
+    "Finite gated observation does not prove runtime entry before gate release.",
+    "This validates allocation and CPU copy worker retirement, not GPU completion-dependent retirement.",
+    "Sustained replay, memory plateau and measured performance remain open."
+  ]
+}
