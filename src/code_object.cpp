@@ -397,7 +397,9 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     for (size_t i = 0; i < k.arguments.size(); ++i) {
         const auto &arg = k.arguments[i];
         if (!((arg.kind == "global_buffer" && arg.size == 8 && arg.offset % 8 == 0) ||
-              (arg.kind == "by_value" && (arg.size == 4 || arg.size == 8) && arg.offset % arg.size == 0)))
+              (arg.kind == "by_value" &&
+               (((arg.size == 4 || arg.size == 8) && arg.offset % arg.size == 0) ||
+                (arg.size > 8 && arg.size <= detail::max_by_value_bytes)))))
             return "unsupported initial argument kind or layout";
         if (!contains(0, k.kernarg_size, arg.offset, arg.size)) return "argument outside kernarg storage";
         for (size_t j = 0; j < i; ++j)
@@ -407,8 +409,8 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
         explicit_end = std::max(explicit_end, uint64_t(arg.offset) + arg.size);
     }
     const uint64_t base = (explicit_end + 7) & ~uint64_t(7);
-    // LLVM rounds explicit-only storage to four bytes; supported arguments already end there.
-    if (k.hidden_arguments.empty() && k.kernarg_size != explicit_end)
+    // LLVM rounds explicit-only storage to four bytes, including aggregate tails.
+    if (k.hidden_arguments.empty() && k.kernarg_size != ((explicit_end + 3) & ~uint64_t(3)))
         return "unaccounted initial kernarg storage";
     if (!k.hidden_arguments.empty()) {
         if (k.hidden_arguments.size() != detail::cov5_geometry.size() + (reduction ? 1u : 0u) ||

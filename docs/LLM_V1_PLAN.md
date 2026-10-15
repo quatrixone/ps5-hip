@@ -151,8 +151,10 @@ checkpoint/resume, even when base weights are frozen.
 
 Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now
 passes and five real device translation units link. Resolve demonstrated
-aggregate-argument, launch-resource, math/library and full-client-link blockers,
+native aggregate-argument, launch-resource, math/library and full-client-link blockers,
 then use the verified CPU token/logit references to qualify required operators.
+Aggregate arguments now pass the offline genuine compiler/CLR qualification;
+see `PUBLIC_AGGREGATE_ARGUMENTS.md`. Native execution is the next ABI gate.
 The host tools and model
 metadata inventory are reproducible through optional Make targets; V1.1 remains
 partial. Select work from demonstrated client blockers. No native LLM, training

@@ -27,6 +27,19 @@ void check_geometry(const GeometryShape &shape) {
 }
 }
 
+void validate_launch_argument(const KernelArgument &layout, const LaunchArgument &arg) {
+    if (layout.kind == "global_buffer") {
+        require(layout.size == 8 && arg.bytes.empty(), "invalid pointer argument representation");
+    } else if (layout.kind == "by_value" && layout.size > 8) {
+        require(layout.size <= detail::max_by_value_bytes && arg.bytes.size() == layout.size &&
+                arg.value == 0 && arg.buffer_bytes == 0, "invalid aggregate argument representation");
+    } else {
+        require(layout.kind == "by_value" && (layout.size == 4 || layout.size == 8) &&
+                arg.bytes.empty() && arg.buffer_bytes == 0 &&
+                (layout.size == 8 || arg.value <= UINT32_MAX), "invalid scalar argument bits");
+    }
+}
+
 static InitialLaunch prepare_launch(const CodeObject &object, const std::string &name,
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
@@ -89,6 +102,7 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
     for (size_t i = 0; i < arguments.size(); ++i) {
         const auto &arg = arguments[i];
         const auto &layout = k.arguments[i];
+        validate_launch_argument(layout, arg);
         require(layout.offset <= result.kernargs.size() && layout.size <= result.kernargs.size() - layout.offset,
                 "argument outside kernarg storage");
         if (layout.kind == "global_buffer") {
@@ -97,12 +111,13 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
             require(!scratch || !overlaps(buffer, scratch->storage), "argument buffer aliases scratch");
             require(!overlaps(buffer, module) && !overlaps(buffer, kernarg_storage),
                     "argument buffer aliases launch storage");
-        } else {
-            require(arg.buffer_bytes == 0 && (layout.size == 8 || arg.value <= UINT32_MAX),
-                    "invalid scalar argument bits");
         }
-        for (unsigned byte = 0; byte < layout.size; ++byte)
-            result.kernargs[layout.offset + byte] = uint8_t(arg.value >> (byte * 8));
+        if (!arg.bytes.empty()) {
+            std::copy(arg.bytes.begin(), arg.bytes.end(), result.kernargs.begin() + layout.offset);
+        } else {
+            for (unsigned byte = 0; byte < layout.size; ++byte)
+                result.kernargs[layout.offset + byte] = uint8_t(arg.value >> (byte * 8));
+        }
     }
     return result;
 }

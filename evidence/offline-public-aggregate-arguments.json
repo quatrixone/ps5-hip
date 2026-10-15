@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "classification": "offline-genuine-compiler-public-clr-aggregate-arguments",
+  "release_scope": "Partial V1.2 prerequisite; native LLM inference and full SDK remain incomplete.",
+  "source_sha256": {
+    "include/ps5hip/code_object.h": "6ec3495928b796921d8fbdfa20791ac1c9ee644ca9514570d82e4f9bcd8deddb",
+    "include/ps5hip/host_launch.h": "dded42ca548db5bfe06d673f388eeb1c148a09f2b549517a127f6bdc77070cdb",
+    "include/ps5hip/launch.h": "950fcf7c1673c77230c40cc2e2a281773bfd7ea74d045442c00ad6cc29d0bb16",
+    "src/code_object.cpp": "ea60a71084d0b7c06dfa310a042551ff0bd284ea41fe93e275316c0f8eeeaf9c",
+    "src/host_launch.cpp": "1db4711347f6d55a193250ab20b5dda85e1cd86739e9a63c9227bc33ebb9476a",
+    "src/launch.cpp": "d65ae11cb1b55c4dae95d0f83e2e9a905a6d90decaeba8f36f3fa7b82be3b3bb",
+    "src/native_launch.cpp": "6854ff1457eef54e5408555fea58995681e9bf6650bd2ec0fe32c64bfa33d05a",
+    "src/hip_launch_profile.cpp": "7b92eddf4c811adf7b52338ea8f7fcb5a5311458b266f8e3377c9fd71e6e2afa",
+    "ports/clr/ps5-device.cpp": "0b960f9c8b857b23528bd9e09dde7a9fd1fb3e0e695d3cc2c280bffa64e8b1de",
+    "tests/host_launch_test.cpp": "1c5714d3f2832126bcc4c8bc525e70ebc5588c3234acf548c693bcb7ced096e6",
+    "tests/native_routes_test.cpp": "9b742a8ff4b803ac3d17a247197e3a620e1ff0113bd6670cee408a5c36a4876a",
+    "tests/hip_launch_profile_test.cpp": "26ba786ce613ba3738df1e92f6e1cfb58aa9ea7b2dbc703c0b3448425e75871a",
+    "tests/hip_aggregate_fixture.h": "288c465e126d7f96e277589e3aa377da3f62a24c51e962db59d5dac5ef685857",
+    "tests/hip_aggregate_fixture.hip": "b09c7f46b1fbea13f1fb87f3a0a0f8c79dd3168ef68e5d71318415bf267a9646",
+    "tests/hip_aggregate_stub_observer.cpp": "b07c0313b61d819777cd073b5ee7d02bf024da16872bcc5ce1b80b8efd716937",
+    "tests/hip_aggregate_compiler_test.py": "d1cb2b91a21a6ae5e9d620f985074e5e9096b295c90b8bc4922d4298788376d2",
+    "tests/public_hip_aggregate_model.cpp": "1c36b6db779e96483873c72f995e02a2c41fc3c5f925a0c231b1c9c7cc3f9d38",
+    "tests/public_hip_aggregate_qualification_test.py": "83e907516d0a009edd4f0c02141342f52b52321f0fc67b5a1b9a9636ce0ba547",
+    "tools/qualify_public_hip_aggregate.py": "b1286794e3b2a06363621a0864f9011d73e568feedc1ef6fcec512edf2e06c76",
+    "Makefile": "ac4ebe60bbf99e3ff868fa0d2ec885e42614b1cc39af2c2f98b22998ff1304f5",
+    "CMakeLists.txt": "e4c1c61f7f4debf61ca8477e3c7c4c8dcf01c65b2ea42223abe706e43075e6d8"
+  },
+  "raw_evidence": {
+    "results/source-public-aggregate-v1/receipt.json": "2a8d4ccb6296804015b33fb349e8bdd9aae30a2f552cec3ace19934abc12dc53",
+    "results/hip-aggregate-fixture-v4/receipt.json": "1eae2c8e14cdabd0647a803ebe589cd7def46f93fcdfa94bcb6e66edfc8d3410",
+    "results/public-hip-aggregate-v3/receipt.json": "e1e77a72fb741fd98dfe26d083c656d62eb64d4125c400b3f6e038610f7ff6ee",
+    "build/aggregate-core-review-v1/focused-results.json": "07e63a120f1bc0afc5dc089dcc968cade0cb70a5962edd1b0e8dfb000f9352b5",
+    "build/aggregate-core-review-v1/broader-results.json": "1ef6a956575892125fdd7f673799558fe701615bc8ddd09ce04af6bf9abffaee",
+    "build/aggregate-core-review-v1/review.json": "5880e6a5cd49d7c15c7313fe949d686ee749ecf88e2ca3cab8e9fc49595ec76b",
+    "results/aggregate-runtime-source-review-v1/review.json": "1554804e462f813a57729150f48a2e2a14d5612b96990fab954b1ad7fb6db803",
+    "results/aggregate-final-review-v2/review.json": "306914fc35718cad8dd9b5d6afc4502589a8af94c934e7c3e39ec7db343231df"
+  },
+  "base_qualification": {
+    "core_translation_units": 71,
+    "total_compilations": 87,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ]
+  },
+  "aggregate_contract": {
+    "max_bytes": 128,
+    "compiler_sizes": [
+      12,
+      16,
+      128
+    ],
+    "compiler_offsets": [
+      0,
+      8,
+      12,
+      32,
+      48,
+      176
+    ],
+    "kernarg_bytes": 180,
+    "between_argument_gap": [
+      24,
+      32
+    ],
+    "nested_pointer_tracking": false
+  },
+  "host_cases": [
+    "12/16/128-byte-aggregate",
+    "real-compiler-stubs",
+    "metadata-layout-and-gap",
+    "deferred-and-eager",
+    "caller-mutation-after-enqueue",
+    "unsupported-geometry/shared-memory-then-valid",
+    "two-captures",
+    "eight-output-guard-bytes",
+    "clean-modeled-ownership",
+    "noop-rejected",
+    "corruption-rejected"
+  ],
+  "qualified_input_identities": 1807,
+  "qualified_artifacts": 16,
+  "core_regressions": {
+    "configured_tests_passed": 32,
+    "focused": "Host capture, O1/O2 native owned routes, direct four-kernel profile",
+    "unconfigured": [
+      "actual combined geometry/LDS fixture",
+      "standalone reduction fixture"
+    ]
+  },
+  "gpu_executed": false,
+  "native_executed": false,
+  "console_state_changed": false,
+  "limits": [
+    "Packet transport copies bytes in the host model; it does not execute GPU ISA.",
+    "Aggregate internal padding is observed but not a portable C++ member value.",
+    "No nested-pointer lifetime or pointer-free metadata guarantee.",
+    "Hashes current source-qualified base objects; base receipt does not independently bind every object byte.",
+    "No native aggregate package or GPU aggregate execution qualified.",
+    "Geometry, LDS, private-memory routes and model-scale memory limits are not expanded by this milestone."
+  ],
+  "failed_attempt": "results/public-hip-aggregate-v1: invalid null-pointer synchronous-error assumption; corrected to unsupported geometry/shared-memory admission tests."
+}

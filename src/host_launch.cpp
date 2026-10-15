@@ -28,8 +28,9 @@ void validate_capture_layout(const Kernel &kernel, NativeLaunchRoute route) {
     for (size_t i=0;i<kernel.arguments.size();++i) {
         const auto &a=kernel.arguments[i];
         require((a.kind=="global_buffer" && a.size==8) ||
-                (a.kind=="by_value" && (a.size==4 || a.size==8)), "unsupported capture width or kind");
-        require(a.offset%a.size==0 && a.offset<=kernel.kernarg_size &&
+                (a.kind=="by_value" && (a.size==4 || a.size==8 ||
+                 (a.size>8 && a.size<=detail::max_by_value_bytes))), "unsupported capture width or kind");
+        require((a.size>8 || a.offset%a.size==0) && a.offset<=kernel.kernarg_size &&
                 a.size<=kernel.kernarg_size-a.offset, "invalid capture argument extent");
         for(size_t j=0;j<i;++j) {
             const auto &b=kernel.arguments[j];
@@ -75,8 +76,12 @@ std::vector<LaunchArgument> capture_launch_arguments(
         require(address >= base && address - base <= storage[i].size &&
                 layout.size <= storage[i].size - (address - base), "argument value outside trusted storage");
         LaunchArgument value{};
-        require(layout.size <= sizeof(value.value), "argument exceeds scalar snapshot width");
-        std::memcpy(&value.value, reinterpret_cast<const void *>(address), layout.size);
+        if (layout.size > sizeof(value.value)) {
+            value.bytes.resize(layout.size);
+            std::memcpy(value.bytes.data(), reinterpret_cast<const void *>(address), layout.size);
+        } else {
+            std::memcpy(&value.value, reinterpret_cast<const void *>(address), layout.size);
+        }
         if (layout.kind == "global_buffer") {
             bool found = false;
             for (const auto range : buffers)

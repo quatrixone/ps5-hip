@@ -130,9 +130,10 @@ Kernel::Kernel(const amd::Device& d,const Program& p,const ps5hip::Kernel& k)
     std::vector<amd::KernelParameterDescriptor> args(k.arguments.size());
     for(size_t i=0;i<args.size();++i){
         const auto& src=k.arguments[i];auto& dst=args[i];
-        dst.offset_=src.offset;dst.size_=src.size;dst.alignment_=src.size;dst.typeQualifier_=0;
+        // Opaque aggregates keep compiler offsets; their byte count is not an alignment.
+        dst.offset_=src.offset;dst.size_=src.size;dst.alignment_=src.size>8?1:src.size;dst.typeQualifier_=0;
         if(src.kind=="global_buffer"&&src.size==8){dst.type_=T_POINTER;dst.addressQualifier_=CL_KERNEL_ARG_ADDRESS_GLOBAL;dst.info_.oclObject_=amd::KernelParameterDescriptor::MemoryObject;}
-        else if(src.kind=="by_value"&&(src.size==4||src.size==8)){dst.type_=src.size==4?T_INT:T_LONG;dst.addressQualifier_=CL_KERNEL_ARG_ADDRESS_PRIVATE;dst.info_.oclObject_=amd::KernelParameterDescriptor::ValueObject;}
+        else if(src.kind=="by_value"&&(src.size==4||src.size==8||(src.size>8&&src.size<=ps5hip::detail::max_by_value_bytes))){dst.type_=src.size==4?T_INT:src.size==8?T_LONG:T_VOID;dst.addressQualifier_=CL_KERNEL_ARG_ADDRESS_PRIVATE;dst.info_.oclObject_=amd::KernelParameterDescriptor::ValueObject;}
         else throw ObjectError("unsupported argument kind");
     }
     if(!createSignature(args,args.size(),amd::KernelSignature::ABIVersion_2))throw ObjectError("CLR signature creation");

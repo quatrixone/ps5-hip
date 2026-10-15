@@ -109,9 +109,8 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     // Resolve before any temporary allocation; pointer ranges are actual current
     // logical extents, including interior offsets, never caller-invented sizes.
     for (size_t i = 0; i < values.size(); ++i) {
+        validate_launch_argument(k.arguments[i], values[i]);
         if (k.arguments[i].kind != "global_buffer") {
-            require(values[i].buffer_bytes == 0 && (k.arguments[i].size == 8 || values[i].value <= UINT32_MAX),
-                "invalid native scalar bits");
             continue;
         }
         auto hold = data.resolve(reinterpret_cast<const void *>(values[i].value), values[i].buffer_bytes);
@@ -191,7 +190,9 @@ PreparedNativeLaunch prepare_native_vector(const BundledCodeObject &bundle, cons
     for (size_t i = 0; i < 4; ++i)
         require(kernel.arguments[i].offset == i * 8 && kernel.arguments[i].size == (i == 3 ? 4 : 8) &&
             kernel.arguments[i].kind == (i == 3 ? "by_value" : "global_buffer"), "unmeasured native vector argument layout");
-    require(values.size() == 4 && values[3].value == 73 && values[3].buffer_bytes == 0, "unmeasured native vector element count");
+    require(values.size() == 4 && values[3].value == 73 && values[3].buffer_bytes == 0 &&
+            std::all_of(values.begin(), values.end(), [](const LaunchArgument &arg) { return arg.bytes.empty(); }),
+            "unmeasured native vector element count");
     for (size_t i = 0; i < 3; ++i) {
         require(values[i].value % sizeof(float) == 0, "unaligned native vector pointer");
         const auto hold = data.resolve(reinterpret_cast<const void *>(values[i].value), 73 * sizeof(float));

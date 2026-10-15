@@ -62,8 +62,8 @@ void hip_runtime_validate_arguments(const Kernel &kernel,const NativeLaunchReque
     require(expected.route==request.route && expected.shape.dimensions==request.shape.dimensions,"launch profile changed");
     require(values.size()==kernel.arguments.size(),"captured argument count");
     for(size_t i=0;i<values.size();++i) {
+        validate_launch_argument(kernel.arguments[i], values[i]);
         if(kernel.arguments[i].kind=="global_buffer") require(values[i].buffer_bytes!=0,"empty live pointer extent");
-        else require(!values[i].buffer_bytes && (kernel.arguments[i].size==8 || values[i].value<=UINT32_MAX),"invalid scalar bits");
     }
     // The registry/capture and native preparer validate live extents. Scalar
     // meanings and the kernel's indexing bounds remain the program's contract.

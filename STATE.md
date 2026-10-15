@@ -37,7 +37,7 @@ converted weights, real compiler probe and CPU token/logit fixtures.
 The bounded effective compiler probe now passes twelve host-object builds and
 links backend/getrows/mmvq device modules. A controlled library-order fix now
 also links norm/RoPE: OCML must precede its OCLC constants. Cooperative softmax
-linkage remains unresolved, along with header-version alignment, aggregate argument ABI
+linkage remains unresolved, along with header-version alignment, native aggregate argument ABI
 and launch resource requirements. See `docs/LLM_V1_COMPILE_PROBE.md` and
 `evidence/offline-llm-hip-compile-probe.json`. No final client link or native
 operator execution is proven; diagnostic historical headers are not new locks.
@@ -48,6 +48,20 @@ The full SDK roadmap stays open; v1 does not require all G5-G12 work to finish.
 Historical next-step paragraphs below are superseded by this release priority.
 The planning milestone itself made no console change. The subsequent native
 compiler-launch checkpoint below records the current installed image/log.
+
+## Aggregate arguments qualified offline
+
+Genuine HIP compiler stubs now pass 12/16/128-byte by-value arguments through
+CLR in eager and deferred host runs. Caller mutation, compiler offsets, zero
+argument gaps, guards, unsupported-call recovery and clean modeled ownership
+pass; no-op and corrupt transports fail the output oracle. The full 87-unit
+CLR sanitizer qualification and 32 configured core regressions pass.
+See `docs/PUBLIC_AGGREGATE_ARGUMENTS.md` and
+`evidence/offline-public-aggregate-arguments.json` for exact scope and provenance.
+Nested pointers remain opaque and require caller-managed lifetime. No native
+aggregate execution or new console image is claimed. Next: integrate the native
+aggregate title, audit/package it, then freeze and validate a fresh candidate
+on idle .40 before proceeding to real LLM launch resources and operators.
 
 ## Static module failure handling qualified offline
 

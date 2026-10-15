@@ -57,6 +57,24 @@ All older next-step paragraphs below are historical and subordinate to this
 priority. The latest native compiler-launch checkpoint below records the current
 installed image/log; the earlier backing-test image/log are preserved backups.
 
+## Aggregate arguments qualified offline
+
+Genuine HIP compiler stubs now pass 12/16/128-byte by-value arguments through
+CLR in eager and deferred host runs. Caller mutation, compiler offsets, zero
+argument gaps, guards, unsupported-call recovery and clean modeled ownership
+pass; no-op and corrupt transports fail the output oracle. The full 87-unit
+CLR sanitizer qualification and 32 configured core regressions pass.
+See `docs/PUBLIC_AGGREGATE_ARGUMENTS.md` and
+`evidence/offline-public-aggregate-arguments.json` for exact scope and provenance.
+Nested pointers remain opaque and require caller-managed lifetime. No native
+aggregate execution or new console image is claimed. Next: integrate the native
+aggregate title, audit/package it, then freeze and validate a fresh candidate
+on idle .40 before proceeding to real LLM launch resources and operators.
+
+Local next-step draft: `tools/public_hip_aggregate_console_title.cpp` is
+uncommitted and unbuilt. Review it before integration; it is not required to
+reproduce the committed offline qualification or an installed console image.
+
 ## Static module failure handling checkpoint
 
 Latest native checkpoint passed: `evidence/console40-public-embedded-success.json`.

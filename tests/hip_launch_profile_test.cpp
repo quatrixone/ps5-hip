@@ -1,4 +1,4 @@
-﻿#include "ps5hip/hip_launch_profile.h"
+#include "ps5hip/hip_launch_profile.h"
 #include "ps5hip/hip_runtime_control.h"
 #include "ps5hip/host_launch.h"
 #include <fstream>
@@ -28,6 +28,20 @@ int main(int argc,char **argv) {
     for(size_t i=0;i<k.arguments.size();++i){bad=k;bad.arguments[i].size=16;
      reject([&]{capture_launch_arguments(bad,r.route,{reinterpret_cast<const uint8_t*>(1),k.arguments.size()*8},{},{});});}
     if(!k.hidden_arguments.empty()){bad=k;++bad.hidden_arguments.back().offset;reject([&]{select_hip_launch_profile(bad,groups,threads,0);});}
+    if(!geometry && !k.private_bytes) {
+     auto aggregate=k;aggregate.hidden_arguments.clear();aggregate.arguments.resize(1);
+     aggregate.arguments[0].kind="by_value";aggregate.arguments[0].offset=4;aggregate.arguments[0].size=12;
+     aggregate.kernarg_size=16;
+     auto request=select_hip_launch_profile(aggregate,groups,threads,0);
+     LaunchArgument value{};value.bytes.assign(12,0x5a);
+     hip_runtime_validate_arguments(aggregate,request,{value});
+     for(unsigned mutation=0;mutation<4;++mutation){auto wrong=value;
+      if(mutation==0)wrong.bytes.pop_back();
+      if(mutation==1)wrong.bytes.push_back(0);
+      if(mutation==2)wrong.value=1;
+      if(mutation==3)wrong.buffer_bytes=1;
+      reject([&]{hip_runtime_validate_arguments(aggregate,request,{wrong});});}
+    }
     if(!geometry && !k.private_bytes && k.hidden_arguments.empty()) {
      auto dynamic=select_hip_launch_profile(k,groups,threads,1280);check(dynamic.route==NativeLaunchRoute::Lds);
      reject([&]{select_hip_launch_profile(k,groups,threads,65537);});

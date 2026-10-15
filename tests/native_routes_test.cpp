@@ -91,6 +91,11 @@ int main(int argc,char **argv) {
                 if(c.request.route!=NativeLaunchRoute::Lds){bad=c.request;bad.dynamic_lds_bytes=256;reject([&]{prepare_native_launch(*c.bundle,k,args,buffers.data,bad);});}
                 auto wrong=args;--wrong[0].buffer_bytes;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
                 wrong=args;wrong[0].value=UINT64_MAX;reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
+                // Mixed scalar/global and aggregate representations reject before allocation.
+                for (size_t i = 0; i < args.size(); ++i) {
+                    wrong=args;wrong[i].bytes.push_back(0);
+                    reject([&]{prepare_native_launch(*c.bundle,k,wrong,buffers.data,c.request);});
+                }
                 auto copy=k;reject([&]{prepare_native_launch(*c.bundle,copy,args,buffers.data,c.request);});
                 auto mutated=*c.bundle;auto &selected=mutated.object.kernels[&k-c.bundle->object.kernels.data()];
                 selected.arguments[0].size=16;reject([&]{prepare_native_launch(mutated,selected,args,buffers.data,c.request);});

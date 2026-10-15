@@ -28,6 +28,7 @@ help:
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
 	@echo 'make public-hip-embedded-package Build native compiler registration/launch title offline (fresh outputs)'
 	@echo 'make public-hip-embedded-host-test  Build compiler objects and qualify genuine CLR registration (fresh outputs)'
+	@echo 'make public-hip-aggregate-host-test Qualify compiler aggregate arguments through genuine CLR (fresh outputs)'
 	@echo 'make console-controls  Build launch/close controllers and read-only teardown helper offline'
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
@@ -131,6 +132,16 @@ public-hip-embedded-fixture: deps-build
 
 public-hip-embedded-host-test: public-hip-host-test public-hip-embedded-fixture
 	$(PYTHON) tools/qualify_public_hip_embedded.py --base $(QUALIFICATION_DIR) --compiler $(EMBEDDED_FIXTURE_DIR) --output $(EMBEDDED_QUALIFICATION_DIR)
+
+AGGREGATE_FIXTURE_DIR ?= results/hip-aggregate-compiler
+AGGREGATE_QUALIFICATION_DIR ?= results/public-hip-aggregate
+.PHONY: public-hip-aggregate-fixture public-hip-aggregate-host-test
+public-hip-aggregate-fixture: deps-build
+	PS5HIP_AGGREGATE_OUTPUT="$(AGGREGATE_FIXTURE_DIR)" $(PYTHON) tests/hip_aggregate_compiler_test.py
+
+public-hip-aggregate-host-test: public-hip-host-test public-hip-aggregate-fixture
+	$(PYTHON) tests/public_hip_aggregate_qualification_test.py
+	$(PYTHON) tools/qualify_public_hip_aggregate.py --base $(QUALIFICATION_DIR) --compiler $(AGGREGATE_FIXTURE_DIR) --output $(AGGREGATE_QUALIFICATION_DIR)
 
 SNAPSHOT_BUILD_DIR ?= build/source-make-snapshot
 .PHONY: console-controls

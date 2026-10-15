@@ -1,5 +1,6 @@
 #include "ps5hip/host_launch.h"
 #include <array>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -48,6 +49,66 @@ int main(int argc, char **argv) {
         const auto packets = ps5hip::encode_initial_dispatch(launch);
         check(packets.size() >= 5 && std::vector<uint32_t>(packets.end() - 5, packets.end()) ==
               std::vector<uint32_t>({0xc0031502, 2, 1, 1, 0x8005}));
+        // Aggregate metadata offsets are authoritative, not offset modulo payload size.
+        // Synthetic layout mutations test packing only; the seed object is compiler-built.
+        for (uint32_t width : {9u, 12u, 16u, 127u, 128u}) {
+            auto aggregate_object = owned.object;
+            auto &layout = aggregate_object.kernels.front();
+            layout.hidden_arguments.clear();
+            layout.arguments.back().offset = 28;
+            layout.arguments.back().size = width;
+            layout.kernarg_size = (28 + width + 3) & ~3u;
+            std::vector<uint8_t> payload(width);
+            for (uint32_t i = 0; i < width; ++i) payload[i] = uint8_t(i * 37 + 11);
+            const auto original = payload;
+            auto aggregate_addresses = addresses;
+            aggregate_addresses.back() = payload.data();
+            auto aggregate_slots = slots;
+            aggregate_slots.back() = bytes(payload.data(), payload.size());
+            auto capture_aggregate = [&] {
+                return ps5hip::capture_initial_arguments(layout,
+                    bytes(aggregate_addresses.data(), sizeof(aggregate_addresses)), aggregate_slots, buffers);
+            };
+            const auto captured = capture_aggregate();
+            check(captured.back().value == 0 && captured.back().buffer_bytes == 0 &&
+                  captured.back().bytes == original);
+            payload.assign(width, 0xff);
+            aggregate_addresses.back() = nullptr;
+            auto packed = ps5hip::prepare_initial_launch(aggregate_object, kernel.name,
+                module, kernarg, 2, captured);
+            std::vector<uint8_t> wanted(layout.kernarg_size, 0);
+            for (unsigned i = 0; i < 3; ++i) put(wanted, i * 8, pointers[i], 8);
+            std::copy(original.begin(), original.end(), wanted.begin() + 28);
+            check(packed.kernargs == wanted && captured.back().bytes == original);
+            aggregate_addresses.back() = payload.data();
+            --aggregate_slots.back().size;
+            reject(capture_aggregate);
+            for (unsigned mutation = 0; mutation < 5; ++mutation) {
+                auto malformed = captured;
+                if (mutation == 0) malformed.back().bytes.pop_back();
+                if (mutation == 1) malformed.back().bytes.push_back(0);
+                if (mutation == 2) malformed.back().value = 1;
+                if (mutation == 3) malformed.back().buffer_bytes = 1;
+                if (mutation == 4) malformed.front().bytes.push_back(0);
+                reject([&] { ps5hip::prepare_initial_launch(aggregate_object, kernel.name,
+                    module, kernarg, 2, malformed); });
+            }
+            for (unsigned mutation = 0; mutation < 3; ++mutation) {
+                auto malformed = layout;
+                if (mutation == 0) { malformed.arguments.back().size = 129; malformed.kernarg_size = 157; }
+                if (mutation == 1) malformed.arguments.back().offset = 20;
+                if (mutation == 2) malformed.arguments.back().kind = "global_buffer";
+                reject([&] { ps5hip::capture_initial_arguments(malformed,
+                    bytes(reinterpret_cast<const void *>(uintptr_t(1)), sizeof(aggregate_addresses)),
+                    aggregate_slots, buffers); });
+            }
+        }
+        for (size_t scalar_index : {size_t(0), size_t(3)}) {
+            auto malformed = values;
+            malformed[scalar_index].bytes.push_back(0);
+            reject([&] { ps5hip::prepare_initial_launch(owned.object, kernel.name,
+                module, kernarg, 2, malformed); });
+        }
         const auto original_pointers = pointers;
         const auto original_addresses = addresses;
         pointers.fill(0); addresses.fill(nullptr); n = 0;

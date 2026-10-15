@@ -8,6 +8,8 @@ namespace ps5hip {
 // This measured profile has at least one explicit argument. Pointer values must
 // resolve uniquely inside that inventory. Copies own their
 // bits, not GPU allocations; this cannot detect address reuse or prove mappings.
+// Aggregate bytes preserve padding and own their snapshot. Embedded pointers are
+// opaque: callers must keep any referenced allocations live through completion.
 // Performs full route/layout validation before reading any argument storage.
 void validate_capture_layout(const Kernel &, NativeLaunchRoute);
 std::vector<LaunchArgument> capture_launch_arguments(

@@ -32,6 +32,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.1 partial | CPU only | seven fixed prefill/decode cases repeated bitwise; 64-step and 512-token boundary cases; 334 full logit rows and 16 tooling tests pass | evidence/offline-llm-cpu-reference.json | next: native compiler launch and client-required operator/ABI coverage
 
+- 2026-10-15 | V1.2 prerequisite | offline | genuine compiler aggregate arguments through CLR, eager/deferred and negative controls; 87-unit sanitizer qualification and 32 core regressions pass | evidence/offline-public-aggregate-arguments.json | next: native aggregate package and .40 validation
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1 runtime prerequisite | e365c5d | .40 | pass: genuine compiler-stub launches,146values16guards,clean finalization/lifecycle | evidence/console40-public-embedded-success.json | next: real operator ABI/resources

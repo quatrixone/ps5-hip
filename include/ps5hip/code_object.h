@@ -29,6 +29,8 @@ struct Kernel {
 };
 
 namespace detail {
+// shortcut: bounded by the measured LLM aggregates; qualify larger values before expanding.
+inline constexpr uint32_t max_by_value_bytes = 128;
 // COv5 offsets relative to the 8-byte-aligned start of the 256-byte implicit area.
 struct GeometryField { const char *kind; uint32_t offset, size; };
 inline constexpr std::array<GeometryField, 13> cov5_geometry{{
