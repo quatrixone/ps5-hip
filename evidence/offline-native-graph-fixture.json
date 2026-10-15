@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-host-graph-fixture-pass",
+  "source_base": "816a40c63950a5fac259ba34eb958e02fc70106b",
+  "source_identity": "Exact input hashes bind new shared fixture, native title and control changes before commit.",
+  "native_objects": 74,
+  "host_compilations": 79,
+  "host_strict_links": 10,
+  "host_tests_passed": 62,
+  "control_tests_passed": 20,
+  "package_sha256": "c702c08dcd20db44a4566b2077adbc5a52851a0ea273a0196d49e20c2f24731a",
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "61e3e57c1fecbda4e050eaf391270f61d689c5653e8b57ac2644342b186e2077",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "2fadb5cf04e0bccba1f3839bda817fa92c1d10dea1030226564c1dea1ba1d6e3",
+    "extracted_sha256": "326eb4f2c81dd54d093bfe5c4e7ec58fb648fa5cf3f52e5d85395325fed2b2db",
+    "omitted_note": {
+      "offset": 5440016,
+      "bytes": 24,
+      "raw_hex": "0400000008000000030000005349450023770e36f743c993",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-graph-fixture-v1/link-receipt.json": "a79f3aacb4741c8c8203c1f118cab8c4fca41137efe63e1b28f51582d7459a42",
+    "results/native-graph-package-review/review.json": "7b6d7dec9d8bb37666127b8ad59b3844c79c0e297515865cd1801dc7dc5b13aa",
+    "results/public-native-graph-oracle-review/review.json": "68baa05facf936103c6c0d78fc39e0fef22f07193e6521dfa0857346f855e64b",
+    "results/public-native-graph-oracle-v2/receipt.json": "4a8ad956492d597ded1b83eea9b8a71fa9d9a288658640e3ca7480d1286ce838",
+    "results/public-native-graph-oracle-v2/graph-combined.stdout": "dc5fd8b136077cbc8cfc38347d1e968ad6f16f9cb6c241c7dc67ec6ab98994d1",
+    "results/public-native-graph-oracle-v2/graph-combined.json": "d1f2496d2424a7d2309a82eb1efe91f9332322ae023c114fd18aeaf522f3d167",
+    "results/native-graph-build-v1.log": "3d20e10ad53fef3605190bb42a8a74fe87f34e928b817316f6d87f8b806b0a22",
+    "results/native-graph-revalidate-v1.log": "3d20e10ad53fef3605190bb42a8a74fe87f34e928b817316f6d87f8b806b0a22",
+    "results/native-graph-host.log": "48fa13e4ff1c29bd0867544682625096752be2a009a3cb936aacfdfa4d68b651",
+    "results/native-graph-controls.log": "d274799399a90abac75dcc18d76341d2ef63200cc4735d6a813a1fc4bca71d58"
+  },
+  "independent_reviews": [
+    {
+      "path": "results/public-native-graph-oracle-review/review.json",
+      "sha256": "68baa05facf936103c6c0d78fc39e0fef22f07193e6521dfa0857346f855e64b",
+      "deployment_approved": false
+    },
+    {
+      "path": "results/native-graph-package-review/review.json",
+      "sha256": "7b6d7dec9d8bb37666127b8ad59b3844c79c0e297515865cd1801dc7dc5b13aa",
+      "deployment_approved": false
+    }
+  ],
+  "expected_console_contract": {
+    "graphs": 2,
+    "replays": 32,
+    "callbacks": 64,
+    "invalidations": 6,
+    "caller_owned_graphs": 3,
+    "allocations": 0,
+    "frees": 0,
+    "queues": 5,
+    "retired_queues": 5,
+    "gpu_execution": false
+  },
+  "accepted_scope": [
+    "All source/object and current build-input identities match",
+    "Prepared rectangular memory and all three capture files match exact final patch outputs",
+    "Serialized SCE symbol hashes and exact shell provider pass strict no-GPU policy",
+    "Public graph and capture APIs and shared fixture calls retained in linked ISA",
+    "Independent FSELF extraction matches except unmapped 24-byte SIE note",
+    "Independent UFS fsck and exact six-file extraction match receipt",
+    "Pinned libc digest and configured results directory match",
+    "Shared oracle matches accepted fresh host qualification: two graphs,32replays64callbacks6invalidations3borrowed graphs",
+    "Exact graph transcript requires no GPU execution and zeroallocations/frees withfive retired queues",
+    "Actual shared fixture ISA references public capture/recovery and graph replay/update/destroy APIs; main calls fixture twice",
+    "Shared mismatch calls checked; native checked invokes sync-log/quarantine; exact graph transcript validates32/64/6/3 and5queues"
+  ],
+  "limits": [
+    "No native execution or console contact",
+    "No deployment authorization or current remote baseline verification",
+    "Initial host-oracle qualification v1 was intentionally canceled after correcting the native failure hook; it is preserved and not accepted",
+    "No frozen graph candidate yet; prior candidate control inputs have changed."
+  ],
+  "preserved_diagnostic": "results/public-native-graph-oracle-v1"
+}

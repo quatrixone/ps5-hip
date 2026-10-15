@@ -39,11 +39,16 @@ FILL_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_fill'
 FILL_LINES[2] = 'HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=4096 rejected=16 pitched=true padding=true allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending'
 FILL_LINES[6] = 'HIP_FILL FINAL allocations=1 frees=1 queues=1 retired=1 gate_destroyed=true application_fini=pending'
 FILL_EXPECTED = ('\n'.join(FILL_LINES) + '\n').encode('ascii')
-LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill')}
+GRAPH_LINES = list(LINES)
+GRAPH_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_graph'
+GRAPH_LINES[2] = 'HIP_GRAPH PASS init=0 count=1 graphs=2 replays=32 callbacks=64 invalidations=6 external_graphs=3 updates=true source_destroyed=true gpu_execution=false watchdog_joined=true finalization=pending'
+GRAPH_LINES[6] = 'HIP_GRAPH FINAL allocations=0 frees=0 queues=5 retired=5 gate_destroyed=true application_fini=pending'
+GRAPH_EXPECTED = ('\n'.join(GRAPH_LINES) + '\n').encode('ascii')
+LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill', 'graph')}
 
 
 def check_log(raw, fixture='bootstrap'):
-    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'fill': FILL_EXPECTED}.get(fixture)
+    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')
     return {'application_result': 'application-pass', 'kernel': 'public_hip_' + fixture,

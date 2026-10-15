@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -169,6 +169,23 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'launch')
+
+    def test_graph_transcript_requires_replay_recovery_and_cleanup(self):
+        self.assertEqual(check_log(GRAPH_EXPECTED, 'graph')['kernel'], 'public_hip_graph')
+        self.assertFalse(check_log(GRAPH_EXPECTED, 'graph')['hardware_gate_passed'])
+        lines = GRAPH_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [GRAPH_EXPECTED * 2, COPY_EXPECTED, GRAPH_EXPECTED + b'FAIL\n']
+        for before, after in ((b'graphs=2', b'graphs=1'), (b'replays=32', b'replays=31'),
+                              (b'callbacks=64', b'callbacks=63'), (b'invalidations=6', b'invalidations=0'),
+                              (b'external_graphs=3', b'external_graphs=0'), (b'updates=true', b'updates=false'),
+                              (b'source_destroyed=true', b'source_destroyed=false'),
+                              (b'gpu_execution=false', b'gpu_execution=true'),
+                              (b'allocations=0', b'allocations=1'), (b'retired=5', b'retired=4')):
+            invalid.append(GRAPH_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'graph')
 
     def test_copy_transcript_requires_rectangles_and_cleanup(self):
         self.assertEqual(check_log(COPY_EXPECTED, 'copy')['kernel'], 'public_hip_copy')

@@ -22,6 +22,7 @@ help:
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
+	@echo 'make public-hip-graph-package Build host graph replay and capture-recovery fixture offline'
 	@echo 'make public-hip-fill-package  Build the public HIP contiguous and pitched fill fixture offline'
 	@echo 'make public-hip-launch-package  Build the public HIP kernel-launch fixture offline'
 	@echo 'make public-hip-module-package  Build the public HIP module ownership fixture offline'
@@ -114,3 +115,8 @@ public-hip-fill-package: deps-build
 
 clean-build:
 	$(CMAKE) -E rm -rf build/host build/native build/public-hip build/public-hip-memory build/public-hip-copy build/public-hip-module build/public-hip-launch
+
+GRAPH_BUILD_DIR ?= build/public-hip-graph
+.PHONY: public-hip-graph-package
+public-hip-graph-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture graph --output $(GRAPH_BUILD_DIR)

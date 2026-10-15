@@ -55,7 +55,7 @@ def build_inputs():
              "tools/ps5-clangxx", "patches/native-import-libraries.patch",
              "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
-             "tools/public_hip_fill_console_title.cpp", "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
+             "tools/public_hip_graph_fixture.h", "tools/public_hip_graph_console_title.cpp", "tools/public_hip_fill_console_title.cpp", "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
              "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
              "tools/prepare_public_hip_capture.py", "tools/prepare_public_hip_fill.py", "tools/prepare_public_hip_rect.py", "tools/prepare_public_hip_aot.py", "tools/prepare_public_hip_launch.py", "tools/public_hip_module_console_title.cpp", "tools/public_hip_launch_console_title.cpp",
              "kernels/thread_words.hip",
@@ -226,6 +226,8 @@ def link_title(output, units, fixture="bootstrap"):
         required += ["hipModuleLaunchKernel", "hipDeviceSynchronize"]
     if fixture == "fill":
         required += ["hipMemset", "hipMemsetD16", "hipMemsetD32Async", "hipMemsetAsync", "hipDeviceSynchronize"]
+    if fixture == "graph":
+        required += ["hipGraphInstantiate", "hipGraphLaunch", "hipGraphExecHostNodeSetParams", "hipStreamBeginCapture", "hipStreamEndCapture", "hipGraphDestroy", "hipGraphExecDestroy"]
     for name in required:
         if name not in symbols:
             raise RuntimeError(f"missing public bootstrap symbol {name}")
@@ -275,7 +277,7 @@ def convert_title(output, tool, fixture="bootstrap"):
                             "--stub", output / "libSceAgcDriver.so", "--file-name", "eboot.elf",
                             "--import-library", "libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil"])
     run(output, "verify-sce-imports", [sys.executable, ROOT / "tests/public_hip_imports_test.py", converted,
-                                     *(["--no-gpu-imports"] if fixture in ("module", "fill", "copy") else [])])
+                                     *(["--no-gpu-imports"] if fixture in ("module", "fill", "copy", "graph") else [])])
     run(output, "sign", [tool, "self", "--sign", "--in", converted, "--out", signed])
     run(output, "extract", [tool, "self", "--extract", "--file", signed,
                             "--out", extracted])
@@ -354,7 +356,7 @@ def package_title(output, image, libc, results_dir, code_object=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph"), default="bootstrap")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     validate_results_directory(args.results_dir)

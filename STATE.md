@@ -11,6 +11,20 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+A dedicated native host-graph fixture now shares its oracle with the sanitizer
+model: explicit graph replay followed by capture recovery checks 32 changed-input
+replays, 64 callbacks, six invalidations and three caller-owned graphs. It requires
+five retired queues, no device allocations and no GPU work. See
+`evidence/offline-native-graph-fixture.json` for fresh shared-oracle qualification,
+74-object Make packaging, strict transcript checks and independent review.
+This prepares native graph testing; it does not establish a console pass.
+
+Adding the graph transcript and freezer support changed bound control inputs.
+Earlier frozen candidates, including `results/source-copy-capture-console-v1`,
+remain preserved but must not deploy through this changed checkout without a new
+freeze and review. The graph package itself still needs a committed-source freeze,
+recovery confirmation and independent operational review before .40 testing.
+
 A replacement native copy package includes the capture cleanup at `50a2361`:
 `build/public-hip-copy-capture-v1` passed the full 74-object Make build and cached
 verification. Its frozen candidate is `results/source-copy-capture-console-v1`;

@@ -229,6 +229,18 @@ retire exactly, with no device allocation or GPU submission. ASan leak detection
 covers normal cleanup. This does not qualify kernel/memory graph nodes, capture
 invalidation, concurrent graph updates, host-memory plateau or GPU replay speed.
 
+The dedicated native graph fixture is built with
+`make public-hip-graph-package GRAPH_BUILD_DIR=build/public-hip-graph`.
+It shares `tools/public_hip_graph_fixture.h` with the host qualifier and runs the
+explicit and recovery cases sequentially: two executables, 32 changed-input replays,
+64 callbacks, six invalidations and three caller-owned graph checks. Callback data
+has static lifetime; uncertain native failure flushes the log and quarantines.
+Exactly four of five queues retire before main returns, and all five must retire
+before the final transcript. The no-GPU import policy and denied backend factory
+remain enforced. A 30-second watchdog bounds the fixture. This is a prepared
+console test, not native graph acceptance; deployment still needs a freshly frozen
+candidate, recovered console baseline and independent operational review.
+
 Capture recovery also tests the error path after forbidden stream synchronization.
 Ending an invalidated capture clears stream state, discards its internally owned
 graph and returns a null graph with `hipErrorStreamCaptureInvalidated`. A graph
