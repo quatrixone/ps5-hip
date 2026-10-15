@@ -16,8 +16,10 @@ initialization, around constructors/main, and around elevation/log opening.
 The extracted executable contains all eight checkpoints; its DebugOutText
 import binds to libkernel. All source/object hashes and seven packaged files
 were verified, and the GPU kernel is unchanged. Four import-profile and 26
-console-control tests passed. Hardware execution is pending a fresh frozen
-candidate review; the previous consumed run must not be reused.
+console-control tests passed. The fresh frozen candidate deployed and verified
+on .40, with prior image/log preserved, healthy services and both locks released.
+Execution awaits receipt-bound review. See `evidence/console40-copy-startup-deployment.json`.
+The previous consumed recovery run must not be reused.
 See `evidence/offline-copy-startup-localization.json`.
 
 ## Current generic-update and recovery candidate

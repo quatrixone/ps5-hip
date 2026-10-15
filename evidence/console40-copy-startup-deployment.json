@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-verified-copy-startup-deployment",
+  "source_commit": "c0a7c9ac8c61012d59ec848dab5b834b1480a803",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "378b823a72930bea754938189b0d74e902d5489bac73d322dc02ae5a6739f8a4",
+  "manifest_sha256": "c7f7a4407c53a15203d1187955c0789b8c35c54bbe814e4906c05447581c350f",
+  "complete_ftp_reads": 20,
+  "launched": false,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "prior_image_sha256": "dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b",
+  "prior_log_sha256": "0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd",
+  "prior_image_and_log_preserved": true,
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/source-public-copy-startup-console-v1/manifest.json": "c7f7a4407c53a15203d1187955c0789b8c35c54bbe814e4906c05447581c350f",
+    "results/source-public-copy-startup-console-v1/deployment-review.json": "52658ba6577696e720c847216309b9ae54abd0f8603f675889450542588438f0",
+    "results/source-public-copy-startup-console-v1/deploy/receipt.json": "16253315a7046de1b2de4871da7f1484bf6dd54d4f471ada3d6454fc2e92fd54",
+    "results/source-public-copy-startup-console-v1/deploy/snapshot.log": "978a7433d9ad8a3d29c47233b1617e8f8ecd64f3d68de200c0032d2a02ce92b1",
+    "results/source-public-copy-startup-console-v1/deploy/post_snapshot.log": "58fab85e3d10949114293103000348e19d6979ced57de4312ec901b6773091c4",
+    "results/source-public-copy-startup-console-v1/deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163"
+  },
+  "limits": [
+    "Deployment phase consumed; never replay.",
+    "Native startup-diagnostic execution remains pending separate receipt-bound review."
+  ]
+}
