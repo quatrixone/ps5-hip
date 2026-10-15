@@ -12,8 +12,11 @@ model verifies 84 dispatches, four allocations/frees and seven retired queues.
 Full 84-unit sanitizer qualification, 26 controls and a fresh 74-object native
 package passed. See `../evidence/offline-two-kernel-replay.json`.
 
-Next: freeze/review `build/public-hip-multi-kernel-v1`, preserve the current
-CPU lifetime image/log below, then run once on idle .40. Acceptance requires
+The package deployed and verified on idle .40; the CPU image/log are preserved,
+services healthy and both locks released. See
+`evidence/console40-multi-kernel-deployment.json` (relative to repository root).
+Installed image: `309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c`.
+Next: receipt-bound review, then one bounded execution. Acceptance requires
 the existing joined oracle plus 5840 added values, 640 guards and clean aggregate
 retirement. The 30-second title watchdog and 40-second controller limit remain.
 These are repeated correctness checks; native validation, memory plateau,
@@ -662,7 +665,7 @@ before every G5 optimization is complete. G7 and G8 share the qualified SDK and
 need not wait on each other's application work. Implementation order follows
 dependencies; it does not imply a promise to run concurrent hardware tests.
 
-## 5. G1 â€” Freeze the compiler and platform contract
+## 5. G1 Ã¢â‚¬â€ Freeze the compiler and platform contract
 
 **Objective:** establish reproducible inputs and a precise account of what the
 native platform can launch. Advances R1, N1 and N3.
@@ -702,7 +705,7 @@ explain it rather than falsely requiring every compiler artifact to be byte-iden
 Decision: choose the first target/configuration for G2. If no candidate can avoid
 an unsupported assumption, reduce the kernel or implement a focused compiler fix.
 
-## 6. G2 â€” Execute a HIP-compiled kernel natively
+## 6. G2 Ã¢â‚¬â€ Execute a HIP-compiled kernel natively
 
 **Objective:** bridge AMDGPU code objects to PS5 dispatch. Advances R2 and N2.
 
@@ -738,7 +741,7 @@ entry-state programming is inaccessible, isolate the missing field and investiga
 an equivalent compiler lowering or public platform path. A hand-written replacement
 kernel can diagnose the launch path but cannot satisfy the HIP code-object gate.
 
-## 7. G3 â€” Prove compute semantics beyond a canary
+## 7. G3 Ã¢â‚¬â€ Prove compute semantics beyond a canary
 
 **Objective:** establish a trustworthy compiler/runtime contract. Advances R3.
 
@@ -779,7 +782,7 @@ Decision: lock the feature profile and compiler settings. Record platform-specif
 workarounds as narrow changes with reproductions. Do not generalize a working
 instruction subset into complete `gfx1013` or `gfx1030` compatibility.
 
-## 8. G4 â€” Make real HIP C++ programs work
+## 8. G4 Ã¢â‚¬â€ Make real HIP C++ programs work
 
 **Objective:** deliver source-level usability. Advances R4 and R8.
 
@@ -873,7 +876,7 @@ qualified in `../evidence/offline-hipify-title-integration.json`.
 Decision: publish the supported API matrix internally. Missing required semantics
 block the client; do not fill exported symbols with success-returning stubs.
 
-## 9. G5 â€” Streams, graphs and memory efficiency
+## 9. G5 Ã¢â‚¬â€ Streams, graphs and memory efficiency
 
 Latest native checkpoints: joined producer/consumer capture passed on .40
 with event reuse and clean teardown, followed by CPU-copy queued free and
@@ -963,7 +966,7 @@ the unbatched control. Total application latency remains separately measured.
 Decision: keep a single physical queue unless a qualified second queue offers a
 measured benefit that outweighs its synchronization and recovery complexity.
 
-## 10. G6 â€” Bring up useful ROCm libraries
+## 10. G6 Ã¢â‚¬â€ Bring up useful ROCm libraries
 
 **Objective:** make reusable mathematical building blocks available. Advances R5.
 
@@ -1005,7 +1008,7 @@ or error-path correctness.
 Decision: retain libraries that reduce application work or provide useful kernels.
 Avoid carrying an enormous tuned-kernel database that the console cannot use.
 
-## 11. G7 â€” Standalone inference client and SDK preview
+## 11. G7 Ã¢â‚¬â€ Standalone inference client and SDK preview
 
 **Objective:** prove that developers can use the SDK for native inference without
 an application-specific integration. Advances R6 and R8. ProsperoAI integration,
@@ -1040,7 +1043,7 @@ from a clean host. Repository privacy and release publication remain owner decis
 Decision: a preview may deliver useful capability without a speed win. Record the
 measured tradeoffs and retain explicit errors for unsupported client features.
 
-## 12. G8 â€” Native LibTorch and Python/PyTorch inference
+## 12. G8 Ã¢â‚¬â€ Native LibTorch and Python/PyTorch inference
 
 **Objective:** make the console a framework target rather than only a custom
 inference appliance. Advances R7 and is a major expansion in host-platform scope.
@@ -1081,7 +1084,7 @@ Decision: if Python integration is blocked, retain G8a as a partial milestone an
 state the remaining ABI/dependency blocker. Do not rename C++ inference as a
 completed Python/PyTorch port.
 
-## 13. G9 â€” Autograd, small-model training and LoRA
+## 13. G9 Ã¢â‚¬â€ Autograd, small-model training and LoRA
 
 **Objective:** show that useful learning workloads can execute on the console.
 Advances R7 beyond inference. This is the ambitious core demonstration.
@@ -1123,7 +1126,7 @@ Decision: scale only while measured memory and stability allow. A useful small
 training capability is a substantive achievement; do not promise large-model full
 training or derive training capacity from quantized inference fit.
 
-## 14. G10 â€” Make performance and reliability competitive
+## 14. G10 Ã¢â‚¬â€ Make performance and reliability competitive
 
 **Objective:** turn a working port into a credible compute platform. Advances
 N2-N4 and determines which applications should adopt it.
@@ -1172,7 +1175,7 @@ tradeoff warrants it. Keep compiler and driver changes independently reproducibl
 and upstream suitable corrections with minimal reproductions when publication is
 authorized.
 
-## 15. G11 â€” Native compilation and graph compiler experiments
+## 15. G11 Ã¢â‚¬â€ Native compilation and graph compiler experiments
 
 **Objective:** remove more of the development-PC dependency and explore modern
 framework compilation. This is frontier work after the core platform is useful.
@@ -1205,7 +1208,7 @@ Decision: retain this work only if it improves developer autonomy or workloads
 enough to justify toolchain size and maintenance. No whole-console LLVM deployment
 is needed to call the earlier application SDK successful.
 
-## 16. G12 â€” Multi-console cooperative compute
+## 16. G12 Ã¢â‚¬â€ Multi-console cooperative compute
 
 **Objective:** investigate a small owner-controlled PS5 compute cluster. This is
 a separate frontier extension, requiring multiple available authorized consoles.

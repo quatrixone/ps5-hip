@@ -19,8 +19,11 @@ model verifies 84 dispatches, four allocations/frees and seven retired queues.
 Full 84-unit sanitizer qualification, 26 controls and a fresh 74-object native
 package passed. See `evidence/offline-two-kernel-replay.json`.
 
-Next: freeze/review `build/public-hip-multi-kernel-v1`, preserve the current
-CPU lifetime image/log below, then run once on idle .40. Acceptance requires
+The package deployed and verified on idle .40; the CPU image/log are preserved,
+services healthy and both locks released. See
+`evidence/console40-multi-kernel-deployment.json` (relative to repository root).
+Installed image: `309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c`.
+Next: receipt-bound review, then one bounded execution. Acceptance requires
 the existing joined oracle plus 5840 added values, 640 guards and clean aggregate
 retirement. The 30-second title watchdog and 40-second controller limit remain.
 These are repeated correctness checks; native validation, memory plateau,
