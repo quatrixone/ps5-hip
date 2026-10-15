@@ -34,6 +34,20 @@ Historical next-step paragraphs below are superseded by this release priority.
 No console change occurred for this planning milestone; the installed image/log
 in the native backing checkpoint below remain the baseline.
 
+## Static module failure handling qualified offline
+
+The genuine CLR static loader now publishes only successfully extracted modules.
+Failed extraction no longer becomes false success on retry. Function/variable
+lookups reject null failed-module slots, and late registration logs extraction
+failure instead of asserting. The focused sanitizer regression reproduces the
+original bug and covers errors, allocation failure, retry and cleanup; the full
+85-compilation public HIP sanitizer qualification passes on the final inputs.
+See `evidence/offline-static-module-failure.json`.
+
+This does not enable compiler-generated embedded images. Continue with the
+bounded linker-span/registration work in `docs/PUBLIC_EMBEDDED_IMAGES.md`, plus
+model conversion/reference fixtures. No console run or new installed image.
+
 ## CLR command lifetime accounting qualified offline
 
 The public source build now accounts both Command base constructors and actual

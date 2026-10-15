@@ -1,0 +1,48 @@
+{
+    "schema":  1,
+    "date":  "2026-10-15",
+    "classification":  "offline-static-module-failure-handling",
+    "qualification_recorded_head":  "3c2f6c3247f8449e629eb057f43cb02523e023ed",
+    "total_compilations":  85,
+    "sha256":  {
+                   "ports/clr/ps5-public-static-module.patch":  "2130c319586ff9ccaa5c4926edd815475c0a071ef442d0fd7600890934228fb5",
+                   "ports/clr/ps5-public-static-module.json":  "471ab1bc39e0cc07f5c3a616d58a6914890a266773c44ac98957215ae443d389",
+                   "tools/prepare_public_hip_static_module.py":  "295c9e89bdb10768ffc71afedcea61b917e6fa196283397c9e317941f927a152",
+                   "tools/build_public_hip.py":  "3548876527532cfd1beccea580d7bb6c07dd5b0d286a3d358d59ea676c9b2d2c",
+                   "tests/public_hip_static_module_test.py":  "0f5bc822856bb39a9c12c99f7bc98e2bf4a9b723552dddfae79f2dfceb315278",
+                   "CMakeLists.txt":  "158b618227618098bb0e3e2edcf929ba809e94024708759d229bef328af58cb0",
+                   "results/source-public-static-module-v2/receipt.json":  "dc71a7bcd13c094987f323c0a71e52b9a3e5045262bfa4aed108d5fa7dab3278",
+                   "results/static-module-review-v1/review.json":  "3b20abf6c1c2a6e2636be2c7f91e91999cdaff24a15f8ec0b87521a2f52ebeea",
+                   "results/static-module-final-review-v1/review.json":  "2d31bc5d065d8d161def268e42c8c5299802b6591001b44563b1313a43712385"
+               },
+    "checks":  [
+                   "Original genuine digest reproduces false success on second failed extraction",
+                   "Patched candidate publication and cleanup: repeated failures, constructor/extraction OOM, retry and cached success",
+                   "Genuine function/variable null-slot guards and late registration failure/recovery",
+                   "Exact patch preparation is idempotent and rejects source drift",
+                   "Full genuine public HIP host sanitizer suite passed on final unchanged inputs"
+               ],
+    "superseded_run":  {
+                           "path":  "results/source-public-static-module-v1",
+                           "reason":  "Input changed during qualification after caller guards were added; no final receipt accepted",
+                           "exit_code":  1
+                       },
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "limits":  [
+                   "Host providers and packet transport are modeled",
+                   "No new native package or console validation",
+                   "Compiler-generated embedded-image admission remains unsupported",
+                   "Eager registration failure and general registration/unload lifecycle remain open"
+               ],
+    "final_review":  {
+                         "command_records":  257,
+                         "result":  "pass",
+                         "successful_commands":  238,
+                         "expected_negative_controls":  19,
+                         "path":  "results/static-module-qualification-review-v1/review.json",
+                         "core_units":  69,
+                         "fixture_model_compilations":  16,
+                         "sha256":  "61439c4f372e38cdd33deaf07f5a0ade762807aa7c2a768ef67b52c57cb53fc1"
+                     }
+}

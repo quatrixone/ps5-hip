@@ -1,0 +1,13 @@
+{
+  "patch_sha256": "2130c319586ff9ccaa5c4926edd815475c0a071ef442d0fd7600890934228fb5",
+  "files": {
+    "hipamd/src/hip_code_object.cpp": {
+      "before": "94aecd7fc79d1291dab99688cc82bc15c9570956f78909f6933d108b537c5d46",
+      "after": "4f5f4c183efca6a545113c7c1d64d924e80d12eab0f93fc8732900d2eff52734"
+    },
+    "hipamd/src/hip_global.cpp": {
+      "before": "f350ed02ee2e4f2f544fc7466c94ea20281d61d4fdc7d851026143d8f3f89452",
+      "after": "542b19bd4916882b27def4e3cff957166e79d7f7a737d4aca6aeda93efa5ae1c"
+    }
+  }
+}

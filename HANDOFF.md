@@ -42,6 +42,21 @@ this changes release sequencing, not their acceptance criteria.
 All older next-step paragraphs below are historical and subordinate to this
 priority. The installed backing-test image/log remain unchanged.
 
+## Static module failure handling checkpoint
+
+The publication-on-failure bug and its null-slot consumers are fixed and passed
+focused plus full genuine CLR host sanitizer qualification. Read
+`evidence/offline-static-module-failure.json` and `docs/PUBLIC_EMBEDDED_IMAGES.md`.
+The first qualification directory `results/source-public-static-module-v1` is
+superseded: it rejected changed inputs after caller fixes were added. The final
+successful qualification is `results/source-public-static-module-v2`.
+
+Next: compiler-generated bounded wrapper/bundle admission through genuine CLR,
+generic per-object linker spans and registration failure lifecycle. Pointer-only
+images remain unsupported; eager registration failure and broader lifecycle
+handling remain open. No native package or console execution was qualified for
+this change; freeze a fresh candidate before the actual registration/launch test.
+
 ## CLR command lifetime accounting qualified offline
 
 The public source build now accounts both Command base constructors and actual

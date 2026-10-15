@@ -1,0 +1,69 @@
+--- a/hipamd/src/hip_code_object.cpp
++++ b/hipamd/src/hip_code_object.cpp
+@@ -23,6 +23,10 @@
+ #include "amd_hsa_elf.hpp"
+ 
+ #include <cstring>
++#if defined(WITH_PS5_DEVICE)
++#include <memory>
++#include <new>
++#endif
+ 
+ #include <hip/driver_types.h>
+ #include "hip/hip_runtime_api.h"
+@@ -1145,8 +1149,19 @@
+   }
+ 
+   // Create a new fat binary object and extract the fat binary for all devices.
++#if defined(WITH_PS5_DEVICE)
++  try {
++    // A failed extraction must not become a cached successful module.
++    auto candidate = std::make_unique<FatBinaryInfo>(nullptr, data);
++    IHIP_RETURN_ONFAIL(candidate->ExtractFatBinary(g_devices));
++    programs = candidate.release();
++  } catch (const std::bad_alloc&) {
++    return hipErrorOutOfMemory;
++  }
++#else
+   programs = new FatBinaryInfo(nullptr, data);
+   IHIP_RETURN_ONFAIL(programs->ExtractFatBinary(g_devices));
++#endif
+ 
+   return hipSuccess;
+ }
+@@ -1156,7 +1171,11 @@
+ 
+   if (initialized) {
+     hipError_t err = digestFatBinary(data, modules_[data]);
++#if defined(WITH_PS5_DEVICE)
++    if (err != hipSuccess) HIP_ERROR_PRINT(err, "static module extraction failed");
++#else
+     assert(err == hipSuccess);
++#endif
+   }
+   return &modules_[data];
+ }
+--- a/hipamd/src/hip_global.cpp
++++ b/hipamd/src/hip_global.cpp
+@@ -148,7 +148,11 @@
+ }
+ 
+ hipError_t Function::getStatFunc(hipFunction_t* hfunc, int deviceId) {
++#if defined(WITH_PS5_DEVICE)
++  if (modules_ == nullptr || *modules_ == nullptr) return hipErrorInvalidDeviceFunction;
++#else
+   guarantee(modules_ != nullptr, "Module not initialized");
++#endif
+ 
+   if (dFunc_.size() != g_devices.size()) {
+     return hipErrorNoBinaryForGpu;
+@@ -238,6 +242,9 @@
+ }
+ 
+ hipError_t Var::getStatDeviceVar(DeviceVar** dvar, int deviceId) {
++#if defined(WITH_PS5_DEVICE)
++  if (modules_ == nullptr || *modules_ == nullptr) return hipErrorInvalidSymbol;
++#endif
+   guarantee((deviceId >= 0) , "Invalid DeviceId, less than zero");
+   guarantee((static_cast<size_t>(deviceId) < g_devices.size()),
+             "Invalid DeviceId, greater than no of code objects");

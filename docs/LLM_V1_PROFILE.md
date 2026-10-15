@@ -103,3 +103,8 @@ Next: a genuine embedded-image registration/launch test and the effective HIP
 client compile/link probe; in parallel prepare the pinned weights/conversion
 and CPU reference fixtures. Follow with the required operator ABI/geometry,
 matmul and memory coverage. General G5 diagnostics remain deferred.
+
+The static-module failure publication prerequisite passed focused and full CLR
+host qualification. Remaining registration work is documented in
+[PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md); embedded images remain
+unsupported.
