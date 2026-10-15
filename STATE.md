@@ -21,8 +21,16 @@ oracle. See `evidence/offline-public-capture-session.json` for source qualificat
 native compilation and review; the failing baseline remains in
 `evidence/offline-child-capture-diagnostic.json`. Concurrent mutation, complex
 event rejoin topologies and further operation admission after invalidation remain
-unqualified. The frozen graph fixture below is unchanged and lacks this fix;
-a fresh native package and console qualification remain required.
+unqualified. The replacement native graph package described next includes this
+runtime fix; its title still tests single-origin capture recovery only.
+
+A fresh 74-object Make graph package at `c57f014` passed cached validation and is
+frozen in `results/source-graph-session-console-v1`. See
+`evidence/offline-native-graph-session-runtime.json` for package and frozen-candidate
+audit identities. The unchanged title checks 32 replays, 64 callbacks and six
+single-origin invalidations; the 24-case cross-stream matrix remains host-only.
+Recovery confirmation, fresh baseline verification and independent operational
+review are required before deployment. No console contact occurred.
 
 A dedicated native host-graph fixture now shares its oracle with the sanitizer
 model: explicit graph replay followed by capture recovery checks 32 changed-input
@@ -35,7 +43,7 @@ This prepares native graph testing; it does not establish a console pass.
 Adding the graph transcript and freezer support changed bound control inputs.
 Earlier frozen candidates, including `results/source-copy-capture-console-v1`,
 remain preserved but must not deploy through this changed checkout without a new
-freeze and review. The graph package is now frozen at `454c8fd` in
+freeze and review. The earlier graph package was frozen at `454c8fd` in
 `results/source-graph-console-v1`. Independent offline review verified all 28
 bound files, six package files and 99 committed build inputs. See
 `evidence/offline-frozen-native-graph.json` for identities and review provenance.

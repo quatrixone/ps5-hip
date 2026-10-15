@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-graph-session-runtime-and-frozen-identity-pass",
+  "frozen_source_commit": "c57f01433b6652d8217d7233cce31aa11be9af9b",
+  "manifest_sha256": "3b5b23e2cb75a3eecc11529b0d61f6b8e6d8293c0171c819708f5dc32b776c2e",
+  "package_sha256": "4de021f814b71decbb782a7e8f459fe7cb0c89b36ff67b94bab57f321b1bad10",
+  "objects": 74,
+  "bound_files": 28,
+  "package_files": 6,
+  "committed_build_inputs": 99,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-graph-session-console-v1/manifest.json": "3b5b23e2cb75a3eecc11529b0d61f6b8e6d8293c0171c819708f5dc32b776c2e",
+    "results/source-graph-session-console-v1/build-receipt.json": "699b320898b0857eb000216f2a1de6db01b98681601a9c5cc04515f89ada5534",
+    "results/source-graph-session-console-v1/checkpoint.json": "6dcc55cde663e2c2182cf598748d22252ff023a27c207d23b800372c3d47282f",
+    "results/source-graph-session-console-v1/offline-review.json": "d43f4da14f47c432f6344506cf3db582078b3502882c79c2b2bf8e911b800252",
+    "results/native-graph-session-review/review.json": "98c686edaa90337415af8980f2d0f03baaf010695c634f1e6db5983075dbe693",
+    "results/native-graph-session-build-v1.log": "58cf0c6b958d169f2b5b0092228a1c5ab574be03c278d49b15b97c0eb49595c3",
+    "results/native-graph-session-revalidate-v1.log": "58cf0c6b958d169f2b5b0092228a1c5ab574be03c278d49b15b97c0eb49595c3"
+  },
+  "accepted_scope": [
+    "Fresh full Make build and cached validation pass.",
+    "Prepared capture patch and retained native ISA contain graph/capture-ID checks and parent/child invalidation propagation.",
+    "Strict no-GPU imports, FSELF roundtrip excluding the unmapped SIE note, UFS filesystem check and exact package inventory pass.",
+    "All frozen files, build inputs, helper identities and graph transcript match independently reviewed artifacts.",
+    "Deployment and execution reject missing operational approval before network access."
+  ],
+  "limits": [
+    "No native execution, console contact or fresh baseline verification.",
+    "Unchanged native fixture exercises 32 replays, 64 callbacks and six single-origin invalidations; the 24-case cross-stream matrix remains host-model qualification.",
+    "Historical image/log hashes remain admission requirements. Owner recovery confirmation, full baseline verification and independent operational review remain required."
+  ],
+  "deployment_approved": false
+}
