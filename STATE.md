@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The pitched-fill package is now frozen at `919ef03` and independently verified:
+28 bound files, six package files and 91 committed build inputs. Missing operational
+approval blocks deployment before network access. See
+`evidence/offline-frozen-pitched-fill.json`. Recovery and baseline verification
+remain pending; no console contact occurred.
+
 The native fill fixture now includes pitched 2D/3D execution: two changed rounds
 compare 4,096 bytes including guards, row padding and slice gaps, and check 16
 invalid requests without mutation. Fresh Make packaging and offline review are

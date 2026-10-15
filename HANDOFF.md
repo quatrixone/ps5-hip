@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Current frozen candidate: `results/source-pitched-fill-console-v1`, source
+`919ef03`, manifest `1f9214d0fc5d79af9219eb764c9777f24a7b81e1cad7b1d70f39e7c7ed31785b`.
+Offline identity review passed; `review.json` operational approval remains absent.
+See `evidence/offline-frozen-pitched-fill.json`. Do not deploy before recovery,
+full baseline verification and independent operational review.
+
 The latest fixture is `build/public-hip-pitched-console-v1`: contiguous plus
 pitched 2D/3D fills, 4,096 comparisons and 16 rejections over two changed rounds.
 The transcript validator and candidate hypothesis require that expanded contract.

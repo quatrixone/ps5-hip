@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-frozen-pitched-fill-identity-pass",
+  "frozen_source_commit": "919ef03feb78fe750d7e759912b329ec64535cb8",
+  "manifest_sha256": "1f9214d0fc5d79af9219eb764c9777f24a7b81e1cad7b1d70f39e7c7ed31785b",
+  "package_sha256": "89e7bc9722d1b1a73fca35a4014e30bca2602faa4e8045363a9a8639e8647fed",
+  "bound_files": 28,
+  "package_files": 6,
+  "committed_build_inputs": 91,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-pitched-fill-console-v1/manifest.json": "1f9214d0fc5d79af9219eb764c9777f24a7b81e1cad7b1d70f39e7c7ed31785b",
+    "results/source-pitched-fill-console-v1/build-receipt.json": "a8d3720c19b3650f40a22c7fc68429e49b8c4f8a00cb2746dadef062c029ad9a",
+    "results/source-pitched-fill-console-v1/offline-review.json": "2fd669ce52a329a66c7c4cec6e3177f35913d8fdcab38aa2c992584974853be0",
+    "results/source-pitched-fill-console-v1/checkpoint.json": "e64a807da798f6cf81bbc498b7d879698d49965fd1beead9d15d96a258915797"
+  },
+  "independent_review": {
+    "path": "results/source-pitched-fill-console-v1/offline-review.json",
+    "sha256": "2fd669ce52a329a66c7c4cec6e3177f35913d8fdcab38aa2c992584974853be0",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "All manifest-bound artifacts and exact six-file inventory verified",
+    "Full package input map equals clean current committed frozen source although package receipt records earlier source-base",
+    "Snapshot/launch/close identities equal prior independently reviewed candidate",
+    "Hypothesis4096/16/padding matches strict transcript and reviewed source oracle",
+    "Preserved memorylog requirements unchanged; baseline image/log revalidation still required",
+    "Operational review absent: Control constructor fails with FileNotFoundError before network or deploy directory creation; socket creation trapped after imports"
+  ],
+  "limits": [
+    "Historical baseline hashes are admission requirements, not fresh remote observations",
+    "Console recovery and installed image remain unverified",
+    "No operational approval, deployment or execution authorization",
+    "Older candidates preserved and held"
+  ]
+}
