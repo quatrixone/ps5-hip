@@ -9,6 +9,27 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Native replay backing samples passed
+
+The .40 run matched all 32 synchronized samples: 32768 live bytes in two
+allocations after warmup, 128 allocations/releases in each execution path,
+98304 accounted peak bytes and zero final live backing. The combined title
+completed 84 GPU dispatches, verified 5840 additional values and 640 guards,
+and retired all seven queues. Natural exit, installed files, idle mounts,
+service health and both lock releases passed independent outcome review.
+See `evidence/console40-replay-backing-success.json`.
+
+Installed image: `639cc88438b720df630c90f10479ae191d98984c3bba14761e8b42989b305b3b`.
+Current copy_gpu log: `1ed01138f133404876e234d8b26bf7ac1cb249816e4f170f9dfa1a1d5032596a`.
+Both phases of `results/source-public-replay-backing-console-v1` are consumed;
+the previous two-kernel image/log remain preserved.
+
+Next: CLR command lifetime accounting and CPU preparation/submit/wait
+measurements. These bounded samples cover NativeMemory backing only; setup,
+parameter updates and resets are excluded from execution churn. Host heap,
+command plateau, sustained reliability, true GPU time, GPU-dependent retirement
+and measured graph efficiency remain open. G5 is incomplete.
+
 ## Replay backing samples qualified offline
 
 Deployment checkpoint: the frozen backing-measurement package was installed and

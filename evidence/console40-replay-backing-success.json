@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-replay-backing",
+  "source_commit": "ea8b3af42a53a63d862e5cde81cabb39a1410ab2",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "639cc88438b720df630c90f10479ae191d98984c3bba14761e8b42989b305b3b",
+  "manifest_sha256": "dc379653c58d9b3d6bac1f8be99f0bf60ad8962aef88c08787676cd88cb98c0b",
+  "application_log_sha256": "1ed01138f133404876e234d8b26bf7ac1cb249816e4f170f9dfa1a1d5032596a",
+  "process": [
+    [
+      "PPSA99014",
+      "229"
+    ]
+  ],
+  "complete_ftp_reads": 26,
+  "backing": {
+    "samples": 32,
+    "live_bytes": 32768,
+    "live_allocations": 2,
+    "eager_allocations": 128,
+    "eager_releases": 128,
+    "graph_allocations": 128,
+    "graph_releases": 128,
+    "peak_bytes": 98304,
+    "final_live_bytes": 0
+  },
+  "gpu_submissions": 84,
+  "replay_rounds": 20,
+  "warmup_rounds": 4,
+  "verification_rounds": 16,
+  "replay_values": 5840,
+  "replay_guards": 640,
+  "allocations": 4,
+  "frees": 4,
+  "queues": 7,
+  "retired_queues": 7,
+  "callbacks": 28,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-replay-backing-console-v1",
+  "raw_evidence": {
+    "manifest.json": "dc379653c58d9b3d6bac1f8be99f0bf60ad8962aef88c08787676cd88cb98c0b",
+    "execution-review.json": "a06147fa543d330b5178425cec43778c70db61c543e3a672b4905a2edceb2066",
+    "outcome-review.json": "35aa6d7df9760e62068bbb46a0bd1a14d078d43ce7f27030fffa2399e3508897",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/receipt.json": "76a9a7629664393769bf9f7b85db2093f8ec450dfe101b8590e5ec59c3b87df0",
+    "execute/application.log": "1ed01138f133404876e234d8b26bf7ac1cb249816e4f170f9dfa1a1d5032596a",
+    "execute/before-launch.log": "b719ea4fc0af3d34081c688d48d3edba53104174129fc45c57c20db316d4cf2f",
+    "execute/klog.log": "58dedd5be897c44391f1c88e50bb65b256c4d05b8611c88b508d09b3ff77ad86",
+    "execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "execute/observed.log": "37ce3efccd4384c77ed0225ce7140390bb660305e0f6daf6db8dcf6571f036a5",
+    "execute/post_snapshot.log": "b70ef9add85970e0434f868bf6ad45dc081057ba7b9ada0e09ce16b1513f25f3",
+    "execute/snapshot.log": "b70ef9add85970e0434f868bf6ad45dc081057ba7b9ada0e09ce16b1513f25f3"
+  },
+  "limits": [
+    "NativeMemory backing only; no process-heap or CLR command lifetime measurement.",
+    "Execution churn excludes setup, parameter updates and buffer resets.",
+    "Accounted peak is not instantaneous physical high-water usage during concurrent syscalls.",
+    "Bounded samples do not establish sustained reliability or graph speed improvement.",
+    "True GPU timing, GPU-completion-dependent retirement and full G5 remain open."
+  ]
+}
