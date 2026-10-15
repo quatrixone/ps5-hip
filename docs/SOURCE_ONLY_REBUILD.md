@@ -1,9 +1,13 @@
 # Build the native public HIP package from GitHub source
 
-For the optional inference-v1 host reference tools and bounded model metadata
-fetch, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). These targets do not download
-model weights or establish native inference; the default SDK build below is
-unchanged.
+For the optional inference-v1 CPU tools, source-weight download and locked
+F16/Q4_0 conversion, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). Run
+`make llm-model-fetch`, then `make llm-model-convert` in WSL/Linux x86-64.
+The converter target fetches isolated, hash-locked Python/CPU dependencies and
+builds its host tools; it needs no copied environment or globally installed
+PyTorch. These optional targets do not establish native inference; the default
+SDK build below is unchanged. Repeated downloads need a fresh
+`LLM_MODEL_RECEIPT`, and repeated conversions need a fresh `LLM_GGUF_DIR`.
 
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or

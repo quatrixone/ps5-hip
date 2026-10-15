@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "classification": "offline-locked-model-conversion",
+  "client_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "model_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+  "python_version": "Python 3.12.15",
+  "packages": [
+    {
+      "name": "certifi",
+      "version": "2026.7.22"
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.5.2"
+    },
+    {
+      "name": "filelock",
+      "version": "4.2.0"
+    },
+    {
+      "name": "fsspec",
+      "version": "2026.9.0"
+    },
+    {
+      "name": "gguf",
+      "version": "0.19.0"
+    },
+    {
+      "name": "hf-xet",
+      "version": "1.7.0"
+    },
+    {
+      "name": "huggingface_hub",
+      "version": "0.36.2"
+    },
+    {
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6"
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.4"
+    },
+    {
+      "name": "mpmath",
+      "version": "1.3.0"
+    },
+    {
+      "name": "networkx",
+      "version": "3.7"
+    },
+    {
+      "name": "numpy",
+      "version": "2.2.6"
+    },
+    {
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "name": "pip",
+      "version": "25.0.1"
+    },
+    {
+      "name": "protobuf",
+      "version": "4.25.9"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "name": "regex",
+      "version": "2026.9.29"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2"
+    },
+    {
+      "name": "safetensors",
+      "version": "0.8.0"
+    },
+    {
+      "name": "sentencepiece",
+      "version": "0.2.2"
+    },
+    {
+      "name": "setuptools",
+      "version": "81.0.0"
+    },
+    {
+      "name": "sympy",
+      "version": "1.14.0"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.22.2"
+    },
+    {
+      "name": "torch",
+      "version": "2.11.0+cpu"
+    },
+    {
+      "name": "tqdm",
+      "version": "4.70.1"
+    },
+    {
+      "name": "transformers",
+      "version": "4.57.6"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    },
+    {
+      "name": "urllib3",
+      "version": "2.8.0"
+    }
+  ],
+  "inputs_and_receipts": {
+    "llm-conversion-inputs.json": "7b127673fa786641860e414315777afa7f06b1d64a92a6b18297fa2dca7cf154",
+    "ports/llm-conversion-requirements.txt": "1aec8fdaebf7abd35fcf997cf7b8bb13e9b2534dfc581710e8bce0cb8b4dac33",
+    "tools/prepare_llm_conversion.py": "a0303c72b32531f780f950773cc0ea21728d90bb0e96c705b38f024cd4539a27",
+    "tools/convert_llm_model.py": "df23ce17fe704b2370f3b2baddf8e403bb1676f53b8f47a883db82bbe22a22f4",
+    "tools/fetch_llm_model.py": "67125ba2b7656b9e5ab478278e5bf190476d4b2178c8dfbb92cd45dcd2912e15",
+    "tests/llm_conversion_test.py": "2c88ddf25cf3508a7ae5fe6135afebbbc5def13639ee41f8b03f7f25612ac9a2",
+    "models/tinyllama-gguf/receipt.json": "80f9b3426427efca13d90aef46690e6f41935e6b537b4b40dd4526275ff2a0b2",
+    "models/tinyllama-gguf/commands.json": "d85edb9c2967071bbaed3058733b46140577fad9f0ef4958015d0cac991b1c73",
+    ".deps/llm-conversion-env/receipt.json": "98e10f57cef7579661a1f23eb6da6e3f2b43995a1446fe0dd1366559dc29ac26",
+    "build/llm-cpu-reference-v2/receipt.json": "9ecbb9a1afdd2e63b2103e8127ccea486ec18f9dadb6755b9c054322d77bdfcf",
+    "models/tinyllama-gguf/convert-f16.stderr": "0192db2a2a431daaac02e5d5446d196d0120a9356c235ff55ff60fa5606b904f",
+    "models/tinyllama-gguf/quantize-q4_0.stderr": "d8155c36be73b1015555e97efc65aeb561564449ad4eca5ffe83ce49cf93f5ad",
+    "results/llm-model-conversion-verification/tool-tests.stdout": "2f863569de5d59913c608c7a987b9c65a242900e8993e588ee79b6b4c0bab5be",
+    "results/llm-model-conversion-verification/tool-tests.stderr": "ddb953ad18cf2c8687b3fa04d848c6593600a5e859d5557e38c8aabc806d2a0d"
+  },
+  "commands": [
+    {
+      "label": "convert-f16",
+      "exit_code": 0
+    },
+    {
+      "label": "quantize-q4_0",
+      "exit_code": 0
+    }
+  ],
+  "conversion_options": {
+    "outtype": "f16",
+    "quantization": "Q4_0",
+    "pure": true,
+    "threads": 4,
+    "offline": true
+  },
+  "outputs": {
+    "tinyllama-f16.gguf": {
+      "bytes": 2201018624,
+      "sha256": "e657561bf17a670d0e1516d6338a7a75f65803acf58fd53bd822a08c3ddf44df",
+      "tensor_bytes": 2200281088,
+      "dtype_counts": {
+        "F16": 156,
+        "F32": 45
+      },
+      "metadata": {
+        "general.architecture": "llama",
+        "llama.context_length": 2048,
+        "llama.embedding_length": 2048,
+        "llama.block_count": 22,
+        "llama.feed_forward_length": 5632,
+        "llama.attention.head_count": 32,
+        "llama.attention.head_count_kv": 4
+      },
+      "dtype_bytes": {
+        "F16": 2199912448,
+        "F32": 368640
+      },
+      "tensor_count": 201,
+      "parameters": 1100048384,
+      "metadata_and_alignment_bytes": 737536
+    },
+    "tinyllama-q4_0.gguf": {
+      "bytes": 619831552,
+      "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+      "tensor_bytes": 619094016,
+      "dtype_counts": {
+        "Q4_0": 156,
+        "F32": 45
+      },
+      "metadata": {
+        "general.architecture": "llama",
+        "llama.context_length": 2048,
+        "llama.embedding_length": 2048,
+        "llama.block_count": 22,
+        "llama.feed_forward_length": 5632,
+        "llama.attention.head_count": 32,
+        "llama.attention.head_count_kv": 4
+      },
+      "dtype_bytes": {
+        "Q4_0": 618725376,
+        "F32": 368640
+      },
+      "tensor_count": 201,
+      "parameters": 1100048384,
+      "metadata_and_alignment_bytes": 737536
+    }
+  },
+  "residual_F32": {
+    "count": 45,
+    "shape": [
+      2048
+    ],
+    "bytes": 368640,
+    "names": [
+      "output_norm.weight",
+      "blk.{0..21}.attn_norm.weight",
+      "blk.{0..21}.ffn_norm.weight"
+    ]
+  },
+  "tests": {
+    "command": "make llm-tool-test",
+    "exit_code": 0,
+    "tests": 13
+  },
+  "independent_sha256sum": {
+    "exit_code": 0,
+    "outputs": {
+      "tinyllama-f16.gguf": "e657561bf17a670d0e1516d6338a7a75f65803acf58fd53bd822a08c3ddf44df",
+      "tinyllama-q4_0.gguf": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+    }
+  },
+  "limits": [
+    "No CPU inference, reference logits or token generation performed.",
+    "No native execution or console contact.",
+    "No measured native model fit or performance.",
+    "Output hashes identify this conversion; cross-machine byte reproducibility not yet tested."
+  ]
+}

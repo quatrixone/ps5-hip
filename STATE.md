@@ -23,7 +23,10 @@ remain unproven. See `docs/LLM_V1_PROFILE.md` and
 Optional Make targets fetch the client, build CPU tools and reproduce the
 locked TinyLlama metadata/header profile. `make llm-model-fetch` now downloads
 and verifies full source weights/tokenizer; see `evidence/offline-llm-model-source.json`.
-Conversion, reference logits and actual model memory usage remain open. Next: compiler-generated
+F16 and pure Q4_0 conversion now pass with locked upstream tools. The Q4_0
+GGUF is 619831552 bytes, with 156 Q4_0 and 45 F32 tensors; see
+`evidence/offline-llm-model-conversion.json`. Reference logits and actual model
+memory usage remain open. Next: compiler-generated
 embedded-image registration and the effective HIP client compile/link probe,
 alongside pinned weight conversion and CPU fixtures.
 

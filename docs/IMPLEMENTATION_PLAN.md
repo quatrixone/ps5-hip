@@ -25,6 +25,8 @@ mark the full SDK goal complete. Historical next actions below are superseded.
 See [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) for reproducible Make targets and
 source-inspected blockers. No model or native inference is qualified yet.
 
+- 2026-10-15 | V1.1 partial | offline | locked F16 and pure Q4_0 conversion verified; Q4_0 GGUF 619831552 bytes with 156 Q4_0 and 45 F32 tensors | evidence/offline-llm-model-conversion.json | next: CPU reference logits and native client prerequisites
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1 runtime prerequisite | offline | failed module publication and null consumers fixed; full CLR host qualification passed | evidence/offline-static-module-failure.json | next: bounded embedded-image admission

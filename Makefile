@@ -18,6 +18,8 @@ help:
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
 	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
 	@echo 'make llm-model-fetch  Fetch and verify locked source weights/tokenizer (2.2 GB; fresh receipt required)'
+	@echo 'make llm-conversion-env  Prepare isolated, hash-locked CPU conversion dependencies (Linux x86-64)'
+	@echo 'make llm-model-convert  Convert verified source model to F16 and pure Q4_0 (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
@@ -81,6 +83,14 @@ LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
 LLM_MODEL_RECEIPT ?= results/llm-model-source/receipt.json
+LLM_CONVERSION_ENV ?= .deps/llm-conversion-env
+LLM_GGUF_DIR ?= models/tinyllama-gguf
+.PHONY: llm-conversion-env llm-model-convert
+llm-conversion-env: llm-tool-test
+	$(PYTHON) tools/prepare_llm_conversion.py --output $(LLM_CONVERSION_ENV)
+
+llm-model-convert: llm-conversion-env llm-cpu-reference
+	$(LLM_CONVERSION_ENV)/venv/bin/python tools/convert_llm_model.py --source $(LLM_MODEL_DIR) --output $(LLM_GGUF_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --environment $(LLM_CONVERSION_ENV)
 .PHONY: llm-model-fetch
 llm-model-fetch: llm-tool-test
 	$(PYTHON) tools/fetch_llm_model.py --output $(LLM_MODEL_DIR) --receipt $(LLM_MODEL_RECEIPT)
@@ -92,6 +102,7 @@ llm-cpu-reference: llm-deps-fetch llm-tool-test
 	$(PYTHON) tools/build_llm_cpu_reference.py --output $(LLM_CPU_BUILD_DIR)
 
 llm-tool-test:
+	$(PYTHON) tests/llm_conversion_test.py
 	$(PYTHON) tests/fetch_llm_model_test.py
 	$(PYTHON) tests/profile_llm_model_test.py
 	$(PYTHON) tests/llm_reference_test.py

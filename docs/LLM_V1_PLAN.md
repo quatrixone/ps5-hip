@@ -23,7 +23,8 @@ as an SDK example; ProsperoAI integration remains outside scope.
   exact checkpoint, tokenizer, conversion inputs and generated GGUF hashes in
   V1.1. Metadata/tokenizer and the expected source weight hash are now locked in
   `../models/tinyllama-1.1b-chat-v1.0.json`. Full source weights/tokenizer are now
-  downloaded and hash-verified; converted GGUF and model execution remain
+  downloaded and hash-verified. F16 and pure Q4_0 GGUF conversion are verified
+  in `../evidence/offline-llm-model-conversion.json`; model execution remains
   unqualified. It is not yet a supported native model.
 - CPU model loading, tokenization, scheduling and sampling are expected. Model
   tensor computation must use the PS5 HIP backend. Any temporary CPU tensor
@@ -127,8 +128,8 @@ checkpoint/resume, even when base weights are frozen.
 ## Immediate next action
 
 Continue V1.1 from `LLM_V1_PROFILE.md`: qualify compiler-generated embedded-image
-registration, prepare the effective HIP compile/link probe, and produce pinned
-model conversion outputs and CPU reference fixtures. The host tools and model
+registration, prepare the effective HIP compile/link probe, and produce CPU
+reference fixtures from the verified conversion outputs. The host tools and model
 metadata inventory are reproducible through optional Make targets; V1.1 remains
 partial. Select work from demonstrated client blockers. No native LLM, training
 or first-release completion is claimed yet.
