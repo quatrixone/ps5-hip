@@ -1406,3 +1406,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-14 | public modules | offline pass: extraction error guard, sanitizers and native object | evidence/offline-public-module-errors.json | module loading and execution
 
 - 2026-10-14 | public modules | offline pass: loaded kernel discovery, 60 host tests, native object | evidence/offline-public-module-symbols.json | qualify real module loading
+
+- 2026-10-14 | parser portability | offline pass: Clang18/libstdc++15 recursive metadata type, 60 host tests, PS5 object | evidence/offline-parser-portability.json | full-runtime sanitizer build

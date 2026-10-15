@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-14",
+  "status": "offline-pass",
+  "change": "Define recursive metadata Value special members and field lookup after type completion for Clang18 with libstdc++15.",
+  "validation": [
+    "60 host tests passed after rebuild.",
+    "Clang18 ASan/UBSan translation unit compiled.",
+    "PS5 cross-compilation passed.",
+    "Independent review found no parser semantic change."
+  ],
+  "limits": [
+    "No new console execution.",
+    "Full public-runtime source qualifier still in progress."
+  ],
+  "artifacts_sha256": {
+    "src/code_object.cpp": "19b71fce730fbc7982a7478919412cd86b0b35fa0ba0e4d26441d1103d6b2410",
+    "results/parser-portability-build.log": "127a419a72d11b3a9096b19f51bc722e933eb7e027b58aaab4d1f276feb927df",
+    "results/parser-portability-tests.log": "4cbce30939669e967857088cc4ce1e266b7bd2a8cd382933c72da0af8e735314",
+    "results/parser-portability-native.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/parser-portability-native.o": "c157417ab9a11aab871203f1af74c8bf89ebeb65f76dc073bb8d68f8d45b79a1",
+    "results/public-hip-source-model-v1/parser-fixed.o": "74b2c872af4424fb618e2e45ebfeb5a80e8cac0c802a1eb36bf568131402d51a"
+  }
+}

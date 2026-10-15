@@ -47,16 +47,18 @@ struct Bytes {
 // Small bounded MessagePack reader for the AMDGPU metadata grammar. Unsupported
 // encodings fail explicitly; maps reject duplicate keys before schema validation.
 struct Value {
+    Value();
+    ~Value();
+    Value(const Value&);
+    Value(Value&&) noexcept;
+    Value& operator=(const Value&);
+    Value& operator=(Value&&) noexcept;
     enum Type { Integer, String, Array, Map, Boolean, Nil } type = Nil;
     uint64_t number = 0;
     std::string string;
     std::vector<Value> items;
     std::vector<std::pair<std::string, Value>> fields;
-    const Value &field(const char *key) const {
-        require(type == Map, "expected metadata map");
-        for (const auto &kv : fields) if (kv.first == key) return kv.second;
-        throw ObjectError(std::string("missing metadata field: ") + key);
-    }
+    const Value &field(const char *key) const;
     uint32_t integer() const {
         require(type == Integer && number <= UINT32_MAX, "expected uint32 metadata value");
         return uint32_t(number);
@@ -66,6 +68,19 @@ struct Value {
         return string;
     }
 };
+
+// Instantiate the recursive pair only after Value is complete (Clang/libstdc++).
+Value::Value() = default;
+Value::~Value() = default;
+Value::Value(const Value&) = default;
+Value::Value(Value&&) noexcept = default;
+Value& Value::operator=(const Value&) = default;
+Value& Value::operator=(Value&&) noexcept = default;
+const Value &Value::field(const char *key) const {
+    require(type == Map, "expected metadata map");
+    for (const auto &kv : fields) if (kv.first == key) return kv.second;
+    throw ObjectError(std::string("missing metadata field: ") + key);
+}
 
 struct Msgpack {
     Bytes bytes;
