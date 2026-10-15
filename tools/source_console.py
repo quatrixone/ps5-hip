@@ -10,6 +10,7 @@ import socket
 import threading
 import time
 import uuid
+from source_public_hip_log import LOG_NAMES
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = '192.168.4.40'
@@ -71,6 +72,11 @@ class Control:
         self.candidate, self.phase = candidate, phase
         self.manifest_sha = sha((candidate / 'manifest.json').read_bytes())
         self.manifest = json.loads((candidate / 'manifest.json').read_text())
+        self.fixture = self.manifest.get('fixture', 'bootstrap')
+        baseline_fixture = self.manifest.get('baseline_log_fixture', 'bootstrap')
+        require(self.fixture in LOG_NAMES and baseline_fixture in LOG_NAMES, 'unknown log fixture')
+        self.log = '/data/ps5-hip/results/' + LOG_NAMES[self.fixture]
+        self.baseline_log = '/data/ps5-hip/results/' + LOG_NAMES[baseline_fixture]
         review = json.loads((candidate / 'review.json').read_text())
         require(review.get('approved') is True and review.get('manifest_sha256') == sha((candidate / 'manifest.json').read_bytes()),
                 'independent review does not approve this manifest')
@@ -174,18 +180,20 @@ class Control:
             require(self.fetch(MOUNT + '/' + name, len(expected)) == expected, 'mounted bytes mismatch: ' + name)
 
     def fresh_log(self):
-        require(not any(row.endswith(' ' + Path(LOG).name) for row in self.listing(str(Path(LOG).parent))), 'result log already exists')
+        require(not any(row.endswith(' ' + Path(self.log).name) for row in self.listing(str(Path(self.log).parent))), 'result log already exists')
 
     def deploy(self):
         self.idle()
         snapshot(self.send('snapshot'))
         baseline_log = self.manifest.get('baseline_log_sha256')
+        if self.baseline_log != self.log:
+            self.fresh_log()
         if baseline_log:
-            previous_log = self.fetch(LOG, 65536)
+            previous_log = self.fetch(self.baseline_log, 65536)
             require(sha(previous_log) == baseline_log, 'baseline log changed')
             (self.out / 'previous-application.log').write_bytes(previous_log)
-            log_backup = LOG + '.' + baseline_log + '.preserved'
-            require(not any(row.endswith(' ' + Path(log_backup).name) for row in self.listing(str(Path(LOG).parent))),
+            log_backup = self.baseline_log + '.' + baseline_log + '.preserved'
+            require(not any(row.endswith(' ' + Path(log_backup).name) for row in self.listing(str(Path(self.baseline_log).parent))),
                     'log backup already exists')
         else:
             self.fresh_log()
@@ -204,8 +212,8 @@ class Control:
         require(self.fetch(temporary, len(image)) == image, 'temporary upload mismatch')
         self.idle()
         if baseline_log:
-            require(self.fetch(LOG, 65536) == previous_log, 'baseline log changed before preservation')
-            self.ftp.rename(LOG, log_backup)
+            require(self.fetch(self.baseline_log, 65536) == previous_log, 'baseline log changed before preservation')
+            self.ftp.rename(self.baseline_log, log_backup)
             require(self.fetch(log_backup, 65536) == previous_log, 'preserved log mismatch')
             self.record['log_backup'] = log_backup
         self.fresh_log()
@@ -281,10 +289,10 @@ class Control:
                 require(time.monotonic() < deadline, 'title observation deadline')
                 time.sleep(1)
             self.idle()
-            application = self.fetch(LOG, 65536)
+            application = self.fetch(self.log, 65536)
             (self.out / 'application.log').write_bytes(application)
             from source_public_hip_log import check_log
-            self.record['application'] = check_log(application)
+            self.record['application'] = check_log(application, self.fixture)
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
             require(before == after, 'matching title mounts changed')
@@ -312,7 +320,7 @@ class Control:
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:
-                    (self.out / 'application.log').write_bytes(self.fetch(LOG, 65536))
+                    (self.out / 'application.log').write_bytes(self.fetch(self.log, 65536))
                 except Exception as error:
                     self.record['application_capture_error'] = repr(error)
             require(not worker.is_alive(), 'klog collector did not stop')

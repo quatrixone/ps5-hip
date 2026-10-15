@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--baseline-image-sha256', required=True)
     parser.add_argument('--baseline-log-sha256')
+    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory'), default='bootstrap')
     args = parser.parse_args()
     import re
     for value in (args.baseline_image_sha256, args.baseline_log_sha256):
@@ -28,6 +29,9 @@ def main():
     if not output.is_relative_to(ROOT / 'results'):
         parser.error('candidate must be under results/')
     receipt = json.loads((args.build / 'link-receipt.json').read_text())
+    fixture = receipt.get('fixture', 'bootstrap')
+    if fixture not in ('bootstrap', 'memory'):
+        parser.error('unknown fixture')
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 74:
         parser.error('not the complete .40 candidate')
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
@@ -51,14 +55,16 @@ def main():
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_image_sha256': args.baseline_image_sha256,
                 'baseline_log_sha256': args.baseline_log_sha256,
+                'baseline_log_fixture': args.baseline_log_fixture, 'fixture': fixture,
                 'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                 'package': relative + '/package/PPSA99014.ffpkg', 'app': relative + '/package/app',
                 'launch': relative + '/controllers/launch.elf', 'close': relative + '/controllers/close.elf',
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': 'New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.',
-                'expected': 'Exact bootstrap transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
+                'hypothesis': ('New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.' if fixture == 'bootstrap' else
+                               'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.'),
+                'expected': 'Exact ' + fixture + ' transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
                 'reject': 'Any identity, log, mount, lifecycle, timeout, exception, or health failure; never retry automatically.',
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')

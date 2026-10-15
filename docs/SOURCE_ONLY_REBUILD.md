@@ -60,6 +60,16 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+The next public HIP fixture is available with
+`make public-hip-memory-package RESULTS_DIR=/data/ps5-hip/results`. It builds
+74 fresh objects into `build/public-hip-memory` and exercises genuine
+`hipMalloc`/`hipFree` for 257-byte and 4097-byte buffers, rejects interior and
+double frees, and requires complete shutdown. Its exact-hash preparation adds
+the reviewed HIP memory guards over the already-adapted SVM implementation.
+The `memory` receipt/manifest fixture selects a separate strict log oracle;
+bootstrap receipts and transcripts cannot satisfy it. This recipe is offline
+until its own package and console cycle are qualified.
+
 `tools/freeze_source_candidate.py` copies a completed build, controllers and
 the separately built read-only snapshot into a new `results/` candidate and
 binds their hashes. The source tree must be committed first. The current

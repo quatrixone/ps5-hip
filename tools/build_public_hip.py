@@ -53,7 +53,8 @@ def build_inputs():
              "tools/native_runtime.h", "tools/native_shell_exit_probe.cpp",
              "tools/public_hip_app_crt.cpp", "tools/public_hip_bootstrap_console_title.cpp",
              "tools/ps5-clangxx", "patches/native-import-libraries.patch",
-             "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py"}
+             "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
+             "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
         names.update(path.relative_to(ROOT).as_posix() for path in (ROOT / folder).rglob("*")
                      if path.is_file() and path.suffix in
@@ -72,7 +73,7 @@ def run(output, label, argv):
         raise RuntimeError(f"{label} failed ({process.returncode}): {process.stderr[-3000:]}")
 
 
-def source_tree(output):
+def source_tree(output, fixture="bootstrap"):
     base = output / "source-base"
     public = output / "source-public"
     if not (base / "receipt.json").exists():
@@ -100,6 +101,8 @@ def source_tree(output):
         guard.write_text(sha(public / "hipamd/src/hip_gl.cpp") + "\n")
     if guard.read_text().strip() != sha(public / "hipamd/src/hip_gl.cpp"):
         raise RuntimeError("guarded HIP GL source changed")
+    if fixture == "memory":
+        run(output, "prepare-memory", [sys.executable, ROOT / "tools/prepare_public_hip_memory.py", public])
     return public
 
 
@@ -131,11 +134,13 @@ def compiler_flags(source):
             "-ffunction-sections", "-fdata-sections", *["-D" + d for d in defines]]
 
 
-def compile_units(output, source):
+def compile_units(output, source, fixture="bootstrap"):
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
     units = [source / name for name in SOURCE_UNITS]
     units += [ROOT / name for name in PROJECT_UNITS]
+    if fixture == "memory":
+        units[units.index(ROOT / "tools/public_hip_bootstrap_console_title.cpp")] = ROOT / "tools/public_hip_memory_console_title.cpp"
     units += [DEPS / "elevation/client/elevation.cpp"]
     hip = sorted((source / "hipamd/src").glob("*.cpp"))
     hip = [path for path in hip if path.stem not in ("fixme", "hip_runtime")]
@@ -177,7 +182,7 @@ def native_stubs(output):
              "-o", output / (name + ".so")])
 
 
-def link_title(output, units):
+def link_title(output, units, fixture="bootstrap"):
     sdk = DEPS / "sdk/target/lib"
     static = ["libc++.a", "libc++abi.a", "libunwind.a", "libc.a",
               "libps5platform.a", "libdl.a", "libpthread.a"]
@@ -197,7 +202,10 @@ def link_title(output, units):
                "--as-needed", *imports]
     run(output, "link", command)
     symbols = subprocess.check_output(["llvm-readelf-18", "-Ws", str(output / "title.elf")], text=True)
-    for name in ("hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"):
+    required = ["hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"]
+    if fixture == "memory":
+        required += ["hipMalloc", "hipFree"]
+    for name in required:
         if name not in symbols:
             raise RuntimeError(f"missing public bootstrap symbol {name}")
 
@@ -322,6 +330,7 @@ def package_title(output, image, libc, results_dir):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory"), default="bootstrap")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     validate_results_directory(args.results_dir)
@@ -329,10 +338,14 @@ def main():
     if not output.is_relative_to((ROOT / "build").resolve()) and not output.is_relative_to((ROOT / ".local").resolve()):
         parser.error("output must stay within build/ or .local/")
     output.mkdir(parents=True, exist_ok=True)
-    source = source_tree(output)
     cached = output / "link-receipt.json"
+    if cached.exists() and json.loads(cached.read_text()).get("fixture", "bootstrap") != args.fixture:
+        raise RuntimeError("cached fixture differs; use a fresh output")
+    source = source_tree(output, args.fixture)
     if cached.exists():
         previous = json.loads(cached.read_text())
+        if previous.get("fixture", "bootstrap") != args.fixture:
+            raise RuntimeError("cached fixture differs; use a fresh output")
         units = previous["units"]
         if (len(units) != 74 or previous["title_elf_sha256"] != sha(output / "title.elf") or
                 any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
@@ -348,15 +361,15 @@ def main():
             return
     else:
         native_stubs(output)
-        units = compile_units(output, source)
-        link_title(output, units)
+        units = compile_units(output, source, args.fixture)
+        link_title(output, units, args.fixture)
     tool = native_tool(output)
     libc = clean_room_libc(output, tool)
     image, roundtrip = convert_title(output, tool)
     package, files = package_title(output, image, libc, args.results_dir)
     receipt = {"classification": "offline-public-hip-native-link", "source_commit":
                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
-               "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),
+               "fixture": args.fixture, "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),
                "fself_sha256": sha(image), "fself_roundtrip": roundtrip,
                "package_sha256": sha(package), "package_files": files,
                "input_sha256": build_inputs(), "results_dir": args.results_dir,

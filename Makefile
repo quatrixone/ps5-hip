@@ -19,6 +19,7 @@ help:
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
+	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
 	@echo 'make           Run all of the above; set RESULTS_DIR to the intended console results path'
 
 deps-fetch:
@@ -67,5 +68,9 @@ build/public-hip/link-receipt.json: dependencies.json elevation-inputs.json cont
 public-hip-package: build/public-hip/link-receipt.json
 	$(PYTHON) tools/build_public_hip.py --output build/public-hip
 
+.PHONY: public-hip-memory-package
+public-hip-memory-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture memory --output build/public-hip-memory
+
 clean-build:
-	$(CMAKE) -E rm -rf build/host build/native build/public-hip
+	$(CMAKE) -E rm -rf build/host build/native build/public-hip build/public-hip-memory
