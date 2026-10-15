@@ -2,6 +2,30 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Native allocation-lifetime cases passed
+
+- 2026-10-15 | G5 | 7a8ba25 | .40 | pass: CPU lifetime/teardown | evidence/console40-copy-lifetime-success.json | next: measured multi-kernel replay
+
+The CPU-only copy title passed queued free with a live executable and parameter
+migration followed by freeing old allocations before replay on .40. All 384
+lifetime comparison bytes and 7168 rectangular-copy bytes matched; eight
+allocations/frees and four retired queues were verified. The title exited
+naturally, installed files and idle mounts matched, services remained healthy,
+and both locks released. See `../evidence/console40-copy-lifetime-success.json`.
+
+Installed image: `dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7`.
+Current copy log: `b0596a28d2ae370b309ce4be2b683c543d699e82d065206b9f8044524fbeef58`.
+Both phases of `results/source-public-copy-lifetime-console-v1` are consumed.
+The previous joined GPU image and log remain preserved. This CPU-worker test
+does not prove GPU-completion-dependent retirement; its 100 ms observation also
+cannot prove entry into the freeing API before gate release.
+
+Next: qualify changing-input two-kernel replay, then measure actual native
+allocation/command lifetime and submission overhead. HIP allocation counters
+alone miss the per-dispatch command/marker allocations. Establish eager/captured
+baselines before optimizing; sustained replay, memory plateau, performance and
+the full G5 contract remain open.
+
 ## Shared native allocation-lifetime candidate
 
 The CPU-only copy title now uses the same lifetime helper as the sanitizer model:
@@ -834,12 +858,15 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 â€” Streams, graphs and memory efficiency
 
-Latest native checkpoint: captured H2D/kernel/D2D/D2H replay matched eager
-execution over two changing-input rounds on .40, with disabled-copy retirement,
-updated owned arguments and clean teardown. See
-`../evidence/console40-public-copy-kernel-graph-success.json`. Copy-capture
-invalidation, memory-node updates/lifetime, GPU cross-stream capture, resource
-plateaus and measured replay efficiency remain open.
+Latest native checkpoints: joined producer/consumer capture passed on .40
+with event reuse and clean teardown, followed by CPU-copy queued free and
+parameter migration with eight allocations freed and four queues retired. See
+`../evidence/console40-copy-joined-success.json` and
+`../evidence/console40-copy-lifetime-success.json`. GPU-completion-dependent
+retirement, sustained multi-kernel replay, resource plateaus and measured replay
+efficiency remain open. Measure command and native temporary allocations as well
+as HIP buffers; the current per-kernel submission path allocates command/marker
+storage and waits independently. Stable HIP buffer counts alone are insufficient.
 Earlier checkpoint details below retain their historical scope.
 
 The shared native GPU graph fixture now passes full host sanitizer qualification,

@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-cpu-allocation-lifetime",
+  "source_commit": "7a8ba25a1228a24e89b0912c51626f1d5607ca69",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7",
+  "manifest_sha256": "d4c6e67d035c01f44a53f43aa5a84d41d2f64f14b318bd323cd5c2d4cac8145f",
+  "application_log_sha256": "b0596a28d2ae370b309ce4be2b683c543d699e82d065206b9f8044524fbeef58",
+  "process": [
+    [
+      "PPSA99014",
+      "209"
+    ]
+  ],
+  "complete_ftp_reads": 26,
+  "rectangular_copy_bytes": 7168,
+  "bounds_rejected": 16,
+  "lifetime_cases": 2,
+  "lifetime_compared_bytes": 384,
+  "cases": [
+    "queued-free-with-live-executable",
+    "migration-free-old-before-replay"
+  ],
+  "allocations": 8,
+  "frees": 8,
+  "queues": 4,
+  "retired_queues": 4,
+  "gpu_submissions": 0,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-copy-lifetime-console-v1",
+  "raw_evidence": {
+    "manifest.json": "d4c6e67d035c01f44a53f43aa5a84d41d2f64f14b318bd323cd5c2d4cac8145f",
+    "execution-review.json": "5e7829571327b2c4192accdf607b4a941a8346b5cab2618fb9888797f960fd4e",
+    "outcome-review.json": "b1e6c307c92b9301c0ab1ac9292906476dc8f5c639676ae8797d2a4da516251b",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/receipt.json": "965b34b3840e1915ac3c7d9efcca572d583aebe8bea5fbb645eeaf3566e93d86",
+    "execute/application.log": "b0596a28d2ae370b309ce4be2b683c543d699e82d065206b9f8044524fbeef58",
+    "execute/before-launch.log": "34e653ac1d9256eff2589862ba38c5440fa298c368aa87ae51a67f3324f2a263",
+    "execute/klog.log": "9af8e27b77ed0772d115f4b4b9fbc905cd74e918bf08a1ffe5f2a69780e40313",
+    "execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "execute/observed.log": "3630accc17b76156a68f8ed048b9b240b7014e45bc0d41bc4d1c3ed3482b69eb",
+    "execute/post_snapshot.log": "d499af72b1b1c4d25aa53432a90d41d73773fff9b344f8e33566251e01e0b5a2",
+    "execute/snapshot.log": "d499af72b1b1c4d25aa53432a90d41d73773fff9b344f8e33566251e01e0b5a2"
+  },
+  "limits": [
+    "CPU copy-worker lifetime only; GPU-completion-dependent retirement remains unproven.",
+    "The 100 ms gate observation cannot prove entry into the freeing API before gate release.",
+    "Sustained multi-kernel replay, memory plateau and measured replay efficiency remain open.",
+    "One natural exit does not establish startup reliability or close G5."
+  ]
+}

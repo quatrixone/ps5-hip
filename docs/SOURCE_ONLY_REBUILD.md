@@ -448,8 +448,10 @@ while the executable and stream remain alive, and executable parameter migration
 to replacement allocations before freeing the old buffers. It verifies exact
 output, allocation removal and final cleanup. The gated free test observes a
 bounded interval; it cannot prove the freeing thread entered the runtime before
-the gate was released. These are sanitizer host-model checks, not native
-allocation-lifetime acceptance. Buffers must remain valid for future replays.
+the gate was released. The shared CPU-only native fixture also passed on .40
+at `7a8ba25`, including eight frees and four retired queues; see
+`../evidence/console40-copy-lifetime-success.json`. This does not qualify
+GPU-completion-dependent retirement. Buffers must remain valid for future replays.
 
 The bounded copy/kernel fixture passed on .40 at `ac93df8`; see
 `../evidence/console40-public-copy-kernel-graph-success.json`. Its candidate phases
