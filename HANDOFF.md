@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+GPU graph deployment passed: 21 complete reads, seven mounted files, preservation,
+healthy services and owned-lock release. Current installed image is
+`37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2`;
+no GPU graph result log exists yet. See `evidence/console40-gpu-graph-deployment.json`.
+The previous stream image/log below are now preserved historical baselines.
+
 The GPU graph candidate `results/source-public-graph-gpu-console-v1` is frozen
 at `a80845d` and independently approved for one deployment. See
 `evidence/offline-frozen-native-gpu-graph.json`; execution needs exact-receipt review.
