@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The native fill candidate is frozen at `fff2451` and passed independent offline
+identity review: 28 bound files and six package files. See
+`evidence/offline-frozen-public-fill.json`. Deployment and execution remain
+blocked by absent operational approval; no console contact occurred. Recovery
+confirmation and complete baseline verification are still pending.
+
 A dedicated native fill fixture now builds with `make public-hip-fill-package`:
 74 fresh native objects and a six-file package, with GPU imports excluded.
 Its expected console contract checks two changed-pattern rounds, 512 compared

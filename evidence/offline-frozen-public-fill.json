@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-15",
+  "status": "frozen-offline-identity-pass-console-not-run",
+  "candidate": "results/source-fill-console-v1",
+  "workspace": "/home/denis/ps5-hip-module-package",
+  "source_commit": "fff245165479301fe5e2af9caa4c83d78feec302",
+  "manifest_sha256": "bc7aaf315544b526663e3a84457cd9aa2157d3c9fb0c59cda06c3b4609af1d30",
+  "package_sha256": "8c2f13cd6cb2b995b1b69abdeb617c75d16a3f8029388dabbf0e4153d5cd5330",
+  "review_sha256": "c337a0e8836e353a2266d1aac798456f7e0a63dc4863c6c6ce2f30df00c5ff9a",
+  "bound_files_verified": 28,
+  "package_files_verified": 6,
+  "preservation_requirements": {
+    "baseline_image_sha256": "37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5",
+    "baseline_log_sha256": "1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b",
+    "baseline_log_preserved": true,
+    "baseline_log_fixture": "memory"
+  },
+  "approval_gate_check_sha256": "ddab51c04b1170b6366c756f08cae4820a45a0cb85b8ab4c89e518321740e752",
+  "prerequisites_log_sha256": "a1bf7bef374f3e6f965e4e2f632ebc4cff483b9f432ab96b4406229e730a17d4",
+  "deployment_authorized": false,
+  "console_contacted": false,
+  "limits": [
+    "Baseline hashes are admission requirements, not current remote observations.",
+    "Owner recovery status and complete installed image/preserved log verification remain required.",
+    "Separate operational review must approve exact manifest and later deployment receipt.",
+    "No native fill execution or GPU acceptance."
+  ]
+}

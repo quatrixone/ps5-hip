@@ -16,6 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Frozen fill candidate
+
+`results/source-fill-console-v1` in the WSL worktree is frozen at `fff2451`.
+Independent offline identity review verifies 28 bound files, six package files,
+build inputs, helpers and preservation requirements. See
+`evidence/offline-frozen-public-fill.json`; `offline-review.json` explicitly has
+`approved:false` and `deployment_authorized:false`. Operational `review.json`
+is absent. An offline approval-gate check confirms both deploy and execute stop
+before network access or phase directory creation.
+
+This is preparation only. Await owner recovery confirmation, then verify the full
+installed image and preserved memory log against the manifest, console idleness,
+services and owned lock before a separate operational review. Baseline hashes
+are requirements, not current remote observations. No previous consumed phase
+may be replayed. Keep the earlier launch candidate and raw evidence preserved.
+
 ## Native fill fixture checkpoint
 
 `make public-hip-fill-package FILL_BUILD_DIR=build/public-hip-fill-v1
