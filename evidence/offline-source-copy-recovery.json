@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-14",
+  "status": "offline-pass",
+  "scope": "Explicit preserved-baseline log recovery and FTP failure diagnostics",
+  "input_sha256": {
+    "tools/source_console.py": "a10702810ce5ac846822e0f613e7d47eae1ed07962fbf182934f2d5e2acd67c3",
+    "tools/freeze_source_candidate.py": "37f63597bf29e58e199f071ad980c492808a95466398ff545572f38a5330f168",
+    "tests/source_console_test.py": "2bdd6564100d96aab35855ead3f506cdba759216d1179b9ebf809c07ef0023a6",
+    "results/source-copy-recovery-tests.log": "557f9fadbfcc59af0eeb164862622a93e9a9448c25313f4225f8f5c7c852b2e7"
+  },
+  "validation": {
+    "control_unit_tests": 15,
+    "related_ctest_cases": 3,
+    "independent_review": "No blocking state/safety regressions; three suggested failure tests added and passed."
+  },
+  "console": "No deployment or execution attempted; .40 declared services returned No route to host.",
+  "limits": [
+    "New control hashes require a distinct frozen independently reviewed candidate.",
+    "Old v1 remains consumed/inert.",
+    "Current installed-image integrity remains unverified.",
+    "Partial read hashes never prove full image integrity.",
+    "Read size/time limits unchanged."
+  ]
+}

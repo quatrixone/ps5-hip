@@ -97,7 +97,18 @@ build with that explicit `RESULTS_DIR` when preparing this case.
 Supply `--baseline-image-sha256` for the exact installed image and, when
 preserving an existing bootstrap log, `--baseline-log-sha256`. Deployment
 rejects changed bytes and preserves both under unique digest-named backups.
-An absent baseline log digest requires that no prior bootstrap log exists.
+Select the prior fixture with `--baseline-log-fixture`. An absent baseline log
+digest requires that the new fixture's result log is absent.
+
+If a failed deployment already preserved the baseline log, a distinct candidate
+may use `--baseline-log-preserved` together with its exact digest and fixture.
+This verifies the SHA-suffixed `.preserved` file, requires the original and new
+result paths to be absent, and rechecks the preserved bytes before image
+replacement and after settling. It never renames that log again. This option
+does not authorize replaying a consumed deployment or bypass image verification;
+establish current installed-image integrity and obtain independent review first.
+FTP receipts now record each read's received bytes, elapsed time and SHA-256,
+including failures. A partial read hash is not installed-image verification.
 
 The converter is built from pinned source plus
 `patches/native-import-libraries.patch`. Before signing, a serialized SCE

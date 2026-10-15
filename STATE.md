@@ -1388,3 +1388,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-14 | Public HIP source build | 7ef291c | fresh GitHub-only clone, offline | pass: default make, 54 host tests, native core, 74-object title, FSELF/UFS audits | evidence/offline-main-source-build.json | independent candidate review before any console run
 
 - 2026-10-14 | G5 public copy | 7880705 | offline pass: 58 host tests, 74 objects, independent review; .40 FTP deployment failed, no execution | evidence/offline-source-public-copy.json | connectivity and full image verification before new reviewed deployment
+
+- 2026-10-14 | G5 recovery controls | offline pass: preserved-log verification and FTP diagnostics; 15 unit cases | evidence/offline-source-copy-recovery.json | restore connectivity

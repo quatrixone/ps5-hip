@@ -39,6 +39,14 @@ candidate that explicitly handles the already-preserved baseline log. Preserve
 raw `deploy`, `inspect`, and `measure` phase receipts. Offline implementation can
 continue while console testing is held.
 
+Recovery controls now support a new reviewed candidate with
+`--baseline-log-preserved` and the prior log digest/fixture. They verify the
+existing preserved bytes without renaming, reject conflicting fresh logs and
+recheck before replacement and after settling. FTP receipts retain partial-read
+diagnostics with an explicit completion flag. Fifteen focused control tests and
+the three related CTest cases pass offline. This changes frozen control hashes;
+v1 stays consumed/inert. No new deployment has been attempted.
+
 Latest progress: source `be6e521` adds the memory fixture to the supported Make
 pipeline. All 57 host tests and 74 fresh-object native build/package checks
 passed. The independently reviewed `results/source-memory-console-v1` case

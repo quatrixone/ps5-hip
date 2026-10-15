@@ -77,6 +77,11 @@ class Control:
         require(self.fixture in LOG_NAMES and baseline_fixture in LOG_NAMES, 'unknown log fixture')
         self.log = '/data/ps5-hip/results/' + LOG_NAMES[self.fixture]
         self.baseline_log = '/data/ps5-hip/results/' + LOG_NAMES[baseline_fixture]
+        self.baseline_log_preserved = self.manifest.get('baseline_log_preserved', False)
+        require(type(self.baseline_log_preserved) is bool, 'invalid baseline log preservation mode')
+        require(not self.baseline_log_preserved or
+                re.fullmatch('[0-9a-f]{64}', self.manifest.get('baseline_log_sha256') or ''),
+                'preserved baseline log requires digest')
         review = json.loads((candidate / 'review.json').read_text())
         require(review.get('approved') is True and review.get('manifest_sha256') == sha((candidate / 'manifest.json').read_bytes()),
                 'independent review does not approve this manifest')
@@ -116,12 +121,65 @@ class Control:
 
     def fetch(self, path, bound=8388608):
         data = bytearray()
-        deadline = time.monotonic() + 30
+        started = time.monotonic()
+        entry = {'path': path, 'byte_limit': bound, 'deadline_seconds': 30,
+                 'received_bytes': 0, 'complete': False}
+        received_hash = hashlib.sha256()
         def append(block):
-            require(len(data) + len(block) <= bound and time.monotonic() < deadline, 'FTP read bound')
+            entry['received_bytes'] += len(block)
+            received_hash.update(block)
+            require(entry['received_bytes'] <= bound, 'FTP read size bound: ' + path)
+            require(time.monotonic() - started < 30, 'FTP read deadline: ' + path)
             data.extend(block)
-        self.ftp.retrbinary('RETR ' + path, append, blocksize=65536)
-        return bytes(data)
+        try:
+            self.ftp.retrbinary('RETR ' + path, append, blocksize=65536)
+            require(time.monotonic() - started < 30, 'FTP read deadline: ' + path)
+            entry['complete'] = True
+            return bytes(data)
+        except Exception as error:
+            entry['error'] = repr(error)
+            raise
+        finally:
+            entry['elapsed_seconds'] = time.monotonic() - started
+            entry['received_sha256'] = received_hash.hexdigest()
+            self.record.setdefault('ftp_reads', []).append(entry)
+
+    def absent(self, path):
+        require(not any(row.endswith(' ' + Path(path).name)
+                        for row in self.listing(str(Path(path).parent))), 'path already exists: ' + path)
+
+    def baseline_log_read(self):
+        digest = self.manifest.get('baseline_log_sha256')
+        if not digest:
+            self.fresh_log()
+            return None
+        require(re.fullmatch('[0-9a-f]{64}', digest), 'invalid baseline log digest')
+        backup = self.baseline_log + '.' + digest + '.preserved'
+        if self.baseline_log_preserved:
+            self.absent(self.baseline_log)
+            self.fresh_log()
+            source = backup
+        else:
+            self.absent(backup)
+            source = self.baseline_log
+        raw = self.fetch(source, 65536)
+        require(sha(raw) == digest, 'baseline log changed')
+        (self.out / 'previous-application.log').write_bytes(raw)
+        return raw, backup
+
+    def preserve_baseline_log(self, previous):
+        if previous is None:
+            return
+        raw, backup = previous
+        if self.baseline_log_preserved:
+            self.absent(self.baseline_log)
+        else:
+            require(self.fetch(self.baseline_log, 65536) == raw, 'baseline log changed before preservation')
+            self.absent(backup)
+            self.ftp.rename(self.baseline_log, backup)
+        require(self.fetch(backup, 65536) == raw, 'preserved log mismatch')
+        self.record['log_backup'] = backup
+        self.record['log_already_preserved'] = self.baseline_log_preserved
 
     def listing(self, path):
         rows = []
@@ -188,15 +246,7 @@ class Control:
         baseline_log = self.manifest.get('baseline_log_sha256')
         if self.baseline_log != self.log:
             self.fresh_log()
-        if baseline_log:
-            previous_log = self.fetch(self.baseline_log, 65536)
-            require(sha(previous_log) == baseline_log, 'baseline log changed')
-            (self.out / 'previous-application.log').write_bytes(previous_log)
-            log_backup = self.baseline_log + '.' + baseline_log + '.preserved'
-            require(not any(row.endswith(' ' + Path(log_backup).name) for row in self.listing(str(Path(self.baseline_log).parent))),
-                    'log backup already exists')
-        else:
-            self.fresh_log()
+        previous = self.baseline_log_read()
         old_sha = self.manifest['baseline_image_sha256']
         require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
         old = self.fetch(REMOTE, 16777216)
@@ -211,11 +261,7 @@ class Control:
         self.ftp.storbinary('STOR ' + temporary, io.BytesIO(image))
         require(self.fetch(temporary, len(image)) == image, 'temporary upload mismatch')
         self.idle()
-        if baseline_log:
-            require(self.fetch(self.baseline_log, 65536) == previous_log, 'baseline log changed before preservation')
-            self.ftp.rename(self.baseline_log, log_backup)
-            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log mismatch')
-            self.record['log_backup'] = log_backup
+        self.preserve_baseline_log(previous)
         self.fresh_log()
         start = self.history_read('before-preserve')
         require(self.fetch(REMOTE, len(old)) == old, 'baseline changed')
@@ -240,6 +286,7 @@ class Control:
         self.installed()
         require(self.fetch(backup, len(old)) == old, 'preserved image changed')
         if baseline_log:
+            previous_log, log_backup = previous
             require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')
         self.fresh_log()
         snapshot(self.send('post_snapshot'))

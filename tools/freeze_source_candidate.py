@@ -19,8 +19,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--baseline-image-sha256', required=True)
     parser.add_argument('--baseline-log-sha256')
+    parser.add_argument('--baseline-log-preserved', action='store_true',
+                        help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
     parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy'), default='bootstrap')
     args = parser.parse_args()
+    if args.baseline_log_preserved and not args.baseline_log_sha256:
+        parser.error('--baseline-log-preserved requires --baseline-log-sha256')
     import re
     for value in (args.baseline_image_sha256, args.baseline_log_sha256):
         if value is not None and not re.fullmatch('[0-9a-f]{64}', value):
@@ -55,6 +59,7 @@ def main():
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_image_sha256': args.baseline_image_sha256,
                 'baseline_log_sha256': args.baseline_log_sha256,
+                'baseline_log_preserved': args.baseline_log_preserved,
                 'baseline_log_fixture': args.baseline_log_fixture, 'fixture': fixture,
                 'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                 'package': relative + '/package/PPSA99014.ffpkg', 'app': relative + '/package/app',
