@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The unchanged diagnostic package is revalidated and frozen with corrected
+controls at `ad02169` in `results/source-public-launch-diagnostic-console-v2`.
+Independent deployment-only review permits one retry of the pre-upload transport
+failure; see `evidence/offline-diagnostic-transport-retry.json`. Execution still
+requires separate review of a successful deployment receipt.
+
 The diagnostic deployment stopped before upload: the baseline image download
 hit its 30-second deadline after 6,922,236 bytes. Services stayed healthy and the
 owned lock was released; image and log were not renamed, and nothing launched.

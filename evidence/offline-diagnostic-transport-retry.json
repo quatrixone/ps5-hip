@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-15",
+  "status": "reviewed-diagnostic-transport-retry-frozen",
+  "control_source": "ad021699231bc109b131d28fc385bba788a0b137",
+  "package_source": "6603bbc91e8fa2d1337f2f288358d4f920b0bf18",
+  "package_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+  "manifest_sha256": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+  "retry_scope": "One retry of diagnostic v1 baseline-download timeout before upload; unchanged package, reviewed90second image-read controls. No further automatic retry.",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-diagnostic-console-v2/manifest.json": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+    "results/source-public-launch-diagnostic-console-v2/deployment-review.json": "320ad3207db83a013ab6e7b36776b91199117058f00c492e4fff737b1d7acb01",
+    "results/public-hip-launch-diagnostic-v2-revalidate.log": "141cf5d9ff8d10d0f1a8604bff65091ed0873b417b05e2ce4ffca04bc2ce0bd0"
+  },
+  "limits": [
+    "No deployment or execution of v2 yet.",
+    "Independent approval permits one deploy only; exact successful receipt must be reviewed before execute."
+  ]
+}
