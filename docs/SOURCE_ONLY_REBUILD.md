@@ -412,8 +412,11 @@ Build a dedicated .40 package with:
 make public-hip-copy-gpu-package COPY_GPU_BUILD_DIR=build/public-hip-copy-gpu-v2 RESULTS_DIR=/data/ps5-hip/results
 ```
 
-The host/native shared oracle captures H2D, kernel, D2D, D2H and a dependent
-callback. It first checks 27 failed-copy capture/recovery cases across three
+The host/native shared oracle captures H2D and a kernel on the origin stream,
+then uses an event to join a consumer stream for D2D and D2H copies. A second
+event rejoins the origin before its callback. It checks the five-node dependency
+graph and resets both capture states, then reuses the events in eager execution.
+It first checks 27 failed-copy capture/recovery cases across three
 capture modes, four invalid setter calls and two invalid generic-update handles.
 The same helper runs in the source qualifier and the native title; the transcript
 requires these counts. A compatible generic graph update must also succeed.
@@ -426,10 +429,19 @@ Both device buffers are poisoned after the eager control so stale eager output
 cannot hide a missing graph copy. The host qualifier rejects omitted H2D, D2D
 and D2H edges, no-op kernel writes and corrupt writes. Acceptance requires four
 GPU dispatches, 292 exact active values, 32 guards, eight callbacks, two freed
-allocations and three retired queues. The exact transcript is
+allocations and four retired queues. The exact transcript is
 `ps5-hip-public-copy_gpu.log`; a fresh frozen candidate and independent review
-are required before a bounded console case. This does not qualify cross-stream
-GPU capture, memory-node parameter updates or sustained replay efficiency.
+are required before a bounded console case. This producer/consumer case does
+not prove concurrent GPU dispatch, general multi-kernel capture or sustained
+replay efficiency. Hardware validation of this joined variant is pending.
+
+The source qualifier also checks queued graph copies followed by `hipFree`
+while the executable and stream remain alive, and executable parameter migration
+to replacement allocations before freeing the old buffers. It verifies exact
+output, allocation removal and final cleanup. The gated free test observes a
+bounded interval; it cannot prove the freeing thread entered the runtime before
+the gate was released. These are sanitizer host-model checks, not native
+allocation-lifetime acceptance. Buffers must remain valid for future replays.
 
 The bounded copy/kernel fixture passed on .40 at `ac93df8`; see
 `../evidence/console40-public-copy-kernel-graph-success.json`. Its candidate phases

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-joined-capture-and-allocation-lifetime-pass",
+  "package_sha256": "6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5",
+  "total_compilations": 84,
+  "native_objects": 74,
+  "host_cases": [
+    "two-stream-producer-consumer-capture-rejoin",
+    "capture-state-reset-and-event-reuse",
+    "missing-rejoin-rejected",
+    "five-existing-output-mutations-rejected",
+    "queued-free-before-exec-teardown",
+    "parameter-migration-and-free-old-before-replay"
+  ],
+  "gpu_oracle": {
+    "launches": 4,
+    "values": 292,
+    "guards": 32,
+    "allocations": 2,
+    "frees": 2,
+    "queues": 4,
+    "retired": 4
+  },
+  "allocation_lifetime": {
+    "allocations": 6,
+    "frees": 6,
+    "observation_ms": 100
+  },
+  "control_tests": 26,
+  "kernel_unchanged": true,
+  "native_executed": false,
+  "raw_evidence": {
+    "results/cross-stream-lifetime-qualified-v1/receipt.json": "0e0c27eacaf98c8dbc196fd32fe9ddde27d00986ade75bdd5bda7c48f92149ad",
+    "build/public-hip-copy-joined-v1/link-receipt.json": "24568203a59f7f2755bce36931cf8175c97b44bbb769146c2de29ccc07106b2e",
+    "results/copy-joined-independent-review-v1/review.json": "804c49f45ccfb1c56449dd19bc061f1115f11bd39584a24148225e1db2280496",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined.json": "c6f5151b4a43f85e116bd0d53a4d1e54cd0a8509641ca65a7a5a30b48ce8cc0b",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined.stdout": "9290393a1c6562759a64c215d8b1e422efbe01a6894d2b94c07af8cd77a25a23",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined.stderr": "981b62ca9a99281a0a6ef4d73359773a064ddf9f76cfd08473249381f4270d97",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined-missing-join.json": "eddd5d597b5aba6d2d5368f62b89c849cb8c410874275251a25517bd3e9ae6df",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined-missing-join.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/cross-stream-lifetime-qualified-v1/copy-gpu-joined-missing-join.stderr": "adfe92738d44db2fcb7f6046c3e0f211fa5522b96815ada4a53064a66e2fe294",
+    "results/cross-stream-lifetime-qualified-v1/allocation-lifetime.json": "e32205929b3a1582097023140b7b8c1d43269cd911fa1515f5c54a44beb45587",
+    "results/cross-stream-lifetime-qualified-v1/allocation-lifetime.stdout": "4a2f1b27a422020e84290ea823eaae5434b4afc9c7386b4d4e3dea880d0871a2",
+    "results/cross-stream-lifetime-qualified-v1/allocation-lifetime.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Host transport models GPU work; native joined-capture execution is pending.",
+    "Single producer kernel with dependent consumer copies; no concurrent or multi-kernel GPU execution claim.",
+    "The finite gated-free observation does not prove runtime entry before gate release.",
+    "Five output mutation controls remain single-stream; missing-rejoin negative targets joined capture.",
+    "Native allocation-lifetime validation, sustained replay and performance remain open."
+  ]
+}

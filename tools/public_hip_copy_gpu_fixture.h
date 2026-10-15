@@ -3,10 +3,16 @@
 #include "public_hip_copy_recovery_fixture.h"
 namespace copy_gpu_fixture {
 inline void run(const char* path,bool capture,
-                void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr){
+                void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr, bool joined=false){
  HIP_OK(hipInit(0));hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,path));
  hipFunction_t function=nullptr;HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
  hipStream_t stream=nullptr;HIP_OK(hipStreamCreateWithFlags(&stream,hipStreamNonBlocking));
+ hipStream_t peer=stream;hipEvent_t ready=nullptr,done=nullptr;
+ if(joined){
+  HIP_OK(hipStreamCreateWithFlags(&peer,hipStreamNonBlocking));
+  HIP_OK(hipEventCreateWithFlags(&ready,hipEventDisableTiming));
+  HIP_OK(hipEventCreateWithFlags(&done,hipEventDisableTiming));
+ }
  void *a=nullptr,*b=nullptr;HIP_OK(hipMalloc(&a,81*sizeof(unsigned)));HIP_OK(hipMalloc(&b,81*sizeof(unsigned)));
  copy_recovery::capture_errors(stream,a,b,81*sizeof(unsigned));
  static unsigned input[81],output[81],eager[81],callbacks;callbacks=0;
@@ -20,13 +26,28 @@ inline void run(const char* path,bool capture,
   HIP_OK(hipStreamBeginCapture(stream,hipStreamCaptureModeThreadLocal));
   HIP_OK(hipMemcpyAsync(a,input,sizeof(input),hipMemcpyHostToDevice,stream));
   HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,stream,args,nullptr));
-  HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,stream));
-  HIP_OK(hipMemcpyAsync(output,b,sizeof(output),hipMemcpyDeviceToHost,stream));
+  if(joined){HIP_OK(hipEventRecord(ready,stream));HIP_OK(hipStreamWaitEvent(peer,ready,0));}
+  HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,peer));
+  HIP_OK(hipMemcpyAsync(output,b,sizeof(output),hipMemcpyDeviceToHost,peer));
+  if(joined){HIP_OK(hipEventRecord(done,peer));HIP_OK(hipStreamWaitEvent(stream,done,0));}
   HIP_OK(hipLaunchHostFunc(stream,host.fn,host.userData));
   HIP_OK(hipStreamEndCapture(stream,&graph));
+  if(joined){
+   for(auto captured:{stream,peer}){hipStreamCaptureStatus state;HIP_OK(hipStreamIsCapturing(captured,&state));checked(state==hipStreamCaptureStatusNone,__LINE__);}
+  }
   size_t total=0;HIP_OK(hipGraphGetNodes(graph,nullptr,&total));checked(total==5,__LINE__);
   size_t n=1;HIP_OK(hipGraphGetRootNodes(graph,&nodes[0],&n));checked(n==1,__LINE__);
-  for(unsigned i=1;i<5;++i){n=1;HIP_OK(hipGraphNodeGetDependentNodes(nodes[i-1],&nodes[i],&n));checked(n==1,__LINE__);}
+  for(unsigned i=1;i<5;++i){
+   hipGraphNode_t next[2]{};n=2;HIP_OK(hipGraphNodeGetDependentNodes(nodes[i-1],next,&n));
+   checked(n==(joined&&i==2?2u:1u),__LINE__);
+   nodes[i]=next[0];
+   if(joined&&i==2){hipGraphNodeType type;HIP_OK(hipGraphNodeGetType(next[0],&type));if(type==hipGraphNodeTypeHost)nodes[i]=next[1];}
+   hipGraphNode_t dependencies[2]{};n=2;HIP_OK(hipGraphNodeGetDependencies(nodes[i],dependencies,&n));
+   checked(n==(joined&&i==4?2u:1u),__LINE__);
+   if(joined&&i==4)checked((dependencies[0]==nodes[1]&&dependencies[1]==nodes[3])||(dependencies[1]==nodes[1]&&dependencies[0]==nodes[3]),__LINE__);
+   else checked(dependencies[0]==nodes[i-1],__LINE__);
+  }
+  n=0;HIP_OK(hipGraphNodeGetDependentNodes(nodes[4],nullptr,&n));checked(n==0,__LINE__);
  }else{
   HIP_OK(hipGraphCreate(&graph,0));
   HIP_OK(hipGraphAddMemcpyNode1D(&nodes[0],graph,nullptr,0,a,input,sizeof(input),hipMemcpyHostToDevice));
@@ -67,8 +88,10 @@ inline void run(const char* path,bool capture,
   // Eager control uses the same data and public operations as the graph.
   HIP_OK(hipMemcpyAsync(a,input,sizeof(input),hipMemcpyHostToDevice,stream));
   HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,stream,args,nullptr));
-  HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,stream));
-  HIP_OK(hipMemcpyAsync(eager,b,sizeof(eager),hipMemcpyDeviceToHost,stream));
+  if(joined){HIP_OK(hipEventRecord(ready,stream));HIP_OK(hipStreamWaitEvent(peer,ready,0));}
+  HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,peer));
+  HIP_OK(hipMemcpyAsync(eager,b,sizeof(eager),hipMemcpyDeviceToHost,peer));
+  if(joined){HIP_OK(hipEventRecord(done,peer));HIP_OK(hipStreamWaitEvent(stream,done,0));}
   HIP_OK(hipStreamSynchronize(stream));
   // Erase eager device results so every graph copy edge is observable.
   HIP_OK(hipMemset(a,0x6b,sizeof(input)));HIP_OK(hipMemset(b,0x91,sizeof(input)));
@@ -84,7 +107,9 @@ inline void run(const char* path,bool capture,
    }
   }
  }
- HIP_OK(hipGraphExecDestroy(exec));HIP_OK(hipStreamDestroy(stream));
+ HIP_OK(hipGraphExecDestroy(exec));
+ if(joined){HIP_OK(hipEventDestroy(done));HIP_OK(hipEventDestroy(ready));HIP_OK(hipStreamDestroy(peer));}
+ HIP_OK(hipStreamDestroy(stream));
  HIP_OK(hipFree(b));HIP_OK(hipFree(a));HIP_OK(hipModuleUnload(module));
 }
 }

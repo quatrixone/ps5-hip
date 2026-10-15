@@ -16,6 +16,23 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Joined capture and allocation lifetime qualified offline
+
+Full source ASan/UBSan qualification passed 84 compilations, including two-stream
+GPU-producer/copy-consumer capture with event rejoin/reuse, exact dependencies,
+missing-rejoin rejection and the existing output mutants. The shared oracle
+retains four launches, 292 values and 32 guards, with four queues retired.
+Separate lifetime cases passed queued free with a live executable and parameter
+migration followed by freeing old allocations before replay; all six allocations
+were released. Their 100 ms scheduling observation does not prove runtime entry.
+A fresh 74-object native joined package and 26 control tests passed offline.
+See `evidence/offline-joined-capture-lifetime.json`.
+
+Next: freeze/review the joined candidate and validate it once on idle .40.
+The installed image and log remain the native recovery baseline below. Native
+allocation-lifetime validation, sustained replay and performance remain open.
+Neither host modeling nor this one producer/consumer topology completes G5.
+
 ## Native copy recovery passed
 
 The startup-instrumented package passed one bounded .40 run: 27 capture-recovery

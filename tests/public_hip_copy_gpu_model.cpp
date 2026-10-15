@@ -13,7 +13,7 @@ struct Final {
   std::fprintf(stderr,"PUBLIC_GRAPH_GPU_COUNTS queues=%u retired=%u allocations=%u frees=%u\n",unsigned(observed.queues),unsigned(observed.retired_queues),unsigned(observed.allocations),unsigned(observed.frees));
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
   checked(observed.allocations==2&&observed.frees==2&&observed.launches==4,__LINE__);
-  const unsigned queues=3;
+  const unsigned queues=std::strncmp(mode,"joined",6)==0?4:3;
   checked(observed.queues==queues&&observed.retired_queues==queues&&allocations.empty(),__LINE__);
   std::puts("PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=2 frees=2 ownership=clean gpu_execution=false");
  }
@@ -26,15 +26,34 @@ extern "C" int __wrap_pthread_create(pthread_t* p,const pthread_attr_t* a,void*(
 extern "C" int __wrap_pthread_join(pthread_t p,void** v){return __real_pthread_join(p,v);}
 static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(stderr,"PUBLIC_GRAPH_GPU_ERROR line=%d status=%d\n",line,int(status));std::abort();}}
 #define HIP_OK(x) ok(x,__LINE__)
+static bool join_omitted=false;
+static hipError_t joined_wait(hipStream_t stream,hipEvent_t event,unsigned flags){
+ static unsigned waits=0;
+ if(!std::strcmp(mode,"joined-missing-join")&&++waits==2){join_omitted=true;return hipSuccess;}
+ return hipStreamWaitEvent(stream,event,flags);
+}
+static hipError_t joined_end(hipStream_t stream,hipGraph_t* graph){
+ auto status=hipStreamEndCapture(stream,graph);
+ if(join_omitted){
+  checked(status==hipErrorStreamCaptureUnjoined,__LINE__);
+  std::fputs("PUBLIC_COPY_GPU_UNJOINED_REJECTED\n",stderr);std::abort();
+ }
+ return status;
+}
+#define hipStreamWaitEvent joined_wait
+#define hipStreamEndCapture joined_end
 #include "public_hip_copy_gpu_fixture.h"
+#undef hipStreamWaitEvent
+#undef hipStreamEndCapture
 int main(int argc,char**argv){
  checked(argc==3,__LINE__);mode=argv[2];resume=true;
  copy_gpu_fixture::run(argv[1],std::strcmp(mode,"explicit")!=0,[](hipGraphExec_t exec,const hipGraphNode_t* nodes){
   if(!std::strcmp(mode,"copy-h2d"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[0],0));
   if(!std::strcmp(mode,"copy-d2d"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[2],0));
   if(!std::strcmp(mode,"copy-d2h"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[3],0));
- });
+ },std::strncmp(mode,"joined",6)==0);
  checked(submits==4&&backend_calls==1,__LINE__);completed=true;
+ if(!std::strcmp(mode,"joined"))std::puts("PUBLIC_COPY_GPU_JOINED_PASS streams=2 rejoined=true events_reused=true");
  std::puts("PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false");
  return 0;
 }
