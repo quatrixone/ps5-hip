@@ -37,8 +37,8 @@ the entire workspace, dependency trees or historical logs by default.
 
 The planning request did not request a console run. When later work is authorized,
 follow the current `ps5-homebrew-dev-protocol` runbook and ignored
-`.local/ENVIRONMENT.md`. In this workspace the runbook is
-`../../docs/ps5-homebrew-dev-protocol/docs/RUNBOOK.md`.
+`.local/ENVIRONMENT.md`. After `make deps-fetch`, the pinned runbook is
+`.deps/sources/protocol/docs/RUNBOOK.md`.
 
 Use WSL for native builds and console traffic. Coordinate the current shared-console
 lock; do not import an old project's lock waiver or assume its title ID is available.
