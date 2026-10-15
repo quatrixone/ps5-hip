@@ -11,6 +11,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Latest source-Make console result: **failed teardown**. Candidate `910f716`
+reached public `hipInit=0` and device count `1` on .40, then SIGSEGV at the
+shell-exit import. The Make builder omitted the existing converter import-library
+patch. Services remain healthy, the lock was released, and a read-only follow-up
+found idle app queries and stable mounts. Preserve the consumed v1 candidate;
+see `evidence/native-source-make-bootstrap-failure.json`. A corrected converter
+and distinct package are being qualified. No public HIP GPU result is claimed.
+The historical registered-only descriptions below describe earlier checkpoints.
+
 The known bootstrap deployment-review classification mismatch is fixed at
 `98a6887` on `codex/public-hip-bootstrap-resume` in `.local/g5-hip-native-link`.
 Seven binding regressions and the inert-entry test pass under WSL. Execution is
@@ -1232,6 +1241,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-14 | G5 | 910f716 | .40 | failed: public init/count observed, shell-exit SIGSEGV | evidence/native-source-make-bootstrap-failure.json | fix converter; preserve v1
 
 - 2026-10-14 | public HIP bootstrap D | `3ac8385` | .40: exact candidate registered, never launched; installed/mounted bytes, old image/log, 34 backups, idle/services/locks independently reviewed | `evidence/native-public-hip-bootstrap-deployment.json` | bind and review one-use E; G5 open
 - 2026-10-14 | native public memory and ROCclr GEMM | `1f969f6` / `a0af56e` | offline native packages and independent reviews passed; no console runs | `HANDOFF.md` | refresh controls after bootstrap registration

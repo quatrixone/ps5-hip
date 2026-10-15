@@ -1,6 +1,6 @@
 """Offline integration test of the pinned converter patch against its unmodified source.
 
-Run after build_native_canary.py for gfx1013/runtime. No console or firmware files.
+Run after the source-only public HIP build. No console or firmware files.
 """
 import base64
 import hashlib
@@ -13,10 +13,10 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-BUILD = ROOT / "build/native/gfx1013-runtime"
+BUILD = ROOT / "build/public-hip"
 
 
-def read_imports(path):
+def read_imports(path, verify_hash=False):
     data = path.read_bytes()
     phoff = struct.unpack_from("<Q", data, 32)[0]
     stride, count = struct.unpack_from("<HH", data, 54)
@@ -44,6 +44,7 @@ def read_imports(path):
         if tag == 0x61000049:
             libraries[value >> 48] = string(value & 0xffffffff)
     start = offset(tags[6])
+    decoded = {}
     for p in range(start + 24, start + tags[0x6100003f], 24):
         name = string(struct.unpack_from("<I", data, p)[0])
         hashed, library, module = name.split("#")
@@ -54,6 +55,29 @@ def read_imports(path):
                 value = value * 64 + alphabet.index(char)
             return value
         symbols[hashed] = (modules[number(module)], libraries[number(library)])
+        decoded[(p - start) // 24] = hashed + '#' + libraries[number(library)] + '#' + modules[number(module)]
+    if verify_hash:
+        table = offset(tags[4])
+        buckets, chains = struct.unpack_from('<II', data, table)
+        if not buckets or chains != tags[0x6100003f] // 24:
+            raise ValueError('invalid import hash dimensions')
+        for index, identity in decoded.items():
+            hashed = 0
+            for byte in identity.encode():
+                hashed = ((hashed << 4) + byte) & 0xffffffff
+                high = hashed & 0xf0000000
+                if high:
+                    hashed ^= high >> 24
+                hashed &= ~high
+            current = struct.unpack_from('<I', data, table + 8 + (hashed % buckets) * 4)[0]
+            visited = set()
+            while current and current != index:
+                if current >= chains or current in visited:
+                    raise ValueError('invalid import hash chain')
+                visited.add(current)
+                current = struct.unpack_from('<I', data, table + 8 + buckets * 4 + current * 4)[0]
+            if current != index:
+                raise ValueError('serialized import identity absent from hash bucket: ' + identity)
     return modules, libraries, symbols
 
 
@@ -68,17 +92,21 @@ class ImportLibraries(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory(prefix="ps5hip-imports-")
         cls.work = pathlib.Path(cls.temporary.name)
         lock = json.loads((ROOT / "dependencies.json").read_text())
-        native = ROOT / ".deps" / ("native-tools-" + lock["native_tools"]["revision"])
+        native = ROOT / ".deps/sources/native-tools/tooling/native"
         original = cls.work / "original"
         shutil.copytree(native, original)
-        subprocess.run(["patch", "--batch", "--fuzz=0", "-R", "-p1", "-d", str(original),
-                        "-i", str(ROOT / "patches/native-import-libraries.patch")], check=True, capture_output=True)
         zlib = ROOT / ".deps" / ("host-zlib-" + lock["host_zlib"]["version"]) / "root"
         cls.original_tool = cls.work / "original-tool"
-        subprocess.run(["clang++-18", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Werror",
-                        *[str(original / name) for name in ("native_app_builder.cpp", "elf_object.cpp",
+        patched = cls.work / 'patched'
+        shutil.copytree(original, patched)
+        subprocess.run(['patch', '--batch', '--fuzz=0', '-p1', '-d', str(patched),
+                        '-i', str(ROOT / 'patches/native-import-libraries.patch')], check=True, capture_output=True)
+        cls.patched_tool = cls.work / 'patched-tool'
+        for source, target in ((original, cls.original_tool), (patched, cls.patched_tool)):
+            subprocess.run(["clang++-18", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Werror",
+                        *[str(source / name) for name in ("native_app_builder.cpp", "elf_object.cpp",
                                                            "sce_module_writer.cpp", "self_container.cpp")],
-                        "-I", str(zlib / "include"), str(zlib / "lib/libz.a"), "-o", str(cls.original_tool)],
+                        "-I", str(zlib / "include"), str(zlib / "lib/libz.a"), "-o", str(target)],
                        check=True, capture_output=True)
         cls.base = cls.convert(tool=cls.original_tool)
 
@@ -90,7 +118,7 @@ class ImportLibraries(unittest.TestCase):
     def convert(cls, *bindings, tool=None, success=True, pie=None):
         path = cls.work / "output.elf"
         path.unlink(missing_ok=True)
-        command = [str(tool or BUILD / "ps5-native-tool"), "link", "--in", str(pie or BUILD / "llvm-pie.elf"),
+        command = [str(tool or cls.patched_tool), "link", "--in", str(pie or BUILD / "title.elf"),
                    "--out", str(path), "--stub-dir", str(ROOT / ".deps/sdk/target/lib"),
                    "--stub", str(BUILD / "libSceAgc.so"), "--stub", str(BUILD / "libSceAgcDriver.so"),
                    "--file-name", "eboot.elf"]
@@ -108,10 +136,30 @@ class ImportLibraries(unittest.TestCase):
         data = self.convert(*bindings)
         path = self.work / "inspect.elf"
         path.write_bytes(data)
-        return read_imports(path)
+        return read_imports(path, verify_hash=True)
 
     def test_no_override_is_byte_identical_to_unpatched_converter(self):
         self.assertEqual(self.convert(), self.base)
+
+    def test_serialized_hash_lookup_rejects_missing_bucket(self):
+        data = bytearray(self.convert('libSceLibcInternal:exit:libExitProbe'))
+        phoff = struct.unpack_from('<Q', data, 32)[0]
+        count = struct.unpack_from('<H', data, 56)[0]
+        headers = [struct.unpack_from('<IIQQQQQQ', data, phoff + i * 56) for i in range(count)]
+        dynamic = next(row for row in headers if row[0] == 2)
+        tags = dict(struct.unpack_from('<QQ', data, p)
+                    for p in range(dynamic[2], dynamic[2] + dynamic[5], 16))
+        load = next(row for row in headers if row[0] == 1 and row[3] <= tags[4] < row[3] + row[5])
+        table = load[2] + tags[4] - load[3]
+        buckets = struct.unpack_from('<I', data, table)[0]
+        data[table + 8:table + 8 + buckets * 4] = bytes(buckets * 4)
+        path = self.work / 'corrupt-hash.elf'
+        path.write_bytes(data)
+        # Symbol/module/library decoding alone still succeeds, so this isolates
+        # the hash consistency check from the original import-identity check.
+        read_imports(path)
+        with self.assertRaisesRegex(ValueError, 'absent from hash bucket'):
+            read_imports(path, verify_hash=True)
 
     def test_multiple_libraries_and_shared_override(self):
         modules, libraries, symbols = self.inspect(
@@ -152,17 +200,16 @@ class ImportLibraries(unittest.TestCase):
                           ' status = sceShellCoreUtilExitApp();\n}\n')
         obj, pie = self.work / "shell-import.o", self.work / "shell-import.elf"
         lock = json.loads((ROOT / "dependencies.json").read_text())
-        native = ROOT / ".deps" / ("native-tools-" + lock["native_tools"]["revision"])
         subprocess.run([str(ROOT / "tools/ps5-clangxx"), "-O2", "-fPIC", "-fvisibility=hidden",
                         "-fno-stack-protector", "-c", str(source), "-o", str(obj)], check=True, capture_output=True)
-        subprocess.run(["ld.lld-18", "-pie", "-T", str(native / "ps5-pie.ld"), "-z", "max-page-size=0x4000",
+        subprocess.run(["ld.lld-18", "-pie", "-T", str(ROOT / "ports/clr/ps5-pie.ld"), "-z", "max-page-size=0x4000",
                         "--version-script", str(BUILD / "symbols.map"), "-e", "_start", "-o", str(pie),
                         str(obj), str(ROOT / ".deps/sdk/target/lib/libSceSystemService.so")],
                        check=True, capture_output=True)
         data = self.convert("libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil", pie=pie)
         path = self.work / "shell-native.elf"
         path.write_bytes(data)
-        modules, libraries, symbols = read_imports(path)
+        modules, libraries, symbols = read_imports(path, verify_hash=True)
         self.assertEqual(symbols[nid("sceShellCoreUtilExitApp")],
                          ("libSceSystemService", "libSceShellCoreUtil"))
         self.assertEqual(symbols[nid("sceSystemServiceHideSplashScreen")],

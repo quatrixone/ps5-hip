@@ -3,11 +3,16 @@ from pathlib import Path
 import sys
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from source_console import lifecycle, snapshot
+from source_console import lifecycle, snapshot, native_fault
 from source_public_hip_log import EXPECTED, check_log
 
 
 class ConsoleContractTest(unittest.TestCase):
+    def test_native_faults_rejected(self):
+        for raw in (b'# exception: 6', b'# A user thread receives a fatal signal', b'Kernel panic', b'panic: fatal'):
+            self.assertTrue(native_fault(raw))
+        self.assertFalse(native_fault(b'[KSTUFF] game stopped: PPSA99014 pid=629'))
+
     start = b'[GAME] started: PPSA99014 pid=501\n'
     stop = b'[KSTUFF] game stopped: PPSA99014 pid=501\n'
 

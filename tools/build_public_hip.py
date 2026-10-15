@@ -52,7 +52,8 @@ def build_inputs():
              "tools/prepare_hip_admission.py", "tools/guard_native_hip_gl.py",
              "tools/native_runtime.h", "tools/native_shell_exit_probe.cpp",
              "tools/public_hip_app_crt.cpp", "tools/public_hip_bootstrap_console_title.cpp",
-             "tools/ps5-clangxx"}
+             "tools/ps5-clangxx", "patches/native-import-libraries.patch",
+             "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
         names.update(path.relative_to(ROOT).as_posix() for path in (ROOT / folder).rglob("*")
                      if path.is_file() and path.suffix in
@@ -202,7 +203,13 @@ def link_title(output, units):
 
 
 def native_tool(output):
-    vendor = DEPS / "sources/native-tools/tooling/native"
+    upstream = DEPS / "sources/native-tools/tooling/native"
+    vendor = output / "native-tool-source"
+    if vendor.exists():
+        raise RuntimeError("native converter source output already exists; use a fresh build")
+    shutil.copytree(upstream, vendor)
+    run(output, "native-import-patch", ["patch", "--batch", "--fuzz=0", "-p1", "-d", vendor,
+                                       "-i", ROOT / "patches/native-import-libraries.patch"])
     zlib = DEPS / "host-zlib-1.3.2/root"
     tool = output / "ps5-native-tool"
     sources = [vendor / name for name in ("native_app_builder.cpp", "self_container.cpp",
@@ -238,6 +245,7 @@ def convert_title(output, tool):
                             "--stub-dir", sdk, "--stub", output / "libSceAgc.so",
                             "--stub", output / "libSceAgcDriver.so", "--file-name", "eboot.elf",
                             "--import-library", "libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil"])
+    run(output, "verify-sce-imports", [sys.executable, ROOT / "tests/public_hip_imports_test.py", converted])
     run(output, "sign", [tool, "self", "--sign", "--in", converted, "--out", signed])
     run(output, "extract", [tool, "self", "--extract", "--file", signed,
                             "--out", extracted])

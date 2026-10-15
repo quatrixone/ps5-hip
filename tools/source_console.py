@@ -19,7 +19,10 @@ MOUNT = '/mnt/shadowmnt/PPSA99014_b6d9b2e4'
 LOG = '/data/ps5-hip/results/ps5-hip-public-bootstrap.log'
 HISTORY = '/data/shadowmount/debug.log'
 LOCK = Path('/mnt/c/Users/Denis/Documents/PS5/lock.txt')
-OLD_SHA = '836c10c6e66eb3d98245e23f96394ac8a7f51c34c750a4b18b35fc22210975b8'
+
+def native_fault(raw):
+    lower = bytes(raw).lower()
+    return any(marker in lower for marker in (b'# exception:', b'receives a fatal signal', b'kernel panic', b'panic:'))
 
 
 def require(value, message):
@@ -176,11 +179,22 @@ class Control:
     def deploy(self):
         self.idle()
         snapshot(self.send('snapshot'))
-        self.fresh_log()
+        baseline_log = self.manifest.get('baseline_log_sha256')
+        if baseline_log:
+            previous_log = self.fetch(LOG, 65536)
+            require(sha(previous_log) == baseline_log, 'baseline log changed')
+            (self.out / 'previous-application.log').write_bytes(previous_log)
+            log_backup = LOG + '.' + baseline_log + '.preserved'
+            require(not any(row.endswith(' ' + Path(log_backup).name) for row in self.listing(str(Path(LOG).parent))),
+                    'log backup already exists')
+        else:
+            self.fresh_log()
+        old_sha = self.manifest['baseline_image_sha256']
+        require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
         old = self.fetch(REMOTE, 16777216)
-        require(sha(old) == OLD_SHA, 'historical baseline differs; replan')
+        require(sha(old) == old_sha, 'historical baseline differs; replan')
         (self.out / 'old.ffpkg').write_bytes(old)
-        backup = REMOTE + '.source-rebuild-' + OLD_SHA + '.preserved'
+        backup = REMOTE + '.source-rebuild-' + old_sha + '.preserved'
         temporary = '/data/homebrew/.PPSA99014-source-' + self.token + '.upload'
         entries = self.listing('/data/homebrew')
         require(not any(row.endswith(' ' + Path(backup).name) for row in entries), 'backup already exists')
@@ -189,6 +203,12 @@ class Control:
         self.ftp.storbinary('STOR ' + temporary, io.BytesIO(image))
         require(self.fetch(temporary, len(image)) == image, 'temporary upload mismatch')
         self.idle()
+        if baseline_log:
+            require(self.fetch(LOG, 65536) == previous_log, 'baseline log changed before preservation')
+            self.ftp.rename(LOG, log_backup)
+            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log mismatch')
+            self.record['log_backup'] = log_backup
+        self.fresh_log()
         start = self.history_read('before-preserve')
         require(self.fetch(REMOTE, len(old)) == old, 'baseline changed')
         self.record.update(backup=backup, temporary=temporary)
@@ -211,6 +231,8 @@ class Control:
             self.idle()
         self.installed()
         require(self.fetch(backup, len(old)) == old, 'preserved image changed')
+        if baseline_log:
+            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')
         self.fresh_log()
         snapshot(self.send('post_snapshot'))
         self.record['accepted'] = True
@@ -252,9 +274,9 @@ class Control:
                 current = self.history_read('observed')
                 stopped, starts = lifecycle(current[len(baseline):])
                 require(not self.capture_errors and worker.is_alive(), 'klog capture failed')
-                require(b'# exception:' not in self.klog[launch_offset:], 'native exception: no automatic retry')
+                require(not native_fault(self.klog[launch_offset:]), 'native fault: no automatic retry')
                 if stopped:
-                    self.record['natural_stop'] = True
+                    self.record['ordered_stop'] = True
                     break
                 require(time.monotonic() < deadline, 'title observation deadline')
                 time.sleep(1)
@@ -269,7 +291,7 @@ class Control:
             self.installed()
             self.record['accepted'] = True
         finally:
-            if self.record['launched'] and not self.record.get('natural_stop'):
+            if self.record['launched'] and not self.record.get('ordered_stop'):
                 try:
                     current = self.history_read('before-safety-close')
                     _, starts = lifecycle(current[len(baseline):])
@@ -288,8 +310,14 @@ class Control:
                     self.record['safety_close_error'] = repr(error)
             self.stop.set(); worker.join(timeout=2); sock.close()
             (self.out / 'klog.log').write_bytes(self.klog)
+            if not (self.out / 'application.log').exists():
+                try:
+                    (self.out / 'application.log').write_bytes(self.fetch(LOG, 65536))
+                except Exception as error:
+                    self.record['application_capture_error'] = repr(error)
             require(not worker.is_alive(), 'klog collector did not stop')
-            require(not self.capture_errors and b'# exception:' not in self.klog[launch_offset:], 'klog failed or exception during postchecks')
+            require(not self.capture_errors and not native_fault(self.klog[launch_offset:]), 'klog failed or native fault during postchecks')
+        self.record['natural_stop'] = True
 
     def run(self):
         try:

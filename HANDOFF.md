@@ -18,6 +18,17 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
+Latest continuation: source-only Make built all prerequisites and 74 objects.
+The fresh v1 package was deployed and launched once on .40; public initialization
+and count=1 were observed, but shell-exit called through an incorrectly bound
+SCE import and SIGSEGV occurred. This is a failed gate, not clean teardown.
+See `evidence/native-source-make-bootstrap-failure.json`; raw v1 evidence is
+preserved under `results/source-make-console-v1`. Current work corrects the
+converter patch application and binary import audit before a distinct v2 case.
+The user confirmed this host is the sole .40 controller and authorized an
+independent review agent. The prior original-workspace recovery block is obsolete
+for new source-built candidates; historical phases remain consumed/inert.
+
 - G1 passed offline; G2 passed its named arithmetic fixture. G3 has substantial
   bounded native compute evidence, but broader qualification remains open. G4
   has genuine registered HIP clients, reusable runtime, HIPIFY translation,

@@ -17,7 +17,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--baseline-image-sha256', required=True)
+    parser.add_argument('--baseline-log-sha256')
     args = parser.parse_args()
+    import re
+    for value in (args.baseline_image_sha256, args.baseline_log_sha256):
+        if value is not None and not re.fullmatch('[0-9a-f]{64}', value):
+            parser.error('baseline digests must be lowercase SHA-256')
     output = args.output.resolve()
     if not output.is_relative_to(ROOT / 'results'):
         parser.error('candidate must be under results/')
@@ -43,6 +49,8 @@ def main():
         files[name] = digest(ROOT / name)
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
+                'baseline_image_sha256': args.baseline_image_sha256,
+                'baseline_log_sha256': args.baseline_log_sha256,
                 'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                 'package': relative + '/package/PPSA99014.ffpkg', 'app': relative + '/package/app',
                 'launch': relative + '/controllers/launch.elf', 'close': relative + '/controllers/close.elf',

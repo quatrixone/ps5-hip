@@ -118,3 +118,16 @@
          import.mangled = nid(import.plain) + "#" + encode_id(import.library_id) + "#" +
                           encode_id(import.module_id);
      }
+@@ -751,8 +801,11 @@
+         write_u16(dynamic_symbols, at + 6, source.section);
+         write_u64(dynamic_symbols, at + 8, source.value);
+         write_u64(dynamic_symbols, at + 16, source.size);
++        const auto binding = bindings.find(import.plain);
++        const std::string &library = binding == bindings.end()
++            ? import.provider->library_name : binding->second.second;
+         hash_names[import.dynamic_symbol] = nid(import.plain) + "#" +
+-                                            import.provider->library_name + "#" +
++                                            library + "#" +
+                                             import.provider->module_name;
+     }
+     const Bytes dynamic_strings = strings.data();

@@ -65,6 +65,16 @@ the separately built read-only snapshot into a new `results/` candidate and
 binds their hashes. The source tree must be committed first. The current
 console control is scoped to `.40`, PPSA99014 and `/data/ps5-hip/results`;
 build with that explicit `RESULTS_DIR` when preparing this case.
+Supply `--baseline-image-sha256` for the exact installed image and, when
+preserving an existing bootstrap log, `--baseline-log-sha256`. Deployment
+rejects changed bytes and preserves both under unique digest-named backups.
+An absent baseline log digest requires that no prior bootstrap log exists.
+
+The converter is built from pinned source plus
+`patches/native-import-libraries.patch`. Before signing, a serialized SCE
+import audit checks module/library bindings, including the shell-exit import.
+The first source-Make hardware attempt exposed this missing patch and failed
+teardown; see `evidence/native-source-make-bootstrap-failure.json`.
 
 `tools/source_console.py` requires independent review bound to the frozen
 manifest before any socket is opened. Its separate one-use `deploy` phase

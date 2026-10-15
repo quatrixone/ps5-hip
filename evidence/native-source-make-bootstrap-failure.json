@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-14",
+  "classification": "failed",
+  "source_commit": "910f716",
+  "target": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "85f3efaa042d0ba5f8690090ec24a1aa41de42a261ec6379435d343c7e45bee6",
+  "manifest_sha256": "be7acda0413646d92939f8babf112e194ab77d0848a4e839d78c5302ffbc2e6b",
+  "application_log_sha256": "3fc1846b65694e7d1ae62b268e65a4cfd8d96183f1c2a45612e0759a146c8922",
+  "pid": 629,
+  "application_id": "0x2018",
+  "observed": "Public hipInit=0 and hipGetDeviceCount=0/count=1; watchdog, atexit, static destructor, application finalization reached. SIGSEGV at RIP 0 after shell-exit request; no request-return=0.",
+  "diagnosis": "Make compiled the pinned converter without patches/native-import-libraries.patch. It silently ignored --import-library and encoded the shell-exit NID with libSceSystemService instead of libSceShellCoreUtil. Independent binary comparison confirms the mismatch.",
+  "receipt_correction": "v1 execute natural_stop=true records only ordered lifecycle. Fatal signal proves clean teardown false; overall accepted was false. New controls reject fatal signals and defer natural_stop until final checks.",
+  "healthy_services_after": true,
+  "owned_lock_released": true,
+  "read_only_followup": "Idle app queries and stable two-row UFS/nullfs title mounts; no retroactive acceptance.",
+  "public_hip_gpu_execution": false,
+  "raw_evidence": "results/source-make-console-v1/",
+  "independent_review": "results/source-make-independent-review/execution-review.json",
+  "next": "Preserve consumed candidate, repair converter and qualify a distinct reviewed package. Do not replay v1."
+}
