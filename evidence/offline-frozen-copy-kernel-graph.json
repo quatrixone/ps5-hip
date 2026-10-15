@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-frozen-copy-kernel-graph-deployment-review",
+  "source_commit": "ac93df8ab2afcc15b2d55e54b1b478e251344e63",
+  "package_sha256": "25cf1041ac4ac9b5a18e54728913816ce450a889bb9f76ac0096f79119ed9503",
+  "bound_files": 29,
+  "package_files": 7,
+  "committed_inputs": 106,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-copy-gpu-console-v1/manifest.json": "04caca5a3349b06ac9d7096724e6e10f3e212d03a2ff8b9d4a447adbd1d04220",
+    "results/source-public-copy-gpu-console-v1/deployment-review.json": "009ad9fe9edefa320851b084c966b36eea5f6d7c4314c9849d49e3e12a7a2836",
+    "results/source-public-copy-gpu-console-v1/build-receipt.json": "213b414fa0b420f035f749bc711c93e9ceb0cd5d7694d9e8778731367e169173"
+  },
+  "limits": [
+    "One deployment only; separate successful receipt review before execution.",
+    "No native copy/kernel graph execution yet."
+  ]
+}
