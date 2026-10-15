@@ -164,6 +164,12 @@ Two negative controls simulate missing and incorrect computation; each must fail
 at the output oracle. Providers and packet execution are modeled, so passing this
 case is not evidence of GPU execution on a PS5.
 
+The `launch-events` case records a timing-disabled event after a held modeled
+dispatch, requires `hipErrorNotReady` before release, then successful event
+synchronization/query and destruction with clean ownership. It retains device
+synchronization before readback, so it does not independently qualify blocking
+event synchronization, timestamps or cross-stream ordering.
+
 The current public adapter admits 64x1x1 blocks, one-dimensional grids and no
 shared memory. Packed launch buffers and kernel graph/capture routes return an
 explicit unsupported error pending their implementation and qualification. These

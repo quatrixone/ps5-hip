@@ -16,6 +16,23 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Offline event checkpoint
+
+Fresh event qualification in `results/public-event-source-v1` completed successfully
+(session65028 finished). It verifies NotReady while modeled dispatch is held,
+successful event synchronization/query after release, event destruction and clean
+ownership. See `evidence/offline-public-event-query.json`. This narrow claim does
+not independently prove blocking synchronization; a later device sync still
+protects readback. All twelve base modes and launch oracle controls also passed.
+
+Cross-stream diagnostics remain unqualified. `results/public-stream-dependency-probe-v1`
+can pass through scheduling coincidence; v2's missing-wait control aborts waiting
+for the consumer callback while producer holds the shared adapter gate. Do not
+report these as event-dependency acceptance. Next isolation approach: hold a
+producer host callback outside the adapter gate, record an event after it, and
+prove the consumer callback cannot pass that event; a missing-wait control must
+progress independently. This tests logical ordering, not GPU concurrency.
+
 ## Frozen launch candidate
 
 `/home/denis/ps5-hip-module-package/results/source-launch-console-v1` is frozen

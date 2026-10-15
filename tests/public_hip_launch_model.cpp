@@ -63,11 +63,20 @@ int main(int argc,char**argv){
  checked(hipGraphAddKernelNode(&node,graph,nullptr,0,&params)==hipErrorNotSupported,__LINE__);
  HIP_OK(hipGraphDestroy(graph));HIP_OK(hipStreamDestroy(capturing));
  checked(submits==0&&backend_calls==0&&!observed.terminal&&!observed.uncertain,__LINE__);
+ const bool event_case=std::strcmp(mode,"events")==0;
+ hipEvent_t completion=nullptr;
+ if(event_case)HIP_OK(hipEventCreateWithFlags(&completion,hipEventDisableTiming));
  HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,nullptr,args,nullptr));
+ if(event_case)HIP_OK(hipEventRecord(completion,nullptr));
  {
   std::unique_lock<std::mutex> lock(mutex);
   checked(changed.wait_for(lock,std::chrono::seconds(5),[]{return entered;}),__LINE__);
+  if(event_case)checked(hipEventQuery(completion)==hipErrorNotReady,__LINE__);
   salt=999;count=0;resume=true;changed.notify_all();
+ }
+ if(event_case){
+  HIP_OK(hipEventSynchronize(completion));HIP_OK(hipEventQuery(completion));
+  HIP_OK(hipEventDestroy(completion));
  }
  HIP_OK(hipDeviceSynchronize());HIP_OK(hipMemcpy(output,buffer,sizeof(output),hipMemcpyDeviceToHost));
  for(unsigned i=0;i<words;++i)if(output[i]!=(i<73?i*17+19:input[i])){
@@ -75,5 +84,6 @@ int main(int argc,char**argv){
  }
  checked(backend_calls==1&&submits==1,__LINE__);
  HIP_OK(hipFree(buffer));HIP_OK(hipModuleUnload(module));completed=true;
- std::puts("PUBLIC_LAUNCH_PASS values=73 guards=8 captured_args=true gpu_execution=false");
+ if(event_case)std::puts("PUBLIC_EVENT_PASS pending_then_complete=true values=73 guards=8 captured_args=true gpu_execution=false");
+ else std::puts("PUBLIC_LAUNCH_PASS values=73 guards=8 captured_args=true gpu_execution=false");
 }

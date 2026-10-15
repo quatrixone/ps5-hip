@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Timing-disabled public HIP events now pass a fresh host-model query/lifetime
+case: NotReady during held dispatch, success after release, event destruction
+and clean ownership. See `evidence/offline-public-event-query.json`. Independent
+blocking semantics, cross-stream ordering, timestamps and native event behavior
+remain unqualified; the full streams/events gate stays open.
+
 The launch candidate is frozen at `6f5167e` and independently verified offline:
 29 bound files, seven package files and 86 build inputs match. See
 `evidence/offline-frozen-public-launch.json`. No operational approval or console
@@ -1329,6 +1335,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | fresh public event pending-query/completion/lifetime model | evidence/offline-public-event-query.json | next: isolate cross-stream event ordering and recover .40
 
 - 2026-10-15 | G5 | main | frozen public launch identity/preservation review, no deployment approval | evidence/offline-frozen-public-launch.json | next: .40 recovery and operational review
 

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-event-query-lifetime-pass",
+  "source_base": "157ab8a0ec40f10121e1a28e1fc4397554a9b3e8",
+  "source_identity": "Exact uncommitted test/qualifier bytes bound by receipt. Production runtime unchanged from launch acceptance.",
+  "base_translation_units": 69,
+  "alternate_launch_harness_units": 1,
+  "included_files": 683,
+  "base_modes": [
+    "normal",
+    "default",
+    "tls",
+    "init-fail",
+    "create-fail",
+    "join-fail",
+    "self-destroy",
+    "reset",
+    "reset-join-fail",
+    "memory",
+    "module",
+    "module-unbundler"
+  ],
+  "launch_cases": [
+    "normal",
+    "events-pending-then-complete",
+    "noop-output-rejected",
+    "corrupt-output-rejected"
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-event-source-v1/receipt.json": "2b4df3f25d5cd5a22c6e360175c579e5aa44f45f3899f2e1dde9528dda1a51b9",
+    "results/public-event-source-v1/launch-events.json": "2e51ea766107fc0c02db2f5edb9b57d79aa3b20725c934e7a4354f6197648e8d",
+    "results/public-event-source-v1/launch-events.stdout": "2cb5566716c9c607031f14f93314bb67e78241e85aefcbbf005bceab62492f6f",
+    "results/public-event-source-v1/launch-events.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Timing-disabled event recorded after held modeled launch reports hipErrorNotReady.",
+    "After dispatch release, event synchronization and query return success.",
+    "Event destruction, exact73outputs/8guards and final resource ownership pass."
+  ],
+  "limits": [
+    "Does not independently prove synchronization blocks until completion; later device synchronization protects readback.",
+    "Providers/transport modeled; no console or hardware event acceptance.",
+    "Cross-stream diagnostic is not accepted: bypass control cannot distinguish event ordering from shared adapter-gate serialization.",
+    "Full streams/events/graphs objective remains open."
+  ],
+  "independent_review": {
+    "verdict": "pass-source-only-public-event-pending-to-complete",
+    "path": "results/public-event-source-v1/independent-review.json",
+    "sha256": "fdeab02ff4de2b9c5851106d4f1eac3ab866564bb68e9a82318f8694e5053a4b",
+    "deployment_approved": false
+  }
+}
