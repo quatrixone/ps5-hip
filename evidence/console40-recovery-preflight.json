@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-15",
+  "status": "read-only-wsl-console-recovery-preflight-pass",
+  "host": "192.168.4.40",
+  "owner_recovery_confirmed": true,
+  "services": [
+    2121,
+    3232,
+    9021
+  ],
+  "active_titles": [],
+  "full_image_bytes": 9437184,
+  "full_image_sha256": "37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5",
+  "preserved_memory_log_sha256": "1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/console40-recovery-preflight-v1/receipt.json": "b7200aded160a94dd029c30561c43554bf9db6f84c564011079c94322c06b333",
+    "results/console40-recovery-preflight-v2/receipt.json": "0737bf76d6b76af9288dd367eaf29c4264dc2ffaeda751348d5899d3e771fcff",
+    "results/console40-recovery-preflight-v3/check.py": "b2d5738906b0b9b6fb48650e4f755f2df1ff4aaa51445867e8098137e14f3259",
+    "results/console40-recovery-preflight-v3/receipt.json": "f1ad071a311f92baf209a62ae1c01a475f4d1e49aaed9e5e2ae6d2db9bff519b"
+  },
+  "limits": [
+    "Earlier refused/timed-out attempts preserved; each retry followed fresh owner evidence or instruction.",
+    "No remote mutation, payload, deployment or application launch.",
+    "Observation made without holding a console lock during offline builds; locked checks remain required immediately before console phases."
+  ]
+}

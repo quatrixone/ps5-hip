@@ -605,6 +605,10 @@ across four stream positions, three modes and both graph ownership forms; see
 `../evidence/offline-public-capture-session.json`. Complex event rejoins, concurrent
 capture mutation and native acceptance remain open.
 
+Descendant event rejoin recovery and a five-node changing-input replay now pass
+host qualification; see `../evidence/offline-public-capture-rejoin.json`. Native
+rejoin execution and concurrent capture mutation remain open.
+
 **Objective:** keep GPU workloads resident and avoid paying a host round trip for
 every operation. Advances R4, N2 and N4.
 

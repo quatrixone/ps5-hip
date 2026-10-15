@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-capture-rejoin-recovery-and-admission-pass",
+  "source_base": "8ea287dc848816cd89999c3bcce05f7be392f0b2",
+  "implementation": "Attach a capture parent only on initial entry. Existing session event rejoins add graph dependencies without reparenting. Reject invalidated waiters and nonzero flags before event processing; reject and invalidate cross-session merges.",
+  "qualification": {
+    "fresh_compilations": 79,
+    "strict_links": 10,
+    "prior_cases": 37,
+    "rejoin_invalidations": 24,
+    "capture_modes": 3,
+    "streams": 4,
+    "caller_owned_graphs": 12,
+    "cross_session_merges_rejected": 3,
+    "successful_graph_nodes": 5,
+    "changed_input_replays": 8,
+    "final_queues_and_retirements": 7,
+    "host_tests": 62,
+    "control_tests": 20
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-capture-rejoin-source-v2/receipt.json": "145c74b49417106268184cd326e869075f699bb7b7d2be1566ce50d45c434c9e",
+    "results/public-capture-rejoin-source-v2/graph-rejoin.stdout": "d94121fd7dd86f77195de0043bf11731f0028722c83c3ae15cec6f7be28ce51b",
+    "results/public-capture-rejoin-review/review.json": "03b4afdf2c857b16ed91466476d68dbe594fbfca300bb8b495015e021fd845f2",
+    "results/public-capture-rejoin-diagnostic-v2/diagnostic.cpp": "c0f5ff725a420db1a80dfb75f5c9f3f5caaf8de84f53d9baa2ef697fc5baeab1",
+    "results/public-capture-rejoin-diagnostic-v2/run.json": "7c027ce104dc42bd1a675630891664e976e78c6f4b27b69bc6dc394d2d42e336",
+    "results/public-capture-rejoin-diagnostic-v2/run.stderr": "385e357236785e7bc69423fe6374324054519e42f115678b62d7ac049a60f426",
+    "results/public-capture-rejoin-negative-v1/run.json": "df21b8bda9b096d24f216805d55030a5f06166a7aa695eb8e4dfea5fab90992a",
+    "results/public-capture-rejoin-negative-v1/run.stderr": "845d29c7fb7ddfe35970c8b88824875b80f17fe09875e5bb51e46e8b2d644f53",
+    "results/capture-rejoin-preparation-v1/receipt.json": "a119ec5383c1861f72377bc62749f889b64d4bded4a7b75596e3b5567eb4f637",
+    "results/capture-rejoin-host.log": "b7783828fc7f08cbd0f629dd8ab202e9d8eaef3e98480b3261890d7dc3955cb6",
+    "results/capture-rejoin-controls.log": "272d151543a8f7f70366283513fc40d000bc27e8181cc8d7cab571ecebda7b87"
+  },
+  "independent_review": {
+    "path": "results/public-capture-rejoin-review/review.json",
+    "sha256": "03b4afdf2c857b16ed91466476d68dbe594fbfca300bb8b495015e021fd845f2",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "Reproduced baseline descendant rejoin cycle and AddressSanitizer stack overflow in EndCapture.",
+    "Canceled rejoined captures reset all four streams, preserve borrowed graphs and allow reuse of all four events.",
+    "Successful rejoined graph survives source-graph destruction and produces exact input*22 results over eight changed inputs.",
+    "Invalidated waiters reject both captured and ordinary events; invalid flags do not start a child capture.",
+    "Three owned cross-session merges reject and clean up both origins.",
+    "Old runtime fails the exact final-client admission oracle; patch repeat and three bound-source drift checks pass."
+  ],
+  "limits": [
+    "Host sanitizer qualification; no native execution or GPU execution.",
+    "Full native package build/audit and console acceptance remain separate.",
+    "Concurrent capture mutation, arbitrary join topologies and borrowed cross-session merges remain unqualified.",
+    "Interrupted source/native v1 builds have no final receipts and are excluded."
+  ]
+}

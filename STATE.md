@@ -11,6 +11,20 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Descendant event rejoins now preserve the capture parent tree, fixing a reproduced
+EndCapture stack overflow. Fresh source qualification covers 24 canceled rejoins,
+invalidated/invalid-flag wait admission, three rejected cross-session merges and
+eight exact changing-input replays of a successfully rejoined five-node graph.
+See `evidence/offline-public-capture-rejoin.json`. The native rebuild is underway;
+previous frozen packages do not contain this latest fix.
+
+The owner confirmed .40 recovery and WSL-only access. After two failed service
+checks and fresh owner confirmation, a read-only WSL preflight verified all three
+services, no active application titles, the full installed image and preserved
+memory log. See `evidence/console40-recovery-preflight.json`. Deployment still
+requires a committed, frozen, independently reviewed candidate and fresh locked
+preflight; no application has been launched in this recovery session.
+
 Cross-stream capture invalidation now propagates across the tested capture tree,
 fixing the reproduced false-success result from ending an invalidated child's
 origin capture. Fresh qualification passes 24 cases across origin, child, sibling

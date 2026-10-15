@@ -331,6 +331,12 @@ def main():
         'PUBLIC_GRAPH_FINAL queues=4 retired=4 allocations=0 frees=0 ownership=clean gpu_execution=false']:
         raise RuntimeError('cross-stream capture invalidation/recovery differs')
     print('public capture session recovery PASS', flush=True)
+    result = run('graph-rejoin', [output / 'graph-model', 'rejoin'], env)
+    if result.splitlines() != [
+        'PUBLIC_CAPTURE_REJOIN_PASS invalidations=24 streams=4 modes=3 external_graphs=12 merges_rejected=3 replays=8 replay_nodes=5 ordinary_callbacks=1 events_reused=4',
+        'PUBLIC_GRAPH_FINAL queues=7 retired=7 allocations=0 frees=0 ownership=clean gpu_execution=false']:
+        raise RuntimeError('capture rejoin invalidation/recovery differs')
+    print('public capture rejoin recovery PASS', flush=True)
     result = run('graph-combined', [output / 'graph-model', 'combined'], env)
     if result.splitlines() != [
         'PUBLIC_GRAPH_COMBINED_PASS graphs=2 replays=32 callbacks=64 invalidations=6 gpu_execution=false',
@@ -366,7 +372,7 @@ def main():
                'graph_model_sha256': sha(output / 'graph-model'),
                'graph_cases': ['explicit-host-replay-update-source-destroy',
                                'captured-host-replay-update-source-destroy', 'noop-output-rejected',
-                               'capture-invalidation-cleanup-and-reuse', 'cross-stream-capture-session-recovery', 'combined-native-fixture-oracle'],
+                               'capture-invalidation-cleanup-and-reuse', 'cross-stream-capture-session-recovery', 'capture-rejoin-recovery', 'combined-native-fixture-oracle'],
                'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,

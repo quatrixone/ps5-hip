@@ -10,8 +10,8 @@
     },
     "hipamd/src/hip_stream.cpp": {
       "before": "9dfeaf7ea8702bd81a6cb234270a4053a07033305a6c11a376a6a32a5eaa0c44",
-      "after": "2bfd2694e7be6f8a5604a5c9306160ffec4f85318e2f90f940d829a7bb83137f"
+      "after": "dc544f6101edbd8f61f1d58caa077251283cd64a2bbdc88dfde48e7ef8ad5a39"
     }
   },
-  "patch_sha256": "fb7b7491103ecb5562dc1edae3031272eeb177193f6e76f5d8a0c4eae0facf53"
+  "patch_sha256": "4bb87ea584bb4a91aae0189f85707a560f3ef4640266da3dd7c10dc3ac845010"
 }

@@ -108,3 +108,41 @@
    originStream_ = false;
    parentStream_ = nullptr;
    lastCapturedNodes_.clear();
+@@ -457,6 +460,13 @@
+     return hipErrorInvalidHandle;
+   }
+   hip::Stream* waitStream = reinterpret_cast<hip::Stream*>(stream);
++#if defined(WITH_PS5_DEVICE)
++  if (flags != 0) return hipErrorInvalidValue;
++  if (waitStream != nullptr &&
++      waitStream->GetCaptureStatus() == hipStreamCaptureStatusInvalidated) {
++    return hipErrorStreamCaptureInvalidated;
++  }
++#endif
+   hip::Event* e = reinterpret_cast<hip::Event*>(event);
+   auto eventStreamHandle = reinterpret_cast<hipStream_t>(e->GetCaptureStream());
+   // the stream associated with the device might have been destroyed
+@@ -474,7 +484,23 @@
+     if (waitStream == nullptr) {
+       return hipErrorInvalidHandle;
+     }
++#if defined(WITH_PS5_DEVICE)
++    if (eventStream->GetCaptureStatus() == hipStreamCaptureStatusInvalidated) {
++      return hipErrorStreamCaptureInvalidated;
++    }
++    if (waitStream->GetCaptureStatus() != hipStreamCaptureStatusNone &&
++        (waitStream->GetCaptureGraph() != eventStream->GetCaptureGraph() ||
++         waitStream->GetCaptureID() != eventStream->GetCaptureID())) {
++      waitStream->SetCaptureStatus(hipStreamCaptureStatusInvalidated);
++      eventStream->SetCaptureStatus(hipStreamCaptureStatusInvalidated);
++      return hipErrorStreamCaptureMerge;
++    }
++    // Joining an existing session adds a graph dependency, not a new capture
++    // parent. Reparenting on a descendant event creates a cleanup cycle.
++    if (waitStream->GetCaptureStatus() == hipStreamCaptureStatusNone) {
++#else
+     if (!waitStream->IsOriginStream()) {
++#endif
+       waitStream->SetCaptureGraph((eventStream)->GetCaptureGraph());
+       waitStream->SetCaptureId((eventStream)->GetCaptureID());
+       waitStream->SetCaptureMode((eventStream)->GetCaptureMode());
