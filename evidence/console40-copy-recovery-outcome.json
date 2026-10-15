@@ -1,0 +1,70 @@
+{
+  "classification": "independent-native-outcome-audit-failed-prelog-timeout",
+  "accepted": false,
+  "manifest_sha256": "7ffeba50010165ecf850bae7e67e6d0c09c64657d120365b2030c6ec28e022d9",
+  "execution_receipt_sha256": "a2ff3b7b5d306f6e976c0d730f6de68489b0ea42495f40af9a25bd6bd875f29f",
+  "execution_review_sha256": "0553491efa4573fa777b5b6308c4a7a85733756da5b7c61233d8fe06716cd0b5",
+  "package_sha256": "dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b",
+  "reached": "native loader EXEC for PPSA99014 PID179; no application log checkpoint",
+  "failure": "40-second observation deadline; no natural stop or application transcript",
+  "observations": {
+    "one_title_start": [
+      [
+        "PPSA99014",
+        "179"
+      ]
+    ],
+    "exact_title_safety_closed": true,
+    "stop_only_after_safety_close": true,
+    "healthy_services_after": true,
+    "primary_lock_released": true,
+    "secondary_lock_released": true,
+    "application_log_ftp550": true,
+    "complete_reads": 49,
+    "incomplete_reads": 1,
+    "klog_launch_offset": 666,
+    "scoped_native_fault_pattern": false,
+    "application_checkpoint_seen": false,
+    "gpu_dispatch_proven": false,
+    "post_execution_mount_snapshot_available": false
+  },
+  "interpretation": [
+    "Failure is confirmed, location before the first application log checkpoint remains unknown.",
+    "No explicit native trap/panic/GPU fault in scoped klog; absence is not proof no fault occurred.",
+    "CRASH KILL_END is within requested close sequence and alone does not demonstrate spontaneous crash.",
+    "mDBG wait messages reference separate payload PID180; startup/environment clue only.",
+    "No GPU regression or recovery-feature hardware acceptance can be inferred."
+  ],
+  "next_baseline": {
+    "image_sha256": "dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b",
+    "image_scope": "verified immediately before launch; execute did not mutate installed image; not reread after safety close",
+    "new_log": "FTP550 at final capture; no application.log produced",
+    "prior_log_sha256": "0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd",
+    "prior_log_preserved": true,
+    "prior_log_scope": "verified at deployment; not reread after safety close"
+  },
+  "raw_evidence_sha256": {
+    "after-safety-close.log": "f62afd94b53565d37662d9fb542fc1e21708c4be3a229806f8a6ca3f430185df",
+    "before-launch.log": "9d9db82570734eaf8cdbc669a74518b4915fb2727b25fa404e1cb6c5cbec9ea3",
+    "before-safety-close.log": "6c6b531cc736dd518ed5180cf66b53b73052ed0c472dd2cd72a29707b223f183",
+    "close-consumed": "72431b7408d5bf7218c3baaa995dc36f0f94ee9530d61a4014871c8c2c5b248a",
+    "close.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "klog.log": "b969c8524ec42e44b575a4e5f225c87acc6ea234a12938bb71486445fa147133",
+    "launch-consumed": "72431b7408d5bf7218c3baaa995dc36f0f94ee9530d61a4014871c8c2c5b248a",
+    "launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "observed.log": "6c6b531cc736dd518ed5180cf66b53b73052ed0c472dd2cd72a29707b223f183",
+    "receipt.json": "a2ff3b7b5d306f6e976c0d730f6de68489b0ea42495f40af9a25bd6bd875f29f",
+    "snapshot-consumed": "72431b7408d5bf7218c3baaa995dc36f0f94ee9530d61a4014871c8c2c5b248a",
+    "snapshot.log": "978a7433d9ad8a3d29c47233b1617e8f8ecd64f3d68de200c0032d2a02ce92b1"
+  },
+  "secondary_lock_receipt_sha256": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+  "console_contact": "Outcome audit was offline; the underlying execution contacted .40 once.",
+  "retry_authorized": false,
+  "next_action": "Preserve consumed phases and investigate startup offline; any further console case needs a separately reviewed hypothesis/candidate.",
+  "date": "2026-10-15",
+  "source_commit": "1f4c75cfd55f3dd30576c2e079f27735b1a2a09e",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "raw_directory": "results/source-public-copy-recovery-console-v1",
+  "independent_audit_sha256": "c781c8935caf57733108734c6add46c87c4fecfc2f996e34e1024663200546f0"
+}

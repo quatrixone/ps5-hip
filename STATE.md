@@ -20,12 +20,23 @@ existing four-dispatch GPU oracle. The 74-object package, Make revalidation,
 26 controls and independent extracted-artifact/ISA audit passed.
 See `evidence/offline-graph-update-recovery.json`.
 
-The recovery package is deployed on .40: 21 complete reads, exact mounted files,
-preserved prior image/log, healthy services and both locks released. Installed
-image: `dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b`.
-The old copy_gpu log is SHA-preserved and the new log is absent. Deployment in
-`results/source-public-copy-recovery-console-v1` is consumed. Next: independent
-receipt-bound execution review, then one bounded run. See `evidence/console40-copy-recovery-deployment.json`.
+The recovery package deployed successfully, but its single .40 execution failed
+at the 40-second observation deadline before producing an application log.
+The loader reached PPSA99014 PID179; no HIP dispatch or recovery assertion is
+proven. The controller safety-closed that exact title, confirmed idle/healthy
+services and released both locks. There is no explicit native/GPU fault in the
+scoped kernel log; absence does not rule one out.
+
+Both phases in `results/source-public-copy-recovery-console-v1` are consumed;
+never replay them. Image verified immediately before launch:
+`dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b`.
+It was not reread after safety-close. The old image/log were preserved and
+verified at deployment; the new application log was absent at final capture.
+Next: investigate startup offline, including elevation before log redirection.
+Separate PID180 debug-subsystem wait messages are a clue, not a root cause.
+Any further hardware test requires a fresh frozen, reviewed candidate.
+See `evidence/console40-copy-recovery-outcome.json` and
+`evidence/console40-copy-recovery-deployment.json`.
 Other parameter/dependency failures can still partly mutate an executable;
 nested compatibility and direct child-setter safety remain separate gaps.
 This does not close G5 or the SDK roadmap.
