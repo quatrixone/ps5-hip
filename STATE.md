@@ -11,12 +11,21 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
-The reviewed graph candidate at `cf9fafe` is now installed on .40. Deployment
-passed full image/mounted-file verification, preservation checks, snapshots,
-service health and owned-lock release. See `evidence/console40-source-graph-deploy.json`.
-The deployment phase under `results/source-graph-rejoin-console-v1` is consumed;
-do not rerun it. No title launch occurred. Execution is the next phase after
-independent review of this exact deployment receipt.
+The source-built public host-graph fixture passed on .40 via WSL at `cf9fafe`:
+32 changing-input replays, 64 callbacks, six single-origin capture invalidations,
+three caller-owned graphs and all five queues retired. The title stopped naturally;
+ordered lifecycle, mount snapshots, services and owned-lock release passed. See
+`evidence/console40-public-host-graph.json` and the separate deployment evidence.
+Both phases under `results/source-graph-rejoin-console-v1` are consumed; never
+replay them. This is native host-node graph acceptance, not GPU execution or G5
+completion; cross-stream/rejoin matrices remain host-model evidence.
+
+Next deployment baseline: installed image
+`85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4`,
+graph log `a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e`
+(current, not yet SHA-renamed). Preserve this pair in the next reviewed cycle;
+the older memory image and SHA-renamed memory log remain preserved. Recheck
+services, idleness and baseline bytes under the owned lock before further work.
 
 Descendant event rejoins now preserve the capture parent tree, fixing a reproduced
 EndCapture stack overflow. Fresh source qualification covers 24 canceled rejoins,
@@ -25,15 +34,15 @@ eight exact changing-input replays of a successfully rejoined five-node graph.
 See `evidence/offline-public-capture-rejoin.json`. The full 74-object native Make
 rebuild and cached validation passed. The replacement candidate is frozen at
 `cf9fafe` in `results/source-graph-rejoin-console-v1`; independent deployment-only
-review passed. See `evidence/offline-native-graph-rejoin-runtime.json`. Execution
-still requires a successful, separately reviewed deployment receipt.
+review passed. See `evidence/offline-native-graph-rejoin-runtime.json`. The later
+deployment and execution passed as recorded above.
 
 The owner confirmed .40 recovery and WSL-only access. After two failed service
 checks and fresh owner confirmation, a read-only WSL preflight verified all three
 services, no active application titles, the full installed image and preserved
 memory log. See `evidence/console40-recovery-preflight.json`. Deployment still
 requires a committed, frozen, independently reviewed candidate and fresh locked
-preflight; no application has been launched in this recovery session.
+preflight; the later graph cycle passed as recorded above.
 
 Cross-stream capture invalidation now propagates across the tested capture tree,
 fixing the reproduced false-success result from ending an invalidated child's
@@ -93,7 +102,7 @@ qualification, source-preparation drift checks, native compilation and independe
 review. Child/event recovery and other rejected API invalidation remain open.
 The previously frozen rectangular-copy package does not contain this runtime fix;
 the replacement packages above now include it. The capture-specific native
-fixture is built and frozen; console acceptance remains pending.
+fixture is built and its bounded console acceptance now passes as recorded above.
 
 Host-node graph construction and thread-local capture now pass fresh source
 qualification: each replays 16 changing inputs, updates callback functions and
@@ -102,7 +111,8 @@ and three retired queues. Capture performs no callbacks before launch, and a
 no-op producer fails the unchanged output oracle. See
 `evidence/offline-public-host-graph.json` for the 79-compilation/ten-link result
 and independent review. Device-memory/kernel graph nodes, capture invalidation,
-concurrent updates, native execution and performance remain unqualified.
+concurrent updates and performance remain unqualified; bounded native host-node
+execution now passes as recorded above.
 
 Legacy default-stream ordering now passes four fresh sanitizer-model cases:
 ordinary streams order implicitly with the null stream in both directions, while

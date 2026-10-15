@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-native-public-host-graph-fixture-on-console40",
+  "source_commit": "cf9fafe60fe70c08ed429712cbed0cf40f038547",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "manifest_sha256": "d982a0426ec5dea45f63c7563b607145b1dfa4f501bf8a4f5ad0a394e32c6886",
+  "installed_package_sha256": "85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4",
+  "application_log_sha256": "a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e",
+  "qualification": {
+    "graphs": 2,
+    "changed_input_replays": 32,
+    "callbacks": 64,
+    "capture_invalidations": 6,
+    "caller_owned_graphs": 3,
+    "queues": 5,
+    "retired_queues": 5,
+    "device_allocations": 0,
+    "device_frees": 0,
+    "natural_stop": true,
+    "ordered_stop": true,
+    "healthy_after": true,
+    "lock_released": true
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-graph-rejoin-console-v1/manifest.json": "d982a0426ec5dea45f63c7563b607145b1dfa4f501bf8a4f5ad0a394e32c6886",
+    "results/source-graph-rejoin-console-v1/deploy/receipt.json": "ad3f6c40ec36cce690d8a038b342bdfb63cb841947ca64f116de3d2a75910c31",
+    "results/source-graph-rejoin-console-v1/execute/receipt.json": "2d2121e0b59d9d696417d5dea99f3c29b6303fd6c745118ce9545b23654d4871",
+    "results/source-graph-rejoin-console-v1/execute/application.log": "a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e",
+    "results/source-graph-rejoin-console-v1/execute/snapshot.log": "586b5ded393ba7fb9be30992894199a675b09f0e4727e785052fa7f3354e68ff",
+    "results/source-graph-rejoin-console-v1/execute/post_snapshot.log": "586b5ded393ba7fb9be30992894199a675b09f0e4727e785052fa7f3354e68ff",
+    "results/source-graph-rejoin-console-v1/execute/before-launch.log": "8ab8277dcc82175c35b26fbea6c07d97e8d73d378db9b3d967f5259843f1fcca",
+    "results/source-graph-rejoin-console-v1/execute/observed.log": "1dda5170c114c61133f7bb2216b7215969dc8e6e7c693d31784f4afa2781aa51",
+    "results/source-graph-rejoin-console-v1/execute/klog.log": "c484c43ad9a6c4676ea52750df4e8d275d5d9235e04f01d27afd99722fdc555c",
+    "results/source-graph-rejoin-console-v1/execution-authorization.json": "2d95a616e5908162cd0127b5b67cc0442890250b0ff32466b18e1ba5849216e2"
+  },
+  "limits": [
+    "Native host-node graph fixture only; no GPU execution or full G5 acceptance.",
+    "Cross-stream invalidation and descendant-rejoin matrices remain host-model qualification.",
+    "Both phases and consumed helpers are single-use; never replay this candidate."
+  ],
+  "next_baseline": {
+    "image_sha256": "85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4",
+    "log_fixture": "graph",
+    "log_sha256": "a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e",
+    "log_preserved": false
+  },
+  "independent_review": {
+    "path": "results/source-graph-rejoin-console-v1/execution-review.json",
+    "sha256": "8ce0e3e7c38581e15b2c91663e4e00733dcd78129c04f8cde9db84944049e0e1",
+    "classification": "pass-native-public-host-graph-only",
+    "complete_ftp_reads_verified": 26,
+    "title_pid": 98
+  }
+}

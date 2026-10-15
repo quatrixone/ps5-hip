@@ -609,6 +609,11 @@ Descendant event rejoin recovery and a five-node changing-input replay now pass
 host qualification; see `../evidence/offline-public-capture-rejoin.json`. Native
 rejoin execution and concurrent capture mutation remain open.
 
+The native public host-node graph fixture passed on .40: 32 replays, 64 callbacks,
+six single-origin recoveries and clean five-queue retirement with natural title
+exit. See `../evidence/console40-public-host-graph.json`. This does not qualify
+GPU execution, native cross-stream/rejoin matrices or the full G5 contract.
+
 **Objective:** keep GPU workloads resident and avoid paying a host round trip for
 every operation. Advances R4, N2 and N4.
 
