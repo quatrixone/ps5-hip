@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-14",
+  "status": "offline-pass",
+  "scope": "Public HIP function discovery from loaded PS5 AOT kernel table",
+  "validation": {
+    "host_tests_passed": 60,
+    "review_followup": "Unordered-map model and order-independent membership assertion passed focused rerun.",
+    "sanitizers": "ASan/UBSan on actual enumeration function with modeled program table; unpatched negative control fails.",
+    "native": "Modified devprogram.cpp compiled with current PS5 compiler flags.",
+    "independent_review": "Production ordering/consumers and exact patch integration reviewed; test-order assumption corrected."
+  },
+  "limits": [
+    "No public module loading or kernel execution qualification.",
+    "Does not enable runtime unbundler or COMGR.",
+    "No new full native package built.",
+    "Console .40 unreachable; no deployment or launch."
+  ],
+  "input_sha256": {
+    "ports/clr/ps5-public-module-symbols.patch": "db19181078377c19e79b96cda26adfe7351310d081c6dc958f54bfe6a9c83f78",
+    "tools/prepare_public_hip_symbols.py": "0b09e7232e67bc9e282402876566a6de42c37accd06cf38a3bd8e33e38503835",
+    "tests/public_hip_module_symbols_test.py": "4909cf28e39c6e7dc770135de0a00b06b99bcda27ed005a9002ae9df5f40af6d",
+    "tools/build_public_hip.py": "9a43963147886eddcb2f73520dbb2ea7f85152e9dfb785aa1bf755c66232bb7e",
+    "results/public-module-symbols-v1/native.json": "43b1ba191e9394517467bcd67d7c23a1f589ba06f1f3ecb57f9bd94471419235",
+    "results/public-module-symbols-v1/ctest.log": "a951d432e4065072cf1ef71a588e8707c4d37c725096faecae13c69b912d6643",
+    "results/public-module-symbols-v1/review-followup.log": "d5a9810ecdf819c59851e87be3e71f78a5127ab1487bdcfd50576a87247e2046",
+    "results/public-module-symbols-v1/services.json": "61d1115144090cd2586a1ac264587cad3fe6aaf720da37579c83e9d6ec54e4de"
+  }
+}

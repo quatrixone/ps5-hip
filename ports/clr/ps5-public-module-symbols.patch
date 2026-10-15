@@ -1,0 +1,23 @@
+--- a/rocclr/device/devprogram.cpp
++++ b/rocclr/device/devprogram.cpp
+@@ -2931,7 +2931,19 @@
+ }
+ 
+ bool Program::getGlobalFuncFromCodeObj(std::vector<std::string>* func_names) const {
+-#if defined(USE_COMGR_LIBRARY)
++#if defined(WITH_PS5_DEVICE)
++  // The AOT loader has already validated and owns these kernels. Compiler
++  // services are neither available nor needed to enumerate this loaded table.
++  if (func_names == nullptr || !isCodeObjectLoaded() || kernels().empty()) return false;
++  std::vector<std::string> names;
++  names.reserve(kernels().size());
++  for (const auto& entry : kernels()) {
++    if (entry.first.empty() || entry.second == nullptr) return false;
++    names.push_back(entry.first);
++  }
++  func_names->swap(names);
++  return true;
++#elif defined(USE_COMGR_LIBRARY)
+   return getSymbolsFromCodeObj(func_names, AMD_COMGR_SYMBOL_TYPE_FUNC);
+ #else
+   return true;

@@ -18,6 +18,17 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
+Public module function discovery now enumerates the validated, loaded PS5 AOT
+kernel table instead of returning success with an empty list when COMGR is
+absent. Unloaded/empty/invalid tables fail without changing caller output.
+All 60 host tests passed, including sanitizer positive/negative controls;
+the changed native translation unit compiled and independent review passed
+after correcting an ordering assumption in the test. See
+`evidence/offline-public-module-symbols.json`. This still does not qualify
+public module loading or kernel execution. Next, qualify the real module-loading
+path and its code-object admission without relying on unavailable compiler
+services; then exercise public lookup/launch with retained module ownership.
+
 The source build now applies an exact module-extraction error guard. Unexpected
 runtime-unbundler errors previously fell through to a null per-device entry;
 the PS5 path now returns those errors and validates the extracted list before

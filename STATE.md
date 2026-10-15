@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Public function discovery now exposes the validated AOT kernel table after load,
+with atomic output publication and explicit invalid-state failures. Sixty host
+tests, native object compilation and independent review passed; see
+`evidence/offline-public-module-symbols.json`. Real public module load/launch
+qualification remains open; .40 is still unreachable.
+
 Public module-loading prerequisite: extraction failures now propagate instead
 of dereferencing uninitialized device entries. Malformed result lists are rejected
 before indexing. Sanitizer regression, unpatched negative control and native
@@ -1398,3 +1404,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-14 | G5 recovery controls | offline pass: preserved-log verification and FTP diagnostics; 15 unit cases | evidence/offline-source-copy-recovery.json | restore connectivity
 
 - 2026-10-14 | public modules | offline pass: extraction error guard, sanitizers and native object | evidence/offline-public-module-errors.json | module loading and execution
+
+- 2026-10-14 | public modules | offline pass: loaded kernel discovery, 60 host tests, native object | evidence/offline-public-module-symbols.json | qualify real module loading
