@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-replay-backing-measurement-candidate",
+  "package_sha256": "639cc88438b720df630c90f10479ae191d98984c3bba14761e8b42989b305b3b",
+  "total_compilations": 84,
+  "native_objects": 74,
+  "replay": {
+    "rounds": 20,
+    "warmup_rounds": 4,
+    "verification_rounds": 16,
+    "kernels": 2,
+    "launches": 80,
+    "values": 5840,
+    "guards": 640,
+    "alternating_order": true
+  },
+  "native_combined_expected": {
+    "launches": 84,
+    "callbacks": 28,
+    "allocations": 4,
+    "frees": 4,
+    "queues": 7,
+    "retired": 7
+  },
+  "backing": {
+    "samples": 32,
+    "live_bytes": 32768,
+    "live_allocations": 2,
+    "eager_allocations": 128,
+    "eager_releases": 128,
+    "graph_allocations": 128,
+    "graph_releases": 128,
+    "peak_bytes": 98304,
+    "final_live_bytes": 0
+  },
+  "control_tests": 27,
+  "native_executed": false,
+  "raw_evidence": {
+    "results/replay-backing-qualified-v1/receipt.json": "9580a9a466460108e5c7bb167ac77907de2ae2d1797cae2f296efdb7502b4667",
+    "build/public-hip-replay-backing-v1/link-receipt.json": "ea363231c54877b56a9e4060dd6ffe01ba568f807fb7e8f839bff877dde7ed02",
+    "results/replay-backing-independent-review-v1/review.json": "805b6b4c543a8dfce36be537b14ecde875673f26fb4c04d5929f217332281867",
+    "results/replay-backing-qualified-v1/copy-gpu-replay.json": "80258be1b092d18a2ff11805ea603a2ebc3ce13fca7a5b1e79e774fef3b599b5",
+    "results/replay-backing-qualified-v1/copy-gpu-replay.stdout": "dd97d637e20c1ab25a7d3b9885783c7614ba0c52f5f312d1ea924b6c5c50ec67",
+    "results/replay-backing-qualified-v1/copy-gpu-replay.stderr": "981b62ca9a99281a0a6ef4d73359773a064ddf9f76cfd08473249381f4270d97",
+    "results/replay-backing-qualified-v1/copy-gpu-combined.json": "ded433a3c2b70f6ac78a150fa475521b01e9e92bdd0017994e92469d5455c6d8",
+    "results/replay-backing-qualified-v1/copy-gpu-combined.stdout": "5521f586062e7b8eef56666edb876049a7d09a2b862c69326710282426d97df7",
+    "results/replay-backing-qualified-v1/copy-gpu-combined.stderr": "cce15718098d7554272790cf90afa3c62354b4879e2f4f2f33fdc85f39a38b81",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-first.json": "9c33438eaac5040ec08debb9740f47b0203d78a5d430d50ae827d8aafda38410",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-first.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-first.stderr": "037a6b56b0cf4368ea28f08ec1fc4473e82f20a91b7400284592d005426d8c23",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-second.json": "4b4d36a2065bd21ab4a5082bb21a5a89bcba946ada4942db0175c16d0908c6e7",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-second.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/replay-backing-qualified-v1/copy-gpu-replay-omit-second.stderr": "3c21f3fea64e272c1b9d74e2c7907b2be8d10404588034972d8ef6f4b11c309d",
+    "results/replay-backing-qualified-v1/copy-gpu-retained-backing.json": "323de00465394d05d879537bab46aa28dd83b484125538cc37d006dde92a6f61",
+    "results/replay-backing-qualified-v1/copy-gpu-retained-backing.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/replay-backing-qualified-v1/copy-gpu-retained-backing.stderr": "eb5bcafc7c9ea684ae7d3d69dc8f886a48d8cd0a59142e5a03be8b93bd13f7eb"
+  },
+  "limits": [
+    "Native package built and inspected, not executed.",
+    "Two kernels write separate regions; no computed-data dependency or concurrency claim.",
+    "NativeMemory samples only; no timing, command lifetime or process-heap instrumentation.",
+    "Source graph is destroyed after the last update and before the last replay.",
+    "GPU-completion-dependent allocation retirement and full G5 remain open."
+  ]
+}

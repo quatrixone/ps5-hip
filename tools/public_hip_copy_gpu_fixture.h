@@ -1,5 +1,6 @@
 // Shared host/native copy/kernel graph oracle. Caller provides checked and HIP_OK.
 #pragma once
+#include "ps5hip/native_memory.h"
 #include "public_hip_copy_recovery_fixture.h"
 namespace copy_gpu_fixture {
 inline void run(const char* path,bool capture,
@@ -112,7 +113,14 @@ inline void run(const char* path,bool capture,
  HIP_OK(hipStreamDestroy(stream));
  HIP_OK(hipFree(b));HIP_OK(hipFree(a));HIP_OK(hipModuleUnload(module));
 }
-inline void run_replay(const char* path,void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr){
+struct ReplayBacking {
+ unsigned samples=0;
+ uint64_t live_bytes=0,outstanding=0,peak_bytes=0,final_live_bytes=0,eager_allocations=0,eager_releases=0,graph_allocations=0,graph_releases=0;
+};
+inline ReplayBacking run_replay(const char* path,void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr,
+                               void(*before_sample)()=nullptr){
+ const auto entry_backing=ps5hip::native_memory_stats();
+ ReplayBacking backing;
  hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,path));hipFunction_t function=nullptr;
  HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
  hipStream_t origin=nullptr,peer=nullptr;HIP_OK(hipStreamCreateWithFlags(&origin,hipStreamNonBlocking));
@@ -166,6 +174,7 @@ inline void run_replay(const char* path,void(*before_replay)(hipGraphExec_t,cons
    const bool graph_pass=((round+pass)&1)!=0;
    HIP_OK(hipMemset(a,0x6b,sizeof(input)));HIP_OK(hipMemset(b,0x91,sizeof(input)));
    for(auto& value:output)value=0xdeadbeefu;for(auto& value:eager)value=0xdeadbeefu;
+   const auto before_backing=ps5hip::native_memory_stats();
    if(graph_pass){
     count=0;salts[0]=salts[1]=999;HIP_OK(hipGraphLaunch(exec,origin));
    }else{
@@ -179,6 +188,18 @@ inline void run_replay(const char* path,void(*before_replay)(hipGraphExec_t,cons
     HIP_OK(hipEventRecord(done,peer));HIP_OK(hipStreamWaitEvent(origin,done,0));
    }
    HIP_OK(hipStreamSynchronize(origin));
+   if(round>=warmup_rounds){
+    if(before_sample)before_sample();
+    const auto sample=ps5hip::native_memory_stats();
+    const auto acquired=sample.allocations-before_backing.allocations,released=sample.releases-before_backing.releases;
+    if(sample.live_bytes!=backing.live_bytes||sample.allocations-sample.releases!=backing.outstanding||
+       !acquired||acquired!=released){
+     std::fprintf(stderr,"PUBLIC_MULTI_KERNEL_REPLAY_BACKING_MISMATCH round=%u pass=%u\n",round,pass);checked(false,__LINE__);
+    }
+    ++backing.samples;backing.peak_bytes=sample.peak_bytes;
+    if(graph_pass){backing.graph_allocations+=acquired;backing.graph_releases+=released;}
+    else {backing.eager_allocations+=acquired;backing.eager_releases+=released;}
+   }
    const auto* result=graph_pass?output:eager;
    for(unsigned i=0;i<162;++i){const unsigned region=i/81,local=i%81;
     const unsigned expected=local<73?local*17+19+round*101+region*37:input[i];
@@ -186,8 +207,16 @@ inline void run_replay(const char* path,void(*before_replay)(hipGraphExec_t,cons
    }
   }
   checked(callbacks==round+1,__LINE__);
+  if(round+1==warmup_rounds){const auto baseline=ps5hip::native_memory_stats();
+   backing.live_bytes=baseline.live_bytes;backing.outstanding=baseline.allocations-baseline.releases;}
+
  }
  HIP_OK(hipGraphExecDestroy(exec));HIP_OK(hipEventDestroy(done));HIP_OK(hipEventDestroy(ready));
  HIP_OK(hipStreamDestroy(peer));HIP_OK(hipStreamDestroy(origin));HIP_OK(hipFree(b));HIP_OK(hipFree(a));HIP_OK(hipModuleUnload(module));
+ const auto exit_backing=ps5hip::native_memory_stats();
+ checked(backing.samples==32&&exit_backing.live_bytes==entry_backing.live_bytes&&
+         exit_backing.allocations-exit_backing.releases==entry_backing.allocations-entry_backing.releases,__LINE__);
+ backing.final_live_bytes=exit_backing.live_bytes;
+ return backing;
 }
 }

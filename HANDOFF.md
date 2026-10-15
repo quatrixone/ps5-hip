@@ -16,6 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Replay backing samples qualified offline
+
+The shared two-kernel fixture now checks 32 synchronized samples against one
+post-warmup baseline. Full 84-unit sanitizer qualification measured two live
+allocations/32768 bytes, 128 allocations/releases in each execution path,
+98304 accounted peak bytes and zero final backing. Deliberately retained backing
+fails the shared sample check. A fresh 74-object native package, independent
+artifact audit and 27 transcript controls passed.
+See `evidence/offline-replay-backing.json`.
+
+Next: freeze/review `build/public-hip-replay-backing-v1`, then validate once on
+idle .40 using the installed two-kernel image/log below as baseline. The live
+backing check covers NativeMemory only. Churn excludes setup, parameter updates
+and buffer resets; neither command/process-heap plateau nor speed improvement
+is established. Native sampling and the broader G5 contract remain open.
+
 ## Native backing accounting qualified offline
 
 `native_memory_stats()` now provides coherent cumulative allocation/release

@@ -15,6 +15,7 @@ struct Final {
   checked(observed.allocations==(combined_case?4u:2u)&&observed.frees==observed.allocations&&observed.launches==(combined_case?84u:std::strncmp(mode,"replay",6)==0?80u:4u),__LINE__);
   const unsigned queues=combined_case?7:(std::strncmp(mode,"joined",6)==0||std::strncmp(mode,"replay",6)==0)?4:3;
   checked(observed.queues==queues&&observed.retired_queues==queues&&allocations.empty(),__LINE__);
+  const auto backing=ps5hip::native_memory_stats();checked(backing.live_bytes==0&&backing.allocations==backing.releases,__LINE__);
   std::printf("PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=%u frees=%u ownership=clean gpu_execution=false\n",unsigned(observed.allocations),unsigned(observed.frees));
  }
 };
@@ -45,20 +46,30 @@ static hipError_t joined_end(hipStream_t stream,hipGraph_t* graph){
 #include "public_hip_copy_gpu_fixture.h"
 #undef hipStreamWaitEvent
 #undef hipStreamEndCapture
+static void report_backing(const copy_gpu_fixture::ReplayBacking& backing){
+ std::printf("PUBLIC_REPLAY_BACKING samples=%u live_bytes=%llu live_allocations=%llu eager_allocations=%llu eager_releases=%llu graph_allocations=%llu graph_releases=%llu peak_bytes=%llu final_live_bytes=%llu gpu_execution=false\n",backing.samples,
+ (unsigned long long)backing.live_bytes,(unsigned long long)backing.outstanding,
+ (unsigned long long)backing.eager_allocations,(unsigned long long)backing.eager_releases,(unsigned long long)backing.graph_allocations,(unsigned long long)backing.graph_releases,
+ (unsigned long long)backing.peak_bytes,(unsigned long long)backing.final_live_bytes);
+}
 int main(int argc,char**argv){
  checked(argc==3,__LINE__);mode=argv[2];resume=true;
  if(!std::strcmp(mode,"combined")){
   combined_case=true;mode="joined";copy_gpu_fixture::run(argv[1],true,nullptr,true);
-  mode="replay-combined";copy_gpu_fixture::run_replay(argv[1]);
+  mode="replay-combined";const auto backing=copy_gpu_fixture::run_replay(argv[1]);report_backing(backing);
   checked(submits==84&&backend_calls==1,__LINE__);completed=true;
   std::puts("PUBLIC_COPY_GPU_COMBINED_PASS launches=84 allocations=4 frees=4 queues=7 gpu_execution=false");
   return 0;
  }
  if(!std::strncmp(mode,"replay",6)){
-  HIP_OK(hipInit(0));copy_gpu_fixture::run_replay(argv[1],[](hipGraphExec_t exec,const hipGraphNode_t* nodes){
+  HIP_OK(hipInit(0));const auto backing=copy_gpu_fixture::run_replay(argv[1],[](hipGraphExec_t exec,const hipGraphNode_t* nodes){
    if(!std::strcmp(mode,"replay-omit-first"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[0],0));
    if(!std::strcmp(mode,"replay-omit-second"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[1],0));
-  });
+  },[]{if(!std::strcmp(mode,"replay-retained-backing")){
+   static ps5hip::NativeMemory* retained=nullptr;
+   if(!retained)retained=new ps5hip::NativeMemory(1,256,false);
+  }});
+  report_backing(backing);
   checked(submits==80&&backend_calls==1,__LINE__);completed=true;
   std::puts("PUBLIC_MULTI_KERNEL_REPLAY_PASS replay_rounds=20 warmup_rounds=4 verification_rounds=16 kernels_per_replay=2 replay_values=5840 replay_guards=640 alternating_order=true launches=80 gpu_execution=false");
   return 0;

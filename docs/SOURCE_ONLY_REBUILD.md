@@ -404,6 +404,16 @@ concurrent allocation/release. This API does not measure host heap, process RSS
 or CLR command lifetime. See `../evidence/offline-native-backing-accounting.json`
 for the sanitizer tests and native-core compilation; console sampling is pending.
 
+The shared replay candidate now samples backing after each synchronized eager
+and graph execution in the sixteen verification rounds. The focused model
+requires all 32 samples to retain the warm baseline of two allocations/32768
+bytes and report balanced execution-path churn: 128 allocations/releases for
+each path. This excludes graph setup, setters and buffer resets. Accounted
+lifetime peak is 98304 bytes, with zero live backing after teardown. A deliberate
+retained allocation after warmup must fail the same sample check. Full native
+validation of these measurements is pending; they do not cover CLR commands or
+process heap and do not establish a speed improvement.
+
 The PS5 copy graph path creates a dependency marker for a disabled 1D copy
 during command preparation. That same marker receives graph wait lists and is
 enqueued during replay. It does not construct an unused copy command that would

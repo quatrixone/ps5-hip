@@ -245,6 +245,21 @@ class ConsoleContractTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 check_log(raw, 'capture_gpu')
 
+    def test_replay_backing_requires_all_samples_and_balanced_churn(self):
+        for before, after in ((b'samples=32', b'samples=31'),
+                              (b'live_bytes=32768', b'live_bytes=49152'),
+                              (b'live_allocations=2', b'live_allocations=3'),
+                              (b'eager_allocations=128', b'eager_allocations=0'),
+                              (b'eager_releases=128', b'eager_releases=127'),
+                              (b'graph_allocations=128', b'graph_allocations=0'),
+                              (b'graph_releases=128', b'graph_releases=127'),
+                              (b'peak_bytes=98304', b'peak_bytes=114688'),
+                              (b'final_live_bytes=0', b'final_live_bytes=16384')):
+            raw = COPY_GPU_EXPECTED.replace(before, after)
+            self.assertNotEqual(raw, COPY_GPU_EXPECTED)
+            with self.assertRaises(ValueError):
+                check_log(raw, 'copy_gpu')
+
     def test_gpu_graph_transcript_requires_replay_and_cleanup(self):
         self.assertEqual(check_log(GRAPH_GPU_EXPECTED, 'graph_gpu')['kernel'], 'public_hip_graph_gpu')
         lines = GRAPH_GPU_EXPECTED.splitlines(keepends=True)
