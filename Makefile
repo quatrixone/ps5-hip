@@ -14,6 +14,9 @@ all: host-test native-core public-hip-package
 
 help:
 	@echo 'make deps-fetch  Fetch and verify locked upstream sources and archives'
+	@echo 'make llm-deps-fetch  Fetch the optional locked standalone inference client'
+	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
+	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
@@ -72,6 +75,23 @@ host-test: deps-build device-fixtures
 
 # A separate fresh directory preserves every sanitizer run's evidence.
 QUALIFICATION_DIR ?= results/public-hip-host
+
+LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
+LLM_PROFILE_DIR ?= results/llm-model-profile
+.PHONY: llm-deps-fetch llm-cpu-reference llm-model-profile llm-tool-test
+llm-deps-fetch:
+	$(PYTHON) tools/fetch_locked_deps.py --llm-client --fetch
+
+llm-cpu-reference: llm-deps-fetch llm-tool-test
+	$(PYTHON) tools/build_llm_cpu_reference.py --output $(LLM_CPU_BUILD_DIR)
+
+llm-tool-test:
+	$(PYTHON) tests/profile_llm_model_test.py
+	$(PYTHON) tests/llm_reference_test.py
+
+llm-model-profile: llm-tool-test
+	$(PYTHON) tools/profile_llm_model.py --output $(LLM_PROFILE_DIR) --check-lock models/tinyllama-1.1b-chat-v1.0.json
+
 .PHONY: public-hip-host-test
 public-hip-host-test: deps-fetch
 	$(PYTHON) tools/qualify_public_hip_source.py --output $(QUALIFICATION_DIR)

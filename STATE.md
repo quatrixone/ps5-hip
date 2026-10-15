@@ -15,7 +15,16 @@ Owner decision on 2026-10-15: prioritize the bounded first release in
 `docs/LLM_V1_PLAN.md`. Start V1.1 client/model profiling, then client-required
 public HIP launch/memory coverage, tensor operations and end-to-end inference.
 The current upstream inventory baseline is llama.cpp master
-`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; no client build or model run is proven.
+`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`. CPU reference tools now build and
+pass upstream quantization and RoPE tests. The native client and model run
+remain unproven. See `docs/LLM_V1_PROFILE.md` and
+`evidence/offline-llm-v1-inputs.json` for this partial V1.1 checkpoint.
+
+Optional Make targets fetch the client, build CPU tools and reproduce the
+locked TinyLlama metadata/header profile. Full weights, conversion, reference
+logits and actual model memory usage remain open. Next: compiler-generated
+embedded-image registration and the effective HIP client compile/link probe,
+alongside pinned weight conversion and CPU fixtures.
 
 Defer new retirement-ack diagnostics and general G5 optimization unless a real
 client blocker requires them. Existing correctness tests remain regressions.

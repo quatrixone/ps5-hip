@@ -15,7 +15,8 @@ compile_commands.json
 
 # Raw hardware evidence and downloaded model data
 results/
-models/
+models/*
+!models/tinyllama-1.1b-chat-v1.0.json
 *.gguf
 *.safetensors
 *.onnx

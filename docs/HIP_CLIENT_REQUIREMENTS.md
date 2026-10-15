@@ -1,6 +1,9 @@
 # HIP client requirements for G4 and G7
 
 First-release priority (2026-10-15): follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md).
+The current standalone input profile and concrete public-HIP blockers are in
+[LLM_V1_PROFILE.md](LLM_V1_PROFILE.md); its source inspection does not claim a
+preprocessed or link-complete API census.
 The standalone upstream llama.cpp inventory baseline is
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; its build/profile inspection is recorded
 in `../evidence/llm-v1-planning-baseline.json`. Refresh the full active API/kernel

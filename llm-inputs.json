@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "inference-v1 inputs; native client and model execution unqualified",
+  "client": {
+    "source_url": "https://github.com/ggml-org/llama.cpp",
+    "source_ref": "master",
+    "revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e"
+  },
+  "native_profile": {
+    "GGML_HIP": true,
+    "GGML_HIP_GRAPHS": false,
+    "GGML_HIP_NO_VMM": true,
+    "GGML_HIP_RCCL": false,
+    "GGML_HIP_MMQ_MFMA": false,
+    "context_tokens": 512,
+    "batch": 1,
+    "quantization": "Q4_0"
+  }
+}

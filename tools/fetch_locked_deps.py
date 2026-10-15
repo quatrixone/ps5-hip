@@ -95,7 +95,17 @@ def archive(name, url, expected, fetch):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fetch", action="store_true", help="download missing pinned inputs")
+    parser.add_argument("--llm-client", action="store_true", help="check/fetch only the optional inference client")
     args = parser.parse_args()
+    if args.llm_client:
+        spec = read("llm-inputs.json")["client"]
+        path = source("llama-client", spec, args.fetch)
+        if args.fetch:
+            git("-C", path, "sparse-checkout", "disable")
+        if not (path / "ggml/src/ggml-cpu/CMakeLists.txt").is_file():
+            raise RuntimeError("incomplete inference source; run make llm-deps-fetch")
+        print("llama-client", spec["revision"], path)
+        return
     for name, spec in sources().items():
         path = source(name, spec, args.fetch)
         print(name, spec["revision"], path)

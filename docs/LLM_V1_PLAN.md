@@ -21,7 +21,9 @@ as an SDK example; ProsperoAI integration remains outside scope.
 - Candidate checkpoint: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`. Its model card
   identifies a Llama 2 architecture/tokenizer and Apache-2.0 license. Freeze the
   exact checkpoint, tokenizer, conversion inputs and generated GGUF hashes in
-  V1.1; it is not yet downloaded, memory-qualified or a supported model.
+  V1.1. Metadata/tokenizer and the expected source weight hash are now locked in
+  `../models/tinyllama-1.1b-chat-v1.0.json`; full weights and converted GGUF are
+  not yet downloaded/qualified. It is not yet a supported model.
 - CPU model loading, tokenization, scheduling and sampling are expected. Model
   tensor computation must use the PS5 HIP backend. Any temporary CPU tensor
   fallback is diagnostic and must be listed; it cannot silently satisfy final
@@ -53,7 +55,9 @@ not a separate fake runtime that bypasses the SDK under test.
 
 Initial upstream source inspected from `ggml-org/llama.cpp` master:
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`. This is an inventory baseline, not a
-qualified build or a requirement to maintain a fork. Source hashes and the
+qualified native build or a requirement to maintain a fork. CPU reference tools
+and upstream quantization/RoPE tests now pass; see `LLM_V1_PROFILE.md`.
+Source hashes and the
 inspection scope are in `../evidence/llm-v1-planning-baseline.json`.
 
 The upstream HIP CMake target requires HIP, hipBLAS and rocBLAS, compiles shared
@@ -121,7 +125,9 @@ checkpoint/resume, even when base weights are frozen.
 
 ## Immediate next action
 
-Begin V1.1: refresh the historical `HIP_CLIENT_REQUIREMENTS.md` inventory against
-the standalone upstream baseline; prepare a real HIP compile/link spike and a
-CPU reference/model tensor inventory. Select work from demonstrated client
-blockers. No native LLM, training or first-release completion is claimed yet.
+Continue V1.1 from `LLM_V1_PROFILE.md`: qualify compiler-generated embedded-image
+registration, prepare the effective HIP compile/link probe, and produce pinned
+model conversion outputs and CPU reference fixtures. The host tools and model
+metadata inventory are reproducible through optional Make targets; V1.1 remains
+partial. Select work from demonstrated client blockers. No native LLM, training
+or first-release completion is claimed yet.

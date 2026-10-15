@@ -1,5 +1,10 @@
 # Build the native public HIP package from GitHub source
 
+For the optional inference-v1 host reference tools and bounded model metadata
+fetch, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). These targets do not download
+model weights or establish native inference; the default SDK build below is
+unchanged.
+
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or
 `results` directory and no checkout of another ps5-hip branch.

@@ -24,8 +24,14 @@ refresh the standalone llama HIP inventory, prepare the client compile/link
 spike and lock model/tokenizer/conversion inputs with a CPU reference.
 The inspected upstream master snapshot is
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; local sparse source is ignored at
-`.deps/sources/llama-client`. The planning evidence records public URLs/hashes;
-the Make dependency fetcher does not consume this inventory source yet.
+`.deps/sources/llama-client` (now a full checkout). Optional Make targets
+`llm-deps-fetch`, `llm-cpu-reference` and `llm-model-profile` reproduce the
+client inputs, host tools and locked model metadata. Read `docs/LLM_V1_PROFILE.md`
+and `evidence/offline-llm-v1-inputs.json` before continuing. CPU quantization and
+RoPE tests passed; no weights, conversion, reference logits or native client
+execution are qualified. V1.1 remains partial. The next runtime blocker is
+compiler-generated embedded-image registration; prepare the effective HIP
+compile/link probe and pinned model conversion/reference fixtures in parallel.
 
 Retirement-ack work was stopped before edits or experiments. Do not resume it
 as a v1 prerequisite. Current public launch routes, model-scale memory and

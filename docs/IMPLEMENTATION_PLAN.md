@@ -18,6 +18,11 @@ mark the full SDK goal complete. Historical next actions below are superseded.
 
 - 2026-10-15 | release plan | owner decision | native LLM inference prioritized | LLM_V1_PLAN.md | next: V1.1 client/model profile
 
+- 2026-10-15 | V1.1 partial | offline | CPU tools and quantization/RoPE tests passed; model metadata locked | evidence/offline-llm-v1-inputs.json | next: embedded-image registration, HIP compile/link probe, model conversion/reference fixtures
+
+See [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) for reproducible Make targets and
+source-inspected blockers. No model or native inference is qualified yet.
+
 ## CLR command lifetime accounting qualified offline
 
 - 2026-10-15 | G5 | offline | pass: command lifetimes/85-unit sanitizer/native package | evidence/offline-clr-command-accounting.json | next: retirement acknowledgement

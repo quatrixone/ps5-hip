@@ -1,0 +1,74 @@
+{
+    "schema":  1,
+    "date":  "2026-10-15",
+    "classification":  "partial-v1.1-offline-inputs-and-cpu-tools",
+    "client_revision":  "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+    "validation":  [
+                       "Fresh CPU tools build passed",
+                       "Identical-input cached build passed",
+                       "Upstream quantization test: 0 tests failed",
+                       "Upstream RoPE test: exit 0",
+                       "Five tooling unit tests passed",
+                       "Immutable model metadata/header profile matches lock"
+                   ],
+    "model_revision":  "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "cpu_artifacts":  {
+                          "cmake/bin/libggml-base.so":  "38c31b187e5fe5b2fdb90d0ebcc58a75a074282c050506ea3d139387459b633d",
+                          "cmake/bin/libggml-base.so.0":  "38c31b187e5fe5b2fdb90d0ebcc58a75a074282c050506ea3d139387459b633d",
+                          "cmake/bin/libggml-base.so.0.27.0":  "38c31b187e5fe5b2fdb90d0ebcc58a75a074282c050506ea3d139387459b633d",
+                          "cmake/bin/libggml-cpu.so":  "4e53a909bf359711c7d5899832af7d3764e977cd5047bc37a95447122ca4cef2",
+                          "cmake/bin/libggml-cpu.so.0":  "4e53a909bf359711c7d5899832af7d3764e977cd5047bc37a95447122ca4cef2",
+                          "cmake/bin/libggml-cpu.so.0.27.0":  "4e53a909bf359711c7d5899832af7d3764e977cd5047bc37a95447122ca4cef2",
+                          "cmake/bin/libggml.so":  "a6d0661184df4684c21cfdb12b5056b4e9cdcff1c3169b015c87e9b31993a7f8",
+                          "cmake/bin/libggml.so.0":  "a6d0661184df4684c21cfdb12b5056b4e9cdcff1c3169b015c87e9b31993a7f8",
+                          "cmake/bin/libggml.so.0.27.0":  "a6d0661184df4684c21cfdb12b5056b4e9cdcff1c3169b015c87e9b31993a7f8",
+                          "cmake/bin/libllama-common.so":  "c73cc62704c253b86f579041d65629b0bd97780ca62dbbf0e557ce3f01cd3130",
+                          "cmake/bin/libllama-common.so.0":  "c73cc62704c253b86f579041d65629b0bd97780ca62dbbf0e557ce3f01cd3130",
+                          "cmake/bin/libllama-common.so.0.7.0":  "c73cc62704c253b86f579041d65629b0bd97780ca62dbbf0e557ce3f01cd3130",
+                          "cmake/bin/libllama-completion-impl.so":  "3cf32cb09644ed68a1d8bdfd27ed6c8df9f9b6b4f78d591bc406ddea6b8352d5",
+                          "cmake/bin/libllama-perplexity-impl.so":  "2543ad2f1feedeeb1aff38e3625c0442cc8f47750a8c16b11f440476778c655c",
+                          "cmake/bin/libllama-quantize-impl.so":  "3d0680b35f59700ad0b077a1db3278380def2f2e26a96d32ea5c7cd3dc0488d2",
+                          "cmake/bin/libllama.so":  "5fa2f3c079fc8bd934090de04d31ff130ddf07692f4d920ba0df37001b08847f",
+                          "cmake/bin/libllama.so.0":  "5fa2f3c079fc8bd934090de04d31ff130ddf07692f4d920ba0df37001b08847f",
+                          "cmake/bin/libllama.so.0.7.0":  "5fa2f3c079fc8bd934090de04d31ff130ddf07692f4d920ba0df37001b08847f",
+                          "cmake/bin/llama-completion":  "dcc2812c7d6cb241f955d28c0cb6d1b9ea71747ae2b86d68b84710c343633e54",
+                          "cmake/bin/llama-perplexity":  "22b3fb7d744612a67f6d007c962d4a147cd525bc89d00e61e7a3ebc8ba5dfff8",
+                          "cmake/bin/llama-quantize":  "6c5b33ddfa0e4688a32be45fc6125baf9629c514f0d3786e45fe4b2b5b6140f6",
+                          "cmake/bin/llama-tokenize":  "f86b25568aecce625d411ef00e2abacd6a080ca89955435f1d728b4552e1a670",
+                          "cmake/bin/test-quantize-fns":  "847eb64e76cee959d5a09c10abce54d2a8acd4c19e44ed793e2f0681f1f695e6",
+                          "cmake/bin/test-rope":  "5bbdc3fd1e425aae6be68b4c1674656655c7ca245ca9af84469efc0d41fca937"
+                      },
+    "sha256":  {
+                   "build/llm-cpu-reference-v2/receipt.json":  "9ecbb9a1afdd2e63b2103e8127ccea486ec18f9dadb6755b9c054322d77bdfcf",
+                   "build/llm-cpu-reference-v2/commands.json":  "bd50114ec04ee98dd582a44ce50d2f9a40655ee738a22efef89f57d1f0f03262",
+                   "build/llm-cpu-reference-v2/quantize-fns.stdout":  "106d6ef69dbd62b60ea3eafce41d38ff7c220e747df6074abb1f2a4d504a48fa",
+                   "build/llm-cpu-reference-v2/rope.stdout":  "b6acbac9a0619764dd39a85f06d3767a79ac416c7e7c6e4e744863c5f80c9628",
+                   "results/llm-model-profile-v1/profile.json":  "c0c2cd33e16d9a76708afdeb434dfb4ef501adc909e255adcfb2d427387e674d",
+                   "models/tinyllama-1.1b-chat-v1.0.json":  "c0c2cd33e16d9a76708afdeb434dfb4ef501adc909e255adcfb2d427387e674d",
+                   "llm-inputs.json":  "0e2e537b0e2b6d76356108df5a0df633f6b8eb11fde3a0a4b0552ba51fbbfc5f",
+                   "tools/build_llm_cpu_reference.py":  "a953d608fafb5ef1971385d3185f20376bbaf31dfac21e4d0f53c0416ee0115c",
+                   "tools/profile_llm_model.py":  "456debc275f7ad0812b62a145f199ba7545896b68bac3e75dd79432dea33c541",
+                   "tools/fetch_locked_deps.py":  "72e4eb558bc425f6448ff7474e29006d902b9a9314233eba011f2a92f18a1819",
+                   "tests/llm_reference_test.py":  "aa133c98b2435124289b4a0946edf3a6ea31f1ba95b77cc2b24a4957ff605526",
+                   "tests/profile_llm_model_test.py":  "809a44f131ac0c50cfa2d7f45598c122b877cf1825a36065b9166d6a64a73bbd"
+               },
+    "model_loaded":  false,
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "limits":  [
+                   "Full weights not downloaded or hash-verified; expected hash comes from immutable Git LFS pointer",
+                   "No GGUF conversion or inference logits",
+                   "Q4_0 memory is an explicit storage estimate, not actual converter output or native fit",
+                   "Client blockers are source inspection, not a completed HIP compile/link census"
+               ],
+    "next":  [
+                 "Compiler-generated embedded-image registration",
+                 "Effective HIP client compile/link probe",
+                 "Pinned weight conversion and CPU fixtures"
+             ],
+    "independent_review":  {
+                               "path":  "results/llm-v1-input-review-v1/review.json",
+                               "result":  "pass",
+                               "sha256":  "461b05f9ba24ac2fb0303bd7e92a72a581bda44aa9eba42720faa54f4f7608e4"
+                           }
+}
