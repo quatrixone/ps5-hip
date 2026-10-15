@@ -43,7 +43,9 @@ compile/link probe using the pinned converted model and CPU reference fixtures.
 
 That bounded probe is now recorded in `docs/LLM_V1_COMPILE_PROBE.md` and
 `evidence/offline-llm-hip-compile-probe.json`: twelve host objects compile;
-backend/getrows/mmvq device modules link. Resolve the remaining header/library
+backend/getrows/mmvq device modules link. The follow-up also links norm/RoPE
+using the same verified bitcodes with OCML before OCLC constants; a reversed-order
+negative control confirms the cause. Resolve the remaining header/cooperative-library
 and ABI/resource blockers before claiming a runnable client. Historical matching
 hipBLAS headers were diagnostic only, not a selected dependency update.
 

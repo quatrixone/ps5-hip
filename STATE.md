@@ -34,8 +34,9 @@ embedded-image launch and the effective HIP client compile/link probe,
 using the pinned converted weights and CPU token/logit fixtures.
 
 The bounded effective compiler probe now passes twelve host-object builds and
-links backend/getrows/mmvq device modules. It identifies genuine unresolved
-math/cooperative builtins, header-version alignment, aggregate argument ABI
+links backend/getrows/mmvq device modules. A controlled library-order fix now
+also links norm/RoPE: OCML must precede its OCLC constants. Cooperative softmax
+linkage remains unresolved, along with header-version alignment, aggregate argument ABI
 and launch resource requirements. See `docs/LLM_V1_COMPILE_PROBE.md` and
 `evidence/offline-llm-hip-compile-probe.json`. No final client link or native
 operator execution is proven; diagnostic historical headers are not new locks.

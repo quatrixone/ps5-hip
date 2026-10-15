@@ -159,7 +159,8 @@ size from total weight bytes or simply raise an advertised capability.
 ## Source-inspected client blockers
 
 The bounded [real compiler probe](LLM_V1_COMPILE_PROBE.md) now supplements this
-inventory: twelve host objects compile and three device modules link. It also
+inventory: twelve host objects compile and five device modules link after
+correcting OCML/OCLC library order. It also
 confirms aggregate ABI/resource requirements and remaining library/version
 blockers. This is not a complete client link or native execution result.
 

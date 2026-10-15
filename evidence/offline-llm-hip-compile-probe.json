@@ -667,5 +667,183 @@
     ".local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/src/mul_hi.cl",
     "-o",
     "results/llm-hip-probe-v13/mul_hi.bc"
-  ]
+  ],
+  "library_order_followup": {
+    "classification": "resolved device-library command ordering; no source or library binary changes",
+    "raw_results": [
+      "results/llm-hip-library-order-v1",
+      "results/llm-hip-library-order-v2"
+    ],
+    "required_order": [
+      "ockl-workitem-only.bc",
+      "mul_hi.bc",
+      "ocml.bc",
+      "oclc_abi_version_500.bc",
+      "oclc_correctly_rounded_sqrt_on.bc",
+      "oclc_daz_opt_off.bc",
+      "oclc_finite_only_off.bc",
+      "oclc_isa_version_1013.bc",
+      "oclc_unsafe_math_off.bc",
+      "oclc_wavefrontsize64_off.bc"
+    ],
+    "library_sha256": {
+      "ockl-workitem-only.bc": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+      "mul_hi.bc": "1e519ea56184104abe151eccbeda0d4b0adff185b15ef435680d3f0b997b803b",
+      "ocml.bc": "16d01f8cdc09678919addaa01dd2045110e934c4cb71336a140e2f485e551829",
+      "oclc_abi_version_500.bc": "d097461b741b52519bb713b82e64f90af8aa741527d5a911d978b5aec2a86bbb",
+      "oclc_correctly_rounded_sqrt_on.bc": "a73a84adebd64b73ca1bc7740c87086efdc29b8739944d0128c10a3f89e8765a",
+      "oclc_daz_opt_off.bc": "5815bec8f022052efbb484a51113d38fc4a6e9cd47f1849aadd095b010d57ba3",
+      "oclc_finite_only_off.bc": "66a32e969632a7bbffffcf037e7b3eaac120b64f365b0bffd0a129af30196819",
+      "oclc_isa_version_1013.bc": "19576c2b782919ebbaab0ed5bd98dcfb3df19565576e3f3311ba3c4b772e8d2b",
+      "oclc_unsafe_math_off.bc": "58d1e3aa427105caf6d074a80c5276aa44f88630efb6d43bcf97d39a77c6d743",
+      "oclc_wavefrontsize64_off.bc": "99b3b6fecb9046eb07194c04a9d5f521b4c308e15a959db2931e11b697124c50"
+    },
+    "linked_objects": {
+      "norm": {
+        "sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5",
+        "bytes": 60544,
+        "kernels": 16,
+        "undefined_symbols": [],
+        "kernarg_segment_size": [
+          28,
+          288,
+          320,
+          488
+        ],
+        "group_segment_fixed_size": [
+          0,
+          256
+        ],
+        "private_segment_fixed_size": [
+          0
+        ],
+        "max_flat_workgroup_size": [
+          1024
+        ],
+        "wavefront_size": [
+          32
+        ]
+      },
+      "rope": {
+        "sha256": "c492c51e731d0c6e941ecfd44181af86c58aafe7b313998a1ae7962e2ca35ff9",
+        "bytes": 366760,
+        "kernels": 48,
+        "undefined_symbols": [],
+        "kernarg_segment_size": [
+          368,
+          376,
+          384,
+          488
+        ],
+        "group_segment_fixed_size": [
+          0
+        ],
+        "private_segment_fixed_size": [
+          0
+        ],
+        "max_flat_workgroup_size": [
+          1024
+        ],
+        "wavefront_size": [
+          32
+        ]
+      }
+    },
+    "minimal_reproduction": {
+      "source": "#include <hip/hip_runtime.h>\n__global__ void daz_probe(float *x) { x[0] = rsqrtf(x[0]); }\n",
+      "outcomes": {
+        "working-link": 0,
+        "working-ir": 0,
+        "ocml_after_constants-link": 1,
+        "ocml_after_constants-ir": 0
+      },
+      "unoptimized_ir": {
+        "working": "@__oclc_daz_opt = internal local_unnamed_addr addrspace(4) constant i8 0, align 1",
+        "ocml_after_constants": "@__oclc_daz_opt = external local_unnamed_addr addrspace(4) constant i8, align 1"
+      }
+    },
+    "raw_artifacts": {
+      "results/llm-hip-library-order-v1/commands.json": {
+        "bytes": 4061,
+        "sha256": "dbd6156b566e16633ad19e012500a022a42072e9e0448615ce74f78a14b433f0"
+      },
+      "results/llm-hip-library-order-v1/norm.driver": {
+        "bytes": 7064,
+        "sha256": "3eb8575ecddc797db4d2010e5e67eaecad7703034c8cacba8a7f219c22ee8731"
+      },
+      "results/llm-hip-library-order-v1/norm.hsaco": {
+        "bytes": 60544,
+        "sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5"
+      },
+      "results/llm-hip-library-order-v1/norm.notes": {
+        "bytes": 55952,
+        "sha256": "3c6a5e5088d405794b7558419cc59a47b889a404ca9bb37223da10b58bf0338f"
+      },
+      "results/llm-hip-library-order-v1/norm.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v1/norm.undefined": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v1/rope.driver": {
+        "bytes": 7064,
+        "sha256": "b1f292d412f1efe8fb3b7c94dd41d979b834509b6927bbc16eaef5a5201a3032"
+      },
+      "results/llm-hip-library-order-v1/rope.hsaco": {
+        "bytes": 366760,
+        "sha256": "c492c51e731d0c6e941ecfd44181af86c58aafe7b313998a1ae7962e2ca35ff9"
+      },
+      "results/llm-hip-library-order-v1/rope.notes": {
+        "bytes": 208854,
+        "sha256": "85de5956cb59b751b1dc1dd4c284ba0cb746cf2cb44417e79de015b865fea283"
+      },
+      "results/llm-hip-library-order-v1/rope.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v1/rope.undefined": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v2/commands.json": {
+        "bytes": 8335,
+        "sha256": "b864d769aed3991d98840dad5bb2b4272417c9c90eb2d35c5474018c3931c22f"
+      },
+      "results/llm-hip-library-order-v2/daz_probe.hip": {
+        "bytes": 90,
+        "sha256": "42b109b1f6b50a4bf0850556e5634a8c511024735433455da77302af5ea92f8e"
+      },
+      "results/llm-hip-library-order-v2/ocml_after_constants-ir.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v2/ocml_after_constants-link.stderr": {
+        "bytes": 275,
+        "sha256": "29a698a08b71e14f50f2e1205349ffdf8bb94b2d0e9117957cc69052e56f13b8"
+      },
+      "results/llm-hip-library-order-v2/ocml_after_constants.ll": {
+        "bytes": 16755,
+        "sha256": "28ab5dcdc409224f3a26d1a2a2b38255f0a6b7b2be8d5146d1084d9a2ed50ee1"
+      },
+      "results/llm-hip-library-order-v2/working-ir.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v2/working-link.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "results/llm-hip-library-order-v2/working.hsaco": {
+        "bytes": 3192,
+        "sha256": "ab7f942f2e1ae20849ff63ad2d4639880f55d9b3efb88d64a244a8075ac78410"
+      },
+      "results/llm-hip-library-order-v2/working.ll": {
+        "bytes": 16757,
+        "sha256": "9eefd50e9691094761808e97a55bc9d78c2441f1d7341ea4077a72ec3adc1fa0"
+      }
+    },
+    "mechanism": "Clang emits -mlink-builtin-bitcode in supplied order. OCLC before OCML can be discarded by only-needed linking before OCML references it; controlled IR shows external declaration vs internal i8 zero definition. Keep bodies before their configuration dependencies."
+  }
 }

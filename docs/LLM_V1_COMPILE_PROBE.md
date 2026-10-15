@@ -25,7 +25,7 @@ Both sets came directly from official source URLs recorded with hashes in the ev
 
 The successful backend device module has one kernel; getrows has 109; mmvq has 317. `llvm-nm --undefined-only` reports no remaining undefined symbols for those three linked objects. This does not establish runtime admission or reachability of every included kernel.
 
-The mul-hi body is the genuine existing device-library `ockl/src/mul_hi.cl`, compiled using its already-generated upstream CMake rule, then processed with upstream `prepare-builtins`. No function was reimplemented. The source revision is `1e2c94795ee0d6ab8e2ff3035965a6b74e11b475`. Initial attempts with a raw bitcode path exposed the driver's library-path lookup behavior; subsequent fresh runs copied the verified bitcodes into a separate probe directory and used basenames. Raw and prepared variants both expose the norm/RoPE daz residual. Preserve that failure as a compiler/library integration issue to investigate, not a reason to suppress or fake the symbol.
+The mul-hi body is the genuine existing device-library `ockl/src/mul_hi.cl`, compiled using its already-generated upstream CMake rule, then processed with upstream `prepare-builtins`. No function was reimplemented. The source revision is `1e2c94795ee0d6ab8e2ff3035965a6b74e11b475`. Initial attempts with a raw bitcode path exposed the driver's library-path lookup behavior; subsequent fresh runs copied the verified bitcodes into a separate probe directory and used basenames. Raw and prepared variants both expose the norm/RoPE daz residual. Those failures are preserved. The follow-up below resolves this compiler/library integration issue by correcting command ordering, without suppressing or faking the symbol.
 
 ## ABI and launch requirements observed
 
@@ -67,4 +67,37 @@ For library-enabled links, remove `-nogpulib` and `-c`, add `--no-gpu-bundle-out
 
 Local full argv, diagnostics, dependency hashes and objects are in `results/llm-hip-probe-v2` through `v13`; normalized command copies and notes are in `results/llm-hip-probe-report-v1`. These ignored outputs are not required source inputs. Evidence contains their hashes and outcomes. The assembly-only mmvq experiment hit a 180-second timeout; its separately linked HSACO supplied metadata without repeating the expensive assembly step. Earlier failed invocation variants are preserved and not counted as passes.
 
-Next work: resolve the header-version integration decision and daz constant link issue; turn the genuine mul-hi slice into reproducible build input; select/validate real operator modules with aggregate ABI, LDS/private memory and launch geometry; supply the needed BLAS/runtime implementations; then perform full client link and compare native logits against the frozen CPU fixtures. No full SDK is necessary for this sequence.
+Next work: resolve the header-version integration decision; turn the genuine mul-hi slice into reproducible build input; select/validate real operator modules with aggregate ABI, LDS/private memory and launch geometry; supply the needed BLAS/runtime implementations; then perform full client link and compare native logits against the frozen CPU fixtures. No full SDK is necessary for this sequence.
+
+
+## Follow-up: genuine norm and RoPE links now pass
+
+The `__oclc_daz_opt` residual was caused by explicit bitcode ordering in the probe command, not a missing implementation. The earlier command iterated an alphabetically ordered evidence dictionary, placing OCML after its OCLC configuration constants. The existing working OCML recipe already places OCML first. Clang emits `-mlink-builtin-bitcode` in that supplied order; only-needed linking can discard a constant before the subsequently loaded OCML body needs it.
+
+Reordering the same hash-verified binary inputs to workitem, mul-hi, OCML, then all OCLC configuration bitcodes produces linked gfx1013 norm and RoPE modules with **zero undefined symbols**. No source, library binary, architecture, version or numerical option changed. Norm has 16 kernels in a 60,544-byte object; RoPE has 48 kernels in a 366,760-byte object. Both use wave32. Linked metadata and exact hashes are in `library_order_followup` in the evidence. These results supersede the earlier unresolved-daz result, while retaining the original diagnostic records.
+
+A controlled two-line source confirms causality:
+
+```cpp
+#include <hip/hip_runtime.h>
+__global__ void daz_probe(float *x) { x[0] = rsqrtf(x[0]); }
+```
+
+With otherwise identical arguments, bodies-before-constants links successfully; moving only OCML after the constants fails with undefined `__oclc_daz_opt`. Unoptimized LLVM IR (`-S -emit-llvm -Xclang -disable-llvm-passes`) exposes the distinction directly: working order has an internal address-space-4 `i8 0` definition; reversed order has only an external `i8` declaration. This is a regression test shape for a future device-library recipe: preserve explicit dependency order, not filename sorting.
+
+For the representative link command above, supply library flags in this exact tested order:
+
+```text
+--hip-device-lib=ockl-workitem-only.bc
+--hip-device-lib=mul_hi.bc
+--hip-device-lib=ocml.bc
+--hip-device-lib=oclc_abi_version_500.bc
+--hip-device-lib=oclc_correctly_rounded_sqrt_on.bc
+--hip-device-lib=oclc_daz_opt_off.bc
+--hip-device-lib=oclc_finite_only_off.bc
+--hip-device-lib=oclc_isa_version_1013.bc
+--hip-device-lib=oclc_unsafe_math_off.bc
+--hip-device-lib=oclc_wavefrontsize64_off.bc
+```
+
+Fresh commands, driver traces, positive/negative IR, notes and hashes are under `results/llm-hip-library-order-v1` and `v2`. This raises the successful measured device translation units to five of the six probed: backend, getrows, mmvq, norm and RoPE. Cooperative softmax remains unresolved, as do final host linking, runtime ABI/dispatch admission, coherent current headers and BLAS implementation. No new native or numerical validation is implied.
