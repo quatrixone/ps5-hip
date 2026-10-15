@@ -16,6 +16,29 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Pitched fill and retirement checkpoint
+
+`results/public-pitched-fill-source-v1` passed the fresh source qualifier with
+74 compilations: 69 base, three client harnesses and two injected allocation-failure
+memory units. The pitched case checks 2D row padding, 3D slice gaps, equal pitch
+and width with extra slice rows, changed rounds, overflow/bounds/shape rejection,
+and zero-width no-op. Both reserve/new failures preserve bytes and clean ownership.
+All base/launch/event/stream/contiguous cases, 62 host tests, 18 control tests and
+three changed PS5 translation units pass. See `evidence/offline-public-pitched-fill.json`.
+
+Initial diagnostics v1/v2 exposed a pre-existing retirement race: command completion
+could precede worker batch-reference release, making a later free fail. The adapter
+now requests a fresh finish marker and defers internal marker completion until FIFO
+flush has retired preceding references. Independent held-worker comparison shows
+old synchronization returns early while the corrected path waits and frees once.
+Keep failed raw probes; do not hide the failure with a free retry or early release.
+
+The earlier frozen launch and contiguous-fill candidates below contain the old
+retirement behavior and are now held for rebuilding. Their manifests/packages stay
+preserved; checkpoint files record the hold. A new native package and independent
+review are required before console preparation. Owner recovery and full remote
+baseline verification remain pending. Graph/capture fill remains unsupported.
+
 ## Frozen fill candidate
 
 `results/source-fill-console-v1` in the WSL worktree is frozen at `fff2451`.

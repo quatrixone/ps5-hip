@@ -11,6 +11,19 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Pitched 2D/3D fills now pass fresh host qualification with exact row/slice-padding
+checks across two changed rounds (2,048 byte comparisons). Shared checked-layout
+arithmetic validates the complete touched span before writing. Reserve/command
+allocation failures return out-of-memory without mutation or leaked ownership.
+A discovered queue-retirement race is fixed: synchronization now waits until
+prior batch references are released, allowing one successful free. All 74 fresh
+compilations, existing modes, 62 host tests, 18 control tests and three PS5
+compiles pass. See `evidence/offline-public-pitched-fill.json`.
+
+**Console candidates are held for rebuilding:** earlier frozen launch/fill
+packages predate the retirement fix. Preserve their evidence, but do not deploy
+them as current candidates. No updated package or console execution is claimed.
+
 The native fill candidate is frozen at `fff2451` and passed independent offline
 identity review: 28 bound files and six package files. See
 `evidence/offline-frozen-public-fill.json`. Deployment and execution remain

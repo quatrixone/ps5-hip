@@ -108,7 +108,7 @@ int main() {
       if (hipMemset(data + 127, 0, 2) != hipErrorInvalidValue ||
           hipMemsetD16(data + 1, 0, 1) != hipErrorInvalidValue ||
           hipMemsetD32(buffer, 0, SIZE_MAX / 4 + 1) != hipErrorInvalidValue ||
-          hipMemset2D(buffer, 16, 0, 8, 2) != hipErrorNotSupported)
+          hipMemset2D(buffer, 4, 0, 8, 2) != hipErrorInvalidValue)
         ps5hip_clr_gpu_fail("fill-admission");
       rejected += 4;
       if (hipMemcpy(output.data(), buffer, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)

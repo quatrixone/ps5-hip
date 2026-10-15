@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-pitched-fill-and-retirement-pass",
+  "source_base": "bd245ae3ab16394970048f7d8aa4e746abc37e31",
+  "source_identity": "Exact changed inputs are bound by the fresh receipt and independent review before commit.",
+  "total_compilations": 74,
+  "strict_links": 6,
+  "host_tests_passed": 62,
+  "control_tests_passed": 18,
+  "native_translation_units_compiled": 3,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-pitched-fill-source-v1/receipt.json": "e920c042d9bb35c252a8bc6d9a3cb4c3aa2d5e744614dccfba79ae97cd227c80",
+    "results/public-pitched-fill-source-v1/independent-review.json": "2627eb73336e03c092479849f57a7b25babac4167ee43c7b304b81cfefa72ae0",
+    "results/retirement-barrier-independent-v2/independent-review.json": "43ae8a023d89a022f96bb5c0a241e3e9fa8941c2222f07a4c7f57ba3d07367e7",
+    "results/public-pitched-fill-native-v1/receipt.json": "d7b6217cc06fa6c3856cda1c3dbb75d4d1d59ce329bf99dfce15af286366fab6",
+    "results/public-pitched-fill-host-test.log": "45b4dc0d81a8087e16b44544ac5da09c6965141b2609f5ace241e520d3b4778f",
+    "results/public-pitched-fill-controls.log": "03ca6faec010b84edd7e7864d091c06b3757f919740e2a6f2101a2ab0e224767",
+    "results/public-pitched-fill-source-v1/fill-normal.json": "f2aaee0bd85d748610e7b4118978e85504e24f9efd1e123a98bd96a033f62a4e",
+    "results/public-pitched-fill-source-v1/fill-normal.stdout": "dc69eb7dfd644a0149f0f8480723f641a2dc3fae76a54f0523868304c1d1e483",
+    "results/public-pitched-fill-source-v1/fill-normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-pitched-fill-source-v1/fill-pitched.json": "3ea6d31b31bd5b158581988d9a94aad330b4cf16a7fda13c324d2981aa45059d",
+    "results/public-pitched-fill-source-v1/fill-pitched.stdout": "f7ff82d7bd73b3ce773489251fb463b308d2ed5d4d53ee1f2d7707cbd9d57f40",
+    "results/public-pitched-fill-source-v1/fill-pitched.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-pitched-fill-source-v1/fill-oom-reserve.json": "9c8c4d2798c0abb32de955e976967a5771c36f9b2b9c1033e3e366363ba3dc4f",
+    "results/public-pitched-fill-source-v1/fill-oom-reserve.stdout": "dd31e973dbb9c79027122cfa7d91bc28699fe19579f7cfebd24ffceaa1e5c79f",
+    "results/public-pitched-fill-source-v1/fill-oom-reserve.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-pitched-fill-source-v1/fill-oom-command.json": "7f8a77b6e54e40a8d044b205148d4238dd6361fbd66241fd21d00c7dce045fb7",
+    "results/public-pitched-fill-source-v1/fill-oom-command.stdout": "dd31e973dbb9c79027122cfa7d91bc28699fe19579f7cfebd24ffceaa1e5c79f",
+    "results/public-pitched-fill-source-v1/fill-oom-command.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/retirement-barrier-independent-v2/run-new.json": "e809d761de1a92a81c2c0b718fbbafd611499b96cecec9c13e77dce852d4854d",
+    "results/retirement-barrier-independent-v2/run-new.stdout": "bc1f036307099a72110f35c46040b08d120e243025e5d9aadb1fd13fe775a4ef",
+    "results/retirement-barrier-independent-v2/run-new.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/retirement-barrier-independent-v2/run-old.json": "e191bbede0b1dcb25631f5ece3ff2b505dfa4ca5af512b9f78bbd301b5766892",
+    "results/retirement-barrier-independent-v2/run-old.stdout": "ba14a68896dcbe51c15768bb2f8e80c34215e62dbf41e8c1933cc1aa812e9269",
+    "results/retirement-barrier-independent-v2/run-old.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Checked 2D/3D byte fills preserve row and slice padding across two changed rounds and 2048 exact byte comparisons.",
+    "Bounds, geometry and overflow reject before writes; zero-width remains a no-op.",
+    "Injected reserve and command allocation failures return out-of-memory, preserve bytes and clean ownership.",
+    "Internal finish markers complete after prior batch references retire; independent held-worker old/new diagnostic demonstrates the fix and exactly one retired queue.",
+    "Existing base, module, launch, event, stream and contiguous fill cases retain their expected outcomes."
+  ],
+  "preserved_diagnostics": [
+    "results/public-pitched-fill-probe-v1",
+    "results/public-pitched-fill-probe-v2",
+    "results/public-pitched-fill-probe-v3",
+    "results/retirement-barrier-independent-v1"
+  ],
+  "limits": [
+    "Host model only; no new native package or console execution.",
+    "Native checks compile three translation units only.",
+    "Old frozen launch/fill packages predate the retirement fix and remain held for rebuilding.",
+    "Retirement comparison is a supplemental diagnostic reusing runtime objects; its 500ms observation is scheduler bounded.",
+    "Capture/graph fill routes remain unsupported.",
+    "Console recovery confirmation and baseline verification remain pending."
+  ],
+  "independent_review": {
+    "path": "results/public-pitched-fill-source-v1/independent-review.json",
+    "sha256": "2627eb73336e03c092479849f57a7b25babac4167ee43c7b304b81cfefa72ae0",
+    "deployment_approved": false
+  },
+  "sanitizer_exclusions": [
+    "join-fail",
+    "self-destroy",
+    "reset-join-fail"
+  ]
+}

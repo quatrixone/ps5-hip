@@ -198,6 +198,39 @@ def main():
         'PUBLIC_FILL_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
         raise RuntimeError('public fill byte/ownership contract differs')
     print('public fill PASS', flush=True)
+    result = run('fill-pitched', [output / 'fill-model', 'pitched'], env)
+    if result.splitlines() != [
+        'PUBLIC_PITCHED_FILL_PASS compared_bytes=2048 rounds=2 padding=true gpu_execution=false',
+        'PUBLIC_FILL_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
+        raise RuntimeError('public pitched fill padding/ownership contract differs')
+    print('public pitched fill PASS', flush=True)
+
+    # Inject allocation failures into independent source copies, not production hooks.
+    fill_failure_models = {}
+    memory_source = source / 'hipamd/src/hip_memory.cpp'
+    for index, (stage, anchor) in enumerate((
+        ('reserve', '      commands.reserve(commands.size() + 1);'),
+        ('command', '      command = new amd::FillMemoryCommand(*stream, CL_COMMAND_FILL_BUFFER,'))):
+        text = memory_source.read_text()
+        if text.count(anchor) != 1:
+            raise RuntimeError('fill allocation injection anchor differs: ' + stage)
+        injected = output / ('hip_memory_fill_' + stage + '.cpp')
+        injected.write_text(text.replace(anchor, '      throw std::bad_alloc();\n' + anchor))
+        source_hashes[str(injected.relative_to(ROOT))] = sha(injected)
+        injected_object = compile_one((len(units) + 3 + index, injected))
+        fault_objects = [injected_object if unit == memory_source else obj
+                         for unit, obj in zip(units, fill_objects)]
+        binary = output / ('fill-oom-' + stage)
+        run('fill-oom-' + stage + '-link', [toolchain['clang++-18']['path'], *flags,
+            '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+            '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *fault_objects, '-o', binary])
+        result = run('fill-oom-' + stage, [binary, 'pitched-oom'], env)
+        if result.splitlines() != [
+            'PUBLIC_PITCHED_FILL_OOM unchanged=true ownership=clean gpu_execution=false',
+            'PUBLIC_FILL_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
+            raise RuntimeError('public fill allocation failure contract differs: ' + stage)
+        fill_failure_models[stage] = sha(binary)
+        print('public pitched fill ' + stage + ' OOM PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -217,9 +250,10 @@ def main():
                'launch_model_sha256': sha(output / 'launch-model'),
                'stream_model_sha256': sha(output / 'stream-model'),
                'stream_cases': ['event-ordered', 'bypass-early-consumer-detected'],
-               'total_compilations': len(units) + 3,
+               'total_compilations': len(units) + 5,
+               'fill_allocation_failure_models': fill_failure_models,
                'fill_model_sha256': sha(output / 'fill-model'),
-               'fill_cases': ['patterns-offsets-guards-admission'],
+               'fill_cases': ['patterns-offsets-guards-admission', 'pitched-2d-3d-padding-admission'],
                'launch_fixture_sha256': launch_code_hash,
                'launch_cases': ['normal', 'events-pending-then-complete', 'noop-output-rejected', 'corrupt-output-rejected'],
                'wrong_target_fixture_sha256': wrong_target_hash,

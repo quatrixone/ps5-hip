@@ -1,5 +1,6 @@
 #include "ps5-device.hpp"
 #include "ps5hip/native_data.h"
+#include "ps5hip/fill_layout.h"
 #include "ps5hip/native_launch.h"
 #include "ps5hip/host_launch.h"
 #include "ps5hip/hip_launch_profile.h"
@@ -159,9 +160,14 @@ class Virtual final:public amd::device::VirtualDevice {
 public:
     Virtual(amd::Device& d,std::shared_ptr<State> s):amd::device::VirtualDevice(d),state_(std::move(s)){++state_->observed.queues;}
     ~Virtual(){++state_->observed.retired_queues;}
-    bool isHandlerPending()const override{return false;}
+    // Completed commands still own batch references until an internal marker flush.
+    // Force finish() to wait on a fresh retirement barrier even for completed work.
+    bool isHandlerPending()const override{return true;}
     bool isFenceDirty()const override{return false;}
-    void submitMarker(amd::Marker& c)override{execute(c,[]{});}
+    void submitMarker(amd::Marker& c)override{
+        if(c.type()==0){c.setStatus(CL_RUNNING);return;}
+        execute(c,[]{});
+    }
     void submitWriteMemory(amd::WriteMemoryCommand& c)override{execute(c,[&]{
         if(c.type()!=CL_COMMAND_WRITE_BUFFER)throw ObjectError("unsupported write");
         region(c.destination(),c.origin(),c.size());state_->data.copy_to_device(pointer(c.destination(),c.origin()[0]),c.source(),c.size()[0]);
@@ -176,19 +182,25 @@ public:
         state_->data.copy_device(pointer(c.destination(),c.dstOrigin()[0]),pointer(c.source(),c.srcOrigin()[0]),c.size()[0]);
     });}
     void submitFillMemory(amd::FillMemoryCommand& c)override{
-        if(c.type()!=CL_COMMAND_FILL_BUFFER||c.size()[1]!=1||c.size()[2]!=1){unsupported(c);return;}
+        if(c.type()!=CL_COMMAND_FILL_BUFFER){unsupported(c);return;}
         execute(c,[&]{
-            region(c.memory(),c.origin(),c.size());
-            const size_t pattern=c.patternSize(),bytes=c.size()[0];
-            if(!pattern||pattern>amd::FillMemoryCommand::MaxFillPatterSize||
-               (pattern&(pattern-1))||bytes%pattern||c.origin()[0]%pattern)
-                throw ObjectError("invalid buffer fill pattern or extent");
-            auto hold=state_->data.resolve(pointer(c.memory(),c.origin()[0]),bytes);
+            const size_t pattern=c.patternSize(),width=c.size()[0],pitch=c.surface()[0];
+            const size_t origin=c.origin()[0];
+            FillLayout layout{};
+            if(!c.memory().asBuffer()||c.origin()[1]||c.origin()[2]||origin>c.memory().getSize()||
+               !pattern||pattern>amd::FillMemoryCommand::MaxFillPatterSize||
+               (pattern&(pattern-1))||width%pattern||origin%pattern||pitch%pattern||
+               c.surface()[1]<width||
+               !checked_fill_layout(width,c.size()[1],c.size()[2],pitch,c.surface()[2],
+                                    c.memory().getSize()-origin,layout))
+                throw ObjectError("invalid buffer fill layout");
+            auto hold=state_->data.resolve(pointer(c.memory(),origin),layout.span);
             auto* destination=static_cast<unsigned char*>(hold.memory->cpu())+hold.offset;
-            // The command owns its captured pattern; resolve the complete logical
-            // range before writing and retain the device gate throughout the fill.
-            for(size_t offset=0;offset<bytes;offset+=pattern)
-                std::memcpy(destination+offset,c.pattern(),pattern);
+            // Resolve the entire padded span before any write, under the device gate.
+            for(size_t z=0;z<c.size()[2];++z)
+                for(size_t y=0;y<c.size()[1];++y)
+                    for(size_t x=0;x<width;x+=pattern)
+                        std::memcpy(destination+z*layout.slice+y*pitch+x,c.pattern(),pattern);
         });
     }
     void submitKernel(amd::NDRangeKernelCommand& c)override{execute(c,[&]{
@@ -215,7 +227,14 @@ public:
         close_native_launch_temporaries(launch,state_->data);++state_->observed.launches;
     });}
     void flush(amd::Command* list=nullptr,bool=false)override{
-        while(list){auto* next=list->getNext();if(list->status()>CL_COMPLETE)list->setStatus(CL_INVALID_OPERATION);list->release();list=next;}
+        while(list){
+            auto* next=list->getNext();
+            // FIFO retirement releases prior commands and their memory references
+            // before the internal barrier publishes completion to finish() callers.
+            if(list->type()==0&&list->status()>CL_COMPLETE)execute(*list,[]{});
+            else if(list->status()>CL_COMPLETE)list->setStatus(CL_INVALID_OPERATION);
+            list->release();list=next;
+        }
     }
 #include "ps5-virtual-unsupported.inc"
 };

@@ -184,14 +184,19 @@ gate, `stream-normal` requires no dependent consumer progress within one second.
 `stream-bypass` omits the event wait and requires early consumer progress within
 that deadline. Both cases release the producer and verify two retired queues with
 no allocation or GPU submission. This bounded test is scheduler-dependent; it
-qualifies neither native events nor GPU concurrency. The qualifier builds 72
-translation units in total: 69 base units and three alternate client harnesses.
+qualifies neither native events nor GPU concurrency. The qualifier builds 74
+translation units in total: 69 base units, three alternate client harnesses and
+two independently fault-injected memory units.
 
 The fill client checks contiguous `hipMemset` and word-pattern operations using
 all 128 expected bytes, including unchanged guards. Synchronous calls now wait
 and return command failures; async calls enqueue on the selected stream. Invalid
-alignment and overflowing word counts are rejected before enqueue. Pitched and
-multidimensional fills, capture and graph memset nodes remain unsupported.
+alignment and overflowing word counts are rejected before enqueue. Pitched 2D/3D
+fills validate the complete touched span and preserve row/slice padding; the
+additional case checks 2,048 bytes across changed rounds. Allocation failures are
+injected separately at vector reservation and command construction, requiring
+out-of-memory, unchanged bytes and cleanup. Capture and graph memset nodes remain
+unsupported. Synchronization includes retirement of prior command references.
 The source builder applies these guards to every package fixture. Host models
 and PS5 compilation establish no console fill result.
 
