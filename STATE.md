@@ -5,6 +5,11 @@ resume point, branch map, and evidence identities.
 
 ## Current scope
 
+The first release is standalone TinyLlama 1.1B Q4_0 GPU inference, batch one,
+with a 512-token context. Follow [the release plan](docs/LLM_V1_PLAN.md).
+Training, framework ports and complete ROCm library coverage are deferred;
+new runtime work must unblock this client or its release validation.
+
 As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalone
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.

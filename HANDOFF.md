@@ -16,6 +16,13 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## First-release priority
+
+Follow [LLM_V1_PLAN.md](docs/LLM_V1_PLAN.md): standalone TinyLlama 1.1B Q4_0,
+batch one and 512-token context. Resolve Q4 arithmetic, qualify required
+operators and one complete layer, then full-model inference and release checks.
+Training and broad SDK coverage are later milestones, not prerequisites.
+
 ## Q4 console validation failed; analyze offline before another candidate
 
 The frozen Q4 candidate deployed successfully on .40, including 78 verified

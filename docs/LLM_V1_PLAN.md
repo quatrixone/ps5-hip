@@ -117,9 +117,11 @@ PS5 compatibility. Preserve measured gfx1013 requirements; do not impersonate
 another GPU architecture to make compilation pass.
 
 The public adapter now supports the measured RMSNorm route, with native
-numerical evidence. Q8_1/Q4_0 dispatch qualification is the next bounded step;
-model-scale allocations, including the advertised 64 MiB per-allocation limit,
-remain a separate blocker. Existing geometry/LDS/private-memory proofs and
+numerical evidence. Q8_1/Q4_0 dispatch and the numerical package qualify offline,
+but the first native Q4 comparison failed. Four standalone Q8 cases passed;
+model-width Q8 and chained Q4 were not reached. Resolve this numerical blocker
+before layer integration. Model-scale allocations, including the advertised
+64 MiB per-allocation limit, remain a separate blocker. Existing geometry/LDS/private-memory proofs and
 legacy GEMM tests do not establish support for all model tensors. Validate and
 implement each required route/limit; never merely raise advertised limits.
 
@@ -174,7 +176,7 @@ full SDK roadmap:
 | --- | --- |
 | Reproducible model and CPU oracle | Source weights, Q4_0 conversion and seven repeated CPU inference cases pass; native memory budget and complete client inventory remain open |
 | Native public HIP runtime | Compiler-generated launches and aggregate arguments pass on .40; real operator resource shapes and model-scale allocations remain open |
-| Required operators | Upstream RMSNorm passed its six-case native numerical run; independent outcome review passed. Remaining model operators and full graph integration are open |
+| Required operators | Upstream RMSNorm passed six native cases and four standalone Q8 cases passed. The first native Q4 output failed its frozen tolerance; model-width Q8, chained Q4, remaining operators and full graph integration are open |
 | Complete inference | Native client link, GPU prefill/decode, reference logits and generated tokens remain open |
 | Release qualification | Repeated requests, lifecycle/failure tests, clean source-only client build and measured performance remain open |
 
@@ -185,31 +187,24 @@ correct inference path works. Training is a separately scoped follow-up release.
 
 ## Immediate next action
 
-The next measured blockers and proposed build strategy are recorded in
-[LLM_Q4_PATH.md](LLM_Q4_PATH.md): genuine Q8_1 activation preparation, Q4_0
-multidimensional/static-LDS routing and coherent current hipBLAS interfaces.
-Source-only integration and native numerical validation remain required.
+1. Resolve the native Q4 numerical failure recorded in
+   [the failure evidence](../evidence/console40-public-q4-failure.json).
+   Use retained operands and exact ISA to isolate the cause; build and review a
+   fresh diagnostic candidate before another bounded .40 run. Preserve the
+   failed candidate and original tolerance. Passing offline dispatch tests does
+   not qualify GPU arithmetic.
+2. Qualify model-width Q8 and isolated/chained Q4 against the frozen references,
+   then complete weighted RMSNorm and the required Q/K/V projections. Integrate
+   one reference-checked transformer layer, including RoPE, attention, KV updates,
+   residuals and feed-forward operations, before expanding to the full model.
+3. In parallel where independent, finish the actual client call/operator inventory,
+   native client link and measured model/KV/workspace allocation budget. Use
+   [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) and
+   [LLM_Q4_PATH.md](LLM_Q4_PATH.md); add only demonstrated missing capabilities.
+4. Run complete TinyLlama GPU prefill and incremental decode against the fixed CPU
+   logits/token fixtures, then satisfy V1.5 lifecycle, source-only build and
+   performance reporting requirements.
 
-
-Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now
-passes and five real device translation units link. Resolve demonstrated
-real operator launch-resource, math/library and full-client-link blockers,
-then use the verified CPU token/logit references to qualify required operators.
-Aggregate arguments now pass both offline genuine compiler/CLR qualification
-and bounded native execution on .40; see `PUBLIC_AGGREGATE_ARGUMENTS.md`.
-The CPU RMSNorm oracle and optional null-pointer handling now pass offline; see
-`../evidence/offline-llm-rmsnorm-reference.json` and
-`../evidence/offline-public-nullable-arguments.json`.
-The 2048-column RMSNorm candidate completed its six-case native run with the
-actual 1024-thread/128-byte LDS contract and frozen CPU numerical reference.
-Independent outcome review passed; see
-`../evidence/console40-public-rmsnorm-success.json`.
-Next, finish the client call/operator inventory and select the first unresolved
-Q4_0 matrix/vector multiplication or full-client-link blocker. Qualify each
-remaining operation against real model shapes, then integrate one complete
-transformer layer before full-model prefill and incremental decode. Do not
-expand general SDK coverage merely because an isolated operator now works.
-The host tools and model
-metadata inventory are reproducible through optional Make targets; V1.1 remains
-partial. Select work from demonstrated client blockers. No native LLM, training
-or first-release completion is claimed yet.
+These steps retain all V1.1-V1.5 acceptance criteria. No native LLM, training or
+first-release completion is claimed. Push each validated milestone to private
+GitHub main; keep general SDK expansion off this release's critical path.
