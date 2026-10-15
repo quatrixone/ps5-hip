@@ -26,6 +26,14 @@ hash, and six extracted file hashes are in
 dependency and package path. All console-facing output is offline and marked
 `native_executed: false`.
 
+A fresh GitHub-only clone of `main` at `7ef291c` passed the default `make`
+on 2026-10-14: 54 host tests, the native core, 74 public HIP objects, strict
+native link, FSELF extraction audit, UFS fsck/extraction, and cached
+revalidation. The compact offline receipt is
+`evidence/offline-main-source-build.json`. Its package SHA-256 is
+`051e326a191049a344c3cbf7c173357e7375c863a60a44406f635695ddcba923`;
+this hash applies to that exact source and build environment.
+
 `RESULTS_DIR` is written into `results-dir.txt`. The default is
 `/user/homebrew/ps5-hip`; choose a path that actually exists and is writable
 on the target console before any deployment. To change it or rebuild after

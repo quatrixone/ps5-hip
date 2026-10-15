@@ -11,7 +11,10 @@ resume point, branch map, and evidence identities.
   core, and builds a new 74-object public HIP bootstrap with checked FSELF
   roundtrip and six-file UFS extraction. ProsperoEden and the protocol are
   locked snapshots of public `main`. The new package is offline only and is
-  distinct from the registered image; see `docs/SOURCE_ONLY_REBUILD.md`.
+  distinct from the registered image. A fresh GitHub-only clone at `7ef291c`
+  passed default `make`: 54 host tests, native core, 74 objects, strict link,
+  package validation and cached revalidation. See
+  `evidence/offline-main-source-build.json` and `docs/SOURCE_ONLY_REBUILD.md`.
   No new console result was taken.
 
 - **Public HIP bootstrap package registered on .40; execution has not begun:**
@@ -1331,3 +1334,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | CLR | 5db9751 | offline | CPU package and exact source independently verified | evidence/offline-clr-cpu-native-package.json | native startup
 - 2026-10-13 | CLR | 5db9751 | offline | launch held after shared thread-lifetime findings | evidence/offline-clr-thread-lifetime-hold.json | repair and requalify
 - 2026-10-13 | CLR | 347fa8c | .40 | failed: AppProfile readlink syscall58 before main; delayed idle/image/log checked | evidence/native-clr-app-profile-readlink-failure.json | repair path query
+
+- 2026-10-14 | Public HIP source build | 7ef291c | fresh GitHub-only clone, offline | pass: default make, 54 host tests, native core, 74-object title, FSELF/UFS audits | evidence/offline-main-source-build.json | independent candidate review before any console run

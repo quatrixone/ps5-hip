@@ -47,7 +47,9 @@ one-use E control remains inert pending revised lifecycle checks and review.
 - A relocatable source-only recipe on `main` independently builds a new
   74-object bootstrap package with verified FSELF and UFS2 extraction. This
   package is an offline candidate, not the registered image above; it has not
-  been deployed or executed.
+  been deployed or executed. A fresh GitHub-only clone at `7ef291c` passed
+  default `make` (54 host tests, native core, 74 objects and package audit);
+  see `evidence/offline-main-source-build.json`.
 - Native public HIP allocation/free and native ROCclr FP32 GEMM candidates have
   passed offline native package and independent review. Neither was run on a
   console. The allocation title includes real `hipInit`/count/malloc/free symbols
@@ -126,7 +128,7 @@ installed image, old GPU image/log, backups, and any user data.
 
 ## Next work, in order
 
-1. In the bootstrap branch, create a new E-only binding to the exact D receipt
+1. On `main`, prepare a new E-only binding to the exact historical D receipt
    and review above. Correct `verify_local()`'s review classification, retain the
    one-use/freshness guards, run focused offline checks, freeze source/artifacts,
    and obtain an independent review. Only then consider one bounded `.40` launch
