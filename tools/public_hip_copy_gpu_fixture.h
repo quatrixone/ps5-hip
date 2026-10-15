@@ -112,4 +112,82 @@ inline void run(const char* path,bool capture,
  HIP_OK(hipStreamDestroy(stream));
  HIP_OK(hipFree(b));HIP_OK(hipFree(a));HIP_OK(hipModuleUnload(module));
 }
+inline void run_replay(const char* path,void(*before_replay)(hipGraphExec_t,const hipGraphNode_t*)=nullptr){
+ hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,path));hipFunction_t function=nullptr;
+ HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
+ hipStream_t origin=nullptr,peer=nullptr;HIP_OK(hipStreamCreateWithFlags(&origin,hipStreamNonBlocking));
+ HIP_OK(hipStreamCreateWithFlags(&peer,hipStreamNonBlocking));
+ hipEvent_t ready=nullptr,done=nullptr;HIP_OK(hipEventCreateWithFlags(&ready,hipEventDisableTiming));HIP_OK(hipEventCreateWithFlags(&done,hipEventDisableTiming));
+ static unsigned input[162],output[162],eager[162],callbacks;callbacks=0;
+ void *a=nullptr,*b=nullptr;HIP_OK(hipMalloc(&a,sizeof(input)));HIP_OK(hipMalloc(&b,sizeof(input)));
+ void* regions[]={a,static_cast<unsigned*>(a)+81};unsigned count=73,salts[]={19,56};
+ void* args0[]={&regions[0],&count,&salts[0]};void* args1[]={&regions[1],&count,&salts[1]};
+ hipKernelNodeParams params[2]{};
+ for(unsigned k=0;k<2;++k){params[k].func=reinterpret_cast<void*>(function);params[k].gridDim=dim3(2);params[k].blockDim=dim3(64);params[k].kernelParams=k?args1:args0;}
+ HIP_OK(hipStreamBeginCapture(origin,hipStreamCaptureModeThreadLocal));
+ HIP_OK(hipMemcpyAsync(a,input,sizeof(input),hipMemcpyHostToDevice,origin));
+ HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,origin,args0,nullptr));
+ HIP_OK(hipEventRecord(ready,origin));HIP_OK(hipStreamWaitEvent(peer,ready,0));
+ HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,peer,args1,nullptr));
+ HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,peer));
+ HIP_OK(hipMemcpyAsync(output,b,sizeof(output),hipMemcpyDeviceToHost,peer));
+ HIP_OK(hipEventRecord(done,peer));HIP_OK(hipStreamWaitEvent(origin,done,0));
+ HIP_OK(hipLaunchHostFunc(origin,[](void* p){++*static_cast<unsigned*>(p);},&callbacks));
+ hipGraph_t graph=nullptr;HIP_OK(hipStreamEndCapture(origin,&graph));
+ for(auto stream:{origin,peer}){hipStreamCaptureStatus state;HIP_OK(hipStreamIsCapturing(stream,&state));checked(state==hipStreamCaptureStatusNone,__LINE__);}
+ size_t total=0;HIP_OK(hipGraphGetNodes(graph,nullptr,&total));checked(total==6,__LINE__);
+ hipGraphNode_t root=nullptr,kernels[2]{};size_t n=0;HIP_OK(hipGraphGetRootNodes(graph,nullptr,&n));checked(n==1,__LINE__);HIP_OK(hipGraphGetRootNodes(graph,&root,&n));
+ HIP_OK(hipGraphNodeGetDependentNodes(root,nullptr,&n));checked(n==1,__LINE__);HIP_OK(hipGraphNodeGetDependentNodes(root,&kernels[0],&n));
+ hipGraphNode_t next[2]{};n=0;HIP_OK(hipGraphNodeGetDependentNodes(kernels[0],nullptr,&n));checked(n==2,__LINE__);HIP_OK(hipGraphNodeGetDependentNodes(kernels[0],next,&n));
+ for(auto node:next){hipGraphNodeType type;HIP_OK(hipGraphNodeGetType(node,&type));if(type==hipGraphNodeTypeKernel)kernels[1]=node;}
+ checked(kernels[1]!=nullptr,__LINE__);
+ hipGraphNode_t chain[]={root,kernels[0],kernels[1],nullptr,nullptr,nullptr};
+ for(unsigned i=3;i<6;++i){n=0;HIP_OK(hipGraphNodeGetDependentNodes(chain[i-1],nullptr,&n));checked(n==1,__LINE__);HIP_OK(hipGraphNodeGetDependentNodes(chain[i-1],&chain[i],&n));}
+ const hipGraphNodeType types[]={hipGraphNodeTypeMemcpy,hipGraphNodeTypeKernel,hipGraphNodeTypeKernel,hipGraphNodeTypeMemcpy,hipGraphNodeTypeMemcpy,hipGraphNodeTypeHost};
+ for(unsigned i=0;i<6;++i){
+  hipGraphNodeType type;HIP_OK(hipGraphNodeGetType(chain[i],&type));checked(type==types[i],__LINE__);
+  hipGraphNode_t dependencies[2]{};n=0;HIP_OK(hipGraphNodeGetDependencies(chain[i],nullptr,&n));
+  checked(n==(i==0?0u:i==5?2u:1u),__LINE__);
+  HIP_OK(hipGraphNodeGetDependencies(chain[i],dependencies,&n));
+  if(i==5)checked((dependencies[0]==kernels[0]&&dependencies[1]==chain[4])||(dependencies[1]==kernels[0]&&dependencies[0]==chain[4]),__LINE__);
+  else if(i)checked(dependencies[0]==chain[i-1],__LINE__);
+ }
+ n=0;HIP_OK(hipGraphNodeGetDependentNodes(chain[5],nullptr,&n));checked(n==0,__LINE__);
+ hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
+ constexpr unsigned warmup_rounds=4,verification_rounds=16;
+ // Both phases check every value; this workload does not measure elapsed time.
+ for(unsigned round=0;round<warmup_rounds+verification_rounds;++round){
+  for(unsigned i=0;i<162;++i)input[i]=0xa5000000u+i*7+round*113;
+  count=73;salts[0]=19+round*101;salts[1]=56+round*101;
+  for(unsigned k=0;k<2;++k)HIP_OK(hipGraphExecKernelNodeSetParams(exec,kernels[k],&params[k]));
+  if(round==19){HIP_OK(hipGraphDestroy(graph));graph=nullptr;}
+  if(before_replay)before_replay(exec,kernels);
+  for(unsigned pass=0;pass<2;++pass){
+   const bool graph_pass=((round+pass)&1)!=0;
+   HIP_OK(hipMemset(a,0x6b,sizeof(input)));HIP_OK(hipMemset(b,0x91,sizeof(input)));
+   for(auto& value:output)value=0xdeadbeefu;for(auto& value:eager)value=0xdeadbeefu;
+   if(graph_pass){
+    count=0;salts[0]=salts[1]=999;HIP_OK(hipGraphLaunch(exec,origin));
+   }else{
+    count=73;salts[0]=19+round*101;salts[1]=56+round*101;
+    HIP_OK(hipMemcpyAsync(a,input,sizeof(input),hipMemcpyHostToDevice,origin));
+    HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,origin,args0,nullptr));
+    HIP_OK(hipEventRecord(ready,origin));HIP_OK(hipStreamWaitEvent(peer,ready,0));
+    HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,peer,args1,nullptr));
+    HIP_OK(hipMemcpyAsync(b,a,sizeof(input),hipMemcpyDeviceToDevice,peer));
+    HIP_OK(hipMemcpyAsync(eager,b,sizeof(eager),hipMemcpyDeviceToHost,peer));
+    HIP_OK(hipEventRecord(done,peer));HIP_OK(hipStreamWaitEvent(origin,done,0));
+   }
+   HIP_OK(hipStreamSynchronize(origin));
+   const auto* result=graph_pass?output:eager;
+   for(unsigned i=0;i<162;++i){const unsigned region=i/81,local=i%81;
+    const unsigned expected=local<73?local*17+19+round*101+region*37:input[i];
+    if(result[i]!=expected){std::fprintf(stderr,"PUBLIC_MULTI_KERNEL_REPLAY_OUTPUT_MISMATCH round=%u index=%u\n",round,i);checked(false,__LINE__);}
+   }
+  }
+  checked(callbacks==round+1,__LINE__);
+ }
+ HIP_OK(hipGraphExecDestroy(exec));HIP_OK(hipEventDestroy(done));HIP_OK(hipEventDestroy(ready));
+ HIP_OK(hipStreamDestroy(peer));HIP_OK(hipStreamDestroy(origin));HIP_OK(hipFree(b));HIP_OK(hipFree(a));HIP_OK(hipModuleUnload(module));
+}
 }

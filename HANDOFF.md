@@ -16,6 +16,23 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Two-kernel replay qualified offline
+
+The shared fixture now captures two kernels across joined streams, checks its
+exact six-node topology, alternates eager/captured order and verifies changing
+inputs over four warmup and sixteen verification rounds. Each kernel writes a
+separate guarded region; both independent omission controls reject. The combined
+model verifies 84 dispatches, four allocations/frees and seven retired queues.
+Full 84-unit sanitizer qualification, 26 controls and a fresh 74-object native
+package passed. See `evidence/offline-two-kernel-replay.json`.
+
+Next: freeze/review `build/public-hip-multi-kernel-v1`, preserve the current
+CPU lifetime image/log below, then run once on idle .40. Acceptance requires
+the existing joined oracle plus 5840 added values, 640 guards and clean aggregate
+retirement. The 30-second title watchdog and 40-second controller limit remain.
+These are repeated correctness checks; native validation, memory plateau,
+measured replay efficiency and the full G5 contract remain open.
+
 ## Native allocation-lifetime cases passed
 
 The CPU-only copy title passed queued free with a live executable and parameter

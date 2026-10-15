@@ -221,11 +221,18 @@ class ConsoleContractTest(unittest.TestCase):
                     COPY_GPU_EXPECTED.replace(b'joined_streams=2 rejoined=true events_reused=true ', b''),
                     COPY_GPU_EXPECTED.replace(b'rejoined=true', b'rejoined=false'),
                     COPY_GPU_EXPECTED.replace(b'events_reused=true', b'events_reused=false'),
-                    COPY_GPU_EXPECTED.replace(b'queues=4 retired=4', b'queues=3 retired=3'),
+                    COPY_GPU_EXPECTED.replace(b'queues=7 retired=7', b'queues=6 retired=6'),
                     COPY_GPU_EXPECTED.replace(b'eager_equal=true', b'eager_equal=false'),
                     COPY_GPU_EXPECTED.replace(b'values=292', b'values=146'),
                     COPY_GPU_EXPECTED.replace(b'disabled_replays=6', b'disabled_replays=2'),
-                    COPY_GPU_EXPECTED.replace(b'frees=2', b'frees=1')):
+                    COPY_GPU_EXPECTED.replace(b'frees=4', b'frees=3'),
+                    COPY_GPU_EXPECTED.replace(b'launches=84', b'launches=4'),
+                    COPY_GPU_EXPECTED.replace(b'replay_rounds=20', b'replay_rounds=2'),
+                    COPY_GPU_EXPECTED.replace(b'verification_rounds=16', b'verification_rounds=0'),
+                    COPY_GPU_EXPECTED.replace(b'kernels_per_replay=2', b'kernels_per_replay=1'),
+                    COPY_GPU_EXPECTED.replace(b'replay_values=5840', b'replay_values=292'),
+                    COPY_GPU_EXPECTED.replace(b'replay_guards=640', b'replay_guards=0'),
+                    COPY_GPU_EXPECTED.replace(b'alternating_order=true', b'alternating_order=false')):
             with self.assertRaises(ValueError):
                 check_log(raw, 'copy_gpu')
 

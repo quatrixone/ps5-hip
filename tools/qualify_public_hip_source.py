@@ -281,6 +281,21 @@ def main():
     run('copy-gpu-joined-missing-join', [output / 'copy-gpu-model', launch_code, 'joined-missing-join'], env,
         expected_output_failure=True, failure_marker='PUBLIC_COPY_GPU_UNJOINED_REJECTED')
     print('public copy/kernel graph, joined capture and six negative controls PASS', flush=True)
+    result = run('copy-gpu-replay', [output / 'copy-gpu-model', launch_code, 'replay'], env)
+    if result.splitlines() != [
+        'PUBLIC_MULTI_KERNEL_REPLAY_PASS replay_rounds=20 warmup_rounds=4 verification_rounds=16 kernels_per_replay=2 replay_values=5840 replay_guards=640 alternating_order=true launches=80 gpu_execution=false',
+        'PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=2 frees=2 ownership=clean gpu_execution=false']:
+        raise RuntimeError('multi-kernel replay oracle differs')
+    for negative, index in (('replay-omit-first', 0), ('replay-omit-second', 81)):
+        run('copy-gpu-' + negative, [output / 'copy-gpu-model', launch_code, negative], env,
+            expected_output_failure=True,
+            failure_marker='PUBLIC_MULTI_KERNEL_REPLAY_OUTPUT_MISMATCH round=0 index=' + str(index))
+    print('public multi-kernel replay and independent kernel omission controls PASS', flush=True)
+    result = run('copy-gpu-combined', [output / 'copy-gpu-model', launch_code, 'combined'], env)
+    if result.splitlines() != [
+        'PUBLIC_COPY_GPU_COMBINED_PASS launches=84 allocations=4 frees=4 queues=7 gpu_execution=false',
+        'PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=4 frees=4 ownership=clean gpu_execution=false']:
+        raise RuntimeError('combined native workload ownership differs')
     lifetime_source = ROOT / 'tests/public_hip_allocation_lifetime_model.cpp'
     source_hashes[str(lifetime_source.relative_to(ROOT))] = sha(lifetime_source)
     lifetime_object = compile_one((len(units) + 14, lifetime_source))
@@ -484,7 +499,7 @@ def main():
                'allocation_lifetime_cases': ['queued-free-before-exec-destroy', 'parameter-migration-free-old-before-replay', 'thread-create-failure-rejected', 'thread-join-failure-rejected'],
                'allocation_lifetime_observation_ms': 100,
                'copy_gpu_model_sha256': sha(output / 'copy-gpu-model'),
-               'copy_gpu_cases': ['explicit', 'capture', 'joined', 'missing-join-rejected', 'eager-equality', 'six-disabled-directions', 'update-source-destroy', 'noop-rejected', 'corrupt-rejected', 'h2d-omitted-rejected', 'd2d-omitted-rejected', 'd2h-omitted-rejected'],
+               'copy_gpu_cases': ['explicit', 'capture', 'joined', 'replay20-two-kernels', 'replay-omit-first-rejected', 'replay-omit-second-rejected', 'missing-join-rejected', 'eager-equality', 'six-disabled-directions', 'update-source-destroy', 'noop-rejected', 'corrupt-rejected', 'h2d-omitted-rejected', 'd2d-omitted-rejected', 'd2h-omitted-rejected'],
                'copy_graph_model_sha256': sha(output / 'copy-graph-model'),
                'copy_graph_cases': ['explicit', 'capture', 'changing-input', 'disabled-reenabled', 'source-destroyed', 'allocation-retirement', 'copy-capture-invalidation-27-cases', 'copy-setter-handle-and-exact-subtype-rejection', 'generic-update-type-preflight-and-compatible-replay', 'source-update-isolation', 'exec-update-offsets-guards', 'rejected-update-preserves-parameters'],
                'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),

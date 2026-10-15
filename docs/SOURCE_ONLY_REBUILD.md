@@ -443,6 +443,20 @@ not prove concurrent GPU dispatch, general multi-kernel capture or sustained
 replay efficiency. This bounded joined variant passed on .40 at `a885975`; see
 `../evidence/console40-copy-joined-success.json`. Both candidate phases are consumed.
 
+The next copy/kernel candidate extends that oracle with two `thread_words`
+dispatches over separate 81-word regions. A six-node captured graph crosses to
+the peer stream for the second kernel and copies, then rejoins the origin before
+its callback. Four warmup and sixteen verification rounds alternate eager and
+captured order with changed inputs and salts. Each path independently checks
+146 values and 16 guards per round; source-graph destruction is also exercised.
+The added workload requires 80 dispatches, 5840 values and 640 guards; combined
+native acceptance requires 84 dispatches, four allocations/frees and seven
+retired queues. Separate omitted-kernel controls must reject both missing regions.
+These are bounded correctness checks. They measure neither elapsed time nor
+memory plateau, and the two kernels write independent regions rather than
+passing computed data between kernels. Native validation of this extension is
+pending.
+
 The source qualifier also checks queued graph copies followed by `hipFree`
 while the executable and stream remain alive, and executable parameter migration
 to replacement allocations before freeing the old buffers. It verifies exact

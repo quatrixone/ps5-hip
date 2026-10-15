@@ -27,8 +27,8 @@ std::unique_ptr<ps5hip::SubmissionBackend> backend() {
   return std::make_unique<ps5hip::AgcBackend>();
 }
 void finalized() {
-  if (!completed || observed.terminal || observed.uncertain || observed.launches != 4 ||
-      observed.allocations != 2 || observed.frees != 2 || observed.queues != 4 ||
+  if (!completed || observed.terminal || observed.uncertain || observed.launches != 84 ||
+      observed.allocations != 4 || observed.frees != 4 || observed.queues != 7 ||
       observed.allocations != observed.frees ||
       observed.queues != observed.retired_queues ||
       !observed.gate_destroyed) {
@@ -98,9 +98,13 @@ int main() {
     if(observed.allocations!=2 || observed.frees!=2 || observed.queues!=4 ||
        observed.retired_queues!=3 || observed.terminal || observed.uncertain ||
        observed.launches!=4) ps5hip_clr_gpu_fail("public-retire");
+    copy_gpu_fixture::run_replay("/system_ex/app/PPSA99014/thread_words.hsaco");
+    if(observed.allocations!=4 || observed.frees!=4 || observed.queues!=7 ||
+       observed.retired_queues!=6 || observed.terminal || observed.uncertain ||
+       observed.launches!=84)ps5hip_clr_gpu_fail("replay-retire");
     ps5hip_clr_gpu::watchdog_finish();
     completed=true;
-    std::puts("HIP_COPY_GPU PASS init=0 count=1 rounds=2 launches=4 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 joined_streams=2 rejoined=true events_reused=true eager_equal=true captured=true owned_args=true updated=true source_destroyed=true disabled_replays=6 callbacks=8 allocations=2 frees=2 watchdog_joined=true finalization=pending");
+    std::puts("HIP_COPY_GPU PASS init=0 count=1 rounds=2 launches=84 values=292 guards=32 recovery_cases=27 setter_rejections=4 update_rejections=2 joined_streams=2 rejoined=true events_reused=true eager_equal=true captured=true owned_args=true updated=true source_destroyed=true disabled_replays=6 callbacks=28 allocations=4 frees=4 replay_rounds=20 warmup_rounds=4 verification_rounds=16 kernels_per_replay=2 replay_values=5840 replay_guards=640 alternating_order=true watchdog_joined=true finalization=pending");
     if(!ps5hip_canary::sync_log())ps5hip_clr_gpu_fail("result-log");
     return 0;
   }catch(...){ps5hip_clr_gpu_fail("exception");}

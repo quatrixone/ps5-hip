@@ -58,7 +58,8 @@ public:
   uint64_t output;unsigned n,salt;std::memcpy(&output,reinterpret_cast<void*>(arg),8);std::memcpy(&n,reinterpret_cast<void*>(arg+8),4);std::memcpy(&salt,reinterpret_cast<void*>(arg+12),4);live(output,n*4);
   auto entry=(uint64_t(p.at(0))<<8)|(uint64_t(p.at(1))<<40);for(const auto&a:allocations)if(entry>=uint64_t(a.second.p)&&entry<uint64_t(a.second.p)+a.second.n)code=a.second.p;
 #if defined(PS5HIP_MODEL_PAIRED_SALT)
-  check(code&&n==73&&submits<=4&&salt==19+((submits-1)/2)*24);
+  if(!std::strncmp(mode,"replay",6))check(code&&n==73&&submits<=(!std::strcmp(mode,"replay-combined")?84u:80u)&&salt>=19&&(salt-19)/101<20&&((salt-19)%101==0||(salt-19)%101==37));
+  else check(code&&n==73&&submits<=4&&salt==19+((submits-1)/2)*24);
 #elif defined(PS5HIP_MODEL_CHANGING_SALT)
   check(code&&n==73&&submits<=2&&salt==19+(submits-1)*24);
 #else

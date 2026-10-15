@@ -7,15 +7,15 @@
 #include <hip/hip_runtime.h>
 #include "hip_internal.hpp"
 static ps5hip::clr::Observation observed;
-static bool completed=false;
+static bool completed=false,combined_case=false;
 struct Final {
  ~Final(){
   std::fprintf(stderr,"PUBLIC_GRAPH_GPU_COUNTS queues=%u retired=%u allocations=%u frees=%u\n",unsigned(observed.queues),unsigned(observed.retired_queues),unsigned(observed.allocations),unsigned(observed.frees));
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
-  checked(observed.allocations==2&&observed.frees==2&&observed.launches==4,__LINE__);
-  const unsigned queues=std::strncmp(mode,"joined",6)==0?4:3;
+  checked(observed.allocations==(combined_case?4u:2u)&&observed.frees==observed.allocations&&observed.launches==(combined_case?84u:std::strncmp(mode,"replay",6)==0?80u:4u),__LINE__);
+  const unsigned queues=combined_case?7:(std::strncmp(mode,"joined",6)==0||std::strncmp(mode,"replay",6)==0)?4:3;
   checked(observed.queues==queues&&observed.retired_queues==queues&&allocations.empty(),__LINE__);
-  std::puts("PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=2 frees=2 ownership=clean gpu_execution=false");
+  std::printf("PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=%u frees=%u ownership=clean gpu_execution=false\n",unsigned(observed.allocations),unsigned(observed.frees));
  }
 };
 __attribute__((init_priority(101))) static Final final;
@@ -47,6 +47,22 @@ static hipError_t joined_end(hipStream_t stream,hipGraph_t* graph){
 #undef hipStreamEndCapture
 int main(int argc,char**argv){
  checked(argc==3,__LINE__);mode=argv[2];resume=true;
+ if(!std::strcmp(mode,"combined")){
+  combined_case=true;mode="joined";copy_gpu_fixture::run(argv[1],true,nullptr,true);
+  mode="replay-combined";copy_gpu_fixture::run_replay(argv[1]);
+  checked(submits==84&&backend_calls==1,__LINE__);completed=true;
+  std::puts("PUBLIC_COPY_GPU_COMBINED_PASS launches=84 allocations=4 frees=4 queues=7 gpu_execution=false");
+  return 0;
+ }
+ if(!std::strncmp(mode,"replay",6)){
+  HIP_OK(hipInit(0));copy_gpu_fixture::run_replay(argv[1],[](hipGraphExec_t exec,const hipGraphNode_t* nodes){
+   if(!std::strcmp(mode,"replay-omit-first"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[0],0));
+   if(!std::strcmp(mode,"replay-omit-second"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[1],0));
+  });
+  checked(submits==80&&backend_calls==1,__LINE__);completed=true;
+  std::puts("PUBLIC_MULTI_KERNEL_REPLAY_PASS replay_rounds=20 warmup_rounds=4 verification_rounds=16 kernels_per_replay=2 replay_values=5840 replay_guards=640 alternating_order=true launches=80 gpu_execution=false");
+  return 0;
+ }
  copy_gpu_fixture::run(argv[1],std::strcmp(mode,"explicit")!=0,[](hipGraphExec_t exec,const hipGraphNode_t* nodes){
   if(!std::strcmp(mode,"copy-h2d"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[0],0));
   if(!std::strcmp(mode,"copy-d2d"))HIP_OK(hipGraphNodeSetEnabled(exec,nodes[2],0));
