@@ -23,9 +23,11 @@ mark the full SDK goal complete. Historical next actions below are superseded.
 - 2026-10-15 | V1.1 partial | offline | full source weights/tokenizer downloaded and hash-verified; nine tooling tests passed | evidence/offline-llm-model-source.json | next: pinned conversion and CPU reference fixtures
 
 See [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) for reproducible Make targets and
-source-inspected blockers. No model or native inference is qualified yet.
+source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.1 partial | offline | locked F16 and pure Q4_0 conversion verified; Q4_0 GGUF 619831552 bytes with 156 Q4_0 and 45 F32 tensors | evidence/offline-llm-model-conversion.json | next: CPU reference logits and native client prerequisites
+
+- 2026-10-15 | V1.1 partial | CPU only | seven fixed prefill/decode cases repeated bitwise; 64-step and 512-token boundary cases; 334 full logit rows and 16 tooling tests pass | evidence/offline-llm-cpu-reference.json | next: native compiler launch and client-required operator/ABI coverage
 
 ## Static module failure handling qualified offline
 

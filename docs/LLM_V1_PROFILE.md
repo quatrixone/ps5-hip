@@ -1,8 +1,9 @@
 # Inference v1: locked inputs and current blockers
 
 This is a partial V1.1 checkpoint, not a completed client port. Locked source
-weights now convert to inspected F16 and pure Q4_0 GGUF outputs. Neither CPU
-reference inference/logits nor native HIP model execution is qualified yet.
+weights now convert to inspected F16 and pure Q4_0 GGUF outputs. CPU Q4_0
+prefill/decode logits and greedy-token references pass repeated comparisons;
+native HIP model execution remains unqualified.
 
 ## Reproduce the inputs and host tools
 
@@ -14,6 +15,8 @@ make llm-cpu-reference LLM_CPU_BUILD_DIR=build/llm-cpu-reference
 make llm-model-profile LLM_PROFILE_DIR=results/llm-model-profile
 make llm-model-fetch LLM_MODEL_RECEIPT=results/llm-model-source/receipt.json
 make llm-model-convert LLM_CPU_BUILD_DIR=build/llm-cpu-reference
+make llm-reference-fixtures LLM_CPU_BUILD_DIR=build/llm-cpu-reference \
+  LLM_REFERENCE_DIR=results/llm-reference
 ```
 
 These are optional targets; the default native SDK build does not fetch an LLM
@@ -72,6 +75,38 @@ plus the CPU tool build. Package installation on `/mnt/c` can take several minut
 The first local output hashes below identify the measured build; cross-machine
 bit-for-bit conversion reproducibility has not yet been tested.
 
+`llm-reference-fixtures` rebuilds/revalidates the CPU tools, then compiles the
+small upstream-API harness in `tests/llm_cpu_reference.cpp`. It requires the
+qualified Q4_0 output above; it does not fetch or convert a model implicitly.
+`tests/fixtures/llm-reference-prompts.json` freezes six text prompts and their
+token IDs, plus a repeated-token context-boundary input. The text cases are
+retokenized and checked exactly with both `add_special` and `parse_special`
+enabled. These are raw completion fixtures, not chat-template validation.
+
+The seven cases cover five different prompts with 16 incremental decode calls
+each, one with 64 calls, and 496 input tokens plus 16 calls filling context 512.
+Each case uses batch one, four CPU threads, F16 K/V, disabled Flash Attention,
+zero GPU layers and disabled operation/KQV offloading. There are two independent
+process/context runs per case. All 320 generated/fed tokens match the lowest-ID
+argmax of their raw logits; all corresponding repeats are bitwise identical.
+The 334 rows contain 10,688,000 finite logits (32,000 vocabulary entries/row).
+
+Raw `.f32le` files contain a full prefill logit row, then one full row after
+each actual incremental decode. The final row is retained for comparison but
+not sampled; the boundary case never submits a 513th token. `.tokens` files
+hold the greedy tokens actually fed back. Fixed-step numerical fixtures
+deliberately continue through end-of-generation tokens, so this does not qualify
+normal chat termination. Each run has a fresh context: same-context reset,
+unload/reload lifecycle and native execution still need their own tests.
+See `../evidence/offline-llm-cpu-reference.json` for hashes and results.
+
+Reference outputs require a fresh `LLM_REFERENCE_DIR`; raw logits stay ignored
+and can be regenerated from the frozen source inputs. Receipts bind the model,
+compiler, CPU libraries, harness, tokenizer inputs and output hashes. Matching
+repeats on this host do not establish cross-machine bitwise equivalence or a
+native floating-point tolerance. No tokens/second or native memory-fit claim
+is made by this fixture target.
+
 ## Model and memory inventory
 
 Model: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`, revision
@@ -112,8 +147,9 @@ norm: 2,048 elements each, totaling 368,640 bytes. GGUF metadata/alignment adds
 `e657561bf17a670d0e1516d6338a7a75f65803acf58fd53bd822a08c3ddf44df`.
 Pure Q4_0 SHA-256:
 `c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa`.
-Next freeze CPU token/logit fixtures and measure actual client allocations;
-file size alone still does not establish native memory fit or model correctness.
+CPU token/logit fixtures are now frozen as described above. Next measure native
+client allocations and operator results; file size alone still does not
+establish native memory fit or native model correctness.
 
 The current public adapter caps individual allocations at 64 MiB. Dense
 embeddings exceed that; quantizing may reduce individual tensors, but packed
@@ -130,7 +166,7 @@ compiled or registered because upstream globs broad operator/template sets.
 | Blocker | Concrete source evidence and next work |
 | --- | --- |
 | Build/library integration | Upstream `ggml/src/ggml-hip/CMakeLists.txt` requires `hip`, `hipblas`, `rocblas`, links all three, and rejects `GGML_STATIC`. Establish native build/link integration and real operation providers; removing package checks is insufficient. |
-| Embedded image registration | `ports/clr/ps5-public-module-aot.patch` rejects pointer-only images (`fname_.empty()`). File-based public module tests do not establish the compiler-generated `<<<>>>` path. First qualify one bounded embedded image through the genuine registration path. |
+| Native embedded image execution | Bounded compiler-generated registration/stubs now pass genuine CLR host qualification with modeled GPU transport. Native compiler-stub execution is still pending; the cross-compiled bootstrap package alone does not prove it. Pointer-only dynamic image loading remains unsupported. See `PUBLIC_EMBEDDED_IMAGES.md`. |
 | Whole-module admission | `ports/clr/ps5-device.cpp` checks every kernel against the Initial route; an unsupported unused kernel can reject a module. Measure the compiled closure rather than assuming runtime operator selection removes it. |
 | Argument ABI | Current capture/admission accepts only four/eight-byte values and non-null registered global buffers. Ordinary normalization passes `uint3` aggregates and optional null buffers; softmax uses a larger structure. Inspect emitted metadata, then implement the required copying/validation semantics. |
 | Geometry and LDS | Ordinary RMSNorm in `ggml/src/ggml-cuda/norm.cu` uses 256/1024-thread blocks and shared storage; RoPE uses Y-thread geometry. Current public CLR caps workgroups at 64 and admits no LDS. Integrate already-proven routes with public HIP and validate these actual operators. |
@@ -144,12 +180,13 @@ Relevant pinned upstream files:
 [softmax](https://github.com/ggml-org/llama.cpp/blob/b76b13379d3b7d67ab0bc424516bb6fd2522bd8e/ggml/src/ggml-cuda/softmax.cu),
 [HIP aliases](https://github.com/ggml-org/llama.cpp/blob/b76b13379d3b7d67ab0bc424516bb6fd2522bd8e/ggml/src/ggml-cuda/vendors/hip.h).
 
-Next: a genuine embedded-image registration/launch test and the effective HIP
-client compile/link probe; in parallel prepare CPU reference fixtures from
-the locked converted outputs. Follow with the required operator ABI/geometry,
+Next: a native embedded-image registration/launch test and the effective HIP
+client compile/link probe, using the frozen CPU references for later numerical
+comparison. Follow with the required operator ABI/geometry,
 matmul and memory coverage. General G5 diagnostics remain deferred.
 
-The static-module failure publication prerequisite passed focused and full CLR
-host qualification. Remaining registration work is documented in
-[PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md); embedded images remain
-unsupported.
+The static-module failure publication prerequisite and bounded compiler-image
+registration now pass genuine CLR host qualification; see
+`../evidence/offline-public-embedded-images.json`. GPU transport was modeled.
+Remaining native compiler-launch work is documented in
+[PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md).

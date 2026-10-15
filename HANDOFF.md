@@ -32,11 +32,14 @@ RoPE tests passed. Full source weights/tokenizer are downloaded and hash-verifie
 through `make llm-model-fetch`; see `evidence/offline-llm-model-source.json`.
 F16 and pure Q4_0 conversion are verified through `make llm-model-convert`;
 see `evidence/offline-llm-model-conversion.json`. The Q4_0 file is 619831552
-bytes and retains 45 F32 tensors alongside 156 Q4_0 tensors. Reference logits
-and native client execution remain unqualified.
+bytes and retains 45 F32 tensors alongside 156 Q4_0 tensors. CPU reference
+logits now pass seven cases twice, including 64 decode steps and a 512-token
+boundary: `make llm-reference-fixtures` reproduces them from frozen token inputs.
+See `evidence/offline-llm-cpu-reference.json`. Native client execution and GPU
+comparison tolerances remain unqualified.
 V1.1 remains partial. The next runtime blocker is
 native compiler-generated embedded-image launch; prepare the effective HIP
-compile/link probe and pinned model conversion/reference fixtures in parallel.
+compile/link probe using the pinned converted model and CPU reference fixtures.
 
 Retirement-ack work was stopped before edits or experiments. Do not resume it
 as a v1 prerequisite. Current public launch routes, model-scale memory and

@@ -2,12 +2,15 @@
 
 For the optional inference-v1 CPU tools, source-weight download and locked
 F16/Q4_0 conversion, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). Run
-`make llm-model-fetch`, then `make llm-model-convert` in WSL/Linux x86-64.
+`make llm-model-fetch`, then `make llm-model-convert`, then
+`make llm-reference-fixtures` in WSL/Linux x86-64.
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed
 PyTorch. These optional targets do not establish native inference; the default
 SDK build below is unchanged. Repeated downloads need a fresh
-`LLM_MODEL_RECEIPT`, and repeated conversions need a fresh `LLM_GGUF_DIR`.
+`LLM_MODEL_RECEIPT`, repeated conversions need a fresh `LLM_GGUF_DIR`, and CPU
+logit/token fixtures need a fresh `LLM_REFERENCE_DIR`. Fixed token inputs live
+in Git; full reference logits are generated locally, validated, and hashed.
 
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or

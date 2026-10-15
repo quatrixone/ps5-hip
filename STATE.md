@@ -25,10 +25,13 @@ locked TinyLlama metadata/header profile. `make llm-model-fetch` now downloads
 and verifies full source weights/tokenizer; see `evidence/offline-llm-model-source.json`.
 F16 and pure Q4_0 conversion now pass with locked upstream tools. The Q4_0
 GGUF is 619831552 bytes, with 156 Q4_0 and 45 F32 tensors; see
-`evidence/offline-llm-model-conversion.json`. Reference logits and actual model
-memory usage remain open. Next: native compiler-generated
+`evidence/offline-llm-model-conversion.json`. CPU prefill/decode references now
+pass seven fixed cases twice, including 64 decode steps and the 512-token
+boundary, with identical raw logits across repeats. See
+`evidence/offline-llm-cpu-reference.json`. Native model memory usage and GPU
+numerical tolerances remain open. Next: native compiler-generated
 embedded-image launch and the effective HIP client compile/link probe,
-alongside pinned weight conversion and CPU fixtures.
+using the pinned converted weights and CPU token/logit fixtures.
 
 Defer new retirement-ack diagnostics and general G5 optimization unless a real
 client blocker requires them. Existing correctness tests remain regressions.
