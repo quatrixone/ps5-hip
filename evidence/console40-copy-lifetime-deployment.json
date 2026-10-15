@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-verified-copy-lifetime-deployment",
+  "source_commit": "7a8ba25a1228a24e89b0912c51626f1d5607ca69",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7",
+  "manifest_sha256": "d4c6e67d035c01f44a53f43aa5a84d41d2f64f14b318bd323cd5c2d4cac8145f",
+  "complete_ftp_reads": 20,
+  "launched": false,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "prior_image_sha256": "6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5",
+  "prior_log_sha256": "cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79",
+  "prior_image_and_log_preserved": true,
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/source-public-copy-lifetime-console-v1/manifest.json": "d4c6e67d035c01f44a53f43aa5a84d41d2f64f14b318bd323cd5c2d4cac8145f",
+    "results/source-public-copy-lifetime-console-v1/deployment-review.json": "28a74233c40a2faad1406b9eaec2f4ba3a723102641e89a116ca8b174b93e165",
+    "results/source-public-copy-lifetime-console-v1/deploy/receipt.json": "4949a047743047618157524cde6630c4b850812e77b7da8526c5388bb5c7ad3c",
+    "results/source-public-copy-lifetime-console-v1/deploy/snapshot.log": "8f1fefedd02cdc81be7555935962b1f56bdc35a4a178d45cf608b59bdc5aff6f",
+    "results/source-public-copy-lifetime-console-v1/deploy/post_snapshot.log": "d499af72b1b1c4d25aa53432a90d41d73773fff9b344f8e33566251e01e0b5a2",
+    "results/source-public-copy-lifetime-console-v1/deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163"
+  },
+  "limits": [
+    "Deployment phase consumed; never replay.",
+    "Native allocation-lifetime execution remains pending separate receipt-bound review."
+  ]
+}

@@ -27,8 +27,11 @@ ASan/UBSan qualification, 26 controls and a fresh 74-object native package passe
 independent artifact review confirms six package files and no GPU imports.
 See `evidence/offline-native-lifetime-fixture.json`.
 
-Next: freeze/review `build/public-hip-copy-lifetime-v2` and run once on idle .40.
-Use the joined image/log baseline below; preserve it before deployment. Native
+The lifetime package deployed and verified on idle .40; both locks released.
+See `evidence/console40-copy-lifetime-deployment.json` (relative to repo root).
+Next: receipt-bound review, then one bounded execution.
+The joined image/log baseline below is preserved. Installed image is
+`dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7`. Native
 acceptance requires 7168 existing comparison bytes plus 384 lifetime bytes,
 eight allocations/frees, four retired queues, no GPU submissions and natural
 exit. The 100 ms gate observation cannot prove entry into the freeing call.
@@ -762,7 +765,7 @@ for new source-built candidates; historical phases remain consumed/inert.
   This is not public HIP GPU support.
 - Genuine exported upstream `hipMalloc`/`hipFree` passed the 69-unit Linux
   PS5-registry model, ten ASan/UBSan and ten TSan modes, and independent review.
-  Integrated commits `209664d`–`debf465`; see
+  Integrated commits `209664d`â€“`debf465`; see
   `evidence/offline-hip-public-memory-bridge.json`. Native public API behavior
   now has the bounded native allocation/free result above; copies and GPU launch remain open.
 - A **clean 74-object native public HIP bootstrap** title was built, strictly
@@ -785,11 +788,11 @@ for new source-built candidates; historical phases remain consumed/inert.
   console. The allocation title includes real `hipInit`/count/malloc/free symbols
   in 74 freshly compiled units. The corrected GEMM candidate passes GeometryLds
   admission, a 39-unit sanitizer model, a 46-unit strict native build, and
-  package/control review. It targets a 9×11×13 FP32 result with 99 active values
+  package/control review. It targets a 9Ã—11Ã—13 FP32 result with 99 active values
   and 45 padding guards. No native GEMM numerical result exists.
 
-Overall progress is roughly **20–22% of the twelve-goal ambition**, a judgment
-about the full roadmap rather than a formal gate metric. G5–G12 are open.
+Overall progress is roughly **20â€“22% of the twelve-goal ambition**, a judgment
+about the full roadmap rather than a formal gate metric. G5â€“G12 are open.
 
 ## Historical branches and local material
 
@@ -856,14 +859,14 @@ ignored `.local/ENVIRONMENT.md`. The user permits .40 proof-of-concept tests whe
 useful, but wants candidates finished and reviewed offline first. Preserve the
 installed image, old GPU image/log, backups, and any user data.
 
-## Scope update — 2026-10-14
+## Scope update â€” 2026-10-14
 
 The owner removed ProsperoAI integration. G7 now targets a standalone ggml/llama
 inference client and SDK preview; application-specific ABI, UI and model coverage
 are no longer acceptance requirements. Historical source/evidence records remain
 provenance. No implementation gate is closed by this scope change.
 
-## Fresh-checkout continuation � 2026-10-14
+## Fresh-checkout continuation ï¿½ 2026-10-14
 
 This checkout is now on local `main`, with the standalone scope and corrected
 source-build pipeline integrated. An isolated historical bootstrap checkout

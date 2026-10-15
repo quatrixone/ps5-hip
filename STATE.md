@@ -20,8 +20,11 @@ ASan/UBSan qualification, 26 controls and a fresh 74-object native package passe
 independent artifact review confirms six package files and no GPU imports.
 See `evidence/offline-native-lifetime-fixture.json`.
 
-Next: freeze/review `build/public-hip-copy-lifetime-v2` and run once on idle .40.
-Use the joined image/log baseline below; preserve it before deployment. Native
+The lifetime package deployed and verified on idle .40; both locks released.
+See `evidence/console40-copy-lifetime-deployment.json` (relative to repo root).
+Next: receipt-bound review, then one bounded execution.
+The joined image/log baseline below is preserved. Installed image is
+`dd5f92c5c117518958ec088da0ced54980904b61eec17302527344bd099227f7`. Native
 acceptance requires 7168 existing comparison bytes plus 384 lifetime bytes,
 eight allocations/frees, four retired queues, no GPU submissions and natural
 exit. The 100 ms gate observation cannot prove entry into the freeing call.
