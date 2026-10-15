@@ -25,6 +25,11 @@ see `evidence/offline-native-public-launch-current.json`. The pending native tes
 requires two launches, 146 exact outputs, 16 guards, two rejected geometries and
 one fully retired allocation/queue. No GPU result is claimed before execution.
 
+Deployment subsequently passed through WSL: all seven mounted files matched,
+the graph image/log were preserved, and services and lock release passed. See
+`evidence/console40-public-launch-deploy.json`. The exact deployment receipt has
+independent approval for one bounded execution; the deploy phase is consumed.
+
 - 2026-10-15 | G5 | cf9fafe | .40 | pass: native host graph and teardown | evidence/console40-public-host-graph.json | next: native public GPU qualification
 
 The source-built public host-graph fixture passed on .40 via WSL at `cf9fafe`:

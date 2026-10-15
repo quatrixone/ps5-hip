@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-deployment-only-public-hip-gpu-launch",
+  "source_commit": "4acfab25c1aab60c592926966c9017492995d7d9",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "manifest_sha256": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+  "installed_package_sha256": "998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459",
+  "accepted": true,
+  "launched": false,
+  "healthy_after": true,
+  "lock_released": true,
+  "complete_ftp_reads": 21,
+  "preserved_image": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4.preserved",
+  "preserved_log": "/data/ps5-hip/results/ps5-hip-public-graph.log.a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e.preserved",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-current-console-v1/manifest.json": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+    "results/source-public-launch-current-console-v1/deploy/receipt.json": "a68617bb340a3ac23e224f4053a4543830ff59e36a99cab57c844597995a1e0f",
+    "results/source-public-launch-current-console-v1/deployment-review.json": "66ecc759a006bab647fb781119029a5cc50d071a371c2fd00340ad33d43bef40",
+    "results/source-public-launch-current-console-v1/execution-authorization.json": "63dbb983ce28c827e1d6e370e3b0b95ba3c8fbad709a254a019d61b204a0f020",
+    "results/source-public-launch-current-console-v1/deploy/previous-application.log": "a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e",
+    "results/source-public-launch-current-console-v1/deploy/snapshot.log": "586b5ded393ba7fb9be30992894199a675b09f0e4727e785052fa7f3354e68ff",
+    "results/source-public-launch-current-console-v1/deploy/post_snapshot.log": "1cde57df7daea9516b9448d57fb1e03f4864274ecb2b339ad021817549d3a674"
+  },
+  "limits": [
+    "Deployment only; public HIP GPU execution is pending.",
+    "Deploy phase consumed. Independent review permits one bounded execute tied to this exact receipt."
+  ]
+}
