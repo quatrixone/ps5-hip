@@ -18,6 +18,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+The stream package deployment passed all 21 complete reads and seven mounted
+file checks through WSL. The old image/log are preserved; services are healthy
+and the lock is released. Installed image is now
+`568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981`.
+No stream application log exists yet. See `evidence/console40-stream-package-deploy.json`;
+older installed-image notes below describe the preserved successful baseline.
+
 The stream candidate at `3160818` is frozen and independently approved for
 one WSL deployment. All 29 bound files, seven package files and 101 committed
 inputs match. See `evidence/offline-public-stream-deployment.json`; execution
