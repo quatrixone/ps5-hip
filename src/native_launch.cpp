@@ -125,23 +125,13 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     for (auto range : live) backing.push_back(data.resolve(reinterpret_cast<void *>(range.address), range.bytes).memory->range());
     // Validate dimensions/capacity without invented GPU allocations.
     if (request.route == NativeLaunchRoute::Geometry || request.route == NativeLaunchRoute::GeometryLds) {
-        const auto &s = request.shape;
-        require(request.route != NativeLaunchRoute::GeometryLds || s.dimensions == 2,
-                "combined native geometry/LDS requires 2D");
-        require((s.dimensions == 2 && s.threads == std::array<uint32_t,3>{8,8,1} && s.groups[2] == 1) ||
-                (s.dimensions == 3 && s.threads == std::array<uint32_t,3>{8,4,2}), "unsupported native geometry shape");
-        uint64_t groups = 1;
-        for (unsigned axis = 0; axis < 3; ++axis) {
-            require(s.groups[axis] && s.groups[axis] <= UINT32_MAX / s.threads[axis] &&
-                groups <= (UINT32_MAX / 64) / s.groups[axis], "native geometry extent exceeds limit");
-            groups *= s.groups[axis];
-        }
+        validate_geometry_entry(k, request.shape, request.route == NativeLaunchRoute::GeometryLds);
     } else {
         require(request.shape.dimensions == 1 && request.shape.threads == std::array<uint32_t,3>{reduction ? 1024u : 64u,1,1} &&
             request.shape.groups[1] == 1 && request.shape.groups[2] == 1 && request.shape.groups[0] &&
             request.shape.groups[0] <= UINT32_MAX / (reduction ? 1024u : 64u), "unsupported native 1D shape");
     }
-    require(k.max_workgroup_size >= (reduction ? 1024u : 64u) && (k.required_workgroup == std::array<uint32_t,3>{} ||
+    require(k.max_workgroup_size >= request.shape.threads[0]*request.shape.threads[1]*request.shape.threads[2] && (k.required_workgroup == std::array<uint32_t,3>{} ||
         k.required_workgroup == request.shape.threads), "native required workgroup mismatch");
     const uint32_t scratch_bytes = request.route == NativeLaunchRoute::BufferScratch ? buffer_scratch_ring_bytes(k.private_bytes) : 0;
     if (request.route == NativeLaunchRoute::Lds || reduction)

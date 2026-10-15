@@ -52,6 +52,15 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.1/V1.3 prerequisite | offline | source-built selected Q8_1/Q4_0 modules and isolated modern header adaptation pass | evidence/offline-llm-q4-source-fixture.json | next: actual public HIP ABI/resource routing and native numerical gates
 
+## Q8/Q4 offline dispatch and numerical references
+
+- 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate
+- 2026-10-15 | V1.3 reference | CPU only | eight Q4 cases / 296 outputs, four Q8 cases, 16 corruption controls and repeated genuine GGUF extraction pass | evidence/offline-llm-q4-numerical-reference.json | next: isolated and chained GPU arithmetic with full raw-buffer verification
+
+These are bounded offline gates. Q8/Q4 numerical GPU execution, remaining
+operators, model-scale memory, the complete client and full-model inference
+remain unproven. The first release still requires all V1.1-V1.5 exit evidence.
+
 ## Static module failure handling qualified offline
 
 - 2026-10-15 | V1.2 prerequisite | 55a6197 | .40 | pass: aggregate compiler launches,320memberbytes64guards,clean lifecycle | evidence/console40-public-aggregate-success.json | next: real RMSNorm resources/oracle

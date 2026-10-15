@@ -113,9 +113,12 @@ struct GeometryShape {
     std::array<uint32_t, 3> groups, threads;
     uint32_t dimensions;
 };
+// Shared shape/entry validation, also used before native allocation.
+void validate_geometry_shape(const GeometryShape &);
+void validate_geometry_entry(const Kernel &, const GeometryShape &, bool lds);
 struct GeometryLaunch { InitialLaunch state; GeometryShape shape; };
 
-// Only measured uniform64-thread shapes8x8x1(dim2) or8x4x2(dim3).
+// Measured 8x8x1/8x4x2 and quantization256x1x1 geometry.
 // Complete blocks, zero global offsets/remainders; logical tails live in kernels.
 GeometryLaunch prepare_geometry_launch(const CodeObject &object, const std::string &name,
     GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
@@ -124,7 +127,7 @@ std::vector<uint32_t> encode_geometry_dispatch(const GeometryLaunch &launch);
 
 struct GeometryLdsLaunch { GeometryLaunch geometry; LdsPlan lds; };
 // Measured XY entry, 8x8x1, static512 LDS and the complete COv5 geometry area.
-// No dynamic LDS, scratch or explicit-only geometry entry in this profile.
+// Also supports measured32x4x1/static384/explicit-only192B; no dynamic LDS or scratch.
 GeometryLdsLaunch prepare_geometry_lds_launch(const CodeObject &object, const std::string &name,
     GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
     const std::vector<LaunchArgument> &arguments);

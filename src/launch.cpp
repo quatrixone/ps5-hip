@@ -14,17 +14,28 @@ void check_range(GpuRange range) {
 bool overlaps(GpuRange a, GpuRange b) {
     return a.address < b.address + b.bytes && b.address < a.address + a.bytes;
 }
-void check_geometry(const GeometryShape &shape) {
+}
+void validate_geometry_shape(const GeometryShape &shape) {
     require((shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{8,8,1} && shape.groups[2] == 1) ||
-            (shape.dimensions == 3 && shape.threads == std::array<uint32_t,3>{8,4,2}), "unsupported measured geometry shape");
+            (shape.dimensions == 3 && shape.threads == std::array<uint32_t,3>{8,4,2}) ||
+            (shape.dimensions == 1 && shape.threads == std::array<uint32_t,3>{256,1,1} && shape.groups[1] == 1 && shape.groups[2] == 1) ||
+            (shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{32,4,1} && shape.groups[2] == 1), "unsupported measured geometry shape");
     uint64_t groups = 1;
     for (unsigned axis = 0; axis < 3; ++axis) {
         require(shape.groups[axis] != 0 && shape.groups[axis] <= UINT32_MAX / shape.threads[axis],
                 "invalid geometry axis extent");
-        require(groups <= (UINT32_MAX / 64) / shape.groups[axis], "geometry grid product exceeds limit");
+        require(groups <= (UINT32_MAX / (shape.threads[0]*shape.threads[1]*shape.threads[2])) / shape.groups[axis], "geometry grid product exceeds limit");
         groups *= shape.groups[axis];
     }
 }
+void validate_geometry_entry(const Kernel &k, const GeometryShape &shape, bool lds) {
+    validate_geometry_shape(shape);
+    const auto rejection = lds ? geometry_lds_launch_rejection(k) : geometry_launch_rejection(k);
+    if (!rejection.empty()) throw ObjectError(rejection);
+    const bool q8 = shape.threads == std::array<uint32_t,3>{256,1,1};
+    const bool q4 = shape.threads == std::array<uint32_t,3>{32,4,1};
+    require(k.rsrc2 == (lds ? (q4 ? 0xb8cu : 0x98cu) : (q8 ? 0x38cu : 0x138cu)) &&
+        (!q8 || !lds) && (!q4 || lds) && (!lds || shape.dimensions == 2), "geometry entry/shape mismatch");
 }
 
 void validate_launch_argument(const KernelArgument &layout, const LaunchArgument &arg) {
@@ -55,8 +66,8 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
     if (!rejection.empty()) throw ObjectError(rejection);
     const auto threads = geometry ? geometry->threads : std::array<uint32_t,3>{reduction ? 1024u : 64u,1,1};
     const auto groups = geometry ? geometry->groups : std::array<uint32_t,3>{groups_x,1,1};
-    if (geometry) check_geometry(*geometry);
-    require(k.max_workgroup_size >= (reduction ? 1024u : 64u), "kernel cannot support the initial 64-thread group");
+    if (geometry) validate_geometry_entry(k, *geometry, lds);
+    require(k.max_workgroup_size >= threads[0]*threads[1]*threads[2], "kernel cannot support the requested workgroup");
     require(k.required_workgroup == std::array<uint32_t, 3>{} ||
             k.required_workgroup == threads, "required workgroup shape mismatch");
     if (!geometry) require(groups_x != 0 && groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid initial dispatch dimensions");
@@ -131,8 +142,12 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     require(launch.entry_address >= window_begin && launch.entry_address < window_end &&
             launch.entry_address % 256 == 0, "invalid dispatch entry address");
     if (geometry) {
-        check_geometry(*geometry);
+        validate_geometry_shape(*geometry);
         require(launch.threads == geometry->threads && launch.groups_x == geometry->groups[0], "geometry plan shape mismatch");
+        const bool explicit_q4 = geometry->threads == std::array<uint32_t,3>{32,4,1};
+        if (explicit_q4) require(lds && launch.kernargs.size() == 192 && launch.rsrc1 == 0x60af00c3u,
+                                "invalid explicit geometry ABI");
+        else {
         require(launch.kernargs.size() >= 256 && launch.kernargs.size() <= 65536,
                 "invalid geometry implicit storage");
         std::array<uint8_t, 256> expected{};
@@ -145,6 +160,11 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
         }
         require(std::equal(expected.begin(), expected.end(), launch.kernargs.end() - 256),
                 "geometry implicit arguments disagree with dispatch shape");
+        }
+        if (geometry->threads == std::array<uint32_t,3>{256,1,1})
+            require(!lds && launch.kernargs.size()==328 && launch.rsrc1==0x60af00c1u &&
+                std::all_of(launch.user_sgprs.begin(),launch.user_sgprs.begin()+4,[](uint32_t v){return v==0;}),
+                "invalid quantization geometry ABI");
     } else require(launch.threads == std::array<uint32_t, 3>{reduction ? 1024u : 64u, 1, 1} && launch.groups_x != 0 &&
                    launch.groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid dispatch shape");
     if(reduction) {
@@ -165,7 +185,7 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     require(flat_init ? launch.user_sgpr_count == 8 :
             (launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6), "invalid dispatch user-SGPR count");
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count &&
-            (geometry ? launch.rsrc2 == (lds ? (0x98cu | lds->rsrc2_lds) : 0x138cu) : !(launch.rsrc2 & ~((reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
+            (geometry ? launch.rsrc2 == (lds ? ((geometry->threads[0]==32 ? 0xb8cu : 0x98cu) | lds->rsrc2_lds) : (geometry->threads[0]==256 ? 0x38cu : 0x138cu)) : !(launch.rsrc2 & ~((reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     if (scratch) {
         require(launch.rsrc2 == (flat_init ? 0x91u : 0x8du) && launch.user_sgpr_count == (flat_init ? 8u : 6u) &&
@@ -179,7 +199,7 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     }
     if (lds) {
         const uint32_t base = launch.rsrc2 & ~0x00ff8000u;
-        require((reduction ? (base == 0x8cu || base == 0x38cu) : base == (geometry ? 0x98cu : 0x8cu)) &&
+        require((reduction ? (base == 0x8cu || base == 0x38cu) : base == (geometry ? (geometry->threads[0]==32 ? 0xb8cu : 0x98cu) : 0x8cu)) &&
                 launch.rsrc2 == (base | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
                 std::all_of(launch.user_sgprs.begin(), launch.user_sgprs.begin() + 4,
                             [](uint32_t value) { return value == 0; }), "LDS dispatch entry state mismatch");
@@ -206,8 +226,9 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     registers(0xb848, resources, 2);
     registers(0xb8a0, &launch.rsrc3, 1);
     // Pinned Mesa GFX10: SIMD_DEST_CNTL when waves/group is divisible by4.
-    // Existing64-thread routes have2 waves; bounded reduction has32 waves.
-    const uint32_t limits = reduction ? (1u<<22) : 0;
+    // Existing64-thread routes have2 waves; Q8/Q4 have8/4 and reduction32.
+    const uint32_t waves = (launch.threads[0]*launch.threads[1]*launch.threads[2] + 31)/32;
+    const uint32_t limits = waves % 4 == 0 ? (1u<<22) : 0;
     registers(0xb854, &limits, 1);
     registers(0xb81c, launch.threads.data(), 3);
     if (flat_init) {
@@ -327,7 +348,7 @@ std::vector<uint32_t> encode_flat_call_dispatch(const FlatCallLaunch &launch) {
 GeometryLaunch prepare_geometry_launch(const CodeObject &object, const std::string &name,
     GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
     const std::vector<LaunchArgument> &arguments) {
-    check_geometry(shape);
+    validate_geometry_shape(shape);
     return {prepare_launch(object, name, module, kernarg_storage, shape.groups[0], arguments,
                            nullptr, false, false, &shape), shape};
 }
@@ -338,17 +359,18 @@ std::vector<uint32_t> encode_geometry_dispatch(const GeometryLaunch &launch) {
 GeometryLdsLaunch prepare_geometry_lds_launch(const CodeObject &object, const std::string &name,
     GpuRange module, GpuRange kernarg_storage, const GeometryShape &shape,
     const std::vector<LaunchArgument> &arguments) {
-    check_geometry(shape);
+    validate_geometry_shape(shape);
     require(shape.dimensions == 2, "combined geometry/LDS requires the measured 2D shape");
     auto state = prepare_launch(object, name, module, kernarg_storage, shape.groups[0], arguments,
                                 nullptr, true, false, &shape);
-    const auto lds = plan_lds(512, 0);
+    const auto lds = plan_lds(state.rsrc2 == 0xb8cu ? 384u : 512u, 0);
     state.rsrc2 |= lds.rsrc2_lds;
     return {{std::move(state), shape}, lds};
 }
 std::vector<uint32_t> encode_geometry_lds_dispatch(const GeometryLdsLaunch &launch) {
-    const auto expected = plan_lds(512, 0);
-    require(launch.geometry.shape.dimensions == 2 && launch.lds.static_bytes == 512 &&
+    const uint32_t bytes = launch.geometry.shape.threads == std::array<uint32_t,3>{32,4,1} ? 384u : 512u;
+    const auto expected = plan_lds(bytes, 0);
+    require(launch.geometry.shape.dimensions == 2 && launch.lds.static_bytes == bytes &&
             launch.lds.dynamic_bytes == 0 && launch.lds.allocated_bytes == expected.allocated_bytes &&
             launch.lds.rsrc2_lds == expected.rsrc2_lds, "inconsistent geometry/LDS plan");
     return encode_dispatch(launch.geometry.state, nullptr, &launch.lds, nullptr, &launch.geometry.shape);

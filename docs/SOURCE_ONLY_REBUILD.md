@@ -34,6 +34,30 @@ requirements and unresolved imports. It does not build or run the inference
 client. Diagnostic hipBLAS2.2 headers remain confined to this operator fixture;
 modern interface integration is separate. See [Q4 path](LLM_Q4_PATH.md).
 
+To additionally qualify the selected modules through genuine public HIP on the
+host, use fresh directories for all three prerequisite outputs and the result:
+
+```sh
+make public-hip-q4-host-test \
+  QUALIFICATION_DIR=results/q4-public-base \
+  LLM_RMSNORM_FIXTURE_DIR=results/q4-public-device-prerequisites \
+  LLM_Q4_FIXTURE_DIR=results/q4-public-device-fixture \
+  Q4_QUALIFICATION_DIR=results/q4-public-dispatch
+```
+
+This checks dispatch packets and memory ownership under sanitizers, including
+eager/deferred module loading and a deliberately incorrect packet. It does not
+execute GPU arithmetic. See [HIP_QUANTIZED.md](HIP_QUANTIZED.md) for the measured
+contracts and numerical validation still required before native inference.
+
+`make llm-q4-reference` additionally fetches/converts the locked model and builds
+the CPU RMSNorm prerequisite, then emits GPU-format Q8 bytes and Q4 numerical
+references. For a repeat, supply fresh `LLM_MODEL_RECEIPT`, `LLM_GGUF_DIR`,
+`LLM_RMSNORM_REFERENCE_DIR`, `LLM_RMSNORM_FIXTURE_DIR`, `LLM_Q4_FIXTURE_DIR` and
+`LLM_Q4_REFERENCE_DIR` outputs. Verified CPU/conversion tool builds are reusable.
+See [LLM_Q4_REFERENCE.md](LLM_Q4_REFERENCE.md) for cases, format restrictions,
+the fixed error budget and direct invocation with existing prerequisites.
+
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or
 `results` directory and no checkout of another ps5-hip branch.

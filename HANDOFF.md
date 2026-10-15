@@ -16,16 +16,29 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Next offline implementation: Q4_0 inference path
+## Q4 dispatch and numerical reference: offline qualification
 
-`make llm-q4-fixture` now builds the selected Q8_1/Q4_0 modules from authenticated
-sources; seven focused tests pass. The isolated modern hipBLAS interface helper
-and its generated-overlay syntax checks also pass. See `docs/LLM_Q4_PATH.md` and
-`evidence/offline-llm-q4-source-fixture.json`. Next implement the exact public-HIP
-resource/ABI contracts, then numerical references and .40 validation. Q8 uses
-256x1x1 with hidden geometry; Q4 uses 32x4x1, static LDS384 and explicit-only
-kernargs192. Do not map either to the RMSNorm route. No new console run occurred;
-the installed RMSNorm baseline below remains current.
+The genuine public HIP runtime now admits the measured Q8_1/Q4_0 contracts:
+256x1x1 with 328-byte hidden-geometry arguments for Q8, and 32x4x1 with
+384-byte static LDS and 192-byte explicit-only arguments for Q4. The public
+host model passes four dispatches, 30 negative controls, eager/deferred loading
+and intentional packet-mismatch detection. The shared 87-compilation suite,
+RMSNorm regression, 32 core tests and native aggregate cross-build pass.
+
+The independent GPU-format numerical reference builder also passes: eight Q4
+cases / 296 outputs, four standalone Q8 cases and 16 corruption controls.
+Actual model weights and the original authenticated RMSNorm activation are
+retained; width5632 activations are synthetic. These are offline references,
+not GPU arithmetic or full-model inference evidence.
+
+Next qualify the native numerical harness/package and independent raw verifier,
+then freeze and validate isolated Q4 and chained Q8/Q4 execution on .40.
+The draft harness uses 28 launches and retains all four buffers at every stage.
+Do not deploy a draft or reuse the consumed RMSNorm candidate. No new console
+run occurred; the installed RMSNorm baseline below remains current. See
+`docs/HIP_QUANTIZED.md`, `docs/LLM_Q4_REFERENCE.md` and the compact offline
+milestone evidence. Remaining operators, model-scale allocations, client link,
+full inference and release qualification remain open.
 
 ## Native RMSNorm numerical run completed
 

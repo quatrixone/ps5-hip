@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "classification": "offline-gpu-format-q4-numerical-reference",
+  "source_sha256": {
+    "tools/llm_q4_reference.py": "3c2d4c74461e201cc9bea95bc8861586686892d9e20e69debd170bae48bed385",
+    "tests/llm_q4_reference_test.py": "283ec45e1a5c049241e38f146ee2a6f29bf74e603b6b8addd65b345e6f3028b4",
+    "tools/build_llm_q4_reference.py": "99dd301fbf76ca29e5d399f9ef937d3453c4fdf83ac3642c7d84e60319c3eb56",
+    "tests/llm_q4_reference_build_test.py": "2122acdfd2ca72a3df6721bc10d4c4a4404978e45589656a628251d16d8dcb14",
+    "tests/llm_q4_weights.cpp": "6cc1232ca216c616959effc07beb60c172c8247b8aa77866864189a0ba672a65",
+    "CMakeLists.txt": "ee9a41da99a377c5706ce838ff0df409931ad12f1cc03ec418a516488066373d",
+    "Makefile": "b60a0a56e37edd400875429f1451e0385b82dcc946381bb231b20efd1f60de42"
+  },
+  "raw_evidence": {
+    "results/llm-q4-reference-v3/receipt.json": "2d94b68350cb8ddc49cf97e533874b73c6ad845cb84b00fede340f2a50f33abb",
+    "results/q4-reference-refresh-review-v1/review.json": "246a7bf29d49f8c019dddd4fc60408da06975e131fcf7b00ef9a00b2ca26cc4b",
+    "results/q4-reference-root-review-v1/review.json": "c1ea456f487c95b3d239b1c8bf9ff6c0a29e097f6f4aa2fb2f783e1effe8f28b",
+    "results/q4-reference-half-proof-v1/review.json": "e355a948620c01dee1eb18b6008ce90450b63425068cdea2c36e85e8145be77a",
+    "results/q4-numerical-builder-review-v1/review.json": "512c2199f94c4510a693e5e6af6d8d3770be76438d31731a58d5be0d19fa933c",
+    "results/llm-q4-reference-v1/half-domain-failure.json": "b06cd6d049c91c002e3cc95e280cf73a618b71f10497a20d166cccbb1e424c98",
+    "build/q4-core-v1/Testing/Temporary/LastTest.log": "e721f2b0b8e7866874d674730043cfb7b9740250f13be025760fbe8539b372ac"
+  },
+  "validation": {
+    "reference_tests_passed": 8,
+    "builder_tests_passed": 3,
+    "ctests_passed": 2,
+    "q4_cases": 8,
+    "q4_outputs": 296,
+    "q8_cases": 4,
+    "negative_controls": 16,
+    "authenticated_inputs": 1313,
+    "artifacts": 74,
+    "weight_extractions_bitwise_equal": true,
+    "independent_builder_review": "PASS"
+  },
+  "profile": {
+    "schema": 1,
+    "oracle": {
+      "schema": 2,
+      "widths": [
+        2048,
+        5632
+      ],
+      "q8_block_bytes": 36,
+      "q4_block_bytes": 18,
+      "q8_rounding": "F32 RN-even division; integer ties away; original XOR16,8,4,2,1 sum",
+      "q4_rounding": "two F32 fused operations per partial; stride64; waves1,2,3; XOR16,8,4,2,1",
+      "budget": "gamma_(ceil(blocks/64)+12) * sum_abs_uncancelled_partial_operands",
+      "unsupported": [
+        "nonfinite",
+        "F32 subnormal intermediates",
+        "binary16 underflow-to-zero/overflow",
+        "fused pointer arguments"
+      ],
+      "gpu_executed": false
+    },
+    "cases": [
+      {
+        "name": "attn-k-1",
+        "width": 2048,
+        "rows": 1,
+        "input": "authenticated RMSNorm embedding output row0 token1"
+      },
+      {
+        "name": "attn-k-2",
+        "width": 2048,
+        "rows": 2,
+        "input": "authenticated RMSNorm embedding output row0 token1"
+      },
+      {
+        "name": "attn-k-17",
+        "width": 2048,
+        "rows": 17,
+        "input": "authenticated RMSNorm embedding output row0 token1"
+      },
+      {
+        "name": "attn-k-256",
+        "width": 2048,
+        "rows": 256,
+        "input": "authenticated RMSNorm embedding output row0 token1"
+      },
+      {
+        "name": "ffn-down-1",
+        "width": 5632,
+        "rows": 1,
+        "input": "deterministic synthetic; not a model activation trace"
+      },
+      {
+        "name": "ffn-down-17",
+        "width": 5632,
+        "rows": 17,
+        "input": "deterministic synthetic; not a model activation trace"
+      }
+    ],
+    "native_executed": false,
+    "synthetic_cases": [
+      "synthetic-zero",
+      "synthetic-pattern"
+    ],
+    "q8_cases": [
+      {
+        "name": "q8-zero",
+        "input_width": 256,
+        "padded_width": 256
+      },
+      {
+        "name": "q8-constant",
+        "input_width": 256,
+        "padded_width": 256
+      },
+      {
+        "name": "q8-signed-ties",
+        "input_width": 256,
+        "padded_width": 256
+      },
+      {
+        "name": "q8-padding",
+        "input_width": 255,
+        "padded_width": 256
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "attn-k-1",
+      "width": 2048,
+      "rows": 1,
+      "origin": "authenticated RMSNorm embedding output row0 token1"
+    },
+    {
+      "name": "attn-k-2",
+      "width": 2048,
+      "rows": 2,
+      "origin": "authenticated RMSNorm embedding output row0 token1"
+    },
+    {
+      "name": "attn-k-17",
+      "width": 2048,
+      "rows": 17,
+      "origin": "authenticated RMSNorm embedding output row0 token1"
+    },
+    {
+      "name": "attn-k-256",
+      "width": 2048,
+      "rows": 256,
+      "origin": "authenticated RMSNorm embedding output row0 token1"
+    },
+    {
+      "name": "ffn-down-1",
+      "width": 5632,
+      "rows": 1,
+      "origin": "deterministic synthetic; not a model activation trace"
+    },
+    {
+      "name": "ffn-down-17",
+      "width": 5632,
+      "rows": 17,
+      "origin": "deterministic synthetic; not a model activation trace"
+    },
+    {
+      "name": "synthetic-zero",
+      "width": 2048,
+      "rows": 1,
+      "origin": "handencoded synthetic Q4 and activation"
+    },
+    {
+      "name": "synthetic-pattern",
+      "width": 2048,
+      "rows": 1,
+      "origin": "handencoded synthetic Q4 and activation"
+    }
+  ],
+  "gpu_executed": false,
+  "native_executed": false,
+  "limits": [
+    "No GPU or full-model inference proof.",
+    "The original activation row is retained; binary16 subnormal support corrects the reference domain without changing the budget.",
+    "F32 subnormal intermediates, nonfinite values, half underflow to zero and overflow remain rejected.",
+    "5632 activations are synthetic, not traced hidden states.",
+    "Builder CLI completed using authenticated prerequisites; new top-level Make recipe was dry-run checked, not fully repeated from an empty cache."
+  ],
+  "next_gate": "Frozen native harness with raw Q8/Q4 readbacks, guard/input checks and isolated/chained launches, then .40 validation."
+}

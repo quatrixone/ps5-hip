@@ -379,9 +379,15 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
             return "unsupported buffer-scratch entry contract";
     } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
+    const bool q8 = geometry && !lds && k.rsrc2 == 0x38cu;
+    const bool q4 = geometry && lds && k.rsrc2 == 0xb8cu;
+    if ((q8 || q4) && (k.rsrc1 != (q8 ? 0x60af00c1u : 0x60af00c3u) ||
+        k.kernarg_size != (q8 ? 328u : 192u) || k.kernarg_alignment != 8 ||
+        k.max_workgroup_size != (q8 ? 256u : 128u) ||
+        k.hidden_arguments.size() != (q8 ? 13u : 0u))) return "unsupported measured quantized geometry ABI";
     if (lds) {
-        if (k.group_bytes > 65536 || k.properties != 0x409 || (reduction ? (k.rsrc2 != 0x8cu && k.rsrc2 != 0x38cu) : k.rsrc2 != (geometry ? 0x98cu : 0x8cu)) ||
-            (geometry ? (k.group_bytes != 512 || k.hidden_arguments.empty()) : (!reduction && !k.hidden_arguments.empty())))
+        if (k.group_bytes > 65536 || k.properties != 0x409 || (reduction ? (k.rsrc2 != 0x8cu && k.rsrc2 != 0x38cu) : k.rsrc2 != (geometry ? (q4 ? 0xb8cu : 0x98cu) : 0x8cu)) ||
+            (geometry ? (k.group_bytes != (q4 ? 384u : 512u) || (!q4 && k.hidden_arguments.empty())) : (!reduction && !k.hidden_arguments.empty())))
             return "unsupported LDS entry contract";
     } else if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
     if (k.preload || k.rsrc3) return "preload/resource3 requires additional launch support";
@@ -390,7 +396,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     const uint32_t user_sgprs = (k.rsrc2 >> 1) & 31;
     if (user_sgprs != (flat_call ? 8u : ((k.properties & 1) ? 6u : 2u))) return "user-SGPR count mismatch";
     if (geometry) {
-        if (k.rsrc2 != (lds ? 0x98cu : 0x138cu) || k.properties != 0x409 || k.hidden_arguments.empty() || k.sgpr_spills || k.vgpr_spills)
+        if (k.rsrc2 != (lds ? (q4 ? 0xb8cu : 0x98cu) : (q8 ? 0x38cu : 0x138cu)) || k.properties != 0x409 || (!q4 && k.hidden_arguments.empty()) || k.sgpr_spills || k.vgpr_spills)
             return "unsupported measured XYZ entry contract";
     } else if ((k.rsrc2 & ~(reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
         return "unsupported system-SGPR/work-item contract";

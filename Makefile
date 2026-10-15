@@ -22,6 +22,7 @@ help:
 	@echo 'make llm-model-convert  Convert verified source model to F16 and pure Q4_0 (fresh output required)'
 	@echo 'make llm-rmsnorm-fixture  Build unchanged upstream RMSNorm device module from authenticated sources'
 	@echo 'make llm-q4-fixture  Build selected upstream Q8_1 and Q4_0 kernels (fresh outputs required)'
+	@echo 'make llm-q4-reference  Build authenticated GPU-format Q8/Q4 numerical references offline'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
@@ -29,6 +30,7 @@ help:
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
+	@echo 'make public-hip-q4-host-test  Qualify selected Q8/Q4 public HIP dispatch and ownership offline'
 	@echo 'make public-hip-aggregate-package Build native aggregate compiler-launch title offline (fresh outputs)'
 	@echo 'make public-hip-rmsnorm-package Build native RMSNorm numerical title and verified model/reference assets (fresh outputs)'
 	@echo 'make public-hip-embedded-package Build native compiler registration/launch title offline (fresh outputs)'
@@ -108,6 +110,16 @@ llm-q4-fixture: llm-rmsnorm-fixture
 	$(PYTHON) tests/llm_q4_fixture_test.py
 	$(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture $(LLM_RMSNORM_FIXTURE_DIR) --output $(LLM_Q4_FIXTURE_DIR)
 
+LLM_Q4_REFERENCE_DIR ?= results/llm-q4-reference
+.PHONY: llm-q4-reference
+llm-q4-reference: llm-q4-fixture
+	$(MAKE) llm-model-fetch
+	$(MAKE) llm-model-convert
+	$(MAKE) llm-rmsnorm-reference
+	$(PYTHON) tests/llm_q4_reference_test.py
+	$(PYTHON) tests/llm_q4_reference_build_test.py
+	$(PYTHON) tools/build_llm_q4_reference.py --rmsnorm-reference $(LLM_RMSNORM_REFERENCE_DIR) --fixture $(LLM_Q4_FIXTURE_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf --output $(LLM_Q4_REFERENCE_DIR)
+
 .PHONY: llm-rmsnorm-reference
 llm-rmsnorm-reference: llm-cpu-reference
 	$(PYTHON) tools/build_llm_rmsnorm_reference.py --output $(LLM_RMSNORM_REFERENCE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
@@ -145,6 +157,11 @@ llm-model-profile: llm-tool-test
 .PHONY: public-hip-host-test
 public-hip-host-test: deps-build
 	$(PYTHON) tools/qualify_public_hip_source.py --output $(QUALIFICATION_DIR)
+
+Q4_QUALIFICATION_DIR ?= results/public-hip-q4
+.PHONY: public-hip-q4-host-test
+public-hip-q4-host-test: public-hip-host-test llm-q4-fixture
+	$(PYTHON) tools/qualify_public_hip_q4.py --base $(QUALIFICATION_DIR) --fixture $(LLM_Q4_FIXTURE_DIR) --output $(Q4_QUALIFICATION_DIR)
 
 EMBEDDED_FIXTURE_DIR ?= build/public-hip-embedded-fixture
 EMBEDDED_QUALIFICATION_DIR ?= results/public-hip-embedded

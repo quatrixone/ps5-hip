@@ -115,8 +115,15 @@ an uninitialized LDS declaration during extraction; only the exact measured
 384-byte address-space-3 type/alignment transformation is permitted, and the
 linked descriptor is independently checked. This is not a numerical proof.
 
-Next extend the genuine public runtime coherently: 256x1x1 Q8 and 32x4x1 Q4
-workgroups; correct group/wave limits and SIMD_DEST_CNTL; distinct explicit-only
-and hidden-argument contracts; CLR module admission, attributes and device
-Y-dimension reporting. Preserve existing route regressions and reject invalid
-combinations before allocating. Then freeze numerical fixtures and validate .40.
+The genuine public runtime now covers 256x1x1 Q8 and 32x4x1 Q4 workgroups,
+their distinct hidden/explicit-only arguments, static LDS and scheduling bits.
+The final host model passes four dispatches and 30 rejection checks in eager
+and deferred modes; the shared 87-compilation suite and RMSNorm regression
+also pass. See [HIP_QUANTIZED.md](HIP_QUANTIZED.md). These checks establish
+dispatch and ownership behavior, not GPU arithmetic.
+
+The numerical reference builder now produces the independent GPU-format
+corpus described in [LLM_Q4_REFERENCE.md](LLM_Q4_REFERENCE.md). Next qualify
+the native harness and package, freeze their identities, and validate isolated
+Q4 plus chained Q8/Q4 execution on .40. Remaining operators, model-scale
+allocations and complete native inference remain open.

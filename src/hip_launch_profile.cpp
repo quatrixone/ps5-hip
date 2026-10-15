@@ -23,7 +23,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     }
     else if(kernel.private_bytes) request.route=NativeLaunchRoute::BufferScratch;
     else if(geometry && kernel.group_bytes) {
-        require(!shared && threads==std::array<uint32_t,3>{8,8,1},"unsupported combined geometry/LDS shape or dynamic size");
+        require(!shared && (threads==std::array<uint32_t,3>{8,8,1} || threads==std::array<uint32_t,3>{32,4,1}),"unsupported combined geometry/LDS shape or dynamic size");
         request.route=NativeLaunchRoute::GeometryLds;
     }
     else if(geometry && shared) throw ObjectError("dynamic geometry/LDS unsupported");
@@ -31,19 +31,15 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     else if(geometry) request.route=NativeLaunchRoute::Geometry;
     else request.route=NativeLaunchRoute::Initial;
     validate_capture_layout(kernel,request.route);
-    require(kernel.max_workgroup_size>=(reduction ? 1024u : 64u) && (kernel.required_workgroup==std::array<uint32_t,3>{} || kernel.required_workgroup==threads),"required workgroup mismatch");
     if(geometry) {
-        require((threads==std::array<uint32_t,3>{8,8,1} && groups[2]==1) || threads==std::array<uint32_t,3>{8,4,2},"unsupported geometry block");
-        request.shape.dimensions=threads[2]==1?2u:3u;
-        uint64_t product=1;
-        for(unsigned axis=0;axis<3;++axis) {
-            require(groups[axis] && groups[axis]<=UINT32_MAX/threads[axis] && product<=(UINT32_MAX/64)/groups[axis],"geometry extent overflow");
-            product*=groups[axis];
-        }
+        request.shape.dimensions=threads==std::array<uint32_t,3>{256,1,1}?1u:(threads[2]==1?2u:3u);
+        validate_geometry_entry(kernel,request.shape,request.route==NativeLaunchRoute::GeometryLds);
     } else {
         require(groups[0] && groups[0]<=UINT32_MAX/(reduction ? 1024u : 64u) && groups[1]==1 && groups[2]==1,"unsupported 1D extent");
         request.shape.dimensions=1;
     }
+    require(kernel.max_workgroup_size>=threads[0]*threads[1]*threads[2] &&
+        (kernel.required_workgroup==std::array<uint32_t,3>{} || kernel.required_workgroup==threads),"required workgroup mismatch");
     if(request.route==NativeLaunchRoute::Lds || reduction)
         require(plan_lds(kernel.group_bytes,request.dynamic_lds_bytes).allocated_bytes!=0,"empty LDS allocation");
     if(request.route==NativeLaunchRoute::BufferScratch) (void)buffer_scratch_ring_bytes(kernel.private_bytes);

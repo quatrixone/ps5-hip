@@ -89,6 +89,26 @@ public:
     }
     uint64_t virtualAddress()const override{return reinterpret_cast<uintptr_t>(base_);}
 };
+struct PublicProfile {
+    NativeLaunchRoute route;
+    std::array<uint32_t,3> threads;
+    uint32_t dynamic_lds_limit;
+};
+static bool public_profile(const ps5hip::Kernel& k,PublicProfile& profile){
+    // Explicit admitted union: a non-initial kernel is not necessarily a reduction.
+    if(k.rsrc2==0x38c && geometry_launch_rejection(k).empty())
+        profile={NativeLaunchRoute::Geometry,{256,1,1},0};
+    else if(k.rsrc2==0xb8c && geometry_lds_launch_rejection(k).empty())
+        profile={NativeLaunchRoute::GeometryLds,{32,4,1},0};
+    else if(initial_launch_rejection(k).empty())
+        profile={NativeLaunchRoute::Initial,{64,1,1},0};
+    else if(reduction_lds_launch_rejection(k).empty())
+        profile={NativeLaunchRoute::ReductionLds,{1024,1,1},65536};
+    else return false;
+    const uint32_t flat=profile.threads[0]*profile.threads[1]*profile.threads[2];
+    return k.max_workgroup_size>=flat && (k.required_workgroup==std::array<uint32_t,3>{} ||
+                                        k.required_workgroup==profile.threads);
+}
 class Program;
 class Kernel final:public amd::device::Kernel {
 public:
@@ -115,12 +135,9 @@ public:
             std::vector<size_t> supported;
             for(size_t i=0;i<candidate.object.kernels.size();++i){
                 const auto& k=candidate.object.kernels[i];
-                const bool initial=initial_launch_rejection(k).empty();
-                if(!initial && !reduction_lds_launch_rejection(k).empty())continue;
-                const uint32_t threads=initial?64u:1024u;
-                if(k.max_workgroup_size<threads || (k.required_workgroup!=std::array<uint32_t,3>{} &&
-                   k.required_workgroup!=std::array<uint32_t,3>{threads,1,1}))continue;
-                validate_capture_layout(k,initial?NativeLaunchRoute::Initial:NativeLaunchRoute::ReductionLds);
+                PublicProfile profile{};
+                if(!public_profile(k,profile))continue;
+                validate_capture_layout(k,profile.route);
                 supported.push_back(i);
             }
             if(supported.empty())return false;
@@ -144,9 +161,10 @@ Kernel::Kernel(const amd::Device& d,const Program& p,const ps5hip::Kernel& k)
         else throw ObjectError("unsupported argument kind");
     }
     if(!createSignature(args,args.size(),amd::KernelSignature::ABIVersion_2))throw ObjectError("CLR signature creation");
-    const bool reduction=!initial_launch_rejection(k).empty();
-    workGroupInfo_.size_=std::min(k.max_workgroup_size,reduction?1024u:64u);workGroupInfo_.wavefrontSize_=k.wave_size;
-    workGroupInfo_.availableLDSSize_=reduction?65536:0;
+    PublicProfile profile{};
+    if(!public_profile(k,profile))throw ObjectError("unqualified public kernel profile");
+    workGroupInfo_.size_=profile.threads[0]*profile.threads[1]*profile.threads[2];workGroupInfo_.wavefrontSize_=k.wave_size;
+    workGroupInfo_.availableLDSSize_=k.group_bytes+profile.dynamic_lds_limit;
     workGroupInfo_.localMemSize_=k.group_bytes;workGroupInfo_.privateMemSize_=k.private_bytes;
 }
 class Virtual final:public amd::device::VirtualDevice {
@@ -238,7 +256,8 @@ public:
             groups[i]=n/t;threads[i]=t;
         }
         auto request=select_hip_launch_profile(k->native,groups,threads,c.sharedMemBytes());
-        if(request.route!=NativeLaunchRoute::Initial && request.route!=NativeLaunchRoute::ReductionLds)throw ObjectError("unqualified CLR launch route");
+        PublicProfile profile{};
+        if(!public_profile(k->native,profile)||request.route!=profile.route)throw ObjectError("unqualified CLR launch route");
         const auto& signature=k->signature();std::vector<const void*> addresses;std::vector<ReadableSpan> spans;
         for(size_t i=0;i<k->native.arguments.size();++i){const auto& a=k->native.arguments[i];const auto& d=signature.at(i);
             if(d.offset_!=a.offset||d.size_!=a.size||d.offset_>signature.paramsSize()||d.size_>signature.paramsSize()-d.offset_)throw ObjectError("captured signature mismatch");
@@ -274,10 +293,10 @@ public:
         // Bounded device-buffer policy, not a claim about total physical memory.
         info_.maxMemAllocSize_=64u*1024u*1024u;info_.memBaseAddrAlign_=0x10000;
         info_.maxPhysicalMemAllocSize_=0;
-        // Bounded public routes: one-dimensional blocks of 64 or 1024, Wave32.
+        // Bounded qualified Wave32 profiles, including the 32x4 Q4 block.
         // These are admission limits, not the console's full hardware limits.
         info_.maxWorkGroupSize_=1024;info_.maxWorkItemDimensions_=3;
-        info_.maxWorkItemSizes_[0]=1024;info_.maxWorkItemSizes_[1]=1;info_.maxWorkItemSizes_[2]=1;
+        info_.maxWorkItemSizes_[0]=1024;info_.maxWorkItemSizes_[1]=4;info_.maxWorkItemSizes_[2]=1;
         info_.wavefrontWidth_=32;info_.localMemSizePerCU_=65536;
 
         const auto* isa=amd::Isa::findIsa("amdgcn-amd-amdhsa--gfx1013");
