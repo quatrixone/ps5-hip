@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-copy-recovery",
+  "source_commit": "c0a7c9ac8c61012d59ec848dab5b834b1480a803",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "378b823a72930bea754938189b0d74e902d5489bac73d322dc02ae5a6739f8a4",
+  "manifest_sha256": "c7f7a4407c53a15203d1187955c0789b8c35c54bbe814e4906c05447581c350f",
+  "application_log_sha256": "10e600412f16acfd9fc2dc17cc4320457af9bec63341778efb661926c5cc296a",
+  "process": [
+    [
+      "PPSA99014",
+      "189"
+    ]
+  ],
+  "startup_checkpoints": [
+    "PS5HIP BOOT runtime-ready",
+    "PS5HIP BOOT constructors-begin",
+    "PS5HIP BOOT main-begin",
+    "PS5HIP BOOT elevation-begin",
+    "PS5HIP BOOT elevation-returned status=0 path=helper",
+    "PS5HIP BOOT log-open-begin",
+    "PS5HIP BOOT log-ready",
+    "PS5HIP BOOT main-returned"
+  ],
+  "complete_ftp_reads": 28,
+  "capture_recovery_cases": 27,
+  "setter_rejections": 4,
+  "update_handle_rejections": 2,
+  "launches": 4,
+  "exact_values": 292,
+  "guards": 32,
+  "disabled_replays": 6,
+  "callbacks": 8,
+  "allocations": 2,
+  "frees": 2,
+  "queues": 3,
+  "retired_queues": 3,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-copy-startup-console-v1",
+  "raw_evidence": {
+    "manifest.json": "c7f7a4407c53a15203d1187955c0789b8c35c54bbe814e4906c05447581c350f",
+    "execution-review.json": "dd3adef90d62a6c5a4602a02a3f72c732c590c62e88b1cd6b5f498d2f105f80c",
+    "outcome-review.json": "028110bd89d2a78442b01a34e8b8b02678ae82afc014e29c9cbd5e446eff1e61",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/receipt.json": "fa3ea51314d2cf07d4168fb9f88731cf579529ef2dc15bd276826a0e53c246fc",
+    "execute/application.log": "10e600412f16acfd9fc2dc17cc4320457af9bec63341778efb661926c5cc296a",
+    "execute/before-launch.log": "605eef567b3e8a29d6546c0cbb628df880609a1d257bb52bde4dce17d89e8bd1",
+    "execute/klog.log": "7366b60328ffb3dbafa5fec09046afaeaa6ec8326b7ec0319bdecd4b0dd978a3",
+    "execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "execute/observed.log": "3d2cdfed2a456d4f1db500c6913f2ffc86574fe1f3c5d2f4738dfc2dfef1b5b4",
+    "execute/post_snapshot.log": "58fab85e3d10949114293103000348e19d6979ced57de4312ec901b6773091c4",
+    "execute/snapshot.log": "58fab85e3d10949114293103000348e19d6979ced57de4312ec901b6773091c4"
+  },
+  "limits": [
+    "Previous pre-log timeout root cause remains unproven; this is one successful run, not startup reliability qualification.",
+    "Generic nested/subtype update rejection remains offline-qualified; native case checks invalid handles and compatible update.",
+    "General update transactionality, allocation lifetime, cross-stream capture, sustained replay and performance remain open; G5 is not complete."
+  ]
+}

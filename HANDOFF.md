@@ -16,20 +16,27 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
-## Startup localization candidate
+## Native copy recovery passed
 
-A fresh 74-object copy_gpu package adds kernel-log checkpoints after runtime
-initialization, around constructors/main, and around elevation/log opening.
-The extracted executable contains all eight checkpoints; its DebugOutText
-import binds to libkernel. All source/object hashes and seven packaged files
-were verified, and the GPU kernel is unchanged. Four import-profile and 26
-console-control tests passed. The fresh frozen candidate deployed and verified
-on .40, with prior image/log preserved, healthy services and both locks released.
-Execution awaits receipt-bound review. See `evidence/console40-copy-startup-deployment.json`.
-The previous consumed recovery run must not be reused.
-See `evidence/offline-copy-startup-localization.json`.
+The startup-instrumented package passed one bounded .40 run: 27 capture-recovery
+cases, four rejected setters, two invalid update handles and compatible generic
+update, followed by four GPU dispatches matching 292 values and 32 guards.
+Six disabled-copy replays and eight callbacks passed. Both allocations were
+freed, all three queues retired, and the title exited naturally. Mounted files
+were reverified, idle mounts matched, services stayed healthy and both locks
+were released. All eight startup markers appeared; elevation returned success
+through the helper. The prior timeout's root cause remains unproven.
 
-## Current generic-update and recovery candidate
+Installed image: `378b823a72930bea754938189b0d74e902d5489bac73d322dc02ae5a6739f8a4`.
+Current application log: `10e600412f16acfd9fc2dc17cc4320457af9bec63341778efb661926c5cc296a`.
+Both phases of `results/source-public-copy-startup-console-v1` are consumed.
+See `evidence/console40-copy-recovery-success.json`.
+Next: continue G5 allocation-lifetime and cross-stream capture work offline;
+general update transactionality, sustained replay and performance remain open.
+Native nested/subtype update rejection and startup reliability are not proven
+by this bounded result. G5 and the broader SDK remain incomplete.
+
+## Previous generic-update and recovery candidate
 
 Generic executable updates now validate handles and preflight exact node types
 and nested child counts before mutation. Full ASan/UBSan source qualification
