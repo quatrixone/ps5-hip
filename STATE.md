@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+A fresh native copy package now includes the rectangular-copy runtime at
+`61a1797`: Make compiled 74 objects, packaged and passed cached verification and
+independent artifact audit. See `evidence/offline-native-copy-rect-runtime.json`.
+Its existing title tests contiguous copies only; a rectangular native fixture
+and console acceptance remain pending. No console contact occurred.
+
 Public rectangular D2D copying now passes fresh qualification: 78 compilations,
 nine links, 4,096 compared bytes over two changed rounds and 31 rejection checks.
 Checked origin/span admission, adapter dispatch and synchronous failure propagation

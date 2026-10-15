@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-copy-package-with-rectangular-runtime-pass",
+  "source_commit": "61a1797f9418aa1c7598a2e9cedb596841553e00",
+  "native_objects": 74,
+  "package_sha256": "ebad80db7469ef837a967270001beda6de3fa0ae6b89b9a62ffccf1a780a273a",
+  "fself_sha256": "5a1ef05efe12f8b050a0d8e875f30288abcec567db2b89aac1800eef30319e85",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "cd666eb5ceb473ddf1d74d0c131b11c2f6efcef8ed2689c8dbf6e968856260fa",
+    "extracted_sha256": "b49198c19e29721df127ac82137db0c45e30388b81cc1aa4c0813d3d06fb419b",
+    "omitted_note": {
+      "offset": 5442388,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500725b7a2c17b2b579",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "5a1ef05efe12f8b050a0d8e875f30288abcec567db2b89aac1800eef30319e85",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-copy-rect-v1/link-receipt.json": "91f2164865984cfa25e5eb51cc74e96ca6b5abbdd2d335b81438a585ceedd494",
+    "results/public-copy-rect-package-review/review.json": "f3be6625982c5944049f523b3d871f2e04caa31fe14a303f937af889077b0afc",
+    "results/public-copy-rect-package-build.log": "29a2581abf6162478340f66dc5c3ff00d2875160ce7ad3962e414f3eac289931",
+    "results/public-copy-rect-package-revalidate.log": "29a2581abf6162478340f66dc5c3ff00d2875160ce7ad3962e414f3eac289931"
+  },
+  "accepted_scope": [
+    "Fresh Make copy package builds74nativeobjects with checked rectangular-copy source preparation.",
+    "Repeated cached Make verification passes.",
+    "Independent audit verifies runtime provenance, exact prepared outputs, serialized imports, signing roundtrip and six-file package extraction."
+  ],
+  "limits": [
+    "Copy title remains contiguous-only; this build does not test rectangular copies on console.",
+    "No console execution, frozen operational candidate or deployment approval.",
+    "Recovery and baseline verification remain pending."
+  ],
+  "independent_review": {
+    "path": "results/public-copy-rect-package-review/review.json",
+    "sha256": "f3be6625982c5944049f523b3d871f2e04caa31fe14a303f937af889077b0afc",
+    "deployment_approved": false
+  }
+}
