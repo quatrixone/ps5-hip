@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-native-kernel-capture-deployment",
+  "source_commit": "ede4ced",
+  "package_sha256": "c74a8d2d19d3703760b4cab02584076a056da137fa88c4746c50e752477d2ad5",
+  "manifest_sha256": "dc9f572752841f74e702d699f55fb5c92aac6d2d29ebe99a5d6453aa72e602a1",
+  "transport": "WSL Ubuntu",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "complete_reads": 21,
+  "package_files": 7,
+  "healthy_after": true,
+  "lock_released": true,
+  "launched": false,
+  "preserved_image": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2.preserved",
+  "preserved_log": "/data/ps5-hip/results/ps5-hip-public-graph_gpu.log.fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242.preserved",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-capture-gpu-console-v1/manifest.json": "dc9f572752841f74e702d699f55fb5c92aac6d2d29ebe99a5d6453aa72e602a1",
+    "results/source-public-capture-gpu-console-v1/deploy/receipt.json": "055546d20c621f026d6e46662b7cc5253205398deec90ad733c7324dda9dcb2d",
+    "results/source-public-capture-gpu-console-v1/deployment-review.json": "aa571c424fcd55b3b4ba1c9f56536686d1915844ff6e292d23572b1ff25f6883",
+    "results/source-public-capture-gpu-console-v1/deploy/snapshot.log": "3d95db6d34feb581c3981f1df1a947f7eebd5ad63383127c3b7abb96c78cac79",
+    "results/source-public-capture-gpu-console-v1/deploy/post_snapshot.log": "e88be730902aa11e8d02918043b9130998e7968ff3d1d558d915f8af9f1638ea",
+    "results/source-public-capture-gpu-console-v1/execution-authorization.json": "39be509726fdd3b54f95fdeb05522afc4820b6b4bfe14f20e8a825ff6ea6539b"
+  },
+  "limits": [
+    "Independent review permits one bounded execution tied to exact deployment receipt.",
+    "Deploy consumed; native captured GPU execution pending."
+  ]
+}
