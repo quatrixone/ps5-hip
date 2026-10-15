@@ -12,6 +12,9 @@ builds the SDK, zlib, UFS2Tool, bundled Lapy helper, and controllers.
 `make host-test` runs host tests; `make native-core` cross-compiles the core.
 ProsperoEden and ps5-homebrew-dev-protocol are locked snapshots of public
 `main`, so their old local-only commits and dedicated branches are not required.
+The clean-clone dependency build completed, but its helper ELF digest differed
+from the original workspace build. These targets prove source availability and
+buildability, not identical bytes for the installed package.
 
 The private GitHub branches contain the source and build scripts, but **they do
 not yet provide an end-to-end, tested, source-only rebuild of the exact

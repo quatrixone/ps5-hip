@@ -13,7 +13,7 @@ BundledCodeObject read_object(const char *path) {
     result.bundle_target="hipv4-amdgcn-amd-amdhsa--"+result.object.target;
     return result;
 }
-const Kernel &named(const BundledCodeObject &bundle,const std::string &name) {
+const Kernel &named(const BundledCodeObject &bundle,const char *name) {
     const auto i=std::find_if(bundle.object.kernels.begin(),bundle.object.kernels.end(),
         [&](const Kernel &k){return k.name==name;});check(i!=bundle.object.kernels.end());return *i;
 }

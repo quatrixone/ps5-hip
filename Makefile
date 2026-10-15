@@ -5,11 +5,12 @@ UFS_REV := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies
 ZLIB_VERSION := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies.json"))["host_zlib"]["version"])')
 TITLE_ID := $(shell $(PYTHON) -c 'import json; print(json.load(open("title.json"))["title_id"])')
 
-.PHONY: help deps-fetch deps-check deps-build host-test native-core clean-build
+.PHONY: help deps-fetch deps-check deps-build device-fixtures host-test native-core clean-build
 
 help:
 	@echo 'make deps-fetch  Fetch and verify locked upstream sources and archives'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
+	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make native-core Cross-compile the native core library'
 
@@ -36,7 +37,15 @@ build/controllers/$(TITLE_ID)/receipt.json: controller-inputs.json title.json de
 
 deps-build: .deps/sdk/.ps5-sdk-revision .deps/host-zlib-$(ZLIB_VERSION)/receipt.json .deps/ufs2tool-$(UFS_REV)/receipt.json .deps/elevation/receipt.json build/controllers/$(TITLE_ID)/receipt.json
 
-host-test:
+build/canaries/build.json: tools/build_canaries.py kernels/canary.hip dependencies.json
+	$(PYTHON) tools/build_canaries.py >/dev/null
+
+build/canaries/resources-build.json: tools/build_canaries.py kernels/resources.hip dependencies.json
+	$(PYTHON) tools/build_canaries.py --fixture resources >/dev/null
+
+device-fixtures: build/canaries/build.json build/canaries/resources-build.json
+
+host-test: deps-build device-fixtures
 	$(CMAKE) -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Debug
 	$(CMAKE) --build build/host
 	$(CTEST) --test-dir build/host --output-on-failure

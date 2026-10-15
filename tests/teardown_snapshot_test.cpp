@@ -271,7 +271,7 @@ int main() {
             case 3: std::memset(last.f_mntfromname, 'x', sizeof(last.f_mntfromname)); break;
             case 4: std::memset(static_cast<void*>(&last), 0, sizeof(last)); break;
             case 5: // Wrong record stride leaves the expected final version zero.
-                std::memset(rows, 0, static_cast<size_t>(bytes));
+                std::memset(static_cast<void*>(rows), 0, static_cast<size_t>(bytes));
                 for (size_t i = 0; i != 1110; ++i) {
                     Row value;
                     std::memcpy(reinterpret_cast<unsigned char*>(rows) + i * 464, &value, sizeof(value));

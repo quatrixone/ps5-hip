@@ -7,7 +7,7 @@ resume point, branch map, and evidence identities.
 
 - **Source-only dependency foundation:** the root Makefile fetches verified
   public inputs, builds the SDK, zlib, UFS2Tool, exact-title Lapy helper and
-  launch/close controllers, runs 55 host tests, and cross-compiles the native
+  launch/close controllers, runs the host suite, and cross-compiles the native
   core. ProsperoEden and the protocol are locked snapshots of public `main`.
   This does not yet recreate the 74-object public HIP bootstrap from a clean
   clone; see `docs/SOURCE_ONLY_REBUILD.md`. No new console result was taken.
