@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-make-output-overrides-and-bootstrap-pass",
+  "source_base": "b19fc45c24abb349046d7f1f2a3ee2d4725e3990",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "package_sha256": "3515f034f2edae800714920c266e0200912a4cefb301fa8120f9866986812fe9",
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "728595b4dcd32231bfda05d7ade52151f734c56663f243649d93ad521b7410d5",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-retirement-v1/link-receipt.json": "1a6f4dac85ffe02f3a9ca3ffe508fbf671dac26d43cb79737fb2914fab76a71a",
+    "results/public-default-retirement-review/review.json": "1d3c97044534b19561aae66dc37d3da521cd423c69ff776bc158192fbb7983f1",
+    "results/public-default-retirement-build.log": "d16842fe6130514235d0cd79d1a35bf5b61c5a052d156108f199ba2aed5562fd",
+    "results/public-default-retirement-revalidate.log": "41f43d00aefa1035cf8a15313ea8ab924cc24e1677e5d223efbfe738ef083160",
+    "results/package-output-overrides.json": "6f9f156b6b1710a59951d86a7038fbcc9ff534ea80995e169ca254b24631a0ba"
+  },
+  "changed_files": {
+    "Makefile": "5d49439f6c8da4696f9e53a575196fb02be129c782118ffa7021891f0e9bd3f2",
+    "docs/SOURCE_ONLY_REBUILD.md": "b8b567bd73519509278d223d3a5080a17640c5ec21706dab354d52ac01941542"
+  },
+  "accepted_scope": [
+    "Full default Make target with fresh PUBLIC_BUILD_DIR passes host tests, native core and bootstrap packaging.",
+    "Bootstrap, memory and copy dry runs each select exactly one builder call with requested output.",
+    "Cached bootstrap Make verification passes; independent package audit verifies native identities, signing and six extracted files."
+  ],
+  "limits": [
+    "Memory/copy output routing checked by dry run only; no new builds of those fixtures.",
+    "Bootstrap does not exercise fill calls.",
+    "No console execution or deployment approval."
+  ],
+  "independent_review": {
+    "path": "results/public-default-retirement-review/review.json",
+    "sha256": "1d3c97044534b19561aae66dc37d3da521cd423c69ff776bc158192fbb7983f1",
+    "deployment_approved": false
+  }
+}

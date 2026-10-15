@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Make now accepts `PUBLIC_BUILD_DIR`, `MEMORY_BUILD_DIR` and `COPY_BUILD_DIR`
+to preserve earlier artifacts. A full default Make run with a fresh bootstrap
+directory passed 62 host tests, native core and 74-object packaging, followed by
+cached verification and independent audit. See `evidence/offline-make-output-overrides.json`.
+No console execution is claimed.
+
 Current frozen candidate: `results/source-pitched-fill-console-v1`, source
 `919ef03`, manifest `1f9214d0fc5d79af9219eb764c9777f24a7b81e1cad7b1d70f39e7c7ed31785b`.
 Offline identity review passed; `review.json` operational approval remains absent.

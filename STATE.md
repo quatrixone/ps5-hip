@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Make now accepts `PUBLIC_BUILD_DIR`, `MEMORY_BUILD_DIR` and `COPY_BUILD_DIR`
+to preserve earlier artifacts. A full default Make run with a fresh bootstrap
+directory passed 62 host tests, native core and 74-object packaging, followed by
+cached verification and independent audit. See `evidence/offline-make-output-overrides.json`.
+No console execution is claimed.
+
 The pitched-fill package is now frozen at `919ef03` and independently verified:
 28 bound files, six package files and 91 committed build inputs. Missing operational
 approval blocks deployment before network access. See

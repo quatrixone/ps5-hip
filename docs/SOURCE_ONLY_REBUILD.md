@@ -26,6 +26,13 @@ hash, and six extracted file hashes are in
 dependency and package path. All console-facing output is offline and marked
 `native_executed: false`.
 
+After source changes, preserve earlier build evidence by selecting a fresh output:
+`make PUBLIC_BUILD_DIR=build/public-hip-v2 RESULTS_DIR=/data/ps5-hip/results`.
+The bootstrap target always invokes the builder, which validates cached inputs and
+rejects stale artifacts. Memory and copy targets likewise accept `MEMORY_BUILD_DIR`
+and `COPY_BUILD_DIR`; module, launch and fill use their corresponding overrides.
+Default directories remain unchanged. These overrides do not delete old outputs.
+
 A fresh GitHub-only clone of `main` at `7ef291c` passed the default `make`
 on 2026-10-14: 54 host tests, the native core, 74 public HIP objects, strict
 native link, FSELF extraction audit, UFS fsck/extraction, and cached
@@ -61,11 +68,12 @@ prove public HIP startup or GPU execution.
 ## Fresh deployment controls
 
 `make public-hip-fill-package RESULTS_DIR=/data/ps5-hip/results` builds the
-native contiguous-fill test in `build/public-hip-fill`; use `FILL_BUILD_DIR` for
+native contiguous and pitched-fill test in `build/public-hip-fill`; use `FILL_BUILD_DIR` for
 a fresh output directory. The six-file package has no GPU-driver imports. Its
 client checks two changed-pattern rounds, byte/16-bit/32-bit fills, all guards,
-eight rejected inputs and exact allocation/queue retirement. The strict expected
-transcript contains 512 byte comparisons. Packaging does not establish console
+16 rejected inputs and exact allocation/queue retirement. The pitched cases cover
+2D row padding, 3D slice gaps and equal pitch/width with extra slice rows. The strict
+expected transcript contains 4,096 byte comparisons. Packaging does not establish console
 execution; the normal freeze/review/recovery requirements still apply.
 
 `make public-hip-launch-package RESULTS_DIR=/data/ps5-hip/results` builds the

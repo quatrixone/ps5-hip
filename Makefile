@@ -22,11 +22,12 @@ help:
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
-	@echo 'make public-hip-fill-package  Build the public HIP contiguous fill fixture offline'
+	@echo 'make public-hip-fill-package  Build the public HIP contiguous and pitched fill fixture offline'
 	@echo 'make public-hip-launch-package  Build the public HIP kernel-launch fixture offline'
 	@echo 'make public-hip-module-package  Build the public HIP module ownership fixture offline'
 	@echo 'make public-hip-copy-package  Build the checked public HIP synchronous-copy fixture offline'
-	@echo 'make           Run all of the above; set RESULTS_DIR to the intended console results path'
+	@echo 'Package output overrides: PUBLIC_BUILD_DIR MEMORY_BUILD_DIR COPY_BUILD_DIR MODULE_BUILD_DIR LAUNCH_BUILD_DIR FILL_BUILD_DIR'
+	@echo 'make           Build dependencies, host tests, native core and bootstrap package'
 
 deps-fetch:
 	$(PYTHON) tools/fetch_locked_deps.py --fetch
@@ -82,19 +83,19 @@ native-core: .deps/sdk/.ps5-sdk-revision
 	$(CMAKE) -S . -B build/native -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps5-toolchain.cmake -DBUILD_TESTING=OFF
 	$(CMAKE) --build build/native --target ps5hip_native_memory
 
-build/public-hip/link-receipt.json: dependencies.json elevation-inputs.json controller-inputs.json title.json assets/param.json assets/icon0.png tools/build_public_hip.py tools/prepare_clr_gpu_source.py tools/prepare_hip_admission.py tools/guard_native_hip_gl.py ports/clr/manifest.json ports/clr/adapter-manifest.json ports/clr/ps5-public-hip.json ports/clr/ps5-pie.ld ports/hip/hip/hip_version.h | deps-build
-	$(PYTHON) tools/build_public_hip.py --output build/public-hip
+PUBLIC_BUILD_DIR ?= build/public-hip
+public-hip-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --output $(PUBLIC_BUILD_DIR)
 
-public-hip-package: build/public-hip/link-receipt.json
-	$(PYTHON) tools/build_public_hip.py --output build/public-hip
-
+MEMORY_BUILD_DIR ?= build/public-hip-memory
 .PHONY: public-hip-memory-package
 public-hip-memory-package: deps-build
-	$(PYTHON) tools/build_public_hip.py --fixture memory --output build/public-hip-memory
+	$(PYTHON) tools/build_public_hip.py --fixture memory --output $(MEMORY_BUILD_DIR)
 
+COPY_BUILD_DIR ?= build/public-hip-copy
 .PHONY: public-hip-copy-package
 public-hip-copy-package: deps-build
-	$(PYTHON) tools/build_public_hip.py --fixture copy --output build/public-hip-copy
+	$(PYTHON) tools/build_public_hip.py --fixture copy --output $(COPY_BUILD_DIR)
 
 MODULE_BUILD_DIR ?= build/public-hip-module
 .PHONY: public-hip-module-package
