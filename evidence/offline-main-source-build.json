@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "classification": "offline-main-source-only-build",
+  "date": "2026-10-14",
+  "source_commit": "7ef291c8182a43d91bb43744355858b5bec2f790",
+  "source": "fresh clone of the private GitHub main branch, without copied dependency or build directories",
+  "command": "make",
+  "toolchain": {
+    "host_cpp": "GCC 15.2.0",
+    "native_cpp": "Clang 18.1.8",
+    "python": "3.14.4"
+  },
+  "checks": {
+    "host_tests": "54 passed, 0 failed",
+    "native_core": "ps5hip_native_memory cross-compiled",
+    "public_hip_objects": 74,
+    "public_hip_link": "strict native link passed",
+    "fself_roundtrip": "extracted ELF matches converted ELF except one unmapped 24-byte SIE note",
+    "package": "UFS fsck and exact six-file extraction passed",
+    "cached_revalidation": "second public-hip-package invocation passed"
+  },
+  "artifacts": {
+    "receipt": "build/public-hip/link-receipt.json",
+    "title_elf_sha256": "d41064007c40ea33fd5b6dcc6c351c78831645dd0bcb6034c4add266e70d8880",
+    "fself_sha256": "3c7c55de5a541c7e7e45f18bde05a3e5ce74a2fa19659dccce9b798e1d92e4e3",
+    "package": "build/public-hip/package/PPSA99014.ffpkg",
+    "package_sha256": "051e326a191049a344c3cbf7c173357e7375c863a60a44406f635695ddcba923",
+    "package_file_count": 6
+  },
+  "results_dir": "/user/homebrew/ps5-hip",
+  "native_executed": false,
+  "limits": [
+    "This is a newly built offline candidate, not the image registered on console .40.",
+    "No PS5 startup, public HIP API behavior, or GPU execution is established by this build."
+  ]
+}

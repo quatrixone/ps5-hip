@@ -13,7 +13,8 @@ the entire workspace, dependency trees or historical logs by default.
   canary, rename a failed gate as success, or reduce acceptance silently.
 - Implement the smallest complete step that advances the active gate. Planned
   directories and APIs are not instructions to create empty scaffolding.
-- Preserve user changes. Use development branches for implementation. Do not
+- Preserve user changes. Keep the supported build and its source on `main`;
+  temporary branches must be integrated before handing off a build. Do not
   publish the repository, create releases or change repository access unasked.
 - The user's instructions and current authorization take precedence over this file.
 

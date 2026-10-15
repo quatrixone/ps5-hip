@@ -27,6 +27,11 @@
     "usage": "native module converter and title startup, exported from committed source",
     "license": "GPL-3.0-or-later"
   },
+  "hip_headers": {
+    "source_url": "https://github.com/ROCm/HIP",
+    "revision": "d3b75fbb82113374e2d6103baa96a9c61425da48",
+    "usage": "public HIP host API headers for the native bootstrap"
+  },
   "mesa_reference": {
     "source_url": "https://github.com/mihawk-99/PS5_Mesa",
     "revision": "0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8",

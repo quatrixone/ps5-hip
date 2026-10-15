@@ -35,7 +35,7 @@ def main():
     files = {}
     exports = [(args.eden_source, lock["client"]["revision"],
                 lock["client"]["source_path"] + "/" + name, "client/" + name)
-               for name in ("elevation.cpp", "elevation.hpp", "protocol.hpp", "validate-helper.py")]
+               for name in ("elevation.cpp", "elevation.hpp", "protocol.hpp")]
     exports += [(args.lapy_source, lock["helper"]["revision"], name, "lapy/" + name)
                 for name in ("LICENSE", "tools/build_owned_daemon.py",
                              *["source/" + name for name in ("owned_root_daemon.c", "donor_transaction.c",
@@ -55,11 +55,13 @@ def main():
                     "--sdk", str(sdk), "--logging-client", str(logging),
                     "--elf-helper", "--title", title], env=env, check=True)
     output = destination / "lapy/build" / ("owned_root_helper-" + title)
-    subprocess.run(["python3", str(destination / "client/validate-helper.py"),
+    validator = ROOT / "tools/validate_helper_elf.py"
+    subprocess.run(["python3", str(validator),
                     str(output / "lapy.elf")], check=True)
     receipt = {"inputs": lock, "sdk_revision": deps["sdk"]["revision"],
                "llvm_version": deps["llvm"]["version"], "title_id": title,
-               "source_sha256": files, "helper_sha256": sha(output / "lapy.elf"),
+               "source_sha256": files, "validator_sha256": sha(validator),
+               "helper_sha256": sha(output / "lapy.elf"),
                "hardware_validated": False}
     (destination / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
