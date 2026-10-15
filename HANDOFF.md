@@ -37,9 +37,9 @@ logits now pass seven cases twice, including 64 decode steps and a 512-token
 boundary: `make llm-reference-fixtures` reproduces them from frozen token inputs.
 See `evidence/offline-llm-cpu-reference.json`. Native client execution and GPU
 comparison tolerances remain unqualified.
-V1.1 remains partial. The next runtime blocker is
-native compiler-generated embedded-image launch; prepare the effective HIP
-compile/link probe using the pinned converted model and CPU reference fixtures.
+V1.1 remains partial. The native compiler-generated embedded-image launch now
+passes its bounded .40 case. Continue with the demonstrated client ABI/resource
+and math/library blockers using the pinned model and CPU reference fixtures.
 
 That bounded probe is now recorded in `docs/LLM_V1_COMPILE_PROBE.md` and
 `evidence/offline-llm-hip-compile-probe.json`: twelve host objects compile;
@@ -54,9 +54,21 @@ as a v1 prerequisite. Current public launch routes, model-scale memory and
 required math operations are higher priority. The original SDK goals remain;
 this changes release sequencing, not their acceptance criteria.
 All older next-step paragraphs below are historical and subordinate to this
-priority. The installed backing-test image/log remain unchanged.
+priority. The latest native compiler-launch checkpoint below records the current
+installed image/log; the earlier backing-test image/log are preserved backups.
 
 ## Static module failure handling checkpoint
+
+Latest native checkpoint passed: `evidence/console40-public-embedded-success.json`.
+Genuine CLR compiler registration/stubs executed two GPU launches, 146 exact
+values and 16 guards, then balanced device allocation/free and queue retirement.
+PID 239 exited naturally; installed files, idle mounts, health and both locks
+passed review. Current package is
+`e3d38022543668343a029d14cc55c1506bd5e1bc026719d3a1bd39c599093359`;
+embedded log is `45c411ac7cc7203a726853146995cb5e88b463de20e5c467c803cb0f2c57d978`.
+Both phases of `results/source-public-embedded-console-v1` are consumed. Preserve
+its receipts; do not reuse its controls. Previous image/log backups remain on
+the console. Earlier baseline/next-run instructions below are historical.
 
 Latest offline checkpoint: `build/public-hip-embedded-native-v2` contains the
 actual 77-object compiler-launch package and passing layout/startup audit.
@@ -64,17 +76,17 @@ Read `evidence/offline-public-embedded-native-package.json`; parent review
 verified artifact hashes and unchanged sources for all 75 runtime units.
 The earlier v1 audit failed only because it expected RX native text; the
 converter emits execute-only text. The corrected audit keeps exact byte checks
-and rejects incorrect permissions. Failed artifacts remain preserved. Next
-freeze the committed v2 candidate, review it, and run the bounded .40 case.
-No console image has changed at this checkpoint.
+and rejects incorrect permissions. Failed artifacts remain preserved. Deployment
+and execution were completed by the native checkpoint above. The package receipt remains
+offline evidence, while the separate console receipt proves the bounded run.
 
-Current continuation: genuine CLR embedded registration has passed the full
+Earlier offline prerequisite: genuine CLR embedded registration passed the full
 87-compilation host suite and actual compiler-stub tests (single/two modules,
 reversed order, eager/deferred loading and repeated missing-name rejection).
 Read `evidence/offline-public-embedded-images.json` and
 `docs/PUBLIC_EMBEDDED_IMAGES.md`. The 76-object native bootstrap builds, but
 does not contain the compiler-launch candidate. Next integrate/audit that title
-and test it on .40. Device backing cleanup is checked; complete static registry
+and test it on .40; that bounded case has since passed above. Device backing cleanup is checked; complete static registry
 retirement accounting remains unproven.
 
 The publication-on-failure bug and its null-slot consumers are fixed and passed

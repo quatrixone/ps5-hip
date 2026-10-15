@@ -172,7 +172,7 @@ compiled or registered because upstream globs broad operator/template sets.
 | Blocker | Concrete source evidence and next work |
 | --- | --- |
 | Build/library integration | Upstream `ggml/src/ggml-hip/CMakeLists.txt` requires `hip`, `hipblas`, `rocblas`, links all three, and rejects `GGML_STATIC`. Establish native build/link integration and real operation providers; removing package checks is insufficient. |
-| Native embedded image execution | Bounded compiler-generated registration/stubs now pass genuine CLR host qualification with modeled GPU transport. Native compiler-stub execution is still pending; the cross-compiled bootstrap package alone does not prove it. Pointer-only dynamic image loading remains unsupported. See `PUBLIC_EMBEDDED_IMAGES.md`. |
+| Native embedded image execution | Bounded compiler-generated registration/stubs now pass genuine CLR host qualification and the single-module/two-launch .40 case. This does not qualify arbitrary operator modules. Pointer-only dynamic image loading remains unsupported. See `PUBLIC_EMBEDDED_IMAGES.md`. |
 | Whole-module admission | `ports/clr/ps5-device.cpp` checks every kernel against the Initial route; an unsupported unused kernel can reject a module. Measure the compiled closure rather than assuming runtime operator selection removes it. |
 | Argument ABI | Current capture/admission accepts only four/eight-byte values and non-null registered global buffers. Ordinary normalization passes `uint3` aggregates and optional null buffers; softmax uses a larger structure. Inspect emitted metadata, then implement the required copying/validation semantics. |
 | Geometry and LDS | Ordinary RMSNorm in `ggml/src/ggml-cuda/norm.cu` uses 256/1024-thread blocks and shared storage; RoPE uses Y-thread geometry. Current public CLR caps workgroups at 64 and admits no LDS. Integrate already-proven routes with public HIP and validate these actual operators. |
@@ -186,13 +186,13 @@ Relevant pinned upstream files:
 [softmax](https://github.com/ggml-org/llama.cpp/blob/b76b13379d3b7d67ab0bc424516bb6fd2522bd8e/ggml/src/ggml-cuda/softmax.cu),
 [HIP aliases](https://github.com/ggml-org/llama.cpp/blob/b76b13379d3b7d67ab0bc424516bb6fd2522bd8e/ggml/src/ggml-cuda/vendors/hip.h).
 
-Next: a native embedded-image registration/launch test and the effective HIP
-client compile/link probe, using the frozen CPU references for later numerical
-comparison. Follow with the required operator ABI/geometry,
+The bounded native embedded-image registration/launch test now passes; see
+`../evidence/console40-public-embedded-success.json`. Next use the effective HIP
+compiler probe and frozen CPU references to implement and qualify operator ABI/geometry,
 matmul and memory coverage. General G5 diagnostics remain deferred.
 
 The static-module failure publication prerequisite and bounded compiler-image
 registration now pass genuine CLR host qualification; see
 `../evidence/offline-public-embedded-images.json`. GPU transport was modeled.
-Remaining native compiler-launch work is documented in
+The completed bounded native compiler-launch case and remaining limits are documented in
 [PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md).

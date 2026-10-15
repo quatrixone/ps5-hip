@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-public-compiler-launch",
+  "source_commit": "e365c5d97c4a9b3921338cdaf70d439b8a6f96d6",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "e3d38022543668343a029d14cc55c1506bd5e1bc026719d3a1bd39c599093359",
+  "manifest_sha256": "60994a0b985527675f19f9964c91edb856611f63bfc75eb0304611bf6ef9da5e",
+  "application_log_sha256": "45c411ac7cc7203a726853146995cb5e88b463de20e5c467c803cb0f2c57d978",
+  "process": [
+    [
+      "PPSA99014",
+      "239"
+    ]
+  ],
+  "gpu_submissions": 2,
+  "values": 146,
+  "guards": 16,
+  "allocations": 1,
+  "frees": 1,
+  "queues": 1,
+  "retired_queues": 1,
+  "gate_destroyed": true,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-embedded-console-v1",
+  "raw_evidence": {
+    "manifest.json": "60994a0b985527675f19f9964c91edb856611f63bfc75eb0304611bf6ef9da5e",
+    "review.json": "6283d6413004ee422c7e0d707b99b8fb521ac218488db73ed0bbf5d75b7c7409",
+    "freeze-review-detail.json": "0a41016fe9af8ef0cad50581bb13d702d9fbe822e52451f94266271b2916364e",
+    "deployment-review-detail.json": "78d615c6657f0e038f3b5338e32a9a7ccdb4d6b08dc2cfdbd3f8492dcf9bbf96",
+    "outcome-review.json": "c39122cacb53920dfc806008fe02a8bd4ecb263269f8d0d5075b97d45e6ddac5",
+    "deploy/receipt.json": "6743b6a67510f0b000c3e4a774916877805c3e4676c51aa5c82b6d4b158b465b",
+    "execute/receipt.json": "d1e1a193b531407df4e5f5f487b3d7b8a23e1d32c90080d3d1ac1b1e0b1d31a9",
+    "deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/application.log": "45c411ac7cc7203a726853146995cb5e88b463de20e5c467c803cb0f2c57d978",
+    "execute/before-launch.log": "3de16d84c0a50883dac4988b8631ab554d18bfd717ea72b623cba22719674b15",
+    "execute/observed.log": "364524f66b440057c377ff1a1c065d1b1a150fc2207657caf83ffad9c6a51b44",
+    "execute/klog.log": "b3c8487b3f58bc1bff594c7417a56b0a666b4e4f0183a466a3d73a344990e569",
+    "execute/snapshot.log": "ec2679d287bc47c8f595d77f2d8d2bf2692c6c45dc7a9f56e91f4f7d113858aa",
+    "execute/post_snapshot.log": "ec2679d287bc47c8f595d77f2d8d2bf2692c6c45dc7a9f56e91f4f7d113858aa"
+  },
+  "limits": [
+    "One compiler module/kernel, deferred loading, two bounded launches only.",
+    "Device backing and queue retirement do not prove full static-registry ownership accounting.",
+    "No LLM operator, model inference, training or complete HIP/ROCm compatibility claim."
+  ]
+}

@@ -29,9 +29,10 @@ GGUF is 619831552 bytes, with 156 Q4_0 and 45 F32 tensors; see
 pass seven fixed cases twice, including 64 decode steps and the 512-token
 boundary, with identical raw logits across repeats. See
 `evidence/offline-llm-cpu-reference.json`. Native model memory usage and GPU
-numerical tolerances remain open. Next: native compiler-generated
-embedded-image launch and the effective HIP client compile/link probe,
-using the pinned converted weights and CPU token/logit fixtures.
+numerical tolerances remain open. Native compiler-generated embedded-image
+launch now passes the bounded .40 case below. Next: client-required aggregate
+argument ABI, launch resources and math/library integration, using the pinned
+converted weights, real compiler probe and CPU token/logit fixtures.
 
 The bounded effective compiler probe now passes twelve host-object builds and
 links backend/getrows/mmvq device modules. A controlled library-order fix now
@@ -45,10 +46,23 @@ Defer new retirement-ack diagnostics and general G5 optimization unless a real
 client blocker requires them. Existing correctness tests remain regressions.
 The full SDK roadmap stays open; v1 does not require all G5-G12 work to finish.
 Historical next-step paragraphs below are superseded by this release priority.
-No console change occurred for this planning milestone; the installed image/log
-in the native backing checkpoint below remain the baseline.
+The planning milestone itself made no console change. The subsequent native
+compiler-launch checkpoint below records the current installed image/log.
 
 ## Static module failure handling qualified offline
+
+Latest native checkpoint: genuine CLR compiler registration/stubs passed on .40
+with two GPU launches, 146 values, 16 guards, one allocation/free and one retired
+queue. Finalization, natural exit, installed readbacks, idle snapshots, service
+health and both lock releases passed independent review. See
+`evidence/console40-public-embedded-success.json`. This closes the bounded native
+compiler-launch prerequisite, not V1.2 or LLM inference.
+
+Current installed package: `e3d38022543668343a029d14cc55c1506bd5e1bc026719d3a1bd39c599093359`.
+Current embedded log: `45c411ac7cc7203a726853146995cb5e88b463de20e5c467c803cb0f2c57d978`.
+Both phases of `results/source-public-embedded-console-v1` are consumed. The
+previous package/copy_gpu log are preserved; older installed-baseline paragraphs
+below are historical. Future console cases require a fresh candidate.
 
 The actual native compiler-launch candidate now builds and passes the
 raw/converted/extracted image audit and packaging. See
@@ -56,8 +70,8 @@ raw/converted/extracted image audit and packaging. See
 one genuine HIP compiler object; ten audited functions preserve their bytes,
 with native execute-only text and verified registration/teardown ordering.
 All 75 runtime translation units match the previously qualified bootstrap.
-Next commit/freeze this candidate and validate it on idle .40. This is offline
-evidence only; native compiler-stub execution and LLM inference remain open.
+The subsequent native checkpoint above validates this candidate. This package
+receipt itself remains offline evidence; native LLM inference remains open.
 
 Superseded next step: bounded compiler embedded-image registration is now
 qualified offline through genuine CLR, including eager/deferred, two-module,

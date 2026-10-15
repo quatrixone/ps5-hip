@@ -4,6 +4,17 @@ The inference client uses compiler-generated registration and launches. Existing
 public file-module tests do not establish that path. This work must use genuine
 CLR registration, not substitute the older project runtime.
 
+## Native checkpoint
+
+The bounded compiler-launch case passed on .40 with source `e365c5d`: two GPU
+launches, 146 exact values, 16 guards, one allocation/free and one retired queue.
+Native finalization, natural exit, installed file readbacks, matching idle mount
+snapshots, service health and both lock releases passed independent review.
+See `../evidence/console40-public-embedded-success.json`. This proves one native
+module/kernel with deferred loading. Native eager/multiple-module behavior,
+complete static-registry ownership accounting and LLM inference remain open.
+The experiment contract below is now executed; its controls are consumed.
+
 ## Correctness prerequisite
 
 `StatCO::digestFatBinary` previously assigned its cached pointer before extraction.

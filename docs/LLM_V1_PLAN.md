@@ -149,9 +149,11 @@ checkpoint/resume, even when base weights are frozen.
 
 ## Immediate next action
 
-Continue V1.1 from `LLM_V1_PROFILE.md`: qualify compiler-generated embedded-image
-native launch, prepare the effective HIP compile/link probe, and use the verified
-CPU token/logit references to qualify required operators. The host tools and model
+Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now
+passes and five real device translation units link. Resolve demonstrated
+aggregate-argument, launch-resource, math/library and full-client-link blockers,
+then use the verified CPU token/logit references to qualify required operators.
+The host tools and model
 metadata inventory are reproducible through optional Make targets; V1.1 remains
 partial. Select work from demonstrated client blockers. No native LLM, training
 or first-release completion is claimed yet.
