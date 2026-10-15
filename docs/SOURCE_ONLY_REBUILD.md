@@ -57,3 +57,22 @@ execution control. Compare the new candidate's hashes, perform independent
 package/control review, then plan any console experiment separately under
 `AGENTS.md` and the shared-console runbook. Building this package does not
 prove public HIP startup or GPU execution.
+
+## Fresh deployment controls
+
+`tools/freeze_source_candidate.py` copies a completed build, controllers and
+the separately built read-only snapshot into a new `results/` candidate and
+binds their hashes. The source tree must be committed first. The current
+console control is scoped to `.40`, PPSA99014 and `/data/ps5-hip/results`;
+build with that explicit `RESULTS_DIR` when preparing this case.
+
+`tools/source_console.py` requires independent review bound to the frozen
+manifest before any socket is opened. Its separate one-use `deploy` phase
+preserves the exact historical image, waits for its unmount, promotes the
+verified new package, waits two minutes and verifies mounted bytes. The
+`execute` phase additionally requires review of that new deployment receipt.
+It checks fresh results, observes one bounded public HIP startup, preserves
+klog and application evidence, compares read-only mount snapshots, and uses
+only the exact-title close controller if cleanup is necessary. It never
+replays historical D/E controls. Review and current environment/lock checks
+remain required; these commands are deliberately outside the Make build.
