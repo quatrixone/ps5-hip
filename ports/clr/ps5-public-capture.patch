@@ -1,6 +1,43 @@
 --- a/hipamd/src/hip_graph.cpp
 +++ b/hipamd/src/hip_graph.cpp
-@@ -905,9 +905,16 @@
+@@ -81,6 +81,21 @@
+   return hipSuccess;
+ }
+ 
++#if defined(WITH_PS5_DEVICE)
++static hipError_t ps5GraphParameterStatus(hip::Graph* graph) {
++  for (auto node : graph->GetNodes()) {
++    if (node->GetType() == hipGraphNodeTypeKernel) {
++      auto status = static_cast<hip::GraphKernelNode*>(node)->ParameterStatus();
++      if (status != hipSuccess) return status;
++    } else if (node->GetType() == hipGraphNodeTypeGraph) {
++      auto status = ps5GraphParameterStatus(node->GetChildGraph());
++      if (status != hipSuccess) return status;
++    }
++  }
++  return hipSuccess;
++}
++#endif
++
+ hipError_t ihipGraphAddKernelNode(hip::GraphNode** pGraphNode, hip::Graph* graph,
+                                   hip::GraphNode* const* pDependencies, size_t numDependencies,
+                                   const hipKernelNodeParams* pNodeParams,
+@@ -111,6 +126,14 @@
+   }
+ 
+   *pGraphNode = new hip::GraphKernelNode(pNodeParams, pNodeEvents);
++#if defined(WITH_PS5_DEVICE)
++  status = static_cast<hip::GraphKernelNode*>(*pGraphNode)->ParameterStatus();
++  if (status != hipSuccess) {
++    delete *pGraphNode;
++    *pGraphNode = nullptr;
++    return status;
++  }
++#endif
+   status = ihipGraphAddNode(*pGraphNode, graph, pDependencies, numDependencies, capture);
+   return status;
+ }
+@@ -905,9 +928,16 @@
    }
    hip::Stream* s = reinterpret_cast<hip::Stream*>(stream);
    // It can be initiated if the stream is not already in capture mode
@@ -17,7 +54,7 @@
    if(graph == nullptr) {
      s->SetCaptureGraph(new hip::Graph(s->GetDevice()));
    } else {
-@@ -976,6 +983,9 @@
+@@ -976,6 +1006,9 @@
    if (pGraph == nullptr) {
      return hipErrorInvalidValue;
    }
@@ -27,7 +64,7 @@
    if (stream == nullptr) {
      return hipErrorIllegalState;
    }
-@@ -1012,6 +1022,14 @@
+@@ -1012,6 +1045,14 @@
    // If capture was invalidated, due to a violation of the rules of stream capture
    if (s->GetCaptureStatus() == hipStreamCaptureStatusInvalidated) {
      *pGraph = nullptr;
@@ -42,6 +79,69 @@
      return hipErrorStreamCaptureInvalidated;
    }
  
+@@ -1270,6 +1311,14 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+   hip::GraphNode* node = new hip::ChildGraphNode(reinterpret_cast<hip::Graph*>(childGraph));
++#if defined(WITH_PS5_DEVICE)
++  auto parameterStatus = ps5GraphParameterStatus(node->GetChildGraph());
++  if (parameterStatus != hipSuccess) {
++    delete node;
++    *pGraphNode = nullptr;
++    HIP_RETURN(parameterStatus);
++  }
++#endif
+   hipError_t status = ihipGraphAddNode(node, reinterpret_cast<hip::Graph*>(graph),
+                                        reinterpret_cast<hip::GraphNode* const*>(pDependencies),
+                                        numDependencies, false);
+@@ -1295,6 +1344,14 @@
+   if (clonedGraph == nullptr) {
+     return hipErrorInvalidValue;
+   }
++#if defined(WITH_PS5_DEVICE)
++  auto parameterStatus = ps5GraphParameterStatus(clonedGraph);
++  if (parameterStatus != hipSuccess) {
++    delete clonedGraph;
++    *pGraphExec = nullptr;
++    return parameterStatus;
++  }
++#endif
+   std::vector<hip::GraphNode*> graphNodes;
+   if (false == clonedGraph->TopologicalOrder(graphNodes)) {
+     return hipErrorInvalidValue;
+@@ -1701,7 +1758,7 @@
+   if(status != hipSuccess) {
+     HIP_RETURN(status);
+   }
+-  if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++  if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+     status = reinterpret_cast<hip::GraphExec*>(hGraphExec)
+         ->UpdateAQLPacket(reinterpret_cast<hip::GraphKernelNode*>(clonedNode));
+   }
+@@ -2069,6 +2126,14 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+   *pGraphClone = reinterpret_cast<hipGraph_t>(g->clone());
++#if defined(WITH_PS5_DEVICE)
++  auto status = ps5GraphParameterStatus(reinterpret_cast<hip::Graph*>(*pGraphClone));
++  if (status != hipSuccess) {
++    delete reinterpret_cast<hip::Graph*>(*pGraphClone);
++    *pGraphClone = nullptr;
++    HIP_RETURN(status);
++  }
++#endif
+   HIP_RETURN(hipSuccess);
+ }
+ 
+@@ -2466,7 +2531,7 @@
+           *updateResult_out = hipGraphExecUpdateErrorNotSupported;
+         }
+         HIP_RETURN(hipErrorGraphExecUpdateFailure);
+-      } else if (DEBUG_CLR_GRAPH_PACKET_CAPTURE &&
++      } else if (HIP_GRAPH_PACKET_CAPTURE_ENABLED &&
+                  oldGraphExecNodes[i]->GetType() == hipGraphNodeTypeKernel) {
+         status =
+             reinterpret_cast<hip::GraphExec*>(hGraphExec)
 --- a/hipamd/src/hip_internal.hpp
 +++ b/hipamd/src/hip_internal.hpp
 @@ -306,6 +306,9 @@

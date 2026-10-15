@@ -667,6 +667,14 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
+Explicit GPU kernel graph nodes now pass full source sanitizer qualification and
+independent audit: owned arguments, parameter updates, replay after source-graph
+destruction, allocation/command failure recovery, parallel/child cleanup and
+disabled-node dependencies. The suite compiled 81 units and linked 12 clients;
+all prior cases passed. See `../evidence/offline-public-kernel-graph.json`. GPU transport
+is modeled; native GPU graph execution is the next acceptance step. Modules and
+device allocations remain caller-owned and live through synchronized exec teardown.
+
 The bounded native explicit-stream/event GPU fixture passed: two changed-input
 launches, one reused event, exact producer/consumer readback, two buffers freed
 and three queues retired. See `../evidence/console40-public-stream-gpu-success.json`.

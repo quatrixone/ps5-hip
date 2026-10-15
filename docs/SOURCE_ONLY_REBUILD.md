@@ -323,3 +323,27 @@ The shared host/native oracle has bypass, no-write and corrupt-write negative
 controls in the source qualifier. Host-model evidence does not establish native
 GPU execution. Freeze and independently review a fresh candidate before console
 use; consult the current `STATE.md` baseline rather than reusing an old receipt.
+
+## Explicit GPU kernel graph qualification
+
+The source qualifier includes `tests/public_hip_graph_gpu_model.cpp`. It exercises
+real HIP/ROCclr graph construction and command replay with modeled GPU transport:
+two changed-salt kernel replays, deep-copied arguments, executable parameter
+updates and replay after destroying the source graph. The module and device
+allocation remain alive until the executable graph has been destroyed and its
+work synchronized; graph argument copies do not transfer ownership of those resources.
+
+PS5 graph replay uses the command path. ROCr AQL packet capture is disabled for
+this backend regardless of the upstream debug flag, because dispatch uses PM4.
+Explicit kernel nodes use the existing bounded launch geometry and argument ABI;
+module-launch stream capture and 3D memcpy graph admission remain unsupported.
+
+Fault injection targets the graph argument table and each of its three argument
+allocations during add, clone, instantiate, child-graph construction and parameter
+updates. Failed updates preserve the old arguments. Command-construction failure
+is exercised after a successful replay and inside parallel and child graphs;
+unsubmitted commands must be released and later callbacks must not execute.
+Disabled kernel nodes become dependency-preserving markers and can be re-enabled.
+These cases do not establish general allocation-failure coverage, resource-pool
+plateaus, graph submission efficiency or native GPU graph execution. A shared
+native oracle and a fresh reviewed console candidate are still required.

@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-explicit-kernel-graph-runtime",
+  "source_base_commit": "c3d0b7e",
+  "qualification": {
+    "compilations": 81,
+    "links": 12,
+    "inputs": 112,
+    "included_files": 697,
+    "previous_cases": 42,
+    "rounds": 2,
+    "exact_values": 146,
+    "guards": 16,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 7,
+    "retired_queues": 7
+  },
+  "implementation": [
+    "Enable explicit kernel graph nodes using existing bounded launch ABI and checked wide grid products.",
+    "Own graph arguments transactionally; propagate add/clone/instantiate/child copy failure and retain old values after failed updates.",
+    "Use command replay instead of incompatible ROCr AQL capture.",
+    "Propagate first construction error; release unsubmitted parallel/child commands, preserve disabled-node dependencies, restore internal queue cursor on every exit."
+  ],
+  "new_cases": [
+    "owned-arguments-update-source-destroy",
+    "argument-allocation-failures",
+    "single-parallel-child-command-failures",
+    "disabled-reenabled",
+    "noop-output-rejected",
+    "corrupt-output-rejected"
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-graph-gpu-source-v5/receipt.json": "a17749a2a5ca313adbbf85b32de77c596397f82efb617887c81af711c8134ac5",
+    "results/public-graph-gpu-review-v5/review.json": "6ab6afefd24e6f8540ccc6d27e22c23a5021310922c6c0dfd5e3479d23bb916f",
+    "results/public-graph-gpu-source-v5/graph-gpu-normal.json": "10ee961561f9202889fd3451eeebbf24d1e6fc62cf2ba9eac3ee98b33ebe2fcc",
+    "results/public-graph-gpu-source-v5/graph-gpu-normal.stdout": "1054dd06f6d754615c543c8ff2bc72c73044f6f4b312c4d11768c9822e3dcf8a",
+    "results/public-graph-gpu-source-v5/graph-gpu-normal.stderr": "bd54a52112b500b605b94f2c43313f4ba76ce13083d8d4132530662b6bcb4f5a",
+    "results/public-graph-gpu-source-v5/graph-gpu-noop.json": "ae07af40702ad772990fd0a59a47db03a0081428b225ab8d59146ad0c8003b28",
+    "results/public-graph-gpu-source-v5/graph-gpu-noop.stderr": "6781e68684ebc7c705875c62aeae1af3307f549b4170187fcd923fe298a0b715",
+    "results/public-graph-gpu-source-v5/graph-gpu-corrupt.json": "ae9977a798a71e45a4b20071f51438e4df2666ca2177c839cb1ba1af354eb0d8",
+    "results/public-graph-gpu-source-v5/graph-gpu-corrupt.stderr": "6781e68684ebc7c705875c62aeae1af3307f549b4170187fcd923fe298a0b715"
+  },
+  "prior_failures_preserved": [
+    "results/public-graph-gpu-source-v1: incompatible AQL capture path",
+    "results/public-graph-gpu-source-v2: obsolete two-queue assertion",
+    "results/public-graph-gpu-source-v4: queue cursor exhausted after repeated failed parallel replay"
+  ],
+  "limits": [
+    "Modeled GPU transport only; no native GPU graph run or console contact.",
+    "Modules and device allocations remain live until synchronized graph-executable destruction; graph argument copies do not transfer resource ownership.",
+    "Argument allocation fault seam covers table and three arguments, not every C++ allocation.",
+    "Module kernel capture, broader memcpy graph admission, resource plateau and replay efficiency remain open."
+  ],
+  "next": "Build a shared native GPU graph oracle, review frozen package and test once on .40 through WSL."
+}

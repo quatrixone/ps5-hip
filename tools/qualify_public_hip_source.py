@@ -38,7 +38,7 @@ def main():
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
-                 'tests/public_hip_graph_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -188,6 +188,23 @@ def main():
         run('stream-gpu-' + negative, [output / 'stream-gpu-model', launch_code, negative], env,
             expected_output_failure=True, failure_marker='PUBLIC_STREAM_GPU_OUTPUT_MISMATCH round=0 index=0')
     print('public stream GPU ordering and three negative controls PASS', flush=True)
+    graph_gpu_source = ROOT / 'tests/public_hip_graph_gpu_model.cpp'
+    source_hashes[str(graph_gpu_source.relative_to(ROOT))] = sha(graph_gpu_source)
+    graph_gpu_object = compile_one((len(units) + 11, graph_gpu_source))
+    graph_gpu_objects = [graph_gpu_object if unit.name == 'hip_admission_model.cpp' else obj
+                         for unit, obj in zip(units, objects)]
+    run('graph-gpu-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *graph_gpu_objects, '-o', output / 'graph-gpu-model'])
+    result = run('graph-gpu-normal', [output / 'graph-gpu-model', launch_code, 'normal'], env)
+    if result.splitlines() != [
+        'PUBLIC_GRAPH_GPU_PASS rounds=2 values=146 guards=16 owned_args=true updated=true source_destroyed=true gpu_execution=false',
+        'PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false']:
+        raise RuntimeError('public GPU graph argument/replay/lifetime contract differs')
+    for negative in ('noop', 'corrupt'):
+        run('graph-gpu-' + negative, [output / 'graph-gpu-model', launch_code, negative], env,
+            expected_output_failure=True, failure_marker='PUBLIC_GRAPH_GPU_OUTPUT_MISMATCH round=0 index=0')
+    print('public GPU graph replay and two negative controls PASS', flush=True)
     stream_source = ROOT / 'tests/public_hip_stream_model.cpp'
     source_hashes[str(stream_source.relative_to(ROOT))] = sha(stream_source)
     stream_object = compile_one((len(units) + 1, stream_source))
@@ -363,9 +380,10 @@ def main():
     run('graph-explicit-noop', [output / 'graph-model', 'explicit-noop'], env,
         expected_output_failure=True, failure_marker='PUBLIC_GRAPH_OUTPUT_MISMATCH round=0')
     print('public host graph no-op output control PASS', flush=True)
-    for name, expected in {**inputs, **source_hashes}.items():
-        if sha(ROOT / name) != expected:
-            raise RuntimeError('input changed during qualification: ' + name)
+    for collection in (inputs, source_hashes):
+        for name, expected in collection.items():
+            if sha(ROOT / name) != expected:
+                raise RuntimeError('input changed during qualification: ' + name)
     for name, expected in header_hashes.items():
         if sha(name) != expected:
             raise RuntimeError('header changed during qualification: ' + name)
@@ -385,7 +403,9 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 11,
+               'total_compilations': len(units) + 12,
+               'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),
+               'graph_gpu_cases': ['owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
                'stream_gpu_model_sha256': sha(output / 'stream-gpu-model'),
                'stream_gpu_cases': ['event-ordered-two-rounds', 'bypass-stale-output-rejected', 'noop-output-rejected', 'corrupt-output-rejected'],
                'graph_model_sha256': sha(output / 'graph-model'),

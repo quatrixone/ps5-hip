@@ -1,5 +1,4 @@
 {
-  "patch_sha256": "7281674bcbe72d9f5b62288902607d0c49664644a0da7d7aecfcc4c37c089f10",
   "files": {
     "hipamd/src/hip_module.cpp": {
       "before": "b82f767028fc45576e3ed932dc3c3fa7d28c9b78c958d4d506ed17b2980aa6d7",
@@ -7,7 +6,12 @@
     },
     "hipamd/src/hip_graph_internal.hpp": {
       "before": "d9209a4d961a3d899ebc406bc206857cec87158feaf35ecc5f196856d90a5264",
-      "after": "0aa801d40a8bf0306f29c1c46fefb862285f5892a4b12a44e0d03d1001b654ab"
+      "after": "27fdbc931ba6d48490e7d466ab9123dc209acda98eaa9a6a378cbd64c14cf657"
+    },
+    "hipamd/src/hip_graph_internal.cpp": {
+      "before": "fa6825284cc1605c28718bb52aa0a84f67e9ffa482b01901bf62e2e76c4c007a",
+      "after": "04205e2e2d2ab7acbc44fcfc2e397cc2a43bc63a0d7751d94e7ab530a557b391"
     }
-  }
+  },
+  "patch_sha256": "2f4c5e2394afbd958ee31cf7b896f353f313f3fd3683d4becf5e22c78e85ff11"
 }

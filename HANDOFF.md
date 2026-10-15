@@ -18,6 +18,14 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+Explicit GPU kernel graph nodes now pass full source sanitizer qualification and
+independent audit: owned arguments, parameter updates, replay after source-graph
+destruction, allocation/command failure recovery, parallel/child cleanup and
+disabled-node dependencies. The suite compiled 81 units and linked 12 clients;
+all prior cases passed. See `evidence/offline-public-kernel-graph.json`. GPU transport
+is modeled; native GPU graph execution is the next acceptance step. Modules and
+device allocations remain caller-owned and live through synchronized exec teardown.
+
 - 2026-10-15 | G5 | 3160818 | .40 | pass: bounded native stream/event GPU | evidence/console40-public-stream-gpu-success.json | next: GPU graph nodes/lifetime
 
 The native public HIP explicit-stream/event fixture passed on .40 through WSL

@@ -130,14 +130,343 @@
    HIP_RETURN(ihipLaunchKernel(hostFunction, gridDim, blockDim, args, sharedMemBytes, stream,
 --- a/hipamd/src/hip_graph_internal.hpp
 +++ b/hipamd/src/hip_graph_internal.hpp
-@@ -1193,6 +1193,10 @@
+@@ -39,6 +39,13 @@
+   hipEvent_t startEvent_;
+   hipEvent_t stopEvent_;
+ } ihipExtKernelEvents;
++
++// PS5 submits PM4 through the adapter; ROCr AQL packet capture is not a valid path.
++#if defined(WITH_PS5_DEVICE)
++#define HIP_GRAPH_PACKET_CAPTURE_ENABLED false
++#else
++#define HIP_GRAPH_PACKET_CAPTURE_ENABLED DEBUG_CLR_GRAPH_PACKET_CAPTURE
++#endif
+ 
+ namespace hip {
+ struct Graph;
+@@ -247,6 +254,11 @@
+     commands_.clear();
+     stream_ = stream;
+     return hipSuccess;
++  }
++  // Only called for commands constructed in an aborted, not-enqueued batch.
++  virtual void DiscardUnsubmittedCommands() {
++    for (auto command : commands_) if (command) command->release();
++    commands_.clear();
+   }
+   /// Return node unique ID
+   int GetID() const { return id_; }
+@@ -329,6 +341,9 @@
+     // If the node is disabled it becomes empty node. To maintain ordering just enqueue marker.
+     // Node can be enabled/disabled only for kernel, memcpy and memset nodes.
+     if (!isEnabled_ &&
++#if defined(WITH_PS5_DEVICE)
++        type_ != hipGraphNodeTypeKernel &&
++#endif
+         (type_ == hipGraphNodeTypeKernel || type_ == hipGraphNodeTypeMemcpy ||
+          type_ == hipGraphNodeTypeMemset)) {
+       amd::Command::EventWaitList waitList;
+@@ -596,7 +611,7 @@
+     }
+     // Release the kernel arg memory.
+     auto device = g_devices[ihipGetDevice()]->devices()[0];
+-    if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++    if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+       if (kernarg_pool_size_graph_ != 0) {
+         device->hostFree(kernarg_pool_graph_, kernarg_pool_size_graph_);
+         for (auto& element : kernarg_graph_) {
+@@ -722,6 +737,13 @@
+     return parallelLists_[0].back()->GetCommands();
+   }
+ 
++  void DiscardUnsubmittedCommands() override {
++    if (endCommand_) { endCommand_->release(); endCommand_ = nullptr; }
++    for (auto it = childGraphNodeOrder_.rbegin(); it != childGraphNodeOrder_.rend(); ++it)
++      (*it)->DiscardUnsubmittedCommands();
++    if (startCommand_) { startCommand_->release(); startCommand_ = nullptr; }
++  }
++
+   // Create child graph node commands and set waitlists
+   hipError_t CreateCommand(hip::Stream* stream) override {
+     hipError_t status = GraphNode::CreateCommand(stream);
+@@ -799,9 +821,13 @@
+   }
+ };
+ 
++#if defined(WITH_PS5_DEVICE) && defined(PS5HIP_CLR_MODEL)
++extern "C" void* ps5hip_graph_argument_alloc(size_t) __attribute__((weak));
++extern "C" hipError_t ps5hip_graph_command_status() __attribute__((weak));
++#endif
+ class GraphKernelNode : public GraphNode {
+-  hipKernelNodeParams kernelParams_;   //!< Kernel node parameters
+-  unsigned int numParams_;             //!< No. of kernel params as part of signature
++  hipKernelNodeParams kernelParams_{};   //!< Kernel node parameters
++  unsigned int numParams_ = 0;             //!< No. of kernel params as part of signature
+   hipKernelNodeAttrValue kernelAttr_;  //!< Kernel node attributes
+   unsigned int kernelAttrInUse_;       //!< Kernel attributes in use
+   ihipExtKernelEvents kernelEvents_;   //!< Events for Ext launch kernel
+@@ -920,7 +946,46 @@
+     return func;
+   }
+ 
++  hipError_t parameterStatus_ = hipSuccess;
++  hipError_t ParameterStatus() const { return parameterStatus_; }
+   hipError_t copyParams(const hipKernelNodeParams* pNodeParams) {
++#if defined(WITH_PS5_DEVICE)
++    hipFunction_t func = getFunc(*pNodeParams, ihipGetDevice());
++    if (!func) return hipErrorInvalidDeviceFunction;
++    const auto& signature = hip::DeviceFunc::asFunction(func)->kernel()->signature();
++    const size_t count = signature.numParameters();
++    auto allocate = [](size_t bytes) -> void* {
++#if defined(PS5HIP_CLR_MODEL)
++      if (ps5hip_graph_argument_alloc) return ps5hip_graph_argument_alloc(bytes);
++#endif
++      return malloc(bytes);
++    };
++    void** copied = static_cast<void**>(allocate((count ? count : 1) * sizeof(void*)));
++    if (!copied) return hipErrorOutOfMemory;
++    memset(copied, 0, count * sizeof(void*));
++    for (size_t i = 0; i < count; ++i) {
++      copied[i] = allocate(signature.at(i).size_);
++      if (!copied[i]) {
++        for (size_t j = 0; j < i; ++j) free(copied[j]);
++        free(copied);
++        return hipErrorOutOfMemory;
++      }
++      memcpy(copied[i], pNodeParams->kernelParams[i], signature.at(i).size_);
++    }
++    // Allocate everything first, including when the caller used GetParams.
++    hipKernelNodeParams replacement = *pNodeParams;
++    replacement.kernelParams = copied;
++    replacement.extra = nullptr;
++    freeParams();
++    kernelParams_ = replacement;
++    numParams_ = count;
++    hasHiddenHeap_ = false;
++    for (size_t i = count; i < signature.numParametersAll(); ++i)
++      if (signature.at(i).info_.oclObject_ == amd::KernelParameterDescriptor::HiddenHeap)
++        hasHiddenHeap_ = true;
++    parameterStatus_ = hipSuccess;
++    return hipSuccess;
++#else
+     hasHiddenHeap_ = false;
+     hipFunction_t func = getFunc(*pNodeParams, ihipGetDevice());
+     if (!func) {
+@@ -928,7 +993,7 @@
+     }
+     hip::DeviceFunc* function = hip::DeviceFunc::asFunction(func);
+     amd::Kernel* kernel = function->kernel();
+-    if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++    if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+       auto device = g_devices[ihipGetDevice()]->devices()[0];
+       device::Kernel* devKernel = const_cast<device::Kernel*>(kernel->getDeviceKernel(*device));
+       kernargSegmentByteSize_ = devKernel->KernargSegmentByteSize();
+@@ -988,16 +1053,20 @@
+       kernelParams_.extra[4] = pNodeParams->extra[4];
+     }
+     return hipSuccess;
++#endif
+   }
+ 
+   GraphKernelNode(const hipKernelNodeParams* pNodeParams, const ihipExtKernelEvents* pEvents)
+       : GraphNode(hipGraphNodeTypeKernel, "bold", "octagon", "KERNEL") {
++#if !defined(WITH_PS5_DEVICE)
+     kernelParams_ = *pNodeParams;
++#endif
+     kernelEvents_ = { 0 };
+     if (pEvents != nullptr) {
+       kernelEvents_ = *pEvents;
+     }
+-    if (copyParams(pNodeParams) != hipSuccess) {
++    parameterStatus_ = copyParams(pNodeParams);
++    if (parameterStatus_ != hipSuccess) {
+       ClPrint(amd::LOG_ERROR, amd::LOG_CODE, "[hipGraph] Failed to copy params");
+     }
+     memset(&kernelAttr_, 0, sizeof(kernelAttr_));
+@@ -1030,9 +1099,12 @@
+   }
+ 
+   GraphKernelNode(const GraphKernelNode& rhs) : GraphNode(rhs) {
++#if !defined(WITH_PS5_DEVICE)
+     kernelParams_ = rhs.kernelParams_;
++#endif
+     kernelEvents_ = rhs.kernelEvents_;
+-    hipError_t status = copyParams(&rhs.kernelParams_);
++    hipError_t status = rhs.parameterStatus_ == hipSuccess ? copyParams(&rhs.kernelParams_) : rhs.parameterStatus_;
++    parameterStatus_ = status;
+     if (status != hipSuccess) {
+       ClPrint(amd::LOG_ERROR, amd::LOG_CODE, "[hipGraph] Failed to allocate memory to copy params");
+     }
+@@ -1049,6 +1121,15 @@
+   }
+ 
+   hipError_t CreateCommand(hip::Stream* stream) override {
++    commands_.clear();
++    if (stream == nullptr) return hipErrorInvalidResourceHandle;
++    if (parameterStatus_ != hipSuccess) return parameterStatus_;
++#if defined(WITH_PS5_DEVICE) && defined(PS5HIP_CLR_MODEL)
++    if (ps5hip_graph_command_status) {
++      auto injected = ps5hip_graph_command_status();
++      if (injected != hipSuccess) return injected;
++    }
++#endif
+     hipFunction_t func = nullptr;
+     hipError_t status = validateKernelParams(&kernelParams_, &func,
+                                              stream ? hip::getDeviceID(stream->context()) : -1);
+@@ -1060,7 +1141,15 @@
+       return status;
+     }
+     commands_.reserve(1);
+-    amd::Command* command;
++#if defined(WITH_PS5_DEVICE)
++    if (!isEnabled_) {
++      auto marker = new amd::Marker(*stream, !kMarkerDisableFlush, {});
++      if (!marker) return hipErrorOutOfMemory;
++      commands_.emplace_back(marker);
++      return hipSuccess;
++    }
++#endif
++    amd::Command* command = nullptr;
+     status = ihipLaunchKernelCommand(
+         command, func, kernelParams_.gridDim.x * kernelParams_.blockDim.x,
+         kernelParams_.gridDim.y * kernelParams_.blockDim.y,
+@@ -1068,6 +1157,7 @@
+         kernelParams_.blockDim.y, kernelParams_.blockDim.z, kernelParams_.sharedMemBytes,
+         stream, kernelParams_.kernelParams, kernelParams_.extra, kernelEvents_.startEvent_,
+         kernelEvents_.stopEvent_, 0, 0, 0, 0, 0, 0, 0);
++    if (status != hipSuccess) return status;
+     commands_.emplace_back(command);
+     return status;
+   }
+@@ -1081,6 +1171,9 @@
+       ClPrint(amd::LOG_ERROR, amd::LOG_CODE, "[hipGraph] Failed to validateKernelParams");
+       return status;
+     }
++#if defined(WITH_PS5_DEVICE)
++    return copyParams(params);
++#else
+     if ((kernelParams_.kernelParams && kernelParams_.kernelParams == params->kernelParams) ||
+          (kernelParams_.extra && kernelParams_.extra == params->extra)) {
+       // params is copied from kernelParams_ and then updated, so just copy it back
+@@ -1094,6 +1187,7 @@
+       ClPrint(amd::LOG_ERROR, amd::LOG_CODE, "[hipGraph] Failed to set params");
+     }
+     return status;
++#endif
+   }
+ 
+   hipError_t SetAttrParams(hipKernelNodeAttrID attr, const hipKernelNodeAttrValue* params) {
+@@ -1193,6 +1287,14 @@
  
    static hipError_t validateKernelParams(const hipKernelNodeParams* pNodeParams,
                                           hipFunction_t* ptrFunc = nullptr, int devId = -1) {
 +#if defined(WITH_PS5_DEVICE)
-+    // Kernel graph admission needs independent argument/extent/lifetime qualification.
-+    return hipErrorNotSupported;
++    if (pNodeParams == nullptr) return hipErrorInvalidValue;
++    // Check wide products before upstream narrows them to the launch ABI.
++    if (uint64_t(pNodeParams->gridDim.x) * pNodeParams->blockDim.x > UINT32_MAX ||
++        uint64_t(pNodeParams->gridDim.y) * pNodeParams->blockDim.y > UINT32_MAX ||
++        uint64_t(pNodeParams->gridDim.z) * pNodeParams->blockDim.z > UINT32_MAX)
++      return hipErrorInvalidConfiguration;
 +#endif
      devId = devId == -1 ? ihipGetDevice() : devId;
      hipFunction_t func = getFunc(*pNodeParams, devId);
      if (!func) {
+--- a/hipamd/src/hip_graph_internal.cpp
++++ b/hipamd/src/hip_graph_internal.cpp
+@@ -346,7 +346,7 @@
+   if (status != hipSuccess) {
+     return status;
+   }
+-  if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++  if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+     // For graph nodes capture AQL packets to dispatch them directly during graph launch.
+     status = CaptureAQLPackets();
+   }
+@@ -502,10 +502,17 @@
+                         std::vector<Node>& topoOrder, Graph* clonedGraph,
+                         amd::Command*& graphStart, amd::Command*& graphEnd, hip::Stream* stream) {
+   hipError_t status = hipSuccess;
++  size_t prepared = 0;
++  auto discard = [&]() {
++    if (graphEnd) { graphEnd->release(); graphEnd = nullptr; }
++    while (prepared) topoOrder[--prepared]->DiscardUnsubmittedCommands();
++    if (graphStart) { graphStart->release(); graphStart = nullptr; }
++  };
+   for (auto& node : topoOrder) {
+     // TODO: clone commands from next launch
+     status = node->CreateCommand(node->GetQueue());
+-    if (status != hipSuccess) return status;
++    if (status != hipSuccess) { discard(); return status; }
++    ++prepared;
+     amd::Command::EventWaitList waitList;
+     for (auto depNode : nodeWaitLists[node]) {
+       for (auto command : depNode->GetCommands()) {
+@@ -525,6 +532,7 @@
+       if (graphStart == nullptr) {
+         graphStart = new amd::Marker(*stream, false, {});
+         if (graphStart == nullptr) {
++          discard();
+           return hipErrorOutOfMemory;
+         }
+       }
+@@ -557,7 +565,7 @@
+     ClPrint(amd::LOG_INFO, amd::LOG_CODE,
+             "[hipGraph] EndCommand will get launched on stream %p", stream);
+     if (graphEnd == nullptr) {
+-      graphStart->release();
++      discard();
+       return hipErrorOutOfMemory;
+     }
+   }
+@@ -589,11 +597,11 @@
+   // we track only kernel nodes.
+   amd::AccumulateCommand* accumulate = nullptr;
+   hipError_t status = hipSuccess;
+-  if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++  if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+     accumulate = new amd::AccumulateCommand(*hip_stream, {}, nullptr);
+   }
+   for (int i = 0; i < topoOrder.size(); i++) {
+-    if (DEBUG_CLR_GRAPH_PACKET_CAPTURE && topoOrder[i]->GetType() == hipGraphNodeTypeKernel &&
++    if (HIP_GRAPH_PACKET_CAPTURE_ENABLED && topoOrder[i]->GetType() == hipGraphNodeTypeKernel &&
+         !reinterpret_cast<hip::GraphKernelNode*>(topoOrder[i])->HasHiddenHeap()) {
+       if (topoOrder[i]->GetEnabled()) {
+         hip_stream->vdev()->dispatchAqlPacket(topoOrder[i]->GetAqlPacket(),
+@@ -603,11 +611,15 @@
+     } else {
+       topoOrder[i]->SetStream(hip_stream, graphExec);
+       status = topoOrder[i]->CreateCommand(topoOrder[i]->GetQueue());
++      if (status != hipSuccess) {
++        if (accumulate) accumulate->release();
++        return status;
++      }
+       topoOrder[i]->EnqueueCommands(hip_stream);
+     }
+   }
+ 
+-  if (DEBUG_CLR_GRAPH_PACKET_CAPTURE) {
++  if (HIP_GRAPH_PACKET_CAPTURE_ENABLED) {
+     accumulate->enqueue();
+     accumulate->release();
+   }
+@@ -615,6 +627,12 @@
+ }
+ 
+ hipError_t GraphExec::Run(hipStream_t graph_launch_stream) {
++  // A failed construction consumes stream slots too. Every exit restores them.
++  ResetQueueIndex();
++  struct QueueIndexReset {
++    GraphExec* graph;
++    ~QueueIndexReset() { graph->ResetQueueIndex(); }
++  } reset{this};
+   hipError_t status = hipSuccess;
+ 
+   hip::Stream* launch_stream = hip::getStream(graph_launch_stream);
+@@ -645,6 +663,7 @@
+     for (int i = 0; i < topoOrder_.size(); i++) {
+       topoOrder_[i]->SetStream(launch_stream, this);
+       status = topoOrder_[i]->CreateCommand(topoOrder_[i]->GetQueue());
++      if (status != hipSuccess) return status;
+       topoOrder_[i]->EnqueueCommands(launch_stream);
+     }
+   } else {

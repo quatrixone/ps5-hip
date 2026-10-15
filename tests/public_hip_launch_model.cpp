@@ -60,7 +60,7 @@ int main(int argc,char**argv){
  hipKernelNodeParams params{};params.func=reinterpret_cast<void*>(function);
  params.gridDim=dim3(2,1,1);params.blockDim=dim3(64,1,1);params.kernelParams=args;
  hipGraphNode_t node=nullptr;
- checked(hipGraphAddKernelNode(&node,graph,nullptr,0,&params)==hipErrorNotSupported,__LINE__);
+ HIP_OK(hipGraphAddKernelNode(&node,graph,nullptr,0,&params));
  HIP_OK(hipGraphDestroy(graph));HIP_OK(hipStreamDestroy(capturing));
  checked(submits==0&&backend_calls==0&&!observed.terminal&&!observed.uncertain,__LINE__);
  const bool event_case=std::strcmp(mode,"events")==0;
