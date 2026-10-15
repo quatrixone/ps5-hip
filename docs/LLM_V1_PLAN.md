@@ -173,7 +173,7 @@ full SDK roadmap:
 | --- | --- |
 | Reproducible model and CPU oracle | Source weights, Q4_0 conversion and seven repeated CPU inference cases pass; native memory budget and complete client inventory remain open |
 | Native public HIP runtime | Compiler-generated launches and aggregate arguments pass on .40; real operator resource shapes and model-scale allocations remain open |
-| Required operators | Compiler/link probes exist; actual upstream RMSNorm is the next native numerical gate, followed by the remaining model operations |
+| Required operators | Upstream RMSNorm passed its six-case native numerical run; independent outcome review passed. Remaining model operators and full graph integration are open |
 | Complete inference | Native client link, GPU prefill/decode, reference logits and generated tokens remain open |
 | Release qualification | Repeated requests, lifecycle/failure tests, clean source-only client build and measured performance remain open |
 
@@ -193,9 +193,15 @@ and bounded native execution on .40; see `PUBLIC_AGGREGATE_ARGUMENTS.md`.
 The CPU RMSNorm oracle and optional null-pointer handling now pass offline; see
 `../evidence/offline-llm-rmsnorm-reference.json` and
 `../evidence/offline-public-nullable-arguments.json`.
-The next proposed operator gate is genuine 2048-column RMSNorm with its actual
-1024-thread/128-byte LDS contract and frozen CPU numerical reference; see
-`../evidence/llm-next-runtime-gate.json`.
+The 2048-column RMSNorm candidate completed its six-case native run with the
+actual 1024-thread/128-byte LDS contract and frozen CPU numerical reference.
+Independent outcome review passed; see
+`../evidence/console40-public-rmsnorm-success.json`.
+Next, finish the client call/operator inventory and select the first unresolved
+Q4_0 matrix/vector multiplication or full-client-link blocker. Qualify each
+remaining operation against real model shapes, then integrate one complete
+transformer layer before full-model prefill and incremental decode. Do not
+expand general SDK coverage merely because an isolated operator now works.
 The host tools and model
 metadata inventory are reproducible through optional Make targets; V1.1 remains
 partial. Select work from demonstrated client blockers. No native LLM, training

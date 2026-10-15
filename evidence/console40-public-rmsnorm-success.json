@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-public-rmsnorm",
+  "source_commit": "6265eda71d70a53ed5e9c42cad80843827b1bc3f",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "9daf89bf558e55c5fc0be0e8abe344162eafdaa02d50548a433ff78711e93877",
+  "manifest_sha256": "ded501fabe9adda186a7ae9172c786f15bbb448fefa58ce0c2c9c4d5999d49d9",
+  "cases": 6,
+  "gpu_submissions": 6,
+  "totals": {
+    "values": 81920,
+    "finite_values": 81920,
+    "guard_bytes": 192,
+    "inactive_bytes": 507904,
+    "unchanged_input_bytes": 835776
+  },
+  "reported_metrics": {
+    "max_abs": 3.81469727e-06,
+    "max_budget_fraction": 0.00108311138
+  },
+  "natural_stop": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "raw_directory": "results/source-public-rmsnorm-console-v1",
+  "raw_evidence": {
+    "manifest.json": "ded501fabe9adda186a7ae9172c786f15bbb448fefa58ce0c2c9c4d5999d49d9",
+    "review.json": "428a42aeb7470dfedf9d9ed810e18600f7e8ee29d8ae8b7ff1d0145239449335",
+    "outcome-review.json": "90213269dcf001661ce39361f6e9c361a00ca06de226347fdf51dceccf759593",
+    "deploy/receipt.json": "bc93bb01615727e3957aff52db4212d6e7ad6f8f9d69cc1d8a6a53c827d8cc97",
+    "execute/receipt.json": "0974a406791240d7308e7b4a3b7b6a81dd1892e1e1d51f81e9ef1c7aa0e406d9",
+    "execute/numerical/receipt.json": "17db6656f248941ff7deddf2b192210c5c377d35d6fce0fb4d41b5f5e0c9dc8e",
+    "execute/application.log": "7c21709884e07e95c77edd596711329dd3899a623edc5d806d676bd407f70f2d",
+    "execute/klog.log": "60272fe4ef62d8baa4c7e02dbc7530f12a668e81b561c256efb6e16b1641f8c5",
+    "execute/snapshot.log": "5f62a266814bb86c64b8a546d232064c6d8c9128dc2c01e6a4d71d1fa00dbb84",
+    "execute/post_snapshot.log": "5f62a266814bb86c64b8a546d232064c6d8c9128dc2c01e6a4d71d1fa00dbb84",
+    "deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f"
+  },
+  "raw_buffers": {
+    "rmsnorm-stress-1.output.raw": {
+      "bytes": 139296,
+      "sha256": "d17de3e9b7343759850e5eddceaf8bd615ac5cb41076b07a9f23948fc2d6ddb2"
+    },
+    "rmsnorm-stress-1.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "b2943f1b7cc94e7deb94cc32b0362dad1f658a7a2b07ae1b61e6b9a4f422dbf2"
+    },
+    "rmsnorm-stress-2.output.raw": {
+      "bytes": 139296,
+      "sha256": "1ef2904b7c1af769eb0943a5fa5abff99a3cdd32660726be3b1936a26a26483e"
+    },
+    "rmsnorm-stress-2.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "a85eb0a8a19b31a74cfcae85a82f37408919759dbdc9ebad2110b5b247953262"
+    },
+    "rmsnorm-stress-17.output.raw": {
+      "bytes": 139296,
+      "sha256": "4434d2ac0ec7396cc27fd12a5b67639229bfa10f2952f7d25766d42a4968c229"
+    },
+    "rmsnorm-stress-17.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "98964237d19ed4645daaf0e740163fec591732358dc34fd3490a0dca0fea7a76"
+    },
+    "rmsnorm-embedding-1.output.raw": {
+      "bytes": 139296,
+      "sha256": "ac64e907df2a1cd356f4616c582ff1f273313c68b8400dc3f030c24714d9b8c8"
+    },
+    "rmsnorm-embedding-1.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "dad479e7103b0c0beb7321d2960eb277605246c7cbf530b34cc3df95ba51048d"
+    },
+    "rmsnorm-embedding-2.output.raw": {
+      "bytes": 139296,
+      "sha256": "d1aa6cd6f680eea5a90171bcc242e2f2d776c25222ccf4a06f4dbdd852ee80a1"
+    },
+    "rmsnorm-embedding-2.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "c3a06e6790f23983c197d72aca0790a7281cdeffd45305c6f6a073045ea4f581"
+    },
+    "rmsnorm-embedding-17.output.raw": {
+      "bytes": 139296,
+      "sha256": "5f5e15c9f6b0a51cdc68cf29ed4c665642fc1ddc1708ade8ea32d72797c9c937"
+    },
+    "rmsnorm-embedding-17.input-readback.raw": {
+      "bytes": 139296,
+      "sha256": "9f7a4f6af924e8da3a9fc36ae785bdbc35401ac3b32ae30bb6ff4a498d7c779e"
+    }
+  },
+  "limits": [
+    "Unfused F32 RMSNorm only: width2048, rows1/2/17, stress and Q4_0 model embedding inputs.",
+    "No full-model inference, model-scale allocation, other operator, training, performance or complete HIP/ROCm claim.",
+    "Raw logs and buffers remain local; this compact record binds their identities."
+  ]
+}

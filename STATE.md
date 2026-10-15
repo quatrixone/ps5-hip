@@ -9,6 +9,27 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Native RMSNorm numerical run completed
+
+The six-case upstream RMSNorm run on .40 completed successfully: 81,920
+finite values passed the frozen CPU tolerance, with all input, guard and
+inactive bytes preserved. The title naturally exited, services remained healthy,
+and both owned locks were released. Independent outcome review passed. See
+`evidence/console40-public-rmsnorm-success.json`.
+Candidate: `results/source-public-rmsnorm-console-v1`; deploy and execute are
+consumed. Do not repeat them. The installed package is now
+`9daf89bf558e55c5fc0be0e8abe344162eafdaa02d50548a433ff78711e93877`,
+and the application log is
+`7c21709884e07e95c77edd596711329dd3899a623edc5d806d676bd407f70f2d`.
+The prior aggregate image/log are preserved. This supersedes older installed
+baseline and next-experiment paragraphs below.
+
+Next: complete the client operator/call
+inventory and address the first unresolved Q4_0 multiplication or native client
+link blocker. Integrate one complete transformer layer before full-model
+prefill/decode. Model-scale allocations, remaining operators, full inference
+and release lifecycle/performance qualification remain open.
+
 ## Active priority: native LLM inference v1
 
 Owner decision on 2026-10-15: prioritize the bounded first release in
