@@ -158,6 +158,11 @@ size from total weight bytes or simply raise an advertised capability.
 
 ## Source-inspected client blockers
 
+The bounded [real compiler probe](LLM_V1_COMPILE_PROBE.md) now supplements this
+inventory: twelve host objects compile and three device modules link. It also
+confirms aggregate ABI/resource requirements and remaining library/version
+blockers. This is not a complete client link or native execution result.
+
 The selected profile disables HIP graphs, VMM, RCCL and MFMA-specific MMQ and
 uses ordinary attention. The findings below are source inspection, not a
 preprocessed/link-complete API census. Disabled runtime paths can still be

@@ -41,6 +41,12 @@ V1.1 remains partial. The next runtime blocker is
 native compiler-generated embedded-image launch; prepare the effective HIP
 compile/link probe using the pinned converted model and CPU reference fixtures.
 
+That bounded probe is now recorded in `docs/LLM_V1_COMPILE_PROBE.md` and
+`evidence/offline-llm-hip-compile-probe.json`: twelve host objects compile;
+backend/getrows/mmvq device modules link. Resolve the remaining header/library
+and ABI/resource blockers before claiming a runnable client. Historical matching
+hipBLAS headers were diagnostic only, not a selected dependency update.
+
 Retirement-ack work was stopped before edits or experiments. Do not resume it
 as a v1 prerequisite. Current public launch routes, model-scale memory and
 required math operations are higher priority. The original SDK goals remain;

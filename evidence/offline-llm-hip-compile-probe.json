@@ -1,0 +1,671 @@
+{
+  "schema": 1,
+  "classification": "upstream HIP compiler and link-closure probe; no inference or native execution",
+  "client_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "hip_revision": "d3b75fbb82113374e2d6103baa96a9c61425da48",
+  "clr_revision": "65d174c3e35423bf25c9c369513780c9d9ca760c",
+  "target": "gfx1013",
+  "compiler": "LLVM 18.1.8",
+  "wavefront": 32,
+  "code_object_version": 5,
+  "hip_version": 60241134,
+  "profile_defines": [
+    "NDEBUG",
+    "GGML_USE_HIP",
+    "GGML_HIP_NO_VMM",
+    "GGML_HIP_NO_MMQ_MFMA",
+    "GGML_CUDA_NO_FA"
+  ],
+  "disabled_defines": [
+    "GGML_HIP_GRAPHS",
+    "GGML_USE_NCCL"
+  ],
+  "header_comparisons": {
+    "current_main": {
+      "revision": "e7cd12e461ea953a9c99e9fb7852920fa94cd197",
+      "files": {
+        "hipblas/hipblas.h": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas/library/include/hipblas.h",
+          "bytes": 1485558,
+          "sha256": "5733e5d11be17365ea769d782dab3987070c61614f18e0ac369c8c3d8322018c"
+        },
+        "hipblas-common/hipblas-common.h": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas-common/library/include/hipblas-common/hipblas-common.h",
+          "bytes": 5450,
+          "sha256": "9d92c7d9662b7030c579fcfd6b4f29db280ff9869820ebb152239b1afc173d3b"
+        },
+        "hipblas/hipblas-version.h.in": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas/library/include/hipblas-version.h.in",
+          "bytes": 1803,
+          "sha256": "b4d4db919a573631d16d2db6c1da42a7f916c57c7157764c7a1f7f6c0484cd60"
+        },
+        "hipblas-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas/CMakeLists.txt",
+          "bytes": 11853,
+          "sha256": "a7c588c1f887c0442bdcb7617db3aa07432c7a642f49792a391996210f16edd6"
+        },
+        "hipblas-library-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas/library/CMakeLists.txt",
+          "bytes": 4029,
+          "sha256": "23766e24256851d3c2dc04920d661fb249123d07849fa8c22eab0695312feac8"
+        },
+        "hipblas-common-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas-common/CMakeLists.txt",
+          "bytes": 2113,
+          "sha256": "914194bb5b2407e932a83d497e07d6aced5a1db099e14b95e72d3731c512ad97"
+        },
+        "hipblas-src-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/rocm-libraries/e7cd12e461ea953a9c99e9fb7852920fa94cd197/projects/hipblas/library/src/CMakeLists.txt",
+          "bytes": 8446,
+          "sha256": "16d47e80ac58117ef1e941f4132df9867c39d95ac5f4c23b7d8f4ae2b77a97f5"
+        }
+      },
+      "manifest_sha256": "4f42bbce6ad82d31070b9618cdbc98b42d5cb4f9d82c505fd0f72f6e595b39e8"
+    },
+    "diagnostic_6_2": {
+      "repository": "ROCm/hipBLAS",
+      "revision": "f4095274efb0892a1ef3ce0435352849f721d393",
+      "tag": "rocm-6.2.4",
+      "files": {
+        "hipblas/hipblas.h": {
+          "url": "https://raw.githubusercontent.com/ROCm/hipBLAS/f4095274efb0892a1ef3ce0435352849f721d393/library/include/hipblas.h",
+          "bytes": 1898563,
+          "sha256": "033c13a19919a8e5c1b365049d1e2feb6a4ab5dd86583ab2057966654e813491"
+        },
+        "hipblas/hipblas-version.h.in": {
+          "url": "https://raw.githubusercontent.com/ROCm/hipBLAS/f4095274efb0892a1ef3ce0435352849f721d393/library/include/hipblas-version.h.in",
+          "bytes": 1775,
+          "sha256": "8c46ee049f05bf565deeb1a212b1fa3c4300bc0bb6f89959f4b9a1be45d73c7a"
+        },
+        "hipblas-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/hipBLAS/f4095274efb0892a1ef3ce0435352849f721d393/CMakeLists.txt",
+          "bytes": 11140,
+          "sha256": "bdb7d9ec853946ac200ef59a5bb8857ef6b049317e27d19add3b0bcdea1f37ff"
+        },
+        "hipblas-src-CMakeLists.txt": {
+          "url": "https://raw.githubusercontent.com/ROCm/hipBLAS/f4095274efb0892a1ef3ce0435352849f721d393/library/src/CMakeLists.txt",
+          "bytes": 8441,
+          "sha256": "61b1a89c18f4356bcf0842dabb5a805fb36092c2f91c917cba47921492d42fc5"
+        }
+      },
+      "manifest_sha256": "b2fe7d2137cea813237792fd8713fc234cc330b7ff50f62ecaa5c878d832ecec"
+    }
+  },
+  "runs": {
+    "v2": {
+      "raw_commands": "results/llm-hip-probe-v2/commands.json",
+      "raw_commands_sha256": "1f52b3f25a9dda1fd17ae9093d8b61d916b72d6be87f896b75a10887cb12f8a3",
+      "outcomes": {
+        "linux-norm": 1,
+        "linux-rope": 1,
+        "linux-backend": 1,
+        "gfx1013-norm": 1,
+        "gfx1013-rope": 1,
+        "gfx1013-backend": 1,
+        "ps5-norm": 1,
+        "ps5-rope": 1,
+        "ps5-backend": 1
+      }
+    },
+    "v4": {
+      "raw_commands": "results/llm-hip-probe-v4/commands.json",
+      "raw_commands_sha256": "2651e933139b90bf0625f134c8794cc1091154b80bb6867b5b6e2fefd950bfba",
+      "outcomes": {
+        "linux-norm": 0,
+        "linux-rope": 0,
+        "linux-backend": 1,
+        "gfx1013-norm": 0,
+        "gfx1013-rope": 0,
+        "gfx1013-backend": 1,
+        "ps5-norm": 1,
+        "ps5-rope": 1,
+        "ps5-backend": 1
+      }
+    },
+    "v6": {
+      "raw_commands": "results/llm-hip-probe-v6/commands.json",
+      "raw_commands_sha256": "4453414424419bf9c323e8b2ea63a6d21f36dcdb2734d933eb321facd3136840",
+      "outcomes": {
+        "linux-norm": 0,
+        "linux-rope": 0,
+        "linux-backend": 0,
+        "gfx1013-norm": 0,
+        "gfx1013-rope": 0,
+        "gfx1013-backend": 0,
+        "ps5-norm": 0,
+        "ps5-rope": 0,
+        "ps5-backend": 0
+      }
+    },
+    "v7": {
+      "raw_commands": "results/llm-hip-probe-v7/commands.json",
+      "raw_commands_sha256": "b65657901c30fe7a434da7db98a250fb384b1c4a6d06e3e6a38d5962bc835174",
+      "outcomes": {
+        "linux-norm": 0,
+        "linux-rope": 0,
+        "linux-softmax": 0,
+        "linux-getrows": 0,
+        "linux-mmvq": 0,
+        "linux-backend": 0,
+        "gfx1013-norm": 1,
+        "gfx1013-rope": 1,
+        "gfx1013-softmax": 1,
+        "gfx1013-getrows": 1,
+        "gfx1013-mmvq": 1,
+        "gfx1013-backend": 1,
+        "ps5-norm": 0,
+        "ps5-rope": 0,
+        "ps5-softmax": 0,
+        "ps5-getrows": 0,
+        "ps5-mmvq": 0,
+        "ps5-backend": 0
+      }
+    },
+    "v8": {
+      "raw_commands": "results/llm-hip-probe-v8/commands.json",
+      "raw_commands_sha256": "3c09de99a4db06f67f9961086cb31d13932bccce5a5553a2d27d5dce68b5063a",
+      "outcomes": {
+        "norm": 0,
+        "rope": 0,
+        "softmax": 0,
+        "getrows": 0
+      },
+      "limitation": "mmvq assembly process timed out after 180 seconds; backend assembly not attempted; linked mmvq metadata inspected separately"
+    },
+    "v9": {
+      "raw_commands": "results/llm-hip-probe-v9/commands.json",
+      "raw_commands_sha256": "ce94301c593d59752177c2d6ae926c442d74e8ca36070a7ad2b2136320c3921f",
+      "outcomes": {
+        "norm": 1,
+        "rope": 1,
+        "softmax": 1,
+        "getrows": 1,
+        "mmvq": 1,
+        "backend": 0
+      }
+    },
+    "v10": {
+      "raw_commands": "results/llm-hip-probe-v10/commands.json",
+      "raw_commands_sha256": "06dac573b27f9b0bc7b9747f6062ef8b5aef2aad71a61b0c5f6c30fe3bb7d90a",
+      "outcomes": {
+        "upstream-mul-hi": 0,
+        "norm": 1,
+        "rope": 1,
+        "getrows": 1,
+        "mmvq": 1
+      }
+    },
+    "v11": {
+      "raw_commands": "results/llm-hip-probe-v11/commands.json",
+      "raw_commands_sha256": "8533c8ca2136b1f9910c9bd08b6ab0938308f039e2dbde4f8ac6e624804144c8",
+      "outcomes": {
+        "upstream-mul-hi": 0,
+        "norm": 1,
+        "rope": 1,
+        "getrows": 0,
+        "mmvq": 0
+      }
+    },
+    "v12": {
+      "raw_commands": "results/llm-hip-probe-v12/commands.json",
+      "raw_commands_sha256": "75716fda1ad26f6d74ebf8de46134421e0b4662e3a0991281fe5e702a6664c32",
+      "outcomes": {
+        "upstream-mul-hi": 0,
+        "norm": 1,
+        "rope": 1,
+        "getrows": 0,
+        "mmvq": 0
+      }
+    },
+    "v13": {
+      "raw_commands": "results/llm-hip-probe-v13/commands.json",
+      "raw_commands_sha256": "30be8488b7ddb3ed1997098f97db54f88f3d09d664445a5dd941e39ba26d3e9f",
+      "outcomes": {
+        "upstream-mul-hi": 0,
+        "prepare-builtins": 0,
+        "norm": 1,
+        "rope": 1,
+        "getrows": 0,
+        "mmvq": 0
+      }
+    }
+  },
+  "metadata": {
+    "backend": {
+      "source": "linked HSACO",
+      "kernels": 1,
+      "kernarg_segment_size": [
+        384
+      ],
+      "group_segment_fixed_size": [
+        0
+      ],
+      "private_segment_fixed_size": [
+        0
+      ],
+      "max_flat_workgroup_size": [
+        1024
+      ],
+      "wavefront_size": [
+        32
+      ]
+    },
+    "getrows": {
+      "source": "linked HSACO",
+      "kernels": 109,
+      "kernarg_segment_size": [
+        304,
+        384
+      ],
+      "group_segment_fixed_size": [
+        0
+      ],
+      "private_segment_fixed_size": [
+        0
+      ],
+      "max_flat_workgroup_size": [
+        1024
+      ],
+      "wavefront_size": [
+        32
+      ]
+    },
+    "mmvq": {
+      "source": "linked HSACO",
+      "kernels": 317,
+      "kernarg_segment_size": [
+        164,
+        192,
+        424,
+        448
+      ],
+      "group_segment_fixed_size": [
+        0,
+        384,
+        768,
+        1280,
+        1536,
+        1792,
+        2048,
+        2304,
+        3072,
+        3840,
+        4096,
+        5632,
+        5888,
+        6144,
+        6400,
+        6528,
+        12288
+      ],
+      "private_segment_fixed_size": [
+        0,
+        12,
+        16,
+        24,
+        36,
+        40,
+        104
+      ],
+      "max_flat_workgroup_size": [
+        64,
+        128,
+        256
+      ],
+      "wavefront_size": [
+        32
+      ]
+    },
+    "norm": {
+      "source": "unlinked compiler assembly",
+      "sha256": "59acf9ebcfd9ab222cf7833afeb54971a03d1fb72b5509d4b93f547d9c35f8b2",
+      "kernels": 16,
+      "argument_sizes": [
+        2,
+        4,
+        8,
+        12
+      ],
+      "kernarg_segment_size": [
+        288,
+        320,
+        488
+      ],
+      "group_segment_fixed_size": [
+        0,
+        256
+      ],
+      "private_segment_fixed_size": [
+        0
+      ],
+      "max_flat_workgroup_size": [
+        1024
+      ],
+      "wavefront_size": [
+        32
+      ]
+    },
+    "rope": {
+      "source": "unlinked compiler assembly",
+      "sha256": "964f0e62b9e95de9764881836e57a3cfc3a5391d8e1180dd79809b5b688cd824",
+      "kernels": 48,
+      "argument_sizes": [
+        1,
+        2,
+        4,
+        8,
+        12,
+        16
+      ],
+      "kernarg_segment_size": [
+        368,
+        376,
+        384,
+        488
+      ],
+      "group_segment_fixed_size": [
+        0
+      ],
+      "private_segment_fixed_size": [
+        0,
+        16
+      ],
+      "max_flat_workgroup_size": [
+        1024
+      ],
+      "wavefront_size": [
+        32
+      ]
+    },
+    "softmax": {
+      "source": "unlinked compiler assembly",
+      "sha256": "df24d984e7a8e9fdfc29f9610f899d264f154e423fb5f24c9bb3460cbc65751f",
+      "kernels": 22,
+      "argument_sizes": [
+        2,
+        4,
+        8,
+        128
+      ],
+      "kernarg_segment_size": [
+        288,
+        416
+      ],
+      "group_segment_fixed_size": [
+        0,
+        256
+      ],
+      "private_segment_fixed_size": [
+        0
+      ],
+      "max_flat_workgroup_size": [
+        256,
+        1024
+      ],
+      "wavefront_size": [
+        32
+      ]
+    }
+  },
+  "linked_objects": {
+    "backend": {
+      "path": "results/llm-hip-probe-v9/backend.hsaco",
+      "bytes": 6472,
+      "sha256": "533f9c7d233a0d9bf9222c790c4525c241d3891c068fad051e0a18ee8d9d992a",
+      "undefined_symbols": []
+    },
+    "getrows": {
+      "path": "results/llm-hip-probe-v13/getrows.hsaco",
+      "bytes": 453240,
+      "sha256": "344317047003235ffc11e5a5eb463dfb4bb781e0904cf2e7ddb6d921933c09f7",
+      "undefined_symbols": []
+    },
+    "mmvq": {
+      "path": "results/llm-hip-probe-v13/mmvq.hsaco",
+      "bytes": 2934504,
+      "sha256": "3f5d3f1781e247e9b55eb74276d352a4969cd8fdd5cba09a85e305509c86fc98",
+      "undefined_symbols": []
+    }
+  },
+  "host_backend_imports": [
+    "__hipPopCallConfiguration",
+    "__hipPushCallConfiguration",
+    "__hipRegisterFatBinary",
+    "__hipRegisterFunction",
+    "__hipUnregisterFatBinary",
+    "__hip_fatbin",
+    "hipDeviceCanAccessPeer",
+    "hipDeviceEnablePeerAccess",
+    "hipDeviceGetAttribute",
+    "hipDeviceGetPCIBusId",
+    "hipDeviceSynchronize",
+    "hipEventCreateWithFlags",
+    "hipEventDestroy",
+    "hipEventRecord",
+    "hipEventSynchronize",
+    "hipFree",
+    "hipGetDevice",
+    "hipGetDeviceCount",
+    "hipGetDevicePropertiesR0600",
+    "hipGetErrorString",
+    "hipGetLastError",
+    "hipHostFree",
+    "hipHostMalloc",
+    "hipHostRegister",
+    "hipHostUnregister",
+    "hipLaunchKernel",
+    "hipMalloc",
+    "hipMallocManaged",
+    "hipMemAdvise",
+    "hipMemGetInfo",
+    "hipMemcpy2DAsync",
+    "hipMemcpyAsync",
+    "hipMemcpyPeerAsync",
+    "hipMemsetAsync",
+    "hipSetDevice",
+    "hipStreamCreateWithFlags",
+    "hipStreamDestroy",
+    "hipStreamSynchronize",
+    "hipStreamWaitEvent",
+    "hipblasCreate",
+    "hipblasDestroy",
+    "hipblasGemmBatchedEx",
+    "hipblasGemmEx",
+    "hipblasGemmStridedBatchedEx",
+    "hipblasSetStream",
+    "hipblasSgemm"
+  ],
+  "verified_existing_libraries": {
+    "ockl-workitem-only.bc": "09e6a58193dfaa382c77e975019a2e8e5413ac5ce8a1bc3c612cd4f451ffa03c",
+    "oclc_abi_version_500.bc": "d097461b741b52519bb713b82e64f90af8aa741527d5a911d978b5aec2a86bbb",
+    "oclc_correctly_rounded_sqrt_on.bc": "a73a84adebd64b73ca1bc7740c87086efdc29b8739944d0128c10a3f89e8765a",
+    "oclc_daz_opt_off.bc": "5815bec8f022052efbb484a51113d38fc4a6e9cd47f1849aadd095b010d57ba3",
+    "oclc_finite_only_off.bc": "66a32e969632a7bbffffcf037e7b3eaac120b64f365b0bffd0a129af30196819",
+    "oclc_isa_version_1013.bc": "19576c2b782919ebbaab0ed5bd98dcfb3df19565576e3f3311ba3c4b772e8d2b",
+    "oclc_unsafe_math_off.bc": "58d1e3aa427105caf6d074a80c5276aa44f88630efb6d43bcf97d39a77c6d743",
+    "oclc_wavefrontsize64_off.bc": "99b3b6fecb9046eb07194c04a9d5f521b4c308e15a959db2931e11b697124c50",
+    "ocml.bc": "16d01f8cdc09678919addaa01dd2045110e934c4cb71336a140e2f485e551829"
+  },
+  "mul_hi": {
+    "source": ".local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/src/mul_hi.cl",
+    "source_sha256": "8713ae17ae97ff488efd2d904869ef6524e3535bddac55a1de02aa3b0857c233",
+    "source_commit": "1e2c94795ee0d6ab8e2ff3035965a6b74e11b475",
+    "raw_bitcode_sha256": "7632973cf540eb6dcd9cb5f920bdd202ced5bc030aff59bc0143f36ca4cb2797",
+    "prepared_bitcode_sha256": "1e519ea56184104abe151eccbeda0d4b0adff185b15ef435680d3f0b997b803b"
+  },
+  "limits": [
+    "Diagnostic hipBLAS 2.2 headers are not a selected dependency, library implementation or fork.",
+    "Current hipBLAS 3.8 headers conflict with locked HIP6.2 legacy datatype mapping.",
+    "Norm and rope retain unresolved __oclc_daz_opt after mul_hi resolution despite supplied daz-off bitcode.",
+    "Softmax retains __ockl_grid_sync; capability-gated cooperative path differs from ordinary <=512 attention path.",
+    "No host link, full backend build, launch, numerical equivalence, native GPU, or inference claim.",
+    "Successful linked modules still need runtime admission/ABI validation; imports are compiled closure, not dynamic trace."
+  ],
+  "artifact_inventory": {
+    "results/llm-hip-probe-report-v1/backend.notes": {
+      "bytes": 4033,
+      "sha256": "2f468a086d8ee1394c8fbdfd48037b9a71dddae992283910338432e8da24b0a6"
+    },
+    "results/llm-hip-probe-report-v1/backend.undefined": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/llm-hip-probe-report-v1/getrows.notes": {
+      "bytes": 391753,
+      "sha256": "70665b3941b5449afcaefaee763632422bf9d5a791e330e2125b2467d2b425a5"
+    },
+    "results/llm-hip-probe-report-v1/getrows.undefined": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/llm-hip-probe-report-v1/mmvq.notes": {
+      "bytes": 927404,
+      "sha256": "085997494a654d16ee5d0e1f8ce6f462b72aed0fa2839a4100b6fea42850fe43"
+    },
+    "results/llm-hip-probe-report-v1/mmvq.undefined": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/llm-hip-probe-report-v1/v10-commands.json": {
+      "bytes": 7332,
+      "sha256": "874b34029fd791b85900426d7798ebdc067d877fba8d02b8504e122ce2ca6e7f"
+    },
+    "results/llm-hip-probe-report-v1/v11-commands.json": {
+      "bytes": 7176,
+      "sha256": "89270e948192647f6c213e7df132078cea8e8807a067807df7b4f17f05fd66f2"
+    },
+    "results/llm-hip-probe-report-v1/v12-commands.json": {
+      "bytes": 7176,
+      "sha256": "b8cf4570960f4bc16e753d6080b5440125251b584b2d47bf7f042803b52bc7ea"
+    },
+    "results/llm-hip-probe-report-v1/v13-commands.json": {
+      "bytes": 7467,
+      "sha256": "f0b6fa805093e74cb1a0a92ac3e3c1f04d89cd50320890d37eea4892e4bbce9e"
+    },
+    "results/llm-hip-probe-report-v1/v2-commands.json": {
+      "bytes": 7872,
+      "sha256": "a4d6b4d1ac1140f7dfa9c741787f8a0d3f16f4012e8ead75b386365f1667c993"
+    },
+    "results/llm-hip-probe-report-v1/v4-commands.json": {
+      "bytes": 8403,
+      "sha256": "f9526d8448cf3d8f421d630e1a669fa95b72047948eba3512c82ea805d86cc23"
+    },
+    "results/llm-hip-probe-report-v1/v6-commands.json": {
+      "bytes": 8547,
+      "sha256": "b951d65533e0b63cd1d798f5a4b3c02751a611e00238c84178941f0813693b51"
+    },
+    "results/llm-hip-probe-report-v1/v7-commands.json": {
+      "bytes": 19119,
+      "sha256": "4e425d3bd33b9ea6499f22e813e1344c1bad9a87d92628ce69475a95a59eaf7b"
+    },
+    "results/llm-hip-probe-report-v1/v8-commands.json": {
+      "bytes": 3809,
+      "sha256": "d9c449c409bad125cd213ed869c78656f5a24418ae194077856c7d74189bf20c"
+    },
+    "results/llm-hip-probe-report-v1/v9-commands.json": {
+      "bytes": 9330,
+      "sha256": "f44a3686849708266d24368650280f438100f6f9df1499dc09d056cca4c228d5"
+    }
+  },
+  "actual_client_source_sha256": {
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/getrows.cu": "3691d71610908bd1bbe38729ee143649a99da349ab3077a5cedd155137767adb",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/ggml-cuda.cu": "572e5facba2c6b2ce2f7c6a4c43566d5a719d6e984f7265f1895410cc82d31ec",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/mmvq.cu": "248a109a2daeb55e4c227ac12087c96d33f5498196dd842a40cf432922633538",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/norm.cu": "6ba2af1d57f958a3ac72e5c0e236ffa5c70accd1b40460d6a760d84aca33ff25",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/rope.cu": "cfd572d0aab0789f77613bc82978e4f3b82d102c5a97042e7439e1a02d1f7a0e",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/softmax.cu": "ac288d3d091ceab46e56b05e298b893f37f6129a7e3b36703c3244675d384976"
+  },
+  "diagnostic_hashes": {
+    "results/llm-hip-probe-v7/gfx1013-backend.stderr": "1667bd9d1fbbffafff4925deaadb63dea492935ba2dcda7fc62a8641ba197581",
+    "results/llm-hip-probe-v7/gfx1013-getrows.stderr": "4d9c8745ac5758a4d6431cefe4a7bab36ed343abef380e89f3e08e96ab539efd",
+    "results/llm-hip-probe-v7/gfx1013-mmvq.stderr": "6a450cde71e176df2af223a23e56a63c26aeb500c5a5d8e6ef0ae12df8944419",
+    "results/llm-hip-probe-v7/gfx1013-norm.stderr": "594239c466896f0fba4b9d0961c2da6628425737b26211f16c123b98f27ccec6",
+    "results/llm-hip-probe-v7/gfx1013-rope.stderr": "8bb1c885dd7c2220fe5d80f81a349786734e675720b8a55f1693e7cdebe39db1",
+    "results/llm-hip-probe-v7/gfx1013-softmax.stderr": "be994e67c2f2fb64d8e6ec065f62dd94211a608fc5c4b30ba421734f508893a2",
+    "results/llm-hip-probe-v7/linux-backend.stderr": "9181e58c4137e4a32d8c279e4b7d767b83a2ba1cc21fa9d595e9bc626c47a07c",
+    "results/llm-hip-probe-v7/linux-getrows.stderr": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+    "results/llm-hip-probe-v7/linux-mmvq.stderr": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+    "results/llm-hip-probe-v7/linux-norm.stderr": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+    "results/llm-hip-probe-v7/linux-rope.stderr": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+    "results/llm-hip-probe-v7/linux-softmax.stderr": "c791f4b304b3b0009a749bcf26cc07cfccc30b5506916db8d2082483353f471f",
+    "results/llm-hip-probe-v7/ps5-backend.stderr": "388c068fadcdb19d893c0551d88d8535a64d999137c2e70bde741263108a57c5",
+    "results/llm-hip-probe-v7/ps5-getrows.stderr": "a97161c48d5677d87dd03a53ff54dadbe1686773d62795fad3b396f4042faee3",
+    "results/llm-hip-probe-v7/ps5-mmvq.stderr": "a97161c48d5677d87dd03a53ff54dadbe1686773d62795fad3b396f4042faee3",
+    "results/llm-hip-probe-v7/ps5-norm.stderr": "a97161c48d5677d87dd03a53ff54dadbe1686773d62795fad3b396f4042faee3",
+    "results/llm-hip-probe-v7/ps5-rope.stderr": "a97161c48d5677d87dd03a53ff54dadbe1686773d62795fad3b396f4042faee3",
+    "results/llm-hip-probe-v7/ps5-softmax.stderr": "a97161c48d5677d87dd03a53ff54dadbe1686773d62795fad3b396f4042faee3",
+    "results/llm-hip-probe-v9/backend.stderr": "aeab77d0ba83c896b6464cbf477a59bc8106f8e4c024911983fad16a217eadaf",
+    "results/llm-hip-probe-v9/getrows.stderr": "93f0a5404d5d16dfaa27ab886e8f7f2fcda486828f0a5e78a9e6421856d80338",
+    "results/llm-hip-probe-v9/mmvq.stderr": "556beef28eca37c65f567f17c19f00d4482182c56dd9eb6b1a855287255f7bd1",
+    "results/llm-hip-probe-v9/norm.stderr": "63e9aacaad080881c1cb5c4289f2175d89a3b3f2d9c43608ec09ce3cbabc8ef3",
+    "results/llm-hip-probe-v9/rope.stderr": "63532f6e52f60e91568ccf4aaab67e9d7eff9ef02aabc2fad0a552dce93aa8e3",
+    "results/llm-hip-probe-v9/softmax.stderr": "286ba5ed2d5637cc2a1bbcb0e5fa677f62d7fbd7c7b59ba976f814fa76c0328f",
+    "results/llm-hip-probe-v13/getrows.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/llm-hip-probe-v13/mmvq.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/llm-hip-probe-v13/mul_hi.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/llm-hip-probe-v13/norm.stderr": "e2328630d4ca4c5df6c51b55869f8a0e0f211f0317d79df8eb96c09707b80e52",
+    "results/llm-hip-probe-v13/rope.stderr": "fdcce34b73302eaa58b6096c597408a2d4592c633258ba09cc9b7ad5480befcf"
+  },
+  "actual_ps5_host_objects": {
+    "ps5-backend.o": {
+      "bytes": 305968,
+      "sha256": "1d038d80491aec0096a8d62f27e7af026c643580b7428a75bf807f1d318892cc"
+    },
+    "ps5-getrows.o": {
+      "bytes": 258984,
+      "sha256": "bb5abab1b53494ab7c0686ec574fbad53a65099df8a89c83635e47e1aea4de6e"
+    },
+    "ps5-mmvq.o": {
+      "bytes": 861448,
+      "sha256": "1c7bfad597a281cb42470995c70701c29381e4f02be3bbff1b53c578c51ce133"
+    },
+    "ps5-norm.o": {
+      "bytes": 49704,
+      "sha256": "4ddf5d24d92e4c757a9a75f0f77bc8c6d13a0c4906c81891f37c9253a1042ea7"
+    },
+    "ps5-rope.o": {
+      "bytes": 102376,
+      "sha256": "acf27aa9868a5790cdee14579756e88870aa124e4951fc1afc8c56d6856cad4c"
+    },
+    "ps5-softmax.o": {
+      "bytes": 43256,
+      "sha256": "df76878f2f15e5d22099a840d819b0901d2ad49322218082c5dfe38cd3e615d1"
+    }
+  },
+  "input_dependency_manifest": {
+    "path": "results/llm-hip-probe-v7/inputs.json",
+    "sha256": "6044fc495c80d24d0ba78f695b2635e890b78a418989f0c9ce90eea345f162f6"
+  },
+  "commands_template": [
+    "/usr/lib/llvm-18/bin/clang",
+    "-I.local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/../irif/inc",
+    "-I.local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/../oclc/inc",
+    "-I.local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/inc",
+    "-fcolor-diagnostics",
+    "-Werror",
+    "-Wno-error=atomic-alignment",
+    "-x",
+    "cl",
+    "-Xclang",
+    "-cl-std=CL2.0",
+    "-target",
+    "amdgcn-amd-amdhsa",
+    "-fvisibility=protected",
+    "-fomit-frame-pointer",
+    "-Xclang",
+    "-finclude-default-header",
+    "-Xclang",
+    "-fexperimental-strict-floating-point",
+    "-Xclang",
+    "-fdenormal-fp-math=dynamic",
+    "-nogpulib",
+    "-cl-no-stdinc",
+    "-Xclang",
+    "-mcode-object-version=none",
+    "-emit-llvm",
+    "-c",
+    ".local/g3-ocml-math/build/ocml-math-v2/device-libs-source/ockl/src/mul_hi.cl",
+    "-o",
+    "results/llm-hip-probe-v13/mul_hi.bc"
+  ]
+}
