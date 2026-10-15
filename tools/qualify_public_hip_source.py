@@ -38,7 +38,7 @@ def main():
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
-                 'tests/public_hip_allocation_lifetime_model.cpp',
+                 'tests/public_hip_allocation_lifetime_model.cpp', 'tests/public_hip_command_stats_model.cpp',
                  'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'tests/public_hip_nested_update_fixture.h', 'tests/public_hip_copy_gpu_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
@@ -476,6 +476,21 @@ def main():
     run('graph-explicit-noop', [output / 'graph-model', 'explicit-noop'], env,
         expected_output_failure=True, failure_marker='PUBLIC_GRAPH_OUTPUT_MISMATCH round=0')
     print('public host graph no-op output control PASS', flush=True)
+    command_stats_source = ROOT / 'tests/public_hip_command_stats_model.cpp'
+    source_hashes[str(command_stats_source.relative_to(ROOT))] = sha(command_stats_source)
+    command_stats_object = compile_one((len(units) + 15, command_stats_source))
+    command_stats_objects = [command_stats_object if unit.name == 'hip_admission_model.cpp' else obj
+                             for unit, obj in zip(units, objects)]
+    run('command-stats-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *command_stats_objects,
+        '-o', output / 'command-stats-model'])
+    result = run('command-stats', [output / 'command-stats-model'], env)
+    if result.splitlines() != [
+        'PUBLIC_COMMAND_STATS_PASS constructors=2 derived_failures=2 retained_reference=true retained_zero_reference=true concurrent_threads=4 concurrent_objects=256 coherent=true gpu_execution=false',
+        'PUBLIC_COMMAND_STATS_FINAL live=0 balanced=true ownership=clean gpu_execution=false']:
+        raise RuntimeError('CLR command lifetime accounting contract differs')
+    print('public command lifetime accounting PASS', flush=True)
     for collection in (inputs, source_hashes):
         for name, expected in collection.items():
             if sha(ROOT / name) != expected:
@@ -499,7 +514,11 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 15,
+               'total_compilations': len(units) + 16,
+               'command_stats_model_sha256': sha(output / 'command-stats-model'),
+               'command_stats_cases': ['both-base-constructors', 'both-derived-constructor-failures',
+                                       'retained-reference', 'retained-zero-reference',
+                                       'four-thread-256-objects-coherent-snapshots', 'final-zero-balanced'],
                'allocation_lifetime_model_sha256': sha(output / 'allocation-lifetime-model'),
                'allocation_lifetime_cases': ['queued-free-before-exec-destroy', 'parameter-migration-free-old-before-replay', 'thread-create-failure-rejected', 'thread-join-failure-rejected'],
                'allocation_lifetime_observation_ms': 100,

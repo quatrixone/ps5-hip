@@ -1,0 +1,13 @@
+{
+  "files": {
+    "rocclr/platform/command.hpp": {
+      "before": "4058e96b81e5693f91eb68e20481e2e02c1c2d19b587307ea5a5ba20c91d6004",
+      "after": "7bff60d8c8034ee8a7077777b03638a073790f8cb64d64b5f6972bd123ff7a89"
+    },
+    "rocclr/platform/command.cpp": {
+      "before": "06f0f9fdbd828a77b06007da53f3fcdad0eaee6ce3ff21f10aea54c815415b18",
+      "after": "6eb8260c408f76f2b59a0486cf608271ef564e91b73d74a1c9ef0b030e05b7af"
+    }
+  },
+  "patch_sha256": "a8f57ed768f5a62f8c9ed94dd28c2322995d14563df334cdaba28e22ec9a24ed"
+}

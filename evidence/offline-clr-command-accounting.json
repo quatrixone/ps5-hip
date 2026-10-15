@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-clr-command-lifetime-accounting",
+  "total_compilations": 85,
+  "native_objects": 74,
+  "package_sha256": "0f1be8f2f06909259a483c30ad9dcdbc78bdba578386cc71305162e6fef7017d",
+  "cases": [
+    "both-base-constructors",
+    "both-derived-constructor-failures",
+    "retained-reference",
+    "retained-zero-reference",
+    "four-thread-256-objects-coherent-snapshots",
+    "final-zero-balanced"
+  ],
+  "native_executed": false,
+  "raw_evidence": {
+    "results/command-stats-qualified-v1/receipt.json": "52d6e76922c310b19c7671d2b4368877bdbb05c0c8fbd13778cfff797fff6327",
+    "results/command-stats-qualified-v1/command-stats.json": "047ebc5391fd56ad6931cf164425960f553ef0c92dd88cf036eb8342607b95f8",
+    "results/command-stats-qualified-v1/command-stats.stdout": "9a9bdab26a7b0f97b1a37dce508a42fe86c64c63ea399d47a04300e152b716a3",
+    "results/command-stats-qualified-v1/command-stats.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/public-hip-command-stats-v1/link-receipt.json": "0ec5ccc934f6b401516e3201a675304a445d399e10715932b743bf7a9eeda2d5",
+    "results/command-stats-independent-review-v1/review.json": "7d1ea469d0c18079b9a6fce429cd7c441f072f6d3e6cc8aae3de4ab82853a2f9",
+    "results/command-stats-preparer-v1/receipt.json": "983cd42aa10bfe0cb3c97291d0d3f7b7d6d1c6126db6ec4f1124b2c22172a74f"
+  },
+  "limits": [
+    "Command base-lifetime hooks; destructor hook precedes member and Event-base cleanup.",
+    "Counters cover neither heap bytes nor GPU completion.",
+    "No command plateau or timing result: synchronization may precede final worker-reference release.",
+    "All CLR consumers require recompilation after the destructor change.",
+    "Native package built and inspected, not executed. Full G5 remains open."
+  ]
+}

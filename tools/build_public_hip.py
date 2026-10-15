@@ -49,6 +49,7 @@ def build_inputs():
     names = {"dependencies.json", "elevation-inputs.json", "controller-inputs.json",
              "title.json", "assets/param.json", "assets/icon0.png",
              "tools/build_public_hip.py", "tools/prepare_clr_gpu_source.py",
+             "tools/prepare_public_hip_command_stats.py",
              "tools/prepare_hip_admission.py", "tools/guard_native_hip_gl.py",
              "tools/native_runtime.h", "tools/native_shell_exit_probe.cpp",
              "tools/public_hip_app_crt.cpp", "tools/public_hip_bootstrap_console_title.cpp",
@@ -115,6 +116,7 @@ def source_tree(output, fixture="bootstrap"):
     run(output, "prepare-rect", [sys.executable, ROOT / "tools/prepare_public_hip_rect.py", public])
     run(output, "prepare-launch", [sys.executable, ROOT / "tools/prepare_public_hip_launch.py", public])
     run(output, "prepare-capture", [sys.executable, ROOT / "tools/prepare_public_hip_capture.py", public])
+    run(output, "prepare-command-stats", [sys.executable, ROOT / "tools/prepare_public_hip_command_stats.py", public])
     return public
 
 

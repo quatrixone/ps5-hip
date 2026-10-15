@@ -402,7 +402,8 @@ alone never records a release. Snapshots are coherent, but updates follow kernel
 calls, so the peak is not an instantaneous physical high-water measurement during
 concurrent allocation/release. This API does not measure host heap, process RSS
 or CLR command lifetime. See `../evidence/offline-native-backing-accounting.json`
-for the sanitizer tests and native-core compilation; console sampling is pending.
+for the sanitizer tests and native-core compilation. Native sampling passed on
+.40; see `../evidence/console40-replay-backing-success.json`.
 
 The shared replay candidate now samples backing after each synchronized eager
 and graph execution in the sixteen verification rounds. The focused model
@@ -410,9 +411,25 @@ requires all 32 samples to retain the warm baseline of two allocations/32768
 bytes and report balanced execution-path churn: 128 allocations/releases for
 each path. This excludes graph setup, setters and buffer resets. Accounted
 lifetime peak is 98304 bytes, with zero live backing after teardown. A deliberate
-retained allocation after warmup must fail the same sample check. Full native
-validation of these measurements is pending; they do not cover CLR commands or
-process heap and do not establish a speed improvement.
+retained allocation after warmup must fail the same sample check. The native
+run matched these measurements; they do not cover CLR commands or process heap
+and do not establish a speed improvement.
+
+The public build also applies `ports/clr/ps5-command-stats.patch` through its
+hash-checked preparer after the capture patch. `amd::command_stats()` reports
+coherent cumulative created/destroyed/live/peak command counts. Both completed
+base constructors count; the base destructor decrements live. Retained references
+and refused destruction remain live; derived-constructor failures balance.
+These are Command base-lifetime hooks, not heap bytes or GPU completion counters.
+The destructor hook precedes member and Event-base cleanup. Rebuild all CLR
+consumers in a fresh output directory after this patch; mixing old derived
+destructors with the instrumented base would undercount destruction.
+
+Do not assert a command plateau from an immediate `hipStreamSynchronize` sample:
+the completion signal can precede the worker's final barrier-reference release.
+Replay command measurements need an explicit post-retirement acknowledgement
+covering every participating queue; repeated equal samples or sleeps do not
+establish that boundary. Normal HIP synchronization semantics are unchanged.
 
 The PS5 copy graph path creates a dependency marker for a disabled 1D copy
 during command preparation. That same marker receives graph wait lists and is

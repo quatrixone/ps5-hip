@@ -9,6 +9,27 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## CLR command lifetime accounting qualified offline
+
+The public source build now accounts both Command base constructors and actual
+base destruction. Retained references and refused destruction remain live;
+derived-constructor failures balance. Both constructors, two failure paths,
+retained owners, four concurrent threads/256 objects and final zero ownership
+passed the fresh 85-unit sanitizer qualification. The 74-object native package
+and exact patch preparation passed independent review.
+See `evidence/offline-clr-command-accounting.json`.
+
+Next: add a diagnostic post-retirement acknowledgement before sampling command
+counts across warm replay, then CPU preparation/submit/wait measurements.
+Stream synchronization can return before the worker releases its final barrier
+reference, so immediate count equality is not a valid plateau check. Do not
+replace that boundary with sleeps or hold device locks across callbacks.
+The counter destructor hook precedes Event-base cleanup; these counters alone
+prove neither full resource retirement nor heap stability. G5 remains open.
+
+No console was contacted. The installed backing-test image/log below remain
+the baseline; use a fresh candidate for the next meaningful native validation.
+
 ## Native replay backing samples passed
 
 The .40 run matched all 32 synchronized samples: 32768 live bytes in two

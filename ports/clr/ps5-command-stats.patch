@@ -1,0 +1,92 @@
+--- a/rocclr/platform/command.hpp
++++ b/rocclr/platform/command.hpp
+@@ -52,6 +52,13 @@
+ #include <vector>
+ 
+ namespace amd {
++#if defined(WITH_PS5_DEVICE)
++// Completed Command base construction through base destruction, including retained owners.
++// Coherent cumulative counts; not heap bytes or GPU completion counts. No reset.
++struct CommandStats { uint64_t created = 0, destroyed = 0, live = 0, peak = 0; };
++CommandStats command_stats() noexcept;
++#endif
++
+ 
+ /*! \addtogroup Runtime
+  *  @{
+@@ -254,6 +261,9 @@
+  */
+ class Command : public Event {
+  private:
++#if defined(WITH_PS5_DEVICE)
++  static void accountCreated() noexcept;
++#endif
+   HostQueue* queue_;               //!< The command queue this command is enqueue into
+   Command* next_;                  //!< Next GPU command in the queue list
+   Command* batch_head_ = nullptr;  //!< The head of the batch commands
+@@ -284,7 +294,11 @@
+         type_(type),
+         waitingEvent_(nullptr),
+         eventWaitList_(nullWaitList),
+-        commandWaitBits_(0) {}
++        commandWaitBits_(0) {
++#if defined(WITH_PS5_DEVICE)
++    accountCreated();
++#endif
++  }
+ 
+   virtual bool terminate() {
+     if (IS_HIP) {
+@@ -297,6 +311,9 @@
+   }
+ 
+  public:
++#if defined(WITH_PS5_DEVICE)
++  ~Command() override;
++#endif
+   //! Return the queue this command is enqueued into.
+   HostQueue* queue() const { return queue_; }
+ 
+--- a/rocclr/platform/command.cpp
++++ b/rocclr/platform/command.cpp
+@@ -42,6 +42,30 @@
+ #include <algorithm>
+ 
+ namespace amd {
++#if defined(WITH_PS5_DEVICE)
++namespace {
++std::atomic_flag commandStatsLock = ATOMIC_FLAG_INIT;
++CommandStats commandStats;
++struct CommandStatsGuard {
++  CommandStatsGuard() noexcept { while (commandStatsLock.test_and_set(std::memory_order_acquire)) {} }
++  ~CommandStatsGuard() { commandStatsLock.clear(std::memory_order_release); }
++};
++}
++CommandStats command_stats() noexcept {
++  CommandStatsGuard guard;
++  return commandStats;
++}
++void Command::accountCreated() noexcept {
++  CommandStatsGuard guard;
++  ++commandStats.created; ++commandStats.live;
++  commandStats.peak = std::max(commandStats.peak, commandStats.live);
++}
++Command::~Command() {
++  CommandStatsGuard guard;
++  ++commandStats.destroyed; --commandStats.live;
++}
++#endif
++
+ 
+ // ================================================================================================
+ Event::Event(HostQueue& queue, bool profilingEnabled)
+@@ -324,6 +348,9 @@
+   for (const auto &event: eventWaitList) {
+     event->retain();
+   }
++#if defined(WITH_PS5_DEVICE)
++  accountCreated();
++#endif
+ }
+ 
+ // ================================================================================================
