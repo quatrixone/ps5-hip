@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-frozen-native-host-graph-identity",
+  "frozen_source_commit": "454c8fdf3c4bc5a70c7d43f01842c27880ab9d65",
+  "manifest_sha256": "2ab9d2ceba4416b005fba81b27d149fa8b58c2dbf52ac0d89a731cacfde3faef",
+  "package_sha256": "c702c08dcd20db44a4566b2077adbc5a52851a0ea273a0196d49e20c2f24731a",
+  "bound_files": 28,
+  "package_files": 6,
+  "committed_build_inputs": 99,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-graph-console-v1/manifest.json": "2ab9d2ceba4416b005fba81b27d149fa8b58c2dbf52ac0d89a731cacfde3faef",
+    "results/source-graph-console-v1/build-receipt.json": "a79f3aacb4741c8c8203c1f118cab8c4fca41137efe63e1b28f51582d7459a42",
+    "results/source-graph-console-v1/offline-review.json": "0cae7f27896e8797021b4a036297efce840d21c5c9d04fa4f142ed440b8f5fcf",
+    "results/source-graph-console-v1/checkpoint.json": "25f6db8cbed082f11f8ff2709e8866b483c08d0b7c821cfd0d53ba43da9aad7d"
+  },
+  "accepted_scope": [
+    "Every manifest-bound file and exact six-file stage inventory verified",
+    "All native build inputs equal frozen git commit despite earlier receipt base",
+    "Package identity matches independent artifact/ISA/import/extraction review",
+    "Helpers match prior audited candidate",
+    "Graph32replays64callbacks6invalidations3borrowedgraphs andfivequeue finalization match reviewed oracle and strict transcript",
+    "Both deploy and execute reject missing operational review before network access or output directory creation"
+  ],
+  "limits": [
+    "Historical baseline image and preserved log digests are requirements, not fresh observations",
+    "Console recovery and installed image remain unverified",
+    "No deployment authorization or native execution",
+    "Host graph oracle qualification and native artifact retention do not establish console behavior"
+  ],
+  "deployment_approved": false,
+  "console_contacted": false
+}

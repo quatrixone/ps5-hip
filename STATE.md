@@ -22,8 +22,13 @@ This prepares native graph testing; it does not establish a console pass.
 Adding the graph transcript and freezer support changed bound control inputs.
 Earlier frozen candidates, including `results/source-copy-capture-console-v1`,
 remain preserved but must not deploy through this changed checkout without a new
-freeze and review. The graph package itself still needs a committed-source freeze,
-recovery confirmation and independent operational review before .40 testing.
+freeze and review. The graph package is now frozen at `454c8fd` in
+`results/source-graph-console-v1`. Independent offline review verified all 28
+bound files, six package files and 99 committed build inputs. See
+`evidence/offline-frozen-native-graph.json` for identities and review provenance.
+Recovery confirmation, fresh full-image and preserved-log baseline verification,
+and independent operational review are still required before .40 deployment.
+No console contact or native graph execution is claimed.
 
 A replacement native copy package includes the capture cleanup at `50a2361`:
 `build/public-hip-copy-capture-v1` passed the full 74-object Make build and cached
@@ -42,8 +47,8 @@ capture and replay. See `evidence/offline-public-capture-recovery.json` for fres
 qualification, source-preparation drift checks, native compilation and independent
 review. Child/event recovery and other rejected API invalidation remain open.
 The previously frozen rectangular-copy package does not contain this runtime fix;
-the replacement package above now includes it, but a capture-specific native
-fixture and console acceptance remain pending.
+the replacement packages above now include it. The capture-specific native
+fixture is built and frozen; console acceptance remains pending.
 
 Host-node graph construction and thread-local capture now pass fresh source
 qualification: each replays 16 changing inputs, updates callback functions and
