@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-public-aggregate-launch",
+  "source_commit": "55a6197934e6879f65710f982b0ddbcfbdb5b82e",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "54d880eeb81097f7a9caaacad926a424673a1103b6fb33250d46f7b318c494f7",
+  "manifest_sha256": "47fc9b7d94068ba79c3aaf8892542b04ee5b1de2b8336fc05df768a04f006d43",
+  "application_log_sha256": "4090033df580cdd6e15da34b52ba34a4030327222120a41863124d4158b8c3b1",
+  "process": [
+    [
+      "PPSA99014",
+      "249"
+    ]
+  ],
+  "gpu_submissions": 2,
+  "member_bytes": 320,
+  "guard_bytes": 64,
+  "allocations": 1,
+  "frees": 1,
+  "queues": 1,
+  "retired_queues": 1,
+  "gate_destroyed": true,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-aggregate-console-v1",
+  "raw_evidence": {
+    "manifest.json": "47fc9b7d94068ba79c3aaf8892542b04ee5b1de2b8336fc05df768a04f006d43",
+    "review.json": "e4d69ccb872471844c5f0e291612235a75a5d8f29cdc74bb8461c2116edfc72c",
+    "freeze-review-detail.json": "3115d5e954401345758cb53f5eed7d405f455da114fcaff3ed56d1328c9271a4",
+    "deployment-review-detail.json": "41ed3d30199480366f7ef6a8190d5a1027bcc9f2f2a96687be9ca3d9a3823f9c",
+    "outcome-review.json": "cd1e5b56d38bb58f811d1ddde0f1a3d977c118b91d71f105de88b70e012f805e",
+    "deploy/receipt.json": "9da72b5e26e3e9f41c9f92228e1febfa9b90728ab62cd5fc2a3a0d3abe547734",
+    "execute/receipt.json": "1a8c3550a1a689bd14911677337c9e46ee2975533a66db9e281ebefe1c04aab2",
+    "deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/application.log": "4090033df580cdd6e15da34b52ba34a4030327222120a41863124d4158b8c3b1",
+    "execute/before-launch.log": "2341e43604ed1e4b327aab325b477e4075943737a410d0ecc1a74067b69e2e3a",
+    "execute/observed.log": "47df33befb240d430ca04a0385bdab6b3082b9dd91271be115e10b0bc278f232",
+    "execute/klog.log": "42ece42da3e9cac15c596e0e6e7298a435b3d6d87df4b067ca1ff7599664ee45",
+    "execute/snapshot.log": "d40df9327c8813c7a9396d8084280448987c77450052f12d98fd4a3d7c6f662f",
+    "execute/post_snapshot.log": "d40df9327c8813c7a9396d8084280448987c77450052f12d98fd4a3d7c6f662f"
+  },
+  "limits": [
+    "One compiler module with two registered kernels; only aggregate_shapes launched twice with deferred loading. Internal struct padding is unspecified; nested-pointer lifetime remains caller-managed.",
+    "Device backing and queue retirement do not prove full static-registry ownership accounting.",
+    "No LLM operator, model inference, training or complete HIP/ROCm compatibility claim."
+  ]
+}

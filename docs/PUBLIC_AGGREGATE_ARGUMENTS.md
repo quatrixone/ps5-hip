@@ -2,8 +2,8 @@
 
 The LLM compiler probe emits 12-byte vector, 16-byte struct and 128-byte
 softmax arguments. The public runtime now captures and packs these by-value
-arguments through genuine HIP compiler stubs and CLR. This is an offline
-qualification; native aggregate execution and LLM inference remain unqualified.
+arguments through genuine HIP compiler stubs and CLR. The bounded native test
+also passes on .40; real LLM operators and model inference remain unqualified.
 
 ## Contract
 
@@ -62,7 +62,7 @@ test uses explicit unsupported geometry/shared-memory admission errors. The
 passing receipt was v2; the final repeat using Git-normalized source bytes is
 `results/public-hip-aggregate-v3/receipt.json`.
 
-## Next native gate
+## Native qualification
 
 The aggregate title now builds with 76 ordinary objects and one genuine compiler
 object. Raw/converted/extracted image audits verify registration, launch calls,
@@ -81,7 +81,11 @@ make public-hip-aggregate-package \
 
 The candidate checks 320 member bytes and 64 guard bytes across two launches.
 The companion pointer-bearing kernel is registered but not launched. Packaging
-does not prove GPU execution: commit/freeze and independently review a fresh
-candidate before testing on idle .40. No console state changed during packaging.
+does not alone prove GPU execution. The subsequent frozen candidate passed on
+.40: exact member/guard checks, one allocation/free and retired queue, complete
+application finalization, natural exit, matching idle snapshots and installed
+identities, healthy services and both locks released. See
+`../evidence/console40-public-aggregate-success.json`. These controls are consumed;
+use a fresh candidate for future experiments.
 Geometry/LDS/private-memory exposure, model-scale memory, math/library linkage
 and complete native tensor/client execution remain separate open requirements.

@@ -57,7 +57,20 @@ All older next-step paragraphs below are historical and subordinate to this
 priority. The latest native compiler-launch checkpoint below records the current
 installed image/log; the earlier backing-test image/log are preserved backups.
 
-## Aggregate arguments qualified offline
+## Resume: aggregate native gate passed; real operator resources next
+
+Latest native evidence: `evidence/console40-public-aggregate-success.json`.
+Candidate source `55a6197934e6879f65710f982b0ddbcfbdb5b82e` passed on .40:
+two genuine compiler-stub launches, 320 member bytes, 64 guard bytes, one
+allocation/free and one retired queue. PID 249 exited naturally; finalization,
+installed identities, idle snapshots, health and both lock releases passed review.
+
+Installed package: `54d880eeb81097f7a9caaacad926a424673a1103b6fb33250d46f7b318c494f7`.
+Installed FSELF: `6602ba5998b9245ac6a3923569b0fd82bf62c7f42d6c259e0572d0a877028dfc`.
+Aggregate log: `4090033df580cdd6e15da34b52ba34a4030327222120a41863124d4158b8c3b1`.
+Both phases in `results/source-public-aggregate-console-v1` are consumed;
+root deploy12561 and execute28974 terminated successfully. Never reuse controls.
+Previous embedded image/log backups are preserved on the console.
 
 Genuine HIP compiler stubs now pass 12/16/128-byte by-value arguments through
 CLR in eager and deferred host runs. Caller mutation, compiler offsets, zero
@@ -66,25 +79,26 @@ pass; no-op and corrupt transports fail the output oracle. The full 87-unit
 CLR sanitizer qualification and 32 configured core regressions pass.
 See `docs/PUBLIC_AGGREGATE_ARGUMENTS.md` and
 `evidence/offline-public-aggregate-arguments.json` for exact scope and provenance.
-Nested pointers remain opaque and require caller-managed lifetime. No native
-aggregate execution or new console image is claimed. Next: integrate the native
-aggregate title, audit/package it, then freeze and validate a fresh candidate
-on idle .40 before proceeding to real LLM launch resources and operators.
+Nested pointers remain opaque and require caller-managed lifetime. The next
+concrete client gate is unchanged upstream 2048-column RMSNorm: 1024 threads,
+128-byte dynamic LDS, 26 arguments, metadata-selected hidden LDS offset 352,
+and unused null optional mul/add pointers. The canary-specific reduction route
+does not implement this contract. Read `evidence/llm-next-runtime-gate.json`;
+freeze actual ggml CPU outputs and tolerances before native numerical acceptance.
 
 The native aggregate title now builds and passes image/package audits:
 `build/public-hip-aggregate-native-v1/link-receipt.json`, package SHA
 `54d880eeb81097f7a9caaacad926a424673a1103b6fb33250d46f7b318c494f7`.
-See `evidence/offline-public-aggregate-native-package.json`. Next: freeze the
-committed candidate and independently review it before a bounded .40 cycle.
-The installed baseline remains the embedded title until a deployment is recorded.
+See `evidence/offline-public-aggregate-native-package.json`. The subsequent
+console checkpoint above validates this package. Full v1 inference remains open.
 
 ## Static module failure handling checkpoint
 
-Latest native checkpoint passed: `evidence/console40-public-embedded-success.json`.
+Previous native checkpoint: `evidence/console40-public-embedded-success.json`.
 Genuine CLR compiler registration/stubs executed two GPU launches, 146 exact
 values and 16 guards, then balanced device allocation/free and queue retirement.
 PID 239 exited naturally; installed files, idle mounts, health and both locks
-passed review. Current package is
+passed review. Its preserved previous package is
 `e3d38022543668343a029d14cc55c1506bd5e1bc026719d3a1bd39c599093359`;
 embedded log is `45c411ac7cc7203a726853146995cb5e88b463de20e5c467c803cb0f2c57d978`.
 Both phases of `results/source-public-embedded-console-v1` are consumed. Preserve

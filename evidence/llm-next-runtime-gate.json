@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "classification": "read-only proposed next real LLM operator gate; not executed on GPU",
+  "operator": "unfused F32 RMSNorm at TinyLlama hidden width 2048",
+  "source_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "source_entry": "ggml_cuda_op_rms_norm -> rms_norm_f32_cuda -> rms_norm_f32<1024,false,false,false>",
+  "symbol": "_ZL12rms_norm_f32ILi1024ELb0ELb0ELb0EEvPKfPfiiilllfS1_lll15HIP_vector_typeIjLj3EES4_S4_S4_S1_lllS4_S4_S4_S4_f.kd",
+  "linked_object": {
+    "path": "results/llm-hip-library-order-v1/norm.hsaco",
+    "sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5"
+  },
+  "metadata": {
+    "kernarg_segment_size": 488,
+    "kernarg_segment_align": 8,
+    "group_segment_fixed_size": 0,
+    "private_segment_fixed_size": 0,
+    "max_flat_workgroup_size": 1024,
+    "wavefront_size": 32,
+    "sgpr_count": 30,
+    "vgpr_count": 29,
+    "sgpr_spill_count": 0,
+    "vgpr_spill_count": 0
+  },
+  "descriptor": {
+    "rsrc3": "0x0",
+    "rsrc1": "0x60af00c3",
+    "rsrc2": "0x38c",
+    "properties": "0x409"
+  },
+  "arguments": [
+    {
+      "offset": 0,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "offset": 8,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "offset": 16,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "offset": 20,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "offset": 24,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "offset": 32,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 40,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 48,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 56,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "offset": 64,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "offset": 72,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 80,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 88,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 96,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 108,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 120,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 132,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 144,
+      "size": 8,
+      "kind": "global_buffer"
+    },
+    {
+      "offset": 152,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 160,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 168,
+      "size": 8,
+      "kind": "by_value"
+    },
+    {
+      "offset": 176,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 188,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 200,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 212,
+      "size": 12,
+      "kind": "by_value"
+    },
+    {
+      "offset": 224,
+      "size": 4,
+      "kind": "by_value"
+    },
+    {
+      "offset": 232,
+      "size": 4,
+      "kind": "hidden_block_count_x"
+    },
+    {
+      "offset": 236,
+      "size": 4,
+      "kind": "hidden_block_count_y"
+    },
+    {
+      "offset": 240,
+      "size": 4,
+      "kind": "hidden_block_count_z"
+    },
+    {
+      "offset": 244,
+      "size": 2,
+      "kind": "hidden_group_size_x"
+    },
+    {
+      "offset": 246,
+      "size": 2,
+      "kind": "hidden_group_size_y"
+    },
+    {
+      "offset": 248,
+      "size": 2,
+      "kind": "hidden_group_size_z"
+    },
+    {
+      "offset": 250,
+      "size": 2,
+      "kind": "hidden_remainder_x"
+    },
+    {
+      "offset": 252,
+      "size": 2,
+      "kind": "hidden_remainder_y"
+    },
+    {
+      "offset": 254,
+      "size": 2,
+      "kind": "hidden_remainder_z"
+    },
+    {
+      "offset": 272,
+      "size": 8,
+      "kind": "hidden_global_offset_x"
+    },
+    {
+      "offset": 280,
+      "size": 8,
+      "kind": "hidden_global_offset_y"
+    },
+    {
+      "offset": 288,
+      "size": 8,
+      "kind": "hidden_global_offset_z"
+    },
+    {
+      "offset": 296,
+      "size": 2,
+      "kind": "hidden_grid_dims"
+    },
+    {
+      "offset": 352,
+      "size": 4,
+      "kind": "hidden_dynamic_lds_size"
+    }
+  ],
+  "launch": {
+    "columns": 2048,
+    "epsilon": 1e-05,
+    "input_dtype": "F32",
+    "output_dtype": "F32",
+    "groups": [
+      "nrows",
+      1,
+      1
+    ],
+    "threads": [
+      1024,
+      1,
+      1
+    ],
+    "wavefront": 32,
+    "waves_per_workgroup": 32,
+    "dynamic_LDS_bytes": 128,
+    "fixed_LDS_bytes": 0,
+    "private_bytes": 0,
+    "first_rows": [
+      1,
+      2,
+      17
+    ],
+    "contiguous_element_strides": {
+      "row": 2048,
+      "channel": "2048*nrows",
+      "sample": "2048*nrows"
+    },
+    "math": "float accumulation/FMA of x*x, two wave32 SUM reductions with shared 32 floats+barriers, division by 2048, rsqrt(mean+1e-5), multiply each input",
+    "actual_ISA": [
+      "v_fmac_f32",
+      "ds_bpermute_b32",
+      "ds_write_b32",
+      "ds_read_b32",
+      "s_barrier",
+      "v_div_scale_f32/v_div_fmas_f32/v_div_fixup_f32",
+      "v_rsq_f32"
+    ]
+  },
+  "gaps": [
+    {
+      "where": "ports/clr/ps5-device.cpp Program::setKernels",
+      "gap": "Whole 16-kernel norm module is admitted only through Initial. Chosen RMS kernel has hidden_dynamic_lds_size and siblingkernels have fixed LDS. Must legitimately admit eligible resource contracts or build a provenance-preserving selected upstream kernel module; do not relabel unsupported metadata."
+    },
+    {
+      "where": "ports/clr/ps5-device.cpp NDRange submission/device info",
+      "gap": "Rejects any sharedMemBytes, any route except Initial; reports max workgroup64 and local memory0. Real launch requires 1024 threads and 128 dynamic LDS."
+    },
+    {
+      "where": "src/hip_launch_profile.cpp select_hip_launch_profile",
+      "gap": "1024-thread route accepts only 4096 dynamic LDS, not 128. Existing reduction canary is not a generic RMSNorm route."
+    },
+    {
+      "where": "src/code_object.cpp reduction_lds_launch_rejection and launch_rejection",
+      "gap": "Canary-specific four 8-byte args, kernarg 288, rsrc1=0x60af0080; real RMS has 26 args, kernarg 488 and descriptor recorded here. Hidden dynamic LDS is offset 352 (implicit base 232+120). Must derive and validate actual contract rather than bypass checks. The actual rsrc2 is 0x38c (workgroup-ID X/Y/Z enabled), whereas existing reduction entry requires 0x8c; even the first case groups_y=z=1 must supply the compiler's genuine XYZ entry contract."
+    },
+    {
+      "where": "src/native_launch.cpp and src/launch.cpp reduction preparation/packing",
+      "gap": "4096 LDS assertion, hidden dynamic LDS store at hardcoded 152, canary-specific plan/rsrc checks; RMS needs 128 and metadata-selected offset 352. Geometry/COv5 fields must reflect genuine 1024-thread groups."
+    },
+    {
+      "where": "src/host_launch.cpp capture and public lifetime policy",
+      "gap": "Unfused upstream launcher still passes null optional mul/add pointers at explicit offsets 64/144, both metadata global_buffer; current capture requires live allocations for every global_buffer. Eight uint3 aggregates are real 12-byte values now covered by aggregate representation, but nullable unused pointer semantics remain. Do not pretend upstream uses non-null inputs or claim metadata proves pointers unused."
+    }
+  ],
+  "numerical_oracle_needed": {
+    "implementation": "Run locked upstream ggml CPU GGML_OP_RMS_NORM on identical frozen F32 tensors with epsilon 1e-5; independently compute FP64 formula for diagnostic reference. CPU uses wider accumulation and sqrt, GPU uses float tree/FMA and rsqrt, so bitwise equality is not presumed.",
+    "inputs": [
+      "Actual dequantized Q4_0 token_embedding rows for fixed token IDs from CPU reference prompts, serialized F32; hash model/source/input bytes.",
+      "Deterministic finite stress rows: zero, constantpositive/negative, sparse impulses including tailcolumn 2047, alternating signs, bounded mixedmagnitudes; never use hostmodeled output as GPUresult.",
+      "Contiguous2048x1,2048x2,2048x17; later rowstrides with canarypadding using same upstream stridearguments."
+    ],
+    "outputs": "Retrieve all 2048*nrows F32 native values, retain rawbytes and input/output guards, verify unchanged source/padding and repeated launch stability. Compute per-element absolute and relative error, maximum errors/RMSE/finite counts; compare against frozen CPU outputs.",
+    "acceptance": "Numerical tolerance is NOT yet frozen by current plan. Before console run, calibrate CPU-vs-FP64 baseline and declare explicit abs+relative criteria in a fixture manifest; no numerical PASS until that prerequisite exists. Zero-input with positiveepsilon should produce signed zeros numerically, guards exact.",
+    "negative_controls": [
+      "No-op transport/native selection must fail output comparison on nonzero inputs.",
+      "Corrupt one output element and assert oracle failure.",
+      "Interleave changed rows and repeat prior rows to expose stale captures/state."
+    ],
+    "scope": "Actual unchanged upstream kernel execution only; neither fullmodel inference nor throughput qualification."
+  },
+  "smallest_next_implementation": "Dedicated resource qualification for this unchanged 2048-column RMSNorm kernel:128-byte LDS+1024-thread geometry+COv5 hiddenfields and genuine 26-argument/nulloptional-pointer contract. Reuse alreadyproven barrier/dispatch machinery but validate actual descriptor and numerical output. No fullSDK/BLAS required for isolated kernel module launch.",
+  "limits": [
+    "This code object used diagnostic HIP 6.2-matched hipBLAS 2.2 headers; project current-version dependency integration remains open.",
+    "Existing baseline OCML bits establish compile/link closure, not new native rsqrt accuracy.",
+    "Only unfused RMSNorm is selected; learned normweights/multiply and fused variants are separate gates.",
+    "Read-only report; no runtime/build inputs edited and no nativeexecution."
+  ],
+  "source_sha256": {
+    "docs/LLM_V1_COMPILE_PROBE.md": "2a2503946a8ae93d9bdc770c990ffb48f8c53f031367b0bd24c5f5f221d8ee52",
+    "docs/LLM_V1_PLAN.md": "20707ce9799c4b7e1ce075370432ad4ba7c633d937d0c5084a8d8bb47228f1ee",
+    "models/tinyllama-source/config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/norm.cu": "6ba2af1d57f958a3ac72e5c0e236ffa5c70accd1b40460d6a760d84aca33ff25",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/common.cuh": "01ec28a5866346886a5ddd74efc1703b86cacdc31990522733d79ea035ace86b",
+    ".deps/sources/llama-client/ggml/src/ggml-cpu/ops.cpp": "0cb56844ee2e315e4cd35a6bf802a9372f4c9c41725328a5b22a2d28bb254582",
+    "src/hip_launch_profile.cpp": "7b92eddf4c811adf7b52338ea8f7fcb5a5311458b266f8e3377c9fd71e6e2afa",
+    "src/code_object.cpp": "ea60a71084d0b7c06dfa310a042551ff0bd284ea41fe93e275316c0f8eeeaf9c",
+    "src/launch.cpp": "d65ae11cb1b55c4dae95d0f83e2e9a905a6d90decaeba8f36f3fa7b82be3b3bb",
+    "src/native_launch.cpp": "6854ff1457eef54e5408555fea58995681e9bf6650bd2ec0fe32c64bfa33d05a",
+    "src/host_launch.cpp": "1db4711347f6d55a193250ab20b5dda85e1cd86739e9a63c9227bc33ebb9476a",
+    "ports/clr/ps5-device.cpp": "0b960f9c8b857b23528bd9e09dde7a9fd1fb3e0e695d3cc2c280bffa64e8b1de"
+  }
+}

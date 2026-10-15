@@ -36,6 +36,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 ## Static module failure handling qualified offline
 
+- 2026-10-15 | V1.2 prerequisite | 55a6197 | .40 | pass: aggregate compiler launches,320memberbytes64guards,clean lifecycle | evidence/console40-public-aggregate-success.json | next: real RMSNorm resources/oracle
+
 - 2026-10-15 | V1.2 prerequisite | offline | aggregate native compiler title builds; image/package audits and 41 control tests pass | evidence/offline-public-aggregate-native-package.json | next: frozen .40 validation
 
 - 2026-10-15 | V1 runtime prerequisite | e365c5d | .40 | pass: genuine compiler-stub launches,146values16guards,clean finalization/lifecycle | evidence/console40-public-embedded-success.json | next: real operator ABI/resources

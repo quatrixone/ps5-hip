@@ -7,6 +7,10 @@ targets one small Llama-family model, GGUF Q4_0, batch one and a 512-token conte
 through a standalone PS5 HIP client. Model execution is not yet qualified.
 Training, broad frameworks and general SDK expansion remain later goals.
 
+The latest [aggregate-argument prerequisite](docs/PUBLIC_AGGREGATE_ARGUMENTS.md)
+passes on .40 through genuine HIP compiler stubs. Real LLM tensor operators and
+end-to-end model inference remain unqualified.
+
 The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, support standalone inference clients,
 and ultimately run native PyTorch inference and training.

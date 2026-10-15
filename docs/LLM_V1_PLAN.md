@@ -151,10 +151,13 @@ checkpoint/resume, even when base weights are frozen.
 
 Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now
 passes and five real device translation units link. Resolve demonstrated
-native aggregate-argument, launch-resource, math/library and full-client-link blockers,
+real operator launch-resource, math/library and full-client-link blockers,
 then use the verified CPU token/logit references to qualify required operators.
-Aggregate arguments now pass the offline genuine compiler/CLR qualification;
-see `PUBLIC_AGGREGATE_ARGUMENTS.md`. Native execution is the next ABI gate.
+Aggregate arguments now pass both offline genuine compiler/CLR qualification
+and bounded native execution on .40; see `PUBLIC_AGGREGATE_ARGUMENTS.md`.
+The next proposed operator gate is genuine 2048-column RMSNorm with its actual
+1024-thread/128-byte LDS contract and frozen CPU numerical reference; see
+`../evidence/llm-next-runtime-gate.json`.
 The host tools and model
 metadata inventory are reproducible through optional Make targets; V1.1 remains
 partial. Select work from demonstrated client blockers. No native LLM, training
