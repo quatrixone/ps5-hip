@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Module failure reporting now separates `hipModuleLoad` from
+`hipModuleGetFunction` and records the numeric HIP status and handle presence.
+The changed native title compiles; success acceptance is unchanged. See
+`evidence/offline-public-launch-module-diagnostics.json`. This is diagnostic
+coverage only, not a loader fix or a new packaged/console-qualified candidate.
+
 - 2026-10-15 | G5 | 4acfab2 | .40 | failed: public module before GPU | evidence/console40-public-launch-failure.json | next: loader diagnostics
 
 The first native public HIP GPU-launch attempt failed at the combined module

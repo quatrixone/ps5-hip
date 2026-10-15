@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-native-title-module-error-diagnostics",
+  "change": "Separate module-load and function-lookup failures; record numeric HIP status and handle presence before quarantine.",
+  "source_sha256": "e20d6a9ae09eed96ce432bb955ed71c8ad0b76e59082283b85658f46c72a38c6",
+  "object_sha256": "7cd99c794da07708605e3fc98133d078a3f1c59e50b07bf2c044cf3d8e2d1545",
+  "native_compile_returncode": 0,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-launch-module-diagnostic-compile-v1/receipt.json": "cb8beec7ffdc7ed912007c507f18c52250e60d392e7b2f5cf4c335b69a12d8f7",
+    "results/public-launch-module-diagnostic-compile-v1/review.json": "5a1b33b5b118616e54167c6d4eb9859ee93f634a175df9143fedca2a2b96677d",
+    "results/public-launch-module-diagnostic-compile-v1/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-launch-module-diagnostic-compile-v1/stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Native title translation unit compiled.",
+    "Independent review verifies unchanged success oracle and quarantine behavior."
+  ],
+  "limits": [
+    "Underlying module-stage failure remains unresolved.",
+    "Not a newly linked or packaged candidate; requires fresh Make build/freeze/review before console use.",
+    "No further console execution."
+  ]
+}

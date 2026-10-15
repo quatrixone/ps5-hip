@@ -77,9 +77,18 @@ int main() {
       ps5hip_clr_gpu_fail("public-discovery");
     hipModule_t module = nullptr;
     hipFunction_t function = nullptr;
-    if (hipModuleLoad(&module, "/app0/thread_words.hsaco") != hipSuccess || !module ||
-        hipModuleGetFunction(&function, module, "thread_words") != hipSuccess || !function)
-      ps5hip_clr_gpu_fail("public-module");
+    const hipError_t loaded = hipModuleLoad(&module, "/app0/thread_words.hsaco");
+    if (loaded != hipSuccess || !module) {
+      std::fprintf(stderr, "HIP_LAUNCH MODULE_ERROR operation=load status=%d module_present=%s\n",
+                   static_cast<int>(loaded), module ? "true" : "false");
+      ps5hip_clr_gpu_fail("public-module-load");
+    }
+    const hipError_t resolved = hipModuleGetFunction(&function, module, "thread_words");
+    if (resolved != hipSuccess || !function) {
+      std::fprintf(stderr, "HIP_LAUNCH MODULE_ERROR operation=lookup status=%d function_present=%s\n",
+                   static_cast<int>(resolved), function ? "true" : "false");
+      ps5hip_clr_gpu_fail("public-module-lookup");
+    }
     constexpr unsigned words = 81, active = 73;
     void* buffer = nullptr;
     if (hipMalloc(&buffer, words * sizeof(uint32_t)) != hipSuccess || !buffer ||

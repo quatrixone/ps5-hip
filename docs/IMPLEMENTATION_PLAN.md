@@ -2,6 +2,12 @@
 
 Updated: 2026-10-14, America/New_York.
 
+Module failure reporting now separates `hipModuleLoad` from
+`hipModuleGetFunction` and records the numeric HIP status and handle presence.
+The changed native title compiles; success acceptance is unchanged. See
+`../evidence/offline-public-launch-module-diagnostics.json`. This is diagnostic
+coverage only, not a loader fix or a new packaged/console-qualified candidate.
+
 The first native public HIP GPU-launch attempt failed at the combined module
 load/function-lookup check, before allocation or GPU submission. The watchdog
 fired; the controller closed PID 108 and verified idle state, healthy services
