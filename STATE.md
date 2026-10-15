@@ -20,8 +20,12 @@ existing four-dispatch GPU oracle. The 74-object package, Make revalidation,
 26 controls and independent extracted-artifact/ISA audit passed.
 See `evidence/offline-graph-update-recovery.json`.
 
-Native recovery execution is pending; the installed .40 baseline below is
-unchanged. Next: freeze and review this candidate, then one bounded .40 cycle.
+The recovery package is deployed on .40: 21 complete reads, exact mounted files,
+preserved prior image/log, healthy services and both locks released. Installed
+image: `dcfe7293c0034c21b6e5d36fb0e7b405eb763bd5a9c3041a730fc8cfd4858c8b`.
+The old copy_gpu log is SHA-preserved and the new log is absent. Deployment in
+`results/source-public-copy-recovery-console-v1` is consumed. Next: independent
+receipt-bound execution review, then one bounded run. See `evidence/console40-copy-recovery-deployment.json`.
 Other parameter/dependency failures can still partly mutate an executable;
 nested compatibility and direct child-setter safety remain separate gaps.
 This does not close G5 or the SDK roadmap.
