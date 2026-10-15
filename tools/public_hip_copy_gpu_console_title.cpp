@@ -12,6 +12,8 @@
 #include <fstream>
 #include <unistd.h>
 
+extern "C" int sceKernelDebugOutText(int channel, const char *text);
+
 extern "C" int __cxa_thread_atexit_impl(void (*destructor)(void*), void* object,
                                           void* dso) {
   return ps5___cxa_thread_atexit_impl(destructor, object, dso);
@@ -72,8 +74,17 @@ int main() {
     if (!config.eof() || length < 2 || length > 240) return 2;
     const std::string directory(config_bytes, static_cast<size_t>(length));
     if (!ps5hip_canary::valid_results_directory(directory)) return 2;
-    if (elevation::request(elevation::Capability::filesystem, "/app0/lapy.elf") != elevation::Status::ok) return 2;
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT elevation-begin\n");
+    const auto elevated = elevation::request(elevation::Capability::filesystem, "/app0/lapy.elf");
+    char elevation_result[128]{};
+    std::snprintf(elevation_result, sizeof(elevation_result),
+                  "PS5HIP BOOT elevation-returned status=%d path=%s\n",
+                  int(elevated), elevation::path());
+    (void)sceKernelDebugOutText(0, elevation_result);
+    if (elevated != elevation::Status::ok) return 2;
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT log-open-begin\n");
     if (!ps5hip_canary::redirect_log((directory + "/ps5-hip-public-copy_gpu.log").c_str())) return 2;
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT log-ready\n");
     std::puts("PS5HIP START target=gfx1013 kernel=public_hip_copy_gpu");
     if (!finalizer_installed) ps5hip_clr_gpu_fail("finalizer-install");
     ps5hip_canary::check_runtime();

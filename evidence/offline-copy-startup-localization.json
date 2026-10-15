@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-startup-localization-candidate",
+  "package_sha256": "378b823a72930bea754938189b0d74e902d5489bac73d322dc02ae5a6739f8a4",
+  "build_receipt_sha256": "ecbd4b07a896185ece315464d13bc7da3e3fe44b0ad38534de8e50adf454127a",
+  "build_directory": "build/public-hip-copy-startup-v1",
+  "source_changes": [
+    "tools/public_hip_app_crt.cpp",
+    "tools/public_hip_copy_gpu_console_title.cpp"
+  ],
+  "changed_source_sha256": {
+    "tools/public_hip_app_crt.cpp": "495398965c7b2b78868e0af3efd370bf1587facbe4e13c9a1ce46473ec03ce84",
+    "tools/public_hip_copy_gpu_console_title.cpp": "dc5e6996fbd3b1bc8836cf43d59f53f003ceed30905350bc066707589a6fffc9"
+  },
+  "objects_verified": 74,
+  "package_files_verified": 7,
+  "debug_import_binding": [
+    "libkernel",
+    "libkernel"
+  ],
+  "checkpoints": [
+    "runtime-ready",
+    "constructors-begin",
+    "main-begin",
+    "main-returned",
+    "elevation-begin",
+    "elevation-returned status=%d path=%s",
+    "log-open-begin",
+    "log-ready"
+  ],
+  "kernel_sha256": "e128e5b47b5ad10b0032675ed311aa6e3ade58df74b3a0135c71ea987bf52f1e",
+  "kernel_unchanged": true,
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "3762b9c8ee0a29d19246e581235b08b410f317ab1056c1501edc44e6b91bb17f",
+    "extracted_sha256": "05f232d79000575c7fac00cb19f1de9b769946e5cbd8835a26f1ac9d40a7dd47",
+    "omitted_note": {
+      "offset": 5458708,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500663648c8aa59e8ac",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "native_executed": false,
+  "tests": {
+    "import_profiles": 4,
+    "console_controls": 26
+  },
+  "hypothesis": "Kernel-log checkpoints locate startup progress before the application log; elevation is a hypothesis, not an established cause.",
+  "limits": [
+    "No checkpoint has been observed on hardware yet.",
+    "Absence of runtime-ready cannot distinguish early startup failure from unavailable diagnostic output.",
+    "GPU correctness and recovery acceptance remain the unchanged full copy_gpu oracle."
+  ]
+}

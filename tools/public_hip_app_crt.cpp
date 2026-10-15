@@ -21,6 +21,7 @@ extern "C"
     int atexit(Destructor callback);
     [[noreturn]] void exit(int status);
     int application_main(int argc, char **argv, char **envp) __asm__("main");
+    int sceKernelDebugOutText(int channel, const char *text);
 
     extern Initializer __preinit_array_start[] __attribute__((weak));
     extern Initializer __preinit_array_end[] __attribute__((weak));
@@ -83,6 +84,7 @@ _start(void *process_parameters, Destructor loader_teardown)
      * on; the code linked here expects the IEEE state (PS5 platform, fp.h). */
     ps5_fp_ieee();
     _init_env(process_parameters);
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT runtime-ready\n");
     if (loader_teardown != nullptr)
         (void)atexit(loader_teardown);
     (void)atexit(_fini);
@@ -92,8 +94,11 @@ _start(void *process_parameters, Destructor loader_teardown)
 #ifdef PS5HIP_CLR_GPU_TITLE
     ps5hip_install_vector_title_finalizer();
 #endif
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT constructors-begin\n");
     _init();
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT main-begin\n");
     const int status = application_main(argc, argv, nullptr);
+    (void)sceKernelDebugOutText(0, "PS5HIP BOOT main-returned\n");
     catchReturnFromMain(status);
     exit(status);
 }

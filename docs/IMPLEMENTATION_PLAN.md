@@ -2,6 +2,17 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Startup localization candidate
+
+A fresh 74-object copy_gpu package adds kernel-log checkpoints after runtime
+initialization, around constructors/main, and around elevation/log opening.
+The extracted executable contains all eight checkpoints; its DebugOutText
+import binds to libkernel. All source/object hashes and seven packaged files
+were verified, and the GPU kernel is unchanged. Four import-profile and 26
+console-control tests passed. Hardware execution is pending a fresh frozen
+candidate review; the previous consumed run must not be reused.
+See `../evidence/offline-copy-startup-localization.json`.
+
 ## Current generic-update and recovery candidate
 
 Generic executable updates now validate handles and preflight exact node types
