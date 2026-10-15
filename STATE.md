@@ -11,18 +11,29 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The rectangular-copy console candidate is frozen at `27ebfd4` in
+`results/source-rect-copy-console-v1`. Independent offline review verified all
+28 bound files, six package files and 94 committed build inputs, plus the exact
+7,168-comparison/16-rejection oracle. Both deployment and execution fail before
+network access without operational approval. See
+`evidence/offline-frozen-rectangular-copy.json`. No console contact occurred;
+owner recovery confirmation, fresh baseline verification and operational review
+remain required. Older frozen candidates are historical and may have stale
+bound controls; do not substitute them for this candidate.
+
 The native copy fixture now covers contiguous and rectangular 2D/3D transfers:
 7,168 comparisons and 16 rejections over two changed rounds, with exact cleanup
 and no GPU imports. Fresh 74-object Make packaging, cached verification, 62 host
 tests, 19 control tests and independent artifact/oracle review pass. See
 `evidence/offline-native-rect-copy-fixture.json`. No console run is claimed;
-recovery, baseline verification and a newly frozen candidate remain required.
+The candidate is now frozen as described above; recovery, baseline verification
+and operational review remain required.
 
-A fresh native copy package now includes the rectangular-copy runtime at
+Historical runtime-only package: the native copy package includes the rectangular-copy runtime at
 `61a1797`: Make compiled 74 objects, packaged and passed cached verification and
 independent artifact audit. See `evidence/offline-native-copy-rect-runtime.json`.
-Its existing title tests contiguous copies only; a rectangular native fixture
-and console acceptance remain pending. No console contact occurred.
+Its title tests contiguous copies only; the newer rectangular fixture supersedes
+that test scope. Console acceptance remains pending. No console contact occurred.
 
 Public rectangular D2D copying now passes fresh qualification: 78 compilations,
 nine links, 4,096 compared bytes over two changed rounds and 31 rejection checks.
@@ -30,7 +41,8 @@ Checked origin/span admission, adapter dispatch and synchronous failure propagat
 fix the reproduced false-success path. Host/array rectangles and capture/graph
 routes remain unqualified and reject on tested entry paths. See
 `evidence/offline-public-rect-copy.json`; 62 host tests, 18 control tests and three
-changed PS5 translation units also pass. No new package or console run is claimed.
+changed PS5 translation units also pass. That checkpoint did not include a native package or console run; the newer
+package checkpoint above covers packaging only.
 
 The native memory owner now implements rectangular D2D copying with checked
 spans, padding preservation and exact row-overlap rejection. All 62 host tests,

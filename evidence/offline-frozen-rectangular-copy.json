@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-frozen-rectangular-copy-identity-pass",
+  "frozen_source_commit": "27ebfd476676eae003e5a860ea7300c9d4205327",
+  "manifest_sha256": "ac2011b73ed4e8d964ca55fadec0b1066781f5ba697a8a369fdb29f148f0e93c",
+  "package_sha256": "8e26b457ae3dd91fa0077eba78230bf4ed3ad99fa2ad6b0758c592ec8ca4ffba",
+  "bound_files": 28,
+  "package_files": 6,
+  "committed_build_inputs": 94,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-rect-copy-console-v1/manifest.json": "ac2011b73ed4e8d964ca55fadec0b1066781f5ba697a8a369fdb29f148f0e93c",
+    "results/source-rect-copy-console-v1/build-receipt.json": "746184b4eca432ebd6da746827c28c2ee50649e29e3aedd74d1e0a611d377e15",
+    "results/source-rect-copy-console-v1/offline-review.json": "90114485a6c9eba083323cc6998b18a5468aeb435ef6f1b3f06d1ef91b57cc21",
+    "results/source-rect-copy-console-v1/checkpoint.json": "18e7c4d014f124197bbd0ee4c0bb2198d77248ca9266f5ff87479427d0afd4d8"
+  },
+  "independent_review": {
+    "path": "results/source-rect-copy-console-v1/offline-review.json",
+    "sha256": "90114485a6c9eba083323cc6998b18a5468aeb435ef6f1b3f06d1ef91b57cc21",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "Every manifest-bound file verified",
+    "Exact six-file inventory and package match independently audited native rectangle fixture",
+    "All build inputs match both current files and git blobs at frozen commit despite older receipt source-base",
+    "Snapshot and controller hashes match previously audited frozen candidate",
+    "7168 comparisons and 16 rejections match reviewed title and strict transcript",
+    "Both deploy and execute constructors reject absent operational review before socket access or phase directory creation"
+  ],
+  "limits": [
+    "Historical baseline hashes are future admission requirements, not observations of current remote state",
+    "Console recovery and installed image remain unverified",
+    "No operational approval, deployment or execution authorization"
+  ]
+}
