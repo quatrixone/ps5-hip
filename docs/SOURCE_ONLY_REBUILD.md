@@ -383,3 +383,22 @@ graph. Caller-owned capture graphs remain owned by the caller. The model checks
 extra-buffer arguments and each argument-copy allocation failure. Extended/HCC
 launch capture remains rejected. GPU memory graph nodes, cross-stream GPU capture
 and longer replay/lifetime measurements are separate open requirements.
+
+
+### One-dimensional copy graph retirement
+
+The PS5 copy graph path creates a dependency marker for a disabled 1D copy
+during command preparation. That same marker receives graph wait lists and is
+enqueued during replay. It does not construct an unused copy command that would
+retain device buffers. Command-vector capacity is reserved before marker allocation.
+
+The source qualifier exercises explicit and captured H2D/D2D/D2H chains, each
+disabled direction with distinct sentinels, re-enabled changing-input replay and
+source-graph destruction. A parallel fork/join case checks that a held host
+predecessor prevents the joined callback from completing, then verifies completion
+and bytes after release. Its 100 ms observation is bounded scheduler evidence.
+All buffers and queues must retire under the sanitizers.
+
+This host-model coverage does not qualify native copy graphs, invalidated copy
+capture recovery, broader memcpy/memset node types or resource plateaus. A dedicated
+shared native copy/kernel fixture remains required before console acceptance.

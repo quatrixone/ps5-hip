@@ -359,6 +359,52 @@
      devId = devId == -1 ? ihipGetDevice() : devId;
      hipFunction_t func = getFunc(*pNodeParams, devId);
      if (!func) {
+@@ -1394,6 +1496,22 @@
+   }
+ 
+   virtual hipError_t CreateCommand(hip::Stream* stream) override {
++#if defined(WITH_PS5_DEVICE)
++    commands_.clear();
++    if (stream == nullptr) return hipErrorInvalidResourceHandle;
++    if (!isEnabled_) {
++      GraphNode::CreateCommand(stream);
++      try {
++        commands_.reserve(1);
++      } catch (const std::bad_alloc&) {
++        return hipErrorOutOfMemory;
++      }
++      auto marker = new amd::Marker(*stream, !kMarkerDisableFlush, {});
++      if (!marker) return hipErrorOutOfMemory;
++      commands_.emplace_back(marker);
++      return hipSuccess;
++    }
++#endif
+     if ((kind_ == hipMemcpyHostToHost || kind_ == hipMemcpyDefault) && IsHtoHMemcpy(dst_, src_)) {
+       return hipSuccess;
+     }
+@@ -1404,11 +1522,22 @@
+     commands_.reserve(1);
+     amd::Command* command = nullptr;
+     status = ihipMemcpyCommand(command, dst_, src_, count_, kind_, *stream);
++#if defined(WITH_PS5_DEVICE)
++    if (status != hipSuccess) return status;
++#endif
+     commands_.emplace_back(command);
+     return status;
+   }
+ 
+   virtual void EnqueueCommands(hip::Stream* stream) override {
++#if defined(WITH_PS5_DEVICE)
++    if (!isEnabled_) {
++      // Enqueue the same marker that received graph dependency wait lists.
++      commands_[0]->enqueue();
++      commands_[0]->release();
++      return;
++    }
++#endif
+     bool isH2H = false;
+     if ((kind_ == hipMemcpyHostToHost || kind_ == hipMemcpyDefault) && IsHtoHMemcpy(dst_, src_)) {
+       isH2H = true;
 --- a/hipamd/src/hip_graph_internal.cpp
 +++ b/hipamd/src/hip_graph_internal.cpp
 @@ -346,7 +346,7 @@

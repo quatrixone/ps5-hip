@@ -18,6 +18,26 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+- 2026-10-15 | G5 | offline | pass: disabled copy graph retirement | evidence/offline-public-copy-graph.json | next: native copy/kernel fixture
+
+One-dimensional copy graph retirement is fixed and qualified offline.
+Previously, disabled copy replays retained an unused command and later
+`hipFree` returned status 999 in both explicit and captured graphs. Disabled
+1D copies now prepare and enqueue the same dependency marker, with vector
+capacity reserved before marker allocation. The new suite covers all three
+copy directions, six disabled replays, four changing-input replays, source-graph
+destruction and a bounded parallel fork/join check. Full source sanitizers,
+native runtime Make build and cached validation, 62 host regressions and
+25 console controls passed. See `evidence/offline-public-copy-graph.json`.
+
+This is host-model copy-graph evidence and native runtime compile/package
+evidence. The compiled title still tests kernel capture and uses the default
+results directory; it is not a deployable copy-graph test. Next: a shared native
+copy/kernel graph fixture configured for .40, then fresh review and one bounded
+console case. Copy-capture invalidation, broader memory nodes, lifetime and
+resource-plateau requirements remain open. The console baseline below is unchanged.
+
+
 - 2026-10-15 | G5 | ede4ced | .40 | pass: bounded native kernel capture | evidence/console40-public-kernel-capture-success.json | next: memory graph nodes
 
 Standard module-kernel stream capture passed its bounded native test on .40

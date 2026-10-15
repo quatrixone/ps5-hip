@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-one-dimensional-copy-graph-retirement",
+  "source_base_commit": "9cc802f",
+  "source_compilations": 82,
+  "source_links": 13,
+  "source_inputs": 116,
+  "included_files": 699,
+  "native_objects": 74,
+  "package_files": 7,
+  "host_tests": 62,
+  "control_tests": 25,
+  "regression": "Disabled D2D copies retained an unqueued command; subsequent hipFree returned999 after otherwise-correct explicit/captured replay.",
+  "fix": [
+    "Prepare disabled1D-copy marker before dependency setup and enqueue that same marker.",
+    "Reserve command vector before allocating marker; return OutOfMemory on failed reserve.",
+    "Reject null stream and do not store a command when memcpy command preparation fails."
+  ],
+  "qualification": [
+    "Explicit and captured H2D/D2D/D2H chains disable each direction independently for6 sentinel replays.",
+    "Four changing-input replays compare512 bytes after source-graph destruction.",
+    "Parallel fork/join preserves held predecessor dependency in disabled/enabled rounds;100ms observation is scheduler-bounded.",
+    "All2 device buffers freed;3/3 or5/5 queues retired with leak detection."
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-copy-graph-source-v3/receipt.json": "ea8e7459d753cf71036e54e7f259cfc5ac27d33fc7131043f344b8b5ca692d72",
+    "results/public-copy-graph-final-review-v3/review.json": "b8e51a266c3e781e35202c1b70dccd916608444d748c8d165591344ee6b1ff79",
+    "build/public-hip-copy-graph-runtime-v2/link-receipt.json": "a019e8f71392b5729788e81fb29d9d56161a0de852a24576ebbbea19c8264505",
+    "results/native-copy-graph-runtime-review-v2/review.json": "1a8327015d2e7a036b3c4eb9b70b45b7c5fe0133a19afc90a8b86502309c9583",
+    "results/public-hip-copy-graph-runtime-v2-revalidate.log": "ac73da1cafa61f64453c752d7c450037fb680e4ce8b68f419053acb54d444e24",
+    "results/public-copy-graph-host-tests-v2.log": "42b4a1651120cbda321df8cf770d6f242774ad41c9921c33f85c1f13907d4cbf",
+    "results/public-copy-graph-controls-v2.log": "1682d7bd634fb666efa5fec9477cd3eafc0317ceb7ab81a66a243f0e06de27f9",
+    "results/copy-graph-diagnostic-v2/explicit.stderr": "3cdfc4c7ab33a18f17f9f6e0ca78253074d8683ba019c692d3a3d24954f049d8",
+    "results/copy-graph-diagnostic-v2/capture.stderr": "3cdfc4c7ab33a18f17f9f6e0ca78253074d8683ba019c692d3a3d24954f049d8"
+  },
+  "limits": [
+    "No console contact this milestone; previous accepted capture_gpu baseline unchanged.",
+    "Native package still uses capture_gpu title/default results path and is compile/package evidence only; no deployment approval.",
+    "Native copy/kernel shared fixture and bounded .40 case remain next.",
+    "Copy-capture invalidation, broader memory-node updates/failures, allocation lifetime and resource plateaus remain open.",
+    "Initial diagnosticv1 had incorrect sanitizer environment and is not evidence; v2 qualifier intentionally terminated after harness-review finding."
+  ]
+}

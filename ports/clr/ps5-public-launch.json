@@ -6,12 +6,12 @@
     },
     "hipamd/src/hip_graph_internal.hpp": {
       "before": "d9209a4d961a3d899ebc406bc206857cec87158feaf35ecc5f196856d90a5264",
-      "after": "27fdbc931ba6d48490e7d466ab9123dc209acda98eaa9a6a378cbd64c14cf657"
+      "after": "093fc21f5f4fe714633b233554fa61c45e088867c4ee105dd9535c8c17dacab1"
     },
     "hipamd/src/hip_graph_internal.cpp": {
       "before": "fa6825284cc1605c28718bb52aa0a84f67e9ffa482b01901bf62e2e76c4c007a",
       "after": "04205e2e2d2ab7acbc44fcfc2e397cc2a43bc63a0d7751d94e7ab530a557b391"
     }
   },
-  "patch_sha256": "0050a13533c51f936b5cf518e12c7ce4c1cdd5d6faa72c74602ffeb21c47cee9"
+  "patch_sha256": "6d525d05db4632d389d6e182328293bc32543ec3f51ce7c9233ab233a8d69574"
 }
