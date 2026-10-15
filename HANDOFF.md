@@ -18,11 +18,14 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Next offline implementation: Q4_0 inference path
 
-Read `docs/LLM_Q4_PATH.md`: selected Q8_1 LLVM extraction links without fake
-printf services, and an actual hipBLAS-major-version client adaptation passes
-three backend syntax targets with official modern headers. Both are diagnostic
-proofs; source-only integration, runtime resources and numerical gates remain
-open. The console baseline below is unchanged.
+`make llm-q4-fixture` now builds the selected Q8_1/Q4_0 modules from authenticated
+sources; seven focused tests pass. The isolated modern hipBLAS interface helper
+and its generated-overlay syntax checks also pass. See `docs/LLM_Q4_PATH.md` and
+`evidence/offline-llm-q4-source-fixture.json`. Next implement the exact public-HIP
+resource/ABI contracts, then numerical references and .40 validation. Q8 uses
+256x1x1 with hidden geometry; Q4 uses 32x4x1, static LDS384 and explicit-only
+kernargs192. Do not map either to the RMSNorm route. No new console run occurred;
+the installed RMSNorm baseline below remains current.
 
 ## Native RMSNorm numerical run completed
 

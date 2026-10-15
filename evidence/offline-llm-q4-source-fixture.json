@@ -1,0 +1,301 @@
+{
+  "date": "2026-10-15",
+  "classification": "source-only-selected-q4-q8-operator-fixtures",
+  "gpu_executed": false,
+  "native_executed": false,
+  "source_identities": {
+    "tools/build_llm_q4_fixture.py": "d56242d90fc46e97327e276ee8d8e4b31ea74da1b7646436f52f2e299d001d42",
+    "tests/llm_q4_fixture_test.py": "ac030d61f81228f765c52380379a591583946049ff34277d31232fbdcd534a7a",
+    "tools/qualify_public_hip_rmsnorm.py": "f62ce2a3950878373b172b78e7a84d53abef409ffc40c0b9d81423d2a4564583",
+    "tools/prepare_llm_hip_interface.py": "5009a9fde99437146ca5f7b2f4e666964173319d3c577662bc2688a286665c5d",
+    "tests/llm_hip_interface_test.py": "b5c2a00976eab9cfe129be3343916a7c7cfa67eab569adac233d5995bf75d1d8"
+  },
+  "prerequisite": {
+    "path": "results/llm-q4-prerequisite-v1/receipt.json",
+    "sha256": "138987be37813cca54eccdd9ef58cba12b5ad709d686a90d7e5fd36a3f80a761",
+    "command": "make llm-rmsnorm-fixture LLM_RMSNORM_FIXTURE_DIR=results/llm-q4-prerequisite-v1",
+    "exit_code": 0
+  },
+  "fixture": {
+    "path": "results/llm-q4-fixture-v3/receipt.json",
+    "sha256": "7229e901530c65245fef0f69a55a72cc3f3380f4c83a11925dc95a91ae5b29a2",
+    "command": "make -o llm-rmsnorm-fixture llm-q4-fixture LLM_RMSNORM_FIXTURE_DIR=results/llm-q4-prerequisite-v1 LLM_Q4_FIXTURE_DIR=results/llm-q4-fixture-v3",
+    "exit_code": 0
+  },
+  "validation": {
+    "focused_tests": 7,
+    "ctest_names": [
+      "llm_q4_fixture",
+      "llm_hip_interface",
+      "llm_rmsnorm_fixture"
+    ],
+    "inputs_rehashed": 1144,
+    "artifacts_rehashed": 57,
+    "successful_commands": 21
+  },
+  "profiles": {
+    "q8": {
+      "symbol": "_ZL13quantize_q8_1PKfPvlllllj15HIP_vector_typeIjLj3EE",
+      "descriptor": {
+        "group_bytes": 0,
+        "private_bytes": 0,
+        "kernarg_bytes": 328,
+        "rsrc1": 1622081729,
+        "rsrc2": 908,
+        "rsrc3": 0,
+        "properties": 1033,
+        "preload": 0
+      },
+      "arguments": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 24,
+          "size": 8,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 32,
+          "size": 8,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 40,
+          "size": 8,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 48,
+          "size": 8,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 56,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 60,
+          "size": 12,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 72,
+          "size": 4,
+          "value_kind": "hidden_block_count_x"
+        },
+        {
+          "offset": 76,
+          "size": 4,
+          "value_kind": "hidden_block_count_y"
+        },
+        {
+          "offset": 80,
+          "size": 4,
+          "value_kind": "hidden_block_count_z"
+        },
+        {
+          "offset": 84,
+          "size": 2,
+          "value_kind": "hidden_group_size_x"
+        },
+        {
+          "offset": 86,
+          "size": 2,
+          "value_kind": "hidden_group_size_y"
+        },
+        {
+          "offset": 88,
+          "size": 2,
+          "value_kind": "hidden_group_size_z"
+        },
+        {
+          "offset": 90,
+          "size": 2,
+          "value_kind": "hidden_remainder_x"
+        },
+        {
+          "offset": 92,
+          "size": 2,
+          "value_kind": "hidden_remainder_y"
+        },
+        {
+          "offset": 94,
+          "size": 2,
+          "value_kind": "hidden_remainder_z"
+        },
+        {
+          "offset": 112,
+          "size": 8,
+          "value_kind": "hidden_global_offset_x"
+        },
+        {
+          "offset": 120,
+          "size": 8,
+          "value_kind": "hidden_global_offset_y"
+        },
+        {
+          "offset": 128,
+          "size": 8,
+          "value_kind": "hidden_global_offset_z"
+        },
+        {
+          "offset": 136,
+          "size": 2,
+          "value_kind": "hidden_grid_dims"
+        }
+      ],
+      "retained_definitions": {
+        "_ZL13quantize_q8_1PKfPvlllllj15HIP_vector_typeIjLj3EE": "bb9a432e4f9f5f7f405c9a6bbb9aa21a708b2a7d795715cf6d470c037edef3cb"
+      },
+      "module": {
+        "sha256": "8f85a6c063c5e03ea6319c316fe4eef134a954aae7a2dd73a075f8e5c97bdd29",
+        "bytes": 5224
+      }
+    },
+    "q4": {
+      "symbol": "_ZL13mul_mat_vec_qIL9ggml_type2ELi1ELb0ELb0ELb0EEvPKvS2_PKi31ggml_cuda_mm_fusion_args_devicePfj15HIP_vector_typeIjLj3EEjjjS8_jjjS8_jjjj",
+      "descriptor": {
+        "group_bytes": 384,
+        "private_bytes": 0,
+        "kernarg_bytes": 192,
+        "rsrc1": 1622081731,
+        "rsrc2": 2956,
+        "rsrc3": 0,
+        "properties": 1033,
+        "preload": 0
+      },
+      "arguments": [
+        {
+          "offset": 0,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 8,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 16,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 24,
+          "size": 80,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 104,
+          "size": 8,
+          "value_kind": "global_buffer"
+        },
+        {
+          "offset": 112,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 116,
+          "size": 12,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 128,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 132,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 136,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 140,
+          "size": 12,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 152,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 156,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 160,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 164,
+          "size": 12,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 176,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 180,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 184,
+          "size": 4,
+          "value_kind": "by_value"
+        },
+        {
+          "offset": 188,
+          "size": 4,
+          "value_kind": "by_value"
+        }
+      ],
+      "retained_definitions": {
+        "_ZL13mul_mat_vec_qIL9ggml_type2ELi1ELb0ELb0ELb0EEvPKvS2_PKi31ggml_cuda_mm_fusion_args_devicePfj15HIP_vector_typeIjLj3EEjjjS8_jjjS8_jjjj": "721f00ca37587fe4e4e99112de95060634da9b11c7343abbc881303f863c953e"
+      },
+      "module": {
+        "sha256": "643329633c5de09417a452dc96c79e7dd8fa3780b93f40e2065d3abcad3a0c58",
+        "bytes": 5840
+      }
+    }
+  },
+  "reviews": {
+    "results\\q4-fixture-outcome-review-v1\\review.json": "9404e14d12661c1e51267fcd740991d4b2abee04fdf912618fced04fa10abbf2",
+    "results\\q4-fixture-source-review-v2\\review.json": "c81f4f527089c7e40e719c171a051e7bbd3948d3a53339261ea28e6b4217561c",
+    "results\\q4-runtime-route-review-v1\\review.json": "f6cb94015e49e8a532b6dbc624fe67ff1c832a85c15cc5730b6976c4edd334f5"
+  },
+  "limits": [
+    "Selected operator compile/link proof only; no runtime admission, numerical execution or inference claim.",
+    "Unchanged upstream translation units, recursive LLVM extraction; unreachable unrelated kernels excluded. Selected and retained helper bodies, attributes, metadata and named types unchanged; only exact uninitialized384-byte LDS external declaration transformation allowed and recorded.",
+    "HIP6.2 diagnostic hipBLAS headers inherited from authenticated prerequisite; modern header integration remains separate.",
+    "Q4 selection is nonfused with null nested fusion pointers; fused gate/up lifetime unqualified.",
+    "Fresh prerequisite and selected Make target executed in two stages; no historical local binary inputs required.",
+    "Initial v1 rejected an incorrect assumed Q4 implicit ABI; final exact192-byte explicit ABI is established by genuine compiler output.",
+    "Modern interface helper remains separate; selected fixture retains authenticated diagnostic HIP6.2-compatible headers."
+  ]
+}

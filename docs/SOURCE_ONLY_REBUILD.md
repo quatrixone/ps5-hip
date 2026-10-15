@@ -17,6 +17,23 @@ with a fresh `LLM_RMSNORM_FIXTURE_DIR`. This builds authenticated upstream devic
 libraries and the real operator from source; see the same inference profile for
 requirements and limits. It is a compiler fixture, not a runnable LLM client.
 
+For selected upstream Q8_1 activation preparation and nonfused Q4_0
+matrix/vector multiplication, use fresh output directories:
+
+```sh
+make llm-q4-fixture \
+  LLM_RMSNORM_FIXTURE_DIR=results/q4-device-prerequisites \
+  LLM_Q4_FIXTURE_DIR=results/q4-device-fixture
+```
+
+This target builds its authenticated device-library prerequisite, compiles the
+unchanged upstream translation units and extracts the selected kernels from
+LLVM bitcode. Install `llvm-extract-18`, `llvm-dis-18` and `llc-18` alongside the
+LLVM 18.1.8 tools below. It checks the full argument ABI, descriptor, resource
+requirements and unresolved imports. It does not build or run the inference
+client. Diagnostic hipBLAS2.2 headers remain confined to this operator fixture;
+modern interface integration is separate. See [Q4 path](LLM_Q4_PATH.md).
+
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or
 `results` directory and no checkout of another ps5-hip branch.

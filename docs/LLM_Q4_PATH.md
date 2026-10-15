@@ -32,9 +32,9 @@ quantization is not a substitute for final GPU inference acceptance.
 
 The locked client selects the generic nonfused Q4_0 batch-one specialization on
 gfx1013: block `(32,4,1)`, grid `(output_rows,1,1)`, static LDS384 and dynamic
-LDS0. Historical compiled metadata records private0, kernarg192 and 19 explicit
-arguments, including an 80-byte fusion aggregate and three uint3 values. Rebuild
-before using those historical descriptor values in a new candidate. See
+LDS0. Fresh source-built selected metadata confirms private0, kernarg192 and 19
+explicit arguments, including an 80-byte fusion aggregate and three uint3 values.
+Q4 has no hidden arguments; Q8 has thirteen hidden fields in its 328-byte segment. See
 `../evidence/offline-llm-q4-mmvq-inventory.json` for exact source locations,
 arguments and actual GGUF tensor shapes.
 
@@ -53,8 +53,8 @@ host, Prospero host and gfx1013 device. The unmodified baseline fails.
 See `../evidence/offline-llm-current-hipblas-interface.json` for exact source,
 header, tool and command identities. No version spoof or success stub was added.
 
-Next implement a hash-guarded client adaptation and authenticated current header
-recipe. Modern GemmEx distinguishes buffer `hipDataType` from arithmetic
+The hash-guarded client adaptation is implemented below; automated fetching of
+the authenticated current header inventory remains separate. Modern GemmEx distinguishes buffer `hipDataType` from arithmetic
 `hipblasComputeType_t`; do not reuse legacy enum numeric values. Handle creation,
 destruction, stream ownership, SGEMM and the three imported GemmEx variants need
 real implementations before final linking. The pre-existing client math-mode
@@ -73,3 +73,50 @@ success macro is not validated support.
 
 No console was contacted for this checkpoint. No full model, performance or
 training claim follows from these compiler results.
+
+## Implemented interface preparation
+
+`tools/prepare_llm_hip_interface.py` now verifies the clean locked client and
+supplied official header inputs, generates version/export headers, and emits an
+isolated VFS overlay plus the exact one-line patch. It never modifies the
+upstream checkout. Run with LLVM18.1.8/CMake and a fresh output:
+
+```sh
+python3 tools/prepare_llm_hip_interface.py \
+  --headers /path/to/authenticated-official-header-inputs \
+  --output results/llm-hip-interface
+```
+
+The supplied directory must contain the complete official file inventory in
+`evidence/offline-llm-hip-compile-probe.json` under
+`header_comparisons.current_main.files`; the tool checks each size and hash.
+This helper does not fetch those inputs. Its receipt provides the generated
+compiler overlay/include flags. Three focused tests and actual Linux, Prospero
+and gfx1013 backend syntax checks using the generated files pass; see
+`../evidence/offline-llm-hip-interface-preparation.json`.
+The helper is not yet connected to the selected-kernel fixture or a runnable
+client, and it supplies no BLAS implementation.
+
+## Source-built selected kernels
+
+`make llm-q4-fixture` now builds its RMSNorm/device-library prerequisite and
+then the two selected modules from unchanged, clean locked source. See
+[SOURCE_ONLY_REBUILD.md](SOURCE_ONLY_REBUILD.md) for fresh output overrides.
+The fresh prerequisite Make run and subsequent Q4 target execution passed;
+`../evidence/offline-llm-q4-source-fixture.json` records their identities.
+Seven focused tests and independent review cover changed bodies, retained
+helpers, named types, globals, argument metadata and descriptors. No unqualified
+module is published with a success receipt.
+
+Q8 emits one kernel with 328-byte kernargs and no LDS/private storage. Q4 emits
+one kernel with 192-byte explicit-only kernargs, 384-byte static LDS and no
+private storage. Both have zero undefined symbols. The compiler can externalize
+an uninitialized LDS declaration during extraction; only the exact measured
+384-byte address-space-3 type/alignment transformation is permitted, and the
+linked descriptor is independently checked. This is not a numerical proof.
+
+Next extend the genuine public runtime coherently: 256x1x1 Q8 and 32x4x1 Q4
+workgroups; correct group/wave limits and SIMD_DEST_CNTL; distinct explicit-only
+and hidden-argument contracts; CLR module admission, attributes and device
+Y-dimension reporting. Preserve existing route regressions and reject invalid
+combinations before allocating. Then freeze numerical fixtures and validate .40.

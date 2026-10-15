@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-15",
+  "classification": "implemented-isolated-current-hipblas-interface",
+  "native_executed": false,
+  "gpu_executed": false,
+  "client_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "hipblas_revision": "e7cd12e461ea953a9c99e9fb7852920fa94cd197",
+  "hipblas_version": "3.8.0",
+  "source_identities": {
+    "tools/prepare_llm_hip_interface.py": "5009a9fde99437146ca5f7b2f4e666964173319d3c577662bc2688a286665c5d",
+    "tests/llm_hip_interface_test.py": "b5c2a00976eab9cfe129be3343916a7c7cfa67eab569adac233d5995bf75d1d8"
+  },
+  "tests": "Three focused unittest cases; registered CTest llm_hip_interface passed.",
+  "prepared_receipt": {
+    "path": "results\\llm-hip-interface-prepared-v2/receipt.json",
+    "sha256": "01d6860c30462fa3fc5de0d5d6775bc2136be5429ac969800d1f6ea5742248d6"
+  },
+  "generated_artifacts": {
+    "hip.h": "497bc63a6360045f8c6fe428e6f7e1aede1a89c5c6140d913b4e1a35e7e3ba9e",
+    "overlay.json": "406554ddfdd680364ae1ebab97d85b34bc6ed023d537b1d96126fbaaa46a2c45",
+    "CMakeLists.txt": "1351206b1b0eacd19ddc334c2d3b500ab939a977966af05a49978a642db99161",
+    "client.patch": "ef60296333dbfef714be03ec694d65072e4d13492149aeb19fb1cfdaee5c5f03",
+    "include/hipblas/hipblas-export.h": "a2f849394c960f67a023d01c0771f5102e7c504b29895a378dab3d0c81011e74",
+    "include/hipblas/hipblas-version.h": "7d817fb25fe748c235a7e57c4161d7e91dfc68aa367b7a2002a50917b16d45ae",
+    "include/hipblas/hipblas.h": "5733e5d11be17365ea769d782dab3987070c61614f18e0ac369c8c3d8322018c",
+    "include/hipblas-common/hipblas-common.h": "9d92c7d9662b7030c579fcfd6b4f29db280ff9869820ebb152239b1afc173d3b",
+    "include/hipblas/hipblas-version.h.in": "b4d4db919a573631d16d2db6c1da42a7f916c57c7157764c7a1f7f6c0484cd60"
+  },
+  "syntax_receipt": {
+    "path": "results\\llm-hip-interface-syntax-v1/report.json",
+    "sha256": "6cf9ec0ea8a536f9fdc8d0a54543dee1ec0da6b724d4d03e0560c7dece5443f7"
+  },
+  "syntax_targets": [
+    "linux-backend",
+    "gfx1013-backend",
+    "ps5-backend"
+  ],
+  "limits": [
+    "Supplied official inputs are authenticated; no dependency fetch recipe.",
+    "Header adaptation only; no BLAS implementation or runtime qualification.",
+    "CMake imported target generates visibility macros only; no library implementation is built."
+  ]
+}

@@ -21,6 +21,7 @@ help:
 	@echo 'make llm-conversion-env  Prepare isolated, hash-locked CPU conversion dependencies (Linux x86-64)'
 	@echo 'make llm-model-convert  Convert verified source model to F16 and pure Q4_0 (fresh output required)'
 	@echo 'make llm-rmsnorm-fixture  Build unchanged upstream RMSNorm device module from authenticated sources'
+	@echo 'make llm-q4-fixture  Build selected upstream Q8_1 and Q4_0 kernels (fresh outputs required)'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
@@ -100,6 +101,13 @@ LLM_RMSNORM_FIXTURE_DIR ?= results/llm-rmsnorm-fixture
 llm-rmsnorm-fixture: llm-deps-fetch deps-fetch
 	$(PYTHON) tests/llm_rmsnorm_fixture_test.py
 	$(PYTHON) tools/build_llm_rmsnorm_fixture.py --output $(LLM_RMSNORM_FIXTURE_DIR)
+
+LLM_Q4_FIXTURE_DIR ?= results/llm-q4-fixture
+.PHONY: llm-q4-fixture
+llm-q4-fixture: llm-rmsnorm-fixture
+	$(PYTHON) tests/llm_q4_fixture_test.py
+	$(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture $(LLM_RMSNORM_FIXTURE_DIR) --output $(LLM_Q4_FIXTURE_DIR)
+
 .PHONY: llm-rmsnorm-reference
 llm-rmsnorm-reference: llm-cpu-reference
 	$(PYTHON) tools/build_llm_rmsnorm_reference.py --output $(LLM_RMSNORM_REFERENCE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
