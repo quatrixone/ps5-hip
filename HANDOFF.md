@@ -18,13 +18,21 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
-Latest continuation: source-only Make built all prerequisites and 74 objects.
-The fresh v1 package was deployed and launched once on .40; public initialization
-and count=1 were observed, but shell-exit called through an incorrectly bound
-SCE import and SIGSEGV occurred. This is a failed gate, not clean teardown.
-See `evidence/native-source-make-bootstrap-failure.json`; raw v1 evidence is
-preserved under `results/source-make-console-v1`. Current work corrects the
-converter patch application and binary import audit before a distinct v2 case.
+Latest continuation: source-only Make at `7342726` passed all 56 host tests,
+native core, 74 fresh objects, serialized SCE import/hash checks and package
+validation. Independently reviewed v2 ran once on .40 as PID639/app `0x4018`:
+`hipInit=0`, count=1, complete finalization, shell-exit return=0 and natural
+stop passed, with matching mount observations, healthy services and owned lock
+release. See `evidence/native-source-make-bootstrap-success.json` and raw
+`results/source-make-console-v2`. Public HIP allocation/GPU execution is next;
+this bounded startup result does not complete G5.
+
+The preceding v1 run failed with a shell-exit SIGSEGV. Its package and log
+were preserved before v2 deployment; its gate remains failed. The fix applies
+the converter import-library patch omitted by Make, repairs import hash metadata
+and verifies serialized bindings before signing. See
+`evidence/native-source-make-bootstrap-failure.json` and raw
+`results/source-make-console-v1`.
 The user confirmed this host is the sole .40 controller and authorized an
 independent review agent. The prior original-workspace recovery block is obsolete
 for new source-built candidates; historical phases remain consumed/inert.
@@ -45,7 +53,7 @@ for new source-built candidates; historical phases remain consumed/inert.
   PS5-registry model, ten ASan/UBSan and ten TSan modes, and independent review.
   Integrated commits `209664d`–`debf465`; see
   `evidence/offline-hip-public-memory-bridge.json`. Native public API behavior
-  is still untested.
+  beyond initialization/discovery is still untested.
 - A **clean 74-object native public HIP bootstrap** title was built, strictly
   linked, converted, packaged, and independently reviewed. Its one-use D control
   installed and registered image SHA-256
@@ -57,8 +65,8 @@ for new source-built candidates; historical phases remain consumed/inert.
   `evidence/native-public-hip-bootstrap-deployment.json`.
 - A relocatable source-only recipe on `main` independently builds a new
   74-object bootstrap package with verified FSELF and UFS2 extraction. This
-  package is an offline candidate, not the registered image above; it has not
-  been deployed or executed. A fresh GitHub-only clone at `7ef291c` passed
+  original package was an offline candidate. The corrected source-built v2
+  package now passed the bootstrap above. A fresh GitHub-only clone at `7ef291c` passed
   default `make` (54 host tests, native core, 74 objects and package audit);
   see `evidence/offline-main-source-build.json`.
 - Native public HIP allocation/free and native ROCclr FP32 GEMM candidates have
@@ -76,7 +84,7 @@ about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Supported source build | `main` / current remote HEAD | repository root | Fetches dependencies and builds a new bootstrap package offline. |
+| Supported source build | local `main` / tested source `7342726` | repository root | Full Make and bounded .40 bootstrap passed; local continuation not pushed. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
@@ -102,9 +110,9 @@ package review at `../ps5-hip-gemm-bridge/results/gemm-package-independent-revie
 and controls review SHA-256
 `02ccafaeaa25a033364628955c4ad8b85182191f058b04319675bdf7e447a12f`.
 
-## Current console and one-use control state
+## Historical console and one-use control state
 
-The latest read-only D review classified registration as
+The earlier read-only D review classified registration as
 `clear-live-public-HIP-bootstrap-deployment-D`. Its raw D receipt is local and
 untracked at
 `.local/g5-hip-native-link/tools/public_hip_controls/deployment/deployment-20261014T025025.424073Z/deployment.json`
@@ -124,9 +132,9 @@ worktree or replay a consumed phase. The E manifest at
 `.local/g5-hip-native-link/tools/public_hip_controls/execution/manifest.json`
 has `deployment_binding: null`; `run.py` still raises `INERT` at its activation
 point. Its `verify_local()` currently expects D review classification `clear`,
-while the actual reviewed classification is the longer value above. The next
-agent must fix that exact check and bind the receipt/review identities before
-freeze and independent review. **No public HIP E control has been activated.**
+while the actual reviewed classification is the longer value above. This was
+fixed in the source-only continuation below. The historical E remains inert;
+the fresh v2 control now supplies the qualified startup result.
 
 The last D observation found `.40` idle with FTP 2121, klog 3232, and ELF loader
 9021 healthy. Both shared lock files (`C:\Users\denis\Documents\PS5\lock.txt`
@@ -146,7 +154,8 @@ provenance. No implementation gate is closed by this scope change.
 
 ## Fresh-checkout continuation � 2026-10-14
 
-This checkout is on `codex/standalone-sdk-scope`. An isolated bootstrap checkout
+This checkout is now on local `main`, with the standalone scope and corrected
+source-build pipeline integrated. An isolated historical bootstrap checkout
 at `.local/g5-hip-native-link` is on `codex/public-hip-bootstrap-resume`, commit
 `98a6887`. It fixes the known D-review classification mismatch and adds seven
 binding tests; these and the inert-entry test pass under WSL. Execution remains
@@ -157,20 +166,24 @@ The owner identified the original workspace as
 that path absent on this host. The raw deployment receipt/review, consumed markers,
 frozen package and local controller/helper dependencies have not been recovered.
 The new nested checkout contains source only; do not mistake it for the original
-preserved workspace or replay deployment. Obtain the actual workspace location,
-verify its evidence hashes, and continue the E binding from those artifacts.
+preserved workspace or replay deployment. Recovery is not required for the new
+Make-built v2 package and its fresh D/E receipts.
+
+The current installed PPSA99014 package on .40 is
+`403d8d0364ec57dea5342a77676fa7fd15ce74d7c7b1dbf0f823ce9784e01118`.
+Its current bootstrap log hashes to
+`42d39b5728e57d752937b023a49ccf4eceabbdff463747c68159a09e4696be1b`.
+Both v2 phases under `results/source-make-console-v2` are consumed and must not
+be replayed. The previous failed image/log and all historical backups remain
+preserved. Services were healthy and the owned lock released at completion.
+Use the current dedicated-controller environment in `.local/ENVIRONMENT.md`;
+the sole lock for this session is `C:/Users/Denis/Documents/PS5/lock.txt`.
 
 ## Next work, in order
 
-1. On `main`, prepare a new E-only binding to the exact historical D receipt
-   and review above. Correct `verify_local()`'s review classification, retain the
-   one-use/freshness guards, run focused offline checks, freeze source/artifacts,
-   and obtain an independent review. Only then consider one bounded `.40` launch
-   if it is idle and all service, identity, lock, and result-freshness checks pass.
-   Verify public HIP initialization/result and natural teardown, and record a
-   compact execution outcome. A failure must be recorded as a failure, not
-   replayed blindly.
-2. Depending on E, update the native public memory control baseline, review its
+1. Keep the supported source pipeline on `main`; preserve both consumed fresh
+   cases and their independent reviews. Do not reactivate historical D/E phases.
+2. Update the native public memory control baseline to the current v2 image/log, review its
    controls independently, and test its genuine exported API title separately.
    Do not infer native malloc/free from the Linux model or bootstrap startup.
 3. Refresh GEMM D/E controls against the actual then-installed PPSA99014 image,
@@ -182,9 +195,9 @@ verify its evidence hashes, and continue the E binding from those artifacts.
    multi-console gates in `docs/IMPLEMENTATION_PLAN.md`.
 
 Before any hardware experiment, follow `AGENTS.md` and
-`../../docs/ps5-homebrew-dev-protocol/docs/RUNBOOK.md`: state the hypothesis,
+`.deps/sources/protocol/docs/RUNBOOK.md`: state the hypothesis,
 expected result, rejection criterion and timeout; inspect ISA; freeze and hash
-the candidate; check console idleness and both lock locations; use one bounded
+the candidate; check console idleness and the current environment's lock; use one bounded
 launch; audit title stop, services, mounts, and owned lock release. Keep raw
-logs local and commit compact sanitized evidence. This handoff records no new
-console observation.
+logs local and commit compact sanitized evidence. The latest qualified console
+observation is the source-Make v2 bootstrap above.

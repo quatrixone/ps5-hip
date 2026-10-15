@@ -1,0 +1,61 @@
+{
+  "classification": "pass",
+  "scope": "Bounded native public HIP bootstrap: initialization,one discovered device,and clean application-requested title stop",
+  "hardware_gate_passed": "public-HIP-startup-only",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "pid": 639,
+  "app_id": "0x4018",
+  "source_commit": "73427269db8a311d77b70b5b91bebfc45a89b583",
+  "manifest_sha256": "15f6221e12d8860c420dd0f5ca06407ef183ab165af2e53aeddfaf5023eb966a",
+  "package_sha256": "403d8d0364ec57dea5342a77676fa7fd15ce74d7c7b1dbf0f823ce9784e01118",
+  "deployment_receipt_sha256": "60b95d163c2896e1327a8f65bf364682f52bdde9d7a39687431b4cdf2c1e7df7",
+  "execution_receipt_sha256": "4af30a0e6cb54edca171affbfe4027e250b29ebf75cddaa66ce87ae3e6180f61",
+  "application_log_sha256": "42d39b5728e57d752937b023a49ccf4eceabbdff463747c68159a09e4696be1b",
+  "checks": [
+    "Exact ten-line fresh transcript including hipInit0,device_count1,joined watchdog,balanced finalizer,application fini,shell exit return0",
+    "Exactly one ordered same-PID start/stop in append-only history",
+    "Own executable entry and nonforced shell termination in launch-interval klog;no fatal/exception/panic markers",
+    "Pre/post positive title mount snapshots exactly equal;both app queries idle",
+    "Accepted reviewed control entails pre/post exact installed image,six mounted files,metadata checks",
+    "Healthy declared services and owned-lock release reported;local lock absent;no host close payload"
+  ],
+  "limits": [
+    "No public HIP allocation or GPU dispatch was attempted",
+    "Mount observations do not certify global namespace/process absence",
+    "Broader G4/G5 and SDK roadmap remain open"
+  ],
+  "raw_sha256": {
+    "application.log": "42d39b5728e57d752937b023a49ccf4eceabbdff463747c68159a09e4696be1b",
+    "before-launch.log": "05ce8a6d2a643345c8163d7b044ce3928b94039f15a6361d432b33f578aec950",
+    "klog.log": "7f3601c0394d325bfc812e33829518efd1f4e5aa950f887e600518351af4442c",
+    "launch-consumed": "33fe7aff335b885e950ad1d86962b2290b0df4b923bf391d6487abacbf0a9ab9",
+    "launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "observed.log": "bbff8f9dd0c7b2e7ef297f5be700512179a4c3100ab98204d73a23195a8866e3",
+    "post_snapshot-consumed": "33fe7aff335b885e950ad1d86962b2290b0df4b923bf391d6487abacbf0a9ab9",
+    "post_snapshot.log": "6b6d303a667ce7d75f9e3c8569f33eff0b427c02bbb2a88ed8af72c03498c35c",
+    "receipt.json": "4af30a0e6cb54edca171affbfe4027e250b29ebf75cddaa66ce87ae3e6180f61",
+    "snapshot-consumed": "33fe7aff335b885e950ad1d86962b2290b0df4b923bf391d6487abacbf0a9ab9",
+    "snapshot.log": "6b6d303a667ce7d75f9e3c8569f33eff0b427c02bbb2a88ed8af72c03498c35c"
+  },
+  "reviewer_console_access": false,
+  "date": "2026-10-14",
+  "build": {
+    "converter_regressions_passed": 6,
+    "host_tests_passed": 56,
+    "exit_code": 0,
+    "command": "make RESULTS_DIR=/data/ps5-hip/results",
+    "fself_roundtrip": "pass",
+    "fresh_hip_objects": 74,
+    "serialized_import_and_hash_audit": "pass",
+    "independent_six_file_extraction": "pass",
+    "native_core": "pass",
+    "cached_revalidation": "pass"
+  },
+  "raw_evidence": "results/source-make-console-v2",
+  "independent_review": {
+    "sha256": "e878c7b0c64b96669cf3bc5465d2382cc4feaef73cbbede716004e3f5e46832a",
+    "path": "results/source-make-independent-review-v2/execution-review.json"
+  },
+  "previous_failure_preserved": "evidence/native-source-make-bootstrap-failure.json"
+}

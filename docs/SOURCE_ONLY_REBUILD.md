@@ -75,6 +75,10 @@ The converter is built from pinned source plus
 import audit checks module/library bindings, including the shell-exit import.
 The first source-Make hardware attempt exposed this missing patch and failed
 teardown; see `evidence/native-source-make-bootstrap-failure.json`.
+The corrected `7342726` build passed all 56 host tests and the independently
+reviewed bounded initialization/device-count/clean-shutdown test on .40; see
+`evidence/native-source-make-bootstrap-success.json`. This does not qualify
+public HIP allocation or GPU execution.
 
 `tools/source_console.py` requires independent review bound to the frozen
 manifest before any socket is opened. Its separate one-use `deploy` phase

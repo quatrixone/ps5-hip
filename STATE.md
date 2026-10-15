@@ -11,20 +11,21 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
-Latest source-Make console result: **failed teardown**. Candidate `910f716`
-reached public `hipInit=0` and device count `1` on .40, then SIGSEGV at the
-shell-exit import. The Make builder omitted the existing converter import-library
-patch. Services remain healthy, the lock was released, and a read-only follow-up
-found idle app queries and stable mounts. Preserve the consumed v1 candidate;
-see `evidence/native-source-make-bootstrap-failure.json`. A corrected converter
-and distinct package are being qualified. No public HIP GPU result is claimed.
-The historical registered-only descriptions below describe earlier checkpoints.
+Source-only `make RESULTS_DIR=/data/ps5-hip/results` passed at `7342726`:
+56 host tests, native core, 74 fresh public HIP objects and complete package
+validation. A distinct reviewed package then passed the bounded bootstrap on
+.40: public `hipInit=0`, device count `1`, full finalization, shell-exit return
+`0`, natural title stop, matching mount observations and healthy services.
+The owned lock was released. See `evidence/native-source-make-bootstrap-success.json`.
+No public HIP allocation or GPU execution is claimed; G5 remains open.
 
-The known bootstrap deployment-review classification mismatch is fixed at
-`98a6887` on `codex/public-hip-bootstrap-resume` in `.local/g5-hip-native-link`.
-Seven binding regressions and the inert-entry test pass under WSL. Execution is
-still disabled pending recovery of original local evidence and independent review;
-see `HANDOFF.md`. No console was contacted during this continuation.
+The preceding candidate `910f716` failed shell-exit with SIGSEGV because Make
+omitted the native converter import-library patch. Its image, log and receipts
+remain preserved, and its failure is not reclassified. See
+`evidence/native-source-make-bootstrap-failure.json`. The repair applies the
+patch, corrects import hash metadata and verifies serialized bindings before
+signing. Historical D/E controls remain consumed or inert; original-workspace
+recovery is no longer needed for fresh source builds.
 
 ## Actual status
 
@@ -33,14 +34,15 @@ see `HANDOFF.md`. No console was contacted during this continuation.
   launch/close controllers, runs the host suite, cross-compiles the native
   core, and builds a new 74-object public HIP bootstrap with checked FSELF
   roundtrip and six-file UFS extraction. ProsperoEden and the protocol are
-  locked snapshots of public `main`. The new package is offline only and is
-  distinct from the registered image. A fresh GitHub-only clone at `7ef291c`
+  locked snapshots of public `main`. Each Make output is an offline artifact
+  until separately qualified; the corrected v2 is now qualified above. A fresh GitHub-only clone at `7ef291c`
   passed default `make`: 54 host tests, native core, 74 objects, strict link,
   package validation and cached revalidation. See
   `evidence/offline-main-source-build.json` and `docs/SOURCE_ONLY_REBUILD.md`.
-  No new console result was taken.
+  That earlier offline result is now followed by the fresh console bootstrap
+  qualification above.
 
-- **Public HIP bootstrap package registered on .40; execution has not begun:**
+- **Historical public HIP bootstrap registration (superseded by the source-Make case above):**
   the independently reviewed, clean 74-object native bootstrap image
   (`836c10c6...`) was installed and registered as PPSA99014 by a one-use D
   control. Independent D review found the mounted EBOOT/libc bytes matched the
@@ -49,7 +51,7 @@ see `HANDOFF.md`. No console was contacted during this continuation.
   The D receipt and review are bound in
   `evidence/native-public-hip-bootstrap-deployment.json`. The public HIP E
   control remains inert and unbound: there is **no** public HIP startup, API,
-  allocation, or GPU result on the console. Do not replay consumed D phases.
+  allocation, or GPU result from that historical package. Do not replay consumed D phases.
 
 - **Next native candidates remain offline:** a strict native public HIP
   allocation/free title passed 74 fresh-object build, package, and independent
@@ -81,7 +83,7 @@ see `HANDOFF.md`. No console was contacted during this continuation.
   intentional failed-join leak checks. Independent review cleared this bounded
   model at `results/public-memory-bridge-full-review-v1/review.json`; the
   integrated patch stack is at `209664d` through `debf465`. Native public HIP
-  startup, allocation and GPU launch remain unproven. See
+  allocation and GPU launch remain unproven; startup is qualified above. See
   `evidence/offline-hip-public-memory-bridge.json`.
 
 - **Public HIP allocation prerequisite integrated offline:** isolated `70b2c19`
@@ -1241,6 +1243,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-14 | G5 startup | 7342726 | .40 | pass: public init/count and clean teardown | evidence/native-source-make-bootstrap-success.json | allocation then GPU; G5 open
 
 - 2026-10-14 | G5 | 910f716 | .40 | failed: public init/count observed, shell-exit SIGSEGV | evidence/native-source-make-bootstrap-failure.json | fix converter; preserve v1
 
