@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-copy-capture-invalidation-and-valid-node-updates",
+  "source_base_commit": "70bac6d8c44d64de805add7f7e1bb0832ff6dbec",
+  "source_compilations": 83,
+  "host_regressions": 63,
+  "gpu_executed": false,
+  "native_executed": false,
+  "regression": "A rejected captured copy left the session Active; baseline aborts at invalidated-status assertion.",
+  "fix": "Invalidate the shared PS5 copy-capture session on validation or node-add failure.",
+  "qualification": [
+    "27 distinct validation failure cases across three capture modes and four async copy APIs; rerun in explicit, captured and fork/join model modes.",
+    "Subsequent copy rejected, invalidated EndCapture returns null, capture state resets, fresh graph contains only its new node; later stream replay succeeds.",
+    "Graph parameter edits isolated from existing executable; executable updates change source/destination offsets and length across H2D/D2D/D2H with exact buffer guards.",
+    "Rejected null/oversized/kind-changing D2D executable updates preserve last valid parameters.",
+    "Full address/undefined sanitizer source qualification and 63 existing host regressions pass."
+  ],
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/copy-update-qualified-v1/receipt.json": "6d0d773ac27b4b59c920f4c417cc457493d062cd9c5978ff6c93a5b5bdfd7a26",
+    "results/copy-capture-reproduction-v1/before.json": "a67977b2981fc42e4d37fce18d7e0dbffcdd0544baf439b64b3ea791654ff9b3",
+    "results/copy-capture-reproduction-v1/before.stderr": "5960c77268dd999f1ed9f259e05e3a9ca9fa22c9d1756b3b1b9573695021646a",
+    "results/copy-capture-reproduction-v1/model.cpp": "a00ae97ec76c143fbf9ebbd0f5aac47262997f0f46c04ab17bdcdeff76997ecf",
+    "results/copy-capture-qualified-v1/receipt.json": "96c70226aa5f178d26ee65bb5ffea76ffacdf1a254e9f9f91da8c8a6d222d7f4",
+    "results/copy-capture-fixed-v1/host-regressions.log": "57331f871829faf47234ea9e5bc2076c7f5b73d13a674918d8c96e61b225f898",
+    "results/copy-capture-qualified-v1/copy-graph-explicit.json": "30d77ea00b58600ad7c77544ecfc7b4c810c9937375358b3d901893ff562126c",
+    "results/copy-capture-qualified-v1/copy-graph-explicit.stdout": "053ca368088758f6d3662deb24f29887ebd1274ea596d1e25693d39db4f305fc",
+    "results/copy-capture-qualified-v1/copy-graph-capture.json": "b14ead71d806dd1b4206002f0a360553980b0cf5ec8703870bfb87f676241825",
+    "results/copy-capture-qualified-v1/copy-graph-capture.stdout": "053ca368088758f6d3662deb24f29887ebd1274ea596d1e25693d39db4f305fc",
+    "results/copy-capture-qualified-v1/copy-graph-parallel.json": "e66acfd755ed0c7338833c7b032348c8ee5bf9aa682dc8585fbc0a0467455bed",
+    "results/copy-capture-qualified-v1/copy-graph-parallel.stdout": "accee517cd64b7c4a2fe6a6f6b46b0b46c2732b424abdea65b1de1e5992548db",
+    "results/copy-capture-review-v1/review.json": "685c3001998f02038f467c9c148045db978448c63994dde2a49bb0e5d124fdf4"
+  },
+  "limits": [
+    "No new console or native-package validation; previous installed .40 baseline unchanged.",
+    "Forced node-add failure, event-joined copy failure and externally supplied capture-graph ownership not covered by these new tests.",
+    "Individual recovered graphs counted/destroyed; stream replay follows in the existing fixture.",
+    "Memcpy setters still require valid executable-handle and exact node-subtype validation; valid 1D-node tests do not prove general API safety.",
+    "Buffer lifetime through synchronized teardown remains required; G5 and SDK roadmap remain open."
+  ]
+}

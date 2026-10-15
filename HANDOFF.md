@@ -16,6 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Current offline copy-capture checkpoint
+
+Rejected asynchronous 1D copies now invalidate the PS5 capture session instead
+of leaving a partial graph replayable. Full source ASan/UBSan qualification
+passed 27 distinct failure cases across three capture modes and four copy APIs,
+with cleanup/reuse and later replay. Valid 1D graph/executable parameter updates
+passed source-isolation, offset/length, exact guards and rejected-update checks.
+The 63 existing host regressions passed. See `evidence/offline-copy-capture-invalidation.json`.
+
+This is offline evidence only; the installed .40 image below is unchanged.
+Next: validate executable handles and exact node subtype in memcpy setters,
+then package the new failure/recovery cases for .40. Joined-stream failures,
+external capture-graph ownership, allocation lifetime, sustained replay and
+performance remain open. Do not infer general memory-node safety from valid
+1D-node updates.
+
 ## Current native public HIP checkpoint
 
 - 2026-10-15 | G5 | ac93df8 | .40 | pass: bounded captured copy/kernel graph | evidence/console40-public-copy-kernel-graph-success.json | next: memory-node lifetime

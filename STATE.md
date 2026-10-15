@@ -9,6 +9,22 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Current offline copy-capture checkpoint
+
+Rejected asynchronous 1D copies now invalidate the PS5 capture session instead
+of leaving a partial graph replayable. Full source ASan/UBSan qualification
+passed 27 distinct failure cases across three capture modes and four copy APIs,
+with cleanup/reuse and later replay. Valid 1D graph/executable parameter updates
+passed source-isolation, offset/length, exact guards and rejected-update checks.
+The 63 existing host regressions passed. See `evidence/offline-copy-capture-invalidation.json`.
+
+This is offline evidence only; the installed .40 image below is unchanged.
+Next: validate executable handles and exact node subtype in memcpy setters,
+then package the new failure/recovery cases for .40. Joined-stream failures,
+external capture-graph ownership, allocation lifetime, sustained replay and
+performance remain open. Do not infer general memory-node safety from valid
+1D-node updates.
+
 ## Current native public HIP checkpoint
 
 Captured H2D/kernel/D2D/D2H graph replay passed its bounded .40 test through
