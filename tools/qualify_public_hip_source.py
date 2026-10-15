@@ -36,7 +36,8 @@ def main():
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
-                 'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp',
+                 'tests/public_hip_retirement_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -231,6 +232,40 @@ def main():
             raise RuntimeError('public fill allocation failure contract differs: ' + stage)
         fill_failure_models[stage] = sha(binary)
         print('public pitched fill ' + stage + ' OOM PASS', flush=True)
+    # Hold a completed fill before worker retirement. Only generated copies contain hooks.
+    retirement_source = ROOT / 'tests/public_hip_retirement_model.cpp'
+    source_hashes[str(retirement_source.relative_to(ROOT))] = sha(retirement_source)
+    retirement_object = compile_one((len(units) + 5, retirement_source))
+    adapter = ROOT / 'ports/clr/ps5-device.cpp'
+    adapter_text = adapter.read_text()
+    completion = '        c.setStatus(status==CL_SUCCESS?CL_COMPLETE:status);'
+    barrier = 'bool isHandlerPending()const override{return true;}'
+    if adapter_text.count(completion) != 1 or adapter_text.count(barrier) != 1:
+        raise RuntimeError('retirement injection anchors differ')
+    hooked = 'extern "C" void qualification_hold_after_fill();\n' + adapter_text.replace(
+        completion, completion + '\n        if(c.type()==CL_COMMAND_FILL_BUFFER)qualification_hold_after_fill();')
+    retirement_models = {}
+    for index, mode in enumerate(('new', 'old')):
+        injected = output / ('retirement-' + mode + '.cpp')
+        injected.write_text(hooked if mode == 'new' else hooked.replace(
+            barrier, 'bool isHandlerPending()const override{return false;}'))
+        source_hashes[str(injected.relative_to(ROOT))] = sha(injected)
+        adapter_object = compile_one((len(units) + 6 + index, injected))
+        selected = [adapter_object if unit == adapter else
+                    retirement_object if unit.name == 'hip_admission_model.cpp' else obj
+                    for unit, obj in zip(units, objects)]
+        binary = output / ('retirement-' + mode)
+        run('retirement-' + mode + '-link', [toolchain['clang++-18']['path'], *flags,
+            '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+            '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *selected, '-o', binary])
+        result = run('retirement-' + mode, [binary, mode], env)
+        marker = ('RETIREMENT_NEW held_until_retirement=true free_once=true' if mode == 'new'
+                  else 'RETIREMENT_OLD early_sync_observed=true')
+        if result.splitlines() != [marker, 'RETIREMENT_COUNTS queues=1 retired=1',
+                'RETIREMENT_FINAL queues=1 retired=1 ownership=clean gpu_execution=false']:
+            raise RuntimeError('retirement ordering/ownership differs: ' + mode)
+        retirement_models[mode] = sha(binary)
+        print('public retirement ' + mode + ' PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -250,7 +285,9 @@ def main():
                'launch_model_sha256': sha(output / 'launch-model'),
                'stream_model_sha256': sha(output / 'stream-model'),
                'stream_cases': ['event-ordered', 'bypass-early-consumer-detected'],
-               'total_compilations': len(units) + 5,
+               'total_compilations': len(units) + 8,
+               'retirement_models': retirement_models,
+               'retirement_observation_ms': 500,
                'fill_allocation_failure_models': fill_failure_models,
                'fill_model_sha256': sha(output / 'fill-model'),
                'fill_cases': ['patterns-offsets-guards-admission', 'pitched-2d-3d-padding-admission'],

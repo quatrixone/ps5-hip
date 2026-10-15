@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-durable-retirement-regression-pass",
+  "source_base": "9829b4b78d903a9d606a5fa7a6623b5a2c8f7da4",
+  "total_compilations": 77,
+  "strict_links": 8,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-retirement-source-v1/receipt.json": "a421a987e0cea107cae26cc94ba151e6720f15eebc7bbc79505ad907631ea152",
+    "results/public-retirement-source-v1/independent-review.json": "7affa7c81f88129ed786646ead01675931ba22c44eaa7fb61914fb053f6ad4b7",
+    "results/public-retirement-source-v1/retirement-new.json": "a06938bc34dc45de023784ef753b10d45966c52729508c102fa5d977df3e6844",
+    "results/public-retirement-source-v1/retirement-new.stdout": "bc1f036307099a72110f35c46040b08d120e243025e5d9aadb1fd13fe775a4ef",
+    "results/public-retirement-source-v1/retirement-new.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-retirement-source-v1/retirement-old.json": "ad0fa6b596c226e3e8e418fb2fa7a17094374fd25a543a57efbc60f3eb68b3ee",
+    "results/public-retirement-source-v1/retirement-old.stdout": "ba14a68896dcbe51c15768bb2f8e80c34215e62dbf41e8c1933cc1aa812e9269",
+    "results/public-retirement-source-v1/retirement-old.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retirement_models": {
+    "new": "4443cdbc97e1ac8c0f28c8062a7195c4375aadd4ca72bd133ac4c0ac8a2b4226",
+    "old": "e9198e41476ffe524f89f41664db7bf5dd45e0df906f877cd213a685148831ae"
+  },
+  "accepted_scope": [
+    "Fresh runtime closure and all existing base/module/launch/event/stream/fill/fault cases pass.",
+    "Generated adapters hold a completed fill before batch release; fixed path waits, then frees once before stream destruction.",
+    "Negative control disables only forced finish marker admission and exposes early synchronization; cleanup destroys stream before free.",
+    "Both exact transcripts require one allocation/free and one retired queue; ASan/UBSan and leak checks enabled for both controls.",
+    "Harness, generated sources, included files, toolchain and binary hashes are bound in receipt."
+  ],
+  "limits": [
+    "500ms absence-of-return observation is scheduler bounded.",
+    "Production source has no test hook; generated copies are host-only.",
+    "No native rebuild, console execution or deployment approval at this milestone."
+  ],
+  "independent_review": {
+    "path": "results/public-retirement-source-v1/independent-review.json",
+    "sha256": "7affa7c81f88129ed786646ead01675931ba22c44eaa7fb61914fb053f6ad4b7",
+    "deployment_approved": false
+  }
+}

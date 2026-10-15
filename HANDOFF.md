@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The retirement race now has a durable fresh-source regression in the public HIP
+qualifier: 77 compilations and eight strict links pass independent audit, including
+the fixed barrier and a test-only admission bypass with exact one-queue cleanup.
+See `evidence/offline-retirement-regression.json`. The 500 ms observation is
+scheduler bounded; this adds host coverage, not console acceptance.
+
 Make now accepts `PUBLIC_BUILD_DIR`, `MEMORY_BUILD_DIR` and `COPY_BUILD_DIR`
 to preserve earlier artifacts. A full default Make run with a fresh bootstrap
 directory passed 62 host tests, native core and 74-object packaging, followed by

@@ -192,9 +192,18 @@ gate, `stream-normal` requires no dependent consumer progress within one second.
 `stream-bypass` omits the event wait and requires early consumer progress within
 that deadline. Both cases release the producer and verify two retired queues with
 no allocation or GPU submission. This bounded test is scheduler-dependent; it
-qualifies neither native events nor GPU concurrency. The qualifier builds 74
-translation units in total: 69 base units, three alternate client harnesses and
-two independently fault-injected memory units.
+qualifies neither native events nor GPU concurrency. The qualifier builds 77
+translation units in total: 69 base units, four alternate client harnesses,
+two independently fault-injected memory units and two retirement adapter copies.
+
+The retirement client holds a completed fill before worker batch release. The
+fixed adapter must keep synchronization pending during a 500 ms observation,
+then free the allocation once before stream destruction. The negative control
+disables only forced finish-marker admission and must return early during the
+same hold; it destroys the stream before freeing to clean up safely. Both retire
+exactly one queue. Hooks exist only in generated adapter copies, and their source
+and binary hashes are recorded. The absence-of-return observation is scheduler
+bounded; this is host regression evidence, not native retirement acceptance.
 
 The fill client checks contiguous `hipMemset` and word-pattern operations using
 all 128 expected bytes, including unchanged guards. Synchronous calls now wait
