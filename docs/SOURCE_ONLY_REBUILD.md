@@ -363,5 +363,6 @@ one freed allocation and three retired queues at finalization.
 
 The new fixture uses `ps5-hip-public-graph_gpu.log`. A fresh frozen candidate and
 independent package, deployment and execution reviews are required; an older
-host-graph package does not exercise GPU graph nodes. The previous .40 stream
-result remains the console baseline until this fixture has been deployed and run.
+host-graph package does not exercise GPU graph nodes. The bounded native fixture passed on .40; see
+`../evidence/console40-public-gpu-graph-success.json`. Its frozen candidate phases
+are consumed and cannot be replayed. Use STATE.md for the current image/log baseline.

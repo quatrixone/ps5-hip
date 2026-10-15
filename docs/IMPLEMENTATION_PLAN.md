@@ -2,13 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
-Current checkpoint (2026-10-15): bounded native public HIP explicit-stream/event
-GPU ordering passed on .40 at `3160818`: two changed-input launches, event reuse,
-146 exact destination values, 16 guards, source preservation and natural teardown.
-Independent audit verified all 28 reads, installed identity, stable mounts, scoped
-klog, health and lock release. See `../evidence/console40-public-stream-gpu-success.json`.
-Next: required GPU graph nodes/resource lifetime and changing-input captured replay.
-Earlier checkpoint notes below are historical; G5 and G6-G12 remain open.
+Current checkpoint (2026-10-15): bounded native explicit GPU graph replay passed
+on .40 at `a80845d`: two disabled replays, four callbacks, two changed-salt launches,
+146 exact values, 16 guards, copied/updated arguments and source-graph destruction.
+Independent audit verified natural exit, all 27 reads, identity/mounts/klog, service
+health and lock release. See `../evidence/console40-public-gpu-graph-success.json`.
+Next: GPU kernel capture and required memory graph nodes; G5 and G6-G12 remain open.
+Earlier checkpoint notes below are historical.
 
 Both native module fixtures now use the verified system-visible title mount
 for code objects after filesystem elevation. The two changed title units compile
@@ -440,7 +440,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
-| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event GPU and host-graph passes |
+| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event and explicit GPU graph passes |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | Standalone inference client and SDK preview | G5-G6 | planned |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
@@ -666,6 +666,12 @@ Decision: publish the supported API matrix internally. Missing required semantic
 block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
+
+Latest native checkpoint: explicit GPU kernel graph replay now passes its bounded
+shared oracle and full console lifecycle audit. See
+`../evidence/console40-public-gpu-graph-success.json`. This supersedes the pending
+native statements below; GPU capture, memory graph nodes, pooling and measured
+replay efficiency still need implementation and qualification.
 
 The shared native GPU graph fixture now passes full host sanitizer qualification,
 a fresh 74-object Make package, cached validation, 24 console-control tests and

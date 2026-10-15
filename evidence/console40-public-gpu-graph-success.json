@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-bounded-native-public-hip-explicit-gpu-graph",
+  "source_commit": "a80845dee0fc5b5dd440809e7b4275f9f0d59e87",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "package_sha256": "37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2",
+  "manifest_sha256": "c2605e66c8033e5aa3ef8b620b145e2f43c5b51c745aa49f17657eda19c7b45e",
+  "application_log_sha256": "fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242",
+  "qualification": {
+    "rounds": 2,
+    "gpu_dispatches": 2,
+    "exact_values": 146,
+    "tail_guards": 16,
+    "disabled_replays": 2,
+    "callbacks": 4,
+    "owned_arguments": true,
+    "executable_updated": true,
+    "source_graph_destroyed_before_second_dispatch": true,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 3,
+    "retired_queues": 3,
+    "gate_destroyed": true,
+    "natural_stop": true,
+    "complete_ftp_reads": 27,
+    "healthy_after": true,
+    "lock_released": true,
+    "pid": 149
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-graph-gpu-console-v1/manifest.json": "c2605e66c8033e5aa3ef8b620b145e2f43c5b51c745aa49f17657eda19c7b45e",
+    "results/source-public-graph-gpu-console-v1/deploy/receipt.json": "7a05f0b121cb6893e8271dca12c1559015f05528cf40c1db4273218c783d35ee",
+    "results/source-public-graph-gpu-console-v1/execution-authorization.json": "41aaf79ca4b76f3463aca3720b6f7820dbc4e56ffb0271f9a61d400ed7199b86",
+    "results/source-public-graph-gpu-console-v1/execution-review.json": "d227c8cac2c555a88ee142fd507b2020c149fad0a21aa863423c9f1402c97e9b",
+    "results/source-public-graph-gpu-console-v1/execute/receipt.json": "70f24ae4c9ad223d6759460a8e648717bee52f7caf0927d2aa31fd687622511a",
+    "results/source-public-graph-gpu-console-v1/execute/application.log": "fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242",
+    "results/source-public-graph-gpu-console-v1/execute/klog.log": "07b1314b93e5db2c330e008178b80e1af8bcb71171889b18718f3d0c065106a9",
+    "results/source-public-graph-gpu-console-v1/execute/before-launch.log": "6dbef434c07e7fc478036cbbc743b469928fafc0c0a902c79a1c8244f69ad1a1",
+    "results/source-public-graph-gpu-console-v1/execute/observed.log": "588318ed5a5bcd248a7b1ae7040f1ce5b95e77b5ec9925fc53efb13820a9c012",
+    "results/source-public-graph-gpu-console-v1/execute/snapshot.log": "3d95db6d34feb581c3981f1df1a947f7eebd5ad63383127c3b7abb96c78cac79",
+    "results/source-public-graph-gpu-console-v1/execute/post_snapshot.log": "3d95db6d34feb581c3981f1df1a947f7eebd5ad63383127c3b7abb96c78cac79"
+  },
+  "next_baseline": {
+    "image_sha256": "37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2",
+    "log_fixture": "graph_gpu",
+    "log_sha256": "fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242",
+    "log_preserved": false
+  },
+  "limits": [
+    "Explicit fixed-kernel graph; module and allocation remain live through synchronized graph executable teardown.",
+    "No GPU stream capture, broad memory graph-node qualification, native parallel GPU graph stress, resource plateau, concurrency or full G5 acceptance.",
+    "Standalone transcript parser does not prove hardware acceptance; independent complete identity/lifecycle/mount/klog/health audit provides that context.",
+    "Both candidate phases consumed; never replay."
+  ]
+}

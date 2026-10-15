@@ -18,66 +18,35 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
-GPU graph deployment passed: 21 complete reads, seven mounted files, preservation,
-healthy services and owned-lock release. Current installed image is
-`37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2`;
-no GPU graph result log exists yet. See `evidence/console40-gpu-graph-deployment.json`.
-The previous stream image/log below are now preserved historical baselines.
+- 2026-10-15 | G5 | a80845d | .40 | pass: bounded native explicit GPU graph | evidence/console40-public-gpu-graph-success.json | next: GPU capture/memory nodes
 
-The GPU graph candidate `results/source-public-graph-gpu-console-v1` is frozen
-at `a80845d` and independently approved for one deployment. See
-`evidence/offline-frozen-native-gpu-graph.json`; execution needs exact-receipt review.
-
-The shared native GPU graph fixture now passes full host sanitizer qualification,
-a fresh 74-object Make package, cached validation, 24 console-control tests and
-62 host regressions. Independent source/package reviews and a pre-exit retirement
-diagnostic passed; see `evidence/offline-native-gpu-graph-fixture.json`. The new
-fixture requires two disabled replays, two GPU launches, four callbacks, 146 exact
-values, 16 guards and complete three-queue cleanup. Native execution is pending.
-
-The corrected graph runtime also passes a fresh 74-object native Make build,
-cached validation, independent artifact audit and all 62 host regression tests.
-See `evidence/offline-native-kernel-graph-runtime.json`. This package still runs
-the host-graph fixture and is not authorized for deployment as a GPU graph test.
-
-- 2026-10-15 | G5 | f5d9712 | host | pass: explicit GPU graph runtime/model | evidence/offline-public-kernel-graph.json | next: native GPU graph oracle
-
-Explicit GPU kernel graph nodes now pass full source sanitizer qualification and
-independent audit: owned arguments, parameter updates, replay after source-graph
-destruction, allocation/command failure recovery, parallel/child cleanup and
-disabled-node dependencies. The suite compiled 81 units and linked 12 clients;
-all prior cases passed. See `evidence/offline-public-kernel-graph.json`. GPU transport
-is modeled; native GPU graph execution is the next acceptance step. Modules and
-device allocations remain caller-owned and live through synchronized exec teardown.
-
-- 2026-10-15 | G5 | 3160818 | .40 | pass: bounded native stream/event GPU | evidence/console40-public-stream-gpu-success.json | next: GPU graph nodes/lifetime
-
-The native public HIP explicit-stream/event fixture passed on .40 through WSL
-at `3160818`: two changed-input GPU launches, event reuse, 146 exact destination
-values, 16 guards and source preservation. Both buffers were freed, all three
-queues retired and the title exited naturally. The controller accepted all 28
-complete reads, installed identity, stable mounts, service health and owned-lock
-release. Independent final audit passed for PID 139; see
-`evidence/console40-public-stream-gpu-success.json`.
+Native explicit GPU graph replay passed on .40 through WSL at `a80845d`.
+Two disabled replays still ran their callbacks; two changed-salt GPU replays
+produced 146 exact values and preserved 16 guards. Arguments remained correct
+after caller mutation and executable update, and replay survived source-graph
+destruction. One allocation was freed and all three queues retired. PID 149
+exited naturally. Independent audit verified all 27 complete reads, installed
+identity, equal mount snapshots, scoped klog, service health and owned-lock release.
+See `evidence/console40-public-gpu-graph-success.json`.
 
 Current installed image:
-`568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981`.
-Current log: `/data/ps5-hip/results/ps5-hip-public-stream.log`, SHA
-`15474811376944b1cd161907ebeb99c4bfdbe873b79ddaea23112705cda49130`
-(not yet SHA-preserved). The previous successful default-stream image/log are
-preserved. Both phases in `results/source-public-stream-console-v1` are consumed;
-never replay them.
+`37721fdb50c2a030a379d035cda3f8492cf3c7f7d2e479ee4e4f27cbf9752ef2`.
+Current log: `/data/ps5-hip/results/ps5-hip-public-graph_gpu.log`, SHA
+`fd0956990bccf607e7ed79297d2fb37a8c7dd228a230c0326f3bab871488a242`
+(not yet SHA-preserved). The previous stream image/log are preserved. Both phases
+in `results/source-public-graph-gpu-console-v1` are consumed; never replay them.
 
-The source-only Make package and shared sanitizer oracle passed independent
-review, including missing-wait, no-write and corrupt-write negative controls.
-See `evidence/offline-public-stream-gpu-fixture.json` and
-`evidence/console40-stream-package-deploy.json` for build/deployment provenance.
+The shared host/native oracle, exec-update admission checks and full sanitizer
+suite passed, as did the 74-object Make package, cached validation, 24 controls
+and 62 host regressions. See `evidence/offline-native-gpu-graph-fixture.json`.
+Earlier kernel-graph runtime ownership/failure qualification is recorded in
+`evidence/offline-public-kernel-graph.json`. This bounded native result does not
+qualify GPU stream capture, broader memory graph nodes, resource plateaus,
+concurrent execution or measured graph efficiency.
 
-Next: add exec kernel-node update admission regressions (the upstream exec setter
-casts a mapped node without a kernel-type check), then build a shared native
-explicit-kernel graph oracle for .40. GPU/memory capture and broader resource
-lifetime remain open. This bounded fixed-kernel ordering result
-proves neither concurrent GPU execution nor full G5 acceptance.
+Next: implement and qualify GPU kernel stream capture and required memory graph
+nodes, preserving capture invalidation and resource lifetime contracts, then test
+the shared oracle on .40. G5 and the broader roadmap remain open.
 
 ## Historical pitched fill and retirement checkpoints
 
