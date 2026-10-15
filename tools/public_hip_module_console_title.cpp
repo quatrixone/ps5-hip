@@ -75,8 +75,9 @@ int main() {
     unsigned loads = 0, lookups = 0, unloads = 0;
     for (unsigned round = 0; round != 2; ++round) {
       hipModule_t first = nullptr, second = nullptr;
-      if (hipModuleLoad(&first, "/app0/canary.hsaco") != hipSuccess || !first ||
-          hipModuleLoad(&second, "/app0/canary.hsaco") != hipSuccess || !second || first == second)
+      // Filesystem elevation may replace the sandbox root; use the verified title mount.
+      if (hipModuleLoad(&first, "/system_ex/app/PPSA99014/canary.hsaco") != hipSuccess || !first ||
+          hipModuleLoad(&second, "/system_ex/app/PPSA99014/canary.hsaco") != hipSuccess || !second || first == second)
         ps5hip_clr_gpu_fail("module-load");
       loads += 2;
       hipFunction_t first_kernel = nullptr, second_kernel = nullptr, vector_kernel = nullptr;

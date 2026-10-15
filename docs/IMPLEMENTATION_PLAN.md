@@ -2,6 +2,23 @@
 
 Updated: 2026-10-14, America/New_York.
 
+Both native module fixtures now use the verified system-visible title mount
+for code objects after filesystem elevation. The two changed title units compile
+and independent review passed; see `../evidence/offline-native-module-mounted-path.json`.
+This corrects the source-supported namespace mismatch; a fresh package and native
+run are still required to prove the file-open failure is resolved.
+
+The diagnostic run identified `hipModuleLoad` status 301 (`hipErrorFileNotFound`)
+and a null module: file open failed before parsing, lookup, allocation or GPU work.
+PID 119 stopped after the title-specific safety close; services, idle state and
+lock release passed. See `../evidence/console40-module-file-open-failure.json`. Both
+phases of `results/source-public-launch-diagnostic-console-v2` are consumed.
+
+Current image: `1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa`.
+Current launch log: `6baab2fea70f01c8069415594a0e0302249fe029138a92c52287efd2d8c35dbe`
+(not yet preserved). The prior image and failure log were SHA-preserved. These
+identities supersede all older baseline notes below.
+
 The diagnostic deployment stopped before upload: the baseline image download
 hit its 30-second deadline after 6,922,236 bytes. Services stayed healthy and the
 owned lock was released; image and log were not renamed, and nothing launched.

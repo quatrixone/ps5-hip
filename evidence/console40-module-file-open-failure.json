@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-15",
+  "status": "failed-native-public-module-file-open",
+  "package_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+  "manifest_sha256": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "operation": "hipModuleLoad",
+  "status_code": 301,
+  "status_name": "hipErrorFileNotFound",
+  "module_present": false,
+  "reached_parser": false,
+  "reached_gpu_dispatch": false,
+  "safety_close_sent": true,
+  "idle_after_safety_close": true,
+  "healthy_after": true,
+  "lock_released": true,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-diagnostic-console-v2/manifest.json": "48aade3ffc835c56cd767b22c1096f5dac4133cf005e07d6bca2473ddeab35a7",
+    "results/source-public-launch-diagnostic-console-v2/execute/receipt.json": "0523536041d968375c0ed2f571874b3d13c95585e372ea312d0759fa0193ad2a",
+    "results/source-public-launch-diagnostic-console-v2/execute/application.log": "6baab2fea70f01c8069415594a0e0302249fe029138a92c52287efd2d8c35dbe",
+    "results/source-public-launch-diagnostic-console-v2/execute/klog.log": "20e12e80b415970d8f4eb703741cbdcedf514891a0cc49eb1ac59f803ada9ab5",
+    "results/source-public-launch-diagnostic-console-v2/execute/before-launch.log": "798f856d585ac4413f04d1e971d270a9b25a718de1a2cbcd41f84fe5f818906f",
+    "results/source-public-launch-diagnostic-console-v2/execute/observed.log": "4e8bc72db135b521b4665b6ac1c848a3a92134e081805538fb6eeed92fd71792",
+    "results/source-public-launch-diagnostic-console-v2/execute/after-safety-close.log": "9915afceed76e67833e68464942c7a5e9fc8fb998d9e53f3eb72f23172aa75eb",
+    "results/source-public-launch-diagnostic-console-v2/execution-authorization.json": "be6191993b260d2f24b214d153a38c2855f23f7608ae624c97cc0670d23324e2",
+    "results/source-public-launch-diagnostic-console-v2/execution-review.json": "baff09f56562b7e747d18dd0d6f736226431adaa99ad49e80481290f6cf9397d"
+  },
+  "next_baseline": {
+    "image_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+    "log_fixture": "launch",
+    "log_sha256": "6baab2fea70f01c8069415594a0e0302249fe029138a92c52287efd2d8c35dbe",
+    "log_preserved": false
+  },
+  "interpretation": "PS5 ExtractFatBinary returns301 when fopen of the requested filename fails. Title opens config before filesystem elevation and code object after; helper can replace root/jail with system_root. Sandbox path availability after elevation is the leading source-supported hypothesis.",
+  "limits": [
+    "Actual fopen errno/elevation route not recorded.",
+    "No native GPU or clean natural teardown acceptance.",
+    "Both v2 phases consumed; no replay."
+  ]
+}

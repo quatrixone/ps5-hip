@@ -77,10 +77,13 @@ int main() {
       ps5hip_clr_gpu_fail("public-discovery");
     hipModule_t module = nullptr;
     hipFunction_t function = nullptr;
-    const hipError_t loaded = hipModuleLoad(&module, "/app0/thread_words.hsaco");
+    // Filesystem elevation can replace the sandbox root. Use the title mount
+    // verified by console controls, not the sandbox-relative /app0 alias.
+    constexpr const char* code_object_path = "/system_ex/app/PPSA99014/thread_words.hsaco";
+    const hipError_t loaded = hipModuleLoad(&module, code_object_path);
     if (loaded != hipSuccess || !module) {
-      std::fprintf(stderr, "HIP_LAUNCH MODULE_ERROR operation=load status=%d module_present=%s\n",
-                   static_cast<int>(loaded), module ? "true" : "false");
+      std::fprintf(stderr, "HIP_LAUNCH MODULE_ERROR operation=load status=%d module_present=%s path=%s\n",
+                   static_cast<int>(loaded), module ? "true" : "false", code_object_path);
       ps5hip_clr_gpu_fail("public-module-load");
     }
     const hipError_t resolved = hipModuleGetFunction(&function, module, "thread_words");

@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-native-module-path-correction",
+  "change": "Launch and module fixtures open their packaged code object through /system_ex/app/PPSA99014 after filesystem elevation, rather than sandbox-relative /app0.",
+  "rationale": "Elevation helper may replace target root/jail with system_root; controls independently verify the runtime mount. Native failure status301 identifies fopen failure before parser/GPU.",
+  "native_translation_units": 2,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-module-mounted-path-compile-v1/receipt.json": "3535263b25bcf4bb0eedb95d78d10e344e6007540ef2175c470843be14725df4",
+    "results/public-module-mounted-path-compile-v1/review.json": "2ef059daad9eafcfb3daccaab17005ba5ea26ed7fcb5a0ec5b0761c19d877dd7",
+    "results/public-module-mounted-path-compile-v1/launch.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-module-mounted-path-compile-v1/launch.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-module-mounted-path-compile-v1/module.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-module-mounted-path-compile-v1/module.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_evidence": {
+    ".deps/sources/lapy/source/owned_root_daemon.c": "61b82d6845f756387f606e7571ddbbf4ab8b95eccfb8e86013ba27a835c4d3e3",
+    "tools/teardown_snapshot.h": "8f98d2957287192258227c9831e5f9bce6e4ac7e9df8ef6cc07fd5580e76c1dc",
+    "tools/source_console.py": "e93ca21897514955c8166f9abf6c5d431f36ac9c300e572767d74ff8a4583443",
+    "tools/public_hip_launch_console_title.cpp": "0519f1c69afef2971be4674a6554aed31cf07c51cfb189a53c06d3bfc5d41e5e",
+    "tools/public_hip_module_console_title.cpp": "ad38c9e4e9da1b362283d25e8a186d83642df0bdb5420c21e4845c3db20eba1e"
+  },
+  "limits": [
+    "Not yet a new linked package or native execution pass.",
+    "Root namespace explanation remains source-supported inference; actual fopen errno/elevation route was not logged.",
+    "Hardcoded path is for the configured PPSA99014 development fixtures, not a generic HIP loader rule."
+  ]
+}
