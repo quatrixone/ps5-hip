@@ -18,13 +18,23 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
+Latest progress: source `be6e521` adds the memory fixture to the supported Make
+pipeline. All 57 host tests and 74 fresh-object native build/package checks
+passed. The independently reviewed `results/source-memory-console-v1` case
+then passed on .40: two distinct allocations (257 and 4097 bytes), interior-free
+rejection with no retirement, two frees, double-free rejection, joined watchdog,
+balanced finalizer and clean shell-requested shutdown. See
+`evidence/native-source-public-memory-success.json`. Copied data and public HIP
+GPU dispatch remain unqualified. The owner requests pushing every validated
+milestone to `main`; implementation and evidence are published there.
+
 Latest continuation: source-only Make at `7342726` passed all 56 host tests,
 native core, 74 fresh objects, serialized SCE import/hash checks and package
 validation. Independently reviewed v2 ran once on .40 as PID639/app `0x4018`:
 `hipInit=0`, count=1, complete finalization, shell-exit return=0 and natural
 stop passed, with matching mount observations, healthy services and owned lock
 release. See `evidence/native-source-make-bootstrap-success.json` and raw
-`results/source-make-console-v2`. Public HIP allocation/GPU execution is next;
+`results/source-make-console-v2`. Public HIP allocation is now qualified above;
 this bounded startup result does not complete G5.
 
 The preceding v1 run failed with a shell-exit SIGSEGV. Its package and log
@@ -53,7 +63,7 @@ for new source-built candidates; historical phases remain consumed/inert.
   PS5-registry model, ten ASan/UBSan and ten TSan modes, and independent review.
   Integrated commits `209664d`–`debf465`; see
   `evidence/offline-hip-public-memory-bridge.json`. Native public API behavior
-  beyond initialization/discovery is still untested.
+  now has the bounded native allocation/free result above; copies and GPU launch remain open.
 - A **clean 74-object native public HIP bootstrap** title was built, strictly
   linked, converted, packaged, and independently reviewed. Its one-use D control
   installed and registered image SHA-256
@@ -84,7 +94,7 @@ about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Supported source build | local `main` / tested source `7342726` | repository root | Full Make and bounded .40 bootstrap passed; local continuation not pushed. |
+| Supported source build | `main` / bootstrap `7342726`, memory `be6e521` | repository root | Full source builds and bounded .40 bootstrap/memory passed; pushed to GitHub. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
@@ -170,11 +180,11 @@ preserved workspace or replay deployment. Recovery is not required for the new
 Make-built v2 package and its fresh D/E receipts.
 
 The current installed PPSA99014 package on .40 is
-`403d8d0364ec57dea5342a77676fa7fd15ce74d7c7b1dbf0f823ce9784e01118`.
-Its current bootstrap log hashes to
-`42d39b5728e57d752937b023a49ccf4eceabbdff463747c68159a09e4696be1b`.
-Both v2 phases under `results/source-make-console-v2` are consumed and must not
-be replayed. The previous failed image/log and all historical backups remain
+`37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5`.
+Its current memory log hashes to
+`1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b`.
+Both phases under `results/source-memory-console-v1`, and both prior bootstrap
+cases, are consumed and must not be replayed. Previous image/log pairs remain
 preserved. Services were healthy and the owned lock released at completion.
 Use the current dedicated-controller environment in `.local/ENVIRONMENT.md`;
 the sole lock for this session is `C:/Users/Denis/Documents/PS5/lock.txt`.
@@ -183,9 +193,9 @@ the sole lock for this session is `C:/Users/Denis/Documents/PS5/lock.txt`.
 
 1. Keep the supported source pipeline on `main`; preserve both consumed fresh
    cases and their independent reviews. Do not reactivate historical D/E phases.
-2. Update the native public memory control baseline to the current v2 image/log, review its
-   controls independently, and test its genuine exported API title separately.
-   Do not infer native malloc/free from the Linux model or bootstrap startup.
+2. Implement and qualify the next public HIP data-copy/module/launch path using
+   the current memory image/log baseline. Preserve the bounded memory result;
+   allocation/free does not establish byte correctness or GPU execution.
 3. Refresh GEMM D/E controls against the actual then-installed PPSA99014 image,
    keep the corrected GeometryLds source frozen, and independently review before
    a numerical `.40` run. No GEMM GPU success is presently claimed.
@@ -200,4 +210,4 @@ expected result, rejection criterion and timeout; inspect ISA; freeze and hash
 the candidate; check console idleness and the current environment's lock; use one bounded
 launch; audit title stop, services, mounts, and owned lock release. Keep raw
 logs local and commit compact sanitized evidence. The latest qualified console
-observation is the source-Make v2 bootstrap above.
+observation is the source-Make public memory case above.

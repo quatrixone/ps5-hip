@@ -5,7 +5,10 @@ Updated: 2026-10-14, America/New_York.
 Latest bounded G5 prerequisite: source-only Make at `7342726` and its reviewed
 v2 package passed public HIP initialization/device discovery and clean title
 teardown on .40. See `../evidence/native-source-make-bootstrap-success.json`.
-Public HIP allocation, GPU execution and the broader G5 acceptance remain open.
+The subsequent source-built `be6e521` memory case passed two public allocations,
+two frees, interior/double-free rejection and clean teardown on .40; see
+`../evidence/native-source-public-memory-success.json`. Public HIP copies,
+GPU execution and the broader G5 acceptance remain open.
 
 Status: G1 passed its offline acceptance; G2 passed for the declared arithmetic
 fixture in `../evidence/native-g2-acceptance.json`. G3 has one exact private-call

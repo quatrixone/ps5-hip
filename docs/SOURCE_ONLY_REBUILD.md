@@ -68,7 +68,10 @@ double frees, and requires complete shutdown. Its exact-hash preparation adds
 the reviewed HIP memory guards over the already-adapted SVM implementation.
 The `memory` receipt/manifest fixture selects a separate strict log oracle;
 bootstrap receipts and transcripts cannot satisfy it. This recipe is offline
-until its own package and console cycle are qualified.
+until its own package and console cycle are qualified. The `be6e521` candidate
+passed the independently reviewed bounded allocation/free cycle on .40; see
+`evidence/native-source-public-memory-success.json`. It makes no data-copy or
+GPU-dispatch claim.
 
 `tools/freeze_source_candidate.py` copies a completed build, controllers and
 the separately built read-only snapshot into a new `results/` candidate and

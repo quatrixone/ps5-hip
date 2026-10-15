@@ -11,13 +11,22 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Latest G5 progress: source-built public HIP allocation/free passed on .40 at
+`be6e521`. Two distinct 257-byte and 4097-byte allocations, interior-pointer
+rejection without retirement, two frees, double-free rejection, watchdog join
+and clean title shutdown passed. The prior bootstrap image/log were preserved;
+services are healthy and the owned lock released. See
+`evidence/native-source-public-memory-success.json`. This qualifies bounded
+allocation ownership, not copied data or public HIP GPU dispatch. G5 stays open.
+
 Source-only `make RESULTS_DIR=/data/ps5-hip/results` passed at `7342726`:
 56 host tests, native core, 74 fresh public HIP objects and complete package
 validation. A distinct reviewed package then passed the bounded bootstrap on
 .40: public `hipInit=0`, device count `1`, full finalization, shell-exit return
 `0`, natural title stop, matching mount observations and healthy services.
 The owned lock was released. See `evidence/native-source-make-bootstrap-success.json`.
-No public HIP allocation or GPU execution is claimed; G5 remains open.
+That bootstrap case claimed no allocation or GPU execution; the subsequent
+memory case above qualifies allocation/free only. G5 remains open.
 
 The preceding candidate `910f716` failed shell-exit with SIGSEGV because Make
 omitted the native converter import-library patch. Its image, log and receipts
@@ -53,13 +62,13 @@ recovery is no longer needed for fresh source builds.
   control remains inert and unbound: there is **no** public HIP startup, API,
   allocation, or GPU result from that historical package. Do not replay consumed D phases.
 
-- **Next native candidates remain offline:** a strict native public HIP
+- **Historical native candidates:** a strict native public HIP
   allocation/free title passed 74 fresh-object build, package, and independent
   review on `development/g5-native-public-memory` (`1f969f6`); a ROCclr FP32
   GEMM title passed corrected GeometryLds admission, 39-unit sanitizer model,
   46-unit native link/package, and independent control review on
   `development/gemm-native-bridge` (`a0af56e`). Neither was launched. Their
-  current controls must be checked against the now-registered bootstrap image
+  current controls must be checked against the now-registered memory image
   before any console use. See `HANDOFF.md`.
 
 - **Genuine GPU-backed ROCclr dispatch passed on .40:** frozen `e79bd63`
@@ -83,7 +92,7 @@ recovery is no longer needed for fresh source builds.
   intentional failed-join leak checks. Independent review cleared this bounded
   model at `results/public-memory-bridge-full-review-v1/review.json`; the
   integrated patch stack is at `209664d` through `debf465`. Native public HIP
-  allocation and GPU launch remain unproven; startup is qualified above. See
+  GPU launch remains unproven; bounded native allocation/free and startup are qualified above. See
   `evidence/offline-hip-public-memory-bridge.json`.
 
 - **Public HIP allocation prerequisite integrated offline:** isolated `70b2c19`
@@ -1243,6 +1252,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-14 | G5 memory | be6e521 | .40 | pass: 2 public allocations/frees, invalid-free rejection, clean teardown | evidence/native-source-public-memory-success.json | public copies/launch; G5 open
 
 - 2026-10-14 | G5 startup | 7342726 | .40 | pass: public init/count and clean teardown | evidence/native-source-make-bootstrap-success.json | allocation then GPU; G5 open
 

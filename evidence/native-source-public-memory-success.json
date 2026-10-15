@@ -1,0 +1,59 @@
+{
+  "classification": "pass",
+  "scope": "Bounded native public HIP memory allocation/free: two distinct backing allocations,interior/double-free rejection,two retirements,clean title stop",
+  "hardware_gate_passed": "public-HIP-allocation-free-only",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "pid": 654,
+  "app_id": "0x8018",
+  "source_commit": "be6e5219f2fb7f376d2d0dd18444fd72795bbeb2",
+  "manifest_sha256": "97acf7fb8fac9e1a4213c78111b52207b3eb1b18a1e09567595a51e96aa5e9b7",
+  "package_sha256": "37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5",
+  "deployment_receipt_sha256": "17a46536c53842d6a3cf44863c0aad9361e9a871c57c8c3928717fc5f68adfbc",
+  "execution_receipt_sha256": "a8ddfdcdb389e046740475e7359167dd1c32edd96eebff51ad9bf0d9f7ad294b",
+  "application_log_sha256": "1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b",
+  "checks": [
+    "Exact ten-line fresh memory transcript including hipInit0,count1,allocations2/frees2,interior/double-free rejection,joined watchdog,balanced finalizer,application fini,shell exit return0",
+    "Exactly one ordered same-PID start/stop in append-only history",
+    "Own executable entry and nonforced shell termination in launch-interval klog;no fatal/exception/panic markers",
+    "Pre/post positive title mount snapshots exactly equal;both app queries idle",
+    "Accepted reviewed control entails pre/post exact installed image,six mounted files,metadata checks",
+    "Healthy declared services and owned-lock release reported;local lock absent;no host close payload"
+  ],
+  "limits": [
+    "No data-content,transfer,kernel dispatch,concurrent stream or performance validation was attempted",
+    "Mount observations do not certify global namespace/process absence",
+    "Broader G4/G5 and SDK roadmap remain open"
+  ],
+  "raw_sha256": {
+    "application.log": "1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b",
+    "before-launch.log": "4bd8cb657268f645a5afe48eddca4ecd00fa848779fbab4085ac6ff41a6d0069",
+    "klog.log": "b560a30d4c118bf6d0efffeebe3131bfebffc242c4a0f0fc7c1a31e1dca1fa7c",
+    "launch-consumed": "3d43bc97d2aa80df721b3fd639057af433dfd20687bce17ae3b980dc5428e2b6",
+    "launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "observed.log": "5137e2dc26fb56dea4b89615d40ffc68316bb0546f81db9f804ff4b2f748b0b0",
+    "post_snapshot-consumed": "3d43bc97d2aa80df721b3fd639057af433dfd20687bce17ae3b980dc5428e2b6",
+    "post_snapshot.log": "e7af80d063b858c66041308f6644a659a4b69345f6a0c026b6352170c700d7f2",
+    "receipt.json": "a8ddfdcdb389e046740475e7359167dd1c32edd96eebff51ad9bf0d9f7ad294b",
+    "snapshot-consumed": "3d43bc97d2aa80df721b3fd639057af433dfd20687bce17ae3b980dc5428e2b6",
+    "snapshot.log": "e7af80d063b858c66041308f6644a659a4b69345f6a0c026b6352170c700d7f2"
+  },
+  "reviewer_console_access": false,
+  "date": "2026-10-14",
+  "build": {
+    "command": "make host-test public-hip-memory-package RESULTS_DIR=/data/ps5-hip/results",
+    "exit_code": 0,
+    "host_tests_passed": 57,
+    "fself_roundtrip": "pass",
+    "fresh_hip_objects": 74,
+    "cached_revalidation": "pass",
+    "independent_six_file_extraction": "pass",
+    "serialized_import_and_hash_audit": "pass"
+  },
+  "raw_evidence": "results/source-memory-console-v1",
+  "independent_review": {
+    "sha256": "54b94590d41fcb7dd77131acb2921bda2975041833d92e6e530919b69b2d5813",
+    "path": "results/source-memory-independent-review-v1/execution-review.json"
+  },
+  "prior_bootstrap_preserved": "evidence/native-source-make-bootstrap-success.json"
+}
