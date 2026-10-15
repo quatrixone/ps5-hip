@@ -118,6 +118,32 @@ class TransferAndRecoveryTest(unittest.TestCase):
         self.assertEqual(entry['received_bytes'], 6)
         self.assertEqual(entry['received_sha256'], sha(b'prefix'))
 
+    def test_slow_complete_image_allowed_but_logs_keep_short_deadline(self):
+        for image in (False, True):
+            with self.subTest(image=image):
+                with patch('source_console.time.monotonic', side_effect=[0, 40, 40, 40] if image else [0, 40, 40]):
+                    if image:
+                        self.assertEqual(self.c.fetch_image(self.backup, len(self.raw)), self.raw)
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, 'deadline'):
+                            self.c.fetch(self.backup, len(self.raw))
+                entry = self.c.record['ftp_reads'][-1]
+                self.assertEqual(entry['complete'], image)
+                self.assertEqual(entry['deadline_seconds'], 90 if image else 30)
+                self.assertEqual(entry['received_sha256'], self.digest)
+
+    def test_image_deadline_and_size_limits_remain_enforced(self):
+        with patch('source_console.time.monotonic', side_effect=[0, 90, 90]):
+            with self.assertRaisesRegex(RuntimeError, 'deadline'):
+                self.c.fetch_image(self.backup, len(self.raw))
+        self.assertFalse(self.c.record['ftp_reads'][-1]['complete'])
+        with self.assertRaisesRegex(RuntimeError, 'size bound'):
+            self.c.fetch_image(self.backup, len(self.raw) - 1)
+        self.assertFalse(self.c.record['ftp_reads'][-1]['complete'])
+        for deadline in (0, 91):
+            with self.assertRaisesRegex(RuntimeError, 'invalid FTP read deadline'):
+                self.c.fetch(self.backup, deadline_seconds=deadline)
+
     def test_late_empty_retrieval_does_not_pass(self):
         self.c.ftp.retrbinary = lambda *args, **kwargs: None
         with patch('source_console.time.monotonic', side_effect=[0, 31, 31]):

@@ -119,21 +119,22 @@ class Control:
                 pass
         return True
 
-    def fetch(self, path, bound=8388608):
+    def fetch(self, path, bound=8388608, deadline_seconds=30):
+        require(0 < deadline_seconds <= 90, 'invalid FTP read deadline')
         data = bytearray()
         started = time.monotonic()
-        entry = {'path': path, 'byte_limit': bound, 'deadline_seconds': 30,
+        entry = {'path': path, 'byte_limit': bound, 'deadline_seconds': deadline_seconds,
                  'received_bytes': 0, 'complete': False}
         received_hash = hashlib.sha256()
         def append(block):
             entry['received_bytes'] += len(block)
             received_hash.update(block)
             require(entry['received_bytes'] <= bound, 'FTP read size bound: ' + path)
-            require(time.monotonic() - started < 30, 'FTP read deadline: ' + path)
+            require(time.monotonic() - started < deadline_seconds, 'FTP read deadline: ' + path)
             data.extend(block)
         try:
             self.ftp.retrbinary('RETR ' + path, append, blocksize=65536)
-            require(time.monotonic() - started < 30, 'FTP read deadline: ' + path)
+            require(time.monotonic() - started < deadline_seconds, 'FTP read deadline: ' + path)
             entry['complete'] = True
             return bytes(data)
         except Exception as error:
@@ -143,6 +144,12 @@ class Control:
             entry['elapsed_seconds'] = time.monotonic() - started
             entry['received_sha256'] = received_hash.hexdigest()
             self.record.setdefault('ftp_reads', []).append(entry)
+
+    def fetch_image(self, path, bound):
+        # A verified 9 MiB baseline transfer exceeded 30 s on a healthy console.
+        # Keep small logs responsive and the 8 s socket inactivity timeout, but
+        # allow a bounded 90 s for complete images; byte/hash checks are unchanged.
+        return self.fetch(path, bound, deadline_seconds=90)
 
     def absent(self, path):
         require(not any(row.endswith(' ' + Path(path).name)
@@ -229,7 +236,7 @@ class Control:
     def installed(self):
         app = ROOT / self.manifest['app']
         image = (ROOT / self.manifest['package']).read_bytes()
-        require(self.fetch(REMOTE, len(image)) == image, 'installed image mismatch')
+        require(self.fetch_image(REMOTE, len(image)) == image, 'installed image mismatch')
         require(self.fetch('/user/app/' + TITLE + '/mount.lnk', 1024) == MOUNT.encode(), 'mount link changed')
         require(self.fetch('/user/appmeta/' + TITLE + '/param.json', 65536) ==
                 (app / 'sce_sys/param.json').read_bytes(), 'registered metadata mismatch')
@@ -249,7 +256,7 @@ class Control:
         previous = self.baseline_log_read()
         old_sha = self.manifest['baseline_image_sha256']
         require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
-        old = self.fetch(REMOTE, 16777216)
+        old = self.fetch_image(REMOTE, 16777216)
         require(sha(old) == old_sha, 'historical baseline differs; replan')
         (self.out / 'old.ffpkg').write_bytes(old)
         backup = REMOTE + '.source-rebuild-' + old_sha + '.preserved'
@@ -259,15 +266,15 @@ class Control:
         image = (ROOT / self.manifest['package']).read_bytes()
         self.idle(); self.verify()
         self.ftp.storbinary('STOR ' + temporary, io.BytesIO(image))
-        require(self.fetch(temporary, len(image)) == image, 'temporary upload mismatch')
+        require(self.fetch_image(temporary, len(image)) == image, 'temporary upload mismatch')
         self.idle()
         self.preserve_baseline_log(previous)
         self.fresh_log()
         start = self.history_read('before-preserve')
-        require(self.fetch(REMOTE, len(old)) == old, 'baseline changed')
+        require(self.fetch_image(REMOTE, len(old)) == old, 'baseline changed')
         self.record.update(backup=backup, temporary=temporary)
         self.ftp.rename(REMOTE, backup)
-        require(self.fetch(backup, len(old)) == old, 'backup mismatch')
+        require(self.fetch_image(backup, len(old)) == old, 'backup mismatch')
         deadline = time.monotonic() + 60
         while True:
             self.idle()
@@ -284,7 +291,7 @@ class Control:
             time.sleep(5)
             self.idle()
         self.installed()
-        require(self.fetch(backup, len(old)) == old, 'preserved image changed')
+        require(self.fetch_image(backup, len(old)) == old, 'preserved image changed')
         if baseline_log:
             previous_log, log_backup = previous
             require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')

@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-image-transfer-deadline",
+  "change": "Image reads use a90second total deadline; logs remain30seconds and socket inactivity remains8seconds.",
+  "reason": "A healthy baseline transfer received6922236bytes in30.0379seconds and hit the old deadline before upload.",
+  "control_tests_passed": 22,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/image-transfer-deadline-tests-v1.log": "ccdc4b4a04e92e134354b3846a52adebaeac06acb21d1add1173aed30b670894",
+    "results/image-transfer-deadline-review-v1/review.json": "0d4ba2783093e24b3d20f30d0d511753c2da2c6796c5a2f3b3b9d3645cf01f29"
+  },
+  "invariants": [
+    "No larger byte bounds or relaxed full-byte/hash verification.",
+    "Short logs retain30second deadline.",
+    "Oversized and deadline-expired transfers never mark complete.",
+    "No automatic retry or change to candidate/lifecycle requirements."
+  ],
+  "limits": [
+    "Deadline checked on callbacks and return; outstanding socket wait may extend elapsed time.",
+    "Changed control bytes require new freeze and review."
+  ]
+}

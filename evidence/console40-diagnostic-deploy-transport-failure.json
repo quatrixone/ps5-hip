@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "transport-failure-before-upload",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "manifest_sha256": "6778578f2e4d1bdc74d08b6979958e1fb006c336c81c6070822ece07b002757e",
+  "candidate_package_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+  "error": "RuntimeError('FTP read deadline: /data/homebrew/PPSA99014.ffpkg')",
+  "partial_image_bytes": 6922236,
+  "elapsed_seconds": 30.037872892999985,
+  "launched": false,
+  "image_uploaded": false,
+  "baseline_mutated": false,
+  "healthy_after": true,
+  "lock_released": true,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-diagnostic-console-v1/manifest.json": "6778578f2e4d1bdc74d08b6979958e1fb006c336c81c6070822ece07b002757e",
+    "results/source-public-launch-diagnostic-console-v1/deploy/receipt.json": "d69564bf5b360c5fb2c046784c48a64c1c4696a3916e81fbb9a69084d0a768e1",
+    "results/source-public-launch-diagnostic-console-v1/deploy/previous-application.log": "c74c92be3ff8c48d89420312b4bae766b94288f3fb1783d06957b771229ca8ae",
+    "results/source-public-launch-diagnostic-console-v1/deploy/snapshot.log": "1cde57df7daea9516b9448d57fb1e03f4864274ecb2b339ad021817549d3a674",
+    "results/source-public-launch-diagnostic-console-v1/deployment-failure-review.json": "599ce5232cbb1c43fba122b6efd05675ada47b0c64b0693c57fdb40acf6bceb2"
+  },
+  "limits": [
+    "Partial hash does not verify complete image; installed baseline is unverified this attempt.",
+    "No new module status or GPU result.",
+    "Consumed deploy phase must not be replayed; changed controls require fresh frozen review."
+  ]
+}

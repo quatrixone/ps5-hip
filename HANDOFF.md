@@ -18,6 +18,18 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The diagnostic deployment stopped before upload: the baseline image download
+hit its 30-second deadline after 6,922,236 bytes. Services stayed healthy and the
+owned lock was released; image and log were not renamed, and nothing launched.
+See `evidence/console40-diagnostic-deploy-transport-failure.json`. The partial hash
+does not verify the installed image. The consumed diagnostic v1 deploy is not reusable.
+
+Image transfers now allow 90 seconds while logs retain 30 seconds and socket
+inactivity stays at 8 seconds. All 22 control tests and independent review passed;
+byte bounds and complete-content checks are unchanged. See
+`evidence/offline-image-transfer-deadline.json`. Freeze and review a new candidate
+with these controls before the one permitted retry of this transport-only failure.
+
 The module diagnostic now has a fresh 74-object Make package, cached validation,
 independent package audit and deployment-only approval at `6603bbc`. Candidate:
 `results/source-public-launch-diagnostic-console-v1`; see
