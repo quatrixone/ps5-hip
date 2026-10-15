@@ -2,6 +2,11 @@
 
 Updated: 2026-10-14, America/New_York.
 
+Public synchronous copy source at `7880705` passed 58 host tests, a 74-object
+native package and independent review. The .40 deployment failed FTP verification;
+no copy execution occurred, and subsequent connectivity failed. See
+`../evidence/offline-source-public-copy.json`; G5 copy qualification remains open.
+
 Latest bounded G5 prerequisite: source-only Make at `7342726` and its reviewed
 v2 package passed public HIP initialization/device discovery and clean title
 teardown on .40. See `../evidence/native-source-make-bootstrap-success.json`.

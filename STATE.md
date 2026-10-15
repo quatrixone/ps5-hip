@@ -11,11 +11,21 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Latest offline G5 progress: `7880705` builds the public synchronous copy fixture
+with 58 host tests and 74 fresh native objects; independent package/ISA review
+passed. Synchronous completion failures now propagate through `hipMemcpy`.
+The .40 deployment failed during FTP verification; the copy title was never
+launched. A subsequent bounded diagnostic timed out and its health probe returned
+`No route to host`. Current installed-image integrity is unverified. The prior
+memory log was preserved, and all owned locks were released. Do not replay the
+consumed deployment or execute this candidate. See
+`evidence/offline-source-public-copy.json` and the resume instructions in `HANDOFF.md`.
+
 Latest G5 progress: source-built public HIP allocation/free passed on .40 at
 `be6e521`. Two distinct 257-byte and 4097-byte allocations, interior-pointer
 rejection without retirement, two frees, double-free rejection, watchdog join
 and clean title shutdown passed. The prior bootstrap image/log were preserved;
-services are healthy and the owned lock released. See
+services were healthy at that acceptance and the owned lock released. See
 `evidence/native-source-public-memory-success.json`. This qualifies bounded
 allocation ownership, not copied data or public HIP GPU dispatch. G5 stays open.
 
@@ -1376,3 +1386,5 @@ including the provider-fixed store and vector candidates.
 - 2026-10-13 | CLR | 347fa8c | .40 | failed: AppProfile readlink syscall58 before main; delayed idle/image/log checked | evidence/native-clr-app-profile-readlink-failure.json | repair path query
 
 - 2026-10-14 | Public HIP source build | 7ef291c | fresh GitHub-only clone, offline | pass: default make, 54 host tests, native core, 74-object title, FSELF/UFS audits | evidence/offline-main-source-build.json | independent candidate review before any console run
+
+- 2026-10-14 | G5 public copy | 7880705 | offline pass: 58 host tests, 74 objects, independent review; .40 FTP deployment failed, no execution | evidence/offline-source-public-copy.json | connectivity and full image verification before new reviewed deployment

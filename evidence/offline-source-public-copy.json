@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-14",
+  "source_commit": "7880705",
+  "status": "offline-pass-console-no-run",
+  "fixture": "public synchronous HIP copy",
+  "host_tests_passed": 58,
+  "native_objects": 74,
+  "review": {
+    "approved": true,
+    "scope": "Copy candidate deployment only; execution requires deployment review",
+    "fixture": "copy",
+    "manifest_sha256": "c24bac00fb0f01a95cf248b0c423db48512a386376238e8bc258bd2ed2c45ba2",
+    "package_sha256": "f09fe6dda7e33e4b759954e0f5ce2597bcc653d07715a668cf30d0ca2f0934f3",
+    "findings": [],
+    "checks": [
+      "74source/object/current-input hashes verified,selected title compiled first without changing original link order",
+      "Pinned upstream dependency/header identity checker passed;exact c64c1cbb adapted copy source and patch bound",
+      "Independent UFS fsck,six-file extraction,FSELF roundtrip passed",
+      "Public hipMemcpy and actual ihipMemcpy synchronous guard ISA inspected:wait return/status checked before release,hipErrorUnknown999 on failure",
+      "Main ISA calls genuine copies with289byte buffers,257byte interior payload,exact error1 checks,1734comparisons/6rejections;static host buffers retained",
+      "Raw provider imports and serialized SCE library/hash checks passed",
+      "Fixture-specific strict oracle/log,baseline memory package/log and preservation controls reviewed"
+    ],
+    "limits": [
+      "No runtime copy acceptance yet",
+      "CPU copy operations over native direct-memory mappings;no GPU DMA or kernel execution claim",
+      "Bounded synchronous semantics only;async behavior not qualified",
+      "Reviewer did not contact console"
+    ],
+    "evidence": "results/source-copy-independent-review-v1/artifact-checks.json"
+  },
+  "console_phases": {
+    "deploy": {
+      "phase": "deploy",
+      "host": "192.168.4.40",
+      "title_id": "PPSA99014",
+      "accepted": false,
+      "launched": false,
+      "manifest_sha256": "c24bac00fb0f01a95cf248b0c423db48512a386376238e8bc258bd2ed2c45ba2",
+      "package_sha256": "f09fe6dda7e33e4b759954e0f5ce2597bcc653d07715a668cf30d0ca2f0934f3",
+      "log_backup": "/data/ps5-hip/results/ps5-hip-public-memory.log.1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b.preserved",
+      "error": "RuntimeError('FTP read bound')",
+      "healthy_after": true,
+      "lock_released": true
+    },
+    "inspect": {
+      "phase": "inspect",
+      "host": "192.168.4.40",
+      "title_id": "PPSA99014",
+      "accepted": false,
+      "launched": false,
+      "manifest_sha256": "c24bac00fb0f01a95cf248b0c423db48512a386376238e8bc258bd2ed2c45ba2",
+      "package_sha256": "f09fe6dda7e33e4b759954e0f5ce2597bcc653d07715a668cf30d0ca2f0934f3",
+      "error": "RuntimeError('read time bound')",
+      "healthy_after": true,
+      "lock_released": true
+    },
+    "measure": {
+      "phase": "measure",
+      "host": "192.168.4.40",
+      "title_id": "PPSA99014",
+      "accepted": false,
+      "launched": false,
+      "manifest_sha256": "c24bac00fb0f01a95cf248b0c423db48512a386376238e8bc258bd2ed2c45ba2",
+      "package_sha256": "f09fe6dda7e33e4b759954e0f5ce2597bcc653d07715a668cf30d0ca2f0934f3",
+      "error": "TimeoutError('timed out')",
+      "health_error": "OSError(113, 'No route to host')",
+      "lock_released": true
+    }
+  },
+  "installed_image_integrity": "unverified",
+  "copy_execution": false,
+  "limits": [
+    "Synchronous completion error propagation only; async behavior unqualified.",
+    "Native fixture has not run; no GPU DMA or public HIP kernel claim.",
+    "Deployment consumed; do not retry or approve execution.",
+    "Restore connectivity and verify full installed image plus preserved baseline log before preparing a distinct reviewed deployment."
+  ],
+  "raw_evidence_sha256": {
+    "results/source-copy-independent-review-v1/review.json": "64e889f3fe5bcee3c22d19525a360d3b6859bfe2dc0717a0f96e1f9a8e72583d",
+    "results/source-copy-console-v1/deploy/receipt.json": "927954823c628ffb676e1e2e7745f62d162b258779e40a9ec3a881fad83dc1aa",
+    "results/source-copy-console-v1/inspect/receipt.json": "de7d990dcf65d1c71a8f44d16c13433b980e01da5677add2cc648254b30b9ff2",
+    "results/source-copy-console-v1/measure/receipt.json": "4f42631efc6363ffd13b9211af60a5d090f93b35c9f55151cc0759df8d282e7b",
+    "results/source-copy-make-fixed.log": "884a1e2260c01e2a9e5bb63fc6bcda8cc5dbf3a1a630a03c0df1ce8d53b62885",
+    "results/source-copy-make-resumed.log": "82d303542dc25de270cfd8fef5929e3cf419f6d4e4453b382c2edcf88926d54a"
+  }
+}

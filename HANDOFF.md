@@ -18,6 +18,27 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
+Latest source milestone, pushed to `main`: `7880705` adds a source-built public
+synchronous HIP copy fixture and propagates failed completion/status as an error
+before releasing the command. All 58 host tests and the 74-object native package
+passed; independent package/ISA review approved deployment only. See
+`evidence/offline-source-public-copy.json`. Async copies and public HIP GPU
+dispatch remain unqualified.
+
+**Current console hold:** `results/source-copy-console-v1` deployment failed on
+an FTP read bound before recorded image preservation/promotion. No copy launch
+occurred. The prior memory log was renamed to its SHA-suffixed `.preserved` path;
+the uploaded temporary image and all receipts must be retained. A read-only
+installed-image fetch exceeded 120 seconds; a bounded follow-up timed out and
+the final health probe returned `No route to host`. All owned locks were released.
+Current installed-image integrity is unknown; service health from earlier phases
+does not prove it. Do not replay v1 deployment or bind its execution approval.
+After connectivity is restored, establish complete installed-image and preserved
+log hashes read-only. Any further deployment needs a distinct frozen, reviewed
+candidate that explicitly handles the already-preserved baseline log. Preserve
+raw `deploy`, `inspect`, and `measure` phase receipts. Offline implementation can
+continue while console testing is held.
+
 Latest progress: source `be6e521` adds the memory fixture to the supported Make
 pipeline. All 57 host tests and 74 fresh-object native build/package checks
 passed. The independently reviewed `results/source-memory-console-v1` case
