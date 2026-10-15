@@ -18,48 +18,39 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## What is done
 
-The full public HIP host-runtime qualifier is now source-only:
-`make public-hip-host-test QUALIFICATION_DIR=results/<new-directory>` builds
-69 genuine HIP/ROCclr, adapter and model units without old workspace receipts.
-The fresh v3 run passed all ten ASan/UBSan cases (initialization, default/TLS
-streams, creation/join/self-destruction/reset failures, and public allocation).
-It binds 678 included files and compiler/linker identities; intentional retention
-cases disable leak detection and check exact retained ownership instead.
-See `evidence/offline-public-hip-source-model.json`. Transport and platform
-providers are modeled; public module loading, GPU work and console copies remain
-unqualified. The parser portability fix needed for Clang18/libstdc++15 is pushed
-at `66c3ee6`; it also passed all 60 host tests and PS5 cross-compilation.
+The public HIP loader now admits bounded owned raw AOT files, validates the copy
+before publication, keeps bytes stable through program destruction, and uses
+`addDeviceProgram`/`load` without unavailable runtime compiler services. Pointer-only
+images return NotSupported without dereference. Single-device admission and
+one extraction attempt are explicit. See `evidence/offline-public-module-aot.json`.
 
-Next loader implementation: use a bounded owned file read for raw AOT bytes,
-validate the complete copy before publishing module state, and keep its storage
-stable until all device programs are destroyed. The current file helpers have
-stale-descriptor and failed-mapping output hazards; do not borrow their output
-ownership on failure. Skip the upstream compiler build only for validated AOT,
-using the existing `addDeviceProgram`/`load` path. Qualify real public
-load/lookup/unload through the new host runner before preparing a console case.
+Fresh source model `results/public-module-aot-model-v1` passed all twelve cases
+under ASan/UBSan across 69 genuine HIP/ROCclr units. Its original model/runner
+inputs are archived beside the receipt. `results/public-module-aot-extended-check`
+relinked only the updated model against those objects and passed both module
+modes with real gfx1030 rejection, simultaneous modules and effective unbundler
+flag assertions. All 61 host tests passed; native hip_fatbin.cpp compiled.
+The focused actual-extractor harness injects read/close/allocation/parser failures
+and repeated attempts; independent review found no ownership defect.
 
-Public module function discovery now enumerates the validated, loaded PS5 AOT
-kernel table instead of returning success with an empty list when COMGR is
-absent. Unloaded/empty/invalid tables fail without changing caller output.
-All 60 host tests passed, including sanitizer positive/negative controls;
-the changed native translation unit compiled and independent review passed
-after correcting an ordering assumption in the test. See
-`evidence/offline-public-module-symbols.json`. This still does not qualify
-public module loading or kernel execution. Next, qualify the real module-loading
-path and its code-object admission without relying on unavailable compiler
-services; then exercise public lookup/launch with retained module ownership.
+`results/public-module-aot-model-v2` is a fresh full-source rerun of the expanded
+suite (session 69856 at handoff); poll its existing handle before any restart.
+Do not claim this run passed until its receipt and exact mode results are checked.
+The implementation and model inputs must remain unchanged while it runs.
+An untracked local draft of the next native module client is in
+`tools/public_hip_module_console_title.cpp` and its v2 native object compiles;
+it is not packaged or console-qualified. Its loader-only backend factory rejects
+GPU creation, and its acceptance checks reject launches, allocations and queues.
+Finish the native package/controls and independent review after host acceptance.
 
-The source build now applies an exact module-extraction error guard. Unexpected
-runtime-unbundler errors previously fell through to a null per-device entry;
-the PS5 path now returns those errors and validates the extracted list before
-indexing or allocating programs. The actual function passes sanitizer regression
-tests, its unpatched negative control reproduces the fault, and the modified
-translation unit cross-compiles for PS5. See
-`evidence/offline-public-module-errors.json`. No full package rebuild or console
-run is claimed for this change. Public module loading remains open: compiler
-services are unavailable in the current profile, the runtime-unbundler path is
-not enabled by this fix, and public function enumeration/execution still needs
-qualification. Continue that work offline while .40 connectivity is unavailable.
+The host qualifier is reproducible from source with
+`make public-hip-host-test QUALIFICATION_DIR=results/<new-directory>`; no old
+workspace receipts are needed. Platform providers and transport are modeled,
+so this does not establish native PS5 loading or GPU execution. The earlier
+source-only ten-case model and symbol/error-guard milestones remain recorded in
+`evidence/offline-public-hip-source-model.json`,
+`evidence/offline-public-module-symbols.json`, and
+`evidence/offline-public-module-errors.json`.
 
 Latest source milestone, pushed to `main`: `7880705` adds a source-built public
 synchronous HIP copy fixture and propagates failed completion/status as an error

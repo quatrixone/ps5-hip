@@ -5,9 +5,11 @@
 #include <hip/hip_runtime.h>
 #include "hip_internal.hpp"
 #include "platform/runtime.hpp"
+#include "utils/flags.hpp"
 #include <atomic>
 #include <thread>
 #include <cerrno>
+#include <dirent.h>
 static ps5hip::clr::Observation public_observed;
 static bool init_failure=false;
 static unsigned final_kind=0;
@@ -16,7 +18,7 @@ struct FinalObserver {
   if(final_kind==0)return;
   const bool retained=final_kind==4||final_kind==5;
   checked(public_observed.gate_destroyed==!retained,__LINE__);
-  const unsigned expected=(final_kind==2||final_kind==6)?1:(final_kind==3?4:3);
+  const unsigned expected=(final_kind==2||final_kind==6||final_kind==7)?1:(final_kind==3?4:3);
   checked(public_observed.queues==expected,__LINE__);
   checked(public_observed.retired_queues==(final_kind==5?2:expected),__LINE__);
   const unsigned expected_allocations=final_kind==6?1:0;
@@ -44,6 +46,10 @@ static void hold(void*){
 }
 static void self_destroy(void* p){self_result.store(int(hipStreamDestroy(static_cast<hipStream_t>(p))),std::memory_order_release);}
 static void ok(hipError_t e){if(e!=hipSuccess){std::fprintf(stderr,"HIP_ADMISSION_ERROR %d\n",int(e));std::abort();}}
+static unsigned descriptor_count(){
+ auto* d=opendir("/proc/self/fd");checked(d!=nullptr,__LINE__);unsigned n=0;
+ while(readdir(d))++n;checked(closedir(d)==0,__LINE__);return n;
+}
 int main(int argc,char** argv){
  const std::string mode=argc>1?argv[1]:"normal";
  const bool reset_case=mode=="reset"||mode=="reset-join-fail";
@@ -52,10 +58,50 @@ int main(int argc,char** argv){
   std::puts("HIP_PUBLIC_PASS mode=init-fail gpu_execution=false");return 0;
  }
  final_kind=mode=="create-fail"?2:((mode=="tls"||mode=="default")?3:((mode=="join-fail"||mode=="reset-join-fail")?4:(mode=="self-destroy"?5:(mode=="memory"?6:1))));
+ const bool module_case=mode=="module"||mode=="module-unbundler";
+ if(module_case)final_kind=7;
  ok(hipInit(0));int count=0;ok(hipGetDeviceCount(&count));checked(count==1,__LINE__);
  hipMemPool_t pool=nullptr;ok(hipDeviceGetDefaultMemPool(&pool,0));checked(pool!=nullptr,__LINE__);
  // Warm the genuine auxiliary thread setup before narrowly arming a queue fault.
  hipStream_t warm=nullptr;ok(hipStreamCreate(&warm));ok(hipStreamDestroy(warm));
+ if(module_case){
+  checked(argc==4,__LINE__);const std::string path=argv[2];
+  checked(HIP_USE_RUNTIME_UNBUNDLER==(mode=="module-unbundler"),__LINE__);
+  std::ifstream input(path,std::ios::binary);std::vector<char> bytes((std::istreambuf_iterator<char>(input)),{});
+  checked(bytes.size()>64,__LINE__);input.close();
+  const unsigned fds=descriptor_count();
+  hipModule_t module=nullptr;
+  checked(hipModuleLoad(nullptr,path.c_str())==hipErrorInvalidValue,__LINE__);
+  checked(hipModuleLoadData(&module,reinterpret_cast<void*>(1))==hipErrorNotSupported&&module==nullptr,__LINE__);
+  checked(hipModuleLoad(&module,(path+".missing").c_str())==hipErrorFileNotFound&&module==nullptr,__LINE__);
+  checked(hipModuleLoad(&module,argv[3])==hipErrorNoBinaryForGpu&&module==nullptr,__LINE__);
+  const std::string invalid=path+".invalid";
+  for(size_t size:{size_t(0),size_t(63),size_t(128),size_t(64*1024*1024+1)}){
+   {std::ofstream out(invalid,std::ios::binary);if(size){out.seekp(size-1);out.put(0);}checked(out.good(),__LINE__);}
+   checked(hipModuleLoad(&module,invalid.c_str())==hipErrorInvalidImage&&module==nullptr,__LINE__);
+   checked(std::remove(invalid.c_str())==0,__LINE__);
+  }
+  for(unsigned cycle=0;cycle<8;++cycle){
+   const std::string owned=path+".owned";
+   {std::ofstream out(owned,std::ios::binary);out.write(bytes.data(),bytes.size());checked(out.good(),__LINE__);}
+   ok(hipModuleLoad(&module,owned.c_str()));checked(module!=nullptr,__LINE__);
+   hipModule_t independent=nullptr;ok(hipModuleLoad(&independent,owned.c_str()));
+   checked(independent&&independent!=module,__LINE__);
+   checked(std::remove(owned.c_str())==0,__LINE__);
+   hipFunction_t first=nullptr,second=nullptr,missing=nullptr;
+   ok(hipModuleGetFunction(&first,module,"indexed_store"));ok(hipModuleGetFunction(&second,module,"vector_add"));
+   checked(first&&second&&first!=second,__LINE__);
+   hipFunction_t independent_function=nullptr;
+   ok(hipModuleGetFunction(&independent_function,independent,"indexed_store"));
+   checked(independent_function&&independent_function!=first&&independent_function!=second,__LINE__);
+   checked(hipModuleGetFunction(&missing,module,"absent_kernel")==hipErrorNotFound&&missing==nullptr,__LINE__);
+   ok(hipModuleUnload(module));checked(hipModuleUnload(module)==hipErrorNotFound,__LINE__);module=nullptr;
+   hipFunction_t retained=nullptr;ok(hipModuleGetFunction(&retained,independent,"indexed_store"));
+   checked(retained==independent_function,__LINE__);ok(hipModuleUnload(independent));
+  }
+  checked(descriptor_count()==fds&&!backend_calls&&!submits&&allocations.empty(),__LINE__);
+  std::printf("HIP_PUBLIC_PASS mode=%s gpu_execution=false\n",mode.c_str());return 0;
+ }
  if(mode=="memory"){
   void* pointer=nullptr;
   checked(hipMalloc(nullptr,256)==hipErrorInvalidValue,__LINE__);

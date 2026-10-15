@@ -11,8 +11,18 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Public file-backed AOT module loading now passes the genuine HIP host model:
+load, function lookup and unload, copied-file ownership after unlink, malformed
+image rejection, and both runtime-unbundler settings. The fresh 69-unit v1
+passed twelve ASan/UBSan modes; an incremental extension additionally passed
+real gfx1030 rejection, simultaneous-module isolation and effective flag checks.
+All 61 host tests and the native loader translation-unit compile passed.
+See `evidence/offline-public-module-aot.json`. A second fresh expanded-suite run
+is pending. Pointer-only module images remain explicitly unsupported; no public
+module GPU execution, full native package or console module run is claimed.
+
 Full public HIP host-runtime qualification now builds directly from pinned source
-with `make public-hip-host-test`: 69 translation units and ten ASan/UBSan cases
+with `make public-hip-host-test`: 69 translation units; the original ten ASan/UBSan cases
 passed, including exact cleanup/retention outcomes. No historical workspace
 receipts are needed. See `evidence/offline-public-hip-source-model.json`.
 This is a host model with simulated providers/transport, not console acceptance.
@@ -20,8 +30,8 @@ This is a host model with simulated providers/transport, not console acceptance.
 Public function discovery now exposes the validated AOT kernel table after load,
 with atomic output publication and explicit invalid-state failures. Sixty host
 tests, native object compilation and independent review passed; see
-`evidence/offline-public-module-symbols.json`. Real public module load/launch
-qualification remains open; .40 is still unreachable.
+`evidence/offline-public-module-symbols.json`. Public module load/lookup/unload is now host-qualified above; public launch and
+console qualification remain open. .40 connectivity has not been restored.
 
 Public module-loading prerequisite: extraction failures now propagate instead
 of dereferencing uninitialized device entries. Malformed result lists are rejected
@@ -1280,6 +1290,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | offline AOT load/lookup/unload and failure ownership | evidence/offline-public-module-aot.json | next: fresh expanded model, native package, .40 recovery
 
 - 2026-10-14 | G5 memory | be6e521 | .40 | pass: 2 public allocations/frees, invalid-free rejection, clean teardown | evidence/native-source-public-memory-success.json | public copies/launch; G5 open
 

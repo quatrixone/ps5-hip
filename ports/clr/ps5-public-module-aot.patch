@@ -1,0 +1,117 @@
+--- a/hipamd/src/hip_fatbin.hpp
++++ b/hipamd/src/hip_fatbin.hpp
+@@ -62,6 +62,12 @@
+ public:
+   FatBinaryInfo(const char* fname, const void* image);
+   ~FatBinaryInfo();
++#if defined(WITH_PS5_DEVICE)
++  FatBinaryInfo(const FatBinaryInfo&) = delete;
++  FatBinaryInfo& operator=(const FatBinaryInfo&) = delete;
++  FatBinaryInfo(FatBinaryInfo&&) = delete;
++  FatBinaryInfo& operator=(FatBinaryInfo&&) = delete;
++#endif
+ 
+   // Loads Fat binary from file or image, unbundles COs for devices.
+   hipError_t ExtractFatBinaryUsingCOMGR(const std::vector<hip::Device*>& devices);
+@@ -109,6 +115,10 @@
+   }
+ 
+ private:
++#if defined(WITH_PS5_DEVICE)
++  bool ps5_extract_attempted_ = false;
++  std::vector<unsigned char> ps5_image_storage_;
++#endif
+   std::string fname_;        //!< File name
+   amd::Os::FileDesc fdesc_;  //!< File descriptor
+   size_t fsize_;             //!< Total file size
+--- a/hipamd/src/hip_fatbin.cpp
++++ b/hipamd/src/hip_fatbin.cpp
+@@ -21,6 +21,12 @@
+ */
+ 
+ #include "hip_fatbin.hpp"
++#if defined(WITH_PS5_DEVICE)
++#include "ps5hip/code_object.h"
++#include <cstdio>
++#include <memory>
++#include <new>
++#endif
+ 
+ #include <unordered_map>
+ #include "hip_code_object.hpp"
+@@ -328,6 +334,45 @@
+ }
+ 
+ hipError_t FatBinaryInfo::ExtractFatBinary(const std::vector<hip::Device*>& devices) {
++#if defined(WITH_PS5_DEVICE)
++  if (ps5_extract_attempted_) return hipErrorInvalidValue;
++  ps5_extract_attempted_ = true;
++  // Pointer-only images have no caller-supplied extent in this API. Do not
++  // inspect their headers until a bounded memory-image admission path exists.
++  if (fname_.empty()) return hipErrorNotSupported;
++  if (devices.size() != 1 || devices[0] == nullptr || devices[0]->deviceId() < 0 ||
++      static_cast<size_t>(devices[0]->deviceId()) >= fatbin_dev_info_.size()) {
++    return hipErrorInvalidDevice;
++  }
++  const int id = devices[0]->deviceId();
++  if (fatbin_dev_info_[id] != nullptr) return hipErrorInvalidValue;
++  try {
++    std::unique_ptr<std::FILE, decltype(&std::fclose)> file(std::fopen(fname_.c_str(), "rb"), &std::fclose);
++    if (!file) return hipErrorFileNotFound;
++    if (std::fseek(file.get(), 0, SEEK_END) != 0) return hipErrorInvalidImage;
++    const long size = std::ftell(file.get());
++    if (size < 64 || size > 64 * 1024 * 1024 || std::fseek(file.get(), 0, SEEK_SET) != 0) {
++      return hipErrorInvalidImage;
++    }
++    std::vector<unsigned char> bytes(static_cast<size_t>(size));
++    if (std::fread(bytes.data(), 1, bytes.size(), file.get()) != bytes.size() ||
++        std::fgetc(file.get()) != EOF || std::ferror(file.get())) return hipErrorInvalidImage;
++    if (std::fclose(file.release()) != 0) return hipErrorInvalidImage;
++    const auto object = ps5hip::inspect_code_object(bytes.data(), bytes.size());
++    if (object.target != "gfx1013") return hipErrorNoBinaryForGpu;
++    // Programs may borrow this storage; never move/resize it after publication.
++    ps5_image_storage_ = std::move(bytes);
++    image_ = ps5_image_storage_.data();
++    auto info = std::make_unique<FatBinaryDeviceInfo>(image_, ps5_image_storage_.size(), 0);
++    info->program_ = new amd::Program(*devices[0]->asContext());
++    fatbin_dev_info_[id] = info.release();
++    return hipSuccess;
++  } catch (const std::bad_alloc&) {
++    return hipErrorOutOfMemory;
++  } catch (const ps5hip::ObjectError&) {
++    return hipErrorInvalidImage;
++  }
++#else
+   if (!HIP_USE_RUNTIME_UNBUNDLER) {
+     return ExtractFatBinaryUsingCOMGR(devices);
+   }
+@@ -440,6 +485,7 @@
+   }
+ 
+   return hipSuccess;
++#endif
+ }
+ 
+ hipError_t FatBinaryInfo::AddDevProgram(const int device_id) {
+@@ -474,6 +520,13 @@
+ 
+   // If Program was already built skip this step and return success
+   FatBinaryDeviceInfo* fbd_info = fatbin_dev_info_[device_id];
++#if defined(WITH_PS5_DEVICE)
++  // addDeviceProgram validates the executable; no runtime compiler is present.
++  if (fbd_info->prog_built_) return hipSuccess;
++  if (!fbd_info->program_->load()) return hipErrorNoBinaryForGpu;
++  fbd_info->prog_built_ = true;
++  return hipSuccess;
++#else
+   if (fbd_info->prog_built_ == false) {
+     if(CL_SUCCESS != fbd_info->program_->build(g_devices[device_id]->devices(),
+                                                nullptr, nullptr, nullptr,
+@@ -487,6 +540,7 @@
+     return hipErrorNoBinaryForGpu;
+   }
+   return hipSuccess;
++#endif
+ }
+ 
+ // ================================================================================================

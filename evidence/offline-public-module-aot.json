@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-pass",
+  "scope": "File-backed raw gfx1013 AOT admission through genuine public HIP load, lookup and unload",
+  "validation": {
+    "fresh_source_model": {
+      "units": 69,
+      "modes_passed": 12,
+      "included_files": 681,
+      "path": "results/public-module-aot-model-v1",
+      "sanitizers": "ASan/UBSan; leak detection except three intentional retention modes with exact ownership checks"
+    },
+    "extended_model": {
+      "modes_passed": 2,
+      "path": "results/public-module-aot-extended-check",
+      "classification": "incremental model rebuild/relink against unchanged v1 runtime objects",
+      "checks": [
+        "actual gfx1030 rejection",
+        "effective runtime-unbundler flag",
+        "two simultaneous modules and surviving function lookup",
+        "owned image survives source-file unlink",
+        "malformed/size errors and unsupported pointer-only images",
+        "descriptor balance and exact final teardown"
+      ]
+    },
+    "host_tests_passed": 61,
+    "failure_injection": "Actual extractor with modeled parser/destructors: read/close errors, three allocation sites, parser errors, repeated attempts, invalid devices, no pointer dereference",
+    "native": "Modified hip_fatbin.cpp cross-compiled; no full package claimed",
+    "independent_review": "Clear for scoped offline source milestone; fresh v2 artifact audit pending"
+  },
+  "limits": [
+    "Fresh expanded full-source v2 run is still pending.",
+    "Host platform providers and packet transport are modeled; no GPU or console execution.",
+    "Pointer-only images remain NotSupported; filename-backed raw code objects only.",
+    "Native module package and console acceptance remain open.",
+    "Console .40 recovery and installed-image verification remain required before another reviewed deployment."
+  ],
+  "input_sha256": {
+    "ports/clr/ps5-public-module-aot.patch": "6079dd22cb0b71cab3ab67aa0edb59827082fc3f3517b941a5b2176e9c68e4ea",
+    "ports/clr/ps5-public-module-aot.json": "9c8066ae091e0590beb77ce7231355e2cbdaffcf0bc4be524bfe8bd193263eab",
+    "tools/prepare_public_hip_aot.py": "9a650ac07ff8a6fa9e6fcdb454d007e4a7a439170a7963ed8ef9dea4e795f941",
+    "tools/build_public_hip.py": "5b60491665ef889039ed97c0edb5e34eb05e83d82fbd9b5b60a0491f5a81f75d",
+    "tools/qualify_public_hip_source.py": "7f9a949e5b2e2c43e1c5c0308c15b4da2d1135c107022645ad7cd6cffecb01a3",
+    "tests/hip_admission_model.cpp": "b67277d4e9fc93fbb0d48c1bd14cc1fe295c95d94ef1006107e1695c09a036d9",
+    "tests/public_hip_aot_test.py": "36fe30e355f780e663ba9e897fb4f72e4ea0b78a17e9ff44032e8efeb4817dbf",
+    "results/public-module-aot-model-v1/receipt.json": "9d9dfe10a02b0569121698c8ef6f04790425bd16659a54d2e48f1b1984a3af8e",
+    "results/public-module-aot-model-v1/model": "7745ae79c460152e4e04f109ba147ad7cae3815c363f7e3ea0f86d59236ba072",
+    "results/public-module-aot-model-v1/hip_admission_model.input.cpp": "4d5dfb3132ed7ff3837fca3e51afef954a5db2d2c60309b7c7fbd0aa6d42b227",
+    "results/public-module-aot-model-v1/qualify_public_hip_source.input.py": "4645110c039645c84baac944891183d6c9a516f3aab0d50dccce28e3b06ab2c5",
+    "results/public-module-aot-extended-check/receipt.json": "2c81a3c990b7c17843be124c3fe97109345555ef6f57fffa8d9c769ea3cdaccc",
+    "results/public-module-aot-extended-check/model": "b224f0eb08f9fba86991067a0e99442313cb8c12a2b78e64911a879868c68ed3",
+    "results/public-module-aot-host-test.log": "fcaa52e73da0ccb17821fc8ea3a1d1f567f993fe823861764ba2679ad7bf3ec9",
+    "results/public-module-aot-native-v1/command.json": "3b7f63574371565366ea61a92953ea6c9b223e1c1ffc8facdb4192a1cd40fba5",
+    "results/public-module-aot-native-v1/hip_fatbin.o": "2633cbd586800ab23357de288ff2ba231b67ef20a72c851360ecff5b1ce5da09",
+    "results/public-module-aot-model-v1/independent-review.json": "abc946024a1cda615d52f07720f0ae42ed5a272657cefbcf53a2d5078e737b34"
+  }
+}

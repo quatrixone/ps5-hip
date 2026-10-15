@@ -135,10 +135,13 @@ For full public HIP host-runtime qualification, run
 `make public-hip-host-test QUALIFICATION_DIR=results/public-hip-host-v1`.
 Use a new results directory for each run. This builds 69 genuine HIP/ROCclr and
 adapter translation units from the pinned sources, with ASan/UBSan, then runs
-ten separate initialization, thread-lifetime, shutdown and allocation cases.
+twelve separate initialization, thread-lifetime, shutdown, allocation and module cases.
+The module modes build gfx1013/gfx1030 fixtures, check owned file loading, target
+rejection, function lookup, independent modules and unload under both effective
+runtime-unbundler settings. Pointer-only image loading remains unsupported.
 It needs Linux Clang/LLD 18 and no historical workspace receipts or binaries.
 The runner verifies dependencies, records included files and toolchain hashes,
 and preserves each compile/run log. Leak detection is enabled for normal cases;
 the three intentional retention cases instead check exact retained ownership.
 Platform providers and packet transport are modeled: this does not qualify PS5
-execution, real GPU work, public module loading or the pending console copy case.
+execution, real GPU work, native public module loading or the pending console copy case.

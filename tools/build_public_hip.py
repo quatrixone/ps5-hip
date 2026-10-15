@@ -56,7 +56,8 @@ def build_inputs():
              "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
              "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
-             "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py"}
+             "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
+             "tools/prepare_public_hip_aot.py"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
         names.update(path.relative_to(ROOT).as_posix() for path in (ROOT / folder).rglob("*")
                      if path.is_file() and path.suffix in
@@ -103,7 +104,7 @@ def source_tree(output, fixture="bootstrap"):
         guard.write_text(sha(public / "hipamd/src/hip_gl.cpp") + "\n")
     if guard.read_text().strip() != sha(public / "hipamd/src/hip_gl.cpp"):
         raise RuntimeError("guarded HIP GL source changed")
-    run(output, "prepare-module", [sys.executable, ROOT / "tools/prepare_public_hip_module.py", public])
+    run(output, "prepare-module", [sys.executable, ROOT / "tools/prepare_public_hip_aot.py", public])
     run(output, "prepare-symbols", [sys.executable, ROOT / "tools/prepare_public_hip_symbols.py", public])
     if fixture == "memory":
         run(output, "prepare-memory", [sys.executable, ROOT / "tools/prepare_public_hip_memory.py", public])

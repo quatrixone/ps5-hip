@@ -1,0 +1,13 @@
+{
+  "patch_sha256": "6079dd22cb0b71cab3ab67aa0edb59827082fc3f3517b941a5b2176e9c68e4ea",
+  "files": {
+    "hipamd/src/hip_fatbin.hpp": {
+      "before": "ecf0a2eb0c123811d668a4e90e1356ed324f97b7719ecd99a4064d6431ce5a4e",
+      "after": "e63aaa5e51d8490316b2e30c602f162ccea6129b6453efbe25d764d96bca52c7"
+    },
+    "hipamd/src/hip_fatbin.cpp": {
+      "before": "d685dae2e23bfe08c96262bfac722e2941b3b92d9c67972cebb3530058d44a3a",
+      "after": "3a52685bf7692516df679304083f71562c77f4f57804615e5d00a5aec1cd34b7"
+    }
+  }
+}

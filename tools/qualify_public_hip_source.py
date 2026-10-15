@@ -29,13 +29,13 @@ def main():
     (output / 'dependency-check.log').write_text(dependency_check.stdout + dependency_check.stderr)
     dependency_check.check_returncode()
     toolchain = {}
-    for name in ('clang++-18', 'ld.lld-18'):
+    for name in ('clang++-18', 'ld.lld-18', 'llvm-readobj-18', 'llvm-objdump-18'):
         path = Path(shutil.which(name))
         toolchain[name] = {'path': str(path), 'resolved_path': str(path.resolve()), 'sha256': sha(path),
                           'version': subprocess.check_output([path, '--version'], text=True)}
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
-                 'tests/clr_adapter_model.cpp'):
+                 'tests/clr_adapter_model.cpp', 'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
     flags = [str(p) for p in compiler_flags(source)[1:]]
@@ -74,6 +74,7 @@ def main():
         record = {'argv': [str(p) for p in argv], 'exit_code': process.returncode}
         if env:
             record['sanitizer_environment'] = {key: env.get(key) for key in ('ASAN_OPTIONS', 'UBSAN_OPTIONS')}
+            record['runtime_environment'] = {'HIP_USE_RUNTIME_UNBUNDLER': env['HIP_USE_RUNTIME_UNBUNDLER']}
         (output / (label + '.json')).write_text(json.dumps(record, indent=2) + '\n')
         if process.returncode:
             raise RuntimeError(label + ': ' + process.stderr[-2500:])
@@ -100,25 +101,31 @@ def main():
             raise RuntimeError('header changed during compilation: ' + str(path))
         return obj
 
+    run('code-object', [sys.executable, ROOT / 'tools/build_canaries.py', '--output', output / 'canaries'])
+    code_object = output / 'canaries/gfx1013/canary.hsaco'
+    code_hash = sha(code_object)
+    wrong_target = output / 'canaries/gfx1030/canary.hsaco'
+    wrong_target_hash = sha(wrong_target)
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         objects = list(pool.map(compile_one, enumerate(units)))
     run('link', [toolchain['clang++-18']['path'], *flags, '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
                  '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *objects, '-o', output / 'model'])
     modes = ['normal', 'default', 'tls', 'init-fail', 'create-fail', 'join-fail',
-             'self-destroy', 'reset', 'reset-join-fail', 'memory']
+             'self-destroy', 'reset', 'reset-join-fail', 'memory', 'module', 'module-unbundler']
     for mode in modes:
         retained = mode in ('join-fail', 'self-destroy', 'reset-join-fail')
         env = dict(os.environ, ASAN_OPTIONS='protect_shadow_gap=0:halt_on_error=1:detect_leaks=' +
                    ('0' if retained else '1'), UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
-        text = run(mode, [output / 'model', mode], env)
+        env['HIP_USE_RUNTIME_UNBUNDLER'] = '1' if mode == 'module-unbundler' else '0'
+        text = run(mode, [output / 'model', mode, *([code_object, wrong_target] if mode.startswith('module') else [])], env)
         lines = text.splitlines()
         passed = 'HIP_PUBLIC_PASS mode=' + mode + ' gpu_execution=false'
-        if mode not in ('init-fail', 'memory', 'create-fail'):
+        if mode not in ('init-fail', 'memory', 'create-fail', 'module', 'module-unbundler'):
             passed += ' quarantine=' + str(int(retained))
         if lines.count(passed) != 1 or sum(line.startswith('HIP_PUBLIC_PASS ') for line in lines) != 1:
             raise RuntimeError('missing qualification marker: ' + mode)
         if mode != 'init-fail':
-            queues = 1 if mode in ('create-fail', 'memory') else 4 if mode in ('default', 'tls') else 3
+            queues = 1 if mode in ('create-fail', 'memory', 'module', 'module-unbundler') else 4 if mode in ('default', 'tls') else 3
             expected = f'HIP_PUBLIC_FINAL queues={queues} retired={2 if mode == "self-destroy" else queues} gate_destroyed={int(not retained)} retained={int(retained)}'
             if lines.count(expected) != 1 or sum(line.startswith('HIP_PUBLIC_FINAL ') for line in lines) != 1:
                 raise RuntimeError('missing exact lifetime result: ' + mode)
@@ -134,10 +141,14 @@ def main():
     for record in toolchain.values():
         if sha(record['path']) != record['sha256']:
             raise RuntimeError('toolchain changed during qualification')
+    if sha(code_object) != code_hash or sha(wrong_target) != wrong_target_hash:
+        raise RuntimeError('module fixture changed during qualification')
     receipt = {'classification': 'source-only-genuine-public-hip-model', 'source_units': len(units),
                'inputs': inputs, 'prepared_sources': source_hashes, 'modes': modes,
                'included_files': header_hashes, 'toolchain': toolchain,
                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+               'module_fixture_sha256': code_hash,
+               'wrong_target_fixture_sha256': wrong_target_hash,
                'leak_detection_disabled_modes': ['join-fail', 'self-destroy', 'reset-join-fail'],
                'gpu_executed': False, 'native_executed': False,
                'sanitizer': 'address,undefined', 'model_sha256': sha(output / 'model')}
