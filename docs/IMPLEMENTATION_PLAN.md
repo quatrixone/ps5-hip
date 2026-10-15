@@ -20,6 +20,8 @@ mark the full SDK goal complete. Historical next actions below are superseded.
 
 - 2026-10-15 | V1.1 partial | offline | CPU tools and quantization/RoPE tests passed; model metadata locked | evidence/offline-llm-v1-inputs.json | next: embedded-image registration, HIP compile/link probe, model conversion/reference fixtures
 
+- 2026-10-15 | V1.1 partial | offline | full source weights/tokenizer downloaded and hash-verified; nine tooling tests passed | evidence/offline-llm-model-source.json | next: pinned conversion and CPU reference fixtures
+
 See [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) for reproducible Make targets and
 source-inspected blockers. No model or native inference is qualified yet.
 

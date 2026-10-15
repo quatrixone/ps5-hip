@@ -1,0 +1,32 @@
+{
+    "schema":  1,
+    "classification":  "locked-source-download-reviewed",
+    "make_exit_code":  0,
+    "tests":  9,
+    "receipt_sha256":  "4a8c33800cbb3589db4f0f65f2437119b6a16096d16260a57aa15123a9ca0aeb",
+    "independently_checked_files":  [
+                                        "config.json",
+                                        "generation_config.json",
+                                        "tokenizer_config.json",
+                                        "special_tokens_map.json",
+                                        "tokenizer.json",
+                                        "tokenizer.model",
+                                        "README.md",
+                                        "model.safetensors.lfs",
+                                        "model.safetensors"
+                                    ],
+    "weights_independent_sha256sum":  "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "weights_bytes":  2200119864,
+    "tool_sha256":  "67125ba2b7656b9e5ab478278e5bf190476d4b2178c8dfbb92cd45dcd2912e15",
+    "lock_sha256":  "c0c2cd33e16d9a76708afdeb434dfb4ef501adc909e255adcfb2d427387e674d",
+    "converted":  false,
+    "model_executed":  false,
+    "console_contacted":  false,
+    "receipt_path":  "results/llm-model-source/receipt.json",
+    "revision":  "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "limits":  [
+                   "Source download only; no conversion or reference logits",
+                   "No native execution or model memory qualification",
+                   "Full weights remain ignored and are reproducibly fetched from the locked upstream URL"
+               ]
+}

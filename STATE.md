@@ -21,8 +21,9 @@ remain unproven. See `docs/LLM_V1_PROFILE.md` and
 `evidence/offline-llm-v1-inputs.json` for this partial V1.1 checkpoint.
 
 Optional Make targets fetch the client, build CPU tools and reproduce the
-locked TinyLlama metadata/header profile. Full weights, conversion, reference
-logits and actual model memory usage remain open. Next: compiler-generated
+locked TinyLlama metadata/header profile. `make llm-model-fetch` now downloads
+and verifies full source weights/tokenizer; see `evidence/offline-llm-model-source.json`.
+Conversion, reference logits and actual model memory usage remain open. Next: compiler-generated
 embedded-image registration and the effective HIP client compile/link probe,
 alongside pinned weight conversion and CPU fixtures.
 

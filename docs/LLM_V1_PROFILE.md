@@ -11,6 +11,7 @@ Run from WSL/Linux with the existing build prerequisites, including LLVM 18.1.8:
 make llm-deps-fetch
 make llm-cpu-reference LLM_CPU_BUILD_DIR=build/llm-cpu-reference
 make llm-model-profile LLM_PROFILE_DIR=results/llm-model-profile
+make llm-model-fetch LLM_MODEL_RECEIPT=results/llm-model-source/receipt.json
 ```
 
 These are optional targets; the default native SDK build does not fetch an LLM
@@ -34,6 +35,14 @@ contains metadata hashes, tensor inventory and the expected full weight hash
 from the Git LFS pointer. Full weights are not downloaded or hash-verified by
 this target. It is not a model converter or inference test.
 
+`llm-model-fetch` downloads the full locked source weights and metadata into
+ignored `models/tinyllama-source` (override `LLM_MODEL_DIR` if needed). It streams
+and verifies every file's exact size/SHA before publication, preserves corrupt
+existing files for inspection, and writes a receipt only after full-set checks.
+It requires about 2.2 GB of storage. Reuse verified files with a new
+`LLM_MODEL_RECEIPT` path; old evidence is not overwritten. This step still does
+not convert or run the model.
+
 ## Model and memory inventory
 
 Model: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`, revision
@@ -56,7 +65,8 @@ exclude activations, workspace, runtime/host allocations, padding and mappings.
 
 The source file is 2,200,119,864 bytes; its expected SHA-256 is
 `6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933`.
-Future weight download must verify it before conversion. Then lock converter
+The full source download has now verified that hash; see
+`../evidence/offline-llm-model-source.json`. Next lock converter
 dependencies/options and actual F16/Q4_0 outputs; refresh the memory inventory
 from those outputs and the client's real buffer allocation requests.
 

@@ -28,8 +28,10 @@ The inspected upstream master snapshot is
 `llm-deps-fetch`, `llm-cpu-reference` and `llm-model-profile` reproduce the
 client inputs, host tools and locked model metadata. Read `docs/LLM_V1_PROFILE.md`
 and `evidence/offline-llm-v1-inputs.json` before continuing. CPU quantization and
-RoPE tests passed; no weights, conversion, reference logits or native client
-execution are qualified. V1.1 remains partial. The next runtime blocker is
+RoPE tests passed. Full source weights/tokenizer are downloaded and hash-verified
+through `make llm-model-fetch`; see `evidence/offline-llm-model-source.json`.
+Conversion, reference logits and native client execution remain unqualified.
+V1.1 remains partial. The next runtime blocker is
 compiler-generated embedded-image registration; prepare the effective HIP
 compile/link probe and pinned model conversion/reference fixtures in parallel.
 

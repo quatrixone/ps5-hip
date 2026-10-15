@@ -17,6 +17,7 @@ help:
 	@echo 'make llm-deps-fetch  Fetch the optional locked standalone inference client'
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
 	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
+	@echo 'make llm-model-fetch  Fetch and verify locked source weights/tokenizer (2.2 GB; fresh receipt required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
@@ -78,6 +79,11 @@ QUALIFICATION_DIR ?= results/public-hip-host
 
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
+LLM_MODEL_DIR ?= models/tinyllama-source
+LLM_MODEL_RECEIPT ?= results/llm-model-source/receipt.json
+.PHONY: llm-model-fetch
+llm-model-fetch: llm-tool-test
+	$(PYTHON) tools/fetch_llm_model.py --output $(LLM_MODEL_DIR) --receipt $(LLM_MODEL_RECEIPT)
 .PHONY: llm-deps-fetch llm-cpu-reference llm-model-profile llm-tool-test
 llm-deps-fetch:
 	$(PYTHON) tools/fetch_locked_deps.py --llm-client --fetch
@@ -86,6 +92,7 @@ llm-cpu-reference: llm-deps-fetch llm-tool-test
 	$(PYTHON) tools/build_llm_cpu_reference.py --output $(LLM_CPU_BUILD_DIR)
 
 llm-tool-test:
+	$(PYTHON) tests/fetch_llm_model_test.py
 	$(PYTHON) tests/profile_llm_model_test.py
 	$(PYTHON) tests/llm_reference_test.py
 

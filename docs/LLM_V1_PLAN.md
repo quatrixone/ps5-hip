@@ -22,8 +22,9 @@ as an SDK example; ProsperoAI integration remains outside scope.
   identifies a Llama 2 architecture/tokenizer and Apache-2.0 license. Freeze the
   exact checkpoint, tokenizer, conversion inputs and generated GGUF hashes in
   V1.1. Metadata/tokenizer and the expected source weight hash are now locked in
-  `../models/tinyllama-1.1b-chat-v1.0.json`; full weights and converted GGUF are
-  not yet downloaded/qualified. It is not yet a supported model.
+  `../models/tinyllama-1.1b-chat-v1.0.json`. Full source weights/tokenizer are now
+  downloaded and hash-verified; converted GGUF and model execution remain
+  unqualified. It is not yet a supported native model.
 - CPU model loading, tokenization, scheduling and sampling are expected. Model
   tensor computation must use the PS5 HIP backend. Any temporary CPU tensor
   fallback is diagnostic and must be listed; it cannot silently satisfy final
