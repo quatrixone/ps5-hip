@@ -11,6 +11,11 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
+The stream candidate at `3160818` is frozen and independently approved for
+one WSL deployment. All 29 bound files, seven package files and 101 committed
+inputs match. See `evidence/offline-public-stream-deployment.json`; execution
+requires separate review of the exact successful deployment receipt.
+
 The next explicit-stream GPU/event fixture is implemented with a shared
 host/native oracle. Fresh sanitizer qualification passed 80 compilations,
 11 links and all prior cases plus event-ordered, missing-wait, no-write and

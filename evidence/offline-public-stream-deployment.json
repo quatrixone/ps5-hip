@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-stream-deployment-review",
+  "source_commit": "3160818eb183911fe9fe6b9909a049ecd016be24",
+  "package_sha256": "568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981",
+  "manifest_sha256": "786b716bd56642e72cb19242d4bdefa90201d298e77915b2528ada0a83435689",
+  "bound_files_verified": 29,
+  "package_files_verified": 7,
+  "committed_build_inputs_verified": 101,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-stream-console-v1/manifest.json": "786b716bd56642e72cb19242d4bdefa90201d298e77915b2528ada0a83435689",
+    "results/source-public-stream-console-v1/deployment-review.json": "34bda01139366b6687755bf1ddbc2630b9e444cd67a92e6635fab07272e92842",
+    "results/source-public-stream-console-v1/build-receipt.json": "24d8e6407f01d898324f135e0a1953278c02f430fc8de21798bf5918fefe62b8"
+  },
+  "limits": [
+    "Deployment only; exact successful deployment receipt needs independent execution review.",
+    "No new native GPU result yet; previous successful baseline remains current."
+  ]
+}
