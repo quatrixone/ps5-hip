@@ -18,6 +18,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+**Open correctness bug:** public `hipMemcpy2D` D2D can return success without
+copying any requested bytes. Independent sanitizer reproduction observed 0/32
+bytes copied for an 8-by-4 region with 16-byte pitches. The adapter rejects the
+rectangular command while upstream forces asynchronous enqueue. See
+`evidence/public-rect-copy-false-success.json`. Next work is checked rectangular
+D2D support and synchronous failure propagation; do not advertise pitched copies.
+
 Public asynchronous D2D dataflow now passes event-ordering and stale-data bypass
 cases in the fresh 77-compilation/eight-link qualifier. Both verify 128 bytes,
 three single frees and three retired queues. Independent review passed; see

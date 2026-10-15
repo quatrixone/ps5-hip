@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-15",
+  "status": "confirmed-public-rectangular-copy-false-success",
+  "source_commit": "21350374362cd4477c14a94f75020f64e00b6c46",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-rect-copy-diagnostic-v1/probe.cpp": "d5d71d0b68d57389cf7fa010a7b2168d970e5c044259d8c19efc5d2339bf038b",
+    "results/public-rect-copy-diagnostic-v1/compile.json": "25dad3a9f7b708a9d456d24f36c2eb5cc43f1914cba7e4bec4e132eaa89d5bc9",
+    "results/public-rect-copy-diagnostic-v1/link.json": "fb0229e96a253e4b0924c87079c885cedff671d55f25c8a4710277fe4fd7c0c0",
+    "results/public-rect-copy-diagnostic-v1/run.json": "de48f6dde6a2b5499637fa528cdd7c94bc31b7b0655dc41a3e060951b7e00f54",
+    "results/public-rect-copy-diagnostic-v1/run.stdout": "2bdd9ff702ae204c940a145d0dbb6a594b599e2ae486a617b74e0d0970506734",
+    "results/public-rect-copy-diagnostic-v1/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-rect-copy-diagnostic-v1/independent-review.json": "ea57882ce022a376ff58a6971623df618102a0464499fe78b37bd199ab68be2d"
+  },
+  "observed": {
+    "api": "hipMemcpy2D",
+    "direction": "device-to-device",
+    "source_bytes": 128,
+    "destination_bytes": 128,
+    "source_pitch": 16,
+    "destination_pitch": 16,
+    "width_bytes": 8,
+    "height": 4,
+    "returned_status": 0,
+    "expected_copied_bytes": 32,
+    "actual_matching_bytes": 0,
+    "allocations": 3,
+    "frees": 3,
+    "retired_queues": 3
+  },
+  "cause": [
+    "Adapter submitCopyMemory rejects CL_COMMAND_COPY_BUFFER_RECT.",
+    "Upstream ihipMemcpyParam3D forces D2D to async enqueue even for this synchronous public call, returning success before the command rejection."
+  ],
+  "next": [
+    "Implement checked rectangular D2D layout and span admission before writing.",
+    "Preserve caller synchronous intent and propagate command failure.",
+    "Qualify exact 2D/3D data and padding plus invalid/overflow rejection; preserve this failing diagnostic."
+  ],
+  "limits": [
+    "Supplemental host diagnostic reuses previously qualified runtime objects.",
+    "No console or native execution; no production implementation change in this finding."
+  ],
+  "independent_review": {
+    "path": "results/public-rect-copy-diagnostic-v1/independent-review.json",
+    "sha256": "ea57882ce022a376ff58a6971623df618102a0464499fe78b37bd199ab68be2d",
+    "deployment_approved": false
+  }
+}
