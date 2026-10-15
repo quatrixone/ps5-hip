@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The launch candidate is frozen at `6f5167e` and independently verified offline:
+29 bound files, seven package files and 86 build inputs match. See
+`evidence/offline-frozen-public-launch.json`. No operational approval or console
+contact occurred. Owner recovery status, remote baseline verification and a
+separate deployment review remain required.
+
 `make console-controls` now builds the read-only teardown helper as well as the
 launch/close controllers. Repeated invocations verify the successful receipt,
 artifact and input identities instead of accepting a failed build's receipt.
@@ -1323,6 +1329,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | frozen public launch identity/preservation review, no deployment approval | evidence/offline-frozen-public-launch.json | next: .40 recovery and operational review
 
 - 2026-10-15 | G5 | main | source-only Make console helpers with failed-build/tamper rejection | evidence/offline-source-console-controls.json | next: freeze reviewed launch candidate and recover .40
 

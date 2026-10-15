@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-15",
+  "status": "frozen-offline-identity-pass-console-not-run",
+  "candidate": "results/source-launch-console-v1",
+  "workspace": "/home/denis/ps5-hip-module-package",
+  "source_commit": "6f5167e14de8ce6f6089819e023207a7069a5e37",
+  "manifest_sha256": "c9f6d3165fdef82fac4424dfa52c8e6dbb7a7fba0a9387ed88416bc25304c33d",
+  "package_sha256": "b872496cad98caaece8242a7dc6fe7db1b4bda658c216b200170c1b2ffb29e92",
+  "review_sha256": "a5d836e55a0fcc3823516e0467b7ecbf4b05e8bc6e48a972d131bdf54e998c78",
+  "bound_files_verified": 29,
+  "package_files_verified": 7,
+  "build_inputs_verified": 86,
+  "preservation_requirements": {
+    "baseline_image_sha256": "37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5",
+    "baseline_log_sha256": "1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b",
+    "baseline_log_preserved": true,
+    "baseline_log_fixture": "memory"
+  },
+  "deployment_authorized": false,
+  "console_contacted": false,
+  "limits": [
+    "Console recovery and current installed image remain unverified",
+    "Baseline hashes are intended admission requirements, not fresh observations of remote state",
+    "No deployment or execution approval; a separate operational review is required after recovery evidence",
+    "No new hardware correctness or GPU execution claim"
+  ]
+}

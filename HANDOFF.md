@@ -16,6 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Frozen launch candidate
+
+`/home/denis/ps5-hip-module-package/results/source-launch-console-v1` is frozen
+at `6f5167e` and passed independent offline identity review: all 29 bound files,
+seven packaged files and 86 build inputs match. See
+`evidence/offline-frozen-public-launch.json`. Its `offline-review.json` explicitly
+sets `approved:false`; operational `review.json` is absent. This is not deployment
+approval. Preserve this candidate and its source/control identities while further
+implementation proceeds; later source changes require a distinct candidate.
+
+Recovery status from the owner remains pending. After recovery, obtain complete
+read-only installed-image and preserved-memory-log hashes, verify idle/health
+state, and request the independent operational review before any deployment.
+Expected baseline hashes in this manifest are requirements, not current console
+observations. Do not replay prior consumed controls or automatically retry .40.
+
 ## Console preparation checkpoint
 
 `make console-controls` now builds the missing teardown helper from pinned source.
