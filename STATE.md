@@ -11,6 +11,13 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Replay backing samples qualified offline
 
+Deployment checkpoint: the frozen backing-measurement package was installed and
+read back on idle .40 after the full settling period. The previous two-kernel
+image/log are preserved; services are healthy and both locks released. See
+`evidence/console40-replay-backing-deployment.json`. No launch has occurred.
+Next: independent receipt-bound execution review, then one bounded run of
+`results/source-public-replay-backing-console-v1`. Native sampling is still pending.
+
 The shared two-kernel fixture now checks 32 synchronized samples against one
 post-warmup baseline. Full 84-unit sanitizer qualification measured two live
 allocations/32768 bytes, 128 allocations/releases in each execution path,

@@ -4,6 +4,15 @@ Updated: 2026-10-15, America/New_York.
 
 ## Replay backing samples qualified offline
 
+- 2026-10-15 | G5 | ea8b3af | .40 | pass: verified backing-candidate deployment | evidence/console40-replay-backing-deployment.json | next: execution review
+
+Deployment checkpoint: the frozen backing-measurement package was installed and
+read back on idle .40 after the full settling period. The previous two-kernel
+image/log are preserved; services are healthy and both locks released. See
+`../evidence/console40-replay-backing-deployment.json`. No launch has occurred.
+Next: independent receipt-bound execution review, then one bounded run of
+`results/source-public-replay-backing-console-v1`. Native sampling is still pending.
+
 - 2026-10-15 | G5 | offline | pass: 32 backing samples/retention control/native package | evidence/offline-replay-backing.json | next: .40 validation
 
 The shared two-kernel fixture now checks 32 synchronized samples against one

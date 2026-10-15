@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-verified-replay-backing-deployment",
+  "source_commit": "ea8b3af42a53a63d862e5cde81cabb39a1410ab2",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "639cc88438b720df630c90f10479ae191d98984c3bba14761e8b42989b305b3b",
+  "manifest_sha256": "dc379653c58d9b3d6bac1f8be99f0bf60ad8962aef88c08787676cd88cb98c0b",
+  "complete_ftp_reads": 21,
+  "launched": false,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "prior_image_sha256": "309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c",
+  "prior_log_sha256": "f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf",
+  "prior_image_and_log_preserved": true,
+  "raw_workspace": "C:/Users/denis/Documents/PS5/workspace/dev/ps5-hip",
+  "raw_evidence": {
+    "results/source-public-replay-backing-console-v1/manifest.json": "dc379653c58d9b3d6bac1f8be99f0bf60ad8962aef88c08787676cd88cb98c0b",
+    "results/source-public-replay-backing-console-v1/deployment-review.json": "3a6c2220fd2a0d75906e9517c6cc23e3076fc5e99089a37274c1b784ff9a7b72",
+    "results/source-public-replay-backing-console-v1/deploy/receipt.json": "b5457bcf4961798914951f3ab5944ec3f20de7d0d51aa0d882b3fdec15dc39ed",
+    "results/source-public-replay-backing-console-v1/deploy/snapshot.log": "9b639e4b9867cc8c7116d5f4fde0fdc7a5bf33f88f72efa9cc104dfd72c80e35",
+    "results/source-public-replay-backing-console-v1/deploy/post_snapshot.log": "b70ef9add85970e0434f868bf6ad45dc081057ba7b9ada0e09ce16b1513f25f3",
+    "results/source-public-replay-backing-console-v1/deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163"
+  },
+  "limits": [
+    "Deployment phase consumed; never replay.",
+    "Native replay backing measurement remains pending separate receipt-bound review."
+  ]
+}
