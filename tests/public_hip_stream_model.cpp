@@ -30,13 +30,18 @@ static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(s
 #define HIP_OK(x) ok(x,__LINE__)
 int main(int argc,char**argv){
  checked(argc==2,__LINE__);
+ const bool default_case=std::strncmp(argv[1],"default-",8)==0;
+ const bool reverse=std::strcmp(argv[1],"default-reverse-blocking")==0||std::strcmp(argv[1],"default-reverse-nonblocking")==0;
+ const bool nonblocking=std::strcmp(argv[1],"default-nonblocking")==0||std::strcmp(argv[1],"default-reverse-nonblocking")==0;
  checked(std::strcmp(argv[1],"normal")==0||std::strcmp(argv[1],"bypass")==0||
-         std::strcmp(argv[1],"copy")==0||std::strcmp(argv[1],"copy-bypass")==0,__LINE__);
+         std::strcmp(argv[1],"copy")==0||std::strcmp(argv[1],"copy-bypass")==0||
+         std::strcmp(argv[1],"default-blocking")==0||std::strcmp(argv[1],"default-nonblocking")==0||
+         std::strcmp(argv[1],"default-reverse-blocking")==0||std::strcmp(argv[1],"default-reverse-nonblocking")==0,__LINE__);
  copy_case=std::strncmp(argv[1],"copy",4)==0;
- const bool bypass=std::strcmp(argv[1],"bypass")==0||std::strcmp(argv[1],"copy-bypass")==0;
+ const bool bypass=std::strcmp(argv[1],"bypass")==0||std::strcmp(argv[1],"copy-bypass")==0||(default_case&&nonblocking);
  HIP_OK(hipInit(0));hipStream_t producer=nullptr,consumer=nullptr;
- HIP_OK(hipStreamCreateWithFlags(&producer,hipStreamNonBlocking));
- HIP_OK(hipStreamCreateWithFlags(&consumer,hipStreamNonBlocking));
+ if(!default_case||!reverse)HIP_OK(hipStreamCreateWithFlags(&producer,default_case&&!nonblocking?hipStreamDefault:hipStreamNonBlocking));
+ if(!default_case||reverse)HIP_OK(hipStreamCreateWithFlags(&consumer,default_case&&!nonblocking?hipStreamDefault:hipStreamNonBlocking));
  void *input=nullptr,*middle=nullptr,*output=nullptr;
  unsigned char seed[128],actual[128];
  for(unsigned i=0;i<128;++i)seed[i]=static_cast<unsigned char>(i*13+7);
@@ -58,7 +63,7 @@ int main(int argc,char**argv){
   checked(ordering_changed.wait_for(lock,std::chrono::seconds(5),[]{return producer_entered;}),__LINE__);
  }
  checked(hipEventQuery(event)==hipErrorNotReady,__LINE__);
- if(!bypass)HIP_OK(hipStreamWaitEvent(consumer,event,0));
+ if(!bypass&&!default_case)HIP_OK(hipStreamWaitEvent(consumer,event,0));
  if(copy_case)HIP_OK(hipMemcpyAsync(output,middle,128,hipMemcpyDeviceToDevice,consumer));
  HIP_OK(hipLaunchHostFunc(consumer,[](void*){
   std::lock_guard<std::mutex> lock(ordering_mutex);consumer_early=!producer_finished;
@@ -81,7 +86,13 @@ int main(int argc,char**argv){
   for(unsigned i=0;i<128;++i)checked(actual[i]==(bypass?0:seed[i]),__LINE__);
   HIP_OK(hipFree(output));HIP_OK(hipFree(middle));HIP_OK(hipFree(input));
  }
- HIP_OK(hipEventDestroy(event));HIP_OK(hipStreamDestroy(consumer));HIP_OK(hipStreamDestroy(producer));completed=true;
+ HIP_OK(hipStreamSynchronize(producer));
+ HIP_OK(hipStreamQuery(producer));HIP_OK(hipStreamQuery(consumer));
+ HIP_OK(hipEventDestroy(event));
+ if(consumer)HIP_OK(hipStreamDestroy(consumer));
+ if(producer)HIP_OK(hipStreamDestroy(producer));
+ completed=true;
+ if(default_case){std::printf("PUBLIC_DEFAULT_STREAM_PASS direction=%s nonblocking=%s implicit_order=%s gpu_execution=false\n",reverse?"default-to-explicit":"explicit-to-default",nonblocking?"true":"false",nonblocking?"false":"true");return 0;}
  if(copy_case)std::puts(bypass?"PUBLIC_STREAM_COPY_BYPASS stale_bytes=128 gpu_execution=false":"PUBLIC_STREAM_COPY_PASS exact_bytes=128 event_ordered=true gpu_execution=false");
  else std::puts(bypass?"PUBLIC_STREAM_BYPASS early_consumer_detected=true gpu_execution=false":"PUBLIC_STREAM_PASS event_ordered=true gpu_execution=false");
 }

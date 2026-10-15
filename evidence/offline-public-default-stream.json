@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-legacy-default-stream-pass",
+  "source_base": "85871e9f1436e51e309085cf37dadabdeff8620f",
+  "source_identity": "Exact input hashes bind tested changes; source base alone does not describe then-uncommitted model and runner edits.",
+  "compilations": 78,
+  "strict_links": 9,
+  "host_tests_passed": 62,
+  "control_tests_passed": 19,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-default-stream-source-v1/receipt.json": "4dfa265e861b612e5f88aca40ea8d3b70edf6f18778851454ff5908a8786ebf8",
+    "tests/public_hip_stream_model.cpp": "c07b0474cc383e936ae9a0114f810a007b2f489719453de6be07bab851af9aab",
+    "tools/qualify_public_hip_source.py": "3e2b58eefc4adb21b37f40c35158c9781cf1acbc6eafcc6b911c178588d5e50a",
+    "results/public-default-stream-host.log": "fce7ac3d5f10fafc8bf31794295d0ca2ca7bd026452da5991c88649cc3f9511e",
+    "results/public-default-stream-controls.log": "61abf02e96dbad23b96e4349643b5642e6f194a8411e2deceeba822e0f714110",
+    "results/public-default-stream-review/review.json": "15d5057b5ff2f0a8434b38ec54cfbd09e9a3abd52d428bd0b630854cb0462adf",
+    "results/public-default-stream-source-v1.log": "9ccbe60775d1f9f930f5e108d55ffcb1a97b7def87a5b41a6b015395cf9190d1",
+    "results/public-default-stream-source-v1/stream-default-blocking.json": "dda0687df0079d7e9064d4436097c7355ec6aa0ee2968844fcc090edaad7da69",
+    "results/public-default-stream-source-v1/stream-default-blocking.stdout": "8921779090cbc656cf6ed41fcce5a245f0d233e903378563799aec9aaa010774",
+    "results/public-default-stream-source-v1/stream-default-blocking.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-default-stream-source-v1/stream-default-nonblocking.json": "ded8dcf314d732f40c5695c45becb71c2465140c15adc8329646709e530999da",
+    "results/public-default-stream-source-v1/stream-default-nonblocking.stdout": "f2c867a26a5aa0b38071306660671f33789adacd8c4fc7bdd477166c2e91149d",
+    "results/public-default-stream-source-v1/stream-default-nonblocking.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-default-stream-source-v1/stream-default-reverse-blocking.json": "63d94e3f53acf9935b7d6c220c155a88f0374aaa35a1adfaa58badcbf140e604",
+    "results/public-default-stream-source-v1/stream-default-reverse-blocking.stdout": "2254fb9a04dcb6b1369d635f1d6949a1560fe3fa593d68befcfc84be29f104de",
+    "results/public-default-stream-source-v1/stream-default-reverse-blocking.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-default-stream-source-v1/stream-default-reverse-nonblocking.json": "524152f644c7787c3a6160cc8666479339812c53e0a2ecf7da38a1d552e10c4c",
+    "results/public-default-stream-source-v1/stream-default-reverse-nonblocking.stdout": "710e714e5cbdf14e144f03f6335916f684ccd56697463dec78ae602cf06a27f5",
+    "results/public-default-stream-source-v1/stream-default-reverse-nonblocking.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "independent_review": {
+    "path": "results/public-default-stream-review/review.json",
+    "sha256": "15d5057b5ff2f0a8434b38ec54cfbd09e9a3abd52d428bd0b630854cb0462adf",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "Current source, prepared source, included file and resolved toolchain hashes match receipt",
+    "All compilation and strict link records pass",
+    "Four new exact transcripts require correct direction, blocking flag, implicit order and clean two-queue finalization",
+    "New modes use ASan leak detection and UBSan halt-on-error; prior explicit lifetime exclusions unchanged",
+    "Existing accepted runtime outcomes and negative-control failures match prior qualified baseline",
+    "Source has no explicit consumer event wait in default cases; upstream legacy default ordering supplies dependency",
+    "All fixture and fault-model binary hashes verified; host62 and controls19 pass logs inspected",
+    "27 previously accepted run records plus four new default-stream cases passed comparison"
+  ],
+  "limits": [
+    "One-second observation and five-second callback deadlines are scheduler bounded",
+    "Host callbacks exercise logical queue ordering, not GPU concurrency or transfer performance",
+    "Per-thread default streams are not qualified",
+    "No native execution or console/deployment approval"
+  ],
+  "frozen_candidate": "results/source-rect-copy-console-v1",
+  "frozen_bound_files_reverified_unchanged": 28
+}

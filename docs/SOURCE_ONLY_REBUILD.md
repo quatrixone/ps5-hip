@@ -199,6 +199,16 @@ qualifies neither native events nor GPU concurrency. The qualifier builds 78
 translation units in total: 69 base units, five alternate client harnesses,
 two independently fault-injected memory units and two retirement adapter copies.
 
+Four additional stream cases exercise legacy default-stream ordering in both
+directions: explicit producer to null-stream consumer and null-stream producer to
+explicit consumer. An ordinary (`hipStreamDefault`) stream must hold the consumer
+until the producer callback is released; a `hipStreamNonBlocking` stream must let
+the consumer finish while that callback remains held. These cases insert no
+explicit event wait. Each checks post-synchronization stream queries and exact
+retirement of both queues. The one-second observation and five-second producer
+watchdog bound scheduling; they do not prove GPU concurrency or native timing.
+Per-thread default-stream behavior is outside this fixture's scope.
+
 The stream client also tests actual asynchronous D2D dataflow. A held producer
 copies a 128-byte seed into an intermediate allocation, records an event, and a
 consumer copies into a third allocation. With the wait, readback must equal every

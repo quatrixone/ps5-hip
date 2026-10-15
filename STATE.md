@@ -11,6 +11,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Legacy default-stream ordering now passes four fresh sanitizer-model cases:
+ordinary streams order implicitly with the null stream in both directions, while
+nonblocking streams allow the held producer to remain pending as the consumer
+finishes. No explicit event wait supplies that dependency. Exact two-queue
+retirement and successful post-synchronization queries are required. See
+`evidence/offline-public-default-stream.json` for independent review and the
+78-compilation/nine-link qualification. This is a bounded host-model observation;
+native default-stream behavior, per-thread defaults and GPU concurrency remain
+unqualified. The frozen rectangular-copy candidate is unchanged.
+
 The rectangular-copy console candidate is frozen at `27ebfd4` in
 `results/source-rect-copy-console-v1`. Independent offline review verified all
 28 bound files, six package files and 94 committed build inputs, plus the exact

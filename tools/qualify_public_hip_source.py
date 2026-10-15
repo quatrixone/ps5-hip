@@ -193,6 +193,19 @@ def main():
             'PUBLIC_STREAM_COPY_FINAL queues=3 retired=3 allocations=3 frees=3 ownership=clean gpu_execution=false']:
             raise RuntimeError('public async copy ordering/ownership differs: ' + mode)
         print('public stream ' + mode + ' PASS', flush=True)
+    for mode, direction, nonblocking in (
+        ('default-blocking', 'explicit-to-default', False),
+        ('default-nonblocking', 'explicit-to-default', True),
+        ('default-reverse-blocking', 'default-to-explicit', False),
+        ('default-reverse-nonblocking', 'default-to-explicit', True)):
+        result = run('stream-' + mode, [output / 'stream-model', mode], env)
+        marker = ('PUBLIC_DEFAULT_STREAM_PASS direction=' + direction +
+                  ' nonblocking=' + str(nonblocking).lower() +
+                  ' implicit_order=' + str(not nonblocking).lower() + ' gpu_execution=false')
+        if result.splitlines() != [marker,
+            'PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
+            raise RuntimeError('public default stream semantics differ: ' + mode)
+        print('public stream ' + mode + ' PASS', flush=True)
     fill_source = ROOT / 'tests/public_hip_fill_model.cpp'
     source_hashes[str(fill_source.relative_to(ROOT))] = sha(fill_source)
     fill_object = compile_one((len(units) + 2, fill_source))
@@ -307,7 +320,9 @@ def main():
                'launch_model_sha256': sha(output / 'launch-model'),
                'stream_model_sha256': sha(output / 'stream-model'),
                'stream_cases': ['event-ordered', 'bypass-early-consumer-detected',
-                                'async-d2d-event-ordered', 'async-d2d-bypass-stale-data'],
+                                'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
+                                'default-blocking', 'default-nonblocking',
+                                'default-reverse-blocking', 'default-reverse-nonblocking'],
                'total_compilations': len(units) + 9,
                'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
