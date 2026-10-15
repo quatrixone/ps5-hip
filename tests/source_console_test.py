@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, COPY_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -211,6 +211,16 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'stream')
+
+    def test_copy_gpu_transcript_requires_eager_and_retirement(self):
+        self.assertEqual(check_log(COPY_GPU_EXPECTED, 'copy_gpu')['kernel'], 'public_hip_copy_gpu')
+        for raw in (CAPTURE_GPU_EXPECTED, COPY_GPU_EXPECTED * 2,
+                    COPY_GPU_EXPECTED.replace(b'eager_equal=true', b'eager_equal=false'),
+                    COPY_GPU_EXPECTED.replace(b'values=292', b'values=146'),
+                    COPY_GPU_EXPECTED.replace(b'disabled_replays=6', b'disabled_replays=2'),
+                    COPY_GPU_EXPECTED.replace(b'frees=2', b'frees=1')):
+            with self.assertRaises(ValueError):
+                check_log(raw, 'copy_gpu')
 
     def test_captured_gpu_transcript_requires_capture_and_retirement(self):
         self.assertEqual(check_log(CAPTURE_GPU_EXPECTED, 'capture_gpu')['kernel'], 'public_hip_capture_gpu')

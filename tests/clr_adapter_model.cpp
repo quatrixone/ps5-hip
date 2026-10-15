@@ -57,7 +57,9 @@ public:
   auto&s=registers.at(0x240);auto&p=registers.at(0x20c);auto arg=uint64_t(s.at(4))|(uint64_t(s.at(5))<<32);live(arg,16);
   uint64_t output;unsigned n,salt;std::memcpy(&output,reinterpret_cast<void*>(arg),8);std::memcpy(&n,reinterpret_cast<void*>(arg+8),4);std::memcpy(&salt,reinterpret_cast<void*>(arg+12),4);live(output,n*4);
   auto entry=(uint64_t(p.at(0))<<8)|(uint64_t(p.at(1))<<40);for(const auto&a:allocations)if(entry>=uint64_t(a.second.p)&&entry<uint64_t(a.second.p)+a.second.n)code=a.second.p;
-#if defined(PS5HIP_MODEL_CHANGING_SALT)
+#if defined(PS5HIP_MODEL_PAIRED_SALT)
+  check(code&&n==73&&submits<=4&&salt==19+((submits-1)/2)*24);
+#elif defined(PS5HIP_MODEL_CHANGING_SALT)
   check(code&&n==73&&submits<=2&&salt==19+(submits-1)*24);
 #else
   check(code&&n==73&&salt==19);

@@ -18,6 +18,16 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+The shared copy/kernel graph fixture now passes full source sanitizers,
+five negative controls, native Make and cached package validation, 62 host
+regressions and 26 console controls. Independent source/package and pre-exit
+reviews passed. See `evidence/offline-native-copy-kernel-graph.json`.
+The new copy_gpu package targets .40's results directory and compares captured
+H2D/kernel/D2D/D2H replay against eager execution after erasing eager device
+results. Native execution remains pending. Next: freeze, review and run one
+bounded WSL case; the installed baseline below remains unchanged.
+
+
 - 2026-10-15 | G5 | offline | pass: disabled copy graph retirement | evidence/offline-public-copy-graph.json | next: native copy/kernel fixture
 
 One-dimensional copy graph retirement is fixed and qualified offline.

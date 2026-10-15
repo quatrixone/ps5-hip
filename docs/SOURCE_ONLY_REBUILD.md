@@ -402,3 +402,27 @@ All buffers and queues must retire under the sanitizers.
 This host-model coverage does not qualify native copy graphs, invalidated copy
 capture recovery, broader memcpy/memset node types or resource plateaus. A dedicated
 shared native copy/kernel fixture remains required before console acceptance.
+
+
+### Captured copy/kernel graph fixture
+
+Build a dedicated .40 package with:
+
+```sh
+make public-hip-copy-gpu-package COPY_GPU_BUILD_DIR=build/public-hip-copy-gpu-v2 RESULTS_DIR=/data/ps5-hip/results
+```
+
+The host/native shared oracle captures H2D, kernel, D2D, D2H and a dependent
+callback. Six preliminary replays disable each copy direction while the kernel
+is disabled, checking distinct sentinels. Two changing-input rounds compare
+eager and graph execution against exact values and guards, including owned
+arguments, executable kernel update and replay after source-graph destruction.
+
+Both device buffers are poisoned after the eager control so stale eager output
+cannot hide a missing graph copy. The host qualifier rejects omitted H2D, D2D
+and D2H edges, no-op kernel writes and corrupt writes. Acceptance requires four
+GPU dispatches, 292 exact active values, 32 guards, eight callbacks, two freed
+allocations and three retired queues. The exact transcript is
+`ps5-hip-public-copy_gpu.log`; a fresh frozen candidate and independent review
+are required before a bounded console case. This does not qualify cross-stream
+GPU capture, memory-node parameter updates or sustained replay efficiency.

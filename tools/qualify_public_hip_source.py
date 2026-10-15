@@ -38,7 +38,7 @@ def main():
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
-                 'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'tests/public_hip_copy_gpu_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -257,6 +257,27 @@ def main():
             'PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
             raise RuntimeError('public default stream semantics differ: ' + mode)
         print('public stream ' + mode + ' PASS', flush=True)
+    copy_gpu_source = ROOT / 'tests/public_hip_copy_gpu_model.cpp'
+    source_hashes[str(copy_gpu_source.relative_to(ROOT))] = sha(copy_gpu_source)
+    copy_gpu_object = compile_one((len(units) + 13, copy_gpu_source))
+    copy_gpu_objects = [copy_gpu_object if unit.name == 'hip_admission_model.cpp' else obj
+                       for unit, obj in zip(units, objects)]
+    run('copy-gpu-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *copy_gpu_objects, '-o', output / 'copy-gpu-model'])
+    for mode in ('explicit', 'capture'):
+        result = run('copy-gpu-' + mode, [output / 'copy-gpu-model', launch_code, mode], env)
+        if result.splitlines() != [
+            'PUBLIC_COPY_GPU_PASS rounds=2 launches=4 values=292 guards=32 eager_equal=true disabled_replays=6 callbacks=8 gpu_execution=false',
+            'PUBLIC_COPY_GPU_FINAL queues_retired=true allocations=2 frees=2 ownership=clean gpu_execution=false']:
+            raise RuntimeError('shared copy/kernel graph oracle differs')
+    for negative in ('noop', 'corrupt'):
+        run('copy-gpu-' + negative, [output / 'copy-gpu-model', launch_code, negative], env,
+            expected_output_failure=True, failure_marker='PUBLIC_COPY_GPU_OUTPUT_MISMATCH round=0 index=0')
+    for negative, index in (('copy-h2d', 73), ('copy-d2d', 0), ('copy-d2h', 0)):
+        run('copy-gpu-' + negative, [output / 'copy-gpu-model', launch_code, negative], env,
+            expected_output_failure=True, failure_marker='PUBLIC_COPY_GPU_OUTPUT_MISMATCH round=0 index=' + str(index))
+    print('public copy/kernel graph and five negative controls PASS', flush=True)
     copy_graph_source = ROOT / 'tests/public_hip_copy_graph_model.cpp'
     source_hashes[str(copy_graph_source.relative_to(ROOT))] = sha(copy_graph_source)
     copy_graph_object = compile_one((len(units) + 12, copy_graph_source))
@@ -434,7 +455,9 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 13,
+               'total_compilations': len(units) + 14,
+               'copy_gpu_model_sha256': sha(output / 'copy-gpu-model'),
+               'copy_gpu_cases': ['explicit', 'capture', 'eager-equality', 'six-disabled-directions', 'update-source-destroy', 'noop-rejected', 'corrupt-rejected', 'h2d-omitted-rejected', 'd2d-omitted-rejected', 'd2h-omitted-rejected'],
                'copy_graph_model_sha256': sha(output / 'copy-graph-model'),
                'copy_graph_cases': ['explicit', 'capture', 'changing-input', 'disabled-reenabled', 'source-destroyed', 'allocation-retirement'],
                'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),

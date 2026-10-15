@@ -55,6 +55,7 @@ def build_inputs():
              "tools/ps5-clangxx", "patches/native-import-libraries.patch",
              "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
+             "tools/public_hip_copy_gpu_fixture.h", "tools/public_hip_copy_gpu_console_title.cpp",
              "tools/public_hip_capture_gpu_console_title.cpp", "tools/public_hip_graph_gpu_fixture.h", "tools/public_hip_graph_gpu_console_title.cpp",
              "tools/public_hip_stream_gpu_fixture.h", "tools/public_hip_stream_console_title.cpp",
              "tools/public_hip_graph_fixture.h", "tools/public_hip_graph_console_title.cpp", "tools/public_hip_fill_console_title.cpp", "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
@@ -218,11 +219,11 @@ def link_title(output, units, fixture="bootstrap"):
     run(output, "link", command)
     symbols = subprocess.check_output(["llvm-readelf-18", "-Ws", str(output / "title.elf")], text=True)
     required = ["hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"]
-    if fixture in ("memory", "copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu"):
+    if fixture in ("memory", "copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipMalloc", "hipFree"]
-    if fixture in ("copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu"):
+    if fixture in ("copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipMemcpy"]
-    if fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu"):
+    if fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
     if fixture == "launch":
         required += ["hipModuleLaunchKernel", "hipDeviceSynchronize"]
@@ -233,12 +234,14 @@ def link_title(output, units, fixture="bootstrap"):
                      "hipEventDestroy", "hipLaunchHostFunc"]
     if fixture == "fill":
         required += ["hipMemset", "hipMemsetD16", "hipMemsetD32Async", "hipMemsetAsync", "hipDeviceSynchronize"]
-    if fixture in ("graph_gpu", "capture_gpu"):
+    if fixture in ("graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipGraphAddKernelNode", "hipGraphAddHostNode", "hipGraphInstantiate", "hipGraphLaunch",
                      "hipGraphExecKernelNodeSetParams", "hipGraphNodeSetEnabled", "hipGraphDestroy", "hipGraphExecDestroy",
                      "hipStreamCreateWithFlags", "hipStreamSynchronize", "hipStreamDestroy"]
-    if fixture == "capture_gpu":
+    if fixture in ("capture_gpu", "copy_gpu"):
         required += ["hipModuleLaunchKernel", "hipStreamBeginCapture", "hipStreamEndCapture", "hipLaunchHostFunc"]
+    if fixture == "copy_gpu":
+        required += ["hipMemcpyAsync", "hipMemset", "hipGraphAddMemcpyNode1D"]
     if fixture == "graph":
         required += ["hipGraphInstantiate", "hipGraphLaunch", "hipGraphExecHostNodeSetParams", "hipStreamBeginCapture", "hipStreamEndCapture", "hipGraphDestroy", "hipGraphExecDestroy"]
     for name in required:
@@ -369,7 +372,7 @@ def package_title(output, image, libc, results_dir, code_object=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu"), default="bootstrap")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     validate_results_directory(args.results_dir)
@@ -399,9 +402,9 @@ def main():
             print(cached)
             return
     else:
-        if args.fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu"):
+        if args.fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
             run(output, "build-code-object", [sys.executable, ROOT / "tools/build_canaries.py",
-                "--fixture", "thread_words" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu") else "canary",
+                "--fixture", "thread_words" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else "canary",
                 "--output", output / "canaries"])
         native_stubs(output)
         units = compile_units(output, source, args.fixture)
@@ -411,7 +414,7 @@ def main():
     image, roundtrip = convert_title(output, tool, args.fixture)
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
-                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu") else None)
+                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None)
     receipt = {"classification": "offline-public-hip-native-link", "source_commit":
                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "fixture": args.fixture, "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),

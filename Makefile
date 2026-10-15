@@ -17,6 +17,7 @@ help:
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
+	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
 	@echo 'make console-controls  Build launch/close controllers and read-only teardown helper offline'
 	@echo 'make native-core Cross-compile the native core library'
@@ -138,3 +139,9 @@ CAPTURE_GPU_BUILD_DIR ?= build/public-hip-capture-gpu
 .PHONY: public-hip-capture-gpu-package
 public-hip-capture-gpu-package: deps-build
 	$(PYTHON) tools/build_public_hip.py --fixture capture_gpu --output $(CAPTURE_GPU_BUILD_DIR)
+
+
+COPY_GPU_BUILD_DIR ?= build/public-hip-copy-gpu
+.PHONY: public-hip-copy-gpu-package
+public-hip-copy-gpu-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture copy_gpu --output $(COPY_GPU_BUILD_DIR)

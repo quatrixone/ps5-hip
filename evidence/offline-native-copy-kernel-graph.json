@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-shared-copy-kernel-graph-fixture",
+  "source_base_commit": "7d732a9",
+  "package_sha256": "25cf1041ac4ac9b5a18e54728913816ce450a889bb9f76ac0096f79119ed9503",
+  "source_compilations": 83,
+  "source_links": 14,
+  "source_inputs": 119,
+  "included_files": 701,
+  "native_objects": 74,
+  "native_inputs": 106,
+  "package_files": 7,
+  "host_tests": 62,
+  "control_tests": 26,
+  "qualification": [
+    "Shared explicit/captured H2D/kernel/D2D/D2H/callback oracle versus eager control over2changing-input rounds.",
+    "Both device buffers poisoned after eager: independent no-op/corrupt kernel and H2D/D2D/D2H omission negatives rejected.",
+    "Six disabled directional replays; argument ownership/update and source graph destruction.",
+    "Four launches292values32guards8callbacks2allocations/frees;3queues2retired beforeexit3/3after."
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-copy-gpu-source-v2/receipt.json": "88a4ea7a15b5f6f89ce0aa3f5425537b541df43227b024cf958b434bb36b95a9",
+    "results/public-copy-gpu-final-review-v2/review.json": "d8c6cf4c802b0848a0dd6e79ee332bee1dbc1dae8304af3cdfe1a08ec27c20ca",
+    "build/public-hip-copy-gpu-v2/link-receipt.json": "213b414fa0b420f035f749bc711c93e9ceb0cd5d7694d9e8778731367e169173",
+    "results/native-public-copy-gpu-review-v2/review.json": "d0b08bb8678de6fb15e021b3eaba1872bf1b2cf69782ef5c9d5b9796f70d6844",
+    "results/copy-gpu-preexit-independent-v1/review.json": "89d2517d6509da2b76f2f58cf215bae5eecee343afe9c079ad1efef82b876de0",
+    "results/public-hip-copy-gpu-v2-revalidate.log": "9b02d0d64aa33179de65984ae003801a72b7a6c513edd92f8f555988ced332d3",
+    "results/public-copy-gpu-host-tests-v1.log": "c66d93a56aa2cb0baf59cbaf179684d43aabdbdaa446fcb4c70e658368afb478",
+    "results/public-copy-gpu-controls-v1.log": "5b9bdec8ef70bc6ec4378ec05aa715c6693ada7dac388c8b2c95c2159576353f"
+  },
+  "limits": [
+    "No native copy/kernel graph execution yet; separate frozen deployment and receipt-bound execution reviews required.",
+    "Earlier v1 builds intentionally stopped after eager-buffer masking review; diagnosticv1 failed old model salt-count assumption.",
+    "Cross-stream GPU capture, memory-node updates/failure recovery, sustained lifetime/plateaus and measured efficiency remain open."
+  ]
+}

@@ -11,6 +11,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
+The shared copy/kernel graph fixture now passes full source sanitizers,
+five negative controls, native Make and cached package validation, 62 host
+regressions and 26 console controls. Independent source/package and pre-exit
+reviews passed. See `evidence/offline-native-copy-kernel-graph.json`.
+The new copy_gpu package targets .40's results directory and compares captured
+H2D/kernel/D2D/D2H replay against eager execution after erasing eager device
+results. Native execution remains pending. Next: freeze, review and run one
+bounded WSL case; the installed baseline below remains unchanged.
+
+
 One-dimensional copy graph retirement is fixed and qualified offline.
 Previously, disabled copy replays retained an unused command and later
 `hipFree` returned status 999 in both explicit and captured graphs. Disabled
