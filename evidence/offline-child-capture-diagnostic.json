@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-15",
+  "status": "reproduced-cross-stream-capture-invalidation-gap",
+  "source_commit": "57ee1fd",
+  "scope": "Host sanitizer diagnostic using previously qualified runtime objects; not a fresh complete build or console test.",
+  "observation": {
+    "before": {
+      "origin": 1,
+      "child": 1
+    },
+    "child_synchronize": 900,
+    "after": {
+      "origin": 1,
+      "child": 2
+    },
+    "end_capture": {
+      "status": 0,
+      "graph_nonnull": true,
+      "origin": 0,
+      "child": 0
+    }
+  },
+  "reproduction": [
+    "Create two nonblocking streams and a timing-disabled event.",
+    "Begin thread-local capture on origin; record event; child waits on event.",
+    "Synchronize child during capture; inspect both capture statuses.",
+    "End capture on origin; inspect return status, graph pointer and both stream statuses."
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-child-capture-diagnostic-v2/compile.json": "7910f8a1120bea2ed3b783c10c28318d7b305a84c1af6e57bc112f63bf34ca1f",
+    "results/public-child-capture-diagnostic-v2/compile.stderr": "1945d11b38614502218341e82ba45b2de99d9917f35b67dc53a4bfa8670c4a58",
+    "results/public-child-capture-diagnostic-v2/compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-child-capture-diagnostic-v2/diagnostic.cpp": "034a66fb13f3eb609c2d686ad0f9591f5eb431e4621b83a6924591ff98f7408e",
+    "results/public-child-capture-diagnostic-v2/link.json": "1bca1c8ef5809616e7270658ebf769c6e30e49ff45ef87fbce6a07095cbd038b",
+    "results/public-child-capture-diagnostic-v2/link.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-child-capture-diagnostic-v2/link.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-child-capture-diagnostic-v2/run.json": "05b4dd6eabd60e07b49c685536ea581a3ce4be7676a1b257ccdddfa5447345b3",
+    "results/public-child-capture-diagnostic-v2/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-child-capture-diagnostic-v2/run.stdout": "662a26822485ec8ec403f7fdba32e965cc0ea7b5345c027c578b84fe501a3e00"
+  },
+  "runtime_objects_from": "results/public-native-graph-oracle-v2",
+  "limits": [
+    "Diagnostic uses _Exit after observation; it does not validate cleanup, leak freedom or replay.",
+    "No console contact; frozen graph candidate and runtime unchanged."
+  ],
+  "next": "Propagate invalidation across the participating capture streams; regress child-origin, sibling and nested cases plus cleanup and reuse with fresh source qualification.",
+  "independent_review": {
+    "path": "results/public-child-capture-diagnostic-v1/independent-review.json",
+    "sha256": "fa4e4c921abee2cacfa4ab43d3f6ac064bc67572d3b63c64ec98f2a53d41107a",
+    "reused_runtime_objects_verified": 68,
+    "both_diagnostics_reproduced": true
+  }
+}
