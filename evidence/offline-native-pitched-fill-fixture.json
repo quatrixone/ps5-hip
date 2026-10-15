@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-pitched-fill-fixture-pass",
+  "source_base": "7633a1b3dcd48eeba4061d296ffcd32bd55b62d7",
+  "source_identity": "Changed fixture inputs are bound by link receipt and independent review before commit.",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "control_tests_passed": 18,
+  "package_sha256": "89e7bc9722d1b1a73fca35a4014e30bca2602faa4e8045363a9a8639e8647fed",
+  "fself_sha256": "adfd0c39ebb592ecc5889c6563f51799d5ed1d6da4211f9757e44a9827a05932",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "d0b76ab37bd6eb7039ca39b8eaca3115e54b1c68709a06526ef0317acce7ef82",
+    "extracted_sha256": "44621f8bf355910d93f7df43ebb0f41e8a8e9922ad875e0273f061bd518ebdf2",
+    "omitted_note": {
+      "offset": 5441456,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500ba409813adaf8e26",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "adfd0c39ebb592ecc5889c6563f51799d5ed1d6da4211f9757e44a9827a05932",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-pitched-console-v1/link-receipt.json": "a8d3720c19b3650f40a22c7fc68429e49b8c4f8a00cb2746dadef062c029ad9a",
+    "results/public-pitched-console-review/review.json": "29296281e4ee59b416b67f64db326966f49bd9174e421ac2165618f40ca5993b",
+    "results/public-pitched-console-review/source-review.json": "f7a8dd3a77a4aa07ba1f4d7097cf4fae6bb290b250a92d0484447c7994190e5e",
+    "results/public-pitched-console-build.log": "dd1cd972325805b028712b3c939ec429ca6ecd520a18bc040ce0f4d82f6585a5",
+    "results/public-pitched-console-revalidate.log": "dd1cd972325805b028712b3c939ec429ca6ecd520a18bc040ce0f4d82f6585a5",
+    "results/public-pitched-console-host-test.log": "662305c2c4cbf183999a3490accedc4633899ecb623c7f1f29d47260bc1a2d69",
+    "results/public-pitched-console-controls.log": "36d4f2f757c5df2bb76834dcd4ba9829766635f1a595b1ffc2e5701446f77219"
+  },
+  "expected_console_contract": {
+    "rounds": 2,
+    "compared_bytes": 4096,
+    "rejected_requests": 16,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 1,
+    "retired_queues": 1,
+    "gpu_execution": false
+  },
+  "accepted_scope": [
+    "Fresh Make build of expanded native fixture and repeated cached verification.",
+    "Independent fixture/oracle review verifies disjoint bounded writes, changed patterns and untouched row/slice padding including equal-pitch extra slice rows.",
+    "Invalid remaining span, row geometry and multiplication overflow reject without mutation.",
+    "Exact transcript and freeze hypothesis require 4096 comparisons, 16 rejections and pitched/padding claims.",
+    "Independent review verifies 74 object identities, public 2D/3D calls, no-GPU imports, signing roundtrip and six package files."
+  ],
+  "limits": [
+    "No console execution or deployment approval.",
+    "Async pitched operation uses the default stream; native cross-stream behavior remains unqualified.",
+    "Recovery confirmation, baseline verification and candidate freeze remain pending."
+  ],
+  "independent_review": {
+    "path": "results/public-pitched-console-review/review.json",
+    "sha256": "29296281e4ee59b416b67f64db326966f49bd9174e421ac2165618f40ca5993b",
+    "deployment_approved": false
+  }
+}

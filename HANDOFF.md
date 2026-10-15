@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The latest fixture is `build/public-hip-pitched-console-v1`: contiguous plus
+pitched 2D/3D fills, 4,096 comparisons and 16 rejections over two changed rounds.
+The transcript validator and candidate hypothesis require that expanded contract.
+See `evidence/offline-native-pitched-fill-fixture.json`. Earlier frozen candidates
+are historical and must not substitute for this fixture. No console run is claimed.
+
 Replacement package `build/public-hip-fill-retirement-v1` now passes fresh Make
 build and cached verification at `be2f0b1`, with independent offline audit. See
 `evidence/offline-native-fill-retirement.json` for hashes. It retains the contiguous

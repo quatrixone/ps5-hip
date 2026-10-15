@@ -77,7 +77,7 @@ int main() {
     if (initialized != hipSuccess || discovered != hipSuccess || count != 1)
       ps5hip_clr_gpu_fail("public-discovery");
     void* buffer = nullptr;
-    constexpr size_t bytes = 128;
+    constexpr size_t bytes = 512;
     if (hipMalloc(&buffer, bytes) != hipSuccess || !buffer ||
         observed.allocations != 1 || observed.frees != 0)
       ps5hip_clr_gpu_fail("public-allocate");
@@ -105,7 +105,7 @@ int main() {
           hipMemcpy(output.data(), buffer, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
         ps5hip_clr_gpu_fail("fill-byte-or-guard-mismatch");
       compared += bytes;
-      if (hipMemset(data + 127, 0, 2) != hipErrorInvalidValue ||
+      if (hipMemset(data + bytes - 1, 0, 2) != hipErrorInvalidValue ||
           hipMemsetD16(data + 1, 0, 1) != hipErrorInvalidValue ||
           hipMemsetD32(buffer, 0, SIZE_MAX / 4 + 1) != hipErrorInvalidValue ||
           hipMemset2D(buffer, 4, 0, 8, 2) != hipErrorInvalidValue)
@@ -114,17 +114,48 @@ int main() {
       if (hipMemcpy(output.data(), buffer, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
         ps5hip_clr_gpu_fail("rejected-fill-mutation");
       compared += bytes;
+      expected = seed;
+      const unsigned char plane = static_cast<unsigned char>(0x51 + round * 37);
+      const unsigned char volume = static_cast<unsigned char>(0x92 + round * 19);
+      const unsigned char tight = static_cast<unsigned char>(0xc3 + round * 11);
+      for (size_t y = 0; y != 3; ++y)
+        for (size_t x = 0; x != 9; ++x) expected[5 + y * 24 + x] = plane;
+      for (size_t z = 0; z != 3; ++z)
+        for (size_t y = 0; y != 3; ++y)
+          for (size_t x = 0; x != 7; ++x) expected[80 + z * 80 + y * 16 + x] = volume;
+      for (size_t z = 0; z != 2; ++z)
+        for (size_t y = 0; y != 2; ++y)
+          for (size_t x = 0; x != 8; ++x) expected[320 + z * 32 + y * 8 + x] = tight;
+      if (hipMemcpy(buffer, seed.data(), bytes, hipMemcpyHostToDevice) != hipSuccess ||
+          hipMemset2D(data + 5, 24, plane, 9, 3) != hipSuccess ||
+          hipMemset3DAsync(make_hipPitchedPtr(data + 80, 16, 12, 5), volume,
+                           make_hipExtent(7, 3, 3), nullptr) != hipSuccess ||
+          hipMemset3D(make_hipPitchedPtr(data + 320, 8, 8, 4), tight,
+                      make_hipExtent(8, 2, 2)) != hipSuccess ||
+          hipDeviceSynchronize() != hipSuccess ||
+          hipMemcpy(output.data(), buffer, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
+        ps5hip_clr_gpu_fail("pitched-fill-padding-mismatch");
+      compared += bytes;
+      if (hipMemset2D(data + 500, 16, 0, 8, 2) != hipErrorInvalidValue ||
+          hipMemset3D(make_hipPitchedPtr(buffer, 16, 12, 2), 0, make_hipExtent(7, 3, 2)) != hipErrorInvalidValue ||
+          hipMemset3D(make_hipPitchedPtr(buffer, 16, 6, 5), 0, make_hipExtent(7, 3, 2)) != hipErrorInvalidValue ||
+          hipMemset3D(make_hipPitchedPtr(buffer, SIZE_MAX, 8, 2), 0, make_hipExtent(8, 2, 2)) != hipErrorInvalidValue)
+        ps5hip_clr_gpu_fail("pitched-fill-admission");
+      rejected += 4;
+      if (hipMemcpy(output.data(), buffer, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
+        ps5hip_clr_gpu_fail("rejected-pitched-fill-mutation");
+      compared += bytes;
       for (size_t i = 0; i != bytes; ++i)
         if (seed[i] != static_cast<unsigned char>(i * 7 + round * 29 + 0x39))
           ps5hip_clr_gpu_fail("host-source-mutation");
     }
-    if (compared != 512 || rejected != 8 || hipFree(buffer) != hipSuccess ||
+    if (compared != 4096 || rejected != 16 || hipFree(buffer) != hipSuccess ||
         observed.allocations != 1 || observed.frees != 1 || observed.launches ||
         backend_requests || observed.terminal || observed.uncertain)
       ps5hip_clr_gpu_fail("public-retire");
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-    std::puts("HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=512 rejected=8 allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending");
+    std::puts("HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=4096 rejected=16 pitched=true padding=true allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending");
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
     return 0;
   } catch (...) { ps5hip_clr_gpu_fail("exception"); }

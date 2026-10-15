@@ -36,7 +36,7 @@ LAUNCH_LINES[6] = 'HIP_LAUNCH FINAL allocations=1 frees=1 queues=1 retired=1 gat
 LAUNCH_EXPECTED = ('\n'.join(LAUNCH_LINES) + '\n').encode('ascii')
 FILL_LINES = list(LINES)
 FILL_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_fill'
-FILL_LINES[2] = 'HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=512 rejected=8 allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending'
+FILL_LINES[2] = 'HIP_FILL PASS init=0 count=1 rounds=2 compared_bytes=4096 rejected=16 pitched=true padding=true allocations=1 frees=1 gpu_execution=false watchdog_joined=true finalization=pending'
 FILL_LINES[6] = 'HIP_FILL FINAL allocations=1 frees=1 queues=1 retired=1 gate_destroyed=true application_fini=pending'
 FILL_EXPECTED = ('\n'.join(FILL_LINES) + '\n').encode('ascii')
 LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'fill')}

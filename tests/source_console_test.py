@@ -177,8 +177,9 @@ class ConsoleContractTest(unittest.TestCase):
         lines = FILL_EXPECTED.splitlines(keepends=True)
         invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
         invalid += [FILL_EXPECTED * 2, LAUNCH_EXPECTED, FILL_EXPECTED + b'FAIL\n']
-        for before, after in ((b'rounds=2', b'rounds=1'), (b'compared_bytes=512', b'compared_bytes=511'),
-                              (b'rejected=8', b'rejected=0'), (b'gpu_execution=false', b'gpu_execution=true'),
+        for before, after in ((b'rounds=2', b'rounds=1'), (b'compared_bytes=4096', b'compared_bytes=4095'),
+                              (b'rejected=16', b'rejected=0'), (b'pitched=true', b'pitched=false'),
+                              (b'padding=true', b'padding=false'), (b'gpu_execution=false', b'gpu_execution=true'),
                               (b'frees=1', b'frees=0'), (b'retired=1', b'retired=0'),
                               (b'gate_destroyed=true', b'gate_destroyed=false')):
             invalid.append(FILL_EXPECTED.replace(before, after))

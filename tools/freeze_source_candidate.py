@@ -71,7 +71,7 @@ def main():
                 'package_files': receipt['package_files'], 'files': files,
                 'hypothesis': ('New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.' if fixture == 'bootstrap' else
                                'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.' if fixture == 'memory' else
-                               'Public HIP contiguous fills validate512bytes across two changed-pattern rounds, reject8invalid requests, preserve guards and finalize without GPU submission.' if fixture == 'fill' else
+                               'Public HIP contiguous and pitched 2D/3D fills validate4096bytes across two changed-pattern rounds, reject16invalid requests, preserve guards and row/slice padding and finalize without GPU submission.' if fixture == 'fill' else
                                'Public HIP loads the owned AOT kernel and executes two changed-input dispatches, validates146values and16guards, rejects unsupported geometry, and finalizes with exact resource cleanup.' if fixture == 'launch' else
                                'Two independent public HIP modules load their owned AOT file, expose distinct functions, retain the surviving module after the other unloads, and finalize without queues or GPU work.' if fixture == 'module' else
                                'Synchronous public HIP H2D/D2D/D2H copies preserve exact payload, guards and sources across two changed rounds, reject bounds violations without mutation, then cleanly retire.'),

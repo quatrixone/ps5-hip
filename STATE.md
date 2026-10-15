@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The native fill fixture now includes pitched 2D/3D execution: two changed rounds
+compare 4,096 bytes including guards, row padding and slice gaps, and check 16
+invalid requests without mutation. Fresh Make packaging and offline review are
+recorded in `evidence/offline-native-pitched-fill-fixture.json`. This is a prepared
+console test, not a console pass; recovery confirmation is still pending.
+
 The replacement native fill package now passes a fresh 74-object Make build,
 repeated Make verification and independent package audit at `be2f0b1`. It includes
 the retirement fix and checked pitched-fill runtime. Its existing console fixture
