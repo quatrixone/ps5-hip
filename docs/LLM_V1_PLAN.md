@@ -147,6 +147,24 @@ prioritize measured performance and a separately scoped bounded LoRA release;
 that requires backward kernels, gradient validation, optimizer state and
 checkpoint/resume, even when base weights are frozen.
 
+## Release progress and work selection
+
+Use these deliverables to report first-release progress, separately from the
+full SDK roadmap:
+
+| Deliverable | Current evidence / remaining work |
+| --- | --- |
+| Reproducible model and CPU oracle | Source weights, Q4_0 conversion and seven repeated CPU inference cases pass; native memory budget and complete client inventory remain open |
+| Native public HIP runtime | Compiler-generated launches and aggregate arguments pass on .40; real operator resource shapes and model-scale allocations remain open |
+| Required operators | Compiler/link probes exist; actual upstream RMSNorm is the next native numerical gate, followed by the remaining model operations |
+| Complete inference | Native client link, GPU prefill/decode, reference logits and generated tokens remain open |
+| Release qualification | Repeated requests, lifecycle/failure tests, clean source-only client build and measured performance remain open |
+
+Do not estimate completion by counting HIP APIs or passed canaries. A useful
+first release requires every row to meet V1.1-V1.5 acceptance. Runtime additions
+must serve an identified model operation; optimize throughput after the complete
+correct inference path works. Training is a separately scoped follow-up release.
+
 ## Immediate next action
 
 Continue V1.1 from `LLM_V1_PROFILE.md`: the bounded native compiler launch now

@@ -19,9 +19,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 ## Resume here: native LLM inference v1
 
 The owner prioritized a useful inference first release on 2026-10-15. Read
-`docs/LLM_V1_PLAN.md` before choosing more general SDK work. Start V1.1:
-refresh the standalone llama HIP inventory, prepare the client compile/link
-spike and lock model/tokenizer/conversion inputs with a CPU reference.
+`docs/LLM_V1_PLAN.md` before choosing more general SDK work. Continue V1.1/V1.2
+from the evidence below: model conversion and CPU references already pass, as do
+bounded native compiler launches. The next gate is actual upstream RMSNorm,
+then the remaining client-required operators and complete native inference.
+Do not restart completed model preparation or broaden SDK coverage without a
+concrete inference blocker. The release-progress table in the v1 plan separates
+completed prerequisites from the still-open end-to-end release gates.
 The inspected upstream master snapshot is
 `b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; local sparse source is ignored at
 `.deps/sources/llama-client` (now a full checkout). Optional Make targets
