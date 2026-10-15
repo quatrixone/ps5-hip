@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-make-updated-fill-runtime-pass",
+  "commands": [
+    "make RESULTS_DIR=/data/ps5-hip/results",
+    "make public-hip-launch-package LAUNCH_BUILD_DIR=build/public-hip-launch-fill-v1 RESULTS_DIR=/data/ps5-hip/results"
+  ],
+  "host_tests_passed": 62,
+  "native_core_built": true,
+  "default_builder_cached_revalidation_passed": true,
+  "launch_make_revalidation_passed": true,
+  "packages": {
+    "bootstrap": {
+      "directory": "build/public-hip",
+      "source_commit": "ea0c1ca48a932f12327c65a0bd890f613ecb5740",
+      "object_count": 74,
+      "package_sha256": "4e22b58ee4b006577db34fbaf6e4c9410786a25327ea3d2a1a2c6ec9c155659c",
+      "fself_sha256": "63496edc3edaec32c9f3420470e055fa3f5ec570ebf9d630159476bbf56eaef1",
+      "package_files": {
+        "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+        "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+        "eboot.bin": "63496edc3edaec32c9f3420470e055fa3f5ec570ebf9d630159476bbf56eaef1",
+        "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+        "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+        "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+      },
+      "receipt_sha256": "e9d7400db2124ba5b9b246789500aaddad3b59300d24af896ae6924b6b6a3e21",
+      "independent_review": {
+        "path": "results/public-default-fill-package-review/review.json",
+        "sha256": "42a655b2e6ce3086c64b91cf33dbe1451a644de0ece41e306c48ed66c425e1ed"
+      },
+      "native_executed": false
+    },
+    "launch": {
+      "directory": "build/public-hip-launch-fill-v1",
+      "source_commit": "ea0c1ca48a932f12327c65a0bd890f613ecb5740",
+      "object_count": 74,
+      "package_sha256": "eb0f99bb6f86e7426ab60f2fc1f682976b76714284c67c1850ac621a0e144b2c",
+      "fself_sha256": "d799c6459b6612dab7c7e246358026e12267966c8e63fb12e062537fff6124c9",
+      "package_files": {
+        "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+        "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+        "thread_words.hsaco": "e128e5b47b5ad10b0032675ed311aa6e3ade58df74b3a0135c71ea987bf52f1e",
+        "eboot.bin": "d799c6459b6612dab7c7e246358026e12267966c8e63fb12e062537fff6124c9",
+        "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+        "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+        "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+      },
+      "receipt_sha256": "4b78813124e892c158460c5579052f9d5b0921ec8828d068fe3aaf10f2a1a1d7",
+      "independent_review": {
+        "path": "results/public-launch-fill-package-review/review.json",
+        "sha256": "013738f7a013eef110a39d06d84599fd5eac3e6b1e8e4f4709cee4d145bf24a6"
+      },
+      "native_executed": false
+    }
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_logs": {
+    "results/source-make-fill-v1.log": "f7d9bff002be7b93efe66de5626f01fcd1a100832429ecaeab9cc54af0895cdd",
+    "results/public-launch-fill-package-v1.log": "90cd5f38a57972be2428b71168992863c5db5ff0a5e0aab56ac98c6a794e629f",
+    "results/public-launch-fill-package-revalidate.log": "90cd5f38a57972be2428b71168992863c5db5ff0a5e0aab56ac98c6a794e629f"
+  },
+  "limits": [
+    "Both packages contain fill runtime but their existing titles do not call memset.",
+    "No native fill execution, console contact, new frozen operational candidate or deployment approval.",
+    "Existing frozen launch candidate remains preserved at prior runtime revision."
+  ]
+}

@@ -16,6 +16,22 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Updated runtime Make checkpoint
+
+At committed runtime `ea0c1ca`, plain `make RESULTS_DIR=/data/ps5-hip/results`
+completed in the WSL worktree: 62 host tests, native core libraries, and a fresh
+74-object bootstrap package at `build/public-hip`. The second builder invocation
+verified the cached package. The separate launch package at
+`build/public-hip-launch-fill-v1` also built 74 fresh objects and passed repeated
+Make verification. See `evidence/offline-source-make-fill-runtime.json`.
+
+These packages contain the fill implementation but retain the existing bootstrap
+and launch clients. They provide no native fill execution evidence. Neither has
+been frozen into a new operational console candidate or deployed. Preserve the
+historical frozen candidate below; .40 recovery and remote baseline verification
+remain pending. Next useful fill work is a bounded native client with exact byte
+and guard checks, strict transcript and independently reviewed console controls.
+
 ## Contiguous fill implementation checkpoint
 
 `results/public-fill-source-v1` passed the fresh 72-compilation qualifier: all
