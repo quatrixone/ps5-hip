@@ -53,8 +53,9 @@ and release lifecycle/performance qualification remain open.
 The owner prioritized a useful inference first release on 2026-10-15. Read
 `docs/LLM_V1_PLAN.md` before choosing more general SDK work. Continue V1.1/V1.2
 from the evidence below: model conversion and CPU references already pass, as do
-bounded native compiler launches. The next gate is actual upstream RMSNorm,
-then the remaining client-required operators and complete native inference.
+bounded native compiler launches and upstream RMSNorm. The next gates are
+Q8_1/Q4_0 dispatch and numerical validation, then the remaining client-required
+operators and complete native inference.
 Do not restart completed model preparation or broaden SDK coverage without a
 concrete inference blocker. The release-progress table in the v1 plan separates
 completed prerequisites from the still-open end-to-end release gates.

@@ -116,11 +116,12 @@ configuration and emitted ISA must be inspected; flags alone do not establish
 PS5 compatibility. Preserve measured gfx1013 requirements; do not impersonate
 another GPU architecture to make compilation pass.
 
-Current public adapter blockers include its Initial launch route and advertised
-64 MiB per-allocation limit. Existing geometry/LDS/private-memory proofs and
-legacy GEMM tests are useful inputs, not proof those paths work through public
-HIP or support model tensors. Validate and implement the required route/limit;
-never merely raise advertised limits.
+The public adapter now supports the measured RMSNorm route, with native
+numerical evidence. Q8_1/Q4_0 dispatch qualification is the next bounded step;
+model-scale allocations, including the advertised 64 MiB per-allocation limit,
+remain a separate blocker. Existing geometry/LDS/private-memory proofs and
+legacy GEMM tests do not establish support for all model tensors. Validate and
+implement each required route/limit; never merely raise advertised limits.
 
 ## V1 validation contract
 
