@@ -2,6 +2,25 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Native backing accounting qualified offline
+
+- 2026-10-15 | G5 | offline | pass: backing accounting/63 host tests/native core | evidence/offline-native-backing-accounting.json | next: synchronized replay samples
+
+`native_memory_stats()` now provides coherent cumulative allocation/release
+counts, live page-rounded bytes and accounted peak bytes. Failed constructor
+cleanup, unmap/release failures and unresolved GPU ownership remain counted.
+Four concurrent owners over 128 operations, registry quarantine and submission
+temporary cleanup passed sanitizer tests. All 63 host tests and the PS5 native
+core build passed; a stale copy-transcript negative test was also corrected.
+See `../evidence/offline-native-backing-accounting.json`.
+
+Next: sample these counters after synchronized warm replay, with a retained
+backing negative control, then validate on .40. Command lifetime and host-overhead
+measurements remain separate work. No console was contacted for this change;
+the installed two-kernel image/log below remains the next deployment baseline.
+These counters do not measure process RSS, host heap or instantaneous physical
+high-water usage during concurrent kernel calls. G5 remains incomplete.
+
 ## Native two-kernel replay passed
 
 - 2026-10-15 | G5 | 1fa8c9f | .40 | pass: 84-dispatch replay/teardown | evidence/console40-multi-kernel-success.json | next: resource/overhead measurements

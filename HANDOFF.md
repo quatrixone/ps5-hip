@@ -16,6 +16,23 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Native backing accounting qualified offline
+
+`native_memory_stats()` now provides coherent cumulative allocation/release
+counts, live page-rounded bytes and accounted peak bytes. Failed constructor
+cleanup, unmap/release failures and unresolved GPU ownership remain counted.
+Four concurrent owners over 128 operations, registry quarantine and submission
+temporary cleanup passed sanitizer tests. All 63 host tests and the PS5 native
+core build passed; a stale copy-transcript negative test was also corrected.
+See `evidence/offline-native-backing-accounting.json`.
+
+Next: sample these counters after synchronized warm replay, with a retained
+backing negative control, then validate on .40. Command lifetime and host-overhead
+measurements remain separate work. No console was contacted for this change;
+the installed two-kernel image/log below remains the next deployment baseline.
+These counters do not measure process RSS, host heap or instantaneous physical
+high-water usage during concurrent kernel calls. G5 remains incomplete.
+
 ## Native two-kernel replay passed
 
 The joined two-kernel workload passed on .40 over four warmup and sixteen
@@ -37,17 +54,11 @@ lifetimes, then collect warm replay resource and host-overhead baselines before
 optimization. GPU-dependent retirement, sustained reliability, measured replay
 efficiency and the full G5 contract remain open.
 
-Next measurement implementation: add a coherent cumulative snapshot of native
-physical allocations, releases, live bytes and peak bytes in `native_memory.h`.
-Count successful physical allocation before mapping and successful release only;
-failed cleanup must remain counted even when construction throws. Do not reset
-counters or equate destructors with releases. Extend `native_memory_test.cpp`
-for retry/idempotence and independent concurrent owners, and the existing forked
-failure case in `native_data_test.cpp` for retained constructor backing.
-Submission tests manually reclaim mock quarantines outside `NativeMemory`; use
-case-local deltas rather than pretending those frees reached production cleanup.
-These counters cover this allocator, not process RSS or the host heap. Command
-lifetime and CPU preparation/submit/wait measurements remain separate work.
+The accounting API described in the current checkpoint is now implemented.
+Use snapshot deltas after synchronization; do not reset counters. Submission
+tests reclaim mock quarantines outside `NativeMemory`, which intentionally
+does not change production accounting. Command lifetime and CPU preparation,
+submission and wait measurements remain separate work.
 
 ## Two-kernel replay qualified offline
 

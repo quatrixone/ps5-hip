@@ -60,12 +60,16 @@ int main() {
     try {
         using ps5hip::NativeDataRegistry;
         using S = ps5hip::NativeDataStatus;
+        using ps5hip::native_memory_stats;
+        check(native_memory_stats().live_bytes==0);
         {
             NativeDataRegistry data;
             reject(S::InvalidValue, [&] { data.allocate(0); });
             reject(S::InvalidValue, [&] { data.allocate(UINT64_MAX); });
             auto *p = static_cast<unsigned char *>(data.allocate(17));
             auto *other = data.allocate(5);
+            auto pair_stats=native_memory_stats();
+            check(pair_stats.allocations==2&&pair_stats.releases==0&&pair_stats.live_bytes==0x8000&&pair_stats.peak_bytes==0x8000);
             auto hold = data.resolve(p + 1, 16);
             check(hold.offset == 1 && hold.remaining == 16 && hold.memory->range().bytes == 0x4000);
             auto ranges = data.ranges();
@@ -144,6 +148,7 @@ int main() {
             check(data.ranges().empty());
         }
         check(allocations.empty());
+        {auto clean=native_memory_stats();check(clean.live_bytes==0&&clean.allocations==clean.releases);}
         {
             NativeDataRegistry data;
             auto* src = static_cast<unsigned char*>(data.allocate(512));
@@ -182,6 +187,7 @@ int main() {
             data.free(src);data.free(dst);check(data.ranges().empty());
         }
         check(allocations.empty());
+        {auto clean=native_memory_stats();check(clean.live_bytes==0&&clean.allocations==clean.releases);}
         for (bool release_failure : {false, true}) {
             NativeDataRegistry data;
             auto *p = data.allocate(16);
@@ -189,6 +195,7 @@ int main() {
             fail_unmap = !release_failure; fail_release = release_failure;
             reject(S::CleanupFailed, [&] { data.free(p); });
             check(data.poisoned() && !allocations.empty());
+            auto retained=native_memory_stats();check(retained.live_bytes==0x4000&&retained.allocations==retained.releases+1);
             auto old_unmaps = unmaps, old_releases = releases;
             reject(S::Poisoned, [&] { data.free(p); });
             reject(S::Poisoned, [&] { data.resolve(p, 1); });
@@ -201,6 +208,7 @@ int main() {
             fail_unmap = fail_release = false;
         }
         check(allocations.empty());
+        {auto clean=native_memory_stats();check(clean.live_bytes==0&&clean.allocations==clean.releases);}
         for (bool map_failure : {false, true}) {
             NativeDataRegistry data;
             auto *p = data.allocate(16);
@@ -212,13 +220,18 @@ int main() {
             data.free(p);
         }
         check(allocations.empty());
+        {auto clean=native_memory_stats();check(clean.live_bytes==0&&clean.allocations==clean.releases);}
         {
             NativeDataRegistry data;
+            const auto before=native_memory_stats();
             data.allocate(16); duplicate_map = true;
             reject(S::NativeFailure, [&] { data.allocate(32); });
             duplicate_map = false; check(data.poisoned());
+            const auto overlap=native_memory_stats();
+            check(overlap.allocations==before.allocations+2&&overlap.releases==before.releases&&overlap.live_bytes==0x8000);
         }
         check(allocations.empty());
+        {auto clean=native_memory_stats();check(clean.live_bytes==0&&clean.allocations==clean.releases);}
         // Unknown GPU ownership deliberately ends in a child process, never
         // recovered/reused in the parent and never disguised as leak-free cleanup.
         const auto child = fork(); check(child >= 0);
@@ -231,7 +244,9 @@ int main() {
                 hold.memory->acquire_gpu_use(); data.poison();
                 reject(S::Poisoned, [&] { data.copy_to_device(p, "x", 1); });
             }
-            _exit(unmaps == old_unmaps && releases == old_releases && allocations.size() == 1 ? 0 : 1);
+            const auto retained=native_memory_stats();
+            _exit(unmaps == old_unmaps && releases == old_releases && allocations.size() == 1 &&
+                  retained.live_bytes==0x4000&&retained.allocations==retained.releases+1 ? 0 : 1);
         }
         int status = 0; check(waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
         const auto setup_child = fork(); check(setup_child >= 0);
@@ -239,7 +254,9 @@ int main() {
             NativeDataRegistry data;
             fail_map = fail_release = true;
             reject(S::NativeFailure, [&] { data.allocate(1); });
-            _exit(data.poisoned() && allocations.size() == 1 ? 0 : 1);
+            const auto retained=native_memory_stats();
+            _exit(data.poisoned() && allocations.size() == 1 && retained.live_bytes==0x4000&&
+                  retained.allocations==retained.releases+1 ? 0 : 1);
         }
         check(waitpid(setup_child, &status, 0) == setup_child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
         std::cout << "native data model: logical bounds, copy ownership, free and quarantine passed\n";

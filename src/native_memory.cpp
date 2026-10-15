@@ -2,8 +2,30 @@
 #include <ps5platform/kernel.h>
 #include <algorithm>
 #include <cstdio>
+#include <atomic>
 
 namespace ps5hip {
+namespace {
+std::atomic_flag stats_lock = ATOMIC_FLAG_INIT;
+NativeMemoryStats stats;
+struct StatsGuard {
+    StatsGuard() noexcept { while (stats_lock.test_and_set(std::memory_order_acquire)) {} }
+    ~StatsGuard() { stats_lock.clear(std::memory_order_release); }
+};
+void acquired(uint64_t bytes) noexcept {
+    StatsGuard guard;
+    ++stats.allocations; stats.live_bytes += bytes;
+    stats.peak_bytes = std::max(stats.peak_bytes, stats.live_bytes);
+}
+void released(uint64_t bytes) noexcept {
+    StatsGuard guard;
+    ++stats.releases; stats.live_bytes -= bytes;
+}
+}
+NativeMemoryStats native_memory_stats() noexcept {
+    StatsGuard guard;
+    return stats;
+}
 
 NativeMemory::NativeMemory(uint64_t bytes, uint64_t alignment, bool code_window) {
     constexpr uint64_t page = 0x4000, large = 0x200000, limit = uint64_t(1) << 47;
@@ -19,6 +41,7 @@ NativeMemory::NativeMemory(uint64_t bytes, uint64_t alignment, bool code_window)
         physical_ = -1;
         throw ObjectError("direct-memory allocation failed");
     }
+    acquired(bytes_);
     void *mapping = nullptr;
     constexpr int protection = PS5_KERNEL_PROT_CPU_READ | PS5_KERNEL_PROT_CPU_WRITE |
                                PS5_KERNEL_PROT_GPU_READ | PS5_KERNEL_PROT_GPU_WRITE;
@@ -68,6 +91,7 @@ bool NativeMemory::close() {
     }
     if (physical_ >= 0) {
         if (sceKernelReleaseDirectMemory(physical_, bytes_) != 0) return false;
+        released(bytes_);
         physical_ = -1;
     }
     bytes_ = 0;

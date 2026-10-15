@@ -2,6 +2,15 @@
 #include "ps5hip/launch.h"
 
 namespace ps5hip {
+// Process-lifetime NativeMemory-owned physical backing, using page-rounded bytes.
+// Failed cleanup and uncertain GPU ownership remain live; no reset is provided.
+// Accounting follows kernel calls: peak_bytes is the accounted peak, not an
+// instantaneous hardware high-water mark during concurrent in-flight calls.
+struct NativeMemoryStats {
+    uint64_t allocations = 0, releases = 0, live_bytes = 0, peak_bytes = 0;
+};
+NativeMemoryStats native_memory_stats() noexcept;
+
 // Setup may fail after direct-memory acquisition; callers need the cleanup
 // outcome without interpreting diagnostic strings. Existing ObjectError catches work.
 struct NativeMemorySetupError : ObjectError {

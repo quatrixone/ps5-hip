@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-15",
+  "classification": "offline-native-backing-accounting",
+  "inputs": {
+    "include/ps5hip/native_memory.h": "ae3cad4c530f3b2f4fd7ac380a8a87a90320e3690b20d38bd4f53d94fe304572",
+    "src/native_memory.cpp": "a3cb3c20773f5295a264bed5d90d9260ee34e256672f7cdad492f1d398497f48",
+    "tests/native_memory_test.cpp": "d1d2496e0abff0e9b2c165839bcaeffddc51f88f46b51b8ecb1b680d3690871b",
+    "tests/native_data_test.cpp": "bd46eed188ff0b1f00ca68152c1d41dd563821852b4675ea69aac7bfbe16e976",
+    "tests/submission_test.cpp": "4e6d7d03bf07134ff8ade2c70c92d1d1ecf4ebfb7f275029a1e28d733c1babce",
+    "tests/public_hip_memory_test.py": "9954a590512d405cedb40d7f6ecafca5c1b8f50d31c98711206eed0ea6881131",
+    "CMakeLists.txt": "7e2a4bb973ff06d20e7de74e1fe21a8e442a60a416cc36e7f5e175977253742c"
+  },
+  "host_tests": 63,
+  "sanitizers": [
+    "address",
+    "undefined"
+  ],
+  "native_core_built": true,
+  "concurrency": {
+    "owners": 4,
+    "rounds_per_owner": 32,
+    "exact_overlap_bytes": 16777216
+  },
+  "cases": [
+    "page-rounded-allocation",
+    "failed-map-balanced-cleanup",
+    "retained-constructor-failures",
+    "GPU-reference-unmap-release-retention",
+    "idempotent-close",
+    "coherent-concurrent-snapshots",
+    "registry-quarantine",
+    "submission-temporaries-balanced",
+    "uncertain-submission-retention"
+  ],
+  "initial_full_suite_failure": "Stale copy transcript mutation expected one queue; corrected to four and asserted mutation changes valid transcript.",
+  "raw_evidence": {
+    "results/native-accounting-qualified-v1/receipt.json": "b1e5e2dc387a88493ff1da3eda738d8008dfd21927a4edbd24248ae17cf5f4e4",
+    "results/native-accounting-qualified-v1/host.json": "1e28993b309e392cc2d05512d617c2afe8635850329eaa21c7257cfaa00f79fd",
+    "results/native-accounting-qualified-v1/host.log": "42b9eb3d97be621731491dcdcc2858a324218a3ea776bcae2da36298b727c068",
+    "results/native-accounting-qualified-v1/native.json": "e67479984e085c4b7d0d0bc53ac61221ce7e37052790a2d9ced5d3f2c7afe545",
+    "results/native-accounting-qualified-v1/native.log": "db131b3e01599aa85ee5ddfdc7ae31733e8784c62cae4179aabd1c4c101a7b71",
+    "results/native-accounting-qualified-v1/native-memory-symbols.txt": "a5308982229b39e9ac209c24901ace2450519055e2cbcfc8a73c83aa8fe805c7",
+    "build/native/CMakeFiles/ps5hip_native_memory.dir/src/native_memory.cpp.o": "41068dd53c98ac9b846ed5ab1e0d75fb9f4b101691b76f7a49bd91a90ce953ba",
+    "build/native/libps5hip_native_memory.a": "4ac7ecf6cfabe1fd5caca85d0420ba0743401f1b9ec553b7805ec18945a64b34",
+    "build/host/native_memory_test": "0a6c3e1e4ef6f83752333b0b3d32550bcfe570cf5a3c0a9c40fa25321876124a",
+    "build/host/native_data_test": "3a974e1c2ea0d36c1d141dee227e3a6297d5d6ceb78db64b62353746feae3617",
+    "build/host/submission_test": "35c4af3f684221f77198718b4688c093d7a815ac41f7dc421cf0662b88279438",
+    "results/native-accounting-host-v1.log": "19de279f0dc687cc74bf64920cab5627bd46dbbbd0c4b177b323eced8d4193f7"
+  },
+  "limits": [
+    "No console contact or native replay sampling yet.",
+    "NativeMemory-owned backing only, not process heap/RSS or command objects.",
+    "Peak is accounted peak; concurrent in-flight kernel calls are outside the snapshot linearization point."
+  ]
+}

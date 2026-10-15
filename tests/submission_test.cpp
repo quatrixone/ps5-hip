@@ -130,11 +130,16 @@ int main() {
             for (unsigned round = 0; round < 2; ++round) {
                 *static_cast<uint32_t *>(resource->cpu()) = 0x12340000u + round;
                 const auto before = released;
+                const auto backing_before = native_memory_stats();
                 // A delayed second marker must not inherit the first completion.
                 model.writes_after = round ? 3 : 0;
                 check(queue.submit_and_wait(commands, {resource}, 10).status == SubmissionStatus::Complete);
                 check(!queue.poisoned() && model.submits == round + 1);
                 check(released == before + 2 && allocations.size() == 1);
+                const auto backing_after = native_memory_stats();
+                check(backing_after.allocations == backing_before.allocations + 2 &&
+                      backing_after.releases == backing_before.releases + 2 &&
+                      backing_after.live_bytes == backing_before.live_bytes);
                 check(*static_cast<uint32_t *>(resource->cpu()) == 0x12340000u + round);
             }
             check(model.polls == 3 && resource->close() && allocations.empty());
@@ -149,6 +154,7 @@ int main() {
             if (failure == 0) model.submit_error = -10;
             if (failure == 1) model.kick_error = -20;
             const auto before = released;
+            const auto backing_before = native_memory_stats();
             const auto result = queue.submit_and_wait(commands, {second}, 1);
             check(result.status == (failure == 0 ? SubmissionStatus::SubmitFailed :
                                     failure == 1 ? SubmissionStatus::KickFailed : SubmissionStatus::Timeout));
@@ -156,6 +162,10 @@ int main() {
             *model.marker = 1;
             reject([&] { queue.submit_and_wait(commands, {second}, 1); });
             check(model.submits == 2 && !second->close() && released == before);
+            const auto backing_after = native_memory_stats();
+            check(backing_after.allocations == backing_before.allocations + 2 &&
+                  backing_after.releases == backing_before.releases &&
+                  backing_after.live_bytes == backing_before.live_bytes + 2 * 0x4000);
             // The model has no GPU; release quarantined backing only between cases.
             for (auto &entry : allocations) std::free(entry.second);
             allocations.clear();
@@ -175,6 +185,7 @@ int main() {
             if (failure == 9) model.fail_flush_at = 4; // First marker poll after three upload flushes.
             if (failure == 10) { model.writes_after = 0; model.fail_flush_at = 5; } // Readback after marker.
             const auto before = released;
+            const auto backing_before = native_memory_stats();
             if (failure == 4 || failure >= 6) reject([&] { queue.submit_and_wait(commands, {resource}, 1); });
             else {
                 const auto result = queue.submit_and_wait(commands, {resource}, 1);
@@ -186,6 +197,10 @@ int main() {
             if (model.marker) *model.marker = 1; // Late completion cannot silently recover a poisoned queue.
             reject([&] { queue.submit_and_wait(commands, {}, 1); });
             check(model.submits == 1 && model.polls <= 11);
+            const auto backing_after = native_memory_stats();
+            check(backing_after.allocations == backing_before.allocations + 2 &&
+                  backing_after.releases == backing_before.releases &&
+                  backing_after.live_bytes == backing_before.live_bytes + 2 * 0x4000);
         }
         {
             Model model; SubmissionQueue queue(model);
@@ -197,8 +212,12 @@ int main() {
             reject([&] { queue.submit_and_wait(commands, {}, 0); });
         }
         // Only the model can free quarantined backing: it has no GPU or pending work.
+        const auto retained = native_memory_stats();
         for (auto &entry : allocations) std::free(entry.second);
         allocations.clear();
+        const auto after_mock_cleanup = native_memory_stats();
+        check(retained.live_bytes != 0 && after_mock_cleanup.live_bytes == retained.live_bytes &&
+              after_mock_cleanup.releases == retained.releases);
         std::cout << "submission model: completion, failures, timeout quarantine and late-marker rejection passed\n";
     } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }
 }

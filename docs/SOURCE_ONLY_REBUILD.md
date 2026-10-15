@@ -394,6 +394,16 @@ and longer replay/lifetime measurements are separate open requirements.
 
 ### One-dimensional copy graph retirement
 
+`ps5hip::native_memory_stats()` reports cumulative successful physical
+allocations/releases, live page-rounded bytes and accounted peak bytes for
+`NativeMemory` owners. Take replay samples after synchronization. Constructor
+cleanup failures and uncertain GPU ownership remain counted; object destruction
+alone never records a release. Snapshots are coherent, but updates follow kernel
+calls, so the peak is not an instantaneous physical high-water measurement during
+concurrent allocation/release. This API does not measure host heap, process RSS
+or CLR command lifetime. See `../evidence/offline-native-backing-accounting.json`
+for the sanitizer tests and native-core compilation; console sampling is pending.
+
 The PS5 copy graph path creates a dependency marker for a disabled 1D copy
 during command preparation. That same marker receives graph wait lists and is
 enqueued during replay. It does not construct an unused copy command that would

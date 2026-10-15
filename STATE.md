@@ -9,6 +9,23 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Native backing accounting qualified offline
+
+`native_memory_stats()` now provides coherent cumulative allocation/release
+counts, live page-rounded bytes and accounted peak bytes. Failed constructor
+cleanup, unmap/release failures and unresolved GPU ownership remain counted.
+Four concurrent owners over 128 operations, registry quarantine and submission
+temporary cleanup passed sanitizer tests. All 63 host tests and the PS5 native
+core build passed; a stale copy-transcript negative test was also corrected.
+See `evidence/offline-native-backing-accounting.json`.
+
+Next: sample these counters after synchronized warm replay, with a retained
+backing negative control, then validate on .40. Command lifetime and host-overhead
+measurements remain separate work. No console was contacted for this change;
+the installed two-kernel image/log below remains the next deployment baseline.
+These counters do not measure process RSS, host heap or instantaneous physical
+high-water usage during concurrent kernel calls. G5 remains incomplete.
+
 ## Native two-kernel replay passed
 
 The joined two-kernel workload passed on .40 over four warmup and sixteen

@@ -20,10 +20,12 @@ class PublicMemoryTest(unittest.TestCase):
         for raw, fixture in ((EXPECTED, 'memory'), (MEMORY_EXPECTED, 'bootstrap'),
                              (COPY_EXPECTED, 'memory'), (MEMORY_EXPECTED, 'copy'),
                              (COPY_EXPECTED.replace(b'compared_bytes=7168', b'compared_bytes=7167'), 'copy'),
-                             (COPY_EXPECTED.replace(b'queues=1 retired=1', b'queues=1 retired=0'), 'copy'),
+                             (COPY_EXPECTED.replace(b'queues=4 retired=4', b'queues=4 retired=3'), 'copy'),
                              (MEMORY_EXPECTED.replace(b'frees=2', b'frees=1'), 'memory'),
                              (MEMORY_EXPECTED.replace(b'interior_rejected=true', b'interior_rejected=false'), 'memory'),
                              (MEMORY_EXPECTED[:-1], 'memory'), (MEMORY_EXPECTED, 'unknown')):
+            self.assertNotEqual(raw, {'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED,
+                                      'bootstrap': EXPECTED}.get(fixture))
             with self.assertRaises(ValueError):
                 check_log(raw, fixture)
 
