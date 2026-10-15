@@ -181,3 +181,12 @@ and preserves each compile/run log. Leak detection is enabled for normal cases;
 the three intentional retention cases instead check exact retained ownership.
 Platform providers and packet transport are modeled: this does not qualify PS5
 execution, real GPU work, native public module loading or the pending console copy case.
+
+Before freezing a console candidate, run `make console-controls`. This builds
+launch/close controllers and the read-only teardown helper from pinned source;
+it sends no payload and makes no console connection. The snapshot defaults to
+`build/source-make-snapshot`. To preserve an earlier build after source changes,
+use a new `SNAPSHOT_BUILD_DIR=build/<new-directory>` and pass that directory to
+`tools/freeze_source_candidate.py --snapshot-build`. The snapshot builder refuses
+to overwrite an existing attempt. A built helper does not itself certify console
+health or replace the required candidate and deployment reviews.

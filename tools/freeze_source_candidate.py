@@ -17,6 +17,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--snapshot-build', type=Path, default=ROOT / 'build/source-make-snapshot',
+                        help='Offline teardown helper from make console-controls')
     parser.add_argument('--baseline-image-sha256', required=True)
     parser.add_argument('--baseline-log-sha256')
     parser.add_argument('--baseline-log-preserved', action='store_true',
@@ -44,7 +46,7 @@ def main():
     shutil.copytree(args.build / 'package', output / 'package')
     shutil.copyfile(args.build / 'link-receipt.json', output / 'build-receipt.json')
     shutil.copytree(ROOT / 'build/controllers/PPSA99014', output / 'controllers')
-    shutil.copytree(ROOT / 'build/source-make-snapshot', output / 'snapshot')
+    shutil.copytree(args.snapshot_build, output / 'snapshot')
     package = output / 'package/PPSA99014.ffpkg'
     if digest(package) != receipt['package_sha256']:
         parser.error('package hash mismatch')

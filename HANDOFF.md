@@ -16,6 +16,17 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Console preparation checkpoint
+
+`make console-controls` now builds the missing teardown helper from pinned source.
+Its successful artifact is `build/source-make-snapshot/teardown-snapshot.elf` in
+the WSL worktree, with source/import receipt and repeated Make verification.
+Failed-receipt and modified-artifact/log regressions fail closed. The freezer can
+select a separately preserved helper using `--snapshot-build`. See
+`evidence/offline-source-console-controls.json`. No console contact occurred.
+The owner was asked whether .40 and its services have been restored; await that
+status before any retry. Continue offline preparation meanwhile.
+
 ## Native launch package checkpoint
 
 The native public launch client is integrated with Make, package inventory,

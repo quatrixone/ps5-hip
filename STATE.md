@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+`make console-controls` now builds the read-only teardown helper as well as the
+launch/close controllers. Repeated invocations verify the successful receipt,
+artifact and input identities instead of accepting a failed build's receipt.
+See `evidence/offline-source-console-controls.json`. All work is offline; the
+helper does not itself certify console state.
+
 The native public HIP launch fixture now builds with
 `make public-hip-launch-package RESULTS_DIR=/data/ps5-hip/results`: 74 fresh
 objects, genuine public module/launch/copy/synchronization calls and a checked
@@ -1317,6 +1323,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | source-only Make console helpers with failed-build/tamper rejection | evidence/offline-source-console-controls.json | next: freeze reviewed launch candidate and recover .40
 
 - 2026-10-15 | G5 | main | source-built public HIP launch package and strict result/lifecycle controls | evidence/offline-source-public-launch.json | next: .40 recovery, frozen candidate and native validation
 

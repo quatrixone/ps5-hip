@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-console-helper-build-pass",
+  "artifact": {
+    "file": "teardown-snapshot.elf",
+    "bytes": 110904,
+    "sha256": "e241976012341eac0a2045fc4bca1c2141a9dfca2d5a6111b69644d83948dd93"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/source-make-snapshot/receipt.json": "23b423a17c986e6f14bfb6fe6f93d072e59007e8f1abbcd7f63a2a4bcd105f12",
+    "results/source-console-controls-build-v1.log": "3cee9fd903260a186456e87031afe68a45ebc663e949beff0faf9d04ec4c6b82",
+    "results/source-console-controls-revalidate-v1.log": "7a4af5f6d9b511c06127d7edc14b66f39c89582ce88a84ba5b6db29d7c96299a",
+    "results/snapshot-validator-regression-v1/results.json": "ecacd8d9a178d804493d841ef5a744541e061d52153b393614acd404e7f5993a",
+    "results/snapshot-validator-regression-v1/make-failed-receipt.log": "92066f48652163abb92487a334c3ca27cf6fca46709d11c3e2bd9c3559755dea"
+  },
+  "checks": [
+    "make console-controls builds launch/close controllers and teardown snapshot from pinned sources.",
+    "Repeated make validates success classification,artifact,source/SDK/header/tool identities,command logs,and import audit.",
+    "Failed-receipt,changed-artifact,and changed-log negative controls rejected.",
+    "17console-control methods and2snapshot tests pass.",
+    "Repeated Make with an existing failed receipt exits nonzero through the validator."
+  ],
+  "limits": [
+    "No console contact or environment health certification.",
+    "Snapshot results require independent candidate/lifecycle interpretation.",
+    "Console recovery remains pending owner status."
+  ],
+  "independent_review": {
+    "verdict": "pass-offline-console-controls-helper",
+    "path": "results/source-console-controls-independent-review.json",
+    "sha256": "e8911eb2fdaf8bc5e7c675f0e3c7499424aec84c4f2fc261fecef073a3bfc9fa"
+  }
+}

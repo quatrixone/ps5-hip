@@ -18,6 +18,7 @@ help:
 	@echo 'make device-fixtures  Compile the host suite device objects'
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
+	@echo 'make console-controls  Build launch/close controllers and read-only teardown helper offline'
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
@@ -67,6 +68,14 @@ QUALIFICATION_DIR ?= results/public-hip-host
 .PHONY: public-hip-host-test
 public-hip-host-test: deps-fetch
 	$(PYTHON) tools/qualify_public_hip_source.py --output $(QUALIFICATION_DIR)
+
+SNAPSHOT_BUILD_DIR ?= build/source-make-snapshot
+.PHONY: console-controls
+console-controls: deps-build $(SNAPSHOT_BUILD_DIR)/receipt.json
+	$(PYTHON) tools/verify_teardown_snapshot.py --sdk .deps/sdk --output $(SNAPSHOT_BUILD_DIR)
+
+$(SNAPSHOT_BUILD_DIR)/receipt.json: tools/teardown_snapshot.cpp tools/teardown_snapshot.h tools/build_teardown_snapshot.py dependencies.json .deps/sdk/.ps5-sdk-revision
+	$(PYTHON) tools/build_teardown_snapshot.py --sdk .deps/sdk --output $(SNAPSHOT_BUILD_DIR)
 
 native-core: .deps/sdk/.ps5-sdk-revision
 	$(CMAKE) -S . -B build/native -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps5-toolchain.cmake -DBUILD_TESTING=OFF
