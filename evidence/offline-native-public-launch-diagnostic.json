@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-native-module-diagnostic-package",
+  "source_commit": "6603bbc91e8fa2d1337f2f288358d4f920b0bf18",
+  "package_sha256": "1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa",
+  "manifest_sha256": "6778578f2e4d1bdc74d08b6979958e1fb006c336c81c6070822ece07b002757e",
+  "objects": 74,
+  "committed_inputs": 99,
+  "package_files": 7,
+  "diagnostic_question": "Distinguish hipModuleLoad from hipModuleGetFunction and record exact numeric HIP status and handle presence after the prior combined public-module failure.",
+  "changed_variable": "Failure-only title diagnostics at source6603bbc; successful workload and kernel bytes unchanged.",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-launch-module-offline-investigation-v1/review.json": "42c891390b698d86c95a543c38bfb7e56c1d1390f3a5b0a5e3fef33cc68915d1",
+    "results/native-public-launch-diagnostic-review/review.json": "a00a6df563b8bfc593b14163d2a59c19204c064979796c46b76944a8b00df283",
+    "results/source-public-launch-diagnostic-console-v1/manifest.json": "6778578f2e4d1bdc74d08b6979958e1fb006c336c81c6070822ece07b002757e",
+    "results/source-public-launch-diagnostic-console-v1/build-receipt.json": "22d23e1c7c1928ac52422ca06268a355a0c2ec2dae9c6ef73eeff4ce2fc9857e",
+    "results/source-public-launch-diagnostic-console-v1/deployment-review.json": "65f0981badae922e07f9e0e34f48a7f29fa73d4f9d143924cac22e65c76c1a39",
+    "results/public-hip-launch-diagnostic-v1-build.log": "141cf5d9ff8d10d0f1a8604bff65091ed0873b417b05e2ce4ffca04bc2ce0bd0",
+    "results/public-hip-launch-diagnostic-v1-revalidate.log": "141cf5d9ff8d10d0f1a8604bff65091ed0873b417b05e2ce4ffca04bc2ce0bd0"
+  },
+  "accepted_scope": [
+    "Fresh Make build and cached validation passed.",
+    "Independent package and deployment-only reviews passed.",
+    "Offline investigation found no concrete root cause; failure-only diagnostics narrow next decision."
+  ],
+  "limits": [
+    "No new console execution.",
+    "Previous failure is not fixed; expected launch acceptance unchanged.",
+    "Execution requires separate review of exact successful deployment receipt."
+  ]
+}

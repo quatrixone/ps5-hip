@@ -2,6 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
+The module diagnostic now has a fresh 74-object Make package, cached validation,
+independent package audit and deployment-only approval at `6603bbc`. Candidate:
+`results/source-public-launch-diagnostic-console-v1`; see
+`../evidence/offline-native-public-launch-diagnostic.json`. Offline stdio/import/parser
+review found no concrete defect. The distinct case records the failing public API
+and status; unchanged success criteria still require both GPU launches and teardown.
+
 Module failure reporting now separates `hipModuleLoad` from
 `hipModuleGetFunction` and records the numeric HIP status and handle presence.
 The changed native title compiles; success acceptance is unchanged. See
