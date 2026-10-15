@@ -11,14 +11,18 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
-A cross-stream capture diagnostic reproduced an outstanding runtime defect:
-invalidating an event-joined child leaves its origin active, and ending capture
-on the origin returns success with a graph. See
-`evidence/offline-child-capture-diagnostic.json`. The next runtime fix must
-propagate invalidation across participating streams and qualify cleanup/reuse.
-This diagnostic reuses qualified objects and exits after observation; it is not
-a cleanup or native acceptance result. The frozen graph fixture below exercises
-single-origin recovery only and is unchanged.
+Cross-stream capture invalidation now propagates across the tested capture tree,
+fixing the reproduced false-success result from ending an invalidated child's
+origin capture. Fresh qualification passes 24 cases across origin, child, sibling
+and grandchild positions, all three modes and both graph ownership forms. All
+four streams reset and can capture again; both events are reusable, caller-owned
+graphs survive, and all four queues retire. The old runtime fails the same status
+oracle. See `evidence/offline-public-capture-session.json` for source qualification,
+native compilation and review; the failing baseline remains in
+`evidence/offline-child-capture-diagnostic.json`. Concurrent mutation, complex
+event rejoin topologies and further operation admission after invalidation remain
+unqualified. The frozen graph fixture below is unchanged and lacks this fix;
+a fresh native package and console qualification remain required.
 
 A dedicated native host-graph fixture now shares its oracle with the sanitizer
 model: explicit graph replay followed by capture recovery checks 32 changed-input

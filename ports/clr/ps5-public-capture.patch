@@ -65,6 +65,37 @@
      /// Returns last captured graph node
      const std::vector<hip::GraphNode*>& GetLastCapturedNodes() const { return lastCapturedNodes_; }
      /// Set last captured graph node
+@@ -417,7 +424,29 @@
+     /// reset capture parameters
+     hipError_t EndCapture();
+     /// Set capture status
+-    void SetCaptureStatus(hipStreamCaptureStatus captureStatus) { captureStatus_ = captureStatus; }
++    void SetCaptureStatus(hipStreamCaptureStatus captureStatus) {
++#if defined(WITH_PS5_DEVICE)
++      if (captureStatus == hipStreamCaptureStatusInvalidated) {
++        // Mark before traversing either direction: a capture is shared by all
++        // event-joined streams, and parent/child edges point both ways.
++        if (captureStatus_ == hipStreamCaptureStatusNone ||
++            captureStatus_ == hipStreamCaptureStatusInvalidated) return;
++        captureStatus_ = captureStatus;
++        auto invalidate = [this](hipStream_t handle) {
++          auto* peer = reinterpret_cast<hip::Stream*>(handle);
++          if (peer != nullptr && peer->GetCaptureStatus() != hipStreamCaptureStatusNone &&
++              peer->GetCaptureGraph() == pCaptureGraph_ &&
++              peer->GetCaptureID() == captureID_) {
++            peer->SetCaptureStatus(hipStreamCaptureStatusInvalidated);
++          }
++        };
++        invalidate(parentStream_);
++        for (auto stream : parallelCaptureStreams_) invalidate(stream);
++        return;
++      }
++#endif
++      captureStatus_ = captureStatus;
++    }
+     /// Set capture mode
+     void SetCaptureMode(hipStreamCaptureMode captureMode) { captureMode_ = captureMode; }
+     /// Set parent stream
 --- a/hipamd/src/hip_stream.cpp
 +++ b/hipamd/src/hip_stream.cpp
 @@ -57,6 +57,9 @@

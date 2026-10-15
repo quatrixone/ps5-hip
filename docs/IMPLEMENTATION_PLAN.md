@@ -597,8 +597,13 @@ checked rectangular copies and pitched fills. Explicit and captured two-host-nod
 graphs replay changing inputs, accept callback/user-data updates and outlive their
 source graph; see `../evidence/offline-public-host-graph.json`. These are sanitizer
 host-model results. Native public GPU execution, device-memory/kernel graph nodes,
-capture invalidation, graph resource lifetime, memory plateau and measured replay
+broader capture invalidation, graph resource lifetime, memory plateau and measured replay
 performance still require acceptance under the full contract below.
+
+Sequential capture-tree invalidation and recovery now pass 24 host-model cases
+across four stream positions, three modes and both graph ownership forms; see
+`../evidence/offline-public-capture-session.json`. Complex event rejoins, concurrent
+capture mutation and native acceptance remain open.
 
 **Objective:** keep GPU workloads resident and avoid paying a host round trip for
 every operation. Advances R4, N2 and N4.

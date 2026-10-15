@@ -325,6 +325,12 @@ def main():
         'PUBLIC_GRAPH_FINAL queues=3 retired=3 allocations=0 frees=0 ownership=clean gpu_execution=false']:
         raise RuntimeError('capture invalidation cleanup/reuse contract differs')
     print('public capture invalidation recovery PASS', flush=True)
+    result = run('graph-session', [output / 'graph-model', 'session'], env)
+    if result.splitlines() != [
+        'PUBLIC_CAPTURE_SESSION_PASS invalidations=24 streams=4 modes=3 external_graphs=12 callbacks=1 events_reusable=true',
+        'PUBLIC_GRAPH_FINAL queues=4 retired=4 allocations=0 frees=0 ownership=clean gpu_execution=false']:
+        raise RuntimeError('cross-stream capture invalidation/recovery differs')
+    print('public capture session recovery PASS', flush=True)
     result = run('graph-combined', [output / 'graph-model', 'combined'], env)
     if result.splitlines() != [
         'PUBLIC_GRAPH_COMBINED_PASS graphs=2 replays=32 callbacks=64 invalidations=6 gpu_execution=false',
@@ -360,7 +366,7 @@ def main():
                'graph_model_sha256': sha(output / 'graph-model'),
                'graph_cases': ['explicit-host-replay-update-source-destroy',
                                'captured-host-replay-update-source-destroy', 'noop-output-rejected',
-                               'capture-invalidation-cleanup-and-reuse', 'combined-native-fixture-oracle'],
+                               'capture-invalidation-cleanup-and-reuse', 'cross-stream-capture-session-recovery', 'combined-native-fixture-oracle'],
                'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,

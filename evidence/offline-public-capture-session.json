@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-capture-session-invalidation-pass",
+  "source_base": "a16e66720c24cf82e57d87fd224caf26e11c397a",
+  "implementation": "SetCaptureStatus marks invalidation before following parent and child edges in the same graph and capture ID. Graph ownership remains with the origin.",
+  "qualification": {
+    "fresh_compilations": 79,
+    "strict_links": 10,
+    "invalidations": 24,
+    "capture_modes": 3,
+    "streams": 4,
+    "caller_owned_graphs": 12,
+    "retired_queues": 4,
+    "canceled_callbacks": 96,
+    "post_recovery_callbacks": 1,
+    "events_reused": 2,
+    "native_units_compiled": 3,
+    "host_tests": 62,
+    "control_tests": 20
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-capture-session-source-v3/receipt.json": "f0cdcb8aebbc8f0d26afe6768150f603ed7730932881cdf817bd3b4cadf0e814",
+    "results/public-capture-session-source-v3/graph-session.stdout": "0c461d16ed65fdc245a869a5d42b3813c7c0b8bca925be4c57d454ecf388f40c",
+    "results/public-capture-session-native-v2/receipt.json": "43295aa92b79fb01299abf4420d188a0cc86c9347d7f2989de3496342e47530b",
+    "results/public-capture-session-negative-v3/run.json": "1bc3135613a2741a6541403181589cd4e774d259f1f470dc06dff9917d3be7d7",
+    "results/public-capture-session-negative-v3/run.stderr": "c434b7e2593670acf6db9a59691ece34f0620294766de8bc6ca8fded0b4a8a59",
+    "results/public-capture-session-negative-v3/client.sha256": "28abcbbd715f345bf39b879964ceac3f23ab9b5850de7fc512d65522a83257d1",
+    "results/capture-session-preparation-v1/receipt.json": "a54c829c4cc2d47143c1f1825b84003aad84b42f382658d91a112a7fdc8da18d",
+    "results/capture-session-host.log": "9d8100fade43dd9b266c64afde99afa38d0aa9d789c34b3c6f374436514d9927",
+    "results/capture-session-controls.log": "4a04fee3cf398c02010b06554bfca8eb0fdc90397510e2db97d7b9e449a151e7",
+    "results/public-capture-session-native-v3/receipt.json": "c9a81f42c4c5deab8fdafbfab607f930992676ca1f828c88d2e89b35b2541a7b"
+  },
+  "accepted_scope": [
+    "Origin, child, sibling and grandchild invalidation propagates throughout the tested sequential capture tree.",
+    "Origin end-capture rejects invalidation and returns no graph; all four streams reset and can begin/end fresh captures.",
+    "Caller-owned graphs remain queryable with four nodes and are explicitly destroyed by the client.",
+    "Both captured events can be recorded and waited on after recovery; all four queues retire.",
+    "Exact final-client old-runtime negative control aborts at the invalidation status assertion.",
+    "Patch application and repeat are stable; drift in any bound source file is rejected."
+  ],
+  "limits": [
+    "Host sanitizer model; no console execution or GPU execution.",
+    "Native three-unit compilation is not a rebuilt complete console package.",
+    "Concurrent capture mutation, complex event rejoin topologies and admission of further operations after invalidation remain unqualified.",
+    "Frozen native graph candidate at 454c8fd does not contain this fix.",
+    "v1 qualifier canceled for event-reuse test correction; v2 failed incorrect five-queue expectation. Both preserved and excluded from acceptance.",
+    "First native attempt had missing prepared source; successful native v2 supersedes it.",
+    "Native v3 binds each translation unit and capture header before/after compilation and each object; it is not a separately exhaustive native header inventory."
+  ],
+  "independent_review": {
+    "path": "results/public-capture-session-review/review.json",
+    "sha256": "4a6778e4862784e673c6b7651f251c594faad8e269bb67f3e250b7b56938b5e8",
+    "deployment_approved": false
+  }
+}
