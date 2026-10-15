@@ -60,6 +60,22 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+`make public-hip-copy-package RESULTS_DIR=/data/ps5-hip/results` builds the
+next synchronous-copy fixture into `build/public-hip-copy`. Its PS5-specific
+HIP patch preserves the caller's synchronous request through D2D queue selection
+and returns success only after a successful completion wait and `CL_COMPLETE`.
+An uncertain result must retain all host/device buffers and quarantine; the
+fixture uses persistent host storage and never proceeds after such an error.
+Explicit asynchronous requests keep upstream behavior and remain unqualified.
+
+The copy oracle checks two changed rounds of H2D/D2D/D2H copies, 257-byte
+payloads between 16-byte guards, 1,734 device-readback bytes, host/source
+preservation and six exact `hipErrorInvalidValue` bounds rejections without
+mutation. It requires two frees, one retired queue and clean shutdown. The
+completion regression compiles the actual upstream function with mocked
+completion under ASan/UBSan; an unpatched negative control must fail. This is
+offline control-flow evidence, not native transfer or GPU DMA evidence.
+
 The next public HIP fixture is available with
 `make public-hip-memory-package RESULTS_DIR=/data/ps5-hip/results`. It builds
 74 fresh objects into `build/public-hip-memory` and exercises genuine

@@ -1,0 +1,30 @@
+--- a/hipamd/src/hip_memory.cpp
++++ b/hipamd/src/hip_memory.cpp
+@@ -514,6 +514,10 @@
+ // ================================================================================================
+ hipError_t ihipMemcpy(void* dst, const void* src, size_t sizeBytes, hipMemcpyKind kind,
+                       hip::Stream& stream, bool isHostAsync, bool isGPUAsync) {
++#if defined(WITH_PS5_DEVICE)
++  // Preserve the caller's synchronous contract before D2D selects async enqueue.
++  const bool ps5SynchronousCopy = !isHostAsync;
++#endif
+   hipError_t status;
+   if (sizeBytes == 0) {
+     // Skip if nothing needs writing.
+@@ -553,6 +557,16 @@
+     return status;
+   }
+   command->enqueue();
++#if defined(WITH_PS5_DEVICE)
++  if (ps5SynchronousCopy) {
++    // Keep our reference until both completion and terminal status are observed.
++    // On uncertain completion the caller must retain storage and quarantine.
++    const bool completed = command->awaitCompletion();
++    const bool succeeded = completed && command->status() == CL_COMPLETE;
++    command->release();
++    return succeeded ? hipSuccess : hipErrorUnknown;
++  }
++#endif
+   if (!isHostAsync) {
+     command->awaitCompletion();
+   } else if (!isGPUAsync) {

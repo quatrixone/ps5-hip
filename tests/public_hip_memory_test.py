@@ -10,13 +10,17 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from prepare_public_hip_memory import prepare, digest, AFTER, SVM
-from source_public_hip_log import check_log, EXPECTED, MEMORY_EXPECTED
+from source_public_hip_log import check_log, EXPECTED, MEMORY_EXPECTED, COPY_EXPECTED
 
 
 class PublicMemoryTest(unittest.TestCase):
     def test_fixture_transcripts_are_not_interchangeable(self):
         self.assertEqual(check_log(MEMORY_EXPECTED, 'memory')['kernel'], 'public_hip_memory')
+        self.assertEqual(check_log(COPY_EXPECTED, 'copy')['kernel'], 'public_hip_copy')
         for raw, fixture in ((EXPECTED, 'memory'), (MEMORY_EXPECTED, 'bootstrap'),
+                             (COPY_EXPECTED, 'memory'), (MEMORY_EXPECTED, 'copy'),
+                             (COPY_EXPECTED.replace(b'compared_bytes=1734', b'compared_bytes=1733'), 'copy'),
+                             (COPY_EXPECTED.replace(b'queues=1 retired=1', b'queues=1 retired=0'), 'copy'),
                              (MEMORY_EXPECTED.replace(b'frees=2', b'frees=1'), 'memory'),
                              (MEMORY_EXPECTED.replace(b'interior_rejected=true', b'interior_rejected=false'), 'memory'),
                              (MEMORY_EXPECTED[:-1], 'memory'), (MEMORY_EXPECTED, 'unknown')):

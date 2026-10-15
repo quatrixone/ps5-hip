@@ -20,6 +20,7 @@ help:
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
+	@echo 'make public-hip-copy-package  Build the checked public HIP synchronous-copy fixture offline'
 	@echo 'make           Run all of the above; set RESULTS_DIR to the intended console results path'
 
 deps-fetch:
@@ -72,5 +73,9 @@ public-hip-package: build/public-hip/link-receipt.json
 public-hip-memory-package: deps-build
 	$(PYTHON) tools/build_public_hip.py --fixture memory --output build/public-hip-memory
 
+.PHONY: public-hip-copy-package
+public-hip-copy-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture copy --output build/public-hip-copy
+
 clean-build:
-	$(CMAKE) -E rm -rf build/host build/native build/public-hip build/public-hip-memory
+	$(CMAKE) -E rm -rf build/host build/native build/public-hip build/public-hip-memory build/public-hip-copy

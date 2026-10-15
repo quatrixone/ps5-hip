@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--baseline-image-sha256', required=True)
     parser.add_argument('--baseline-log-sha256')
-    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory'), default='bootstrap')
+    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy'), default='bootstrap')
     args = parser.parse_args()
     import re
     for value in (args.baseline_image_sha256, args.baseline_log_sha256):
@@ -30,7 +30,7 @@ def main():
         parser.error('candidate must be under results/')
     receipt = json.loads((args.build / 'link-receipt.json').read_text())
     fixture = receipt.get('fixture', 'bootstrap')
-    if fixture not in ('bootstrap', 'memory'):
+    if fixture not in ('bootstrap', 'memory', 'copy'):
         parser.error('unknown fixture')
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 74:
         parser.error('not the complete .40 candidate')
@@ -63,7 +63,8 @@ def main():
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
                 'hypothesis': ('New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.' if fixture == 'bootstrap' else
-                               'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.'),
+                               'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.' if fixture == 'memory' else
+                               'Synchronous public HIP H2D/D2D/D2H copies preserve exact payload, guards and sources across two changed rounds, reject bounds violations without mutation, then cleanly retire.'),
                 'expected': 'Exact ' + fixture + ' transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
                 'reject': 'Any identity, log, mount, lifecycle, timeout, exception, or health failure; never retry automatically.',
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}

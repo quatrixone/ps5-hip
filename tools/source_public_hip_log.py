@@ -19,11 +19,16 @@ MEMORY_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_memory'
 MEMORY_LINES[2] = 'HIP_MEMORY PASS init=0 count=1 allocations=2 frees=2 interior_rejected=true double_free_rejected=true watchdog_joined=true finalization=pending'
 MEMORY_LINES[6] = 'HIP_MEMORY FINAL allocations=2 frees=2 queues=0 retired=0 gate_destroyed=true application_fini=pending'
 MEMORY_EXPECTED = ('\n'.join(MEMORY_LINES) + '\n').encode('ascii')
-LOG_NAMES = {'bootstrap': 'ps5-hip-public-bootstrap.log', 'memory': 'ps5-hip-public-memory.log'}
+COPY_LINES = list(LINES)
+COPY_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_copy'
+COPY_LINES[2] = 'HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=1734 bounds_rejected=6 allocations=2 frees=2 watchdog_joined=true finalization=pending'
+COPY_LINES[6] = 'HIP_COPY FINAL allocations=2 frees=2 queues=1 retired=1 gate_destroyed=true application_fini=pending'
+COPY_EXPECTED = ('\n'.join(COPY_LINES) + '\n').encode('ascii')
+LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy')}
 
 
 def check_log(raw, fixture='bootstrap'):
-    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED}.get(fixture)
+    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')
     return {'application_result': 'application-pass', 'kernel': 'public_hip_' + fixture,
