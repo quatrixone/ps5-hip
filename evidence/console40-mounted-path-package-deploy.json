@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-mounted-path-package-deployment",
+  "source_commit": "7207a39",
+  "package_sha256": "6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8",
+  "manifest_sha256": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "complete_ftp_reads": 21,
+  "healthy_after": true,
+  "lock_released": true,
+  "launched": false,
+  "preserved_image": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-1b844cd679fd688f93a43c45c6d11b953cd9b627db93840cdbf0ad93e28f17fa.preserved",
+  "preserved_log": "/data/ps5-hip/results/ps5-hip-public-launch.log.6baab2fea70f01c8069415594a0e0302249fe029138a92c52287efd2d8c35dbe.preserved",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-mounted-path-console-v1/manifest.json": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+    "results/source-public-launch-mounted-path-console-v1/deploy/receipt.json": "0ac68705188ba216223e8ef33c461e81102630ac21212c28a7980ba7435ca659",
+    "results/source-public-launch-mounted-path-console-v1/deployment-review.json": "00cf77258a04441fcb3a3b528ebde13215019620c9e6a519b11600f34eb28af8",
+    "results/source-public-launch-mounted-path-console-v1/execution-authorization.json": "2612900ec83bbf36d850f6a3f496a92d373ef2553ba7b0a1a1ba9591e319c077",
+    "results/source-public-launch-mounted-path-console-v1/deploy/previous-application.log": "6baab2fea70f01c8069415594a0e0302249fe029138a92c52287efd2d8c35dbe",
+    "results/source-public-launch-mounted-path-console-v1/deploy/snapshot.log": "d3031b9437cb677d19a29b55922948d46f5f8b450cc4ac866aae023c31b087e4",
+    "results/source-public-launch-mounted-path-console-v1/deploy/post_snapshot.log": "7869cea5359a64cc35b2d02e0d62d2f0e5c91c6f948674923881aafe0560e5ff"
+  },
+  "limits": [
+    "Deployment only; no GPU result yet.",
+    "Deploy phase consumed. One execute approved bound to exact deployment receipt."
+  ]
+}

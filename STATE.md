@@ -11,6 +11,11 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The mounted-path package deployment passed through WSL: all 21 reads and
+seven mounted files verified, old image/log preserved, services healthy and lock
+released. See `evidence/console40-mounted-path-package-deploy.json`. Independent
+review permits one bounded execute tied to the exact receipt; deploy is consumed.
+
 The mounted-path correction has a fresh 74-object Make package, cached
 validation and independent artifact/deployment-only review at `7207a39`. Frozen
 candidate: `results/source-public-launch-mounted-path-console-v1`; see
