@@ -11,6 +11,11 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
+The corrected graph runtime also passes a fresh 74-object native Make build,
+cached validation, independent artifact audit and all 62 host regression tests.
+See `evidence/offline-native-kernel-graph-runtime.json`. This package still runs
+the host-graph fixture and is not authorized for deployment as a GPU graph test.
+
 Explicit GPU kernel graph nodes now pass full source sanitizer qualification and
 independent audit: owned arguments, parameter updates, replay after source-graph
 destruction, allocation/command failure recovery, parallel/child cleanup and
@@ -40,8 +45,8 @@ review, including missing-wait, no-write and corrupt-write negative controls.
 See `evidence/offline-public-stream-gpu-fixture.json` and
 `evidence/console40-stream-package-deploy.json` for build/deployment provenance.
 
-Next: implement and qualify required GPU graph nodes and their resource lifetime,
-then changing-input captured replay. This bounded fixed-kernel ordering result
+Next: qualify native explicit-kernel graph replay, then required GPU/memory
+capture nodes and broader resource lifetime. This bounded fixed-kernel ordering result
 proves neither concurrent GPU execution nor full G5 acceptance.
 
 ## Historical source-build checkpoints

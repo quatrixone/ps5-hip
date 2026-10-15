@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-native-kernel-graph-runtime-build-only",
+  "source_commit": "f5d97124e422a27d29b067a1e40be0d64b3dfa14",
+  "object_count": 74,
+  "inputs": 101,
+  "package_files": 6,
+  "package_sha256": "ccc9786bee541ae9fa121d901f1c392898fbbe8c08c23cd547994636ad830a53",
+  "fixture": "Existing host graph title; no GPU graph oracle in this package.",
+  "host_regressions_passed": 62,
+  "cached_validation_passed": true,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-graph-kernel-runtime-v2/link-receipt.json": "0960f8e53885ff892ef46feb4bc3a513fbad8f9fe37aba083ac9431b68638ca9",
+    "results/native-graph-kernel-runtime-review-v2/review.json": "b669aa0501a6a5c379e26f2ffe23382bee59d6f3d8f3e76e0c3440b18dd1c7f8",
+    "results/public-hip-graph-kernel-runtime-v2-build.log": "aaca9519e788bd01fb17d6e81cb11caf1d920949a89e962053e4b540e2799ea4",
+    "results/public-hip-graph-kernel-runtime-v2-revalidate.log": "aaca9519e788bd01fb17d6e81cb11caf1d920949a89e962053e4b540e2799ea4",
+    "results/public-kernel-graph-host-tests-v1.log": "f78d67eaff6e16d9b915dd5b347abc2afe56707cc9662369c777415f61a99486"
+  },
+  "limits": [
+    "No console contact or deployment approval; console baseline unchanged.",
+    "This package proves native compilation/link/package compatibility, not native GPU graph execution.",
+    "Pre-cursor-fix v1 package is superseded and must not be deployed."
+  ]
+}
