@@ -9,6 +9,31 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Q4 console validation failed; analyze offline before another candidate
+
+The frozen Q4 candidate deployed successfully on .40, including 78 verified
+readbacks and preserved RMSNorm baseline. Its one execution passed the four
+standalone width256 Q8 cases, then failed the first `attn-k-1` frozen-Q8 Q4
+comparison: actual `0.1636260598897934` (`0x3e278d97`) versus FP64 reference
+`0.21718877422972582`, budget `8.8989529262781016e-06`. This is a numerical
+failure, not a passed Q4 operator gate. Model-width Q8 and chained Q4 were not
+reached. Do not change the tolerance to accept the result.
+
+The harness quarantined on the mismatch and later hit its watchdog. The
+controller timed out, safety-closed the exact title and confirmed idle state,
+healthy services and both owned locks released. No native fault marker was
+found in captured klog. Twenty raw buffers were retained; the other 92 files
+were not produced. Candidate `results/source-public-q4-console-v1` deploy and
+execute phases are consumed; never replay them.
+
+The installed package is now
+`a2b781d9de42725da12c0310fc2d44226a01a287a6af1a24aef318ebabfcd5d9`.
+The prior RMSNorm image/log are preserved. Independent outcome review confirmed
+the failure and clean safety closure; see `evidence/console40-public-q4-failure.json`.
+Next inspect raw operands and exact selected ISA/dispatch, and define a
+narrow diagnostic from evidence. No automatic rerun or new console action is
+authorized by a passing offline reference. Full-model inference remains open.
+
 ## Native Q8/Q4 numerical package built offline
 
 The 76-object native Q4 title now builds and packages successfully. The package

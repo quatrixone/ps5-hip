@@ -54,6 +54,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 candidate | offline | native Q4 package and three-image audit pass; 86 control tests pass | evidence/offline-native-public-q4-package.json | next: freeze and .40 numerical validation
 
+- 2026-10-15 | V1.3 | 1abebce | .40 | failed: first Q4 numeric output; four standalone Q8 cases passed; safety-close/health/locks verified | evidence/console40-public-q4-failure.json | next: offline ISA/raw diagnosis
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate

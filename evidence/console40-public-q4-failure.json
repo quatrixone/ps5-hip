@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-15",
+  "classification": "failed-native-public-q4-numerical",
+  "source_commit": "1abebce68281fe06af035e1e99e89fec3627f077",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "a2b781d9de42725da12c0310fc2d44226a01a287a6af1a24aef318ebabfcd5d9",
+  "manifest_sha256": "c8ce2baf7bb54d657473d88f40858da4349525ae901065566e6f69ce50d581bf",
+  "deployment": {
+    "accepted": true,
+    "complete_ftp_reads": 78,
+    "launched": false
+  },
+  "execution": {
+    "accepted": false,
+    "standalone_q8_cases_passed": 4,
+    "failed_case": "attn-k-1",
+    "failed_stage": "frozen",
+    "actual_f32": 0.1636260598897934,
+    "actual_bits": "0x3e278d97",
+    "reference_fp64": 0.21718877422972582,
+    "error": 0.05356271433993243,
+    "frozen_budget": 8.898952926278102e-06,
+    "budget_fraction": 6018.990636725898,
+    "raw_files_retained": 20,
+    "raw_files_not_produced": 92,
+    "safety_close_sent": true,
+    "idle_after_safety_close": true,
+    "healthy_after": true,
+    "primary_lock_released": true,
+    "secondary_lock_released": true,
+    "natural_finalization": false
+  },
+  "raw_directory": "results/source-public-q4-console-v1",
+  "raw_evidence": {
+    "manifest.json": "c8ce2baf7bb54d657473d88f40858da4349525ae901065566e6f69ce50d581bf",
+    "review.json": "64cfef9626cf398bccb09bf472bbe146f6932af411cbd1c7eddb94dddd0c1887",
+    "freeze-review-detail.json": "49dd81c92eb0d8dded037086cf0b4cb89b1441e10b309277709c354068d3e10a",
+    "deployment-review-detail.json": "6c640c859b0edd123c861027ab92dee2c7c28e3908aace2ad7730c7c48326994",
+    "outcome-review.json": "995a972b7fcbf50cc1ccb7bb1749ceea8f217c0a05c6c3cad8b8820c8c26a040",
+    "deploy/receipt.json": "7e30d8bd27fe371fe2c68679022851f3c2a85f2bfb7d41f262f8dd6b7af9ecfe",
+    "execute/receipt.json": "2a2ff2d0bb0f8e2a689e04a269067e9f30ff13ccdb0d3f6a5035f8e394b0a1af",
+    "deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/application.log": "3c9b9db48d8462030140dd0751cd1a3c3d9c9c130fed00cbd3f292d2d8cbed48",
+    "execute/klog.log": "54c4df71a2ce6d0ed676e73978f5be88bc943ebcfec479efb60d7ee9a28574bf",
+    "execute/snapshot.log": "9caf65ac83832f4ce5d3ab8ced51da104bf2bdb32d727eb8924c812a1c6928a1",
+    "execute/before-launch.log": "5c58a28708e7872532b283d42acd397ca5f74e04baa18fdc2fc7f4992db32d98",
+    "execute/observed.log": "1da6938c9dc7baebd3532968dac813c4c8f41068cfdedb3239ef1d03b0d4819b"
+  },
+  "raw_buffers": {
+    "q4-q8-zero.q8.input.raw": {
+      "bytes": 22560,
+      "sha256": "24ef539fb7cae7fe249baccd75d8031d561ffcec75283b517ec0c766f5bf1937"
+    },
+    "q4-q8-zero.q8.weights.raw": {
+      "bytes": 294944,
+      "sha256": "b4901fdb3149c8fcd98563e3c3b40a160a0e825105a3b752f4d0ce5129efbfd8"
+    },
+    "q4-q8-zero.q8.q8.raw": {
+      "bytes": 6368,
+      "sha256": "8b7ed7772bfb0f08cd608b3883e25a3fc8b188ef368024894133281e2b613e94"
+    },
+    "q4-q8-zero.q8.output.raw": {
+      "bytes": 1056,
+      "sha256": "870797b16d7d9d7d7ff9cfa71c1aeb1c8e3a2a9279a28b53530de6c2a00371e7"
+    },
+    "q4-q8-constant.q8.input.raw": {
+      "bytes": 22560,
+      "sha256": "fa446ef04ab8db0fe65e5f7015505b9299787f84e4713969aa16856fb009686e"
+    },
+    "q4-q8-constant.q8.weights.raw": {
+      "bytes": 294944,
+      "sha256": "b4901fdb3149c8fcd98563e3c3b40a160a0e825105a3b752f4d0ce5129efbfd8"
+    },
+    "q4-q8-constant.q8.q8.raw": {
+      "bytes": 6368,
+      "sha256": "fe6ba37cfd5e7c7ae02e1dba462d436947f17ae4985f67e7068e638b6694b1ba"
+    },
+    "q4-q8-constant.q8.output.raw": {
+      "bytes": 1056,
+      "sha256": "870797b16d7d9d7d7ff9cfa71c1aeb1c8e3a2a9279a28b53530de6c2a00371e7"
+    },
+    "q4-q8-signed-ties.q8.input.raw": {
+      "bytes": 22560,
+      "sha256": "6584533ca90d271fafcccf2150442036806888f3034b5ed0a2a19644c1a08e54"
+    },
+    "q4-q8-signed-ties.q8.weights.raw": {
+      "bytes": 294944,
+      "sha256": "b4901fdb3149c8fcd98563e3c3b40a160a0e825105a3b752f4d0ce5129efbfd8"
+    },
+    "q4-q8-signed-ties.q8.q8.raw": {
+      "bytes": 6368,
+      "sha256": "f19ea47163335cf3f55ed0541a09703e548eb944973f8d4c375d553beef8934c"
+    },
+    "q4-q8-signed-ties.q8.output.raw": {
+      "bytes": 1056,
+      "sha256": "870797b16d7d9d7d7ff9cfa71c1aeb1c8e3a2a9279a28b53530de6c2a00371e7"
+    },
+    "q4-q8-padding.q8.input.raw": {
+      "bytes": 22560,
+      "sha256": "fea8f9edd318824f4062c5c7ed66494cc8aeb8475dd3e3064964aba9d9bcec74"
+    },
+    "q4-q8-padding.q8.weights.raw": {
+      "bytes": 294944,
+      "sha256": "b4901fdb3149c8fcd98563e3c3b40a160a0e825105a3b752f4d0ce5129efbfd8"
+    },
+    "q4-q8-padding.q8.q8.raw": {
+      "bytes": 6368,
+      "sha256": "724ef76126c108a13efddc3fffc827b1a6893dbdc659233833986d91140864be"
+    },
+    "q4-q8-padding.q8.output.raw": {
+      "bytes": 1056,
+      "sha256": "870797b16d7d9d7d7ff9cfa71c1aeb1c8e3a2a9279a28b53530de6c2a00371e7"
+    },
+    "q4-attn-k-1.frozen.input.raw": {
+      "bytes": 22560,
+      "sha256": "de489fbeec8640d0cc0e32490fbfc70c2efcfa71bf30a8dc26ee697f001180f1"
+    },
+    "q4-attn-k-1.frozen.weights.raw": {
+      "bytes": 294944,
+      "sha256": "8609f2ba7b02eb69039124358989e79caa50b736376ae72bb7345ac1afea60d2"
+    },
+    "q4-attn-k-1.frozen.q8.raw": {
+      "bytes": 6368,
+      "sha256": "e68185aeb0dba0787368dd9a2de17818da46f53f24687bacd7aa75500aafb8d3"
+    },
+    "q4-attn-k-1.frozen.output.raw": {
+      "bytes": 1056,
+      "sha256": "1e9cea8452021c22a5816fe8f0bd907ceaf82cafa9ee6758ca209a0e29c65e5d"
+    }
+  },
+  "independent_review": "Failure confirmed; retained inputs, weights, Q8, guards and inactive bytes match authenticated expectations.",
+  "limits": [
+    "Only four standalone width256 Q8 cases completed; model-width Q8 and chained multiplication were not reached.",
+    "Q4 numerical gate failed; no full-model inference or release readiness claim.",
+    "Watchdog and controller timeout followed the explicit numerical quarantine; no automatic retry.",
+    "Deployment and execution phases are consumed."
+  ],
+  "next_action": "Offline ISA/argument/dispatch and exact partial-reduction diagnosis; freeze a fresh evidence-driven diagnostic before any new run."
+}
