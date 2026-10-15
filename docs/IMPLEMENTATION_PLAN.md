@@ -665,6 +665,15 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
 
+The next explicit-stream GPU/event fixture is implemented with a shared
+host/native oracle. Fresh sanitizer qualification passed 80 compilations,
+11 links and all prior cases plus event-ordered, missing-wait, no-write and
+corrupt-write cases. The 74-object native Make package and cached validation
+passed independent review; see `../evidence/offline-public-stream-gpu-fixture.json`.
+It requires two changed-input GPU launches, event reuse, exact destination and
+source checks, two freed buffers and three retired queues. Native execution
+is pending; the current successful default-stream baseline below is unchanged.
+
 The public HIP GPU fixture now passes its bounded two-round native contract: module
 load/lookup,146 outputs,16 guards,2 geometry rejections and complete natural
 teardown. See `../evidence/console40-native-public-hip-gpu-success.json`. Next is

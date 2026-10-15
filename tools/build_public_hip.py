@@ -55,6 +55,7 @@ def build_inputs():
              "tools/ps5-clangxx", "patches/native-import-libraries.patch",
              "tests/native_import_libraries_test.py", "tests/public_hip_imports_test.py",
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
+             "tools/public_hip_stream_gpu_fixture.h", "tools/public_hip_stream_console_title.cpp",
              "tools/public_hip_graph_fixture.h", "tools/public_hip_graph_console_title.cpp", "tools/public_hip_fill_console_title.cpp", "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
              "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
              "tools/prepare_public_hip_capture.py", "tools/prepare_public_hip_fill.py", "tools/prepare_public_hip_rect.py", "tools/prepare_public_hip_aot.py", "tools/prepare_public_hip_launch.py", "tools/public_hip_module_console_title.cpp", "tools/public_hip_launch_console_title.cpp",
@@ -216,14 +217,19 @@ def link_title(output, units, fixture="bootstrap"):
     run(output, "link", command)
     symbols = subprocess.check_output(["llvm-readelf-18", "-Ws", str(output / "title.elf")], text=True)
     required = ["hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"]
-    if fixture in ("memory", "copy", "launch", "fill"):
+    if fixture in ("memory", "copy", "launch", "fill", "stream"):
         required += ["hipMalloc", "hipFree"]
-    if fixture in ("copy", "launch", "fill"):
+    if fixture in ("copy", "launch", "fill", "stream"):
         required += ["hipMemcpy"]
-    if fixture in ("module", "launch"):
+    if fixture in ("module", "launch", "stream"):
         required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
     if fixture == "launch":
         required += ["hipModuleLaunchKernel", "hipDeviceSynchronize"]
+    if fixture == "stream":
+        required += ["hipModuleLaunchKernel", "hipMemcpyAsync", "hipMemset", "hipStreamCreateWithFlags",
+                     "hipStreamWaitEvent", "hipStreamSynchronize", "hipStreamQuery", "hipStreamDestroy",
+                     "hipEventCreateWithFlags", "hipEventRecord", "hipEventSynchronize", "hipEventQuery",
+                     "hipEventDestroy", "hipLaunchHostFunc"]
     if fixture == "fill":
         required += ["hipMemset", "hipMemsetD16", "hipMemsetD32Async", "hipMemsetAsync", "hipDeviceSynchronize"]
     if fixture == "graph":
@@ -356,7 +362,7 @@ def package_title(output, image, libc, results_dir, code_object=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream"), default="bootstrap")
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     validate_results_directory(args.results_dir)
@@ -386,9 +392,9 @@ def main():
             print(cached)
             return
     else:
-        if args.fixture in ("module", "launch"):
+        if args.fixture in ("module", "launch", "stream"):
             run(output, "build-code-object", [sys.executable, ROOT / "tools/build_canaries.py",
-                "--fixture", "thread_words" if args.fixture == "launch" else "canary",
+                "--fixture", "thread_words" if args.fixture in ("launch", "stream") else "canary",
                 "--output", output / "canaries"])
         native_stubs(output)
         units = compile_units(output, source, args.fixture)
@@ -398,7 +404,7 @@ def main():
     image, roundtrip = convert_title(output, tool, args.fixture)
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
-                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture == "launch" else None)
+                                   output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream") else None)
     receipt = {"classification": "offline-public-hip-native-link", "source_commit":
                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "fixture": args.fixture, "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),

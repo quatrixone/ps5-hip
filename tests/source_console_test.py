@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -195,6 +195,22 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'launch')
+
+    def test_stream_gpu_transcript_requires_ordering_and_retirement(self):
+        self.assertEqual(check_log(STREAM_EXPECTED, 'stream')['kernel'], 'public_hip_stream')
+        self.assertFalse(check_log(STREAM_EXPECTED, 'stream')['hardware_gate_passed'])
+        lines = STREAM_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [STREAM_EXPECTED * 2, LAUNCH_EXPECTED, STREAM_EXPECTED + b'FAIL\n']
+        for before, after in ((b'launches=2', b'launches=0'), (b'values=146', b'values=73'),
+                              (b'guards=16', b'guards=0'), (b'event_reused=true', b'event_reused=false'),
+                              (b'source_preserved=true', b'source_preserved=false'),
+                              (b'queues=3', b'queues=2'), (b'retired=3', b'retired=2'),
+                              (b'gate_destroyed=true', b'gate_destroyed=false')):
+            invalid.append(STREAM_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'stream')
 
     def test_graph_transcript_requires_replay_recovery_and_cleanup(self):
         self.assertEqual(check_log(GRAPH_EXPECTED, 'graph')['kernel'], 'public_hip_graph')

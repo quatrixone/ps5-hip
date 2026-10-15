@@ -308,3 +308,18 @@ use a new `SNAPSHOT_BUILD_DIR=build/<new-directory>` and pass that directory to
 `tools/freeze_source_candidate.py --snapshot-build`. The snapshot builder refuses
 to overwrite an existing attempt. A built helper does not itself certify console
 health or replace the required candidate and deployment reviews.
+
+## Explicit-stream GPU fixture
+
+`make public-hip-stream-package STREAM_BUILD_DIR=build/public-hip-stream RESULTS_DIR=/data/ps5-hip/results`
+builds a seven-file package with the same `thread_words` kernel. Two nonblocking
+streams test a producer GPU launch followed by an event-dependent D2D snapshot
+on the consumer. Two changed-input rounds reuse the event, compare 146 outputs
+and 16 destination guards, verify the source, and require two allocations/frees
+and three retired queues. Host callbacks make pending-event and stale-copy cases
+observable; the bounded nonprogress observation is not a concurrency measurement.
+
+The shared host/native oracle has bypass, no-write and corrupt-write negative
+controls in the source qualifier. Host-model evidence does not establish native
+GPU execution. Freeze and independently review a fresh candidate before console
+use; consult the current `STATE.md` baseline rather than reusing an old receipt.

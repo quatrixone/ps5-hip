@@ -18,6 +18,15 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Current native public HIP checkpoint
 
+The next explicit-stream GPU/event fixture is implemented with a shared
+host/native oracle. Fresh sanitizer qualification passed 80 compilations,
+11 links and all prior cases plus event-ordered, missing-wait, no-write and
+corrupt-write cases. The 74-object native Make package and cached validation
+passed independent review; see `evidence/offline-public-stream-gpu-fixture.json`.
+It requires two changed-input GPU launches, event reuse, exact destination and
+source checks, two freed buffers and three retired queues. Native execution
+is pending; the current successful default-stream baseline below is unchanged.
+
 - 2026-10-15 | G5 | 7207a39 | .40 | pass: bounded native public HIP GPU | evidence/console40-native-public-hip-gpu-success.json | next: stream/event GPU ordering
 
 The public HIP GPU fixture passed on .40 through WSL at `7207a39`: public

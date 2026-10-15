@@ -11,6 +11,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
+The next explicit-stream GPU/event fixture is implemented with a shared
+host/native oracle. Fresh sanitizer qualification passed 80 compilations,
+11 links and all prior cases plus event-ordered, missing-wait, no-write and
+corrupt-write cases. The 74-object native Make package and cached validation
+passed independent review; see `evidence/offline-public-stream-gpu-fixture.json`.
+It requires two changed-input GPU launches, event reuse, exact destination and
+source checks, two freed buffers and three retired queues. Native execution
+is pending; the current successful default-stream baseline below is unchanged.
+
 The public HIP GPU fixture passed on .40 through WSL at `7207a39`: public
 module load/lookup, two real default-stream kernel launches, 146 exact outputs,
 16 guards, two unsupported-geometry rejections, one allocation/free and one

@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-source-qualified-and-native-packaged-stream-gpu-fixture",
+  "source_base": "00b929316eba1f65acd2a4ade013c0f3b92fdf31",
+  "source_identity": "Base commit predates integration; exact tested source, headers and tools are bound by receipts.",
+  "source_compilations": 80,
+  "source_links": 11,
+  "inputs": 111,
+  "included_files": 696,
+  "host_tests": 62,
+  "control_tests": 23,
+  "native_objects": 74,
+  "native_inputs": 101,
+  "package_files": 7,
+  "package_sha256": "568d9c574d52f5284a1bff258b95be0498b4be4b984e313a3768636f18d51981",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-stream-gpu-source-v1/receipt.json": "862fefb1db7c4ad6936277620872568cb36b095b2a42b8ff5c54c4fd5d6dfe2e",
+    "results/public-stream-gpu-source-v1.log": "ceb98be263ccdbaea6d24ba368497eadcf22aeaa8696f95f2baa994e63dc0b20",
+    "results/public-stream-gpu-review-v1/finalsource-review.json": "c5bb2a76fb402188e8bdc09b793cb5ce37c9cdc5eb69453ed8595eb29b97fd0b",
+    "results/native-public-stream-review-v1/review.json": "898d8e72dd7d612916c75ab904f760d890222971a4d393be68c46d0dc2aa8234",
+    "build/public-hip-stream-v1/link-receipt.json": "24d8e6407f01d898324f135e0a1953278c02f430fc8de21798bf5918fefe62b8",
+    "results/public-hip-stream-v1-build.log": "8c6eaf4d736ffb382a32fc647a2eb4d827645dc07d3314ab625f75b3502d8079",
+    "results/public-hip-stream-v1-revalidate.log": "8c6eaf4d736ffb382a32fc647a2eb4d827645dc07d3314ab625f75b3502d8079",
+    "results/public-stream-gpu-host-tests-v1.log": "12df1848a6dba09833f0c9547d0eff152578935610555faa4b066cab37511238",
+    "results/public-stream-gpu-controls-v1.log": "5ff816ca518a9b770ba78e4e490cd2c7cd5d3d6b77ed46c35f3ebd41fb86db34"
+  },
+  "expected_native_contract": {
+    "rounds": 2,
+    "gpu_launches": 2,
+    "destination_values": 146,
+    "destination_guards": 16,
+    "source_preserved": true,
+    "event_reused": true,
+    "allocations": 2,
+    "frees": 2,
+    "queues": 3,
+    "retired_queues": 3
+  },
+  "negative_controls": [
+    "Missing event wait produces stale snapshot while producer is held and fails exact output oracle.",
+    "Modeled no-write and corrupt-write both fail round0/index0."
+  ],
+  "preserved_diagnostics": [
+    "v1 rejected old single-salt transport assumption on second round.",
+    "v2 rejected mistaken per-launch backend-factory count; State owns one cached backend.",
+    "v3 incremental normal and all three output negatives pass their intended contracts."
+  ],
+  "limits": [
+    "Full source qualification uses modeled providers/packet transport, not GPU execution.",
+    "Native package is not yet executed; fresh freeze and independent operational review required.",
+    "100ms nonprogress observation is scheduler-bounded; no concurrent GPU execution claim.",
+    "Negative aborts prove oracle sensitivity, not cleanup.",
+    "Full G5 and later gates remain open."
+  ]
+}

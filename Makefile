@@ -22,12 +22,13 @@ help:
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
 	@echo 'make public-hip-memory-package  Build the public HIP allocation/free fixture offline'
+	@echo 'make public-hip-stream-package Build explicit-stream GPU/event ordering fixture offline'
 	@echo 'make public-hip-graph-package Build host graph replay and capture-recovery fixture offline'
 	@echo 'make public-hip-fill-package  Build the public HIP contiguous and pitched fill fixture offline'
 	@echo 'make public-hip-launch-package  Build the public HIP kernel-launch fixture offline'
 	@echo 'make public-hip-module-package  Build the public HIP module ownership fixture offline'
 	@echo 'make public-hip-copy-package  Build the checked public HIP synchronous-copy fixture offline'
-	@echo 'Package output overrides: PUBLIC_BUILD_DIR MEMORY_BUILD_DIR COPY_BUILD_DIR MODULE_BUILD_DIR LAUNCH_BUILD_DIR FILL_BUILD_DIR'
+	@echo 'Package output overrides: PUBLIC_BUILD_DIR MEMORY_BUILD_DIR COPY_BUILD_DIR MODULE_BUILD_DIR LAUNCH_BUILD_DIR FILL_BUILD_DIR GRAPH_BUILD_DIR STREAM_BUILD_DIR'
 	@echo 'make           Build dependencies, host tests, native core and bootstrap package'
 
 deps-fetch:
@@ -120,3 +121,8 @@ GRAPH_BUILD_DIR ?= build/public-hip-graph
 .PHONY: public-hip-graph-package
 public-hip-graph-package: deps-build
 	$(PYTHON) tools/build_public_hip.py --fixture graph --output $(GRAPH_BUILD_DIR)
+
+STREAM_BUILD_DIR ?= build/public-hip-stream
+.PHONY: public-hip-stream-package
+public-hip-stream-package: deps-build
+	$(PYTHON) tools/build_public_hip.py --fixture stream --output $(STREAM_BUILD_DIR)

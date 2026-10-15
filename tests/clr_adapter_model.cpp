@@ -57,7 +57,11 @@ public:
   auto&s=registers.at(0x240);auto&p=registers.at(0x20c);auto arg=uint64_t(s.at(4))|(uint64_t(s.at(5))<<32);live(arg,16);
   uint64_t output;unsigned n,salt;std::memcpy(&output,reinterpret_cast<void*>(arg),8);std::memcpy(&n,reinterpret_cast<void*>(arg+8),4);std::memcpy(&salt,reinterpret_cast<void*>(arg+12),4);live(output,n*4);
   auto entry=(uint64_t(p.at(0))<<8)|(uint64_t(p.at(1))<<40);for(const auto&a:allocations)if(entry>=uint64_t(a.second.p)&&entry<uint64_t(a.second.p)+a.second.n)code=a.second.p;
+#if defined(PS5HIP_MODEL_CHANGING_SALT)
+  check(code&&n==73&&submits<=2&&salt==19+(submits-1)*24);
+#else
   check(code&&n==73&&salt==19);
+#endif
   if(!std::strcmp(mode,"submit"))return -7;if(!std::strcmp(mode,"throw"))throw std::runtime_error("injected submit");
   if(std::strcmp(mode,"noop"))for(unsigned i=0;i<n;++i)reinterpret_cast<unsigned*>(output)[i]=i*17+salt+unsigned(!std::strcmp(mode,"corrupt"));
   const auto*end=w+count-8;check(end[0]==0xc0064900);auto marker=uint64_t(end[3])|(uint64_t(end[4])<<32);live(marker,4);

@@ -36,7 +36,7 @@ def main():
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
-                 'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp',
+                 'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
                  'tests/public_hip_graph_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
@@ -171,6 +171,23 @@ def main():
     if sha(launch_code) != launch_code_hash:
         raise RuntimeError('launch fixture changed during qualification')
     print('public launch and both output negative controls PASS', flush=True)
+    stream_gpu_source = ROOT / 'tests/public_hip_stream_gpu_model.cpp'
+    source_hashes[str(stream_gpu_source.relative_to(ROOT))] = sha(stream_gpu_source)
+    stream_gpu_object = compile_one((len(units) + 10, stream_gpu_source))
+    stream_gpu_objects = [stream_gpu_object if unit.name == 'hip_admission_model.cpp' else obj
+                          for unit, obj in zip(units, objects)]
+    run('stream-gpu-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *stream_gpu_objects, '-o', output / 'stream-gpu-model'])
+    result = run('stream-gpu-normal', [output / 'stream-gpu-model', launch_code, 'normal'], env)
+    if result.splitlines() != [
+        'PUBLIC_STREAM_GPU_PASS rounds=2 launches=2 values=146 guards=16 source_preserved=true event_reused=true gpu_execution=false',
+        'PUBLIC_STREAM_GPU_FINAL queues=3 retired=3 allocations=2 frees=2 ownership=clean gpu_execution=false']:
+        raise RuntimeError('public stream GPU ordering/output/lifetime contract differs')
+    for negative in ('bypass', 'noop', 'corrupt'):
+        run('stream-gpu-' + negative, [output / 'stream-gpu-model', launch_code, negative], env,
+            expected_output_failure=True, failure_marker='PUBLIC_STREAM_GPU_OUTPUT_MISMATCH round=0 index=0')
+    print('public stream GPU ordering and three negative controls PASS', flush=True)
     stream_source = ROOT / 'tests/public_hip_stream_model.cpp'
     source_hashes[str(stream_source.relative_to(ROOT))] = sha(stream_source)
     stream_object = compile_one((len(units) + 1, stream_source))
@@ -368,7 +385,9 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 10,
+               'total_compilations': len(units) + 11,
+               'stream_gpu_model_sha256': sha(output / 'stream-gpu-model'),
+               'stream_gpu_cases': ['event-ordered-two-rounds', 'bypass-stale-output-rejected', 'noop-output-rejected', 'corrupt-output-rejected'],
                'graph_model_sha256': sha(output / 'graph-model'),
                'graph_cases': ['explicit-host-replay-update-source-destroy',
                                'captured-host-replay-update-source-destroy', 'noop-output-rejected',
