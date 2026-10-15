@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The mounted-path correction has a fresh 74-object Make package, cached
+validation and independent artifact/deployment-only review at `7207a39`. Frozen
+candidate: `results/source-public-launch-mounted-path-console-v1`; see
+`evidence/offline-native-mounted-path-package.json`. Its unchanged kernel and
+original GPU acceptance remain pending native validation.
+
 Both native module fixtures now use the verified system-visible title mount
 for code objects after filesystem elevation. The two changed title units compile
 and independent review passed; see `evidence/offline-native-module-mounted-path.json`.

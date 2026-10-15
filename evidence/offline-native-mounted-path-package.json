@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-mounted-path-launch-package",
+  "source_commit": "7207a393d362240e7d675fe2e5976ce7e8c71ea8",
+  "package_sha256": "6df0885e0c61eb1423f2fb41f5c6fb82dcd895873ec12148e14f9cf32cf034c8",
+  "manifest_sha256": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+  "objects": 74,
+  "committed_inputs": 99,
+  "package_files": 7,
+  "hypothesis": "The previous301 fopen failure is caused by the sandbox-relative path after filesystem elevation. Using the verified system-visible title mount permits public module loading and the unchanged two-dispatch146value16guard acceptance with clean teardown.",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-mounted-path-console-v1/manifest.json": "993dbfce333d9b3369cb8c2222243867f74b6a01424fa57324aed25022cb54a6",
+    "results/source-public-launch-mounted-path-console-v1/build-receipt.json": "f53c96052e206f1b3968b649c4eafaf29e910821658c50734dae48834843b208",
+    "results/source-public-launch-mounted-path-console-v1/deployment-review.json": "00cf77258a04441fcb3a3b528ebde13215019620c9e6a519b11600f34eb28af8",
+    "results/native-public-launch-mounted-path-review/review.json": "594d5266f8d33d9c9e9ad3659032d0b9e52d732704842710bbe50fe3943523f3",
+    "results/public-hip-launch-mounted-path-v1-build.log": "015d5369b9cf3f2dabc72432c47657584a4b2cc7574644dfd3726171d9fb63bb",
+    "results/public-hip-launch-mounted-path-v1-revalidate.log": "015d5369b9cf3f2dabc72432c47657584a4b2cc7574644dfd3726171d9fb63bb"
+  },
+  "limits": [
+    "Not yet executed.",
+    "Independent deployment-only approval; execution requires exact deployment receipt review.",
+    "Original two-launch146value16guard acceptance and clean teardown requirements unchanged."
+  ]
+}
