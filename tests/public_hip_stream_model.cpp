@@ -7,6 +7,7 @@
 #include "hip_internal.hpp"
 static ps5hip::clr::Observation observed;
 static bool completed=false;
+static bool copy_case=false;
 static std::mutex ordering_mutex;
 static std::condition_variable ordering_changed;
 static bool producer_entered=false,release_producer=false,producer_finished=false;
@@ -14,9 +15,9 @@ static bool consumer_finished=false,consumer_early=false;
 struct Final {
  ~Final(){
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
-  checked(observed.allocations==0&&observed.frees==0&&observed.launches==0&&backend_calls==0,__LINE__);
-  checked(observed.queues==2&&observed.retired_queues==2&&allocations.empty(),__LINE__);
-  std::puts("PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false");
+  checked(observed.allocations==(copy_case?3:0)&&observed.frees==(copy_case?3:0)&&observed.launches==0&&backend_calls==0,__LINE__);
+  checked(observed.queues==(copy_case?3:2)&&observed.retired_queues==(copy_case?3:2)&&allocations.empty(),__LINE__);
+  std::puts(copy_case?"PUBLIC_STREAM_COPY_FINAL queues=3 retired=3 allocations=3 frees=3 ownership=clean gpu_execution=false":"PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false");
  }
 };
 __attribute__((init_priority(101))) static Final final;
@@ -29,17 +30,28 @@ static void ok(hipError_t status,int line){if(status!=hipSuccess){std::fprintf(s
 #define HIP_OK(x) ok(x,__LINE__)
 int main(int argc,char**argv){
  checked(argc==2,__LINE__);
- checked(std::strcmp(argv[1],"normal")==0||std::strcmp(argv[1],"bypass")==0,__LINE__);
- const bool bypass=std::strcmp(argv[1],"bypass")==0;
+ checked(std::strcmp(argv[1],"normal")==0||std::strcmp(argv[1],"bypass")==0||
+         std::strcmp(argv[1],"copy")==0||std::strcmp(argv[1],"copy-bypass")==0,__LINE__);
+ copy_case=std::strncmp(argv[1],"copy",4)==0;
+ const bool bypass=std::strcmp(argv[1],"bypass")==0||std::strcmp(argv[1],"copy-bypass")==0;
  HIP_OK(hipInit(0));hipStream_t producer=nullptr,consumer=nullptr;
  HIP_OK(hipStreamCreateWithFlags(&producer,hipStreamNonBlocking));
  HIP_OK(hipStreamCreateWithFlags(&consumer,hipStreamNonBlocking));
+ void *input=nullptr,*middle=nullptr,*output=nullptr;
+ unsigned char seed[128],actual[128];
+ for(unsigned i=0;i<128;++i)seed[i]=static_cast<unsigned char>(i*13+7);
+ if(copy_case){
+  HIP_OK(hipMalloc(&input,128));HIP_OK(hipMalloc(&middle,128));HIP_OK(hipMalloc(&output,128));
+  HIP_OK(hipMemcpy(input,seed,128,hipMemcpyHostToDevice));
+  HIP_OK(hipMemset(middle,0,128));HIP_OK(hipMemset(output,0xa5,128));
+ }
  hipEvent_t event=nullptr;HIP_OK(hipEventCreateWithFlags(&event,hipEventDisableTiming));
  HIP_OK(hipLaunchHostFunc(producer,[](void*){
   std::unique_lock<std::mutex> lock(ordering_mutex);producer_entered=true;ordering_changed.notify_all();
   checked(ordering_changed.wait_for(lock,std::chrono::seconds(5),[]{return release_producer;}),__LINE__);
   producer_finished=true;ordering_changed.notify_all();
  },nullptr));
+ if(copy_case)HIP_OK(hipMemcpyAsync(middle,input,128,hipMemcpyDeviceToDevice,producer));
  HIP_OK(hipEventRecord(event,producer));
  {
   std::unique_lock<std::mutex> lock(ordering_mutex);
@@ -47,6 +59,7 @@ int main(int argc,char**argv){
  }
  checked(hipEventQuery(event)==hipErrorNotReady,__LINE__);
  if(!bypass)HIP_OK(hipStreamWaitEvent(consumer,event,0));
+ if(copy_case)HIP_OK(hipMemcpyAsync(output,middle,128,hipMemcpyDeviceToDevice,consumer));
  HIP_OK(hipLaunchHostFunc(consumer,[](void*){
   std::lock_guard<std::mutex> lock(ordering_mutex);consumer_early=!producer_finished;
   consumer_finished=true;ordering_changed.notify_all();
@@ -62,6 +75,13 @@ int main(int argc,char**argv){
  HIP_OK(hipStreamSynchronize(consumer));
  {std::lock_guard<std::mutex> lock(ordering_mutex);checked(consumer_finished&&consumer_early==bypass,__LINE__);}
  HIP_OK(hipEventSynchronize(event));HIP_OK(hipEventQuery(event));
+ if(copy_case){
+  HIP_OK(hipStreamSynchronize(producer));
+  HIP_OK(hipMemcpy(actual,output,128,hipMemcpyDeviceToHost));
+  for(unsigned i=0;i<128;++i)checked(actual[i]==(bypass?0:seed[i]),__LINE__);
+  HIP_OK(hipFree(output));HIP_OK(hipFree(middle));HIP_OK(hipFree(input));
+ }
  HIP_OK(hipEventDestroy(event));HIP_OK(hipStreamDestroy(consumer));HIP_OK(hipStreamDestroy(producer));completed=true;
- std::puts(bypass?"PUBLIC_STREAM_BYPASS early_consumer_detected=true gpu_execution=false":"PUBLIC_STREAM_PASS event_ordered=true gpu_execution=false");
+ if(copy_case)std::puts(bypass?"PUBLIC_STREAM_COPY_BYPASS stale_bytes=128 gpu_execution=false":"PUBLIC_STREAM_COPY_PASS exact_bytes=128 event_ordered=true gpu_execution=false");
+ else std::puts(bypass?"PUBLIC_STREAM_BYPASS early_consumer_detected=true gpu_execution=false":"PUBLIC_STREAM_PASS event_ordered=true gpu_execution=false");
 }

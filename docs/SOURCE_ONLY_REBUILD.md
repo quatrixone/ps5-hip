@@ -196,6 +196,15 @@ qualifies neither native events nor GPU concurrency. The qualifier builds 77
 translation units in total: 69 base units, four alternate client harnesses,
 two independently fault-injected memory units and two retirement adapter copies.
 
+The stream client also tests actual asynchronous D2D dataflow. A held producer
+copies a 128-byte seed into an intermediate allocation, records an event, and a
+consumer copies into a third allocation. With the wait, readback must equal every
+seed byte; bypassing it must read the intermediate buffer's original zeros. The
+output starts at a different value, so an omitted copy cannot pass either oracle.
+Both streams synchronize before readback and each buffer is freed once before
+stream destruction. These cases retain the bounded scheduling caveat above and
+do not establish native asynchronous transfer or GPU concurrency.
+
 The retirement client holds a completed fill before worker batch release. The
 fixed adapter must keep synchronization pending during a 500 ms observation,
 then free the allocation once before stream destruction. The negative control

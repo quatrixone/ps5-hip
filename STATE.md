@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Public asynchronous D2D dataflow now passes event-ordering and stale-data bypass
+cases in the fresh 77-compilation/eight-link qualifier. Both verify 128 bytes,
+three single frees and three retired queues. Independent review passed; see
+`evidence/offline-public-async-copy-order.json`. This is bounded host-model
+coverage, not native asynchronous transfer or GPU concurrency acceptance.
+
 The retirement race now has a durable fresh-source regression in the public HIP
 qualifier: 77 compilations and eight strict links pass independent audit, including
 the fixed barrier and a test-only admission bypass with exact one-queue cleanup.

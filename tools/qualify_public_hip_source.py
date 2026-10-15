@@ -185,6 +185,14 @@ def main():
             'PUBLIC_STREAM_FINAL queues=2 retired=2 ownership=clean gpu_execution=false']:
             raise RuntimeError('public stream ordering/ownership contract differs: ' + mode)
         print('public stream ' + mode + ' PASS', flush=True)
+    for mode, marker in (
+        ('copy', 'PUBLIC_STREAM_COPY_PASS exact_bytes=128 event_ordered=true gpu_execution=false'),
+        ('copy-bypass', 'PUBLIC_STREAM_COPY_BYPASS stale_bytes=128 gpu_execution=false')):
+        result = run('stream-' + mode, [output / 'stream-model', mode], env)
+        if result.splitlines() != [marker,
+            'PUBLIC_STREAM_COPY_FINAL queues=3 retired=3 allocations=3 frees=3 ownership=clean gpu_execution=false']:
+            raise RuntimeError('public async copy ordering/ownership differs: ' + mode)
+        print('public stream ' + mode + ' PASS', flush=True)
     fill_source = ROOT / 'tests/public_hip_fill_model.cpp'
     source_hashes[str(fill_source.relative_to(ROOT))] = sha(fill_source)
     fill_object = compile_one((len(units) + 2, fill_source))
@@ -284,7 +292,8 @@ def main():
                'module_fixture_sha256': code_hash,
                'launch_model_sha256': sha(output / 'launch-model'),
                'stream_model_sha256': sha(output / 'stream-model'),
-               'stream_cases': ['event-ordered', 'bypass-early-consumer-detected'],
+               'stream_cases': ['event-ordered', 'bypass-early-consumer-detected',
+                                'async-d2d-event-ordered', 'async-d2d-bypass-stale-data'],
                'total_compilations': len(units) + 8,
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,

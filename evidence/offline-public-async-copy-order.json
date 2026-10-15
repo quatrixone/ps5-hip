@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-async-d2d-ordering-pass",
+  "source_base": "48703e28723e1cf98a530aef575c6544c7d0ce95",
+  "total_compilations": 77,
+  "strict_links": 8,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-async-copy-source-v1/receipt.json": "c6562e28e93d179decccd0984cdb21166ce194a736d8049da082cae6a729d7a6",
+    "results/public-async-copy-source-v1/independent-review.json": "cab89c1ce432a80e24aa4e87799cca96bf46b95b50f61b05fbb97aea56bb2994",
+    "results/public-async-copy-source-v1/stream-copy.json": "e63ac7ce6666cf8d419cf2c6a3ba34e0a204e86b3b4338638d564e71500d39f9",
+    "results/public-async-copy-source-v1/stream-copy.stdout": "a13205e029edec98f3bc46dc43bba7c3a6d4b6cfb327c974964b467c29b8f48d",
+    "results/public-async-copy-source-v1/stream-copy.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-async-copy-source-v1/stream-copy-bypass.json": "6fc03f228186e56c097ff3b21de375b3de66e9824e4fc7cc7aa44eb73111cdb4",
+    "results/public-async-copy-source-v1/stream-copy-bypass.stdout": "c094be04d6a601ff12868e345b5b79d40b5e2e2a93ef0ca9a701802a68b224f4",
+    "results/public-async-copy-source-v1/stream-copy-bypass.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "accepted_scope": [
+    "Held producer enqueues asynchronous D2D into intermediate memory; event-waiting consumer enqueues D2D to output and returns128exactseedbytes.",
+    "Bypassing the event wait copies128stalezeros before producer release; distinct output sentinel rejects a no-op.",
+    "Both streams synchronize before readback/free; each case frees3allocations exactly once and retires3queues.",
+    "Existing qualification cases and fresh source/header/tool identities pass independent audit."
+  ],
+  "limits": [
+    "One128byte dataflow per mode, with scheduler-bounded waits.",
+    "Host modeled providers only; no native async-transfer or GPU concurrency acceptance.",
+    "No runtime implementation change, native package rebuild or console contact."
+  ],
+  "independent_review": {
+    "path": "results/public-async-copy-source-v1/independent-review.json",
+    "sha256": "cab89c1ce432a80e24aa4e87799cca96bf46b95b50f61b05fbb97aea56bb2994",
+    "deployment_approved": false
+  }
+}
