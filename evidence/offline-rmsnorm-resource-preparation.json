@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "classification": "offline-real-rmsnorm-resource-preparation",
+  "source_sha256": {
+    "include/ps5hip/launch.h": "cb694a126ab25ec78ad22735064457080eb40027856e158e0984cf2cab3becae",
+    "src/code_object.cpp": "76293d8e6f97d302fd04e6e414427000eebc68d00e6e1e24974ec7ffb3c9960a",
+    "src/launch.cpp": "ed6d93a2ae1c5d821321df90717c2a33f29dbfe82d38f8eebac9c9749c229c9a",
+    "src/native_launch.cpp": "7829fa799988d70ea1050f419d03c5219932cc47673984fed96f61f9f2bfb2a5",
+    "src/hip_launch_profile.cpp": "c9a61644f4fe8b672ebd2b34758f8575ce21a52ce9bc09462412902c7849839e",
+    "tests/rmsnorm_launch_test.cpp": "d06682c5304cb7d2ff4e38c6777d37fb41a0085c94ae0373ee3e6e6c72133110",
+    "tests/native_rmsnorm_test.cpp": "c3f750cbc263b1ba7bf992ea185bdb298b5e0e61adfe3f3e86f296d0a6454ac9",
+    "tests/reduction_launch_test.cpp": "13ef54bb909106b0afe190fe9da1ae845d2ab8ae34692891e7dfb1038c7676cc",
+    "CMakeLists.txt": "5b1158ab9cfa6ffe2118b38623f116e1befb665dc799dd10de546b049bcf8e47"
+  },
+  "raw_evidence": {
+    "build/rmsnorm-core-v2/results.json": "ab85ff01ad7277f8567045b12e7ba853b4f07b157b86c344635293539eb4dbaa",
+    "results/rmsnorm-core-review-v1/review.json": "607235e7fe617861c4e6125210942e37cecc0b4c8c75169c11ea594cbd6ae20a",
+    "build/rmsnorm-native-core-v1/build.log": "b2990e22aa443f1a2e0349c33c523f0c0b9fc3b98a55d7a0cc2f4b1739f5ba16",
+    "build/rmsnorm-native-core-v1/libps5hip_object.a": "042089acdc584379b5edc880f070fd7858de6e49cb647ec8962b4f4b71365fcb",
+    "build/rmsnorm-native-core-v1/libps5hip_native_memory.a": "4ccc9ce94006da025c7faef335cce34ba347197df894d600f0c06bec4c2070cb"
+  },
+  "actual_objects": {
+    "results/llm-hip-library-order-v1/norm.hsaco": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5",
+    "results/reduction-compiler-v2/ps5/reduction.hsaco": "807b46dfaef2fbcb16be270fb76fe9b596fd3da96b0cf390e4da67ccebc7229a"
+  },
+  "validation": {
+    "core_sanitizer_tests_passed": 32,
+    "actual_object_ctest_passed": [
+      "rmsnorm_packet",
+      "native_rmsnorm_prepare",
+      "hip_reduction_packet"
+    ],
+    "direct_four_kernel_profile_passed": true,
+    "native_core_cross_build_exit_code": 0,
+    "independent_source_review": "pass-no-unresolved-blockers",
+    "rows": [
+      1,
+      2,
+      17
+    ],
+    "explicit_arguments": 26,
+    "kernarg_bytes": 488,
+    "implicit_bytes": 256,
+    "dynamic_lds_bytes": 128,
+    "allocated_lds_bytes": 1024,
+    "hidden_dynamic_offset": 352,
+    "rsrc1": "0x60af00c3",
+    "rsrc2": "0x1038c",
+    "resource_limits": "0x00400000",
+    "optional_null_arguments_unretained": 2,
+    "owned_temporary_resources": 2,
+    "retained_user_allocations": 2,
+    "native_preparer_rejections_before_allocation": 13
+  },
+  "contract": [
+    "ReductionLds preserves fixed rsrc1 mode bits0x60af0000 with both register allocation fields<=3.",
+    "Descriptor rsrc2 admits only0x8c or0x38c; no private/static LDS, spills, preload or rsrc3.",
+    "Nonzero dynamic sizes through64KiB are resource capacity only; caller must supply algorithmic minimum.",
+    "Legacy canary invocation remains4096 bytes; RMSNorm exact tested request is128 bytes."
+  ],
+  "gpu_executed": false,
+  "native_executed": false,
+  "limits": [
+    "Actual compiler object and host-mapped native preparation, not GPU numerical execution.",
+    "Public CLR still admits Initial only; mixed-module admission and nonzero shared routing remain open.",
+    "Source-only unchanged operator fixture generator is in progress; existing compiler artifact is bound here by hash.",
+    "No whole-client link, model-scale allocations, full inference or SDK completion."
+  ]
+}

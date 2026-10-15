@@ -18,7 +18,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     // Never drop one resource to force a kernel through a different entry ABI.
     require(!(kernel.private_bytes && (kernel.group_bytes || shared || geometry)),"combined scratch resources unsupported");
     if(reduction) {
-        require(shared==4096 && !kernel.private_bytes && !kernel.group_bytes,"unsupported reduction LDS request");
+        require(shared && !kernel.private_bytes && !kernel.group_bytes,"unsupported reduction LDS request");
         request.route=NativeLaunchRoute::ReductionLds;
     }
     else if(kernel.private_bytes) request.route=NativeLaunchRoute::BufferScratch;
@@ -44,7 +44,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
         require(groups[0] && groups[0]<=UINT32_MAX/(reduction ? 1024u : 64u) && groups[1]==1 && groups[2]==1,"unsupported 1D extent");
         request.shape.dimensions=1;
     }
-    if(request.route==NativeLaunchRoute::Lds)
+    if(request.route==NativeLaunchRoute::Lds || reduction)
         require(plan_lds(kernel.group_bytes,request.dynamic_lds_bytes).allocated_bytes!=0,"empty LDS allocation");
     if(request.route==NativeLaunchRoute::BufferScratch) (void)buffer_scratch_ring_bytes(kernel.private_bytes);
     return request;

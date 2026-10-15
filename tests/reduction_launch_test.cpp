@@ -18,7 +18,7 @@ int main(int argc,char**argv){try{
   if(m==0)bad.max_workgroup_size=512;else if(m==1)bad.private_bytes=4;else if(m==2)bad.group_bytes=4;
   else if(m==3)bad.wave_size=64;else if(m==4)bad.rsrc2=0x138c;else if(m==5)bad.preload=1;
   else if(m==6)bad.rsrc3=1;else if(m==7)bad.kernarg_size=280;else if(m==8)bad.sgpr_spills=1;
-  else if(m==9)bad.vgpr_spills=1;else if(m==10)bad.required_workgroup={64,1,1};else bad.arguments[3].kind="global_buffer";
+  else if(m==9)bad.vgpr_spills=1;else if(m==10)bad.required_workgroup={64,1,1};else bad.arguments[3].kind="unsupported";
   reject([&]{select_hip_launch_profile(bad,{16,1,1},{1024,1,1},4096);});++mutations;
  }
  for(size_t i=0;i<k.hidden_arguments.size();++i)for(unsigned m=0;m<4;++m){auto bad=k;
@@ -26,7 +26,7 @@ int main(int argc,char**argv){try{
   else if(m==2)bad.hidden_arguments[i].kind="unknown";else bad.hidden_arguments.push_back(bad.hidden_arguments[i]);
   reject([&]{select_hip_launch_profile(bad,{16,1,1},{1024,1,1},4096);});++mutations;
  }
- for(auto size:{0u,1024u,4095u,4097u,65537u}){reject([&]{select_hip_launch_profile(k,{16,1,1},{1024,1,1},size);});++mutations;}
+ for(auto size:{0u,65537u,UINT32_MAX}){reject([&]{select_hip_launch_profile(k,{16,1,1},{1024,1,1},size);});++mutations;}
  for(auto groups:{std::array<uint32_t,3>{0,1,1},{UINT32_MAX,1,1},{16,2,1},{16,1,2}}){reject([&]{select_hip_launch_profile(k,groups,{1024,1,1},4096);});++mutations;}
  const GpuRange module{0x200000000,object.image_size+4096},args{0x300000000,4096};
  auto p=prepare_reduction_lds_launch(object,k.name,module,args,16,{{0x400000000,65536},{0x500000000,4096},{0x600000000,64},{16384,0}});

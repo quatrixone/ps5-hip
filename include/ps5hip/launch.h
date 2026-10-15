@@ -86,9 +86,10 @@ LdsLaunch prepare_lds_launch(
     const std::vector<LaunchArgument> &arguments, uint32_t dynamic_bytes = 0);
 std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch);
 
-// Bounded 1024x1x1 wave32 reduction with4096 dynamic LDS bytes.
+// Bounded 1024x1x1 wave32 reduction; legacy callers default to 4096 dynamic LDS bytes.
+// The caller supplies the algorithm's required dynamic size; metadata cannot prove sufficiency.
 LdsLaunch prepare_reduction_lds_launch(const CodeObject &, const std::string &,
-    GpuRange, GpuRange, uint32_t groups_x, const std::vector<LaunchArgument> &);
+    GpuRange, GpuRange, uint32_t groups_x, const std::vector<LaunchArgument> &, uint32_t dynamic_bytes = 4096);
 std::vector<uint32_t> encode_reduction_lds_dispatch(const LdsLaunch &);
 
 struct FlatCallLaunch {

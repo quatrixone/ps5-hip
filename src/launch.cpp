@@ -45,7 +45,7 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
                                     GpuRange module, GpuRange kernarg_storage,
                                     uint32_t groups_x, const std::vector<LaunchArgument> &arguments,
                                     const BufferScratchPlan *scratch, bool lds = false, bool flat_call = false,
-                                    const GeometryShape *geometry = nullptr, bool reduction = false) {
+                                    const GeometryShape *geometry = nullptr, bool reduction = false, uint32_t dynamic_bytes = 0) {
     const auto found = std::find_if(object.kernels.begin(), object.kernels.end(),
                                    [&](const Kernel &k) { return k.name == name; });
     require(found != object.kernels.end(), "kernel not found");
@@ -98,7 +98,9 @@ static InitialLaunch prepare_launch(const CodeObject &object, const std::string 
         }
     }
     if(reduction) {
-        result.kernargs[152]=0; result.kernargs[153]=0x10; //4096 little-endian dynamic LDS bytes.
+        const size_t offset = result.kernargs.size() - 256 + 120;
+        for (unsigned byte = 0; byte < 4; ++byte)
+            result.kernargs[offset + byte] = uint8_t(dynamic_bytes >> (8 * byte));
     }
     for (size_t i = 0; i < arguments.size(); ++i) {
         const auto &arg = arguments[i];
@@ -146,20 +148,24 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     } else require(launch.threads == std::array<uint32_t, 3>{reduction ? 1024u : 64u, 1, 1} && launch.groups_x != 0 &&
                    launch.groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid dispatch shape");
     if(reduction) {
-        require(launch.rsrc1==0x60af0080u && !scratch && !geometry && !flat_init && lds && launch.kernargs.size()==288,"invalid reduction dispatch ABI");
+        require((launch.rsrc1 & 0xfffffc00u) == 0x60af0000u && (launch.rsrc1 & 0x3fu) <= 3 &&
+            ((launch.rsrc1 >> 6) & 0xfu) <= 3 && !scratch && !geometry && !flat_init && lds &&
+            launch.kernargs.size() >= 256 && launch.kernargs.size() <= 65536 && launch.kernargs.size() % 8 == 0,
+            "invalid reduction dispatch ABI");
         std::array<uint8_t,256> expected{};
         const std::array<uint64_t,13> values{{launch.groups_x,1,1,1024,1,1,0,0,0,0,0,0,1}};
         for(size_t i=0;i<detail::cov5_geometry.size();++i) {
             const auto &f=detail::cov5_geometry[i];
             for(unsigned b=0;b<f.size;++b) expected[f.offset+b]=uint8_t(values[i]>>(8*b));
         }
-        expected[121]=0x10;
-        require(std::equal(expected.begin(),expected.end(),launch.kernargs.begin()+32),"reduction implicit arguments changed");
+        for (unsigned byte = 0; byte < 4; ++byte)
+            expected[120 + byte] = uint8_t(lds->dynamic_bytes >> (8 * byte));
+        require(std::equal(expected.begin(),expected.end(),launch.kernargs.end()-256),"reduction implicit arguments changed");
     }
     require(flat_init ? launch.user_sgpr_count == 8 :
             (launch.user_sgpr_count == 2 || launch.user_sgpr_count == 6), "invalid dispatch user-SGPR count");
     require(((launch.rsrc2 >> 1) & 31) == launch.user_sgpr_count &&
-            (geometry ? launch.rsrc2 == (lds ? (0x98cu | lds->rsrc2_lds) : 0x138cu) : !(launch.rsrc2 & ~((scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
+            (geometry ? launch.rsrc2 == (lds ? (0x98cu | lds->rsrc2_lds) : 0x138cu) : !(launch.rsrc2 & ~((reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu) | (lds ? 0x00ff8000u : 0u)))) &&
             (launch.rsrc2 & 0x80) && launch.rsrc3 == 0, "unsupported dispatch resources");
     if (scratch) {
         require(launch.rsrc2 == (flat_init ? 0x91u : 0x8du) && launch.user_sgpr_count == (flat_init ? 8u : 6u) &&
@@ -172,7 +178,9 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
                 "flat initialization must contain the raw scratch base");
     }
     if (lds) {
-        require(launch.rsrc2 == ((geometry ? 0x98cu : 0x8cu) | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
+        const uint32_t base = launch.rsrc2 & ~0x00ff8000u;
+        require((reduction ? (base == 0x8cu || base == 0x38cu) : base == (geometry ? 0x98cu : 0x8cu)) &&
+                launch.rsrc2 == (base | lds->rsrc2_lds) && launch.user_sgpr_count == 6 &&
                 std::all_of(launch.user_sgprs.begin(), launch.user_sgprs.begin() + 4,
                             [](uint32_t value) { return value == 0; }), "LDS dispatch entry state mismatch");
     }
@@ -283,14 +291,17 @@ LdsLaunch prepare_lds_launch(
     return {std::move(dispatch), lds};
 }
 LdsLaunch prepare_reduction_lds_launch(const CodeObject &object,const std::string &name,
-    GpuRange module,GpuRange kernarg_storage,uint32_t groups_x,const std::vector<LaunchArgument> &arguments) {
-    auto d=prepare_launch(object,name,module,kernarg_storage,groups_x,arguments,nullptr,true,false,nullptr,true);
-    auto lds=plan_lds(0,4096); d.rsrc2|=lds.rsrc2_lds;
+    GpuRange module,GpuRange kernarg_storage,uint32_t groups_x,const std::vector<LaunchArgument> &arguments,uint32_t dynamic_bytes) {
+    const auto lds=plan_lds(0,dynamic_bytes);
+    require(lds.allocated_bytes != 0,"empty reduction LDS allocation");
+    auto d=prepare_launch(object,name,module,kernarg_storage,groups_x,arguments,nullptr,true,false,nullptr,true,dynamic_bytes);
+    d.rsrc2|=lds.rsrc2_lds;
     return {std::move(d),lds};
 }
 std::vector<uint32_t> encode_reduction_lds_dispatch(const LdsLaunch &launch) {
-    require(launch.lds.static_bytes==0 && launch.lds.dynamic_bytes==4096 &&
-        launch.lds.allocated_bytes==4096 && launch.lds.rsrc2_lds==0x40000,"invalid reduction LDS plan");
+    const auto expected=plan_lds(0,launch.lds.dynamic_bytes);
+    require(launch.lds.static_bytes==0 && expected.allocated_bytes != 0 &&
+        launch.lds.allocated_bytes==expected.allocated_bytes && launch.lds.rsrc2_lds==expected.rsrc2_lds,"invalid reduction LDS plan");
     return encode_dispatch(launch.dispatch,nullptr,&launch.lds,nullptr,nullptr,true);
 }
 std::vector<uint32_t> encode_lds_dispatch(const LdsLaunch &launch) {

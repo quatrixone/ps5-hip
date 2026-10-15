@@ -17,12 +17,33 @@ selected LLVM18 tools, SDK wrapper/dispatcher/config/revision, prepared HIP
 headers and device libraries, rechecking inputs afterward. The saved checker
 requires these inventories and rejects omitted artifacts, headers and wrappers.
 
-The separate ReductionLds route requires wave32, no private/static LDS storage,
-no spills, exact measured rsrc1=0x60af0080, X-only rsrc2=0x8c, properties0x409,
-and a288-byte argument area: three64-bit buffers, size_t,13 COv5 geometry fields
-and dynamic-LDS size at offset152. Existing routes retain their rejection rules.
-The preparation and packet boundaries separately enforce1024x1x1/4096 and
-check the complete implicit argument area, including reserved zeros.
+The ReductionLds route now also supports the unchanged upstream RMSNorm
+operator's resource layout. It requires wave32, no private/static LDS storage,
+no spills, properties 0x409, fixed rsrc1 mode bits 0x60af0000, and SGPR/VGPR
+allocation fields at most 3. Descriptor rsrc2 must be exactly 0x8c or 0x38c.
+Explicit arguments use the shared validated scalar/pointer/aggregate layouts;
+13 COv5 geometry fields and the dynamic-LDS field occupy the final 256 bytes.
+The dynamic size field is at implicit-base + 120, not a fixed module offset.
+
+The old canary still requests 4096 bytes, uses rsrc1 0x60af0080/rsrc2 0x8c,
+and has a 288-byte kernarg area. The real RMSNorm case requests 128 bytes,
+uses rsrc1 0x60af00c3/rsrc2 0x38c, and has 488 bytes for 26 explicit arguments
+plus implicit storage. Existing LDS policy rounds its allocation to 1024 bytes;
+the hidden argument remains 128 and the encoded rsrc2 is 0x1038c.
+
+Dynamic requests are now admitted over the existing allocator's nonzero
+1..65536-byte range instead of requiring 4096 for every reduction. This is
+resource capacity, not algorithmic safety or hardware qualification of every
+size. As with ordinary HIP dynamic shared memory, the caller must request the
+bytes its kernel actually accesses. Metadata cannot infer that minimum. In
+particular, launching the old canary with fewer than 4096 bytes is a caller
+error; these changes do not make that invocation safe. Native numerical fixtures
+must preserve the selected upstream launcher's exact dynamic size.
+
+Preparation and packet encoding independently validate resource fields, the LDS
+plan, 1024x1x1 geometry and all 256 implicit bytes, including reserved zeros.
+Unsupported register modes, spills, private/static LDS and other geometry
+remain rejected. No public CLR resource-capacity change is included here.
 
 Resource policy comes from pinned PS5_Mesa0b2d6d1a61d9bbf89cf8beb88a696144f67c61f8:
 `radv_pipeline_compute.c:38-44` computes32 waves and one CU group with no occupancy
@@ -38,3 +59,14 @@ Compiler proof, host packet/model proof and native execution remain separate.
 Before a native experiment, require a decisive actual-runtime host oracle and
 independently verified deterministic masks/results/guards while preserving the
 same kernel and16-block launch. No native package or console test is included.
+
+## RMSNorm preparation evidence
+
+`evidence/offline-rmsnorm-resource-preparation.json` records actual-object packet
+and host-mapped preparation tests, old reduction regressions and native library
+cross-compilation. Configure `PS5HIP_RMSNORM_OBJECT` with an authenticated
+unchanged upstream `norm.hsaco` to register `rmsnorm_packet` and, with SDK
+platform headers available, `native_rmsnorm_prepare`. Both tests explicitly
+report `gpu_execution=false`; diagnostic argument patterns are not numerical
+RMSNorm inputs. Source-only fixture generation and public CLR resource routing
+remain separate work before a native numerical experiment.

@@ -366,7 +366,9 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
 }
 
 static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false, bool geometry = false, bool reduction = false) {
-    if (reduction && (k.rsrc1 != 0x60af0080u || k.group_bytes || k.max_workgroup_size < 1024 || k.kernarg_size != 288 ||
+    // Keep the measured mode bits; bound both register allocation fields to the measured envelope.
+    if (reduction && ((k.rsrc1 & 0xfffffc00u) != 0x60af0000u || (k.rsrc1 & 0x3fu) > 3 ||
+        ((k.rsrc1 >> 6) & 0xfu) > 3 || k.group_bytes || k.max_workgroup_size < 1024 ||
         k.sgpr_spills || k.vgpr_spills)) return "unsupported reduction resources";
     if (k.wave_size != 32) return "initial launch supports wave32 only";
     if (flat_call) {
@@ -378,7 +380,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
     if (lds) {
-        if (k.group_bytes > 65536 || k.properties != 0x409 || k.rsrc2 != (geometry ? 0x98cu : 0x8cu) ||
+        if (k.group_bytes > 65536 || k.properties != 0x409 || (reduction ? (k.rsrc2 != 0x8cu && k.rsrc2 != 0x38cu) : k.rsrc2 != (geometry ? 0x98cu : 0x8cu)) ||
             (geometry ? (k.group_bytes != 512 || k.hidden_arguments.empty()) : (!reduction && !k.hidden_arguments.empty())))
             return "unsupported LDS entry contract";
     } else if (k.group_bytes || (k.rsrc2 & 0x00ff8000)) return "LDS requires the G3 launch path";
@@ -390,7 +392,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     if (geometry) {
         if (k.rsrc2 != (lds ? 0x98cu : 0x138cu) || k.properties != 0x409 || k.hidden_arguments.empty() || k.sgpr_spills || k.vgpr_spills)
             return "unsupported measured XYZ entry contract";
-    } else if ((k.rsrc2 & ~(scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
+    } else if ((k.rsrc2 & ~(reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
         return "unsupported system-SGPR/work-item contract";
     if (k.rsrc1 & ((1u << 20) | (1u << 22) | (1u << 25))) return "privileged/debug execution unsupported";
     uint64_t explicit_end = 0;
@@ -442,10 +444,7 @@ std::string buffer_scratch_launch_rejection(const Kernel &k) { return launch_rej
 
 std::string lds_launch_rejection(const Kernel &k) { return launch_rejection(k, false, true); }
 std::string reduction_lds_launch_rejection(const Kernel &k) {
-    if (k.arguments.size() != 4 || k.hidden_arguments.empty()) return "unsupported reduction ABI";
-    for (size_t i=0;i<4;++i)
-        if (k.arguments[i].offset != i*8 || k.arguments[i].size != 8 ||
-            k.arguments[i].kind != (i<3 ? "global_buffer" : "by_value")) return "unsupported reduction arguments";
+    if (k.hidden_arguments.empty()) return "unsupported reduction ABI";
     return launch_rejection(k, false, true, false, false, true);
 }
 

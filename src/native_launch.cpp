@@ -64,7 +64,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     }
     if (!rejection.empty()) throw ObjectError(rejection);
     const bool reduction=request.route==NativeLaunchRoute::ReductionLds;
-    require(!reduction || request.dynamic_lds_bytes==4096,"reduction requires4096 dynamic LDS bytes");
+    if (reduction) require(plan_lds(0,request.dynamic_lds_bytes).allocated_bytes != 0,"empty reduction LDS allocation");
     require(request.route == NativeLaunchRoute::Lds || reduction || request.dynamic_lds_bytes == 0,
         "dynamic LDS specified for another native route");
     require(values.size() == k.arguments.size(), "native argument count mismatch");
@@ -84,7 +84,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
             return std::make_pair(encode_lds_dispatch(p), std::move(p.dispatch.kernargs));
         }
         case NativeLaunchRoute::ReductionLds: {
-            auto p=prepare_reduction_lds_launch(object,k.name,code,args,groups,values);
+            auto p=prepare_reduction_lds_launch(object,k.name,code,args,groups,values,request.dynamic_lds_bytes);
             return std::make_pair(encode_reduction_lds_dispatch(p),std::move(p.dispatch.kernargs));
         }
         case NativeLaunchRoute::BufferScratch: {
@@ -144,7 +144,7 @@ PreparedNativeLaunch prepare_native_launch(const BundledCodeObject &bundle, cons
     require(k.max_workgroup_size >= (reduction ? 1024u : 64u) && (k.required_workgroup == std::array<uint32_t,3>{} ||
         k.required_workgroup == request.shape.threads), "native required workgroup mismatch");
     const uint32_t scratch_bytes = request.route == NativeLaunchRoute::BufferScratch ? buffer_scratch_ring_bytes(k.private_bytes) : 0;
-    if (request.route == NativeLaunchRoute::Lds)
+    if (request.route == NativeLaunchRoute::Lds || reduction)
         require(plan_lds(k.group_bytes, request.dynamic_lds_bytes).allocated_bytes != 0, "zero native LDS allocation");
     try {
         const auto image = materialize_code_object(bundle.bytes.data(), bundle.bytes.size());

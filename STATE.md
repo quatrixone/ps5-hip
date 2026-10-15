@@ -49,6 +49,31 @@ Historical next-step paragraphs below are superseded by this release priority.
 The planning milestone itself made no console change. The subsequent native
 compiler-launch checkpoint below records the current installed image/log.
 
+## Real RMSNorm resource preparation qualified offline
+
+The unchanged 16-kernel norm module now passes the bounded ReductionLds core
+route for its unfused 2048-column RMSNorm kernel: 1024 threads, 26 explicit
+arguments, 488 kernarg bytes, hidden dynamic size at offset 352, and 128 requested
+LDS bytes rounded to 1024 allocated bytes. Independent packet checks verify
+rsrc1/rsrc2 0x60af00c3/0x1038c and resource limits 0x00400000 for rows 1/2/17.
+Host-mapped native preparation verifies real pointer capture, aggregate ownership,
+null optional pointers, temporary cleanup and rejection before allocation.
+
+The 32 core sanitizer regressions, three actual-object CTests, direct four-kernel
+profile and fresh PS5 core-library cross-build pass. Source review passes with
+an explicit generic-HIP caller contract: dynamic size is supplied by the caller;
+metadata cannot prove the algorithmic minimum. Legacy reduction still requests
+4096 bytes; only the exact measured invocations have corresponding evidence.
+See `evidence/offline-rmsnorm-resource-preparation.json` and `docs/HIP_REDUCTION.md`.
+Root processes 99096 (core tests) and 19744 (native cross-build) terminated with 0.
+
+Next: finish the source-only upstream RMSNorm fixture generator, then public CLR
+mixed-module admission and nonzero shared-memory routing before a genuine
+numerical GPU candidate. The new generator/test are not yet a validated milestone;
+independent review requires complete hidden-argument and descriptor checks.
+The author agent owns its live build handle and must preserve failed outputs.
+No console change; native RMSNorm numerical accuracy and full inference remain open.
+
 ## Nullable kernel pointers qualified offline
 
 Optional null global-pointer values now survive public HIP capture and native
@@ -65,8 +90,8 @@ profile checks and independent source review pass. See
 76756 terminated successfully; `results/source-public-nullable-v1/receipt.json`
 is its local receipt. No new console run or native numerical result.
 
-Next: extend bounded ReductionLds metadata/resource handling for the unchanged
-upstream RMSNorm kernel, then public module admission and shared-memory routing.
+ReductionLds preparation now passes above. Continue with public module admission
+and shared-memory routing after reproducible fixture generation.
 Use the frozen CPU oracle below; preserve existing rejection and ownership tests.
 
 ## CPU RMSNorm numerical oracle qualified offline
