@@ -60,6 +60,14 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+`make public-hip-fill-package RESULTS_DIR=/data/ps5-hip/results` builds the
+native contiguous-fill test in `build/public-hip-fill`; use `FILL_BUILD_DIR` for
+a fresh output directory. The six-file package has no GPU-driver imports. Its
+client checks two changed-pattern rounds, byte/16-bit/32-bit fills, all guards,
+eight rejected inputs and exact allocation/queue retirement. The strict expected
+transcript contains 512 byte comparisons. Packaging does not establish console
+execution; the normal freeze/review/recovery requirements still apply.
+
 `make public-hip-launch-package RESULTS_DIR=/data/ps5-hip/results` builds the
 native public kernel-launch fixture in `build/public-hip-launch`; set
 `LAUNCH_BUILD_DIR` to a new directory to preserve an earlier attempt. It packages

@@ -16,6 +16,23 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Native fill fixture checkpoint
+
+`make public-hip-fill-package FILL_BUILD_DIR=build/public-hip-fill-v1
+RESULTS_DIR=/data/ps5-hip/results` builds the dedicated contiguous-fill fixture:
+74 native objects and six package files, with no GPU-driver imports or code object.
+The client rejects GPU backend creation, checks changed byte/16-bit/32-bit patterns
+and low-byte truncation across two rounds, compares all 128 bytes before and after
+four rejected requests per round (512 comparisons total), and verifies one
+allocation/free and one retired queue. Host storage is static across quarantine.
+See `evidence/offline-source-public-fill.json` for exact evidence.
+
+The strict fill transcript and freezer support are included; all 62 host tests
+and 18 console-control test methods pass. This package has not been deployed or
+executed. Console recovery status, complete remote baseline verification and
+independent operational review are still required. Preserve historical candidates
+and consumed controls. The broad GPU/stream/graph roadmap remains open.
+
 ## Updated runtime Make checkpoint
 
 At committed runtime `ea0c1ca`, plain `make RESULTS_DIR=/data/ps5-hip/results`
@@ -29,8 +46,8 @@ These packages contain the fill implementation but retain the existing bootstrap
 and launch clients. They provide no native fill execution evidence. Neither has
 been frozen into a new operational console candidate or deployed. Preserve the
 historical frozen candidate below; .40 recovery and remote baseline verification
-remain pending. Next useful fill work is a bounded native client with exact byte
-and guard checks, strict transcript and independently reviewed console controls.
+remain pending. The native fill client and transcript are now built above; its operational
+console controls still require recovery evidence and independent review.
 
 ## Contiguous fill implementation checkpoint
 

@@ -11,6 +11,13 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+A dedicated native fill fixture now builds with `make public-hip-fill-package`:
+74 fresh native objects and a six-file package, with GPU imports excluded.
+Its expected console contract checks two changed-pattern rounds, 512 compared
+bytes including guards, eight rejected requests, and exact cleanup without GPU
+submission. All 62 host tests and 18 console-control tests pass. See
+`evidence/offline-source-public-fill.json`. No console fill execution is claimed.
+
 The updated fill runtime now builds through plain `make`: all 62 host tests,
 native core libraries and a fresh 74-object bootstrap package pass. A separate
 74-object launch package and repeated Make verification also pass. See

@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-fill-package-pass-console-not-run",
+  "source_base": "30fe2105d443bfe3f8d4c4c3988541dfe8c91a89",
+  "source_identity": "Exact uncommitted fixture/build bytes bound by link receipt before integration.",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "console_control_test_methods": 18,
+  "package_sha256": "8c2f13cd6cb2b995b1b69abdeb617c75d16a3f8029388dabbf0e4153d5cd5330",
+  "fself_sha256": "9672b21ac29d04b2d826ac20415055d1fbf646d64b848b4fd24044ec7a6aaeb5",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "791433a1fb5ccfd528410ec99fae3590942e41c760d46585be10aea56b4c1bc3",
+    "extracted_sha256": "0b9ac00f2c791f1d187ded24c00745ee71256a32a22aaf0119c05bcc59bf523a",
+    "omitted_note": {
+      "offset": 5423880,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500bd336dbe516ef552",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "9672b21ac29d04b2d826ac20415055d1fbf646d64b848b4fd24044ec7a6aaeb5",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-fill-v1/link-receipt.json": "eb97a6fddb26f3acd473c71bd7d318c0b2b5a98a13956c98bea17393fa096965",
+    "results/public-fill-package-review/review.json": "4c8fc38c52866c7555c679eeef342ae3d1c93e1f32a5d079f861a22d53bf39e7",
+    "results/public-fill-package-v1.log": "05582acb849aa44cdd1703295a98dcd0778d983b589586c72db9814f5b38d7c8",
+    "results/public-fill-package-revalidate.log": "05582acb849aa44cdd1703295a98dcd0778d983b589586c72db9814f5b38d7c8",
+    "results/public-fill-package-host-tests.log": "b0b00425dccb8f70a0ba030123b41057b7965235415bfae36224ed50aa5c5d3d",
+    "results/public-fill-console-controls-v1.log": "0e22437086fa1a942c2ffc32ce883fd42084501353d5ae490237bb55c07aae84"
+  },
+  "expected_console_contract": {
+    "rounds": 2,
+    "compared_bytes": 512,
+    "rejected_requests": 8,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 1,
+    "retired_queues": 1,
+    "gpu_backend_requests": 0,
+    "gpu_launches": 0,
+    "watchdog_ms": 30000
+  },
+  "accepted_scope": [
+    "Fresh Make native build and repeated cached verification.",
+    "Public byte/16-bit/32-bit fill calls present in linked title; CPU-side exact pattern and guard oracle.",
+    "Strict transcript rejects omission, duplication, changed counts, wrong fixture and GPU claims.",
+    "Serialized import review verifies no GPU-driver dependencies; exact six-file package extraction."
+  ],
+  "limits": [
+    "No console fill execution or operational deployment approval.",
+    "Pitched/multidimensional fills and graph/capture remain unsupported.",
+    "No GPU execution is intended by this fixture.",
+    "Recovery and full installed-image/preserved-log baseline verification remain pending."
+  ],
+  "independent_review": {
+    "path": "results/public-fill-package-review/review.json",
+    "sha256": "4c8fc38c52866c7555c679eeef342ae3d1c93e1f32a5d079f861a22d53bf39e7",
+    "deployment_approved": false
+  }
+}
