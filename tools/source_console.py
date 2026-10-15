@@ -310,10 +310,12 @@ class Control:
                 except Exception as error:
                     self.record['health_error'] = repr(error)
                     self.record['accepted'] = False
-                if LOCK.read_text() == self.token:
+                try:
+                    require(LOCK.read_text() == self.token, 'owned lock changed')
                     LOCK.unlink()
                     self.record['lock_released'] = True
-                else:
+                except Exception as error:
+                    self.record['lock_error'] = repr(error)
                     self.record['accepted'] = False
             (self.out / 'receipt.json').write_text(json.dumps(self.record, indent=2) + '\n')
         print(json.dumps(self.record))
