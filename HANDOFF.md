@@ -16,6 +16,29 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Native Q8/Q4 numerical package built offline
+
+The 76-object native Q4 title now builds and packages successfully. The package
+contains 64 files, including both source-built modules and 56 authenticated
+reference assets. The three-image audit passes startup, actual imports,
+finalizer/watchdog ordering and preservation of 18 critical functions. Twelve
+focused and existing-control test suites pass 86 tests.
+
+Package SHA256: `a2b781d9de42725da12c0310fc2d44226a01a287a6af1a24aef318ebabfcd5d9`.
+Build: `build/public-hip-q4-native-v1/link-receipt.json`; audit:
+`build/public-hip-q4-native-v1/q4-native-audit.json`. Reference v4 retains the
+same 56 numerical assets as v2/v3. The harness requires 28 launches, 112 full
+readbacks, 592 Q4 comparisons and 80,640 exact Q8 bytes. Chained multiplication
+must consume the actual preceding Q8 output without reuploading it.
+
+Q4 freezing, pre-contact authentication, freshness, bounded raw collection and
+per-stage log/raw checks are implemented. Independent package review passes,
+including a separate extraction of all 64 files. See
+`evidence/offline-native-public-q4-package.json`. Next freeze the committed
+candidate, review its manifest and execute one bounded
+idle .40 case under both owned locks. No Q4 GPU arithmetic or full-model
+inference is established. The installed RMSNorm baseline remains unchanged.
+
 ## Q4 dispatch and numerical reference: offline qualification
 
 The genuine public HIP runtime now admits the measured Q8_1/Q4_0 contracts:

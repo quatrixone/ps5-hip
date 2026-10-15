@@ -276,3 +276,16 @@ public-hip-rmsnorm-package: deps-build llm-rmsnorm-fixture
 	$(PYTHON) tests/rmsnorm_dump_test.py
 	$(PYTHON) tools/build_public_hip.py --fixture rmsnorm --rmsnorm-fixture $(LLM_RMSNORM_FIXTURE_DIR) --rmsnorm-reference $(LLM_RMSNORM_REFERENCE_DIR) --output $(RMSNORM_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
 	$(PYTHON) tools/audit_public_hip_rmsnorm_native.py --raw $(RMSNORM_BUILD_DIR)/title.elf --converted $(RMSNORM_BUILD_DIR)/eboot.elf --extracted $(RMSNORM_BUILD_DIR)/extracted.elf --output $(RMSNORM_BUILD_DIR)/rmsnorm-native-audit.json
+
+Q4_BUILD_DIR ?= build/public-hip-q4-native
+.PHONY: public-hip-q4-package
+public-hip-q4-package: deps-build llm-q4-reference
+	$(PYTHON) tests/public_hip_q4_assets_test.py
+	$(PYTHON) tests/public_hip_q4_build_test.py
+	$(PYTHON) tests/public_hip_q4_log_test.py
+	$(PYTHON) tests/source_q4_console_test.py
+	$(PYTHON) tests/source_q4_freeze_test.py
+	$(PYTHON) tests/q4_dump_test.py
+	$(PYTHON) tests/public_hip_q4_native_audit_test.py
+	$(PYTHON) tools/build_public_hip.py --fixture q4 --q4-fixture $(LLM_Q4_FIXTURE_DIR) --q4-reference $(LLM_Q4_REFERENCE_DIR) --output $(Q4_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
+	$(PYTHON) tools/audit_public_hip_q4_native.py --raw $(Q4_BUILD_DIR)/title.elf --converted $(Q4_BUILD_DIR)/eboot.elf --extracted $(Q4_BUILD_DIR)/extracted.elf --output $(Q4_BUILD_DIR)/q4-native-audit.json

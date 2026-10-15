@@ -73,3 +73,43 @@ Next package both isolated Q4 execution with frozen Q8 bytes and chained
 Q8-to-Q4 execution. Preserve complete raw readbacks, input bytes, guards and
 ownership evidence. A passing operator run still leaves the remaining
 transformer operations and full-model prefill/decode open.
+
+## Native numerical candidate
+
+`make public-hip-q4-package` builds the model/reference prerequisites, runs the
+asset/build/raw/log/audit checks, builds the native Q4 title and audits the raw,
+converted and extracted images. Use `Q4_BUILD_DIR`, `LLM_Q4_REFERENCE_DIR` and
+the existing fixture/reference output overrides for fresh builds. This target
+prepares a candidate; it does not deploy or establish GPU execution.
+
+The title reuses four guarded allocations across 28 dispatches. Four standalone
+Q8 cases precede eight matrix cases, each with frozen-Q8 multiplication,
+quantization, and chained multiplication. The chained stage consumes the GPU's
+Q8 allocation without reuploading its contents. Every stage writes all four
+buffers exclusively: 112 raw files / 9,097,984 bytes. Acceptance compares 592
+Q4 outputs and 80,640 Q8 bytes and checks input, weights, guards and inactive
+bytes. The watchdog remains bounded at 30 seconds; completion timing is not
+qualified until the actual console run.
+
+For separately collected raw files, the authenticated offline verifier is:
+
+```sh
+python3 tools/verify_public_hip_q4.py \
+  --fixture results/llm-q4-fixture \
+  --reference results/llm-q4-reference \
+  --dumps results/q4-readbacks \
+  --output results/q4-raw-verification.json
+```
+
+The output must be fresh. Its PASS establishes numerical and byte comparisons,
+not where the dumps originated. Candidate identity, collection freshness,
+natural exit, service health and owned-lock cleanup remain console-control
+requirements. The strict transcript parser also cannot establish those facts.
+
+The Q4 console controls authenticate the frozen reference and all package
+assets before connecting. They require all Q4 dump paths to be absent before
+launch, collect exactly the expected 112 files, and compare each stage's
+reported metrics with the raw results before accepting the run. Normal and
+partial-failure collection share a 120-second budget. That budget rejects late
+acceptance; it does not forcibly cancel a blocked FTP operation, whose existing
+socket inactivity timeout still applies. Failed/partial files are retained.

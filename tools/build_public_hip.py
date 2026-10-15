@@ -19,6 +19,7 @@ from embedded_module_linker import patch_linker as embedded_linker
 from qualify_public_hip_aggregate import compiler_inputs as aggregate_compiler_inputs
 from qualify_public_hip_rmsnorm import fixture_inputs as rmsnorm_fixture_inputs, checked_inputs, checked_tools
 import build_llm_rmsnorm_reference as rms_reference
+from public_hip_q4_assets import assets as q4_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPS = ROOT / ".deps"
@@ -55,6 +56,9 @@ def sha(path):
 def build_inputs():
     names = {"dependencies.json", "elevation-inputs.json", "controller-inputs.json",
              "title.json", "assets/param.json", "assets/icon0.png",
+             "tools/public_hip_q4_console_title.cpp", "tools/public_hip_q4_assets.py",
+             "tests/public_hip_q4_assets_test.py", "tests/public_hip_q4_build_test.py",
+             "tools/verify_public_hip_q4.py", "tests/q4_dump_test.py",
              "tools/public_hip_rmsnorm_console_title.cpp", "tools/qualify_public_hip_rmsnorm.py",
              "tools/build_llm_rmsnorm_fixture.py", "tools/build_llm_rmsnorm_reference.py",
              "tests/public_hip_rmsnorm_build_test.py", "tests/rmsnorm_dump_test.py",
@@ -467,7 +471,7 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
         required += ["hipMemcpy"]
     if fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
-    if fixture == "rmsnorm":
+    if fixture in ("rmsnorm", "q4"):
         required += ["hipMalloc", "hipFree", "hipMemcpy", "hipModuleLoad", "hipModuleGetFunction",
                      "hipModuleUnload", "hipModuleLaunchKernel", "hipDeviceSynchronize"]
     if fixture == "launch":
@@ -581,8 +585,9 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
     for name, path in (extra_assets or {}).items():
-        if not name.startswith("rmsnorm/") or ".." in Path(name).parts or Path(name).is_absolute():
-            raise ValueError("invalid RMSNorm asset destination")
+        if (not name.startswith(("rmsnorm/", "q4/")) or ".." in Path(name).parts or
+                "\\" in name or Path(name).is_absolute()):
+            raise ValueError("invalid numerical asset destination")
         sources[name] = Path(path)
     if code_object is not None:
         sources[code_object.name] = code_object
@@ -626,10 +631,12 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate", "rmsnorm"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate", "rmsnorm", "q4"), default="bootstrap")
     parser.add_argument("--compiler-fixture", type=Path, help="Verified compiler fixture required for embedded or aggregate title")
     parser.add_argument("--rmsnorm-fixture", type=Path)
     parser.add_argument("--rmsnorm-reference", type=Path)
+    parser.add_argument("--q4-fixture", type=Path)
+    parser.add_argument("--q4-reference", type=Path)
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     if (args.fixture in ("embedded", "aggregate")) != (args.compiler_fixture is not None):
@@ -639,6 +646,10 @@ def main():
             (args.fixture == "rmsnorm") != (args.rmsnorm_reference is not None)):
         parser.error("--rmsnorm-fixture and --rmsnorm-reference are required only for rmsnorm")
     rmsnorm = rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) if args.fixture == "rmsnorm" else None
+    if ((args.fixture == "q4") != (args.q4_fixture is not None) or
+            (args.fixture == "q4") != (args.q4_reference is not None)):
+        parser.error("--q4-fixture and --q4-reference are required only for q4")
+    q4 = q4_assets(args.q4_fixture, args.q4_reference) if args.fixture == "q4" else None
     initial_inputs = build_inputs()
     validate_results_directory(args.results_dir)
     output = args.output.resolve()
@@ -657,6 +668,8 @@ def main():
             raise RuntimeError("cached compiler fixture differs; use a fresh output")
         if previous.get("rmsnorm") != rmsnorm:
             raise RuntimeError("cached RMSNorm assets differ; use a fresh output")
+        if previous.get("q4") != q4:
+            raise RuntimeError("cached Q4 assets differ; use a fresh output")
         units = previous["units"]
         if (len(units) != 76 or previous["title_elf_sha256"] != sha(output / "title.elf") or
                 any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
@@ -674,6 +687,12 @@ def main():
                     raise RuntimeError("cached RMSNorm package inventory differs")
                 if rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) != rmsnorm:
                     raise RuntimeError("cached RMSNorm inputs changed")
+            if q4 is not None:
+                expected_assets = {name: sha(path) for name, path in q4["assets"].items()}
+                if {n: d for n, d in previous["package_files"].items() if n.startswith("q4/")} != expected_assets:
+                    raise RuntimeError("cached Q4 package inventory differs")
+                if q4_assets(args.q4_fixture, args.q4_reference) != q4:
+                    raise RuntimeError("cached Q4 inputs changed")
             if embedded is not None:
                 audit_path = output / "embedded-native-audit.json"
                 if sha(audit_path) != previous["embedded_audit_sha256"]:
@@ -708,7 +727,7 @@ def main():
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
                                    output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None,
-                                   extra_assets=rmsnorm["assets"] if rmsnorm else None)
+                                   extra_assets=q4["assets"] if q4 else rmsnorm["assets"] if rmsnorm else None)
     if embedded is not None:
         audit = json.loads((output / "embedded-native-audit.json").read_text())
         if (audit.get("fixture", "embedded") != args.fixture or
@@ -717,6 +736,8 @@ def main():
             raise RuntimeError("native embedded audit or linker inputs changed before publication")
     if rmsnorm is not None and rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) != rmsnorm:
         raise RuntimeError("RMSNorm assets changed before publication")
+    if q4 is not None and q4_assets(args.q4_fixture, args.q4_reference) != q4:
+        raise RuntimeError("Q4 assets changed before publication")
     if initial_inputs != build_inputs() or (embedded is not None and
             compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded):
         raise RuntimeError("native build inputs changed before publication")
@@ -732,6 +753,8 @@ def main():
                "native_executed": False}
     if rmsnorm is not None:
         receipt["rmsnorm"] = rmsnorm
+    if q4 is not None:
+        receipt["q4"] = q4
     if embedded is not None:
         receipt.update(embedded_compiler=embedded, compiler_object_count=1, total_linked_object_count=len(units)+1,
                        embedded_linker_sha256=sha(output / "embedded-pie.ld"),

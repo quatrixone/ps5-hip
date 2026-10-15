@@ -64,6 +64,7 @@ COPY_GPU_BACKING = b'HIP_COPY_GPU BACKING samples=32 live_bytes=32768 live_alloc
 COPY_GPU_EXPECTED = COPY_GPU_EXPECTED.replace(b'HIP_COPY_GPU PASS ', COPY_GPU_BACKING + b'HIP_COPY_GPU PASS ')
 LOG_NAMES = {fixture: 'ps5-hip-public-' + fixture + '.log' for fixture in ('bootstrap', 'memory', 'copy', 'module', 'launch', 'embedded', 'aggregate', 'fill', 'graph', 'stream', 'graph_gpu', 'capture_gpu', 'copy_gpu')}
 LOG_NAMES['rmsnorm'] = 'ps5-hip-public-rmsnorm.log'
+LOG_NAMES['q4'] = 'ps5-hip-public-q4.log'
 
 
 def check_rmsnorm_lines(raw):
@@ -102,15 +103,48 @@ def check_rmsnorm_lines(raw):
     return {'max_abs': max(errors), 'max_budget_fraction': max(fractions)}
 
 
+
+def check_q4_lines(raw):
+    from verify_public_hip_q4 import STAGES
+    lines=raw.decode('ascii').splitlines()
+    if raw!=('\n'.join(lines)+'\n').encode('ascii') or len(lines)!=66:
+        raise ValueError('Q4 transcript framing')
+    expected=[LINES[0].replace('bootstrap','q4'),LINES[1]]
+    number=r'([0-9]+(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?)'
+    metrics=[]
+    for name,stage,width,rows,padded in STAGES:
+        expected.append(f'HIP_Q4 DUMP case={name} stage={stage} files=4 bytes=324928 exclusive=true synced=true')
+        line=lines[len(expected)]
+        pattern=(f'HIP_Q4 CASE case={name} stage={stage} rows={rows} values={0 if stage=="q8" else rows} q8_bytes={padded//32*36} '
+                 +'max_abs='+number+' max_budget_fraction='+number+' inputs_unchanged=true guards=true inactive=true')
+        match=re.fullmatch(pattern,line)
+        if not match:raise ValueError('Q4 case transcript')
+        error,fraction=map(float,match.groups())
+        if not math.isfinite(error) or not math.isfinite(fraction) or not 0<=fraction<=1:
+            raise ValueError('Q4 reported numerical error')
+        if stage=='q8' and (error or fraction):raise ValueError('Q8 reports Q4 numerical metrics')
+        metrics.append(dict(name=name,stage=stage,max_abs=error,max_budget_fraction=fraction))
+        expected.append(line)
+    maximum=max(m['max_abs'] for m in metrics);fraction=max(m['max_budget_fraction'] for m in metrics)
+    line=lines[len(expected)]
+    pattern=('HIP_Q4 PASS cases=12 stages=28 launches=28 values=592 q8_bytes=80640 raw_files=112 raw_bytes=9097984 max_abs='
+             +number+' max_budget_fraction='+number+' allocations=4 frees=4 modules_unloaded=2 watchdog_joined=true finalization=pending')
+    match=re.fullmatch(pattern,line)
+    if not match or tuple(map(float,match.groups()))!=(maximum,fraction):raise ValueError('Q4 aggregate metrics differ')
+    expected.extend([line,*LINES[3:6],'HIP_Q4 FINAL allocations=4 frees=4 queues=1 retired=1 gate_destroyed=true application_fini=pending',*LINES[7:]])
+    if expected!=lines:raise ValueError('Q4 lifecycle or dump transcript differs')
+    return dict(max_abs=maximum,max_budget_fraction=fraction,stages=metrics)
+
+
 def check_log(raw, fixture='bootstrap'):
     if not isinstance(raw, bytes) or len(raw) > 65536:
         raise ValueError('public HIP transcript type or size')
-    if fixture == 'rmsnorm':
+    if fixture in ('rmsnorm', 'q4'):
         try:
-            metrics = check_rmsnorm_lines(raw)
+            metrics = check_rmsnorm_lines(raw) if fixture == 'rmsnorm' else check_q4_lines(raw)
         except (UnicodeError, IndexError) as error:
-            raise ValueError('RMSNorm transcript invalid') from error
-        return {'application_result': 'application-pass', 'kernel': 'public_hip_rmsnorm',
+            raise ValueError(fixture+' transcript invalid') from error
+        return {'application_result': 'application-pass', 'kernel': 'public_hip_'+fixture,
                 'target': 'gfx1013', 'log_sha256': hashlib.sha256(raw).hexdigest(),
                 'bytes': len(raw), 'hardware_gate_passed': False, 'reported_metrics': metrics,
                 'unproven': ['independent raw-buffer numerical validation', 'freshness',

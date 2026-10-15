@@ -105,6 +105,8 @@ class Control:
                     bound.get('reference_receipt_sha256'), 'RMSNorm reference not frozen')
             require(rmsnorm_reference_inputs(reference)['receipt_sha256'] ==
                     bound['reference_receipt_sha256'], 'RMSNorm reference identity changed')
+        if self.fixture == 'q4':
+            self.authenticate_q4()
         self.out = candidate / phase
         self.out.mkdir(exist_ok=False)
         self.record = {'phase': phase, 'host': HOST, 'title_id': TITLE, 'accepted': False, 'launched': False,
@@ -123,6 +125,29 @@ class Control:
         for name, digest in self.manifest['files'].items():
             path = ROOT / name
             require(path.resolve().is_relative_to(ROOT) and sha(path.read_bytes()) == digest, 'frozen input changed: ' + name)
+
+    def authenticate_q4(self):
+        from public_hip_q4_assets import assets
+        bound=self.manifest.get('q4', {})
+        reference=(ROOT/bound.get('reference','')).resolve()
+        fixture=(ROOT/bound.get('fixture','')).resolve()
+        require(reference.is_relative_to(self.candidate.resolve()) and fixture.is_relative_to(ROOT),
+                'Q4 reference or fixture outside frozen scope')
+        require(self.manifest['files'].get(str((reference/'receipt.json').relative_to(ROOT)))==
+                bound.get('reference_receipt_sha256'), 'Q4 reference not frozen')
+        authenticated=assets(fixture,reference)
+        require(authenticated['reference']['receipt_sha256']==bound.get('reference_receipt_sha256'),
+                'Q4 reference identity changed')
+        for name in ('q8','q4'):
+            require(sha((fixture/(name+'.hsaco')).read_bytes())==bound.get('module_sha256',{}).get(name),
+                    'Q4 module identity changed')
+        app=self.candidate/'package/app'
+        for name,path in authenticated['assets'].items():
+            digest=sha(Path(path).read_bytes())
+            require(self.manifest['package_files'].get(name)==digest and sha((app/name).read_bytes())==digest,
+                    'Q4 packaged asset differs: '+name)
+        require({n for n in self.manifest['package_files'] if n.startswith('q4/')}==set(authenticated['assets']),
+                'Q4 packaged asset inventory differs')
 
     def owned_lock(self):
         require(self.owned and LOCK.read_text() == self.token, 'console lock changed')
@@ -308,6 +333,63 @@ class Control:
         self.record['rmsnorm_numerical'] = {'status':'PASS',
             'receipt_sha256':sha((self.out/'numerical/receipt.json').read_bytes())}
 
+    def fresh_q4_dumps(self):
+        if self.fixture!='q4':return
+        from verify_public_hip_q4 import DUMP_NAMES
+        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        require(not any(n.startswith('q4-') and n.endswith('.raw') for n in names), 'Q4 dump already exists')
+        self.record['q4_raw_absent_before_launch']=sorted(DUMP_NAMES)
+
+    def collect_q4_dumps(self,partial=False):
+        if self.fixture!='q4':return
+        from verify_public_hip_q4 import STAGES,CAPACITIES,DUMP_NAMES
+        if not hasattr(self,'q4_capture_deadline'):
+            self.q4_capture_deadline=time.monotonic()+120
+            self.record['q4_raw_capture_limit_seconds']=120
+        folder=self.out/'raw';folder.mkdir(exist_ok=True)
+        records=self.record.setdefault('q4_raw_files',{})
+        if not partial:
+            names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+            require({n for n in names if n.startswith('q4-') and n.endswith('.raw')}==DUMP_NAMES,
+                    'Q4 remote raw inventory differs')
+        for case,stage,_,_,_ in STAGES:
+            for buffer,capacity in CAPACITIES.items():
+                name=f'q4-{case}.{stage}.{buffer}.raw'
+                if name in records:
+                    require(sha((folder/name).read_bytes())==records[name]['sha256'],'collected Q4 dump changed')
+                    continue
+                remaining=self.q4_capture_deadline-time.monotonic()
+                if remaining<=0:
+                    self.record['q4_raw_capture_deadline_exceeded']=True
+                    if partial:return
+                    raise RuntimeError('Q4 total raw capture deadline')
+                try:
+                    raw=self.fetch(self.manifest['results_dir']+'/'+name,capacity+32,deadline_seconds=min(30,remaining))
+                    with (folder/name).open('xb') as stream:stream.write(raw)
+                    require(len(raw)==capacity+32,'Q4 dump length: '+name)
+                    require(time.monotonic()<self.q4_capture_deadline,'Q4 total raw capture deadline')
+                    records[name]={'bytes':len(raw),'sha256':sha(raw)}
+                except Exception as error:
+                    self.record.setdefault('q4_raw_capture_errors',{})[name]=repr(error)
+                    if not partial:raise
+        if not partial:require(set(records)==DUMP_NAMES,'incomplete Q4 readbacks')
+
+    def verify_q4_dumps(self):
+        if self.fixture!='q4':return
+        self.verify()
+        from verify_public_hip_q4 import verify
+        bound=self.manifest['q4'];output=self.out/'numerical/receipt.json'
+        result=verify(ROOT/bound['fixture'],ROOT/bound['reference'],self.out/'raw',output)
+        require(result.get('status')=='PASS','Q4 raw numerical verification failed')
+        stages=[dict(name=c['name'],stage=c['stage'],
+                     max_abs=float(format(c['maximum_absolute_error'],'.9g')),
+                     max_budget_fraction=float(format(c['maximum_budget_fraction'],'.9g'))) for c in result['records']]
+        metrics=dict(max_abs=max(c['max_abs'] for c in stages),
+                     max_budget_fraction=max(c['max_budget_fraction'] for c in stages),stages=stages)
+        require(self.record.get('application',{}).get('reported_metrics')==metrics,
+                'Q4 transcript metrics differ from raw readbacks')
+        self.record['q4_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
+
     def deploy(self):
         self.idle()
         snapshot(self.send('snapshot'))
@@ -366,7 +448,7 @@ class Control:
                 deployment.get('lock_released') is True and deployment.get('phase') == 'deploy' and
                 deployment.get('manifest_sha256') == self.manifest_sha and
                 deployment.get('package_sha256') == self.record['package_sha256'], 'fresh deployment not complete')
-        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps()
+        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps()
         before = snapshot(self.send('snapshot'))
         baseline = self.history_read('before-launch')
         sock = socket.create_connection((HOST, 3232), timeout=3)
@@ -386,7 +468,7 @@ class Control:
         worker.start()
         launch_offset = 0
         try:
-            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps()
+            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps()
             require(not self.capture_errors and worker.is_alive(), 'klog unavailable before launch')
             launch_offset = len(self.klog)
             self.record['klog_launch_offset'] = launch_offset
@@ -406,10 +488,10 @@ class Control:
             self.idle()
             application = self.fetch(self.log, 65536)
             (self.out / 'application.log').write_bytes(application)
-            self.collect_rmsnorm_dumps()
+            self.collect_rmsnorm_dumps(); self.collect_q4_dumps()
             from source_public_hip_log import check_log
             self.record['application'] = check_log(application, self.fixture)
-            self.verify_rmsnorm_dumps()
+            self.verify_rmsnorm_dumps(); self.verify_q4_dumps()
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
             require(before == after, 'matching title mounts changed')
@@ -439,6 +521,11 @@ class Control:
                     self.collect_rmsnorm_dumps(partial=True)
                 except Exception as error:
                     self.record['rmsnorm_raw_capture_error'] = repr(error)
+            if self.fixture == 'q4' and not self.record.get('q4_numerical'):
+                try:
+                    self.collect_q4_dumps(partial=True)
+                except Exception as error:
+                    self.record['q4_raw_capture_error'] = repr(error)
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:

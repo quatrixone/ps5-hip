@@ -109,6 +109,87 @@ def freeze_rmsnorm_reference(build, receipt, output):
             'reference_receipt_sha256': copied['receipt_sha256']}
 
 
+Q4_REFERENCE_LIMIT = 16*1024*1024
+Q4_VERIFY_SOURCES = ('tools/verify_public_hip_q4.py','tools/public_hip_q4_assets.py',
+                     'tools/build_public_hip.py','tools/qualify_public_hip_q4.py',
+                     'tools/build_llm_q4_reference.py','tools/llm_q4_reference.py',
+                     'tests/public_hip_q4_assets_test.py','tests/q4_dump_test.py',
+                     'tests/source_q4_freeze_test.py')
+
+
+def validate_q4_audit(build, receipt):
+    from audit_public_hip_q4_native import SOURCES
+    path=build/'q4-native-audit.json'
+    audit=json.loads(path.read_text())
+    if (audit.get('status')!='PASS' or
+            audit.get('classification')!='offline-public-hip-q4-native-image-audit' or
+            audit.get('native_executed') is not False or not isinstance(audit.get('inputs'),dict) or
+            not audit['inputs']):
+        raise ValueError('Q4 native image audit missing or unqualified')
+    for name,expected in audit['inputs'].items():
+        if not Path(name).is_absolute() or digest(Path(name))!=expected:
+            raise ValueError('Q4 audit input changed: '+name)
+    roundtrip=receipt.get('fself_roundtrip',{})
+    required={str((build/'title.elf').resolve()):receipt.get('title_elf_sha256'),
+              str((build/'eboot.elf').resolve()):roundtrip.get('elf_sha256'),
+              str((build/'extracted.elf').resolve()):roundtrip.get('extracted_sha256')}
+    required.update({str((ROOT/name).resolve()):digest(ROOT/name) for name in SOURCES})
+    if any(expected is None or audit['inputs'].get(name)!=expected for name,expected in required.items()):
+        raise ValueError('Q4 audit does not bind candidate images and implementation')
+    return path
+
+
+def freeze_q4_reference(build, receipt, output):
+    from public_hip_q4_assets import assets
+    from verify_public_hip_q4 import ASSET_NAMES
+    bound=receipt.get('q4',{})
+    original=Path(bound.get('reference',{}).get('receipt','')).resolve()
+    q8=Path(bound.get('assets',{}).get('q4/q8.hsaco','')).resolve()
+    q4=Path(bound.get('assets',{}).get('q4/q4.hsaco','')).resolve()
+    if (not original.is_file() or q8.name!='q8.hsaco' or q4.name!='q4.hsaco' or
+            q8.parent!=q4.parent or not q8.parent.is_relative_to(ROOT) or
+            assets(q8.parent,original.parent)!=bound):
+        raise ValueError('Q4 build inputs no longer match')
+    expected_names=ASSET_NAMES|{'q4/q8.hsaco','q4/q4.hsaco'}
+    if set(bound.get('assets',{}))!=expected_names or len(expected_names)!=58:
+        raise ValueError('Q4 exact58 package assets required')
+    expected={name:digest(Path(source)) for name,source in bound['assets'].items()}
+    if {name:value for name,value in receipt['package_files'].items() if name.startswith('q4/')}!=expected:
+        raise ValueError('Q4 package asset inventory differs')
+    if any(digest(build/'package/app'/name)!=value for name,value in expected.items()):
+        raise ValueError('Q4 packaged asset differs')
+    report=json.loads(original.read_text())
+    planned=[];total=original.stat().st_size
+    # Validate the entire copy set and bound before creating any destination files.
+    for name,row in report['artifacts'].items():
+        source=original.parent/name
+        if (Path(name).is_absolute() or not source.resolve().is_relative_to(original.parent) or
+                any(part.is_symlink() for part in (source,*source.parents)) or not source.is_file()):
+            raise ValueError('unsafe Q4 reference artifact path')
+        size=source.stat().st_size;total+=size
+        if size!=row['bytes'] or digest(source)!=row['sha256']:
+            raise ValueError('Q4 reference artifact identity changed')
+        planned.append((name,source,row['sha256']))
+    if total>Q4_REFERENCE_LIMIT:
+        raise ValueError('Q4 reference exceeds16MiB frozen bound')
+    destination=output/'q4-reference'
+    destination.mkdir()
+    shutil.copyfile(original,destination/'receipt.json')
+    for name,source,expected_sha in planned:
+        target=destination/name;target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(source,target)
+        if digest(target)!=expected_sha:raise ValueError('Q4 reference changed during copy')
+    copied=assets(q8.parent,destination)
+    if copied['reference']['receipt_sha256']!=bound['reference']['receipt_sha256']:
+        raise ValueError('frozen Q4 reference receipt differs')
+    if assets(q8.parent,original.parent)!=bound:
+        raise ValueError('Q4 inputs changed during freeze')
+    return {'fixture':str(q8.parent.relative_to(ROOT)),
+            'reference':str(destination.relative_to(ROOT)),
+            'reference_receipt_sha256':copied['reference']['receipt_sha256'],
+            'module_sha256':{name:expected['q4/'+name+'.hsaco'] for name in ('q8','q4')}}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
@@ -137,7 +218,8 @@ def main():
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 76:
         parser.error('not the complete .40 candidate')
     validate_source_inputs(receipt)
-    audit = (validate_rmsnorm_audit(args.build, receipt) if fixture == 'rmsnorm' else
+    audit = (validate_q4_audit(args.build, receipt) if fixture == 'q4' else
+             validate_rmsnorm_audit(args.build, receipt) if fixture == 'rmsnorm' else
              validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None)
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
         parser.error('commit source before freezing')
@@ -155,6 +237,7 @@ def main():
         if digest(output / 'package/app' / name) != expected:
             parser.error('package stage hash mismatch: ' + name)
     rmsnorm = freeze_rmsnorm_reference(args.build, receipt, output) if fixture == 'rmsnorm' else None
+    q4 = freeze_q4_reference(args.build, receipt, output) if fixture == 'q4' else None
     files = {str(path.relative_to(ROOT)): digest(path) for path in output.rglob('*') if path.is_file()}
     for name in ('tools/source_console.py', 'tools/source_public_hip_log.py', 'tools/freeze_source_candidate.py',
                  'dependencies.json', 'elevation-inputs.json', 'controller-inputs.json', 'title.json'):
@@ -172,6 +255,14 @@ def main():
             path = Path(name).resolve()
             if path.is_relative_to(ROOT):
                 files[str(path.relative_to(ROOT))] = expected
+    if q4 is not None:
+        for name in Q4_VERIFY_SOURCES:
+            files[name] = digest(ROOT/name)
+        for source_inputs in (json.loads(audit.read_text())['inputs'], receipt['q4']['inputs']):
+            for name, expected in source_inputs.items():
+                path = Path(name).resolve()
+                if path.is_relative_to(ROOT):
+                    files[str(path.relative_to(ROOT))] = expected
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_image_sha256': args.baseline_image_sha256,
@@ -184,7 +275,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
+                'hypothesis': ('Selected unchanged upstream Q8_1 and nonfused Q4_0 kernels compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
+                               'Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
                                'Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
                                'Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else
                                'After the existing joined-copy recovery oracle, a two-kernel joined graph alternates eager/captured order over four warmup and sixteen further changed-input rounds. Validate 5840 added values and640guards,84totaldispatches,28callbacks,fourallocations/frees and seven retired queues. Require32post-sync backing samples at32768bytes/twoallocations,128balanced allocations/releases per path,98304accountedpeak and zero final backing. This measures NativeMemory backing only, not process heap, command lifetime or timing.' if fixture == 'copy_gpu' else
@@ -203,6 +295,8 @@ def main():
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}
     if rmsnorm is not None:
         manifest['rmsnorm'] = rmsnorm
+    if q4 is not None:
+        manifest['q4'] = q4
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 

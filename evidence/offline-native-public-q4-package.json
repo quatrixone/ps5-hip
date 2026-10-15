@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "classification": "offline-native-public-q4-numerical-package",
+  "source_index_sha256": {
+    "CMakeLists.txt": "76dc21187c7ccd48ce0ecaa7d98c7c7c2a3159a03c9ab5f875dc555ce00e9d1f",
+    "HANDOFF.md": "fe8d94faecf596b4650c7d64dac84951208f0d91b63f41fce2f9db6ab4a3792a",
+    "Makefile": "d2c1a9ee4a431398f1f36ddad44c56118926bb1a102879191cbaea0513d6c3cf",
+    "STATE.md": "858ba996f25a65a593c21a5a05688aba345622a38cc8e7a9aa8b7cc8dc537077",
+    "docs/IMPLEMENTATION_PLAN.md": "bc0096da9dc26c1778962d002da1de13c5b3639401dac526d8d9009089c47076",
+    "docs/LLM_Q4_REFERENCE.md": "129831b2b8c7639f96f2645e4c4ec4781d19681131dda1b0eb50cd35c549b040",
+    "tests/public_hip_q4_assets_test.py": "32177adc7d8c00d481b482b57eca31550d8469558c554f6fefa9a3cf45271201",
+    "tests/public_hip_q4_build_test.py": "a40fcb0a439d67bb4ba30bfbb21e9e08db5c3c6bc5be5198d9b9c1982366e028",
+    "tests/public_hip_q4_log_test.py": "2850398a2c9d9167c14535923b1e90d0e1042b626b405e51fe39eded1367c503",
+    "tests/public_hip_q4_native_audit_test.py": "65072fbfb88419702897c453d65b9b1b86c5d84ecf302f8058b845a6b495e031",
+    "tests/q4_dump_test.py": "935919290ba540053e427412fa3a692f6cb264eb91113f328fa9c4659e9b0442",
+    "tests/source_q4_console_test.py": "6969cb4b040607733815dc5020ef189ef336c2a2fca52997a2bf855d0e23f2b7",
+    "tests/source_q4_freeze_test.py": "82ba3c75eedf328b963df1d5ce66fac2da4751ec947eddc0469c768be11caca5",
+    "tools/audit_public_hip_q4_native.py": "c45ed70186569bc96a940851431be450c69959fb1ef437403e63b9d23f9b1da2",
+    "tools/build_public_hip.py": "04e3de90561c41221bba7b26b410c28018ced835090375ef60210837b84b7e2e",
+    "tools/freeze_source_candidate.py": "27e60f9bf88440fd5f2bf1eb593bad20bdc70f40e971ffa2338d6ddacb8315d9",
+    "tools/public_hip_q4_assets.py": "ac9d255acc74031d208c51cd7339ff33de2268880b084c42b7425cdf01178104",
+    "tools/public_hip_q4_console_title.cpp": "0f0be6ad0ea7a00a88b1f9abca5dde40b1c0f0ead565d120943b9830f96eb5f6",
+    "tools/source_console.py": "68f35840615b915be920825eb368c19f7ea8dd86de00a9fda136e8e11a15a9bb",
+    "tools/source_public_hip_log.py": "2470420d269c0b4e4c29e641d4fef5fc26bdbbd3d5b88cdb6f6a9312626a8a01",
+    "tools/verify_public_hip_q4.py": "a8f835c113482b026c77096b163cdbaca1efb3da4f71cb423581e94eb241b50f"
+  },
+  "raw_evidence": {
+    "build/public-hip-q4-native-v1/link-receipt.json": "62b8f35efb4222f41bfdea6a266e5ace0cd700c944dbb9f193121e6edf89a4f8",
+    "build/public-hip-q4-native-v1/q4-native-audit.json": "de7bacde549ee004f4b6c9dd638e2da9826878bfdc5bdfa81ab260a2687b9886",
+    "results/q4-native-package-review-v1/review.json": "5414076094c9b725843c6f6014f58c98be43e1e809c069391ebb9fb2c0711089",
+    "results/q4-native-controls-tests-v1/receipt.json": "36b1c6a8eb261c1f0bcef2e5a5f19555ef12ec0164ce7a5204a2472149725e52",
+    "results/q4-native-builder-review-v1/review.json": "60055c0baabd85ed092844e87628e46027921d6eb03829653004931e48fa25b4",
+    "results/q4-native-title-review-v1/review.json": "c2e63ef6aeaaa363ec28bfc9b206dc882cada2ff29e08399f454c46ef9cbb66c",
+    "results/q4-log-verifier-review-v2/review.json": "44addf26cfc56cde2a4f73af73b6870a2e944d64afb16c39befe2a686c9450be",
+    "results/q4-control-freeze-review-v1/review.json": "cc2823fc959e5cdbd7521cceb4f93a2348667a3a68f5d49c68497f441e2df1fc",
+    "results/q4-reference-refresh-review-v2/review.json": "c4d43474ccfb4a5b6aff1f99fccf1b252f0618946bfc5163cba487e568c15199",
+    "results/llm-q4-reference-v4/receipt.json": "2e3bb91a6f068c68347cef9e401b7af5b33c35f5ab04ff6f3ab8ffa388f5167c"
+  },
+  "package_sha256": "a2b781d9de42725da12c0310fc2d44226a01a287a6af1a24aef318ebabfcd5d9",
+  "validation": {
+    "native_objects": 76,
+    "package_files": 64,
+    "numerical_assets": 56,
+    "device_modules": 2,
+    "audited_functions": 18,
+    "control_tests": 86,
+    "control_suites": 12,
+    "independent_reviews": "PASS"
+  },
+  "expected_hardware": {
+    "launches": 28,
+    "q4_values": 592,
+    "q8_bytes": 80640,
+    "raw_files": 112,
+    "raw_bytes": 9097984,
+    "allocations": 4,
+    "frees": 4,
+    "retired_queues": 1
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "limits": [
+    "No Q4 GPU arithmetic or full-model inference proof.",
+    "Full native builder completed using authenticated prerequisites; package Make recipe was dry-run checked, not repeated from empty cache.",
+    "30-second title watchdog completion timing remains unmeasured.",
+    "120-second raw capture acceptance bound shares the failure path; socket inactivity may delay final failure handling.",
+    "Compiled source and input hashes are in the raw receipt; source_index_sha256 records repository-normalized Git bytes."
+  ],
+  "next_gate": "Freeze committed candidate, independently review manifest, deploy/readback/review and execute once on idle .40 under both owned locks."
+}
