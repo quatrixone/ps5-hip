@@ -1,0 +1,46 @@
+{
+    "date":  "2026-10-15",
+    "classification":  "source-inspected-inference-release-plan",
+    "source_url":  "https://github.com/ggml-org/llama.cpp",
+    "source_branch":  "master",
+    "revision":  "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+    "source_sha256":  {
+                          "ggml/CMakeLists.txt":  "aedecbcad995197e5d912aa9f789520df6463c737c095e5c12b5d5dfbf02980e",
+                          "ggml/src/ggml-hip/CMakeLists.txt":  "644205340d2c421abffcf2750508007fb8a168f9d01a1cd6000131a858e5f274",
+                          "ggml/src/ggml-cuda/vendors/hip.h":  "db9b1142727f3eaf037d888da133029cd21d9fbe15cfc707be7b9633ae080323",
+                          "ggml/src/ggml-cuda/common.cuh":  "01ec28a5866346886a5ddd74efc1703b86cacdc31990522733d79ea035ace86b",
+                          "ggml/src/ggml-cuda/ggml-cuda.cu":  "572e5facba2c6b2ce2f7c6a4c43566d5a719d6e984f7265f1895410cc82d31ec",
+                          "src/models/llama.cpp":  "38a43fef15432002ed7bc1a49ffb5e1c2cfba30beb5afc1d38422c288ad8d885"
+                      },
+    "profile":  {
+                    "single_device":  true,
+                    "batch":  1,
+                    "context_tokens":  512,
+                    "quantization":  "GGUF Q4_0 with inventoried residual tensor dtypes",
+                    "graphs":  false,
+                    "vmm":  false,
+                    "rccl":  false,
+                    "mfma_mmq":  false
+                },
+    "observations":  [
+                         "HIP CMake requires hip/hipblas/rocblas and rejects GGML_STATIC.",
+                         "Shared CUDA operators compile as HIP; effective preprocessed API/kernel census remains pending.",
+                         "Current public adapter Initial-route and 64 MiB allocation limit require client-specific qualification."
+                     ],
+    "model_candidate":  {
+                            "repository":  "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+                            "card":  "https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+                            "revision_locked":  false,
+                            "weights_downloaded":  false,
+                            "memory_qualified":  false
+                        },
+    "client_built":  false,
+    "model_executed":  false,
+    "console_contacted":  false,
+    "limits":  [
+                   "Source/configuration inspection only; not a preprocessed or linked symbol census.",
+                   "No stock llama HIP compatibility, model fit, correctness or performance claim.",
+                   "Existing Make dependency fetch does not yet consume the client inventory baseline.",
+                   "Full SDK acceptance gates remain open."
+               ]
+}

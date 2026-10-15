@@ -16,6 +16,24 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Resume here: native LLM inference v1
+
+The owner prioritized a useful inference first release on 2026-10-15. Read
+`docs/LLM_V1_PLAN.md` before choosing more general SDK work. Start V1.1:
+refresh the standalone llama HIP inventory, prepare the client compile/link
+spike and lock model/tokenizer/conversion inputs with a CPU reference.
+The inspected upstream master snapshot is
+`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; local sparse source is ignored at
+`.deps/sources/llama-client`. The planning evidence records public URLs/hashes;
+the Make dependency fetcher does not consume this inventory source yet.
+
+Retirement-ack work was stopped before edits or experiments. Do not resume it
+as a v1 prerequisite. Current public launch routes, model-scale memory and
+required math operations are higher priority. The original SDK goals remain;
+this changes release sequencing, not their acceptance criteria.
+All older next-step paragraphs below are historical and subordinate to this
+priority. The installed backing-test image/log remain unchanged.
+
 ## CLR command lifetime accounting qualified offline
 
 The public source build now accounts both Command base constructors and actual
@@ -26,8 +44,8 @@ passed the fresh 85-unit sanitizer qualification. The 74-object native package
 and exact patch preparation passed independent review.
 See `evidence/offline-clr-command-accounting.json`.
 
-Next: add a diagnostic post-retirement acknowledgement before sampling command
-counts across warm replay, then CPU preparation/submit/wait measurements.
+Deferred by the inference-v1 priority: diagnostic post-retirement acknowledgement
+for warm replay command counts and detailed CPU preparation/submit/wait profiling.
 Stream synchronization can return before the worker releases its final barrier
 reference, so immediate count equality is not a valid plateau check. Do not
 replace that boundary with sleeps or hold device locks across callbacks.

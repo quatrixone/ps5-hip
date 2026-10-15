@@ -9,6 +9,21 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Active priority: native LLM inference v1
+
+Owner decision on 2026-10-15: prioritize the bounded first release in
+`docs/LLM_V1_PLAN.md`. Start V1.1 client/model profiling, then client-required
+public HIP launch/memory coverage, tensor operations and end-to-end inference.
+The current upstream inventory baseline is llama.cpp master
+`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; no client build or model run is proven.
+
+Defer new retirement-ack diagnostics and general G5 optimization unless a real
+client blocker requires them. Existing correctness tests remain regressions.
+The full SDK roadmap stays open; v1 does not require all G5-G12 work to finish.
+Historical next-step paragraphs below are superseded by this release priority.
+No console change occurred for this planning milestone; the installed image/log
+in the native backing checkpoint below remain the baseline.
+
 ## CLR command lifetime accounting qualified offline
 
 The public source build now accounts both Command base constructors and actual
@@ -19,8 +34,8 @@ passed the fresh 85-unit sanitizer qualification. The 74-object native package
 and exact patch preparation passed independent review.
 See `evidence/offline-clr-command-accounting.json`.
 
-Next: add a diagnostic post-retirement acknowledgement before sampling command
-counts across warm replay, then CPU preparation/submit/wait measurements.
+Deferred by the inference-v1 priority: diagnostic post-retirement acknowledgement
+for warm replay command counts and detailed CPU preparation/submit/wait profiling.
 Stream synchronization can return before the worker releases its final barrier
 reference, so immediate count equality is not a valid plateau check. Do not
 replace that boundary with sleeps or hold device locks across callbacks.

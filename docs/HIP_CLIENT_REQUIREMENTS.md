@@ -1,5 +1,12 @@
 # HIP client requirements for G4 and G7
 
+First-release priority (2026-10-15): follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md).
+The standalone upstream llama.cpp inventory baseline is
+`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`; its build/profile inspection is recorded
+in `../evidence/llm-v1-planning-baseline.json`. Refresh the full active API/kernel
+census in V1.1. The Prism-specific inventory below remains historical and must
+not add its model formats or application ABI to the new release contract.
+
 Scope update (2026-10-14): ProsperoAI integration is no longer a project
 requirement. References below retain historical research provenance. Refresh
 client-specific requirements against the standalone G7 client selected in

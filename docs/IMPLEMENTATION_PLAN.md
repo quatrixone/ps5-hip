@@ -2,6 +2,22 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Active release priority: native LLM inference v1
+
+Per the owner's 2026-10-15 direction, follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md)
+for the first release: one native standalone Llama-family inference client,
+Q4_0, batch one and a bounded 512-token context. Start client/model profiling,
+then implement only the runtime and tensor capabilities that it demonstrates
+are required. V1.1-V1.5 define implementation order and acceptance evidence.
+
+General command-retirement diagnostics and G5 optimization are deferred unless
+needed by that client. Do not require complete G5 or broad G6 coverage before
+starting G7. Training, frameworks and the remaining G1-G12 objectives retain
+their acceptance criteria on the longer-term roadmap. A v1 release will not
+mark the full SDK goal complete. Historical next actions below are superseded.
+
+- 2026-10-15 | release plan | owner decision | native LLM inference prioritized | LLM_V1_PLAN.md | next: V1.1 client/model profile
+
 ## CLR command lifetime accounting qualified offline
 
 - 2026-10-15 | G5 | offline | pass: command lifetimes/85-unit sanitizer/native package | evidence/offline-clr-command-accounting.json | next: retirement acknowledgement
@@ -14,8 +30,8 @@ passed the fresh 85-unit sanitizer qualification. The 74-object native package
 and exact patch preparation passed independent review.
 See `../evidence/offline-clr-command-accounting.json`.
 
-Next: add a diagnostic post-retirement acknowledgement before sampling command
-counts across warm replay, then CPU preparation/submit/wait measurements.
+Deferred by the inference-v1 priority: diagnostic post-retirement acknowledgement
+for warm replay command counts and detailed CPU preparation/submit/wait profiling.
 Stream synchronization can return before the worker releases its final barrier
 reference, so immediate count equality is not a valid plateau check. Do not
 replace that boundary with sleeps or hold device locks across callbacks.
@@ -767,8 +783,8 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
 | G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded native stream/event, explicit graph and captured copy/kernel passes |
-| G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
-| G7 | Standalone inference client and SDK preview | G5-G6 | planned |
+| G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | prioritize v1 client-required operations; broad coverage remains open |
+| G7 | Standalone inference client and SDK preview | client-required G4-G6 subset | active first-release priority; native model execution unproven |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
 | G9 | Autograd, training and bounded LoRA | G8 | planned |
 | G10 | Competitive performance and sustained reliability | G7-G9 | planned |
@@ -779,6 +795,8 @@ G1-G3 are the critical uncertainty-reduction path. G6 can begin with one operati
 before every G5 optimization is complete. G7 and G8 share the qualified SDK and
 need not wait on each other's application work. Implementation order follows
 dependencies; it does not imply a promise to run concurrent hardware tests.
+The first-release ordering is V1.1-V1.5 in `LLM_V1_PLAN.md`; full G5 optimization
+and G8-G12 are not prerequisites for that bounded release.
 
 ## 5. G1 Ã¢â‚¬â€ Freeze the compiler and platform contract
 

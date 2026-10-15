@@ -2,6 +2,11 @@
 
 An experimental native HIP compute platform for PlayStation 5 homebrew.
 
+**First release: native LLM inference.** The active [v1 plan](docs/LLM_V1_PLAN.md)
+targets one small Llama-family model, GGUF Q4_0, batch one and a 512-token context
+through a standalone PS5 HIP client. Model execution is not yet qualified.
+Training, broad frameworks and general SDK expansion remain later goals.
+
 The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, support standalone inference clients,
 and ultimately run native PyTorch inference and training.
