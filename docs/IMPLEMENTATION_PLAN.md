@@ -68,7 +68,7 @@ ROCclr FP32 GEMM titles are packaged and independently reviewed offline,
 without console execution. See `../HANDOFF.md` and
 `../evidence/native-public-hip-bootstrap-deployment.json` for the exact
 candidate, receipt, and resume point. This does not complete broad G4, public
-HIP GPU support or G5. G5-G12 remain
+HIP GPU support or G5. G5 is in progress; G6-G12 remain
 planned. The four-route title `67072dd` (integrated at `1fb5ada`) completed eight
 blocking launches in two changed-input sequences through integer, static LDS,
 buffer scratch and 2D geometry. Its 393,216 comparisons cover whole host pages,
@@ -364,7 +364,7 @@ pointer and kernel constraints, not a transparent way to load arbitrary `.hsaco`
 | G2 | Native execution of a real HIP code object | G1 | passed for named wave32 1D store/vector fixture; two clean cycles of the same frozen image |
 | G3 | Correct general compute semantics | G2 | private304 and persistent-buffer computation recovered; spill, static/dynamic/mixed LDS, full/partial wave32 and measured2D/3D cycles passed; broader qualification pending |
 | G4 | Real HIP C++ source compatibility | G3 | fixed vector and shared four-route genuine HIP clients passed bounded native cycles; broader qualification pending |
-| G5 | Streams, events, graphs and efficient memory reuse | G4 | planned |
+| G5 | Streams, events, graphs and efficient memory reuse | G4 | in progress; bounded host prerequisites only |
 | G6 | Useful ROCm math and primitive libraries | G4; G5 for efficient execution | planned |
 | G7 | Standalone inference client and SDK preview | G5-G6 | planned |
 | G8 | Native LibTorch and Python/PyTorch inference | G5-G6 | planned |
@@ -590,6 +590,15 @@ Decision: publish the supported API matrix internally. Missing required semantic
 block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 — Streams, graphs and memory efficiency
+
+Bounded progress (2026-10-15): source-only public HIP qualification now covers
+logical stream/event ordering, implicit legacy default-stream dependencies,
+checked rectangular copies and pitched fills. Explicit and captured two-host-node
+graphs replay changing inputs, accept callback/user-data updates and outlive their
+source graph; see `../evidence/offline-public-host-graph.json`. These are sanitizer
+host-model results. Native public GPU execution, device-memory/kernel graph nodes,
+capture invalidation, graph resource lifetime, memory plateau and measured replay
+performance still require acceptance under the full contract below.
 
 **Objective:** keep GPU workloads resident and avoid paying a host round trip for
 every operation. Advances R4, N2 and N4.

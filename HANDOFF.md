@@ -18,6 +18,15 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Host-node graph construction and thread-local capture now pass fresh source
+qualification: each replays 16 changing inputs, updates callback functions and
+user-data pointers, and survives source-graph destruction with exact 32 callbacks
+and three retired queues. Capture performs no callbacks before launch, and a
+no-op producer fails the unchanged output oracle. See
+`evidence/offline-public-host-graph.json` for the 79-compilation/ten-link result
+and independent review. Device-memory/kernel graph nodes, capture invalidation,
+concurrent updates, native execution and performance remain unqualified.
+
 Legacy default-stream ordering now passes four fresh sanitizer-model cases:
 ordinary streams order implicitly with the null stream in both directions, while
 nonblocking streams allow the held producer to remain pending as the consumer

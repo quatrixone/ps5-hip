@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-host-graph-replay-pass",
+  "source_base": "de8fa05921906469fa3d3074d115101beb1e2237",
+  "source_identity": "Exact input hashes bind tested model and qualifier edits; source base alone is insufficient.",
+  "compilations": 79,
+  "strict_links": 10,
+  "host_tests_passed": 62,
+  "control_tests_passed": 19,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-host-graph-source-v1/receipt.json": "e4b1794fc82d9e15202e96e73b66dd884e1bfd0e132f1d6cbda224359db8aaf3",
+    "tests/public_hip_graph_model.cpp": "1f8a1621a0b07369788c339f1a26339d30974f2a2f7800db9bcf131a436eaa3d",
+    "tools/qualify_public_hip_source.py": "c99317797f973ea9978bb5c15d844d375b9725f310ccf9de0fc8468f3eeba52b",
+    "results/public-host-graph-host.log": "af5218c7199bba9f800b89c9bf3ac31457de321a5be8cddcc314e22853f0f538",
+    "results/public-host-graph-controls.log": "9df63763557acb33ebca1b2bab704f9193bf83ee59a24ae7a2f94e83f4e6d4ad",
+    "results/public-host-graph-review/review.json": "590d67aaa1c3cf3e96625a6fb26c7e248752f9948ce0bc9e3ab7c5362848e00a",
+    "results/public-host-graph-source-v1.log": "ae6e9819fe213dfc0eec5116813324c8d3c2bcd60e7506c8da1f276d4a3e52b8",
+    "results/public-host-graph-source-v1/graph-explicit.json": "35ac1eadb46b1ad6d23c7b6c294ca4d7109aa015fad98ef20c2c9a03caf8414f",
+    "results/public-host-graph-source-v1/graph-explicit.stdout": "2e3d9d76bbea8f84525fea91089aacb4ad0e0f923a00693541aacbc26e2a0d23",
+    "results/public-host-graph-source-v1/graph-explicit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-host-graph-source-v1/graph-capture.json": "1211122156671b8d843d930a9b1f68a560a985328387d608d5724185a59e0599",
+    "results/public-host-graph-source-v1/graph-capture.stdout": "754346e276528b1636c5487893c133571fe143a277579fcef7084b6a0c685364",
+    "results/public-host-graph-source-v1/graph-capture.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-host-graph-source-v1/graph-explicit-noop.json": "67d3bcffb624d1de3c687c33a1f332932c2155a0441dbd13c91ebc5f271efefd",
+    "results/public-host-graph-source-v1/graph-explicit-noop.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-host-graph-source-v1/graph-explicit-noop.stderr": "dc212d5505b9e9261cdf589d8907eea25c351ef32102020375860a7f147dcdf4"
+  },
+  "independent_review": {
+    "path": "results/public-host-graph-review/review.json",
+    "sha256": "590d67aaa1c3cf3e96625a6fb26c7e248752f9948ce0bc9e3ab7c5362848e00a",
+    "deployment_approved": false
+  },
+  "accepted_scope": [
+    "Current input, prepared-source, include and resolved toolchain hashes match receipt",
+    "All compilation and strict link records pass; model, fault-model and fixture hashes match",
+    "All previously qualified mode outcomes and sanitizer/runtime environments match baseline",
+    "Explicit and captured two-host-node graphs each replay16times with32callbacks; callback and userdata update at4, source graph destroyed at8",
+    "Exact finalization checks three retired queues, zero allocations/frees and no backend submissions",
+    "Negative no-op callback has exact round0 output mismatch and SIGABRT, with no success transcript",
+    "Host62 and control19 pass logs inspected"
+  ],
+  "limits": [
+    "Host-node graph replay only; no kernel/copy/fill graph admission qualification",
+    "No native execution, console contact or deployment authorization",
+    "Negative control intentionally aborts before cleanup; successful modes require leak detection and clean finalization",
+    "Capture invalidation, concurrent updates, host-memory plateau and measured GPU replay performance remain unqualified."
+  ],
+  "preserved_diagnostic": "results/public-graph-diagnostic-v1",
+  "frozen_candidate": "results/source-rect-copy-console-v1",
+  "frozen_bound_files_reverified_unchanged": 28
+}

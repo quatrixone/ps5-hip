@@ -195,8 +195,8 @@ gate, `stream-normal` requires no dependent consumer progress within one second.
 `stream-bypass` omits the event wait and requires early consumer progress within
 that deadline. Both cases release the producer and verify two retired queues with
 no allocation or GPU submission. This bounded test is scheduler-dependent; it
-qualifies neither native events nor GPU concurrency. The qualifier builds 78
-translation units in total: 69 base units, five alternate client harnesses,
+qualifies neither native events nor GPU concurrency. The qualifier builds 79
+translation units in total: 69 base units, six alternate client harnesses,
 two independently fault-injected memory units and two retirement adapter copies.
 
 Four additional stream cases exercise legacy default-stream ordering in both
@@ -217,6 +217,17 @@ output starts at a different value, so an omitted copy cannot pass either oracle
 Both streams synchronize before readback and each buffer is freed once before
 stream destruction. These cases retain the bounded scheduling caveat above and
 do not establish native asynchronous transfer or GPU concurrency.
+
+The host-graph client builds two dependent host nodes both explicitly and through
+thread-local stream capture. Each executable replays 16 changing inputs, executes
+exactly 32 callbacks, updates callback functions and user-data pointers after four
+replays, then survives destruction of its source graph after eight. Capture and
+instantiation must not execute callbacks. Poisoned intermediates and outputs reject
+omitted or reordered computations; a no-op producer control must fail the output
+oracle on the first replay. Three logical queues remain constant across replay and
+retire exactly, with no device allocation or GPU submission. ASan leak detection
+covers normal cleanup. This does not qualify kernel/memory graph nodes, capture
+invalidation, concurrent graph updates, host-memory plateau or GPU replay speed.
 
 The rectangular-copy client checks public synchronous 2D and asynchronous 3D D2D
 copies with changed data, interior pointers, nonzero origins and different row/slice

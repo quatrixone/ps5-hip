@@ -37,7 +37,8 @@ def main():
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
                  'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_fill_model.cpp',
-                 'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp', 'kernels/thread_words.hip',
+                 'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
+                 'tests/public_hip_graph_model.cpp', 'kernels/thread_words.hip',
                  'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
@@ -60,7 +61,8 @@ def main():
     header_hashes = {}
     header_lock = threading.Lock()
 
-    def run(label, argv, env=None, expected_output_failure=False):
+    def run(label, argv, env=None, expected_output_failure=False,
+            failure_marker='PUBLIC_LAUNCH_OUTPUT_MISMATCH index=0'):
         command = [str(p) for p in argv]
         try:
             process = subprocess.run(command, cwd=ROOT, capture_output=True,
@@ -80,7 +82,7 @@ def main():
             record['runtime_environment'] = {'HIP_USE_RUNTIME_UNBUNDLER': env['HIP_USE_RUNTIME_UNBUNDLER']}
         (output / (label + '.json')).write_text(json.dumps(record, indent=2) + '\n')
         if expected_output_failure:
-            if process.returncode != -6 or 'PUBLIC_LAUNCH_OUTPUT_MISMATCH index=0' not in process.stderr:
+            if process.returncode != -6 or failure_marker not in process.stderr:
                 raise RuntimeError('negative control did not fail the output oracle: ' + label)
         elif process.returncode:
             raise RuntimeError(label + ': ' + process.stderr[-2500:])
@@ -301,6 +303,24 @@ def main():
         'PUBLIC_STREAM_COPY_FINAL queues=3 retired=3 allocations=3 frees=3 ownership=clean gpu_execution=false']:
         raise RuntimeError('rectangular copy data/ownership contract differs')
     print('public rectangular copy PASS', flush=True)
+    graph_source = ROOT / 'tests/public_hip_graph_model.cpp'
+    source_hashes[str(graph_source.relative_to(ROOT))] = sha(graph_source)
+    graph_object = compile_one((len(units) + 9, graph_source))
+    graph_objects = [graph_object if unit.name == 'hip_admission_model.cpp' else obj
+                     for unit, obj in zip(units, objects)]
+    run('graph-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *graph_objects, '-o', output / 'graph-model'])
+    for mode in ('explicit', 'capture'):
+        result = run('graph-' + mode, [output / 'graph-model', mode], env)
+        if result.splitlines() != [
+            'PUBLIC_GRAPH_PASS mode=' + mode + ' replays=16 callbacks=32 parameter_update=true source_destroyed=true gpu_execution=false',
+            'PUBLIC_GRAPH_FINAL queues=3 retired=3 allocations=0 frees=0 ownership=clean gpu_execution=false']:
+            raise RuntimeError('host graph replay/update/ownership differs: ' + mode)
+        print('public host graph ' + mode + ' PASS', flush=True)
+    run('graph-explicit-noop', [output / 'graph-model', 'explicit-noop'], env,
+        expected_output_failure=True, failure_marker='PUBLIC_GRAPH_OUTPUT_MISMATCH round=0')
+    print('public host graph no-op output control PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -323,7 +343,10 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 9,
+               'total_compilations': len(units) + 10,
+               'graph_model_sha256': sha(output / 'graph-model'),
+               'graph_cases': ['explicit-host-replay-update-source-destroy',
+                               'captured-host-replay-update-source-destroy', 'noop-output-rejected'],
                'rect_copy_model_sha256': sha(output / 'rect-copy-model'),
                'retirement_models': retirement_models,
                'retirement_observation_ms': 500,
