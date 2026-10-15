@@ -61,6 +61,26 @@ All older next-step paragraphs below are historical and subordinate to this
 priority. The latest native compiler-launch checkpoint below records the current
 installed image/log; the earlier backing-test image/log are preserved backups.
 
+## Unchanged RMSNorm module now builds from source only
+
+`make llm-rmsnorm-fixture` builds authenticated upstream device libraries and
+unchanged llama.cpp `norm.cu`, without historical `.local` outputs. The fresh
+Make run and independent source-only build produce the same 60,544-byte,
+16-kernel module as the original compiler probe: SHA256
+`504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5`.
+Full 26-explicit/14-hidden argument and descriptor checks, zero undefined
+symbols, two focused tests, CTest registration and independent review pass.
+See `evidence/offline-rmsnorm-source-fixture.json` and `docs/LLM_V1_PROFILE.md`.
+Root Make session 42388 terminated successfully. Use a fresh output per run.
+
+The public CLR resource integration is currently uncommitted work, not a passed
+runtime milestone. Root full qualification session 95483 owns
+`results/source-public-rmsnorm-v1`; poll that same handle before changing its
+inputs. Source preparation/reuse passed with 846 identical files (session 90626
+terminated). The new model/qualifier require their independent review fixes and
+runtime execution against that base. Current native console baseline is still
+the aggregate checkpoint. No RMSNorm numerical GPU execution is claimed.
+
 ## Real RMSNorm resource preparation qualified offline
 
 The unchanged 16-kernel norm module now passes the bounded ReductionLds core
@@ -79,11 +99,10 @@ metadata cannot prove the algorithmic minimum. Legacy reduction still requests
 See `evidence/offline-rmsnorm-resource-preparation.json` and `docs/HIP_REDUCTION.md`.
 Root processes 99096 (core tests) and 19744 (native cross-build) terminated with 0.
 
-Next: finish the source-only upstream RMSNorm fixture generator, then public CLR
+Source-only fixture generation now passes above. Next: qualify public CLR
 mixed-module admission and nonzero shared-memory routing before a genuine
-numerical GPU candidate. The new generator/test are not yet a validated milestone;
-independent review requires complete hidden-argument and descriptor checks.
-The author agent owns its live build handle and must preserve failed outputs.
+numerical GPU candidate. Preserve failed generator v1 evidence; corrected v2
+and the fresh Make run passed the complete hidden-argument/descriptor checks.
 No console change; native RMSNorm numerical accuracy and full inference remain open.
 
 ## Nullable kernel pointers qualified offline

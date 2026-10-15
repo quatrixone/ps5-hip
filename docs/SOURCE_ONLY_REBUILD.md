@@ -12,6 +12,11 @@ SDK build below is unchanged. Repeated downloads need a fresh
 logit/token fixtures need a fresh `LLM_REFERENCE_DIR`. Fixed token inputs live
 in Git; full reference logits are generated locally, validated, and hashed.
 
+For the unchanged upstream RMSNorm device module, run `make llm-rmsnorm-fixture`
+with a fresh `LLM_RMSNORM_FIXTURE_DIR`. This builds authenticated upstream device
+libraries and the real operator from source; see the same inference profile for
+requirements and limits. It is a compiler fixture, not a runnable LLM client.
+
 The supported source and build recipe live on the private `main` branch. A
 fresh WSL/Linux clone needs no copied `.local`, `.deps`, `build`, `dist`, or
 `results` directory and no checkout of another ps5-hip branch.

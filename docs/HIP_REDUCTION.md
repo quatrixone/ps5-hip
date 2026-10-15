@@ -68,5 +68,6 @@ cross-compilation. Configure `PS5HIP_RMSNORM_OBJECT` with an authenticated
 unchanged upstream `norm.hsaco` to register `rmsnorm_packet` and, with SDK
 platform headers available, `native_rmsnorm_prepare`. Both tests explicitly
 report `gpu_execution=false`; diagnostic argument patterns are not numerical
-RMSNorm inputs. Source-only fixture generation and public CLR resource routing
-remain separate work before a native numerical experiment.
+RMSNorm inputs. Source-only fixture generation now passes through
+`make llm-rmsnorm-fixture`; see `evidence/offline-rmsnorm-source-fixture.json`.
+Public CLR resource routing remains separate work before a native numerical experiment.

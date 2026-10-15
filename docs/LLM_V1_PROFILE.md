@@ -223,3 +223,28 @@ CPU build, runtime libraries, declared profile and generated artifacts.
 
 This reference does not qualify native GPU accuracy, strided input, fused
 normalization weights or full-model execution.
+
+## Source-only RMSNorm device fixture
+
+```sh
+make llm-rmsnorm-fixture LLM_RMSNORM_FIXTURE_DIR=results/llm-rmsnorm-fixture
+```
+
+Use a fresh output directory. This optional target fetches the locked client,
+HIP/CLR sources and authenticated device-library sources. It builds upstream
+OCML/OCLC libraries and the required workitem/mul_hi routines, then compiles the
+unchanged upstream `ggml/src/ggml-cuda/norm.cu` for gfx1013 with LLVM 18.1.8.
+No copied `.local` compiler output or historical device-library build is needed.
+Network access to GitHub, CMake/Ninja and the documented LLVM tools are required.
+
+The generator verifies the pinned device-library Git tree and every source
+blob, diagnostic header hashes, compilation dependency closure, library order,
+zero unresolved symbols, all 16 kernel names and the selected kernel's complete
+26-explicit/14-hidden argument layout and descriptor. Receipts bind commands,
+inputs, tools and artifacts. The HIP 6.2-matched hipBLAS 2.2 headers are diagnostic
+compilation inputs; this does not implement hipBLAS or resolve final client
+library integration. Code-object reproducibility does not prove native math.
+
+The resulting `norm.hsaco` can be passed as `PS5HIP_RMSNORM_OBJECT` when configuring
+CMake to run `rmsnorm_packet` and `native_rmsnorm_prepare`. These host tests inspect
+actual code-object packing/resources and ownership without GPU execution.

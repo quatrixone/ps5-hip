@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "classification": "source-only-unchanged-upstream-rmsnorm-compiler-fixture",
+  "source_sha256": {
+    "tools/build_llm_rmsnorm_fixture.py": "861360e6c8ecca02815c5ad80cc01272a1c4ac1fe88e370bb51684c26da2c234",
+    "tests/llm_rmsnorm_fixture_test.py": "c1973173313e0e39f70149f2a07813b9c05d4c2158f9ef33ae4e96ed6ef40f5b",
+    "Makefile": "be5633d1e6073a323760d87d102d0ed435c96b19c6e034ac9bd9f369b19b26c8",
+    "CMakeLists.txt": "20decbea4efc542020fe841018e48fd833717bbc3faaff2e6aeefbe65099e837"
+  },
+  "raw_evidence": {
+    "results/llm-rmsnorm-fixture-v2/receipt.json": "303cd1c88d2b20794210094b101c9ce6897e2318a3232a48b4248dab1954059d",
+    "results/llm-rmsnorm-fixture-make-v1/receipt.json": "7e504ce013089f51cf4717b27428ac554c180c706b8b7642cb1a5777ca353e7c",
+    "results/llm-rmsnorm-fixture-make-v1/make.log": "73a7cb3ee2c1884dc74bdfe42b234a73c6a418eea67725e56b561769e95ed2f7",
+    "results/rmsnorm-fixture-source-review-v1/review.json": "0a57c175e14477087fb6551cfbae27b6509064fd4d9dc0d557f1e5451f1ff468"
+  },
+  "device_library_tree": "773cdc752dbe3099317134dcd2b8ec5d4b086473",
+  "module": {
+    "sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5",
+    "bytes": 60544
+  },
+  "selected": {
+    "symbol": "_ZL12rms_norm_f32ILi1024ELb0ELb0ELb0EEvPKfPfiiilllfS1_lll15HIP_vector_typeIjLj3EES4_S4_S4_S1_lllS4_S4_S4_S4_f",
+    "arguments": [
+      {
+        "offset": 0,
+        "size": 8,
+        "kind": "global_buffer"
+      },
+      {
+        "offset": 8,
+        "size": 8,
+        "kind": "global_buffer"
+      },
+      {
+        "offset": 16,
+        "size": 4,
+        "kind": "by_value"
+      },
+      {
+        "offset": 20,
+        "size": 4,
+        "kind": "by_value"
+      },
+      {
+        "offset": 24,
+        "size": 4,
+        "kind": "by_value"
+      },
+      {
+        "offset": 32,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 40,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 48,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 56,
+        "size": 4,
+        "kind": "by_value"
+      },
+      {
+        "offset": 64,
+        "size": 8,
+        "kind": "global_buffer"
+      },
+      {
+        "offset": 72,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 80,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 88,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 96,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 108,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 120,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 132,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 144,
+        "size": 8,
+        "kind": "global_buffer"
+      },
+      {
+        "offset": 152,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 160,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 168,
+        "size": 8,
+        "kind": "by_value"
+      },
+      {
+        "offset": 176,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 188,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 200,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 212,
+        "size": 12,
+        "kind": "by_value"
+      },
+      {
+        "offset": 224,
+        "size": 4,
+        "kind": "by_value"
+      },
+      {
+        "offset": 232,
+        "size": 4,
+        "kind": "hidden_block_count_x"
+      },
+      {
+        "offset": 236,
+        "size": 4,
+        "kind": "hidden_block_count_y"
+      },
+      {
+        "offset": 240,
+        "size": 4,
+        "kind": "hidden_block_count_z"
+      },
+      {
+        "offset": 244,
+        "size": 2,
+        "kind": "hidden_group_size_x"
+      },
+      {
+        "offset": 246,
+        "size": 2,
+        "kind": "hidden_group_size_y"
+      },
+      {
+        "offset": 248,
+        "size": 2,
+        "kind": "hidden_group_size_z"
+      },
+      {
+        "offset": 250,
+        "size": 2,
+        "kind": "hidden_remainder_x"
+      },
+      {
+        "offset": 252,
+        "size": 2,
+        "kind": "hidden_remainder_y"
+      },
+      {
+        "offset": 254,
+        "size": 2,
+        "kind": "hidden_remainder_z"
+      },
+      {
+        "offset": 272,
+        "size": 8,
+        "kind": "hidden_global_offset_x"
+      },
+      {
+        "offset": 280,
+        "size": 8,
+        "kind": "hidden_global_offset_y"
+      },
+      {
+        "offset": 288,
+        "size": 8,
+        "kind": "hidden_global_offset_z"
+      },
+      {
+        "offset": 296,
+        "size": 2,
+        "kind": "hidden_grid_dims"
+      },
+      {
+        "offset": 352,
+        "size": 4,
+        "kind": "hidden_dynamic_lds_size"
+      }
+    ],
+    "resources": {
+      "kernarg_segment_size": 488,
+      "kernarg_segment_align": 8,
+      "group_segment_fixed_size": 0,
+      "private_segment_fixed_size": 0,
+      "max_flat_workgroup_size": 1024,
+      "wavefront_size": 32
+    }
+  },
+  "descriptor": {
+    "group_bytes": 0,
+    "private_bytes": 0,
+    "kernarg_bytes": 488,
+    "rsrc1": 1622081731,
+    "rsrc2": 908,
+    "rsrc3": 0,
+    "properties": 1033,
+    "preload": 0
+  },
+  "kernel_count": 16,
+  "undefined_symbols": [],
+  "library_order": [
+    "ockl-workitem-only",
+    "mul_hi",
+    "ocml",
+    "oclc_abi_version_500",
+    "oclc_isa_version_1013",
+    "oclc_finite_only_off",
+    "oclc_unsafe_math_off",
+    "oclc_daz_opt_off",
+    "oclc_correctly_rounded_sqrt_on",
+    "oclc_wavefrontsize64_off"
+  ],
+  "validation": {
+    "make_exit_code": 0,
+    "ctest_registration_passed": true,
+    "unit_tests": 2,
+    "independent_review": "PASS",
+    "all_commands_succeeded": true,
+    "inputs_rehashed": 1101,
+    "tools_rehashed": 12,
+    "artifacts_rehashed": 6,
+    "matches_independent_fresh_build": true,
+    "matches_historical_probe": true
+  },
+  "gpu_executed": false,
+  "native_executed": false,
+  "limits": [
+    "Compiler/link/metadata proof only; no numerical or runtime admission proof.",
+    "Diagnostic hipBLAS2.2 headers match locked HIP6.2; no hipBLAS implementation or final client dependency integration."
+  ]
+}
