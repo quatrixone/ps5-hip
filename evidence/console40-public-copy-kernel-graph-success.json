@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-bounded-native-captured-copy-kernel-graph",
+  "source_commit": "ac93df8ab2afcc15b2d55e54b1b478e251344e63",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "transport": "WSL Ubuntu",
+  "package_sha256": "25cf1041ac4ac9b5a18e54728913816ce450a889bb9f76ac0096f79119ed9503",
+  "manifest_sha256": "04caca5a3349b06ac9d7096724e6e10f3e212d03a2ff8b9d4a447adbd1d04220",
+  "application_log_sha256": "0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd",
+  "qualification": {
+    "rounds": 2,
+    "gpu_dispatches": 4,
+    "exact_values": 292,
+    "tail_guards": 32,
+    "disabled_copy_replays": 6,
+    "callbacks": 8,
+    "captured": true,
+    "eager_equal": true,
+    "owned_arguments": true,
+    "executable_updated": true,
+    "source_graph_destroyed": true,
+    "allocations": 2,
+    "frees": 2,
+    "queues": 3,
+    "retired_queues": 3,
+    "gate_destroyed": true,
+    "natural_stop": true,
+    "complete_ftp_reads": 26,
+    "healthy_after": true,
+    "lock_released": true,
+    "pid": 169
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-copy-gpu-console-v1/manifest.json": "04caca5a3349b06ac9d7096724e6e10f3e212d03a2ff8b9d4a447adbd1d04220",
+    "results/source-public-copy-gpu-console-v1/deploy/receipt.json": "22d5ec9016574e9420f3c29d2a246182c7f8dde81f732a8ba863c65b32466a20",
+    "results/source-public-copy-gpu-console-v1/execution-authorization.json": "e4fa9accbc3c105158add161e50f0864ce812d19bb39080551e52361d68fd102",
+    "results/source-public-copy-gpu-console-v1/execution-review.json": "d999179b6b3b9a01159001ae6f408a326484b78aa5103e017b0e24db387524a8",
+    "results/source-public-copy-gpu-console-v1/execute/receipt.json": "99d518cda6bf1efeb9fd926d319aa8bdc3966a55c23a36ab697c844b2110bca8",
+    "results/source-public-copy-gpu-console-v1/execute/application.log": "0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd",
+    "results/source-public-copy-gpu-console-v1/execute/klog.log": "23999cc8a09bc8f8c8da3b417b798ec36445a268fcac81b189ecaba0cfdf0d7c",
+    "results/source-public-copy-gpu-console-v1/execute/before-launch.log": "9d88211c21ca8d32c4a09f907b498bb987ede1ff1e9f1b136da3fe9586faacf3",
+    "results/source-public-copy-gpu-console-v1/execute/observed.log": "bc7ad6a5ce46c46a26e7a7093082af504d400a31424cd2632c998c13ed9f405c",
+    "results/source-public-copy-gpu-console-v1/execute/snapshot.log": "88da9efbbfefa08c07eb7fcf3907f2bba1036438e4fdcf7f83628be1f8a25f7e",
+    "results/source-public-copy-gpu-console-v1/execute/post_snapshot.log": "88da9efbbfefa08c07eb7fcf3907f2bba1036438e4fdcf7f83628be1f8a25f7e"
+  },
+  "next_baseline": {
+    "image_sha256": "25cf1041ac4ac9b5a18e54728913816ce450a889bb9f76ac0096f79119ed9503",
+    "log_fixture": "copy_gpu",
+    "log_sha256": "0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd",
+    "log_preserved": false
+  },
+  "limits": [
+    "Bounded single-stream1D copy/kernel capture and eager comparison; module/allocation remain live through synchronized teardown.",
+    "Copy-capture invalidation, memory-node updates/lifetime, cross-stream GPU capture and sustained resource/efficiency requirements remain open.",
+    "Standalone parser does not establish hardware acceptance; independent complete identity/lifecycle/mount/klog/health audit provides context.",
+    "Both candidate phases consumed; never replay."
+  ]
+}

@@ -11,60 +11,34 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Current native public HIP checkpoint
 
-The shared copy/kernel graph fixture now passes full source sanitizers,
-five negative controls, native Make and cached package validation, 62 host
-regressions and 26 console controls. Independent source/package and pre-exit
-reviews passed. See `evidence/offline-native-copy-kernel-graph.json`.
-The new copy_gpu package targets .40's results directory and compares captured
-H2D/kernel/D2D/D2H replay against eager execution after erasing eager device
-results. Native execution remains pending. Next: freeze, review and run one
-bounded WSL case; the installed baseline below remains unchanged.
-
-
-One-dimensional copy graph retirement is fixed and qualified offline.
-Previously, disabled copy replays retained an unused command and later
-`hipFree` returned status 999 in both explicit and captured graphs. Disabled
-1D copies now prepare and enqueue the same dependency marker, with vector
-capacity reserved before marker allocation. The new suite covers all three
-copy directions, six disabled replays, four changing-input replays, source-graph
-destruction and a bounded parallel fork/join check. Full source sanitizers,
-native runtime Make build and cached validation, 62 host regressions and
-25 console controls passed. See `evidence/offline-public-copy-graph.json`.
-
-This is host-model copy-graph evidence and native runtime compile/package
-evidence. The compiled title still tests kernel capture and uses the default
-results directory; it is not a deployable copy-graph test. Next: a shared native
-copy/kernel graph fixture configured for .40, then fresh review and one bounded
-console case. Copy-capture invalidation, broader memory nodes, lifetime and
-resource-plateau requirements remain open. The console baseline below is unchanged.
-
-
-Standard module-kernel stream capture passed its bounded native test on .40
-through WSL at `ede4ced`. Two disabled replays ran their callbacks; two captured
-GPU launches produced 146 exact values and preserved 16 guards. Owned arguments,
-executable updates and replay after source-graph destruction passed. One allocation
-was freed, all three queues retired, and PID 159 exited naturally. The controller
-recorded 27 complete reads, healthy services and owned-lock release. Independent
-audit verified identity, stable snapshots and scoped klog without a native fault.
-See `evidence/console40-public-kernel-capture-success.json`.
+Captured H2D/kernel/D2D/D2H graph replay passed its bounded .40 test through
+WSL at `ac93df8`. Two changing-input rounds matched eager execution over four
+GPU dispatches, 292 exact values and 32 guards. Six disabled-copy replays,
+argument ownership/update and replay after source-graph destruction passed.
+Both buffers freed, all three queues retired and PID 169 exited naturally.
+The controller accepted 26 complete reads, healthy services and owned-lock
+release. Independent audit verified identity, stable snapshots and scoped klog
+without a native fault. See `evidence/console40-public-copy-kernel-graph-success.json`.
 
 Current installed image:
-`c74a8d2d19d3703760b4cab02584076a056da137fa88c4746c50e752477d2ad5`.
-Current log: `/data/ps5-hip/results/ps5-hip-public-capture_gpu.log`, SHA
-`d979e10fcd62d137d650345ef30324a58c8ffe454a62b1983b0d54aa5b274c1e`
-(not yet SHA-preserved). The previous explicit-graph image/log are preserved.
-Both phases in `results/source-public-capture-gpu-console-v1` are consumed;
+`25cf1041ac4ac9b5a18e54728913816ce450a889bb9f76ac0096f79119ed9503`.
+Current log: `/data/ps5-hip/results/ps5-hip-public-copy_gpu.log`, SHA
+`0ad6a71f8f0810547b5a852134d16abeeff3af98298b21bfd76050eafd4062dd`
+(not yet SHA-preserved). The prior kernel-capture image/log are preserved.
+Both phases in `results/source-public-copy-gpu-console-v1` are consumed;
 never replay them.
 
-Offline qualification includes 36 capture-failure recoveries across three capture
-modes and both graph ownership forms, full sanitizers, a 74-object Make package,
-cached validation, 25 controls and 62 host regressions. See
-`evidence/offline-public-kernel-capture.json`. Failure recovery remains host-model
-evidence; the native result covers the bounded successful single-stream case.
+The shared oracle poisons both device buffers after eager execution. Offline
+negative controls reject omitted H2D/D2D/D2H edges and missing/corrupt GPU writes.
+Full source sanitizers, native Make and cached validation, 62 host regressions
+and 26 controls passed. See `evidence/offline-native-copy-kernel-graph.json`.
+The disabled-copy command retirement fix is separately recorded in
+`evidence/offline-public-copy-graph.json`.
 
-Next: required memory graph nodes, GPU cross-stream capture and resource lifetime
-qualification, followed by resource plateaus and measured replay efficiency.
-G5 and the broader roadmap remain open.
+Next: copy-capture invalidation, memory-node parameter updates and lifetime,
+GPU cross-stream capture, then sustained replay/plateaus and measured efficiency.
+This bounded single-stream 1D copy/kernel result does not close G5 or the broader
+roadmap.
 
 ## Historical source-build checkpoints
 

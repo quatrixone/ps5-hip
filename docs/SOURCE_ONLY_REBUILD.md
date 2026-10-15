@@ -426,3 +426,7 @@ allocations and three retired queues. The exact transcript is
 `ps5-hip-public-copy_gpu.log`; a fresh frozen candidate and independent review
 are required before a bounded console case. This does not qualify cross-stream
 GPU capture, memory-node parameter updates or sustained replay efficiency.
+
+The bounded copy/kernel fixture passed on .40 at `ac93df8`; see
+`../evidence/console40-public-copy-kernel-graph-success.json`. Its candidate phases
+are consumed. Future experiments require a fresh frozen candidate.
