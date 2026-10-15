@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, MODULE_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -153,6 +153,22 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in (EXPECTED[:-1], EXPECTED + EXPECTED, EXPECTED + b'FAIL\n'):
             with self.assertRaises(ValueError):
                 check_log(raw)
+
+    def test_launch_transcript_requires_exact_results_and_cleanup(self):
+        result = check_log(LAUNCH_EXPECTED, 'launch')
+        self.assertEqual(result['kernel'], 'public_hip_launch')
+        self.assertFalse(result['hardware_gate_passed'])
+        lines = LAUNCH_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [LAUNCH_EXPECTED * 2, MODULE_EXPECTED, LAUNCH_EXPECTED + b'FAIL\n']
+        for before, after in ((b'launches=2', b'launches=1'), (b'values=146', b'values=145'),
+                              (b'guards=16', b'guards=15'), (b'rejected=2', b'rejected=0'),
+                              (b'frees=1', b'frees=0'), (b'retired=1', b'retired=0'),
+                              (b'gate_destroyed=true', b'gate_destroyed=false')):
+            invalid.append(LAUNCH_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'launch')
 
     def test_module_transcript_rejects_incomplete_or_wrong_claims(self):
         result = check_log(MODULE_EXPECTED, 'module')

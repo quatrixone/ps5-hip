@@ -11,6 +11,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The native public HIP launch fixture now builds with
+`make public-hip-launch-package RESULTS_DIR=/data/ps5-hip/results`: 74 fresh
+objects, genuine public module/launch/copy/synchronization calls and a checked
+seven-file package including `thread_words.hsaco`. Its expected console contract
+covers two changed-input dispatches,146 active values,16 tail guards, two rejected
+unsupported blocks, and exact cleanup. All 62 host tests and17 console-control test
+methods pass. See `evidence/offline-source-public-launch.json`. No console run
+has occurred; the .40 recovery hold remains in force.
+
 Public HIP launch admission now passes the fresh source sanitizer model: all twelve
 base modes plus a separate launch harness, 73 exact modeled outputs, eight guards,
 argument capture after caller mutation, and clean ownership. Missing/corrupt
@@ -1308,6 +1317,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | source-built public HIP launch package and strict result/lifecycle controls | evidence/offline-source-public-launch.json | next: .40 recovery, frozen candidate and native validation
 
 - 2026-10-15 | G5 | main | public launch admission and fresh sanitizer launch/output/ownership qualification | evidence/offline-public-launch-admission.json | next: native public launch package and .40 recovery
 

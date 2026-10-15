@@ -60,6 +60,16 @@ prove public HIP startup or GPU execution.
 
 ## Fresh deployment controls
 
+`make public-hip-launch-package RESULTS_DIR=/data/ps5-hip/results` builds the
+native public kernel-launch fixture in `build/public-hip-launch`; set
+`LAUNCH_BUILD_DIR` to a new directory to preserve an earlier attempt. It packages
+`thread_words.hsaco` with the title and verifies all seven extracted files.
+The fixture loads the module through public HIP, performs two changed-input
+launches, checks146 active values and16 tail guards, then checks exact resource
+cleanup. Its strict transcript also requires both unsupported-block rejections.
+The native artifact requires independent review, a committed frozen candidate
+and a separately accepted .40 cycle before any console GPU result is claimed.
+
 `make public-hip-module-package RESULTS_DIR=/data/ps5-hip/results` builds
 74 fresh native objects and a seven-file package in `build/public-hip-module`.
 The additional `canary.hsaco` is compiled from `kernels/canary.hip` for gfx1013

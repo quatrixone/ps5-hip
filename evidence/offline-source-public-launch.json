@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-package-pass-console-not-run",
+  "fixture": "public HIP kernel launch",
+  "source_base": "d07eb03c7d7b977d04290cd6fafceb91a56f4950",
+  "source_identity": "Base commit predates integration; exact tested input bytes are bound by the receipt.",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "console_control_test_methods": 17,
+  "package_sha256": "b872496cad98caaece8242a7dc6fe7db1b4bda658c216b200170c1b2ffb29e92",
+  "fself_sha256": "1cac0fbd2345cd8c21c62511ebbd38222d3a7a32b3c15ce2de91aa01c31109f4",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "f8bea5950647a24eea04cb3c1fcb64eb17f93de23ded024f8144ed4b7c59d5c8",
+    "extracted_sha256": "05b4fa2a463f7946d86f8761ffe6afadbc68fe4503d267ca81bf7d7eaf72457d",
+    "omitted_note": {
+      "offset": 5425164,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500a4249d1aca29547f",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "thread_words.hsaco": "e128e5b47b5ad10b0032675ed311aa6e3ade58df74b3a0135c71ea987bf52f1e",
+    "eboot.bin": "1cac0fbd2345cd8c21c62511ebbd38222d3a7a32b3c15ce2de91aa01c31109f4",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-launch-v1/link-receipt.json": "0471b3820efedd44c449731caac05016cad19fc7f4081a07c938bdac2b2401db",
+    "results/public-launch-package-v1.log": "b93c4ef26bae77dcbbca1f9b32f0ff4919f1feb9691a63d2d1d715ba52372f9a",
+    "results/public-launch-package-host-tests.log": "7a23d06ffd9a4c14eaa06a5bde21944e49570b9c7666f7da412bb374aedb01e5",
+    "results/public-launch-package-independent-review/partial-isa-review.json": "012a25307bc25660de1606f0061d8b7d2c86cd7f6d78e9ffbdacc82d404996b3",
+    "results/public-launch-package-v1-revalidate.log": "b495f694ff802ac6a4b4bc3912362ca50b78a23489a51d854039d9746b884e6a"
+  },
+  "expected_console_contract": {
+    "rounds": 2,
+    "launches": 2,
+    "active_values": 146,
+    "tail_guards": 16,
+    "unsupported_blocks_rejected": 2,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 1,
+    "retired_queues": 1,
+    "gate_destroyed": true
+  },
+  "limits": [
+    "Package not executed on console; expected contract is not an observed hardware result.",
+    "Direct kernelParams/default-stream/fixed64x1x1 geometry only.",
+    "Console recovery and image/preserved-log verification remain required before a new frozen, reviewed deployment.",
+    "G5 and broader SDK/framework roadmap remain open."
+  ],
+  "independent_review": {
+    "verdict": "pass-offline-native-public-launch-package",
+    "path": "results/public-launch-package-independent-review/review.json",
+    "sha256": "6afea3ae4212e20f4bb8719d6c0f2d627d1ea315714874dec65370721cec6931",
+    "deployment_approved": false
+  }
+}

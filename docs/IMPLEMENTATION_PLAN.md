@@ -2,6 +2,11 @@
 
 Updated: 2026-10-14, America/New_York.
 
+2026-10-15 native package update: the public launch fixture now builds 74 native
+objects and a checked seven-file package through Make. Strict console controls
+require two dispatches, changed inputs, exact outputs/guards and clean teardown.
+See `../evidence/offline-source-public-launch.json`; console execution is pending.
+
 2026-10-15 public launch update: the fresh source qualifier passes direct public
 HIP module launch with captured arguments, exact modeled outputs, guards and
 resource cleanup. Unsupported public-adapter routes are rejected explicitly.

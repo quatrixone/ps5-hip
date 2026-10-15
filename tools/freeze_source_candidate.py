@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--baseline-log-sha256')
     parser.add_argument('--baseline-log-preserved', action='store_true',
                         help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
-    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy', 'module'), default='bootstrap')
+    parser.add_argument('--baseline-log-fixture', choices=('bootstrap', 'memory', 'copy', 'module', 'launch'), default='bootstrap')
     args = parser.parse_args()
     if args.baseline_log_preserved and not args.baseline_log_sha256:
         parser.error('--baseline-log-preserved requires --baseline-log-sha256')
@@ -34,7 +34,7 @@ def main():
         parser.error('candidate must be under results/')
     receipt = json.loads((args.build / 'link-receipt.json').read_text())
     fixture = receipt.get('fixture', 'bootstrap')
-    if fixture not in ('bootstrap', 'memory', 'copy', 'module'):
+    if fixture not in ('bootstrap', 'memory', 'copy', 'module', 'launch'):
         parser.error('unknown fixture')
     if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 74:
         parser.error('not the complete .40 candidate')
@@ -69,6 +69,7 @@ def main():
                 'package_files': receipt['package_files'], 'files': files,
                 'hypothesis': ('New source-built upstream hipInit and device discovery complete with count=1 and clean natural teardown.' if fixture == 'bootstrap' else
                                'Public hipMalloc allocates two distinct buffers, hipFree rejects interior/double frees and retires both, followed by clean natural teardown.' if fixture == 'memory' else
+                               'Public HIP loads the owned AOT kernel and executes two changed-input dispatches, validates146values and16guards, rejects unsupported geometry, and finalizes with exact resource cleanup.' if fixture == 'launch' else
                                'Two independent public HIP modules load their owned AOT file, expose distinct functions, retain the surviving module after the other unloads, and finalize without queues or GPU work.' if fixture == 'module' else
                                'Synchronous public HIP H2D/D2D/D2H copies preserve exact payload, guards and sources across two changed rounds, reject bounds violations without mutation, then cleanly retire.'),
                 'expected': 'Exact ' + fixture + ' transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
