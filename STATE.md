@@ -11,6 +11,13 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+A fresh 74-object public HIP GPU-launch package at `4acfab2` passed Make,
+cached identity validation and independent package/kernel ISA review. It is frozen
+in `results/source-public-launch-current-console-v1` with deployment-only approval;
+see `evidence/offline-native-public-launch-current.json`. The pending native test
+requires two launches, 146 exact outputs, 16 guards, two rejected geometries and
+one fully retired allocation/queue. No GPU result is claimed before execution.
+
 The source-built public host-graph fixture passed on .40 via WSL at `cf9fafe`:
 32 changing-input replays, 64 callbacks, six single-origin capture invalidations,
 three caller-owned graphs and all five queues retired. The title stopped naturally;

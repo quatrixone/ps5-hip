@@ -2,6 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
+A fresh 74-object public HIP GPU-launch package at `4acfab2` passed Make,
+cached identity validation and independent package/kernel ISA review. It is frozen
+in `results/source-public-launch-current-console-v1` with deployment-only approval;
+see `../evidence/offline-native-public-launch-current.json`. The pending native test
+requires two launches, 146 exact outputs, 16 guards, two rejected geometries and
+one fully retired allocation/queue. No GPU result is claimed before execution.
+
 2026-10-15 native package update: the public launch fixture now builds 74 native
 objects and a checked seven-file package through Make. Strict console controls
 require two dispatches, changed inputs, exact outputs/guards and clean teardown.

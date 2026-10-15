@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-public-launch-frozen-and-reviewed-for-deployment",
+  "source_commit": "4acfab25c1aab60c592926966c9017492995d7d9",
+  "manifest_sha256": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+  "package_sha256": "998e6b60805b8a9a92686629c93896d05e3fff9904f4d77a94dae5dc12d85459",
+  "native_objects": 74,
+  "bound_files": 29,
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "thread_words.hsaco": "e128e5b47b5ad10b0032675ed311aa6e3ade58df74b3a0135c71ea987bf52f1e",
+    "eboot.bin": "62f4f5686cbd5431d6f183ea4b1e692e52c7fbe0b10fbd9a90e4bb17bed64f22",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "committed_build_inputs": 99,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-public-launch-current-console-v1/manifest.json": "9963d9d383c50ae089a3ce6dd0e24609e1a5e7abd265dc760433f264a2ed9882",
+    "results/source-public-launch-current-console-v1/build-receipt.json": "5b65915dc36766120986ffea94d638f9a40ae28328341144e7b8936b6ed0e579",
+    "results/source-public-launch-current-console-v1/deployment-review.json": "66ecc759a006bab647fb781119029a5cc50d071a371c2fd00340ad33d43bef40",
+    "results/native-public-launch-current-review/review.json": "e8942460582541c577a970045be9589bc6ee537400f8858dda79d0e2c425a642",
+    "results/native-public-launch-current-review/kernel-review.json": "4a8d58d7bea36f4784e74d74aa213e112b275c4a4198ba19fce9014437be8cc2",
+    "results/public-hip-launch-current-v1-build.log": "83db273b525c578178c791bf561f298e6c2d7c1a15aec731e40011a79405d9a8",
+    "results/public-hip-launch-current-v1-revalidate.log": "83db273b525c578178c791bf561f298e6c2d7c1a15aec731e40011a79405d9a8"
+  },
+  "baseline": {
+    "baseline_image_sha256": "85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4",
+    "baseline_log_sha256": "a233b4d1611c3d3b501b4632b88e3a8d457d3c4f6239a1b6531ea00dad1e489e",
+    "baseline_log_fixture": "graph",
+    "baseline_log_preserved": false
+  },
+  "accepted_scope": [
+    "Fresh Make build and cached identity validation passed.",
+    "Independent native imports, FSELF, seven-file UFS package, kernel ISA and source audit passed.",
+    "Deployment-only operational review passed; fresh locked preflight required."
+  ],
+  "expected_console_contract": {
+    "launches": 2,
+    "active_values": 146,
+    "tail_guards": 16,
+    "invalid_geometry_rejections": 2,
+    "allocations": 1,
+    "frees": 1,
+    "queues": 1,
+    "retired_queues": 1
+  },
+  "limits": [
+    "No console deployment or execution yet.",
+    "Execution requires independent review of the exact successful deployment receipt.",
+    "One fixed scratch/LDS-free kernel and geometry; broader G5 remains open."
+  ]
+}

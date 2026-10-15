@@ -18,6 +18,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+A fresh 74-object public HIP GPU-launch package at `4acfab2` passed Make,
+cached identity validation and independent package/kernel ISA review. It is frozen
+in `results/source-public-launch-current-console-v1` with deployment-only approval;
+see `evidence/offline-native-public-launch-current.json`. The pending native test
+requires two launches, 146 exact outputs, 16 guards, two rejected geometries and
+one fully retired allocation/queue. No GPU result is claimed before execution.
+
 - 2026-10-15 | G5 | cf9fafe | .40 | pass: native host graph and teardown | evidence/console40-public-host-graph.json | next: native public GPU qualification
 
 The source-built public host-graph fixture passed on .40 via WSL at `cf9fafe`:
