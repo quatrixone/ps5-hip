@@ -274,7 +274,7 @@ def convert_title(output, tool, fixture="bootstrap"):
                             "--stub", output / "libSceAgcDriver.so", "--file-name", "eboot.elf",
                             "--import-library", "libSceSystemService:sceShellCoreUtilExitApp:libSceShellCoreUtil"])
     run(output, "verify-sce-imports", [sys.executable, ROOT / "tests/public_hip_imports_test.py", converted,
-                                     *(["--no-gpu-imports"] if fixture in ("module", "fill") else [])])
+                                     *(["--no-gpu-imports"] if fixture in ("module", "fill", "copy") else [])])
     run(output, "sign", [tool, "self", "--sign", "--in", converted, "--out", signed])
     run(output, "extract", [tool, "self", "--extract", "--file", signed,
                             "--out", extracted])

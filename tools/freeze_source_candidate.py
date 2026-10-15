@@ -74,7 +74,7 @@ def main():
                                'Public HIP contiguous and pitched 2D/3D fills validate4096bytes across two changed-pattern rounds, reject16invalid requests, preserve guards and row/slice padding and finalize without GPU submission.' if fixture == 'fill' else
                                'Public HIP loads the owned AOT kernel and executes two changed-input dispatches, validates146values and16guards, rejects unsupported geometry, and finalizes with exact resource cleanup.' if fixture == 'launch' else
                                'Two independent public HIP modules load their owned AOT file, expose distinct functions, retain the surviving module after the other unloads, and finalize without queues or GPU work.' if fixture == 'module' else
-                               'Synchronous public HIP H2D/D2D/D2H copies preserve exact payload, guards and sources across two changed rounds, reject bounds violations without mutation, then cleanly retire.'),
+                               'Public HIP contiguous and rectangular 2D/3D D2D copies validate7168bytes across two changed rounds, reject16invalid requests, preserve source/guards/padding and retire without GPU submission.'),
                 'expected': 'Exact ' + fixture + ' transcript, one ordered title start/stop, equal two-row mount snapshots, healthy services.',
                 'reject': 'Any identity, log, mount, lifecycle, timeout, exception, or health failure; never retry automatically.',
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}

@@ -1,5 +1,4 @@
 #include "ps5-device.hpp"
-#include "ps5hip/agc_backend.h"
 #include "clr_gpu/watchdog.h"
 #include "native_runtime.h"
 #include "elevation.hpp"
@@ -21,11 +20,14 @@ namespace {
 ps5hip::clr::Observation observed;
 bool finalizer_installed = false;
 bool completed = false;
+std::atomic<unsigned> backend_requests{0};
 std::unique_ptr<ps5hip::SubmissionBackend> backend() {
-  return std::make_unique<ps5hip::AgcBackend>();
+  ++backend_requests;
+  return {};
 }
 void finalized() {
-  if (!completed || observed.terminal ||
+  if (!completed || observed.terminal || observed.uncertain || observed.launches || backend_requests ||
+      observed.allocations != 2 || observed.frees != 2 || observed.queues != 1 ||
       observed.allocations != observed.frees ||
       observed.queues != observed.retired_queues ||
       !observed.gate_destroyed) {
@@ -76,7 +78,7 @@ int main() {
       ps5hip_clr_gpu_fail("public-discovery");
     void* first = nullptr;
     void* second = nullptr;
-    constexpr size_t bytes = 289, guard = 16, payload = 257;
+    constexpr size_t bytes = 512, guard = 16, payload = 257;
     if (hipMalloc(&first, bytes) != hipSuccess || !first ||
         hipMalloc(&second, bytes) != hipSuccess || !second || first == second ||
         observed.allocations != 2 || observed.frees != 0)
@@ -113,17 +115,54 @@ int main() {
       if (hipMemcpy(output.data(), b, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
         ps5hip_clr_gpu_fail("rejected-copy-mutation");
       compared += bytes;
+      expected = seed;
+      for (size_t y = 0; y != 4; ++y)
+        for (size_t x = 0; x != 8; ++x) expected[5 + y * 24 + x] = input[3 + y * 16 + x];
+      if (hipMemcpy(b, seed.data(), bytes, hipMemcpyHostToDevice) != hipSuccess ||
+          hipMemcpy2D(b + 5, 24, a + 3, 16, 8, 4, hipMemcpyDeviceToDevice) != hipSuccess ||
+          hipMemcpy(output.data(), b, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
+        ps5hip_clr_gpu_fail("rectangular-2d-padding");
+      compared += bytes;
+      expected = seed;
+      for (size_t z = 0; z != 3; ++z)
+        for (size_t y = 0; y != 3; ++y)
+          for (size_t x = 0; x != 7; ++x)
+            expected[4 + 24 + z * 120 + y * 24 + x] = input[2 + 16 + z * 80 + y * 16 + x];
+      hipMemcpy3DParms region{};
+      region.srcPtr = make_hipPitchedPtr(a, 16, 12, 5);
+      region.dstPtr = make_hipPitchedPtr(b, 24, 20, 5);
+      region.srcPos = make_hipPos(2, 1, 0); region.dstPos = make_hipPos(4, 1, 0);
+      region.extent = make_hipExtent(7, 3, 3); region.kind = hipMemcpyDeviceToDevice;
+      if (hipMemcpy(b, seed.data(), bytes, hipMemcpyHostToDevice) != hipSuccess ||
+          hipMemcpy3DAsync(&region, nullptr) != hipSuccess || hipDeviceSynchronize() != hipSuccess ||
+          hipMemcpy(output.data(), b, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected)
+        ps5hip_clr_gpu_fail("rectangular-3d-padding");
+      compared += bytes;
+      region.srcPos.x = 10;
+      if (hipMemcpy3D(&region) != hipErrorInvalidValue ||
+          hipMemcpy2D(b + 500, 24, a, 16, 8, 4, hipMemcpyDeviceToDevice) != hipErrorInvalidValue ||
+          hipMemcpy2D(b, 24, a + 500, 16, 8, 4, hipMemcpyDeviceToDevice) != hipErrorInvalidValue ||
+          hipMemcpy2D(b + 1, 16, b, 16, 8, 2, hipMemcpyDeviceToDevice) != hipErrorUnknown)
+        ps5hip_clr_gpu_fail("rectangular-admission");
+      region.srcPos.x = 2; region.srcPtr.ysize = SIZE_MAX;
+      if (hipMemcpy3D(&region) != hipErrorInvalidValue) ps5hip_clr_gpu_fail("rectangular-overflow");
+      rejected += 5;
+      if (hipMemcpy(output.data(), b, bytes, hipMemcpyDeviceToHost) != hipSuccess || output != expected ||
+          hipMemcpy(source_after.data(), a, bytes, hipMemcpyDeviceToHost) != hipSuccess || source_after != input)
+        ps5hip_clr_gpu_fail("rejected-rectangular-mutation");
+      compared += 2 * bytes;
       for (size_t i = 0; i != bytes; ++i)
         if (input[i] != static_cast<unsigned char>((i * 17 + round * 43) ^ 0x59) ||
             seed[i] != static_cast<unsigned char>(i * 7 + round * 29 + 0xa5))
           ps5hip_clr_gpu_fail("host-source-mutation");
     }
-    if (compared != 1734 || rejected != 6 || hipFree(second) != hipSuccess ||
-        hipFree(first) != hipSuccess || observed.allocations != 2 || observed.frees != 2)
+    if (compared != 7168 || rejected != 16 || hipFree(second) != hipSuccess ||
+        hipFree(first) != hipSuccess || observed.allocations != 2 || observed.frees != 2 ||
+        observed.terminal || observed.uncertain || observed.launches || backend_requests)
       ps5hip_clr_gpu_fail("public-retire");
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-    std::puts("HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=1734 bounds_rejected=6 allocations=2 frees=2 watchdog_joined=true finalization=pending");
+    std::puts("HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=7168 bounds_rejected=16 rectangular=true padding=true gpu_execution=false allocations=2 frees=2 watchdog_joined=true finalization=pending");
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
     return 0;
   } catch (...) { ps5hip_clr_gpu_fail("exception"); }

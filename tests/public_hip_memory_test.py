@@ -19,7 +19,7 @@ class PublicMemoryTest(unittest.TestCase):
         self.assertEqual(check_log(COPY_EXPECTED, 'copy')['kernel'], 'public_hip_copy')
         for raw, fixture in ((EXPECTED, 'memory'), (MEMORY_EXPECTED, 'bootstrap'),
                              (COPY_EXPECTED, 'memory'), (MEMORY_EXPECTED, 'copy'),
-                             (COPY_EXPECTED.replace(b'compared_bytes=1734', b'compared_bytes=1733'), 'copy'),
+                             (COPY_EXPECTED.replace(b'compared_bytes=7168', b'compared_bytes=7167'), 'copy'),
                              (COPY_EXPECTED.replace(b'queues=1 retired=1', b'queues=1 retired=0'), 'copy'),
                              (MEMORY_EXPECTED.replace(b'frees=2', b'frees=1'), 'memory'),
                              (MEMORY_EXPECTED.replace(b'interior_rejected=true', b'interior_rejected=false'), 'memory'),

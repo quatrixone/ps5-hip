@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -169,6 +169,21 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'launch')
+
+    def test_copy_transcript_requires_rectangles_and_cleanup(self):
+        self.assertEqual(check_log(COPY_EXPECTED, 'copy')['kernel'], 'public_hip_copy')
+        lines = COPY_EXPECTED.splitlines(keepends=True)
+        invalid = [b''.join(lines[:i] + lines[i+1:]) for i in range(len(lines))]
+        invalid += [COPY_EXPECTED * 2, FILL_EXPECTED, COPY_EXPECTED + b'FAIL\n']
+        for before, after in ((b'rounds=2', b'rounds=1'), (b'compared_bytes=7168', b'compared_bytes=7167'),
+                              (b'bounds_rejected=16', b'bounds_rejected=0'),
+                              (b'rectangular=true', b'rectangular=false'), (b'padding=true', b'padding=false'),
+                              (b'gpu_execution=false', b'gpu_execution=true'), (b'frees=2', b'frees=1'),
+                              (b'retired=1', b'retired=0')):
+            invalid.append(COPY_EXPECTED.replace(before, after))
+        for raw in invalid:
+            with self.assertRaises(ValueError):
+                check_log(raw, 'copy')
 
     def test_fill_transcript_requires_exact_results_and_cleanup(self):
         result = check_log(FILL_EXPECTED, 'fill')

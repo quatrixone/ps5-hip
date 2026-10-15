@@ -21,7 +21,7 @@ MEMORY_LINES[6] = 'HIP_MEMORY FINAL allocations=2 frees=2 queues=0 retired=0 gat
 MEMORY_EXPECTED = ('\n'.join(MEMORY_LINES) + '\n').encode('ascii')
 COPY_LINES = list(LINES)
 COPY_LINES[0] = 'PS5HIP START target=gfx1013 kernel=public_hip_copy'
-COPY_LINES[2] = 'HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=1734 bounds_rejected=6 allocations=2 frees=2 watchdog_joined=true finalization=pending'
+COPY_LINES[2] = 'HIP_COPY PASS init=0 count=1 rounds=2 compared_bytes=7168 bounds_rejected=16 rectangular=true padding=true gpu_execution=false allocations=2 frees=2 watchdog_joined=true finalization=pending'
 COPY_LINES[6] = 'HIP_COPY FINAL allocations=2 frees=2 queues=1 retired=1 gate_destroyed=true application_fini=pending'
 COPY_EXPECTED = ('\n'.join(COPY_LINES) + '\n').encode('ascii')
 MODULE_LINES = list(LINES)

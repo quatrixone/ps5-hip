@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-rectangular-copy-fixture-pass",
+  "source_base": "6d59c06bedea99eb419d4fa74860e0997f8cf759",
+  "source_identity": "Link receipt and independent review bind changed fixture/profile inputs before commit.",
+  "native_objects": 74,
+  "host_tests_passed": 62,
+  "control_tests_passed": 19,
+  "package_sha256": "8e26b457ae3dd91fa0077eba78230bf4ed3ad99fa2ad6b0758c592ec8ca4ffba",
+  "fself_sha256": "43844423c88751c3b0fdebd5b225605d764697442bb3f79db029f329bed3f845",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "2f8cad7a6a65a0ad1bbd6b5830a4990c9026c0d715b2ae75eed0f49f7e5797ba",
+    "extracted_sha256": "d2f19d02a0951bca863428fb35f8f223ce54b7a72e4a9303cc17a8e0f5bf5228",
+    "omitted_note": {
+      "offset": 5426096,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500eafb0aed187594f7",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "43844423c88751c3b0fdebd5b225605d764697442bb3f79db029f329bed3f845",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-rect-fixture-v2/link-receipt.json": "746184b4eca432ebd6da746827c28c2ee50649e29e3aedd74d1e0a611d377e15",
+    "results/native-rect-fixture-review/review.json": "1146f537e29bbd4032599ad406852c7ada4a6663d4a0a1cf5147a6f9874becf6",
+    "results/native-rect-fixture-build-v2.log": "6a71f8e8dcc0f320ec6cbca56c0b5f520f8d18e04dab66fb631613b79497a69f",
+    "results/native-rect-fixture-revalidate.log": "6a71f8e8dcc0f320ec6cbca56c0b5f520f8d18e04dab66fb631613b79497a69f",
+    "results/native-rect-fixture-host-test-v2.log": "f2c90edba73c644aa5b1f905a5d7e7e93b5ab7257292b5f4dbcecb1b744f646e",
+    "results/native-rect-fixture-controls.log": "4399eee192fbf45ecc880b0138a8948b658c03da3ec12a37aaca6688faae3f7b"
+  },
+  "expected_console_contract": {
+    "rounds": 2,
+    "compared_bytes": 7168,
+    "rejected_requests": 16,
+    "allocations": 2,
+    "frees": 2,
+    "queues": 1,
+    "retired_queues": 1,
+    "gpu_execution": false
+  },
+  "accepted_scope": [
+    "Native fixture combines contiguous257byte payload copies with offset2D/differentpitch and async3D/nonzeroorigin/slicegap cases.",
+    "Full512byte readbacks verify changed payload, source and padding; invalid copies preserve output, including synchronous overlap error.",
+    "Backend creation denied and counted; exact ownership/terminal checks precede completion.",
+    "Strict transcript and freezer hypothesis match7168comparisons/16rejections.",
+    "Fresh Make and cachedverification pass; independent provenance/ISA/noGPUimports/signing/sixfilepackage audit passes."
+  ],
+  "preserved_failures": [
+    "results/native-rect-fixture-host-test.log",
+    "results/native-rect-fixture-build.log",
+    "build/public-hip-rect-fixture-v1"
+  ],
+  "limits": [
+    "Offline package only; no console rectangular-copy acceptance.",
+    "Async3D uses default stream followed by device synchronization; native cross-stream behavior not established.",
+    "No frozen operational candidate or deployment approval; recovery and baseline verification remain pending."
+  ],
+  "independent_review": {
+    "path": "results/native-rect-fixture-review/review.json",
+    "sha256": "1146f537e29bbd4032599ad406852c7ada4a6663d4a0a1cf5147a6f9874becf6",
+    "deployment_approved": false
+  }
+}

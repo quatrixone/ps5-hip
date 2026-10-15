@@ -18,6 +18,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The native copy fixture now covers contiguous and rectangular 2D/3D transfers:
+7,168 comparisons and 16 rejections over two changed rounds, with exact cleanup
+and no GPU imports. Fresh 74-object Make packaging, cached verification, 62 host
+tests, 19 control tests and independent artifact/oracle review pass. See
+`evidence/offline-native-rect-copy-fixture.json`. No console run is claimed;
+recovery, baseline verification and a newly frozen candidate remain required.
+
 A fresh native copy package now includes the rectangular-copy runtime at
 `61a1797`: Make compiled 74 objects, packaged and passed cached verification and
 independent artifact audit. See `evidence/offline-native-copy-rect-runtime.json`.
