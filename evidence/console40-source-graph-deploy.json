@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-source-graph-deployment-no-launch",
+  "source_commit": "cf9fafe60fe70c08ed429712cbed0cf40f038547",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "manifest_sha256": "d982a0426ec5dea45f63c7563b607145b1dfa4f501bf8a4f5ad0a394e32c6886",
+  "installed_package_sha256": "85bc98387b524e7898f15bcefd546cba7298bbe68be059cc585a6f8a3f7301c4",
+  "healthy_after": true,
+  "lock_released": true,
+  "launched": false,
+  "preserved_image": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-37decef81b2d32dace7662f0c003322a09da234275a92191628524a027a1e1b5.preserved",
+  "preserved_memory_log": "/data/ps5-hip/results/ps5-hip-public-memory.log.1425fabbd3a010b3be3bf3dc656c5c6fc1b39e4c4c8d9e4fe7491b82bf06791b.preserved",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/source-graph-rejoin-console-v1/deploy/receipt.json": "ad3f6c40ec36cce690d8a038b342bdfb63cb841947ca64f116de3d2a75910c31",
+    "results/source-graph-rejoin-console-v1/deploy/snapshot.log": "6353f5ecba4bfe501509346a6a3872baa3f736e4ae3fb6437088c4141ab175c0",
+    "results/source-graph-rejoin-console-v1/deploy/post_snapshot.log": "586b5ded393ba7fb9be30992894199a675b09f0e4727e785052fa7f3354e68ff",
+    "results/source-graph-rejoin-console-v1/deploy/release.log": "6adc088f0208e18994e35da59a44c9391f8a0b5d86fc5aad7f5027e15403ae17",
+    "results/source-graph-rejoin-console-v1/deployment-review.json": "1f40ab0a7b8ef7c76ab83f1dd99ae0e5e327d7207a4a26f1aa5d9e81befd2d9b"
+  },
+  "accepted_scope": [
+    "Full baseline, temporary upload, promoted image and all six mounted files verified.",
+    "Old image and memory log preserved and reverified after settling.",
+    "Post-deployment snapshot and service health pass; owned lock released."
+  ],
+  "limits": [
+    "No application launch or native graph acceptance in this phase.",
+    "Deployment phase is consumed and must not be replayed.",
+    "Execution requires independent review bound to this exact deployment receipt."
+  ],
+  "independent_review": {
+    "path": "results/source-graph-rejoin-console-v1/execution-authorization.json",
+    "sha256": "2d95a616e5908162cd0127b5b67cc0442890250b0ff32466b18e1ba5849216e2",
+    "execution_authorized": true
+  }
+}

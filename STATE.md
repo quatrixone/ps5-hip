@@ -11,6 +11,13 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The reviewed graph candidate at `cf9fafe` is now installed on .40. Deployment
+passed full image/mounted-file verification, preservation checks, snapshots,
+service health and owned-lock release. See `evidence/console40-source-graph-deploy.json`.
+The deployment phase under `results/source-graph-rejoin-console-v1` is consumed;
+do not rerun it. No title launch occurred. Execution is the next phase after
+independent review of this exact deployment receipt.
+
 Descendant event rejoins now preserve the capture parent tree, fixing a reproduced
 EndCapture stack overflow. Fresh source qualification covers 24 canceled rejoins,
 invalidated/invalid-flag wait admission, three rejected cross-session merges and
