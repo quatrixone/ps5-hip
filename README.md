@@ -42,6 +42,15 @@ The repository is private.
 
 ## Start here
 
+For a fresh WSL/Linux checkout, install Python 3, GNU Make, CMake, Ninja,
+LLVM/LLD 18.1.8 and .NET SDK 10.0.112, then run `make deps-build` to fetch and
+build the locked public dependencies. `make host-test` runs the host suite and
+`make native-core` cross-compiles the core library. The upstream ProsperoEden
+and ps5-homebrew-dev-protocol inputs are snapshots of their public `main`
+branches; their hashes make a build repeatable, not dependent on unpublished
+side branches. The 74-object public HIP bootstrap package still lacks a clean
+source-only build target; see the [rebuild status](docs/SOURCE_ONLY_REBUILD.md).
+
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): architecture, twelve goals,
   acceptance gates, performance targets, risks and the first implementation tasks.
 - [Research baseline](docs/RESEARCH_BASELINE.md): source revisions, established

@@ -1,6 +1,7 @@
 {
   "source_url": "https://github.com/blackbearreloaded/ps5-homebrew-dev-protocol",
-  "revision": "ed775bdf67ec3861f2e6c78360a6ec58508f2c22",
+  "revision": "412c73659c0f230987bd245b727972a377fe19e3",
+  "source_ref": "main",
   "license": "GPL-3.0-or-later",
   "controllers": ["launch", "close"]
 }

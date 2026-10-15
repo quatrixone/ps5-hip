@@ -28,15 +28,18 @@ remains authoritative for locking, declared services, bounded runs and teardown.
 python3 tools/build_controllers.py --protocol-source /path/to/ps5-homebrew-dev-protocol
 ```
 
-`controller-inputs.json` pins the shared protocol at
-`ed775bdf67ec3861f2e6c78360a6ec58508f2c22`. The build exports just the committed
+`controller-inputs.json` locks the public `main` snapshot of the shared protocol.
+Run `make deps-build` to fetch and build it. The build exports just the committed
 launch/close sources and license into ignored dependencies, then compiles them with
 the same pinned SDK and LLVM 18 used for the title. It records source and output
 hashes under `build/controllers/<title-id>/receipt.json`. There is no network or
 send operation in this tool. These ELF payloads are controllers, not title eboots.
 
 The launch controller initializes the user service, obtains the foreground user,
-requests exactly the configured title, reports the native result and terminates the service.
+requests exactly the configured title and terminates the service. The current
+upstream `main` controller produces no output; it returns a success/failure exit
+status. Historical execution controls that parse a printed launch result must
+be revised and independently reviewed before use.
 The close controller compares the running application's title before closing it;
 its fallback obtains an application ID specifically for that title. It never
 closes a guessed process ID. Host mocks compile the actual exported sources and
@@ -49,8 +52,10 @@ run must capture its result and title-specific lifecycle evidence independently.
 ## Captured application results
 
 The harness now uses the Eden client and a bundled, exact-title Lapy owned-root
-helper. It requires successful filesystem elevation; it does not fall back to
-`/download0`. Stage with `--results-dir /chosen/results` to write that absolute
+helper. The current Eden `main` client first attempts a resident Lapy service
+through `/download0`, then falls back to the bundled helper if that service is
+unavailable. It does not require `/download0` for result storage. Stage with
+`--results-dir /chosen/results` to write that absolute
 directory into `results-dir.txt`. No console path is hardcoded in the executable.
 The chosen directory must exist and be writable before launch. The harness uses
 exclusive creation of its exact result filename and never deletes an earlier log.

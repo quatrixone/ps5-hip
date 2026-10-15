@@ -51,6 +51,7 @@ def main():
         shutil.copyfile(args.release_archive, archive)
     subprocess.run(["bash", str(exports / "platform/tools/setup-sdk.sh"), str(deps / "sdk"),
                     sdk["revision"], str(cache)], env=env, check=True)
+    (deps / "sdk/.ps5-sdk-revision").touch()
     print("Prepared pinned SDK at", deps / "sdk")
 
 

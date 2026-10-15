@@ -7,6 +7,12 @@ or recreate the October 14 deployment receipt. Read `../AGENTS.md`,
 
 ## Current answer
 
+`make deps-build` now fetches and verifies external source and archives, then
+builds the SDK, zlib, UFS2Tool, bundled Lapy helper, and controllers.
+`make host-test` runs host tests; `make native-core` cross-compiles the core.
+ProsperoEden and ps5-homebrew-dev-protocol are locked snapshots of public
+`main`, so their old local-only commits and dedicated branches are not required.
+
 The private GitHub branches contain the source and build scripts, but **they do
 not yet provide an end-to-end, tested, source-only rebuild of the exact
 PPSA99014 public HIP bootstrap image**. The final build scripts consume several
@@ -29,7 +35,7 @@ image, treat it as a new deployment candidate with fresh review and controls.
 In WSL/Linux, with access to the private repository:
 
 ```sh
-git clone --branch development/offline-bringup \
+git clone --branch main \
   git@github.com:blackbearreloaded/ps5-hip.git ps5-hip
 cd ps5-hip
 git clone --branch development/g5-hip-native-link \
@@ -58,10 +64,17 @@ Install and verify LLVM/LLD **18.1.8** (`clang-18`, `ld.lld-18`,
 `llvm-config-18`, `llvm-readelf-18`, `llvm-objdump-18`), Python 3, CMake,
 Ninja, `patch`, and .NET SDK **10.0.112** in WSL/Linux. The native tools and
 SDK inputs are fetched from their pinned public Git repositories, rather than
-from the installed console or a proprietary SDK. The UFS2 builder currently
-requires its NuGet dependencies already cached; its restore uses an empty local
-feed. Record how a clean machine obtains and verifies that cache before calling
-the build fully reproducible.
+from the installed console or a proprietary SDK. UFS2Tool restores with the
+committed NuGet package lock in locked mode. Run:
+
+```sh
+make deps-build
+make host-test
+make native-core
+```
+
+The commands below describe individual preparers; the Makefile passes their
+locked source and archive paths automatically.
 
 Fetch the PS5 PayloadSDK fork at commit
 `95c08f27386fc698f6bbe21dde3030140a41d10b`, and the v0.42 release

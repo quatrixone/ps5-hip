@@ -8,6 +8,13 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 the exact bootstrap package is not yet reproducible end-to-end from a clean
 clone, and historical D evidence cannot be built from source.
 
+The root `Makefile` now fetches locked public inputs and builds the SDK,
+zlib, UFS2Tool, Lapy helper, controllers, host suite, and native core. The
+ProsperoEden and protocol locks refer to their public `main` snapshots; old
+local-only commits are no longer build prerequisites. The protocol launch
+controller now returns a status without printing a result, so the historical
+one-use E control remains inert pending revised lifecycle checks and review.
+
 ## What is done
 
 - G1 passed offline; G2 passed its named arithmetic fixture. G3 has substantial
@@ -51,7 +58,7 @@ about the full roadmap rather than a formal gate metric. G5–G12 are open.
 
 | Work | Branch / frozen HEAD | Local checkout | Status |
 | --- | --- | --- | --- |
-| Integrated baseline | `development/offline-bringup` / current remote HEAD | repository root | Documentation handoff published to the private GitHub remote. |
+| Integrated baseline | `main` and `development/offline-bringup` / current remote HEAD | repository root | Source and dependency build foundation published to the private GitHub remote. |
 | Public HIP bootstrap D/E | `development/g5-hip-native-link` / `3ac8385` | `.local/g5-hip-native-link` | D consumed and independently cleared; E inert. |
 | Public HIP memory title | `development/g5-native-public-memory` / `1f969f6` | `.local/g5-native-public-memory` | Reviewed offline; no native run. |
 | Draft memory controls | `development/g5-native-public-memory-controls` / `1f969f6` | `.local/g5-native-public-memory-controls` | Untracked draft controls only; inspect before relying on them. |
