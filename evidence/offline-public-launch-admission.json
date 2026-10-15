@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-public-launch-model-pass-console-not-run",
+  "source_base": "89a5cb1b7db81f0b5e8007d2822406fc1d34bcf2",
+  "source_identity": "Base commit predates uncommitted implementation; exact inputs, prepared sources, included headers and tools are bound in the raw receipt.",
+  "base_translation_units": 69,
+  "alternate_launch_harness_units": 1,
+  "included_files": 683,
+  "host_tests_passed": 62,
+  "base_sanitizer_modes": [
+    "normal",
+    "default",
+    "tls",
+    "init-fail",
+    "create-fail",
+    "join-fail",
+    "self-destroy",
+    "reset",
+    "reset-join-fail",
+    "memory",
+    "module",
+    "module-unbundler"
+  ],
+  "launch_cases": [
+    "normal",
+    "noop-output-rejected",
+    "corrupt-output-rejected"
+  ],
+  "model_sha256": "3794b95289d23c95fc288828eb231fb6bdb0895775e4fd47b8dddf3e1c547e9a",
+  "code_object_sha256": "e128e5b47b5ad10b0032675ed311aa6e3ade58df74b3a0135c71ea987bf52f1e",
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-launch-source-v4/receipt.json": "1b7300f1d6bd44889e5ea88adc3a2860706e5cfb5966decdbe3f122b198a2665",
+    "results/public-launch-source-v4.log": "aeeab2f692deba6188667ab2b1153a5fa68aad7cad2431a1d6fefe443c5c3239",
+    "results/public-launch-source-v4/launch-normal.json": "31ab56c74164ef0042c3ff68ae151f7136a274b32b957c1444dd0ccd938b0cce",
+    "results/public-launch-source-v4/launch-normal.stdout": "39857d3731420c98caf78a9412403fdf6d966c39dc3e2b16d148618eaee107da",
+    "results/public-launch-source-v4/launch-noop.json": "8be71afe1a3266e5c24005df8279a1369723b1d1a856e611b5692335f3fdf897",
+    "results/public-launch-source-v4/launch-noop.stderr": "68f6e52ebbba79de5635334d5767b03e2703bf6e2f3b069ddc9bc109d3de19b5",
+    "results/public-launch-source-v4/launch-corrupt.json": "2a3e49ceff8969e856fb577c9decb68e6f94e6fe2edfda1fe3aef0369d26f1eb",
+    "results/public-launch-source-v4/launch-corrupt.stderr": "68f6e52ebbba79de5635334d5767b03e2703bf6e2f3b069ddc9bc109d3de19b5",
+    "results/public-launch-host-tests.log": "ce744235e577cc0dd263cae61849d422d7a0fad509151c61409b6d8ad4fdf514",
+    "results/public-launch-native-compile-v1/independent-review.json": "58b7c73423e55823b55ef9f76126d88db4eb809cc0968d3410e8cac05e34162b",
+    "results/public-launch-host-tests-final.log": "57fce26dbc434b8885f2e08e715cbfde4adbf1305060cc858ebb87a7a6522267"
+  },
+  "normal_acceptance": {
+    "active_values": 73,
+    "tail_guards": 8,
+    "captured_arguments_after_caller_mutation": true,
+    "allocations": 1,
+    "frees": 1,
+    "launches": 1,
+    "queues": 2,
+    "retired_queues": 2,
+    "gate_destroyed": true
+  },
+  "admission": [
+    "Initial adapter advertises maximum64 workitems and Wave32, with64x1x1 blocks and one-dimensional grid admission.",
+    "Reject shared memory before size_t narrowing in extended APIs.",
+    "Reject packed extra arguments and null argument elements before copying.",
+    "Reject unqualified kernel capture/graph routes; validate host-launch stream before capture access.",
+    "Invalid launch requests submit no work and valid subsequent launch still succeeds."
+  ],
+  "limits": [
+    "Providers and packet transport are modeled; no GPU/native public launch execution.",
+    "Negative controls abort at output mismatch and establish oracle sensitivity, not cleanup.",
+    "PS5 native evidence covers two translation units, not a new linked package.",
+    "Console .40 remains on recovery hold.",
+    "Broader geometry, LDS, graphs, libraries and framework roadmap remains open."
+  ],
+  "preserved_attempts": [
+    "v1/v2 intentionally terminated after compile preflight or independent review findings.",
+    "v3 passed12base modes but runner used wrong fixture path; corrected-path diagnostic passed, without final receipt. Fresh v4 supersedes it."
+  ],
+  "independent_review": {
+    "verdict": "pass-offline-public-launch",
+    "path": "results/public-launch-source-v4/independent-review.json",
+    "sha256": "929765066ce4be6a9e5c7c1f7658656f3567590648b8d5469bffbee58e1d1151",
+    "console_deployment_approved": false
+  }
+}

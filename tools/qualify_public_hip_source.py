@@ -35,7 +35,8 @@ def main():
                           'version': subprocess.check_output([path, '--version'], text=True)}
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
-                 'tests/clr_adapter_model.cpp', 'tools/build_canaries.py', 'kernels/canary.hip'):
+                 'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp', 'kernels/thread_words.hip',
+                 'tools/build_canaries.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
     flags = [str(p) for p in compiler_flags(source)[1:]]
@@ -57,7 +58,7 @@ def main():
     header_hashes = {}
     header_lock = threading.Lock()
 
-    def run(label, argv, env=None):
+    def run(label, argv, env=None, expected_output_failure=False):
         command = [str(p) for p in argv]
         try:
             process = subprocess.run(command, cwd=ROOT, capture_output=True,
@@ -76,7 +77,10 @@ def main():
             record['sanitizer_environment'] = {key: env.get(key) for key in ('ASAN_OPTIONS', 'UBSAN_OPTIONS')}
             record['runtime_environment'] = {'HIP_USE_RUNTIME_UNBUNDLER': env['HIP_USE_RUNTIME_UNBUNDLER']}
         (output / (label + '.json')).write_text(json.dumps(record, indent=2) + '\n')
-        if process.returncode:
+        if expected_output_failure:
+            if process.returncode != -6 or 'PUBLIC_LAUNCH_OUTPUT_MISMATCH index=0' not in process.stderr:
+                raise RuntimeError('negative control did not fail the output oracle: ' + label)
+        elif process.returncode:
             raise RuntimeError(label + ': ' + process.stderr[-2500:])
         return process.stdout
 
@@ -132,6 +136,32 @@ def main():
         elif any(line.startswith('HIP_PUBLIC_FINAL ') for line in lines):
             raise RuntimeError('unexpected finalizer after initialization failure')
         print(mode + ' PASS', flush=True)
+    # Reuse the freshly built runtime, replacing only the model's main object.
+    launch_source = ROOT / 'tests/public_hip_launch_model.cpp'
+    source_hashes[str(launch_source.relative_to(ROOT))] = sha(launch_source)
+    launch_object = compile_one((len(units), launch_source))
+    launch_objects = [launch_object if unit.name == 'hip_admission_model.cpp' else obj
+                      for unit, obj in zip(units, objects)]
+    run('launch-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *launch_objects, '-o', output / 'launch-model'])
+    run('launch-code-object', [sys.executable, ROOT / 'tools/build_canaries.py',
+        '--fixture', 'thread_words', '--output', output / 'launch-canaries'])
+    launch_code = output / 'launch-canaries/gfx1013/thread_words/thread_words.hsaco'
+    launch_code_hash = sha(launch_code)
+    env = dict(os.environ, ASAN_OPTIONS='protect_shadow_gap=0:halt_on_error=1:detect_leaks=1',
+               UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1', HIP_USE_RUNTIME_UNBUNDLER='0')
+    result = run('launch-normal', [output / 'launch-model', launch_code, 'normal'], env)
+    if result.splitlines() != [
+        'PUBLIC_LAUNCH_PASS values=73 guards=8 captured_args=true gpu_execution=false',
+        'PUBLIC_LAUNCH_FINAL ownership=clean gpu_execution=false']:
+        raise RuntimeError('public launch output/lifetime contract differs')
+    for negative in ('noop', 'corrupt'):
+        run('launch-' + negative, [output / 'launch-model', launch_code, negative], env,
+            expected_output_failure=True)
+    if sha(launch_code) != launch_code_hash:
+        raise RuntimeError('launch fixture changed during qualification')
+    print('public launch and both output negative controls PASS', flush=True)
     for name, expected in {**inputs, **source_hashes}.items():
         if sha(ROOT / name) != expected:
             raise RuntimeError('input changed during qualification: ' + name)
@@ -148,6 +178,9 @@ def main():
                'included_files': header_hashes, 'toolchain': toolchain,
                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                'module_fixture_sha256': code_hash,
+               'launch_model_sha256': sha(output / 'launch-model'),
+               'launch_fixture_sha256': launch_code_hash,
+               'launch_cases': ['normal', 'noop-output-rejected', 'corrupt-output-rejected'],
                'wrong_target_fixture_sha256': wrong_target_hash,
                'leak_detection_disabled_modes': ['join-fail', 'self-destroy', 'reset-join-fail'],
                'gpu_executed': False, 'native_executed': False,

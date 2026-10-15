@@ -145,6 +145,20 @@ remain required; these commands are deliberately outside the Make build.
 
 For full public HIP host-runtime qualification, run
 `make public-hip-host-test QUALIFICATION_DIR=results/public-hip-host-v1`.
+
+The qualifier also links a separate public launch client against the same freshly
+compiled runtime. It builds `kernels/thread_words.hip` for gfx1013, tests rejected
+launch/capture/graph requests before submission, then checks 73 exact outputs,
+eight guards, argument capture after caller mutation, and final resource ownership.
+Two negative controls simulate missing and incorrect computation; each must fail
+at the output oracle. Providers and packet execution are modeled, so passing this
+case is not evidence of GPU execution on a PS5.
+
+The current public adapter admits 64x1x1 blocks, one-dimensional grids and no
+shared memory. Packed launch buffers and kernel graph/capture routes return an
+explicit unsupported error pending their implementation and qualification. These
+limits describe this public adapter stage; broader geometry, LDS, graphs and
+framework support remain in the roadmap.
 Use a new results directory for each run. This builds 69 genuine HIP/ROCclr and
 adapter translation units from the pinned sources, with ASan/UBSan, then runs
 twelve separate initialization, thread-lifetime, shutdown, allocation and module cases.

@@ -1,0 +1,1 @@
+extern "C" __attribute__((global)) void thread_words(unsigned* output,unsigned count,unsigned salt){const unsigned i=__builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x();if(i<count)output[i]=i*17u+salt;}

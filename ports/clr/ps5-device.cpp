@@ -213,6 +213,12 @@ public:
         // Bounded device-buffer policy, not a claim about total physical memory.
         info_.maxMemAllocSize_=64u*1024u*1024u;info_.memBaseAddrAlign_=0x10000;
         info_.maxPhysicalMemAllocSize_=0;
+        // Initial public adapter route: one-dimensional blocks of 64, Wave32.
+        // These are admission limits, not the console's full hardware limits.
+        info_.maxWorkGroupSize_=64;info_.maxWorkItemDimensions_=3;
+        info_.maxWorkItemSizes_[0]=64;info_.maxWorkItemSizes_[1]=1;info_.maxWorkItemSizes_[2]=1;
+        info_.wavefrontWidth_=32;info_.localMemSizePerCU_=0;
+
         const auto* isa=amd::Isa::findIsa("amdgcn-amd-amdhsa--gfx1013");
         if(!factory||!isa||!amd::Device::create(*isa))throw ObjectError("PS5 CLR device creation");
         state_->retained=state_;

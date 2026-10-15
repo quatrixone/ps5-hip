@@ -11,6 +11,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+Public HIP launch admission now passes the fresh source sanitizer model: all twelve
+base modes plus a separate launch harness, 73 exact modeled outputs, eight guards,
+argument capture after caller mutation, and clean ownership. Missing/corrupt
+computation negative controls fail the output oracle. Unsupported geometry, shared
+memory, packed arguments and kernel capture/graphs fail before submission.
+All 62 host tests and two PS5-targeted native translation-unit compiles passed.
+See `evidence/offline-public-launch-admission.json`. This uses modeled providers
+and transport; no public GPU launch on .40 or new native package is claimed.
+
 The native public HIP module fixture now builds with `make public-hip-module-package`:
 74 fresh native objects, a seven-file package with the compiled AOT canary,
 validated imports and FSELF/package roundtrips. All 62 host tests pass.
@@ -1299,6 +1308,8 @@ including the provider-fixed store and vector candidates.
 `evidence/offline-controllers.json` records controller hashes and host validation.
 
 ## Milestones
+
+- 2026-10-15 | G5 | main | public launch admission and fresh sanitizer launch/output/ownership qualification | evidence/offline-public-launch-admission.json | next: native public launch package and .40 recovery
 
 - 2026-10-15 | G5 | main | source-built 74-object module package, 62 host tests, loader-only import controls | evidence/offline-source-public-module.json | next: .40 recovery and public launch implementation
 

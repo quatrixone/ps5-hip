@@ -16,6 +16,24 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Current implementation checkpoint
+
+The public launch admission candidate passed fresh qualification in
+`/home/denis/ps5-hip-module-package/results/public-launch-source-v4`.
+Session9627 finished successfully. The69-unit base model and alternate launch
+harness passed12base modes, exact73values/8guards, captured arguments, clean
+ownership, and both output negative controls. See
+`evidence/offline-public-launch-admission.json` for receipt and review identities.
+Earlier v1/v2 were deliberately stopped for fixes; v3 had a runner path error.
+Their records remain preserved; v4 is the fresh acceptance attempt.
+
+The next native fixture draft is `results/public-launch-console-draft.cpp` in that
+worktree. Its PS5 object compile passed and source review found no blocker. It is
+not integrated, packaged or console-tested. It loads thread_words, performs two
+changed-input/salt public HIP dispatches, checks146values/16tailguards and exact
+resource cleanup. Integrate it as the next package milestone. The existing .40
+recovery hold below still applies; no console action was taken for this milestone.
+
 ## What is done
 
 The public HIP loader now admits bounded owned raw AOT files, validates the copy

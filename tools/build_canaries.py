@@ -61,7 +61,7 @@ def require_device_linker(trace, expected):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=pathlib.Path, default=ROOT / "build/canaries")
-    parser.add_argument("--fixture", choices=("canary", "resources"), default="canary")
+    parser.add_argument("--fixture", choices=("canary", "resources", "thread_words"), default="canary")
     args = parser.parse_args()
     commands = {name: shutil.which(name) for name in
                 ("clang++-18", "ld.lld-18", "llvm-readobj-18", "llvm-objdump-18")}
@@ -95,7 +95,8 @@ def main():
             "--file-headers", "--program-headers", "--sections", "--symbols", "--relocations",
             "--notes", str(code)])
         (directory / "readobj.txt").write_text(inspection)
-        expected = ({"indexed_store", "vector_add"} if args.fixture == "canary" else
+        expected = ({"thread_words"} if args.fixture == "thread_words" else
+                    {"indexed_store", "vector_add"} if args.fixture == "canary" else
                     {"reduce_serial", "reduce_lds", "atomic_count", "private_array", "private_explicit", "register_spill"})
         actual = set(re.findall(r"^\s+\.name:\s+(\w+)\s*$", inspection, re.MULTILINE))
         if actual != expected:

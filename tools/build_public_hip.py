@@ -57,7 +57,7 @@ def build_inputs():
              "tools/public_hip_memory_console_title.cpp", "tools/prepare_public_hip_memory.py",
              "tools/public_hip_copy_console_title.cpp", "tools/prepare_public_hip_copy.py",
              "tools/prepare_public_hip_module.py", "tools/prepare_public_hip_symbols.py",
-             "tools/prepare_public_hip_aot.py", "tools/public_hip_module_console_title.cpp",
+             "tools/prepare_public_hip_aot.py", "tools/prepare_public_hip_launch.py", "tools/public_hip_module_console_title.cpp",
              "tools/build_canaries.py", "kernels/canary.hip"}
     for folder in ("src", "include", "ports/clr", "ports/hip", "tools/clr_gpu"):
         names.update(path.relative_to(ROOT).as_posix() for path in (ROOT / folder).rglob("*")
@@ -111,6 +111,7 @@ def source_tree(output, fixture="bootstrap"):
         run(output, "prepare-memory", [sys.executable, ROOT / "tools/prepare_public_hip_memory.py", public])
     elif fixture in ("copy", "module"):
         run(output, "prepare-copy", [sys.executable, ROOT / "tools/prepare_public_hip_copy.py", public])
+    run(output, "prepare-launch", [sys.executable, ROOT / "tools/prepare_public_hip_launch.py", public])
     return public
 
 

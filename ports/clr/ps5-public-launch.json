@@ -1,0 +1,13 @@
+{
+  "patch_sha256": "7281674bcbe72d9f5b62288902607d0c49664644a0da7d7aecfcc4c37c089f10",
+  "files": {
+    "hipamd/src/hip_module.cpp": {
+      "before": "b82f767028fc45576e3ed932dc3c3fa7d28c9b78c958d4d506ed17b2980aa6d7",
+      "after": "6e317a9b526a405ade61b9401c8bf974fcd88bd24ecccb37d530a130be847a9d"
+    },
+    "hipamd/src/hip_graph_internal.hpp": {
+      "before": "d9209a4d961a3d899ebc406bc206857cec87158feaf35ecc5f196856d90a5264",
+      "after": "0aa801d40a8bf0306f29c1c46fefb862285f5892a4b12a44e0d03d1001b654ab"
+    }
+  }
+}

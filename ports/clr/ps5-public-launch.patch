@@ -1,0 +1,143 @@
+--- a/hipamd/src/hip_module.cpp
++++ b/hipamd/src/hip_module.cpp
+@@ -220,6 +220,19 @@
+     return hipErrorInvalidConfiguration;
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  // Reject unsupported public adapter geometry before argument capture/enqueue.
++  // In particular, do not let an asynchronous route rejection poison the device.
++  if (blockDimX != 64 || blockDimY != 1 || blockDimZ != 1 ||
++      globalWorkSizeY != 1 || globalWorkSizeZ != 1 || globalWorkSizeX % 64 != 0 ||
++      sharedMemBytes != 0) {
++    return hipErrorInvalidValue;
++  }
++#endif
++
++#if defined(WITH_PS5_DEVICE)
++  if (extra != nullptr) return hipErrorNotSupported;
++#endif
+   const amd::Device* device = g_devices[deviceId]->devices()[0];
+   const auto& info = device->info();
+   if (sharedMemBytes > info.localMemSizePerCU_) { //sharedMemPerBlock
+@@ -236,6 +249,11 @@
+     LogPrintfError("%s","At least one of kernelParams or extra Params should be provided");
+     return hipErrorInvalidValue;
+   }
++#if defined(WITH_PS5_DEVICE)
++  for (size_t i = 0; i < signature.numParameters(); ++i) {
++    if (kernelParams[i] == nullptr) return hipErrorInvalidValue;
++  }
++#endif
+   if (!kernel->getDeviceKernel(*device)) {
+     return hipErrorInvalidDevice;
+   }
+@@ -438,6 +456,11 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  hip::getStreamPerThread(hStream);
++  if (hStream != nullptr && reinterpret_cast<hip::Stream*>(hStream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipModuleLaunchKernel, hStream, f, gridDimX, gridDimY, gridDimZ, blockDimX,
+                  blockDimY, blockDimZ, sharedMemBytes, kernelParams, extra);
+   if (gridDimX > std::numeric_limits<int32_t>::max() ||
+@@ -463,6 +486,10 @@
+                                     uint32_t localWorkSizeZ, size_t sharedMemBytes,
+                                     hipStream_t hStream, void** kernelParams, void** extra,
+                                     hipEvent_t startEvent, hipEvent_t stopEvent, uint32_t flags) {
++#if defined(WITH_PS5_DEVICE)
++  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++#endif
++
+   HIP_INIT_API(hipExtModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
+                localWorkSizeX, localWorkSizeY, localWorkSizeZ, sharedMemBytes, hStream,
+                kernelParams, extra, startEvent, stopEvent, flags);
+@@ -471,6 +498,11 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  hip::getStreamPerThread(hStream);
++  if (hStream != nullptr && reinterpret_cast<hip::Stream*>(hStream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipExtModuleLaunchKernel, hStream, f, globalWorkSizeX, globalWorkSizeY,
+                  globalWorkSizeZ, localWorkSizeX, localWorkSizeY, localWorkSizeZ, sharedMemBytes,
+                  kernelParams, extra, startEvent, stopEvent, flags);
+@@ -486,10 +518,20 @@
+                                     uint32_t blockDimX, uint32_t blockDimY, uint32_t blockDimZ,
+                                     size_t sharedMemBytes, hipStream_t hStream, void** kernelParams,
+                                     void** extra, hipEvent_t startEvent, hipEvent_t stopEvent) {
++#if defined(WITH_PS5_DEVICE)
++  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++#endif
++
+   HIP_INIT_API(hipHccModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
+                blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams, extra,
+                startEvent, stopEvent);
+ 
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(hStream)) return hipErrorInvalidValue;
++  hip::getStreamPerThread(hStream);
++  if (hStream != nullptr && reinterpret_cast<hip::Stream*>(hStream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   HIP_RETURN(ihipModuleLaunchKernel(f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ, blockDimX,
+                                     blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams,
+                                     extra, startEvent, stopEvent));
+@@ -667,6 +709,16 @@
+ hipError_t hipLaunchKernel_common(const void* hostFunction, dim3 gridDim, dim3 blockDim,
+                                              void** args, size_t sharedMemBytes,
+                                              hipStream_t stream) {
++#if defined(WITH_PS5_DEVICE)
++  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++#endif
++
++#if defined(WITH_PS5_DEVICE)
++  if (!hip::isValid(stream)) return hipErrorInvalidValue;
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipLaunchKernel, stream, hostFunction, gridDim, blockDim, args, sharedMemBytes);
+   return ihipLaunchKernel(hostFunction, gridDim, blockDim, args, sharedMemBytes, stream, nullptr,
+                           nullptr, 0);
+@@ -688,6 +740,10 @@
+ hipError_t hipExtLaunchKernel(const void* hostFunction, dim3 gridDim, dim3 blockDim,
+                                          void** args, size_t sharedMemBytes, hipStream_t stream,
+                                          hipEvent_t startEvent, hipEvent_t stopEvent, int flags) {
++#if defined(WITH_PS5_DEVICE)
++  if (sharedMemBytes != 0) return hipErrorInvalidValue;
++#endif
++
+   HIP_INIT_API(hipExtLaunchKernel, hostFunction, gridDim, blockDim, args, sharedMemBytes,
+                stream, startEvent, stopEvent, flags);
+ 
+@@ -695,6 +751,11 @@
+     HIP_RETURN(hipErrorInvalidValue);
+   }
+ 
++#if defined(WITH_PS5_DEVICE)
++  hip::getStreamPerThread(stream);
++  if (stream != nullptr && reinterpret_cast<hip::Stream*>(stream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
++    return hipErrorNotSupported;
++#endif
+   STREAM_CAPTURE(hipExtLaunchKernel, stream, hostFunction, gridDim, blockDim, args, sharedMemBytes,
+                  startEvent, stopEvent, flags);
+   HIP_RETURN(ihipLaunchKernel(hostFunction, gridDim, blockDim, args, sharedMemBytes, stream,
+--- a/hipamd/src/hip_graph_internal.hpp
++++ b/hipamd/src/hip_graph_internal.hpp
+@@ -1193,6 +1193,10 @@
+ 
+   static hipError_t validateKernelParams(const hipKernelNodeParams* pNodeParams,
+                                          hipFunction_t* ptrFunc = nullptr, int devId = -1) {
++#if defined(WITH_PS5_DEVICE)
++    // Kernel graph admission needs independent argument/extent/lifetime qualification.
++    return hipErrorNotSupported;
++#endif
+     devId = devId == -1 ? ihipGetDevice() : devId;
+     hipFunction_t func = getFunc(*pNodeParams, devId);
+     if (!func) {
