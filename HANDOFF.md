@@ -18,6 +18,12 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+Replacement package `build/public-hip-fill-retirement-v1` now passes fresh Make
+build and cached verification at `be2f0b1`, with independent offline audit. See
+`evidence/offline-native-fill-retirement.json` for hashes. It retains the contiguous
+fixture contract and is not yet frozen or approved for deployment. Historical
+frozen candidates remain held; recovery and baseline verification are pending.
+
 `results/public-pitched-fill-source-v1` passed the fresh source qualifier with
 74 compilations: 69 base, three client harnesses and two injected allocation-failure
 memory units. The pitched case checks 2D row padding, 3D slice gaps, equal pitch

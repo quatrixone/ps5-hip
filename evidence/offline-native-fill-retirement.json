@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-replacement-native-fill-package-pass",
+  "source_commit": "be2f0b179d1cee3b4cb8696e88d1822e1ea3f425",
+  "native_objects": 74,
+  "package_sha256": "02f0057573485daefbee219ed69f787b631cdc75e29d8710425036c840e2dbd5",
+  "fself_sha256": "c7be667299764952278bac381316cd8f6842a07498d064118bc0930dce5087d0",
+  "fself_roundtrip": {
+    "matches_converted_elf": false,
+    "matches_except_unmapped_sie_note": true,
+    "elf_sha256": "478f391261e08a5f93244eecdcbf1b3f626ed1c33c3a2598e1a6104958e9dfad",
+    "extracted_sha256": "a7fe383437a669a558cef843ca1a39b83d8bfce1af403e2b99861d3256264ace",
+    "omitted_note": {
+      "offset": 5440304,
+      "bytes": 24,
+      "raw_hex": "04000000080000000300000053494500d02cb40fd60a01de",
+      "mapped": false,
+      "program_header_index": 13
+    },
+    "native_executed": false
+  },
+  "package_files": {
+    "results-dir.txt": "f5bebf21494d9adf97f0d8dfb9807590b85d690c8346a86e385e28682754769e",
+    "lapy.elf": "024c595e282f2d1381a925762514842cbfb47e9a3cdd478a9a661961ffbc6eca",
+    "eboot.bin": "c7be667299764952278bac381316cd8f6842a07498d064118bc0930dce5087d0",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "build/public-hip-fill-retirement-v1/link-receipt.json": "be7669a2a228b1b45eb7046d03f57fc30fb717e11ddd46f57aaddcfafc7705c5",
+    "results/public-fill-retirement-package-review/review.json": "26b49f1355d8cb4b7db64f0231df797d1a4e611f135009d5e699f01f2678666a",
+    "results/public-fill-retirement-build.log": "e989f9f55fc10dfae3ad0465953ef49b07243f40d9053f6cb64c2cd2d82d5d8e",
+    "results/public-fill-retirement-revalidate.log": "e989f9f55fc10dfae3ad0465953ef49b07243f40d9053f6cb64c2cd2d82d5d8e"
+  },
+  "accepted_scope": [
+    "Fresh Make build of 74 native objects from the committed pitched-fill and retirement-fix source.",
+    "Repeated Make verification passed without replacing prior packages.",
+    "Independent source/object provenance, no-GPU imports, FSELF roundtrip and six-file extraction passed.",
+    "Existing contiguous-fill fixture retains two changed rounds, 512 byte comparisons, eight rejections and exact cleanup; invalid pitch replaces the formerly unsupported valid 2D rejection."
+  ],
+  "limits": [
+    "No console execution or deployment approval.",
+    "This fixture does not exercise pitched fills on console.",
+    "Earlier frozen candidates remain held; this replacement is not yet a frozen operational candidate.",
+    "Recovery confirmation and full installed-image/preserved-log verification remain pending."
+  ],
+  "independent_review": {
+    "path": "results/public-fill-retirement-package-review/review.json",
+    "sha256": "26b49f1355d8cb4b7db64f0231df797d1a4e611f135009d5e699f01f2678666a",
+    "deployment_approved": false
+  }
+}

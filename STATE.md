@@ -11,6 +11,12 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Fresh-checkout preparation
 
+The replacement native fill package now passes a fresh 74-object Make build,
+repeated Make verification and independent package audit at `be2f0b1`. It includes
+the retirement fix and checked pitched-fill runtime. Its existing console fixture
+still tests contiguous fills only. See `evidence/offline-native-fill-retirement.json`.
+No console run or operational candidate freeze is claimed.
+
 Pitched 2D/3D fills now pass fresh host qualification with exact row/slice-padding
 checks across two changed rounds (2,048 byte comparisons). Shared checked-layout
 arithmetic validates the complete touched span before writing. Reserve/command
@@ -22,7 +28,7 @@ compiles pass. See `evidence/offline-public-pitched-fill.json`.
 
 **Console candidates are held for rebuilding:** earlier frozen launch/fill
 packages predate the retirement fix. Preserve their evidence, but do not deploy
-them as current candidates. No updated package or console execution is claimed.
+them as current candidates. The replacement package above is built; no console execution is claimed.
 
 The native fill candidate is frozen at `fff2451` and passed independent offline
 identity review: 28 bound files and six package files. See
