@@ -7,7 +7,7 @@ import subprocess
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_console import Control, lifecycle, snapshot, native_fault, sha
-from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, check_log
+from source_public_hip_log import EXPECTED, COPY_EXPECTED, MODULE_EXPECTED, LAUNCH_EXPECTED, FILL_EXPECTED, GRAPH_EXPECTED, STREAM_EXPECTED, GRAPH_GPU_EXPECTED, CAPTURE_GPU_EXPECTED, check_log
 
 
 class TransferAndRecoveryTest(unittest.TestCase):
@@ -211,6 +211,15 @@ class ConsoleContractTest(unittest.TestCase):
         for raw in invalid:
             with self.assertRaises(ValueError):
                 check_log(raw, 'stream')
+
+    def test_captured_gpu_transcript_requires_capture_and_retirement(self):
+        self.assertEqual(check_log(CAPTURE_GPU_EXPECTED, 'capture_gpu')['kernel'], 'public_hip_capture_gpu')
+        for raw in (GRAPH_GPU_EXPECTED, CAPTURE_GPU_EXPECTED * 2,
+                    CAPTURE_GPU_EXPECTED.replace(b'captured=true', b'captured=false'),
+                    CAPTURE_GPU_EXPECTED.replace(b'retired=3', b'retired=2'),
+                    CAPTURE_GPU_EXPECTED.replace(b'values=146', b'values=0')):
+            with self.assertRaises(ValueError):
+                check_log(raw, 'capture_gpu')
 
     def test_gpu_graph_transcript_requires_replay_and_cleanup(self):
         self.assertEqual(check_log(GRAPH_GPU_EXPECTED, 'graph_gpu')['kernel'], 'public_hip_graph_gpu')

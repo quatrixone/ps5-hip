@@ -52,11 +52,11 @@ int main(int argc,char**argv){
  checked(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,nullptr,null_args,nullptr)==hipErrorInvalidValue,__LINE__);
  hipStream_t capturing=nullptr;HIP_OK(hipStreamCreate(&capturing));
  HIP_OK(hipStreamBeginCapture(capturing,hipStreamCaptureModeThreadLocal));
- checked(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,capturing,args,nullptr)==hipErrorNotSupported,__LINE__);
+ HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,capturing,args,nullptr));
  checked(hipExtModuleLaunchKernel(function,128,1,1,64,1,1,0,capturing,args,nullptr)==hipErrorNotSupported,__LINE__);
  checked(hipHccModuleLaunchKernel(function,128,1,1,64,1,1,0,capturing,args,nullptr)==hipErrorNotSupported,__LINE__);
  hipGraph_t graph=nullptr;HIP_OK(hipStreamEndCapture(capturing,&graph));
- size_t nodes=0;HIP_OK(hipGraphGetNodes(graph,nullptr,&nodes));checked(nodes==0,__LINE__);
+ size_t nodes=0;HIP_OK(hipGraphGetNodes(graph,nullptr,&nodes));checked(nodes==1,__LINE__);
  hipKernelNodeParams params{};params.func=reinterpret_cast<void*>(function);
  params.gridDim=dim3(2,1,1);params.blockDim=dim3(64,1,1);params.kernelParams=args;
  hipGraphNode_t node=nullptr;

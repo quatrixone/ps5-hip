@@ -2,6 +2,13 @@
 
 Updated: 2026-10-14, America/New_York.
 
+Standard module-kernel stream capture is implemented and independently reviewed offline.
+The full sanitizer qualification, 36 capture-failure recoveries, 74-object Make
+package, cached validation, 25 controls and 62 host regressions passed. See
+`../evidence/offline-public-kernel-capture.json`. Native capture remains pending;
+the installed explicit-graph baseline below is unchanged. Next: freeze and review
+the capture candidate, then deploy and run one bounded WSL case on .40.
+
 Current checkpoint (2026-10-15): bounded native explicit GPU graph replay passed
 on .40 at `a80845d`: two disabled replays, four callbacks, two changed-salt launches,
 146 exact values, 16 guards, copied/updated arguments and source-graph destruction.

@@ -2,7 +2,7 @@
   "files": {
     "hipamd/src/hip_module.cpp": {
       "before": "b82f767028fc45576e3ed932dc3c3fa7d28c9b78c958d4d506ed17b2980aa6d7",
-      "after": "6e317a9b526a405ade61b9401c8bf974fcd88bd24ecccb37d530a130be847a9d"
+      "after": "8c79d014b4b8c4a1732d76e77acc86529ca01a2e32fb58176394211a05f4a533"
     },
     "hipamd/src/hip_graph_internal.hpp": {
       "before": "d9209a4d961a3d899ebc406bc206857cec87158feaf35ecc5f196856d90a5264",
@@ -13,5 +13,5 @@
       "after": "04205e2e2d2ab7acbc44fcfc2e397cc2a43bc63a0d7751d94e7ab530a557b391"
     }
   },
-  "patch_sha256": "2f4c5e2394afbd958ee31cf7b896f353f313f3fd3683d4becf5e22c78e85ff11"
+  "patch_sha256": "0050a13533c51f936b5cf518e12c7ce4c1cdd5d6faa72c74602ffeb21c47cee9"
 }

@@ -336,7 +336,7 @@ work synchronized; graph argument copies do not transfer ownership of those reso
 PS5 graph replay uses the command path. ROCr AQL packet capture is disabled for
 this backend regardless of the upstream debug flag, because dispatch uses PM4.
 Explicit kernel nodes use the existing bounded launch geometry and argument ABI;
-module-launch stream capture and 3D memcpy graph admission remain unsupported.
+extended module-launch capture and 3D memcpy graph admission remain unsupported.
 
 Fault injection targets the graph argument table and each of its three argument
 allocations during add, clone, instantiate, child-graph construction and parameter
@@ -366,3 +366,20 @@ independent package, deployment and execution reviews are required; an older
 host-graph package does not exercise GPU graph nodes. The bounded native fixture passed on .40; see
 `../evidence/console40-public-gpu-graph-success.json`. Its frozen candidate phases
 are consumed and cannot be replayed. Use STATE.md for the current image/log baseline.
+
+### Captured module-kernel graph fixture
+
+`make public-hip-capture-gpu-package` builds the standard `hipModuleLaunchKernel`
+stream-capture fixture. Override `CAPTURE_GPU_BUILD_DIR` for a fresh build and set
+`RESULTS_DIR=/data/ps5-hip/results` for the dedicated .40 environment. The fixture
+shares the explicit graph replay oracle, but constructs its kernel and dependent
+host node through stream capture. It checks two disabled replays, then two
+changed-argument launches, update, source destruction and complete retirement.
+
+On this backend, failure while adding a captured module kernel invalidates its
+capture session; `hipStreamEndCapture` returns an invalidated error with no output
+graph. Caller-owned capture graphs remain owned by the caller. The model checks
+36 cases across three capture modes, both ownership forms, unsupported geometry,
+extra-buffer arguments and each argument-copy allocation failure. Extended/HCC
+launch capture remains rejected. GPU memory graph nodes, cross-stream GPU capture
+and longer replay/lifetime measurements are separate open requirements.

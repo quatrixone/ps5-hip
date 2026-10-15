@@ -209,6 +209,16 @@ def main():
         'PUBLIC_GRAPH_GPU_NATIVE_ORACLE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false',
         'PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false']:
         raise RuntimeError('shared native GPU graph oracle differs')
+    for mode in ('capture', 'capture-recover'):
+        result = run('kernel-' + mode, [output / 'graph-gpu-model', launch_code, mode], env)
+        expected = ([
+            'PUBLIC_KERNEL_CAPTURE_RECOVERY_PASS invalidations=36 modes=3 caller_graphs=18 callbacks=0 gpu_execution=false']
+            if mode == 'capture-recover' else []) + [
+            'PUBLIC_KERNEL_CAPTURE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false',
+            'PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false']
+        if result.splitlines() != expected:
+            raise RuntimeError('public kernel capture/recovery oracle differs')
+    print('public kernel capture and36 recovery cases PASS', flush=True)
     print('public GPU graph replay and two negative controls PASS', flush=True)
     stream_source = ROOT / 'tests/public_hip_stream_model.cpp'
     source_hashes[str(stream_source.relative_to(ROOT))] = sha(stream_source)
@@ -410,7 +420,7 @@ def main():
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
                'total_compilations': len(units) + 12,
                'graph_gpu_model_sha256': sha(output / 'graph-gpu-model'),
-               'graph_gpu_cases': ['shared-native-oracle', 'exec-update-handle-type-rejections', 'owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
+               'graph_gpu_cases': ['module-kernel-capture', '36-capture-failure-recoveries', 'shared-native-oracle', 'exec-update-handle-type-rejections', 'owned-arguments-update-source-destroy', 'argument-allocation-failures', 'single-parallel-child-command-failures', 'disabled-reenabled', 'noop-output-rejected', 'corrupt-output-rejected'],
                'stream_gpu_model_sha256': sha(output / 'stream-gpu-model'),
                'stream_gpu_cases': ['event-ordered-two-rounds', 'bypass-stale-output-rejected', 'noop-output-rejected', 'corrupt-output-rejected'],
                'graph_model_sha256': sha(output / 'graph-model'),

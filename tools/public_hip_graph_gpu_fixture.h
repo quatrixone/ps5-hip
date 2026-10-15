@@ -23,7 +23,7 @@ inline void replay(hipGraph_t& graph,hipGraphExec_t exec,hipGraphNode_t node,
   }
  }
 }
-inline void run(const char* path){
+inline void run(const char* path,bool capture=false){
  HIP_OK(hipInit(0));
  hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,path));
  hipFunction_t function=nullptr;HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
@@ -32,14 +32,25 @@ inline void run(const char* path){
  unsigned count=73,salt=19;void* args[]={&buffer,&count,&salt};
  hipKernelNodeParams params{};params.func=reinterpret_cast<void*>(function);
  params.gridDim=dim3(2);params.blockDim=dim3(64);params.kernelParams=args;
- hipGraph_t graph=nullptr;HIP_OK(hipGraphCreate(&graph,0));hipGraphNode_t node=nullptr;
- params.gridDim.x=0x40000002u;
- checked(hipGraphAddKernelNode(&node,graph,nullptr,0,&params)==hipErrorInvalidConfiguration,__LINE__);
- params.gridDim.x=2;
- HIP_OK(hipGraphAddKernelNode(&node,graph,nullptr,0,&params));
+ hipGraph_t graph=nullptr;hipGraphNode_t node=nullptr,host=nullptr;
  static unsigned callbacks=0;callbacks=0;
  hipHostNodeParams host_params{[](void* p){++*static_cast<unsigned*>(p);},&callbacks};
- hipGraphNode_t host=nullptr;HIP_OK(hipGraphAddHostNode(&host,graph,&node,1,&host_params));
+ if(capture){
+  HIP_OK(hipStreamBeginCapture(stream,hipStreamCaptureModeThreadLocal));
+  HIP_OK(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,stream,args,nullptr));
+  HIP_OK(hipLaunchHostFunc(stream,host_params.fn,host_params.userData));
+  HIP_OK(hipStreamEndCapture(stream,&graph));
+  size_t nodes=0;HIP_OK(hipGraphGetNodes(graph,nullptr,&nodes));checked(nodes==2,__LINE__);
+  size_t roots=1;HIP_OK(hipGraphGetRootNodes(graph,&node,&roots));checked(roots==1,__LINE__);
+  size_t children=1;HIP_OK(hipGraphNodeGetDependentNodes(node,&host,&children));checked(children==1,__LINE__);
+ }else{
+  HIP_OK(hipGraphCreate(&graph,0));
+  params.gridDim.x=0x40000002u;
+  checked(hipGraphAddKernelNode(&node,graph,nullptr,0,&params)==hipErrorInvalidConfiguration,__LINE__);
+  params.gridDim.x=2;
+  HIP_OK(hipGraphAddKernelNode(&node,graph,nullptr,0,&params));
+  HIP_OK(hipGraphAddHostNode(&host,graph,&node,1,&host_params));
+ }
  count=0;salt=999;
  hipGraphExec_t exec=nullptr;HIP_OK(hipGraphInstantiate(&exec,graph,nullptr,nullptr,0));
  checked(hipGraphExecKernelNodeSetParams(exec,host,&params)==hipErrorInvalidValue,__LINE__);

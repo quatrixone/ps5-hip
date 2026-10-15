@@ -13,7 +13,7 @@ struct Final {
   std::fprintf(stderr,"PUBLIC_GRAPH_GPU_COUNTS queues=%u retired=%u allocations=%u frees=%u\n",unsigned(observed.queues),unsigned(observed.retired_queues),unsigned(observed.allocations),unsigned(observed.frees));
   checked(completed&&observed.gate_destroyed&&!observed.terminal&&!observed.uncertain,__LINE__);
   checked(observed.allocations==1&&observed.frees==1&&observed.launches==2,__LINE__);
-  const unsigned queues=!std::strcmp(mode,"native")?3:7;
+  const unsigned queues=(!std::strcmp(mode,"native")||!std::strcmp(mode,"capture"))?3:!std::strcmp(mode,"capture-recover")?4:7;
   checked(observed.queues==queues&&observed.retired_queues==queues&&allocations.empty(),__LINE__);
   std::puts("PUBLIC_GRAPH_GPU_FINAL queues_retired=true allocations=1 frees=1 ownership=clean gpu_execution=false");
  }
@@ -40,12 +40,44 @@ extern "C" void* ps5hip_graph_argument_alloc(size_t bytes){
 }
 extern "C" hipError_t ps5hip_graph_command_status(){return fail_command>=0&&command_calls++==unsigned(fail_command)?hipErrorOutOfMemory:hipSuccess;}
 static void inject(int at){fail_argument=at;argument_calls=0;}
+static void capture_failure_cases(const char* path){
+ HIP_OK(hipInit(0));hipModule_t module=nullptr;HIP_OK(hipModuleLoad(&module,path));
+ hipFunction_t function=nullptr;HIP_OK(hipModuleGetFunction(&function,module,"thread_words"));
+ hipStream_t stream=nullptr;HIP_OK(hipStreamCreateWithFlags(&stream,hipStreamNonBlocking));
+ void* buffer=nullptr;unsigned count=73,salt=19;void* args[]={&buffer,&count,&salt};
+ static unsigned unexpected_callbacks=0;
+ for(auto capture_mode:{hipStreamCaptureModeGlobal,hipStreamCaptureModeThreadLocal,hipStreamCaptureModeRelaxed}){
+  for(bool external:{false,true})for(unsigned kind=0;kind<6;++kind){
+   hipGraph_t supplied=nullptr;
+   if(external){HIP_OK(hipGraphCreate(&supplied,0));HIP_OK(hipStreamBeginCaptureToGraph(stream,supplied,nullptr,nullptr,0,capture_mode));}
+   else HIP_OK(hipStreamBeginCapture(stream,capture_mode));
+   HIP_OK(hipLaunchHostFunc(stream,[](void*){++unexpected_callbacks;},nullptr));
+   void* extra[]={HIP_LAUNCH_PARAM_END};
+   if(kind>=2)inject(int(kind)-2);
+   auto result=hipModuleLaunchKernel(function,2,1,1,kind==0?32:64,1,1,0,stream,kind==1?nullptr:args,kind==1?extra:nullptr);
+   inject(-1);
+   checked(result==(kind==0?hipErrorInvalidValue:kind==1?hipErrorNotSupported:hipErrorOutOfMemory),__LINE__);
+   hipStreamCaptureStatus state;HIP_OK(hipStreamIsCapturing(stream,&state));
+   checked(state==hipStreamCaptureStatusInvalidated,__LINE__);
+   checked(hipModuleLaunchKernel(function,2,1,1,64,1,1,0,stream,args,nullptr)==hipErrorStreamCaptureInvalidated,__LINE__);
+   hipGraph_t invalid=reinterpret_cast<hipGraph_t>(0x1234);
+   checked(hipStreamEndCapture(stream,&invalid)==hipErrorStreamCaptureInvalidated&&invalid==nullptr,__LINE__);
+   HIP_OK(hipStreamSynchronize(stream));checked(unexpected_callbacks==0&&submits==0,__LINE__);
+   if(external){size_t nodes=0;HIP_OK(hipGraphGetNodes(supplied,nullptr,&nodes));checked(nodes==1,__LINE__);HIP_OK(hipGraphDestroy(supplied));}
+  }
+ }
+ HIP_OK(hipStreamDestroy(stream));HIP_OK(hipModuleUnload(module));
+ std::puts("PUBLIC_KERNEL_CAPTURE_RECOVERY_PASS invalidations=36 modes=3 caller_graphs=18 callbacks=0 gpu_execution=false");
+}
 int main(int argc,char**argv){
  checked(argc==3,__LINE__);mode=argv[2];resume=true;
- if(!std::strcmp(mode,"native")){
-  graph_gpu_fixture::run(argv[1]);
+ if(!std::strcmp(mode,"native")||!std::strcmp(mode,"capture")||!std::strcmp(mode,"capture-recover")){
+  const bool capture=std::strcmp(mode,"native")!=0;
+  if(!std::strcmp(mode,"capture-recover"))capture_failure_cases(argv[1]);
+  graph_gpu_fixture::run(argv[1],capture);
   checked(submits==2&&backend_calls==1,__LINE__);completed=true;
-  std::puts("PUBLIC_GRAPH_GPU_NATIVE_ORACLE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false");
+  if(capture)std::puts("PUBLIC_KERNEL_CAPTURE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false");
+  else std::puts("PUBLIC_GRAPH_GPU_NATIVE_ORACLE_PASS rounds=2 values=146 guards=16 disabled_replays=2 callbacks=4 gpu_execution=false");
   return 0;
  }
  HIP_OK(hipInit(0));

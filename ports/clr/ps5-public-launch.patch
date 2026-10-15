@@ -32,19 +32,7 @@
    if (!kernel->getDeviceKernel(*device)) {
      return hipErrorInvalidDevice;
    }
-@@ -438,6 +456,11 @@
-     HIP_RETURN(hipErrorInvalidValue);
-   }
- 
-+#if defined(WITH_PS5_DEVICE)
-+  hip::getStreamPerThread(hStream);
-+  if (hStream != nullptr && reinterpret_cast<hip::Stream*>(hStream)->GetCaptureStatus() != hipStreamCaptureStatusNone)
-+    return hipErrorNotSupported;
-+#endif
-   STREAM_CAPTURE(hipModuleLaunchKernel, hStream, f, gridDimX, gridDimY, gridDimZ, blockDimX,
-                  blockDimY, blockDimZ, sharedMemBytes, kernelParams, extra);
-   if (gridDimX > std::numeric_limits<int32_t>::max() ||
-@@ -463,6 +486,10 @@
+@@ -463,6 +481,10 @@
                                      uint32_t localWorkSizeZ, size_t sharedMemBytes,
                                      hipStream_t hStream, void** kernelParams, void** extra,
                                      hipEvent_t startEvent, hipEvent_t stopEvent, uint32_t flags) {
@@ -55,7 +43,7 @@
    HIP_INIT_API(hipExtModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
                 localWorkSizeX, localWorkSizeY, localWorkSizeZ, sharedMemBytes, hStream,
                 kernelParams, extra, startEvent, stopEvent, flags);
-@@ -471,6 +498,11 @@
+@@ -471,6 +493,11 @@
      HIP_RETURN(hipErrorInvalidValue);
    }
  
@@ -67,7 +55,7 @@
    STREAM_CAPTURE(hipExtModuleLaunchKernel, hStream, f, globalWorkSizeX, globalWorkSizeY,
                   globalWorkSizeZ, localWorkSizeX, localWorkSizeY, localWorkSizeZ, sharedMemBytes,
                   kernelParams, extra, startEvent, stopEvent, flags);
-@@ -486,10 +518,20 @@
+@@ -486,10 +513,20 @@
                                      uint32_t blockDimX, uint32_t blockDimY, uint32_t blockDimZ,
                                      size_t sharedMemBytes, hipStream_t hStream, void** kernelParams,
                                      void** extra, hipEvent_t startEvent, hipEvent_t stopEvent) {
@@ -88,7 +76,7 @@
    HIP_RETURN(ihipModuleLaunchKernel(f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ, blockDimX,
                                      blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams,
                                      extra, startEvent, stopEvent));
-@@ -667,6 +709,16 @@
+@@ -667,6 +704,16 @@
  hipError_t hipLaunchKernel_common(const void* hostFunction, dim3 gridDim, dim3 blockDim,
                                               void** args, size_t sharedMemBytes,
                                               hipStream_t stream) {
@@ -105,7 +93,7 @@
    STREAM_CAPTURE(hipLaunchKernel, stream, hostFunction, gridDim, blockDim, args, sharedMemBytes);
    return ihipLaunchKernel(hostFunction, gridDim, blockDim, args, sharedMemBytes, stream, nullptr,
                            nullptr, 0);
-@@ -688,6 +740,10 @@
+@@ -688,6 +735,10 @@
  hipError_t hipExtLaunchKernel(const void* hostFunction, dim3 gridDim, dim3 blockDim,
                                           void** args, size_t sharedMemBytes, hipStream_t stream,
                                           hipEvent_t startEvent, hipEvent_t stopEvent, int flags) {
@@ -116,7 +104,7 @@
    HIP_INIT_API(hipExtLaunchKernel, hostFunction, gridDim, blockDim, args, sharedMemBytes,
                 stream, startEvent, stopEvent, flags);
  
-@@ -695,6 +751,11 @@
+@@ -695,6 +746,11 @@
      HIP_RETURN(hipErrorInvalidValue);
    }
  

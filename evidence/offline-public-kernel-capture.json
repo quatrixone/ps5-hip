@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-15",
+  "status": "pass-offline-standard-module-kernel-capture",
+  "source_base_commit": "a2f0d93",
+  "package_sha256": "c74a8d2d19d3703760b4cab02584076a056da137fa88c4746c50e752477d2ad5",
+  "source_compilations": 81,
+  "source_links": 12,
+  "source_inputs": 115,
+  "included_files": 698,
+  "native_objects": 74,
+  "native_inputs": 104,
+  "package_files": 7,
+  "control_tests": 25,
+  "host_regressions": 62,
+  "capture_failure_recoveries": 36,
+  "changes": [
+    "Enable standard hipModuleLaunchKernel capture with owned kernel arguments.",
+    "Invalidate the capture session on failed kernel-node creation.",
+    "Reuse shared explicit/captured GPU replay oracle and add source-only Make capture package."
+  ],
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/public-kernel-capture-source-v1/receipt.json": "982fdb803c773af234f185ca9bb673a7c8766187b3af23afb3c549dc44cd2732",
+    "results/public-kernel-capture-review-v1/final-source-review.json": "f4449373297c61837c3c0d7c9c6960cd82fb0b1dda348683163a1ebda6819da5",
+    "results/native-public-capture-gpu-review-v1/review.json": "bfd8e08ff8dd27101ae417be4cddd122602ebfa63aeb2708621a3fb9e4e3205b",
+    "results/capture-gpu-preexit-diagnostic-v1/receipt.json": "ba3823f74e9db8a9cb5d0ba3c9a23fc66afb379f2caaf2c20d2bb7f7d8be8dfe",
+    "results/capture-gpu-preexit-diagnostic-v1/independent-review.json": "5177fb4c5c5b543aea8cc4f7a51a3d8f3f26defebe412589f15e200b4ff430ca",
+    "build/public-hip-capture-gpu-v1/link-receipt.json": "bbae932f742fa1a994372f663314a861e495f0db20cab1e4273e121684b7e13d",
+    "results/public-hip-capture-gpu-v1-revalidate.log": "2381acf405ff7e5b60b42146a8684f8af76e244b6d90f3cfed85ce4b9b3cc36b",
+    "results/public-capture-gpu-controls-v1.log": "873b4a316cd34e817c9e04becf77aa33d9d15129069bab3f53d8cfc62a3f2e38",
+    "results/public-capture-gpu-host-tests-v1.log": "a4f4947ad5d81aad90d666269cdeb7c3735087e28ab76891cc28d24b6f985c05"
+  },
+  "limits": [
+    "Native captured GPU execution remains pending.",
+    "The 36 failure recoveries are host-model evidence only.",
+    "Module and buffer must remain live through synchronized graph teardown.",
+    "G5 and broader roadmap remain open."
+  ]
+}
