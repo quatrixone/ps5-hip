@@ -115,6 +115,50 @@ void NativeDataRegistry::copy_device(void *destination, const void *source, uint
     std::memcpy(static_cast<unsigned char *>(to.memory->cpu()) + to.offset,
                 static_cast<const unsigned char *>(from.memory->cpu()) + from.offset, size_t(bytes));
 }
+void NativeDataRegistry::copy_device_rect(void *destination, uint64_t destination_row,
+                                          uint64_t destination_slice, const void *source,
+                                          uint64_t source_row, uint64_t source_slice,
+                                          uint64_t width, uint64_t height, uint64_t depth) {
+    auto span = [&](uint64_t row, uint64_t slice) {
+        const auto limit = uint64_t(std::numeric_limits<size_t>::max());
+        if (!width || !height || !depth || row < width || !slice ||
+            height > slice / row || width > limit)
+            fail(NativeDataStatus::InvalidValue, "invalid rectangular copy geometry");
+        uint64_t remaining = limit - width;
+        if (height - 1 > remaining / row)
+            fail(NativeDataStatus::InvalidValue, "rectangular row extent overflows");
+        const uint64_t rows = (height - 1) * row;
+        remaining -= rows;
+        if (depth - 1 > remaining / slice)
+            fail(NativeDataStatus::InvalidValue, "rectangular slice extent overflows");
+        return width + rows + (depth - 1) * slice;
+    };
+    const auto destination_span = span(destination_row, destination_slice);
+    const auto source_span = span(source_row, source_slice);
+    auto to = resolve(destination, destination_span);
+    auto from = resolve(source, source_span);
+    const auto dst = reinterpret_cast<uintptr_t>(destination);
+    const auto src = reinterpret_cast<uintptr_t>(source);
+    // Rows are monotonically ordered. Merge the interval lists to reject any
+    // actual overlap, while permitting disjoint rows inside overlapping spans.
+    if (dst >= src ? dst - src < source_span : src - dst < destination_span) {
+        uint64_t dy = 0, dz = 0, sy = 0, sz = 0;
+        while (dz < depth && sz < depth) {
+            const auto d = dst + dz * destination_slice + dy * destination_row;
+            const auto s = src + sz * source_slice + sy * source_row;
+            if ((d >= s ? d - s : s - d) < width)
+                fail(NativeDataStatus::InvalidValue, "rectangular copy rows overlap");
+            if (d < s) { if (++dy == height) { dy = 0; ++dz; } }
+            else { if (++sy == height) { sy = 0; ++sz; } }
+        }
+    }
+    auto *target = static_cast<unsigned char *>(to.memory->cpu()) + to.offset;
+    const auto *origin = static_cast<const unsigned char *>(from.memory->cpu()) + from.offset;
+    for (uint64_t z = 0; z < depth; ++z)
+        for (uint64_t y = 0; y < height; ++y)
+            std::memcpy(target + z * destination_slice + y * destination_row,
+                        origin + z * source_slice + y * source_row, size_t(width));
+}
 void NativeDataRegistry::fill(void *device, int value, uint64_t bytes) {
     auto hold = resolve(device, bytes);
     std::memset(static_cast<unsigned char *>(hold.memory->cpu()) + hold.offset, value, size_t(bytes));

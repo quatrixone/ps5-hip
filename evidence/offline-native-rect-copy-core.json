@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-15",
+  "status": "offline-native-rectangular-copy-core-pass",
+  "source_base": "183c9e605c6c40af13215b2a5c15bd3569a6182c",
+  "inputs": {
+    "include/ps5hip/native_data.h": "8c794645ec6c59bec20ad71d1cba8bef3739dc3a6dcca16e5805dc848bad3aaf",
+    "src/native_data.cpp": "618206ffdebaf68c20e364d1ff2a516521b3e7006e615fd183561176eb8eba04",
+    "tests/native_data_test.cpp": "93c86a6fc7b8296230152ea21aa52978875b7b5e7bcd76d18b8fa357467a278a"
+  },
+  "host_tests_passed": 62,
+  "native_core_build_passed": true,
+  "raw_workspace": "/home/denis/ps5-hip-module-package",
+  "raw_evidence": {
+    "results/native-rect-core-review/review.json": "303e974345125da121c2ab135cb174946be8cdea4ad973baa5914c1146cc2098",
+    "results/native-rect-core-build.log": "5c095b2a43d3c77e85e1ba487a6f99cf0097a8b4714ec88733e3c10da44f708b",
+    "results/native-rect-core-tests.log": "c27752d49b9b3d2019cb4d6e09bab946b754f86dc1c27e9aa5128c75dcaf6ed3",
+    "results/native-rect-core-native.log": "4eee938bf9f7191fe0bce7cea2661ae26df1e375d1f51e04c1838a318179891b"
+  },
+  "accepted_scope": [
+    "NativeDataRegistry rectangular D2D primitive validates geometry and both complete logical spans before writing.",
+    "Copies only width bytes per row across slices; preserves padding and rejects actual row overlap while allowing disjoint interleaving.",
+    "Tests cover changed3Ddata/sourcepreservation, bad endpoints/geometry/overflow, lateoverlap and GPUlease rejection.",
+    "Independent overlap predicate comparison matches exhaustive rowpair checking across20000layouts."
+  ],
+  "limits": [
+    "Public HIP rectangular admission, adapter dispatch and synchronous failure propagation remain unimplemented; recorded false-success bug stays open.",
+    "Native core cross-compiles only; no new package or console execution.",
+    "Independent code review preceded native build completion; root separately observed successful native-core build."
+  ],
+  "independent_review": {
+    "path": "results/native-rect-core-review/review.json",
+    "sha256": "303e974345125da121c2ab135cb174946be8cdea4ad973baa5914c1146cc2098",
+    "deployment_approved": false
+  }
+}

@@ -18,6 +18,13 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## Pitched fill and retirement checkpoint
 
+The native memory owner now implements rectangular D2D copying with checked
+spans, padding preservation and exact row-overlap rejection. All 62 host tests,
+PS5 native-core compilation and independent code/overlap review pass. See
+`evidence/offline-native-rect-copy-core.json`. Next: public layout admission,
+adapter dispatch and synchronous error propagation. The public false-success bug
+below remains open; this primitive alone does not qualify public pitched copies.
+
 **Open correctness bug:** public `hipMemcpy2D` D2D can return success without
 copying any requested bytes. Independent sanitizer reproduction observed 0/32
 bytes copied for an 8-by-4 region with 16-byte pitches. The adapter rejects the

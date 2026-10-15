@@ -144,6 +144,44 @@ int main() {
             check(data.ranges().empty());
         }
         check(allocations.empty());
+        {
+            NativeDataRegistry data;
+            auto* src = static_cast<unsigned char*>(data.allocate(512));
+            auto* dst = static_cast<unsigned char*>(data.allocate(512));
+            unsigned char expected[512], source[512], actual[512];
+            for (unsigned round=0; round<2; ++round) {
+                for(unsigned i=0;i<512;++i) { source[i]=static_cast<unsigned char>(i*13+round*37); expected[i]=0xa5; }
+                data.copy_to_device(src,source,512);data.copy_to_device(dst,expected,512);
+                for(unsigned z=0;z<3;++z)for(unsigned y=0;y<3;++y)for(unsigned x=0;x<7;++x)
+                    expected[5+z*96+y*24+x]=source[3+z*80+y*16+x];
+                data.copy_device_rect(dst+5,24,96,src+3,16,80,7,3,3);
+                data.copy_from_device(actual,dst,512);check(std::memcmp(actual,expected,512)==0);
+                data.copy_from_device(actual,src,512);check(std::memcmp(actual,source,512)==0);
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst+500,24,96,src,16,80,7,3,3);});
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst,24,96,src+500,16,80,7,3,3);});
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst,6,96,src,16,80,7,3,3);});
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst,24,48,src,16,80,7,3,3);});
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst,24,96,src,16,80,7,3,UINT64_MAX);});
+                reject(S::InvalidValue,[&]{data.copy_device_rect(dst,24,96,src,16,80,0,3,3);});
+                data.copy_from_device(actual,dst,512);check(std::memcmp(actual,expected,512)==0);
+            }
+            // Interleaved rows share a span but do not overlap; preserve exact source bytes.
+            data.copy_to_device(src,source,512);
+            std::memcpy(expected,source,512);
+            for(unsigned y=0;y<4;++y)std::memcpy(expected+8+y*16,source+y*16,4);
+            data.copy_device_rect(src+8,16,64,src,16,64,4,4,1);
+            data.copy_from_device(actual,src,512);check(std::memcmp(actual,expected,512)==0);
+            // Last destination row overlaps the first source row: reject before any write.
+            reject(S::InvalidValue,[&]{data.copy_device_rect(src,16,64,src+48,16,64,4,4,1);});
+            reject(S::InvalidValue,[&]{data.copy_device_rect(src+48,16,64,src,16,64,4,4,1);});
+            data.copy_from_device(actual,src,512);check(std::memcmp(actual,expected,512)==0);
+            {auto hold=data.resolve(src,1);hold.memory->acquire_gpu_use();
+             reject(S::InUse,[&]{data.copy_device_rect(dst,16,64,src,16,64,4,4,1);});
+             reject(S::InUse,[&]{data.copy_device_rect(src,16,64,dst,16,64,4,4,1);});
+             hold.memory->complete_gpu_use();}
+            data.free(src);data.free(dst);check(data.ranges().empty());
+        }
+        check(allocations.empty());
         for (bool release_failure : {false, true}) {
             NativeDataRegistry data;
             auto *p = data.allocate(16);

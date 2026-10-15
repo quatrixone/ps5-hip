@@ -35,6 +35,11 @@ public:
     void copy_from_device(void *host, const void *device, uint64_t bytes);
     // Both nonempty ranges must be live, CPU-owned and nonoverlapping.
     void copy_device(void *destination, const void *source, uint64_t bytes);
+    // Pitches describe byte rows/slices; validate both complete spans before writes.
+    // Regions may share an allocation only when their actual copied rows are disjoint.
+    void copy_device_rect(void *destination, uint64_t destination_row, uint64_t destination_slice,
+                          const void *source, uint64_t source_row, uint64_t source_slice,
+                          uint64_t width, uint64_t height, uint64_t depth);
     void fill(void *device, int value, uint64_t bytes);
     void poison() noexcept { poisoned_ = true; }
     bool poisoned() const { return poisoned_; }
