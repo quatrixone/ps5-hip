@@ -9,6 +9,27 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Native two-kernel replay passed
+
+The joined two-kernel workload passed on .40 over four warmup and sixteen
+verification rounds, alternating eager/captured order. Its 5840 added values
+and 640 guards matched; the combined title completed 84 GPU dispatches and
+28 callbacks, freed four allocations and retired all seven queues. Natural
+exit, installed files, idle mounts, service health and both lock releases were
+verified. See `evidence/console40-multi-kernel-success.json`.
+
+Installed image: `309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c`.
+Current copy_gpu log: `f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf`.
+Both phases of `results/source-public-multi-kernel-console-v1` are consumed.
+The previous CPU lifetime image and log remain preserved. The two kernels write
+independent regions; ordering is verified, not computed-data dependence or
+concurrent GPU execution. These bounded replays do not establish a memory plateau.
+
+Next: instrument successful native physical allocations/releases and command
+lifetimes, then collect warm replay resource and host-overhead baselines before
+optimization. GPU-dependent retirement, sustained reliability, measured replay
+efficiency and the full G5 contract remain open.
+
 ## Two-kernel replay qualified offline
 
 The shared fixture now captures two kernels across joined streams, checks its

@@ -2,6 +2,29 @@
 
 Updated: 2026-10-15, America/New_York.
 
+## Native two-kernel replay passed
+
+- 2026-10-15 | G5 | 1fa8c9f | .40 | pass: 84-dispatch replay/teardown | evidence/console40-multi-kernel-success.json | next: resource/overhead measurements
+
+The joined two-kernel workload passed on .40 over four warmup and sixteen
+verification rounds, alternating eager/captured order. Its 5840 added values
+and 640 guards matched; the combined title completed 84 GPU dispatches and
+28 callbacks, freed four allocations and retired all seven queues. Natural
+exit, installed files, idle mounts, service health and both lock releases were
+verified. See `../evidence/console40-multi-kernel-success.json`.
+
+Installed image: `309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c`.
+Current copy_gpu log: `f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf`.
+Both phases of `results/source-public-multi-kernel-console-v1` are consumed.
+The previous CPU lifetime image and log remain preserved. The two kernels write
+independent regions; ordering is verified, not computed-data dependence or
+concurrent GPU execution. These bounded replays do not establish a memory plateau.
+
+Next: instrument successful native physical allocations/releases and command
+lifetimes, then collect warm replay resource and host-overhead baselines before
+optimization. GPU-dependent retirement, sustained reliability, measured replay
+efficiency and the full G5 contract remain open.
+
 ## Two-kernel replay qualified offline
 
 The shared fixture now captures two kernels across joined streams, checks its
@@ -878,13 +901,13 @@ block the client; do not fill exported symbols with success-returning stubs.
 
 ## 9. G5 Ã¢â‚¬â€ Streams, graphs and memory efficiency
 
-Latest native checkpoints: joined producer/consumer capture passed on .40
-with event reuse and clean teardown, followed by CPU-copy queued free and
-parameter migration with eight allocations freed and four queues retired. See
-`../evidence/console40-copy-joined-success.json` and
+Latest native checkpoints: two-kernel joined replay passed twenty changing-input
+eager/captured pairs on .40, with 84 combined dispatches, four allocations freed
+and seven queues retired. CPU-copy queued free and parameter migration also
+passed separately. See `../evidence/console40-multi-kernel-success.json` and
 `../evidence/console40-copy-lifetime-success.json`. GPU-completion-dependent
-retirement, sustained multi-kernel replay, resource plateaus and measured replay
-efficiency remain open. Measure command and native temporary allocations as well
+retirement, sustained soak, resource plateaus and measured replay efficiency
+remain open. Measure command and native temporary allocations as well
 as HIP buffers; the current per-kernel submission path allocates command/marker
 storage and waits independently. Stable HIP buffer counts alone are insufficient.
 Earlier checkpoint details below retain their historical scope.

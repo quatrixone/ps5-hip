@@ -454,8 +454,9 @@ native acceptance requires 84 dispatches, four allocations/frees and seven
 retired queues. Separate omitted-kernel controls must reject both missing regions.
 These are bounded correctness checks. They measure neither elapsed time nor
 memory plateau, and the two kernels write independent regions rather than
-passing computed data between kernels. Native validation of this extension is
-pending.
+passing computed data between kernels. This extension passed on .40 at
+`1fa8c9f`; see `../evidence/console40-multi-kernel-success.json`. The candidate
+completed 84 dispatches and retired all seven queues; its phases are consumed.
 
 The source qualifier also checks queued graph copies followed by `hipFree`
 while the executable and stream remain alive, and executable parameter migration

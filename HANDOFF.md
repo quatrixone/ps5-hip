@@ -16,6 +16,39 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Native two-kernel replay passed
+
+The joined two-kernel workload passed on .40 over four warmup and sixteen
+verification rounds, alternating eager/captured order. Its 5840 added values
+and 640 guards matched; the combined title completed 84 GPU dispatches and
+28 callbacks, freed four allocations and retired all seven queues. Natural
+exit, installed files, idle mounts, service health and both lock releases were
+verified. See `evidence/console40-multi-kernel-success.json`.
+
+Installed image: `309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c`.
+Current copy_gpu log: `f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf`.
+Both phases of `results/source-public-multi-kernel-console-v1` are consumed.
+The previous CPU lifetime image and log remain preserved. The two kernels write
+independent regions; ordering is verified, not computed-data dependence or
+concurrent GPU execution. These bounded replays do not establish a memory plateau.
+
+Next: instrument successful native physical allocations/releases and command
+lifetimes, then collect warm replay resource and host-overhead baselines before
+optimization. GPU-dependent retirement, sustained reliability, measured replay
+efficiency and the full G5 contract remain open.
+
+Next measurement implementation: add a coherent cumulative snapshot of native
+physical allocations, releases, live bytes and peak bytes in `native_memory.h`.
+Count successful physical allocation before mapping and successful release only;
+failed cleanup must remain counted even when construction throws. Do not reset
+counters or equate destructors with releases. Extend `native_memory_test.cpp`
+for retry/idempotence and independent concurrent owners, and the existing forked
+failure case in `native_data_test.cpp` for retained constructor backing.
+Submission tests manually reclaim mock quarantines outside `NativeMemory`; use
+case-local deltas rather than pretending those frees reached production cleanup.
+These counters cover this allocator, not process RSS or the host heap. Command
+lifetime and CPU preparation/submit/wait measurements remain separate work.
+
 ## Two-kernel replay qualified offline
 
 The shared fixture now captures two kernels across joined streams, checks its

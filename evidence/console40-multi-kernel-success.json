@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-15",
+  "classification": "pass-bounded-native-two-kernel-replay",
+  "source_commit": "1fa8c9f885947ff5fdb7163fb5628623c8104fef",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "309b66fedf667fcac958b4d2821a1159d01eb22cb1014fe8ee6ae7841daf610c",
+  "manifest_sha256": "bc2ac9c0e2d187a5ee86171d91bebc8423b9236382c0cd98bdd54217765aca8b",
+  "application_log_sha256": "f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf",
+  "process": [
+    [
+      "PPSA99014",
+      "219"
+    ]
+  ],
+  "complete_ftp_reads": 27,
+  "replay_rounds": 20,
+  "warmup_rounds": 4,
+  "verification_rounds": 16,
+  "kernels_per_replay": 2,
+  "replay_values": 5840,
+  "replay_guards": 640,
+  "alternating_order": true,
+  "existing_values": 292,
+  "existing_guards": 32,
+  "allocations": 4,
+  "frees": 4,
+  "queues": 7,
+  "retired_queues": 7,
+  "gpu_submissions": 84,
+  "callbacks": 28,
+  "disabled_replays": 6,
+  "natural_stop": true,
+  "matching_idle_mounts": true,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_released": true,
+  "installed_files_reverified_after_execution": true,
+  "raw_directory": "results/source-public-multi-kernel-console-v1",
+  "raw_evidence": {
+    "manifest.json": "bc2ac9c0e2d187a5ee86171d91bebc8423b9236382c0cd98bdd54217765aca8b",
+    "execution-review.json": "b5e97f12eab837f2218817979b10c313712fa1c5b8f81a7e3ca707b3afbaa214",
+    "outcome-review.json": "9ff131c8eae070994286dfae1e7add4f88ce8c9058a302111866f4936467e375",
+    "execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute/receipt.json": "a9b445a688fe76cda040b9c250645fd4f8276f2cde57a6136c0bf6dc046ca422",
+    "execute/application.log": "f70d127289c1c0f7d23d59177d758ce045f234c7dd68c5512deff2904a063bbf",
+    "execute/before-launch.log": "5dee0e35c16fa767d4eeefa8680b046977704abd479d891928570b794b7b1c13",
+    "execute/klog.log": "abee93982c171e248cce22331890a7a3a4d176905d9c330a12739f0fdce3c1ab",
+    "execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "execute/observed.log": "d8124ef35432c3333b5e3273f4e87dad5fcc9c5786f8504c5ea36d4413a18615",
+    "execute/post_snapshot.log": "9b639e4b9867cc8c7116d5f4fde0fdc7a5bf33f88f72efa9cc104dfd72c80e35",
+    "execute/snapshot.log": "9b639e4b9867cc8c7116d5f4fde0fdc7a5bf33f88f72efa9cc104dfd72c80e35"
+  },
+  "limits": [
+    "Two kernels write independent regions, with event ordering; no computed-data dependency or simultaneous GPU execution claim.",
+    "Twenty eager/captured pairs establish bounded replay correctness, not a sustained soak.",
+    "Memory plateau, true GPU elapsed time and measured replay efficiency remain open.",
+    "GPU-completion-dependent allocation retirement and startup reliability remain unproven; G5 is incomplete."
+  ]
+}
