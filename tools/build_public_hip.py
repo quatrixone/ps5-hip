@@ -12,6 +12,7 @@ import sys
 import tempfile
 
 from native_vector_title import audit_roundtrip
+from prepare_public_hip_embedded import prepared as embedded_prepared
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPS = ROOT / ".deps"
@@ -31,9 +32,9 @@ SOURCE_UNITS = (
     "rocclr/utils/debug.cpp", "rocclr/utils/flags.cpp",
 )
 PROJECT_UNITS = (
-    "ports/clr/ps5-clr-tls.cpp", "ports/clr/ps5-device.cpp",
+    "ports/clr/ps5-clr-tls.cpp", "ports/clr/ps5-device.cpp", "ports/clr/ps5-embedded.cpp",
     "tools/public_hip_app_crt.cpp", "tools/clr_gpu/watchdog.cpp",
-    "src/code_object.cpp", "src/fat_binary.cpp", "src/host_launch.cpp",
+    "src/code_object.cpp", "src/fat_binary.cpp", "src/host_registration.cpp", "src/host_launch.cpp",
     "src/launch.cpp", "src/native_memory.cpp", "src/native_data.cpp",
     "src/native_launch.cpp", "src/submission.cpp", "src/hip_launch_profile.cpp",
     "src/agc_backend.cpp", "tools/native_shell_exit_probe.cpp",
@@ -50,7 +51,7 @@ def build_inputs():
              "title.json", "assets/param.json", "assets/icon0.png",
              "tools/build_public_hip.py", "tools/prepare_clr_gpu_source.py",
              "tools/prepare_public_hip_command_stats.py",
-             "tools/prepare_public_hip_static_module.py",
+             "tools/prepare_public_hip_static_module.py", "tools/prepare_public_hip_embedded.py",
              "tools/prepare_hip_admission.py", "tools/guard_native_hip_gl.py",
              "tools/native_runtime.h", "tools/native_shell_exit_probe.cpp",
              "tools/public_hip_app_crt.cpp", "tools/public_hip_bootstrap_console_title.cpp",
@@ -112,13 +113,17 @@ def source_tree(output, fixture="bootstrap"):
         guard.write_text(sha(public / "hipamd/src/hip_gl.cpp") + "\n")
     if guard.read_text().strip() != sha(public / "hipamd/src/hip_gl.cpp"):
         raise RuntimeError("guarded HIP GL source changed")
-    run(output, "prepare-module", [sys.executable, ROOT / "tools/prepare_public_hip_aot.py", public])
+    has_embedded = embedded_prepared(public)
+    if not has_embedded:
+        run(output, "prepare-module", [sys.executable, ROOT / "tools/prepare_public_hip_aot.py", public])
     run(output, "prepare-symbols", [sys.executable, ROOT / "tools/prepare_public_hip_symbols.py", public])
     run(output, "prepare-rect", [sys.executable, ROOT / "tools/prepare_public_hip_rect.py", public])
     run(output, "prepare-launch", [sys.executable, ROOT / "tools/prepare_public_hip_launch.py", public])
     run(output, "prepare-capture", [sys.executable, ROOT / "tools/prepare_public_hip_capture.py", public])
     run(output, "prepare-command-stats", [sys.executable, ROOT / "tools/prepare_public_hip_command_stats.py", public])
-    run(output, "prepare-static-module", [sys.executable, ROOT / "tools/prepare_public_hip_static_module.py", public])
+    if not has_embedded:
+        run(output, "prepare-static-module", [sys.executable, ROOT / "tools/prepare_public_hip_static_module.py", public])
+    run(output, "prepare-embedded", [sys.executable, ROOT / "tools/prepare_public_hip_embedded.py", public])
     return public
 
 
@@ -160,8 +165,8 @@ def compile_units(output, source, fixture="bootstrap"):
     units += [DEPS / "elevation/client/elevation.cpp"]
     hip = sorted((source / "hipamd/src").glob("*.cpp"))
     hip = [path for path in hip if path.stem not in ("fixme", "hip_runtime")]
-    if len(units) != 44 or len(hip) != 30:
-        raise RuntimeError(f"expected 44 platform and 30 HIP units; got {len(units)} and {len(hip)}")
+    if len(units) != 46 or len(hip) != 30:
+        raise RuntimeError(f"expected 46 platform and 30 HIP units; got {len(units)} and {len(hip)}")
     units += hip
     flags = compiler_flags(source)
 
@@ -184,8 +189,8 @@ def compile_units(output, source, fixture="bootstrap"):
         records = list(pool.map(compile_one, ((index, path) for index, path in enumerate(units)
                                               if index != title_index)))
     records.insert(title_index, title_record)
-    if len(records) != 74 or len({record["object"] for record in records}) != 74:
-        raise RuntimeError("not a clean 74-object closure")
+    if len(records) != 76 or len({record["object"] for record in records}) != 76:
+        raise RuntimeError("not a clean 76-object closure")
     return records
 
 
@@ -394,7 +399,7 @@ def main():
         if previous.get("fixture", "bootstrap") != args.fixture:
             raise RuntimeError("cached fixture differs; use a fresh output")
         units = previous["units"]
-        if (len(units) != 74 or previous["title_elf_sha256"] != sha(output / "title.elf") or
+        if (len(units) != 76 or previous["title_elf_sha256"] != sha(output / "title.elf") or
                 any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
                     sha(output / unit["object"]) != unit["object_sha256"] for unit in units)):
             raise RuntimeError("cached native link or its source changed; use a fresh output")

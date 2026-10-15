@@ -22,7 +22,37 @@ failure, late-registration retry, null function/variable lookup rejection,
 successful retry, cached success and final cleanup. This is a
 prerequisite, not embedded-image support.
 
-## Remaining implementation
+## Qualified offline implementation
+
+Bounded compiler registration now runs through genuine CLR. Exact per-object
+linker spans validate wrappers, names and bundles before use; selected device
+bytes are owned by the static module. Pointer-only dynamic image loading stays
+unsupported. Registration rejects invalid/stale handles and unknown kernel
+names, and unregister retains ownership when synchronization fails.
+
+The final host qualification covers one module, two modules and reversed
+object/span order with eager and deferred loading. Actual compiler constructors,
+launch stubs and destructors execute; GPU transport is modeled. Output no-op
+and corruption controls fail as required. A bounded but absent kernel name
+previously aborted in both loading modes; attribute lookup and real stub launch
+now reject it twice without submissions. The complete 87-compilation CLR host
+suite and the 76-object native bootstrap package also pass. See
+`../evidence/offline-public-embedded-images.json`.
+
+Reproduce from source with fresh output directories:
+
+```sh
+make public-hip-embedded-host-test \
+  QUALIFICATION_DIR=results/public-hip-host-fresh \
+  EMBEDDED_FIXTURE_DIR=build/public-hip-embedded-fixture-fresh \
+  EMBEDDED_QUALIFICATION_DIR=results/public-hip-embedded-fresh
+```
+
+The native bootstrap build establishes cross-compilation and packaging, not
+native compiler-stub execution. The host finalizer checks modeled device
+backing and queue cleanup; it does not count live static registry entries.
+
+## Implementation gates and remaining native work
 
 The path is the exported registration entry point, `hip_platform.cpp` wrapper
 handling, `PlatformState::addFatBinary`, `StatCO::addFatBinary`, deferred digest,
@@ -49,6 +79,13 @@ handling, `PlatformState::addFatBinary`, `StatCO::addFatBinary`, deferred digest
    module, two modules and reversed order; malformed metadata and registration
    failures; retry and initialization failure; exact output and cleanup. Then
    freeze a native candidate and validate on .40 under the console protocol.
+
+Items 1-5 now have bounded implementation and focused regressions. Item 6 has
+the host compiler/CLR evidence above; broader initialization-failure coverage
+and native execution remain open. Next integrate the native compiler object,
+audit constructor/destructor order and linker spans through ELF/SELF conversion,
+then freeze and validate the actual compiler-launch title on .40. Do not
+substitute a bootstrap package or the modeled transport for that evidence.
 
 The public adapter's launch geometry, LDS, argument ABI and model allocations
 remain separate client blockers. Passing registration alone will not qualify

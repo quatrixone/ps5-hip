@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "classification": "offline-genuine-compiler-public-clr-embedded-images",
+  "release_scope": "Partial V1.2 runtime milestone; LLM inference and full SDK remain incomplete.",
+  "source_sha256": {
+    "ports/clr/ps5-public-embedded.patch": "e0bd3a98f66a926be1886f0169d821ea20a8d6ccdec2b8911b68fc37bf38b5cb",
+    "ports/clr/ps5-public-embedded.json": "782d390bb8f95aee1069ef5786e7763dae3d0584385af77df97340b8a9212faa",
+    "ports/clr/ps5-embedded.cpp": "fe9c06371f833a1035121917fb02b0d8d38ecb9977ccb101fa63c3fb41d762a7",
+    "ports/clr/ps5-embedded.h": "df7ad24806480a8299b4576329e2cad541b3aa94c8fa41c861fb757e76f7637e",
+    "tools/prepare_public_hip_embedded.py": "da7a91697111ee01b44e0be4454f6b6704c5e630ed68ef628344f28963b90b7e",
+    "tools/embedded_module_linker.py": "5a1ef1e95a301b739b6c7d462025aa542d5d23642c02708267efd7d554204162",
+    "tools/build_public_hip.py": "8255a29496d6960a0b31a4d9b59123928d25e5239a7665dd7cc98946b34b5796",
+    "tools/qualify_public_hip_source.py": "077809bc0b14b380a9b0b8fd175f413418fbbc2ee73d4864240a779c71ab93da",
+    "tools/build_public_hip_embedded_fixture.py": "d6a3e2ecbfc2ea6157b0623e5f41c78b67434d1495565795764d685f269a8555",
+    "tools/qualify_public_hip_embedded.py": "8ea8607cc4d5d2194d57fc34905f762bff0e7213504b3cdd398ef963f65185ec",
+    "tests/public_hip_embedded.hip": "dbc095f497ee846fae853138cb44ae44144ae9f1ed3749a0aedc3147fc3cbeb4",
+    "tests/public_hip_embedded_model.cpp": "84d65cb28c9550a6825841ec80568b88be7f66bf7a7733bdfbcd66599a065b2a",
+    "tests/public_hip_embedded_test.py": "6971cf93de63c33a28e2e2e74663226c6faa16fc742d8f06108544c9ef6165f6",
+    "tests/public_hip_embedded_fixture_test.py": "5e875e8cc476e5a9e4a46d748712fcef44ee4056a07590e3d537c3b3e3d655f6",
+    "tests/embedded_module_linker_test.py": "f78ce378f6a411622e5e0613e0db29a1ba29605a616dcbf6a71aafa97652973c",
+    "src/host_registration.cpp": "808020d4212824ff55fb4233057aaabbc494a275c29d7f1313e658aadf95bbcd",
+    "include/ps5hip/host_registration.h": "5cdc7708bcbd83341a3b559609c8b789abb84a2a1fd9f90754999d77810b4bef"
+  },
+  "raw_evidence": {
+    "results/source-public-embedded-v2/receipt.json": "9ddeee431b6e553e75b0f1f3dda688896979710cb8a23f679921931ecb416af8",
+    "results/public-embedded-compiler-v7/receipt.json": "b8ced5257f6485740ef94181dde07c724499d94f00d8020eaf1f6bf3343879a5",
+    "results/public-embedded-model-v4/receipt.json": "08fcdb3795a5a34df3461d038285f45d9c82e6693cb72d20d065970b5c6b24c7",
+    "results/public-embedded-missing-name-prefixed-v2/receipt.json": "9b52fc9db48f416a845629040397e31e37a2699d473b2e36e82a51b16ece4371",
+    "build/public-hip-embedded-base-v2/link-receipt.json": "ffa1c4a17a7a61de26df6e845950450df7adfb87d15d05887a2ac664311aa32b",
+    "build/public-hip-embedded-base-v2/parent-review.json": "80a96833afb13c41f776aae7ab73a6cbd55d23e413efef4ef13502301f2ea07a"
+  },
+  "base_qualification": {
+    "core_translation_units": 71,
+    "total_compilations": 87,
+    "sanitizer": "address,undefined",
+    "scope": "Genuine CLR runtime with modeled providers and packet transport."
+  },
+  "compiler": {
+    "hosts": [
+      "linux",
+      "ps5"
+    ],
+    "modules": [
+      "thread_words",
+      "thread_words_b"
+    ],
+    "registration": "Genuine LLVM18 compiler constructors, registration calls, launch stubs and destructors.",
+    "device": "gfx1013; matching Linux/native device instruction bytes; no device libraries needed for this builtin-workitem arithmetic fixture.",
+    "native_objects_only": true
+  },
+  "host_controls": {
+    "link_orders": [
+      "a",
+      "ab",
+      "ba"
+    ],
+    "loading_modes": [
+      "eager",
+      "deferred"
+    ],
+    "single_module": {
+      "values": 73,
+      "guards": 8,
+      "dispatches": 1
+    },
+    "two_modules": {
+      "values": 146,
+      "guards": 16,
+      "dispatches": 2
+    },
+    "negative_output_controls": [
+      "noop",
+      "corrupt"
+    ],
+    "negative_output_runs": 6,
+    "missing_linked_name": {
+      "mutation": "Only host registration string section thread_words -> ghost__words; device bundle, stubs, wrappers, relocation and constructor sections unchanged.",
+      "modes": [
+        "eager",
+        "deferred"
+      ],
+      "retries_per_mode": 2,
+      "attribute_error": "hipErrorInvalidDeviceFunction",
+      "compiler_stub_launch_error": "hipErrorInvalidDeviceFunction",
+      "submissions": 0
+    },
+    "clean_modeled_device_backing_and_queues": true,
+    "command_records": 24
+  },
+  "regression_reproduction": {
+    "old_core": "results/source-public-embedded-v1",
+    "eager_exit": -6,
+    "deferred_exit": -6,
+    "error": "Cannot find Symbol with name: ghost__words",
+    "excluded_fixture_attempt": "results/public-embedded-missing-name-prefixed-v1 used an incorrect token value for the attribute query and is not runtime failure evidence."
+  },
+  "gpu_executed": false,
+  "native_executed": false,
+  "limits": [
+    "Host transport computes expected arithmetic; it is not GPU execution or an ISA emulator.",
+    "Final ownership assertions cover modeled device backing and queues, not static module registry retirement counts.",
+    "Native compiler objects are not a linked native title or console qualification; parent milestone records native baseline separately.",
+    "Modeled runtime reuses currently hashed core objects from a source-qualified build; a fresh source-only rebuild must regenerate the base.",
+    "Coverage is one/two simple registered functions, not all compiler registration APIs, broad HIP geometry/argument ABI, or an LLM backend.",
+    "Arbitrary pointer-only module loading remains unsupported."
+  ],
+  "native_baseline": {
+    "object_count": 76,
+    "scope": "Bootstrap native package rebuilt with embedded runtime source; compiler stubs are not linked into this package.",
+    "parent_source_object_package_hash_review": "pass",
+    "executed": false
+  }
+}

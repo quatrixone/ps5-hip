@@ -25,6 +25,7 @@ help:
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
+	@echo 'make public-hip-embedded-host-test  Build compiler objects and qualify genuine CLR registration (fresh outputs)'
 	@echo 'make console-controls  Build launch/close controllers and read-only teardown helper offline'
 	@echo 'make native-core Cross-compile the native core library'
 	@echo 'make public-hip-package  Build, sign, package, and verify PPSA99014 offline'
@@ -111,8 +112,18 @@ llm-model-profile: llm-tool-test
 	$(PYTHON) tools/profile_llm_model.py --output $(LLM_PROFILE_DIR) --check-lock models/tinyllama-1.1b-chat-v1.0.json
 
 .PHONY: public-hip-host-test
-public-hip-host-test: deps-fetch
+public-hip-host-test: deps-build
 	$(PYTHON) tools/qualify_public_hip_source.py --output $(QUALIFICATION_DIR)
+
+EMBEDDED_FIXTURE_DIR ?= build/public-hip-embedded-fixture
+EMBEDDED_QUALIFICATION_DIR ?= results/public-hip-embedded
+.PHONY: public-hip-embedded-fixture public-hip-embedded-host-test
+public-hip-embedded-fixture: deps-build
+	$(PYTHON) tests/public_hip_embedded_fixture_test.py
+	$(PYTHON) tools/build_public_hip_embedded_fixture.py --output $(EMBEDDED_FIXTURE_DIR)
+
+public-hip-embedded-host-test: public-hip-host-test public-hip-embedded-fixture
+	$(PYTHON) tools/qualify_public_hip_embedded.py --base $(QUALIFICATION_DIR) --compiler $(EMBEDDED_FIXTURE_DIR) --output $(EMBEDDED_QUALIFICATION_DIR)
 
 SNAPSHOT_BUILD_DIR ?= build/source-make-snapshot
 .PHONY: console-controls

@@ -50,7 +50,7 @@ The repository is private.
 For a fresh WSL/Linux checkout, install Python 3, GNU Make, CMake, Ninja,
 LLVM/LLD 18.1.8 and .NET SDK 10.0.112, then run `make` to fetch the locked
 public dependencies, run host tests, cross-compile the native core, and build
-the 74-object public HIP bootstrap package offline. Set `RESULTS_DIR` to the
+the 76-object public HIP bootstrap package offline. Set `RESULTS_DIR` to the
 intended console results path. ProsperoEden and ps5-homebrew-dev-protocol are
 snapshots of their public `main` branches; no unpublished dependency branch is
 needed. See the [source-only build](docs/SOURCE_ONLY_REBUILD.md) for outputs

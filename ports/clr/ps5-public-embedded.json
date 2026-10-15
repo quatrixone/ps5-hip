@@ -1,0 +1,33 @@
+{
+  "patch_sha256": "e0bd3a98f66a926be1886f0169d821ea20a8d6ccdec2b8911b68fc37bf38b5cb",
+  "files": {
+    "hipamd/src/hip_fatbin.hpp": {
+      "before": "e63aaa5e51d8490316b2e30c602f162ccea6129b6453efbe25d764d96bca52c7",
+      "after": "9f6698dd84eb0fa607c687d0f514857b9ea910a1fd8079163b2deee1e5f26c58"
+    },
+    "hipamd/src/hip_fatbin.cpp": {
+      "before": "3a52685bf7692516df679304083f71562c77f4f57804615e5d00a5aec1cd34b7",
+      "after": "ac456a84e8eb26b2018afd5fde6d90bdc5bcebe599c2508f4c39f759581cf846"
+    },
+    "hipamd/src/hip_code_object.hpp": {
+      "before": "d436e08835c834355ea7075a96c6d025aef84fc5e58ef7e51969ec8cb9ccd31c",
+      "after": "16e9f4914ba374fd04773c8a496f5301a3faf8be1dfef95b6c185ddbc8abf70c"
+    },
+    "hipamd/src/hip_code_object.cpp": {
+      "before": "4f5f4c183efca6a545113c7c1d64d924e80d12eab0f93fc8732900d2eff52734",
+      "after": "4f66daef3d1840d6c7cc8b12fd00549f67123e9590a2f9d4c4e416c1b2301147"
+    },
+    "hipamd/src/hip_platform.hpp": {
+      "before": "d81bdb0da704a0d796da374d5a7c5e3c83115e88c29eb89e55a625d760338ea0",
+      "after": "2128b41001b935acda684131e243f74bba5955e238ad6dc20cec40aa8f0f9872"
+    },
+    "hipamd/src/hip_platform.cpp": {
+      "before": "c08925c01de3bcdac146cd0762c0f09aa39f4f4d4fb69501e18649032d9201d0",
+      "after": "cf33d031a207a48c3d111fdfcd951164ed43867ce46c48ebe7bc80b65c5da05e"
+    },
+    "hipamd/src/hip_global.cpp": {
+      "before": "542b19bd4916882b27def4e3cff957166e79d7f7a737d4aca6aeda93efa5ae1c",
+      "after": "b46172ae24841995858f17911205733fce2f14156b005593eadafe87aefc080f"
+    }
+  }
+}

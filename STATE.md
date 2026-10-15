@@ -26,8 +26,8 @@ and verifies full source weights/tokenizer; see `evidence/offline-llm-model-sour
 F16 and pure Q4_0 conversion now pass with locked upstream tools. The Q4_0
 GGUF is 619831552 bytes, with 156 Q4_0 and 45 F32 tensors; see
 `evidence/offline-llm-model-conversion.json`. Reference logits and actual model
-memory usage remain open. Next: compiler-generated
-embedded-image registration and the effective HIP client compile/link probe,
+memory usage remain open. Next: native compiler-generated
+embedded-image launch and the effective HIP client compile/link probe,
 alongside pinned weight conversion and CPU fixtures.
 
 Defer new retirement-ack diagnostics and general G5 optimization unless a real
@@ -39,6 +39,13 @@ in the native backing checkpoint below remain the baseline.
 
 ## Static module failure handling qualified offline
 
+Superseded next step: bounded compiler embedded-image registration is now
+qualified offline through genuine CLR, including eager/deferred, two-module,
+reversed-order and missing-kernel-name controls. The full 87-compilation host
+suite and 76-object native bootstrap package pass. See
+`evidence/offline-public-embedded-images.json`. Next build and audit the native
+compiler-launch title; no new console image or native embedded launch is proven.
+
 The genuine CLR static loader now publishes only successfully extracted modules.
 Failed extraction no longer becomes false success on retry. Function/variable
 lookups reject null failed-module slots, and late registration logs extraction
@@ -47,9 +54,9 @@ original bug and covers errors, allocation failure, retry and cleanup; the full
 85-compilation public HIP sanitizer qualification passes on the final inputs.
 See `evidence/offline-static-module-failure.json`.
 
-This does not enable compiler-generated embedded images. Continue with the
-bounded linker-span/registration work in `docs/PUBLIC_EMBEDDED_IMAGES.md`, plus
-model conversion/reference fixtures. No console run or new installed image.
+This earlier failure-handling checkpoint alone did not enable compiler-generated
+embedded images. The subsequent bounded host qualification above supersedes
+that next step. No console run or new installed image.
 
 ## CLR command lifetime accounting qualified offline
 

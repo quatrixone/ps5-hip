@@ -29,13 +29,16 @@ source-inspected blockers. No model or native inference is qualified yet.
 
 ## Static module failure handling qualified offline
 
+- 2026-10-15 | V1 runtime prerequisite | offline | bounded compiler images through genuine CLR; eager/deferred, two-module/reversed order and missing-name rejection; full 87-compilation host suite and 76-object native bootstrap pass | evidence/offline-public-embedded-images.json | next: native compiler-launch title audit and .40 validation
+
 - 2026-10-15 | V1 runtime prerequisite | offline | failed module publication and null consumers fixed; full CLR host qualification passed | evidence/offline-static-module-failure.json | next: bounded embedded-image admission
 
 The inference-path prerequisite now fixes static-module failure publication and
 null consumers; focused regressions and final 85-compilation CLR sanitizer run
 pass. See `../evidence/offline-static-module-failure.json` and
-[PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md). Embedded images remain
-unsupported; this does not close V1.1 or V1.2.
+[PUBLIC_EMBEDDED_IMAGES.md](PUBLIC_EMBEDDED_IMAGES.md). The subsequent bounded
+host implementation is qualified above; native compiler-launch validation
+remains open. This does not close V1.1 or V1.2.
 
 ## CLR command lifetime accounting qualified offline
 

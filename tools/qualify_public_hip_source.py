@@ -49,14 +49,14 @@ def main():
     flags += ['--driver-mode=g++', '-DPS5HIP_CLR_MODEL', '-I' + str(DEPS / 'sources/sdk/platform/include'),
               '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
     units = [source / name for name in SOURCE_UNITS]
-    units += [ROOT / name for name in ('ports/clr/ps5-clr-tls.cpp', 'ports/clr/ps5-device.cpp',
+    units += [ROOT / name for name in ('ports/clr/ps5-clr-tls.cpp', 'ports/clr/ps5-device.cpp', 'ports/clr/ps5-embedded.cpp',
                                       'tests/hip_admission_model.cpp')]
     units += [ROOT / 'src' / (name + '.cpp') for name in (
-        'code_object', 'fat_binary', 'host_launch', 'launch', 'native_memory',
+        'code_object', 'fat_binary', 'host_registration', 'host_launch', 'launch', 'native_memory',
         'native_data', 'native_launch', 'submission', 'hip_launch_profile')]
     units += [p for p in sorted((source / 'hipamd/src').glob('*.cpp'))
               if p.stem not in ('fixme', 'hip_runtime')]
-    if len(units) != 69:
+    if len(units) != 71:
         raise RuntimeError('unexpected public HIP source closure')
     source_hashes = {str(p.relative_to(ROOT)): sha(p) for p in units}
     header_hashes = {}

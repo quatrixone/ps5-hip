@@ -10,7 +10,7 @@ installed image and D evidence cannot be recreated by Make.
 
 The root `Makefile` now fetches locked public inputs and builds the SDK,
 zlib, UFS2Tool, Lapy helper, controllers, host suite, native core, and a
-74-object public HIP bootstrap package. The
+76-object public HIP bootstrap package. The
 ProsperoEden and protocol locks refer to their public `main` snapshots; old
 local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
@@ -35,7 +35,7 @@ see `evidence/offline-llm-model-conversion.json`. The Q4_0 file is 619831552
 bytes and retains 45 F32 tensors alongside 156 Q4_0 tensors. Reference logits
 and native client execution remain unqualified.
 V1.1 remains partial. The next runtime blocker is
-compiler-generated embedded-image registration; prepare the effective HIP
+native compiler-generated embedded-image launch; prepare the effective HIP
 compile/link probe and pinned model conversion/reference fixtures in parallel.
 
 Retirement-ack work was stopped before edits or experiments. Do not resume it
@@ -46,6 +46,15 @@ All older next-step paragraphs below are historical and subordinate to this
 priority. The installed backing-test image/log remain unchanged.
 
 ## Static module failure handling checkpoint
+
+Current continuation: genuine CLR embedded registration has passed the full
+87-compilation host suite and actual compiler-stub tests (single/two modules,
+reversed order, eager/deferred loading and repeated missing-name rejection).
+Read `evidence/offline-public-embedded-images.json` and
+`docs/PUBLIC_EMBEDDED_IMAGES.md`. The 76-object native bootstrap builds, but
+does not contain the compiler-launch candidate. Next integrate/audit that title
+and test it on .40. Device backing cleanup is checked; complete static registry
+retirement accounting remains unproven.
 
 The publication-on-failure bug and its null-slot consumers are fixed and passed
 focused plus full genuine CLR host sanitizer qualification. Read

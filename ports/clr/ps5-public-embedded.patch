@@ -1,0 +1,385 @@
+--- a/hipamd/src/hip_fatbin.hpp
++++ b/hipamd/src/hip_fatbin.hpp
+@@ -63,6 +63,9 @@
+   FatBinaryInfo(const char* fname, const void* image);
+   ~FatBinaryInfo();
+ #if defined(WITH_PS5_DEVICE)
++  void setPs5StaticImage() { ps5_static_image_ = true; }
++#endif
++#if defined(WITH_PS5_DEVICE)
+   FatBinaryInfo(const FatBinaryInfo&) = delete;
+   FatBinaryInfo& operator=(const FatBinaryInfo&) = delete;
+   FatBinaryInfo(FatBinaryInfo&&) = delete;
+@@ -116,6 +119,7 @@
+ 
+ private:
+ #if defined(WITH_PS5_DEVICE)
++  bool ps5_static_image_ = false;
+   bool ps5_extract_attempted_ = false;
+   std::vector<unsigned char> ps5_image_storage_;
+ #endif
+--- a/hipamd/src/hip_fatbin.cpp
++++ b/hipamd/src/hip_fatbin.cpp
+@@ -23,6 +23,7 @@
+ #include "hip_fatbin.hpp"
+ #if defined(WITH_PS5_DEVICE)
+ #include "ps5hip/code_object.h"
++#include "ps5-embedded.h"
+ #include <cstdio>
+ #include <memory>
+ #include <new>
+@@ -339,7 +340,7 @@
+   ps5_extract_attempted_ = true;
+   // Pointer-only images have no caller-supplied extent in this API. Do not
+   // inspect their headers until a bounded memory-image admission path exists.
+-  if (fname_.empty()) return hipErrorNotSupported;
++  if (fname_.empty() && !ps5_static_image_) return hipErrorNotSupported;
+   if (devices.size() != 1 || devices[0] == nullptr || devices[0]->deviceId() < 0 ||
+       static_cast<size_t>(devices[0]->deviceId()) >= fatbin_dev_info_.size()) {
+     return hipErrorInvalidDevice;
+@@ -347,6 +348,11 @@
+   const int id = devices[0]->deviceId();
+   if (fatbin_dev_info_[id] != nullptr) return hipErrorInvalidValue;
+   try {
++    std::vector<unsigned char> bytes;
++    if (ps5_static_image_) {
++      if (!fname_.empty()) return hipErrorInvalidValue;
++      bytes = ps5hip::read_linked_host_module(image_).bytes;
++    } else {
+     std::unique_ptr<std::FILE, decltype(&std::fclose)> file(std::fopen(fname_.c_str(), "rb"), &std::fclose);
+     if (!file) return hipErrorFileNotFound;
+     if (std::fseek(file.get(), 0, SEEK_END) != 0) return hipErrorInvalidImage;
+@@ -354,10 +360,11 @@
+     if (size < 64 || size > 64 * 1024 * 1024 || std::fseek(file.get(), 0, SEEK_SET) != 0) {
+       return hipErrorInvalidImage;
+     }
+-    std::vector<unsigned char> bytes(static_cast<size_t>(size));
++    bytes.resize(static_cast<size_t>(size));
+     if (std::fread(bytes.data(), 1, bytes.size(), file.get()) != bytes.size() ||
+         std::fgetc(file.get()) != EOF || std::ferror(file.get())) return hipErrorInvalidImage;
+     if (std::fclose(file.release()) != 0) return hipErrorInvalidImage;
++    }
+     const auto object = ps5hip::inspect_code_object(bytes.data(), bytes.size());
+     if (object.target != "gfx1013") return hipErrorNoBinaryForGpu;
+     // Programs may borrow this storage; never move/resize it after publication.
+--- a/hipamd/src/hip_code_object.hpp
++++ b/hipamd/src/hip_code_object.hpp
+@@ -159,6 +159,9 @@
+   //Add/Remove/Digest Fat Binaries passed to us from "__hipRegisterFatBinary"
+   FatBinaryInfo** addFatBinary(const void* data, bool initialized);
+   hipError_t removeFatBinary(FatBinaryInfo** module);
++#if defined(WITH_PS5_DEVICE)
++  bool ps5RegisteredModule(FatBinaryInfo** module);
++#endif
+   hipError_t digestFatBinary(const void* data, FatBinaryInfo*& programs);
+ 
+   //Register vars/funcs given to use from __hipRegister[Var/Func/ManagedVar]
+@@ -180,6 +183,10 @@
+   friend class hip::PlatformState;
+   //Populated during __hipRegisterFatBinary
+   std::unordered_map<const void*, FatBinaryInfo*> modules_;
++#if defined(WITH_PS5_DEVICE)
++  FatBinaryInfo** ps5_retired_[32]{};
++  size_t ps5_retired_count_ = 0;
++#endif
+   //Populated during __hipRegisterFuncs
+   std::unordered_map<const void*, Function*> functions_;
+   //Populated during __hipRegisterVars
+--- a/hipamd/src/hip_code_object.cpp
++++ b/hipamd/src/hip_code_object.cpp
+@@ -1153,6 +1153,7 @@
+   try {
+     // A failed extraction must not become a cached successful module.
+     auto candidate = std::make_unique<FatBinaryInfo>(nullptr, data);
++    candidate->setPs5StaticImage();
+     IHIP_RETURN_ONFAIL(candidate->ExtractFatBinary(g_devices));
+     programs = candidate.release();
+   } catch (const std::bad_alloc&) {
+@@ -1166,8 +1167,20 @@
+   return hipSuccess;
+ }
+ 
++#if defined(WITH_PS5_DEVICE)
++bool StatCO::ps5RegisteredModule(FatBinaryInfo** module) {
++  amd::ScopedLock lock(sclock_);
++  for (size_t i = 0; i < ps5_retired_count_; ++i) if (ps5_retired_[i] == module) return false;
++  for (auto& entry : modules_) if (&entry.second == module) return true;
++  return false;
++}
++#endif
+ FatBinaryInfo** StatCO::addFatBinary(const void* data, bool initialized) {
+   amd::ScopedLock lock(sclock_);
++#if defined(WITH_PS5_DEVICE)
++  // Slots survive retirement so stale compiler handles can never alias a new module.
++  if (modules_.size() >= 32 || modules_.find(data) != modules_.end()) return nullptr;
++#endif
+ 
+   if (initialized) {
+     hipError_t err = digestFatBinary(data, modules_[data]);
+@@ -1182,6 +1195,9 @@
+ 
+ hipError_t StatCO::removeFatBinary(FatBinaryInfo** module) {
+   amd::ScopedLock lock(sclock_);
++#if defined(WITH_PS5_DEVICE)
++  if (!ps5RegisteredModule(module)) return hipErrorInvalidValue;
++#endif
+ 
+   auto vit = vars_.begin();
+   while (vit != vars_.end()) {
+@@ -1223,7 +1239,13 @@
+   while (mit != modules_.end()) {
+     if (&mit->second == module) {
+       delete mit->second;
++#if defined(WITH_PS5_DEVICE)
++      mit->second = nullptr;
++      ps5_retired_[ps5_retired_count_++] = module;
++      ++mit;
++#else
+       mit = modules_.erase(mit);
++#endif
+     } else {
+       ++mit;
+     }
+@@ -1235,6 +1257,12 @@
+ hipError_t StatCO::registerStatFunction(const void* hostFunction, Function* func) {
+   amd::ScopedLock lock(sclock_);
+ 
++#if defined(WITH_PS5_DEVICE)
++  if (!hostFunction || !func || !ps5RegisteredModule(func->moduleInfo()) ||
++      functions_.find(hostFunction) != functions_.end() || functions_.size() >= 256) {
++    return hipErrorInvalidValue;
++  }
++#endif
+   if (functions_.find(hostFunction) != functions_.end()) {
+     DevLogPrintfError("hostFunctionPtr: 0x%x already exists", hostFunction);
+   }
+--- a/hipamd/src/hip_platform.hpp
++++ b/hipamd/src/hip_platform.hpp
+@@ -82,6 +82,9 @@
+   // Static Code Objects functions
+   hip::FatBinaryInfo** addFatBinary(const void* data);
+   hipError_t removeFatBinary(hip::FatBinaryInfo** module);
++#if defined(WITH_PS5_DEVICE)
++  bool ps5RegisteredModule(hip::FatBinaryInfo** module) { return statCO_.ps5RegisteredModule(module); }
++#endif
+   hipError_t digestFatBinary(const void* data, hip::FatBinaryInfo*& programs);
+ 
+   hipError_t registerStatFunction(const void* hostFunction, hip::Function* func);
+--- a/hipamd/src/hip_platform.cpp
++++ b/hipamd/src/hip_platform.cpp
+@@ -26,6 +26,11 @@
+ #include "platform/runtime.hpp"
+ 
+ #include <unordered_map>
++#if defined(WITH_PS5_DEVICE)
++#include "ps5-embedded.h"
++#include <memory>
++#include <new>
++#endif
+ namespace hip {
+ constexpr unsigned __hipFatMAGIC2 = 0x48495046;  // "HIPF"
+ 
+@@ -68,6 +73,17 @@
+ }
+ 
+ void** __hipRegisterFatBinary(const void* data) {
++#if defined(WITH_PS5_DEVICE)
++  try {
++    ps5hip::read_linked_host_module(data);
++    return reinterpret_cast<void**>(PlatformState::instance().addFatBinary(data));
++  } catch (const ps5hip::ObjectError&) {
++    HIP_ERROR_PRINT(hipErrorInvalidImage, "invalid linked compiler module");
++  } catch (const std::bad_alloc&) {
++    HIP_ERROR_PRINT(hipErrorOutOfMemory, "compiler module allocation failed");
++  }
++  return nullptr;
++#else
+   const __CudaFatBinaryWrapper* fbwrapper = reinterpret_cast<const __CudaFatBinaryWrapper*>(data);
+   if (fbwrapper->magic != __hipFatMAGIC2 || fbwrapper->version != 1) {
+     LogPrintfError("Cannot Register fat binary. FatMagic: %u version: %u ", fbwrapper->magic,
+@@ -75,6 +91,7 @@
+     return nullptr;
+   }
+   return reinterpret_cast<void**>(PlatformState::instance().addFatBinary(fbwrapper->binary));
++#endif
+ }
+ 
+ void __hipRegisterFunction(hip::FatBinaryInfo** modules, const void* hostFunction,
+@@ -86,9 +103,31 @@
+     return var ? atoi(var) : 1;
+   }()};
+   hipError_t hip_error = hipSuccess;
++#if defined(WITH_PS5_DEVICE)
++  try {
++    if (!PlatformState::instance().ps5RegisteredModule(modules) || !hostFunction) {
++      HIP_ERROR_PRINT(hipErrorInvalidValue, "invalid compiler function module");
++      return;
++    }
++    auto func = std::make_unique<hip::Function>(ps5hip::linked_host_name(deviceName), modules);
++    hip_error = PlatformState::instance().registerStatFunction(hostFunction, func.get());
++    if (hip_error != hipSuccess) {
++      HIP_ERROR_PRINT(hip_error, "compiler function registration failed");
++      return;
++    }
++    func.release();
++  } catch (const ps5hip::ObjectError&) {
++    HIP_ERROR_PRINT(hipErrorInvalidValue, "invalid linked compiler function name");
++    return;
++  } catch (const std::bad_alloc&) {
++    HIP_ERROR_PRINT(hipErrorOutOfMemory, "compiler function allocation failed");
++    return;
++  }
++#else
+   hip::Function* func = new hip::Function(std::string(deviceName), modules);
+   hip_error = PlatformState::instance().registerStatFunction(hostFunction, func);
+   guarantee((hip_error == hipSuccess), "Cannot register Static function, error: %d", hip_error);
++#endif
+ 
+   if (!enable_deferred_loading) {
+     HIP_INIT_VOID();
+@@ -96,8 +135,15 @@
+ 
+     for (size_t dev_idx = 0; dev_idx < g_devices.size(); ++dev_idx) {
+       hip_error = PlatformState::instance().getStatFunc(&hfunc, hostFunction, dev_idx);
++#if defined(WITH_PS5_DEVICE)
++      if (hip_error != hipSuccess) {
++        HIP_ERROR_PRINT(hip_error, "compiler function eager load failed");
++        return;
++      }
++#else
+       guarantee((hip_error == hipSuccess), "Cannot retrieve Static function, error: %d",
+                                             hip_error);
++#endif
+     }
+   }
+ }
+@@ -117,10 +163,15 @@
+     int constant,                  // Whether this variable is constant
+     int global)                    // Unknown, always 0
+ {
++#if defined(WITH_PS5_DEVICE)
++  HIP_ERROR_PRINT(hipErrorNotSupported, "compiler global registration unsupported");
++  return;
++#else
+   hip::Var* var_ptr = new hip::Var(std::string(hostVar), hip::Var::DeviceVarKind::DVK_Variable,
+                                    size, 0, 0, modules);
+   hipError_t err = PlatformState::instance().registerStatGlobalVar(var, var_ptr);
+   guarantee((err == hipSuccess), "Cannot register Static Global Var, error:%d", err);
++#endif
+ }
+ 
+ void __hipRegisterSurface(
+@@ -129,10 +180,15 @@
+     char* hostVar,                 // Variable name in host code
+     char* deviceVar,               // Variable name in device code
+     int type, int ext) {
++#if defined(WITH_PS5_DEVICE)
++  HIP_ERROR_PRINT(hipErrorNotSupported, "compiler global registration unsupported");
++  return;
++#else
+   hip::Var* var_ptr = new hip::Var(std::string(hostVar), hip::Var::DeviceVarKind::DVK_Surface,
+                                    sizeof(surfaceReference), 0, 0, modules);
+   hipError_t err = PlatformState::instance().registerStatGlobalVar(var, var_ptr);
+   guarantee((err == hipSuccess), "Cannot register Static Glbal Var, err:%d", err);
++#endif
+ }
+ 
+ void __hipRegisterManagedVar(
+@@ -142,6 +198,10 @@
+     void* init_value,  // Initial value to be copied into \p pointer
+     const char* name,  // Name of the variable in code object
+     size_t size, unsigned align) {
++#if defined(WITH_PS5_DEVICE)
++  HIP_ERROR_PRINT(hipErrorNotSupported, "compiler global registration unsupported");
++  return;
++#else
+   HIP_INIT_VOID();
+   hipError_t status = ihipMallocManaged(pointer, size, align);
+   if (status == hipSuccess) {
+@@ -160,6 +220,7 @@
+                                    size, align, reinterpret_cast<hip::FatBinaryInfo**>(hipModule));
+   status = PlatformState::instance().registerStatManagedVar(var_ptr);
+   guarantee((status == hipSuccess), "Cannot register Static Managed Var, error: %d", status);
++#endif
+ }
+ 
+ void __hipRegisterTexture(
+@@ -168,21 +229,40 @@
+     char* hostVar,                 // Variable name in host code
+     char* deviceVar,               // Variable name in device code
+     int type, int norm, int ext) {
++#if defined(WITH_PS5_DEVICE)
++  HIP_ERROR_PRINT(hipErrorNotSupported, "compiler global registration unsupported");
++  return;
++#else
+   hip::Var* var_ptr = new hip::Var(std::string(hostVar), hip::Var::DeviceVarKind::DVK_Texture,
+                                    sizeof(textureReference), 0, 0, modules);
+   hipError_t err = PlatformState::instance().registerStatGlobalVar(var, var_ptr);
+   guarantee((err == hipSuccess), "Cannot register Static Global Var, status: %d", err);
++#endif
+ }
+ 
+ void __hipUnregisterFatBinary(hip::FatBinaryInfo** modules) {
++#if defined(WITH_PS5_DEVICE)
++  if (!PlatformState::instance().ps5RegisteredModule(modules)) {
++    HIP_ERROR_PRINT(hipErrorInvalidValue, "invalid or retired compiler module");
++    return;
++  }
++#endif
+   // By calling hipDeviceSynchronize ensure that all HSA signal handlers
+   // complete before removeFatBinary
+   hipError_t err = hipDeviceSynchronize();
+   if (err != hipSuccess) {
+     LogPrintfError("Error during hipDeviceSynchronize, error: %d", err);
++#if defined(WITH_PS5_DEVICE)
++    // Retain module/program ownership until completion is known.
++    return;
++#endif
+   }
+   err = PlatformState::instance().removeFatBinary(modules);
++#if defined(WITH_PS5_DEVICE)
++  if (err != hipSuccess) HIP_ERROR_PRINT(err, "compiler module removal failed");
++#else
+   guarantee((err == hipSuccess), "Cannot Unregister Fat Binary, error:%d", err);
++#endif
+ }
+ 
+ void __hipRegisterFunction(void** modules, const void* hostFunction, char* deviceFunction,
+@@ -710,6 +790,9 @@
+   }
+   initialized_ = true;
+   for (auto& it : statCO_.modules_) {
++#if defined(WITH_PS5_DEVICE)
++    if (!statCO_.ps5RegisteredModule(&it.second)) continue;
++#endif
+     hipError_t err = digestFatBinary(it.first, it.second);
+     if (err != hipSuccess) {
+       HIP_ERROR_PRINT(err, "continue parsing remaining modules");
+--- a/hipamd/src/hip_global.cpp
++++ b/hipamd/src/hip_global.cpp
+@@ -161,6 +161,12 @@
+   hipModule_t hmod = nullptr;
+   IHIP_RETURN_ONFAIL((*modules_)->BuildProgram(deviceId));
+   IHIP_RETURN_ONFAIL((*modules_)->GetModule(deviceId, &hmod));
++#if defined(WITH_PS5_DEVICE)
++  // Registration may name a bounded string absent from this module.
++  if (as_amd(reinterpret_cast<cl_program>(hmod))->findSymbol(name_.c_str()) == nullptr) {
++    return hipErrorInvalidDeviceFunction;
++  }
++#endif
+ 
+   if (dFunc_[deviceId] == nullptr) {
+     dFunc_[deviceId] = new DeviceFunc(name_, hmod);
+@@ -179,6 +185,12 @@
+   hipModule_t hmod = nullptr;
+   IHIP_RETURN_ONFAIL((*modules_)->BuildProgram(deviceId));
+   IHIP_RETURN_ONFAIL((*modules_)->GetModule(deviceId, &hmod));
++#if defined(WITH_PS5_DEVICE)
++  // Registration may name a bounded string absent from this module.
++  if (as_amd(reinterpret_cast<cl_program>(hmod))->findSymbol(name_.c_str()) == nullptr) {
++    return hipErrorInvalidDeviceFunction;
++  }
++#endif
+ 
+   if (dFunc_[deviceId] == nullptr) {
+     dFunc_[deviceId] = new DeviceFunc(name_, hmod);
