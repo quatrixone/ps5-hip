@@ -32,7 +32,7 @@ help:
 	@echo 'make llm-executed-graph  Capture actual batch-one CPU graph through context512 (fresh output)'
 	@echo 'make llm-vocab-fixture  Build zero-tensor upstream vocabulary GGUF and verify tokenizer equivalence'
 	@echo 'make llm-native-client-link  Cross-build the real loader/tokenizer payload (no app execution)'
-	@echo 'make llm-native-app  Build the vocabulary-only native app and audit its package (fresh output)'
+	@echo 'make llm-native-app  Build/audit native app (default vocab; LLM_NATIVE_APP_PHASE=model-gate requires locked full model)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
@@ -102,6 +102,14 @@ QUALIFICATION_DIR ?= results/public-hip-host
 LLM_EXECUTED_GRAPH_DIR ?= results/llm-executed-graph
 LLM_NATIVE_CLIENT_BUILD_DIR ?= build/llm-native-client
 LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
+LLM_NATIVE_APP_PHASE ?= vocab
+LLM_NATIVE_APP_MODEL ?= $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
+LLM_NATIVE_APP_MODEL_SOURCE ?= $(LLM_MODEL_DIR)
+LLM_NATIVE_APP_CPU_BUILD ?= $(LLM_CPU_BUILD_DIR)
+ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate),$(LLM_NATIVE_APP_PHASE))
+$(error LLM_NATIVE_APP_PHASE must be vocab or model-gate)
+endif
+LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)")
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
@@ -167,12 +175,20 @@ llm-native-app: deps-build llm-deps-fetch
 	@if ! test -f "$(LLM_NATIVE_CLIENT_BUILD_DIR)/receipt.json"; then $(MAKE) llm-native-client-link; fi
 	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
 	$(PYTHON) tests/llm_native_app_build_test.py
+	$(PYTHON) tests/llm_native_model_package_test.py
+	$(PYTHON) tests/source_model_auth_test.py
+	$(PYTHON) tests/source_model_callsites_test.py
+	$(PYTHON) tests/source_model_cleanup_budget_test.py
+	$(PYTHON) tests/source_model_execute_test.py
+	$(PYTHON) tests/source_model_phase_budget_test.py
+	$(PYTHON) tests/source_model_storage_edges_test.py
+	$(PYTHON) tests/source_model_streaming_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tests/public_hip_compile_inputs_test.py
 	$(PYTHON) tests/public_hip_llm_client_build_test.py
 	$(PYTHON) tests/source_llm_client_controls_test.py
 	$(PYTHON) tests/llm_client_native_audit_test.py
-	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)"
+	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS)
 
 .PHONY: llm-executed-graph
 llm-executed-graph: llm-cpu-reference

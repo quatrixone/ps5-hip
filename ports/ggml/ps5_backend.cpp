@@ -12,6 +12,7 @@ static ggml_backend_device device{};
 static ggml_backend_reg registry{};
 static ggml_backend_buffer_type buffer_type{};
 static unsigned graph_calls=0;
+static const ggml_cgraph* last_graph=nullptr;
 static unsigned scheduled_compute_calls=0;
 static unsigned gate_calls=0, rejected=0;
 void require(bool yes){if(!yes){std::fputs("M0 backend invariant/error\n",stderr);ps5hip_llm_fail("backend-invariant");}}
@@ -77,11 +78,12 @@ ggml_status release_compute(ggml_backend_sched_t scheduler,ggml_backend_t ps5,gg
 
 namespace m0 {
 ggml_backend_dev_t device_handle(){return &device;}
-GateStatistics statistics(){return {gate_calls,scheduled_compute_calls,rejected,graph_calls};}
-void reset_statistics(){gate_calls=scheduled_compute_calls=rejected=graph_calls=0;}
+GateStatistics statistics(){return {gate_calls,scheduled_compute_calls,rejected,graph_calls,last_graph};}
+void reset_statistics(){gate_calls=scheduled_compute_calls=rejected=graph_calls=0;last_graph=nullptr;}
 }
 extern "C" ggml_status __real_ggml_backend_sched_graph_compute_async(ggml_backend_sched_t,ggml_cgraph*);
 extern "C" ggml_status __wrap_ggml_backend_sched_graph_compute_async(ggml_backend_sched_t scheduler,ggml_cgraph* graph){
+ m0::last_graph=graph;
  ++m0::gate_calls;
  for(int i=0;i<ggml_graph_n_nodes(graph);++i){
   auto* tensor=ggml_graph_node(graph,i);

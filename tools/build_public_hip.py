@@ -22,7 +22,7 @@ import build_llm_rmsnorm_reference as rms_reference
 from public_hip_q4_assets import assets as q4_assets
 from public_hip_weighted_qkv_assets import assets as weighted_qkv_assets
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json').is_file())
 DEPS = ROOT / ".deps"
 SOURCE_UNITS = (
     "hipamd/src/fixme.cpp", "rocclr/compiler/lib/utils/options.cpp",
@@ -51,7 +51,8 @@ PROJECT_UNITS = (
 
 
 def sha(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def build_inputs():
@@ -215,7 +216,9 @@ def compile_bound_unit(output, path, obj, flags, label):
             "headers": headers}
 
 
-def compile_units(output, source, fixture="bootstrap"):
+def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
+    if client_phase not in ("vocab", "model-gate") or (fixture != "llm_client" and client_phase != "vocab"):
+        raise ValueError("invalid client compile phase")
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
     units = [source / name for name in SOURCE_UNITS]
@@ -238,6 +241,8 @@ def compile_units(output, source, fixture="bootstrap"):
                  if path.stem in ("hip_api_trace", "hip_table_interface",
                                   "hip_table_interface_c") else [])
         if fixture == "llm_client" and path.name == "public_hip_llm_client_console_title.cpp":
+            if client_phase == "model-gate":
+                extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_GATE=1")
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]
@@ -612,6 +617,31 @@ def validate_results_directory(results_dir):
         raise ValueError("results directory must be a bounded absolute console path")
 
 
+def validate_client_assets(assets):
+    phase = Path(assets["client-phase.txt"]).read_bytes() if "client-phase.txt" in assets else b""
+    expected = {"vocab.gguf", "client-phase.txt"}
+    if phase == b"model-gate\n":
+        expected.add("model.gguf")
+    elif phase != b"vocab\n":
+        raise ValueError("invalid client phase bytes")
+    if set(assets) != expected or any(Path(p).is_symlink() or not Path(p).is_file() for p in assets.values()):
+        raise ValueError("invalid phase-specific client assets")
+    if phase == b"model-gate\n":
+        from fetch_llm_model import verify
+        evidence = json.loads((ROOT / "evidence/offline-llm-model-conversion.json").read_text())["outputs"]["tinyllama-q4_0.gguf"]
+        verify(Path(assets["model.gguf"]), evidence["bytes"], evidence["sha256"])
+
+
+def copy_checked_package(packed, final):
+    with Path(packed).open("rb") as stream:
+        stream.seek(0x1055c)
+        if stream.read(4) != bytes.fromhex("19015419"):
+            raise RuntimeError("package format marker differs")
+    if Path(final).exists() or Path(final).is_symlink():
+        raise FileExistsError(final)
+    shutil.copyfile(packed, final)
+
+
 def package_title(output, image, libc, results_dir, code_object=None, extra_assets=None, client_assets=None):
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
     validate_results_directory(results_dir)
@@ -625,10 +655,9 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
     if client_assets is not None:
-        if (set(client_assets) != {"vocab.gguf", "client-phase.txt"} or
-                Path(client_assets["client-phase.txt"]).read_bytes() != b"vocab\n" or
-                code_object is not None or extra_assets):
-            raise ValueError("invalid vocabulary client assets")
+        validate_client_assets(client_assets)
+        if code_object is not None or extra_assets:
+            raise ValueError("client assets cannot mix legacy assets")
         sources.update({name: Path(path) for name, path in client_assets.items()})
     for name, path in (extra_assets or {}).items():
         if (not name.startswith(("rmsnorm/", "q4/", "weighted-qkv/")) or ".." in Path(name).parts or
@@ -665,12 +694,8 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
         run(output, "package-extract", [*command, "extract", packed, extracted])
         if inventory(extracted) != before:
             raise RuntimeError("UFS extraction inventory differs from staged title")
-        data = packed.read_bytes()
-        if data[0x1055c:0x10560] != bytes.fromhex("19015419"):
-            raise RuntimeError("package format marker differs")
         final = stage / (title + ".ffpkg")
-        with final.open("xb") as stream:
-            stream.write(data)
+        copy_checked_package(packed, final)
     return final, before
 
 

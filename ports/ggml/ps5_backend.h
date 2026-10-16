@@ -4,7 +4,7 @@
 extern "C" [[noreturn]] void ps5hip_llm_fail(const char* reason);
 namespace m0 {
 constexpr size_t allocation_limit = 64u * 1024u * 1024u;
-struct GateStatistics { unsigned calls, forwarded, rejected, direct_graph_calls; };
+struct GateStatistics { unsigned calls, forwarded, rejected, direct_graph_calls; const ggml_cgraph* last_graph; };
 ggml_backend_reg_t registration();
 ggml_backend_dev_t device_handle();
 GateStatistics statistics();

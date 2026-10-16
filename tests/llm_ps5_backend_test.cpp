@@ -46,10 +46,23 @@ static void storage_and_gate_check() {
  std::puts("M0_APP STORAGE copied=16 cleared=16 synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false");
 }
 
+static void log_policy_controls(){
+ const char* first="graph_compute: ggml_backend_sched_graph_compute_async failed with error -1\n";
+ const char* second="process_ubatch: failed to compute graph, compute status: -1\n";
+ m0::GateStatistics rejected{1,0,1,0,nullptr};
+ {m0::ModelGateLog p;p.accept(GGML_LOG_LEVEL_ERROR,"loader: failed to read tensor\n");m0::require(p.unexpected.load());}
+ {m0::ModelGateLog p;p.accept(GGML_LOG_LEVEL_ERROR,first,rejected);m0::require(p.unexpected.load());}
+ {m0::ModelGateLog p;p.begin();p.accept(GGML_LOG_LEVEL_ERROR,first,rejected);p.accept(GGML_LOG_LEVEL_ERROR,second,rejected);p.finish();}
+ {m0::ModelGateLog p;p.begin();p.accept(GGML_LOG_LEVEL_ERROR,second,rejected);m0::require(p.unexpected.load());}
+ {m0::ModelGateLog p;p.begin();p.accept(GGML_LOG_LEVEL_ERROR,first,{});m0::require(p.unexpected.load());}
+ {m0::ModelGateLog p;p.begin();p.accept(GGML_LOG_LEVEL_ERROR,first,rejected);p.accept(GGML_LOG_LEVEL_ERROR,second,rejected);p.accept(GGML_LOG_LEVEL_ERROR,first,rejected);m0::require(p.unexpected.load());}
+ {m0::ModelGateLog p;p.begin();bool failed=false;try{p.finish();}catch(const BackendFailure&){failed=true;}m0::require(failed);}
+ std::puts("LOG_POLICY_PASS controls=7 unexpected_loader_error_rejected=true");
+}
 int main(int argc,char**argv){
- m0::require(argc==2);storage_and_gate_check();
+ m0::require(argc==2);log_policy_controls();storage_and_gate_check();
  const auto result=m0::reject_actual_model(argv[1]);
- m0::require(result.gate.calls==1&&result.gate.rejected==1&&result.gate.forwarded==0&&result.post_compute==0);
+ m0::require(result.attempts==2&&result.graph_reused&&result.gate.calls==1&&result.gate.rejected==1&&result.gate.forwarded==0&&result.post_compute==0);
  m0::require(observed.allocations==observed.frees&&!observed.terminal&&!observed.uncertain&&observed.launches==0&&submits==0);
  std::puts("PRODUCTION_GATE_HOST_PASS actual_llama_process=true cpu_bypass=false storage_bounds=3 allocation_limit=67108864 model_compute=0 gpu_submits=0");
 }

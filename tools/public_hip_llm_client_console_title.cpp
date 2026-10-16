@@ -139,19 +139,22 @@ int main() {
     std::puts("PS5HIP START target=gfx1013 kernel=m0_client_boundary");
     if (!finalizer_installed) ps5hip_clr_gpu_fail("finalizer-install");
     ps5hip_canary::check_runtime();
-    ps5hip_clr_gpu::watchdog_start(30000);
+    const bool full_model=configured_model_phase();
+    // Conservative bounded experiment budget, not a performance measurement.
+    ps5hip_clr_gpu::watchdog_start(full_model ? 120000 : 30000);
     const hipError_t initialized = hipInit(0);
     int count = -1;
     const hipError_t discovered = hipGetDeviceCount(&count);
     if (initialized != hipSuccess || discovered != hipSuccess || count != 1)
       ps5hip_clr_gpu_fail("public-discovery");
-    const bool full_model=configured_model_phase();
     if(full_model){
       // Builder and freeze controller must authenticate locked model bytes before enabling this phase.
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
       const std::string model_path=std::string(title_root)+"model.gguf";
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
-      m0::reject_actual_model(model_path.c_str());
+      // This helper accepts only the two exact errors after each observed gate rejection.
+      const auto gate=m0::reject_actual_model(model_path.c_str());
+      m0::require(gate.attempts==2&&gate.graph_reused&&gate.result==-3);
       m0::require(observed.launches==0&&!observed.uncertain&&observed.allocations==observed.frees);
     }else{
       vocabulary_check();storage_and_gate_check();

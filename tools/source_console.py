@@ -11,6 +11,9 @@ import threading
 import time
 import uuid
 from source_public_hip_log import LOG_NAMES, package_limit
+from source_model_streaming import local_identity, readback, stage_upload
+from source_model_freeze import model_contract, stream_digest, validate_model_candidate
+from source_llm_model_log import check_model_log
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = '192.168.4.40'
@@ -72,6 +75,20 @@ def lifecycle(raw):
     return complete, starts
 
 
+class PhaseFTP:
+    def __init__(self, ftp, remaining): self.ftp,self.remaining=ftp,remaining
+    def close(self):
+        return self.ftp.close()
+    def __getattr__(self,name):
+        value=getattr(self.ftp,name)
+        if not callable(value):return value
+        def guarded(*args,**kwargs):
+            self.remaining()
+            result=value(*args,**kwargs)
+            self.remaining()
+            return result
+        return guarded
+
 class Control:
     def __init__(self, candidate, phase):
         self.candidate, self.phase = candidate, phase
@@ -103,7 +120,7 @@ class Control:
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
         self.verify()
-        require((ROOT/self.manifest['package']).stat().st_size <= package_limit(self.fixture), 'candidate package size exceeds fixture bound')
+        require((ROOT/self.manifest['package']).stat().st_size <= (619831552+33554432 if self.model_phase() else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
         if self.fixture == 'llm_client':
             self.authenticate_llm_client()
         if self.fixture == 'rmsnorm':
@@ -123,7 +140,7 @@ class Control:
         self.out.mkdir(exist_ok=False)
         self.record = {'phase': phase, 'host': HOST, 'title_id': TITLE, 'accepted': False, 'launched': False,
                        'manifest_sha256': self.manifest_sha,
-                       'package_sha256': sha((ROOT / self.manifest['package']).read_bytes())}
+                       'package_sha256': stream_digest(ROOT / self.manifest['package'])}
         self.token = 'source-hip-' + str(uuid.uuid4())
         self.owned = False
         self.ftp = None
@@ -136,9 +153,33 @@ class Control:
         require(sha((self.candidate / 'manifest.json').read_bytes()) == self.manifest_sha, 'manifest changed')
         for name, digest in self.manifest['files'].items():
             path = ROOT / name
-            require(path.resolve().is_relative_to(ROOT) and sha(path.read_bytes()) == digest, 'frozen input changed: ' + name)
+            require(path.resolve().is_relative_to(ROOT) and stream_digest(path) == digest, 'frozen input changed: ' + name)
+
+    def phase_remaining(self, requested=1800):
+        if not self.model_phase(): return requested
+        if not hasattr(self, 'phase_deadline'): self.phase_deadline = time.monotonic() + 1800
+        remaining = self.phase_deadline - time.monotonic()
+        require(remaining > 0, 'whole model phase deadline exhausted')
+        return min(requested, remaining)
+
+    def model_readback(self, remote, size, digest, records, seconds, output=None):
+        result=readback(self.ftp,remote,size,digest,records,self.phase_remaining(seconds),output,guard=self.phase_remaining)
+        self.phase_remaining()
+        return result
+
+    def model_upload(self, package, temporary, size, digest, records, seconds):
+        # stage_upload contains upload + readback: use one shared deadline for both via FTP guard.
+        result=stage_upload(self.ftp,package,temporary,size,digest,records,self.phase_remaining(seconds),guard=self.phase_remaining)
+        self.phase_remaining()
+        return result
+
+    def model_phase(self):
+        return getattr(self,'fixture',None) == 'llm_client' and self.manifest.get('llm_client', {}).get('phase') == 'model-gate'
 
     def authenticate_llm_client(self):
+        if self.model_phase():
+            validate_model_candidate(self.candidate,self.manifest)
+            return
         from freeze_source_candidate import validate_llm_client
         bound = self.manifest.get('llm_client', {})
         require(bound.get('phase') == 'vocab', 'full model phase is not authorized')
@@ -286,21 +327,40 @@ class Control:
         (self.out / (name + '.log')).write_bytes(raw)
         return raw
 
+    def verify_close_payload(self):
+        require(sha((self.candidate/'manifest.json').read_bytes())==self.manifest_sha,'cleanup manifest changed')
+        path=(ROOT/self.manifest['close']).resolve()
+        require(path.is_relative_to(ROOT) and self.manifest['files'].get(self.manifest['close'])==stream_digest(path),'cleanup close payload differs')
+
     def send(self, name, bound=262144):
-        self.verify()
+        if name != 'close':self.phase_remaining()
+        if name == 'close' and self.model_phase():self.verify_close_payload()
+        else:self.verify()
+        if name == 'close' and self.model_phase():self.cleanup_remaining()
+        else:self.phase_remaining()
         self.owned_lock()
         payload = (ROOT / self.manifest[name]).read_bytes()
+        if name == 'close' and self.model_phase():require(sha(payload)==self.manifest['files'].get(self.manifest['close']),'cleanup payload changed after verification')
         data = bytearray()
         with (self.out / (name + '-consumed')).open('x') as stream:
             stream.write(self.token)
         deadline = time.monotonic() + 10
         try:
+            if name == 'close' and self.model_phase():self.cleanup_remaining()
+            else:self.phase_remaining()
             with socket.create_connection((HOST, 9021), timeout=3) as sock:
+                if name == 'close' and self.model_phase():self.cleanup_remaining()
                 sock.settimeout(8)
+                if name == 'close' and self.model_phase():self.cleanup_remaining()
+                else:self.phase_remaining()
                 sock.sendall(payload)
                 while True:
+                    if name == 'close' and self.model_phase():self.cleanup_remaining()
+                    else:self.phase_remaining()
                     require(time.monotonic() < deadline, 'controller deadline')
                     block = sock.recv(min(65536, bound + 1 - len(data)))
+                    if name == 'close' and self.model_phase():self.cleanup_remaining()
+                    else:self.phase_remaining()
                     if not block:
                         break
                     data.extend(block)
@@ -310,6 +370,7 @@ class Control:
         return bytes(data)
 
     def installed(self):
+        if self.model_phase():return self.installed_model()
         app = ROOT / self.manifest['app']
         image = (ROOT / self.manifest['package']).read_bytes()
         require(self.fetch_image(REMOTE, len(image)) == image, 'installed image mismatch')
@@ -319,6 +380,17 @@ class Control:
         for name in self.manifest['package_files']:
             expected = (app / name).read_bytes()
             require(self.fetch(MOUNT + '/' + name, len(expected)) == expected, 'mounted bytes mismatch: ' + name)
+
+    def installed_model(self):
+        transfer=self.manifest['model_transfer']
+        self.model_readback(REMOTE,transfer['bytes'],transfer['sha256'],self.record.setdefault('ftp_reads',[]),transfer['deadline_seconds'])
+        require(self.fetch('/user/app/'+TITLE+'/mount.lnk',1024)==MOUNT.encode(),'mount link changed')
+        app=ROOT/self.manifest['app']
+        require(self.fetch('/user/appmeta/'+TITLE+'/param.json',65536)==(app/'sce_sys/param.json').read_bytes(),'registered metadata mismatch')
+        for name,digest in self.manifest['package_files'].items():
+            path=app/name
+            local_identity(path,path.stat().st_size,digest)
+            self.model_readback(MOUNT+'/'+name,path.stat().st_size,digest,self.record.setdefault('ftp_reads',[]),transfer['deadline_seconds'])
 
     def fresh_log(self):
         require(not any(row.endswith(' ' + Path(self.log).name) for row in self.listing(str(Path(self.log).parent))), 'result log already exists')
@@ -504,6 +576,7 @@ class Control:
         self.record['results_directory_verified'] = directory
 
     def deploy(self):
+        if self.model_phase():return self.deploy_model()
         self.idle()
         snapshot(self.send('snapshot'))
         baseline_log = self.manifest.get('baseline_log_sha256')
@@ -541,7 +614,9 @@ class Control:
             require(time.monotonic() < deadline, 'old image release timed out')
             time.sleep(3)
         self.idle(); self.verify()
+        self.phase_remaining()
         self.ftp.rename(temporary, REMOTE)
+        self.phase_remaining()
         self.record['promoted'] = True
         # Give ShadowMount and storage the full runbook settling interval.
         for _ in range(24):
@@ -556,7 +631,118 @@ class Control:
         snapshot(self.send('post_snapshot'))
         self.record['accepted'] = True
 
+    def deploy_model(self):
+        self.phase_remaining()
+        self.ftp = PhaseFTP(self.ftp, self.phase_remaining)
+        model_contract(self.manifest)
+        self.idle()
+        snapshot(self.send('snapshot'))
+        baseline_log = self.manifest.get('baseline_log_sha256')
+        old_sha = self.manifest['baseline_image_sha256']
+        require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
+        baseline=self.manifest['baseline_transfer']
+        old_size=baseline['bytes']
+        self.model_readback(REMOTE,old_size,old_sha,self.record.setdefault('ftp_reads',[]),baseline['deadline_seconds'],self.out/'old.ffpkg')
+        self.ensure_results_directory()
+        if self.baseline_log != self.log:
+            self.fresh_log()
+        previous = self.baseline_log_read()
+        backup = REMOTE + '.source-rebuild-' + old_sha + '.preserved'
+        temporary = '/data/homebrew/.PPSA99014-source-' + self.token + '.upload'
+        entries = self.listing('/data/homebrew')
+        require(not any(row.endswith(' ' + Path(backup).name) for row in entries), 'backup already exists')
+        package=ROOT/self.manifest['package']
+        transfer=self.manifest['model_transfer']
+        size=transfer['bytes']; digest=transfer['sha256']; seconds=transfer['deadline_seconds']
+        self.idle(); self.verify()
+        self.absent(temporary)
+        self.model_upload(package,temporary,size,digest,self.record.setdefault('ftp_transfers',[]),seconds)
+        self.idle()
+        self.preserve_baseline_log(previous)
+        self.fresh_log()
+        start = self.history_read('before-preserve')
+        self.model_readback(REMOTE,old_size,old_sha,self.record.setdefault('ftp_reads',[]),baseline['deadline_seconds'])
+        self.record.update(backup=backup, temporary=temporary)
+        self.ftp.rename(REMOTE, backup)
+        self.model_readback(backup,old_size,old_sha,self.record.setdefault('ftp_reads',[]),baseline['deadline_seconds'])
+        deadline = time.monotonic() + 60
+        while True:
+            self.idle()
+            current = self.history_read('release')
+            if re.search(r'\[IMG\]\[LVD\] unmount complete: source=' + re.escape(REMOTE) + ' mount=' + re.escape(MOUNT) + r' unit=\d+', current[len(start):].decode()):
+                break
+            require(time.monotonic() < deadline, 'old image release timed out')
+            time.sleep(3)
+        self.idle(); self.verify()
+        self.phase_remaining()
+        self.ftp.rename(temporary, REMOTE)
+        self.phase_remaining()
+        self.record['promoted'] = True
+        # Give ShadowMount and storage the full runbook settling interval.
+        for _ in range(24):
+            time.sleep(5)
+            self.idle()
+        self.installed()
+        self.model_readback(backup,old_size,old_sha,self.record.setdefault('ftp_reads',[]),baseline['deadline_seconds'])
+        if baseline_log:
+            previous_log, log_backup = previous
+            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')
+        self.fresh_log()
+        snapshot(self.send('post_snapshot'))
+        self.record['accepted'] = True
+
+    def cleanup_remaining(self):
+        if not hasattr(self,'cleanup_deadline'): self.cleanup_deadline=time.monotonic()+60
+        require(time.monotonic()<self.cleanup_deadline,'bounded cleanup deadline exhausted')
+
+    def cleanup_ftp(self):
+        ftp=self.ftp
+        while isinstance(ftp,PhaseFTP):ftp=ftp.ftp
+        return ftp
+
+    def cleanup_fetch(self,path,bound):
+        require(path in (HISTORY,self.log),'cleanup read path forbidden')
+        self.cleanup_remaining();self.owned_lock();data=bytearray()
+        def append(block):
+            self.cleanup_remaining();require(len(data)+len(block)<=bound,'cleanup read bound');data.extend(block)
+        self.cleanup_ftp().retrbinary('RETR '+path,append,blocksize=65536)
+        self.cleanup_remaining();return bytes(data)
+
+    def cleanup_history(self,name):
+        raw=self.cleanup_fetch(HISTORY,8388608)
+        require(self.history is None or raw.startswith(self.history),'ShadowMount history reset')
+        self.history=raw;(self.out/(name+'.log')).write_bytes(raw);return raw
+
+    def cleanup_active(self):
+        self.cleanup_remaining();self.owned_lock();rows=[]
+        def append(row):
+            self.cleanup_remaining();require(len(rows)<4096,'cleanup directory bound');rows.append(row)
+        self.cleanup_ftp().retrlines('LIST /mnt/sandbox',append)
+        self.cleanup_remaining();require(rows,'unknown sandbox state')
+        return {match[1] for row in rows if (match:=re.search(r'\s((?!NPXS)[A-Z]{4}[0-9]{5})_',row))}
+
+    def emergency_close(self,baseline):
+        current=self.cleanup_history('before-safety-close');_,starts=lifecycle(current[len(baseline):])
+        require(len(starts)==1 and starts[0][0]==TITLE,'ambiguous launch; refuse close')
+        active=self.cleanup_active();require(active in (set(),{TITLE}),'unrelated title; refuse close')
+        if active:
+            self.cleanup_remaining();self.send('close');self.record['safety_close_sent']=True;self.cleanup_remaining()
+            deadline=time.monotonic()+8
+            while self.cleanup_active()=={TITLE} and time.monotonic()<deadline:time.sleep(.5)
+        self.record['idle_after_safety_close']=not self.cleanup_active();self.cleanup_history('after-safety-close')
+
+    def observation_seconds(self):
+        return 150 if self.model_phase() else 40
+
+    def check_application(self, raw):
+        if self.model_phase(): return check_model_log(raw)
+        from source_public_hip_log import check_log
+        return check_log(raw, self.fixture)
+
     def execute(self):
+        if self.model_phase():
+            self.phase_remaining()
+            if getattr(self,'ftp',None) is not None: self.ftp = PhaseFTP(self.ftp, self.phase_remaining)
         deployment = json.loads((self.candidate / 'deploy/receipt.json').read_text())
         require(deployment.get('accepted') is True and deployment.get('healthy_after') is True and
                 deployment.get('lock_released') is True and deployment.get('phase') == 'deploy' and
@@ -587,8 +773,11 @@ class Control:
             launch_offset = len(self.klog)
             self.record['klog_launch_offset'] = launch_offset
             self.record['launched'] = True
-            self.send('launch')  # This pinned controller prints no result; lifecycle is authoritative.
-            deadline = time.monotonic() + 40
+            self.phase_remaining()
+            self.send('launch')
+            self.phase_remaining() # bounded blocking launch return  # This pinned controller prints no result; lifecycle is authoritative.
+            self.record['observation_seconds'] = self.observation_seconds()
+            deadline = time.monotonic() + self.record['observation_seconds']
             while True:
                 current = self.history_read('observed')
                 stopped, starts = lifecycle(current[len(baseline):])
@@ -604,7 +793,7 @@ class Control:
             (self.out / 'application.log').write_bytes(application)
             self.collect_rmsnorm_dumps(); self.collect_q4_dumps(); self.collect_weighted_qkv_dumps()
             from source_public_hip_log import check_log
-            self.record['application'] = check_log(application, self.fixture)
+            self.record['application'] = self.check_application(application)
             self.verify_rmsnorm_dumps(); self.verify_q4_dumps(); self.verify_weighted_qkv_dumps()
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
@@ -614,19 +803,22 @@ class Control:
         finally:
             if self.record['launched'] and not self.record.get('ordered_stop'):
                 try:
-                    current = self.history_read('before-safety-close')
-                    _, starts = lifecycle(current[len(baseline):])
-                    require(len(starts) == 1 and starts[0][0] == TITLE, 'ambiguous launch; refuse close')
-                    active = self.active_titles()
-                    require(active in (set(), {TITLE}), 'unrelated title; refuse close')
-                    if active:
-                        self.send('close')
-                        self.record['safety_close_sent'] = True
-                        close_deadline = time.monotonic() + 8
-                        while self.active_titles() == {TITLE} and time.monotonic() < close_deadline:
-                            time.sleep(.5)
-                    self.record['idle_after_safety_close'] = not self.active_titles()
-                    self.history_read('after-safety-close')
+                    if self.model_phase():
+                        self.emergency_close(baseline)
+                    else:
+                        current = self.history_read('before-safety-close')
+                        _, starts = lifecycle(current[len(baseline):])
+                        require(len(starts) == 1 and starts[0][0] == TITLE, 'ambiguous launch; refuse close')
+                        active = self.active_titles()
+                        require(active in (set(), {TITLE}), 'unrelated title; refuse close')
+                        if active:
+                            self.send('close')
+                            self.record['safety_close_sent'] = True
+                            close_deadline = time.monotonic() + 8
+                            while self.active_titles() == {TITLE} and time.monotonic() < close_deadline:
+                                time.sleep(.5)
+                        self.record['idle_after_safety_close'] = not self.active_titles()
+                        self.history_read('after-safety-close')
                 except Exception as error:
                     self.record['safety_close_error'] = repr(error)
             self.stop.set(); worker.join(timeout=2); sock.close()
@@ -648,7 +840,7 @@ class Control:
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:
-                    (self.out / 'application.log').write_bytes(self.fetch(self.log, 65536))
+                    (self.out / 'application.log').write_bytes(self.cleanup_fetch(self.log,65536) if self.model_phase() else self.fetch(self.log,65536))
                 except Exception as error:
                     self.record['application_capture_error'] = repr(error)
             require(not worker.is_alive(), 'klog collector did not stop')
@@ -657,6 +849,7 @@ class Control:
 
     def run(self):
         try:
+            if self.model_phase(): self.phase_remaining()
             with LOCK.open('x') as stream:
                 stream.write(self.token)
             self.owned = True
@@ -664,6 +857,7 @@ class Control:
             self.ftp = ftplib.FTP()
             self.ftp.connect(HOST, 2121, timeout=8)
             self.ftp.login('anonymous', 'codex')
+            if self.model_phase():self.phase_remaining();self.ftp=PhaseFTP(self.ftp,self.phase_remaining)
             require(self.ftp.sendcmd('SELF') == '226 SELF transfer mode disabled', 'raw SELF transfer mode unavailable')
             getattr(self, self.phase)()
         except Exception as error:
@@ -671,7 +865,9 @@ class Control:
             self.record['error'] = repr(error)
         finally:
             if self.ftp:
-                self.ftp.close()
+                try:self.ftp.close()
+                except Exception as error:
+                    self.record['ftp_close_error']=repr(error);self.record['accepted']=False
             if self.owned:
                 try:
                     self.record['healthy_after'] = self.health()

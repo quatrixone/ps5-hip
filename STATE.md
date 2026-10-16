@@ -16,6 +16,17 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Full-model gate integration is now in production source. Fifteen offline suites
+(134 tests) and independent review pass. The first model-app build failed at
+link because real context destruction needs `ggml_opt_free`; compiling the
+unchanged upstream `ggml-opt.cpp` resolves the diagnostic relink. Model builds
+now require 148 authenticated objects; vocabulary builds retain 147. See
+`evidence/offline-native-llm-model-link-correction.json`. A fresh model-app-v2
+build is running; complete package/audit and installed full-model validation
+remain pending. Preserve failed model-app-v1 and do not treat the relink as a
+packaged/native result. Earlier statements about staged-only model changes are
+superseded.
+
 Current checkpoint: the corrected installed PPSA99014 vocabulary app passed on
 .40, including 32 exact tokenizer cases (236 tokens), HIP copy/clear, synthetic
 unsupported-compute rejection and natural shutdown. The terminal controller

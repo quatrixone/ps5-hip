@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse, hashlib, json, os, shutil, subprocess, sys, threading, shlex, re
 ROOT=next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json').is_file())
-sys.path[:0]=[str(ROOT/'tools'),str(ROOT/'tests')]
+sys.path[:0]=[str(Path(__file__).resolve().parent),str(ROOT/'tools'),str(ROOT/'tests')]
 import build_public_hip as b
 import build_llm_native_client as client_builder
 import build_llm_executed_graph as graph
@@ -23,8 +23,9 @@ def command_file_inputs(output,label,argv,title):
  return persistent,scratch
 
 
-def write_phase(path):
- Path(path).write_bytes(b'vocab\n')
+def write_phase(path,phase='vocab'):
+ if phase not in ('vocab','model-gate'):raise ValueError('invalid app phase')
+ Path(path).write_bytes((phase+'\n').encode())
 
 
 def validate_vocab_asset(asset,evidence):
@@ -89,6 +90,54 @@ def vocab_inputs(folder):
  return {'asset':str(asset),'receipt':str(receipt),'receipt_sha256':digest,'inputs':{**inputs,**{str(folder/n):h for n,h in artifacts.items()},str(receipt):digest}}
 
 
+def validate_phase_arguments(phase,model,model_source,cpu_build):
+ if phase not in ('vocab','model-gate'):raise ValueError('invalid app phase')
+ supplied=(model is not None,model_source is not None,cpu_build is not None)
+ if (phase=='vocab' and any(supplied)) or (phase=='model-gate' and not all(supplied)):raise ValueError('model prerequisites do not match phase')
+
+
+def model_inputs(model,source_dir,cpu_build):
+ from fetch_llm_model import verify
+ model=Path(model).absolute();source_dir=Path(source_dir).absolute();cpu_build=Path(cpu_build).resolve()
+ # Check before resolving so aliases cannot conceal a symlink asset.
+ if model.is_symlink() or not model.is_file() or model.resolve()!=model:raise ValueError('model must be a regular non-aliased file')
+ evidence_path=ROOT/'evidence/offline-llm-model-conversion.json';evidence=json.loads(evidence_path.read_text());expected=evidence['outputs']['tinyllama-q4_0.gguf']
+ if expected['bytes']!=619831552 or expected['sha256']!='c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa':raise ValueError('unexpected model profile')
+ if model.stat().st_size!=expected['bytes']:raise ValueError('model size differs')
+ receipt=model.parent/'receipt.json';receipt_hash=b.sha(receipt);r=json.loads(receipt.read_text())
+ model_lock_path=ROOT/'models/tinyllama-1.1b-chat-v1.0.json';model_lock=json.loads(model_lock_path.read_text());client_lock=read('llm-inputs.json')['client']
+ if r.get('schema')!=1 or r.get('classification')!='host-model-conversion-verified' or r.get('model_inference_executed') is not False or r.get('native_executed') is not False or r.get('model_revision')!=model_lock['revision'] or r.get('source_revision')!=client_lock['revision']:raise ValueError('invalid model conversion receipt')
+ identities=r.get('identities')
+ if not isinstance(identities,dict) or not identities:raise ValueError('missing conversion identities')
+ for name,h in identities.items():
+  if not Path(name).is_absolute() or b.sha(name)!=h:raise ValueError('stale conversion identity')
+ required=[ROOT/n for n in ('llm-inputs.json','llm-conversion-inputs.json','tools/convert_llm_model.py','tools/fetch_llm_model.py')]+[model_lock_path,cpu_build/'receipt.json']
+ for p in required:
+  if identities.get(str(p))!=b.sha(p):raise ValueError('missing conversion prerequisite')
+ environment_receipts=[Path(p) for p in identities if Path(p).name=='receipt.json' and Path(p)!=cpu_build/'receipt.json']
+ if len(environment_receipts)!=1:raise ValueError('conversion environment receipt missing')
+ environment=json.loads(environment_receipts[0].read_text())
+ if environment.get('lock_sha256')!=b.sha(ROOT/'llm-conversion-inputs.json'):raise ValueError('conversion environment lock differs')
+ output=r.get('outputs',{}).get('tinyllama-q4_0.gguf',{})
+ for key in ('bytes','sha256','metadata','dtype_counts','tensor_bytes'):
+  if output.get(key)!=expected[key]:raise ValueError('converted model metadata/profile differs')
+ tensors=output.get('tensors',[])
+ if len(tensors)!=expected['tensor_count'] or len({t['name'] for t in tensors})!=len(tensors) or sum(t['elements'] for t in tensors)!=expected['parameters']:raise ValueError('converted tensor inventory differs')
+ commands=r.get('commands',[])
+ if [c.get('label') for c in commands]!=['convert-f16','quantize-q4_0'] or any(c.get('exit_code')!=0 or c.get('timed_out') for c in commands):raise ValueError('conversion did not succeed')
+ if Path(commands[0]['argv'][2])!=source_dir or Path(commands[1]['argv'][0])!=cpu_build/'cmake/bin/llama-quantize' or Path(commands[1]['argv'][3])!=model:raise ValueError('conversion command identities differ')
+ inputs={**identities,str(receipt):receipt_hash,str(evidence_path):b.sha(evidence_path)}
+ # Existing helper verifies clean locked client, complete CPU/tool closure and exact GGUF digest.
+ for p,h in graph.cpu_inputs(cpu_build,model).items():
+  if p in inputs and inputs[p]!=h:raise ValueError('model prerequisite identity conflict')
+  inputs[p]=h
+ for name,spec in model_lock['metadata'].items():
+  p=source_dir/name;verify(p,spec['bytes'],spec['sha256']);inputs[str(p)]=spec['sha256']
+ p=source_dir/'model.safetensors';weights=model_lock['weights'];verify(p,weights['file_bytes'],weights['expected_file_sha256']);inputs[str(p)]=weights['expected_file_sha256']
+ if b.sha(receipt)!=receipt_hash:raise ValueError('conversion receipt changed')
+ return {'asset':str(model),'source_dir':str(source_dir),'cpu_build':str(cpu_build),'bytes':expected['bytes'],'sha256':expected['sha256'],'receipt':str(receipt),'receipt_sha256':receipt_hash,'inputs':inputs}
+
+
 def merged_unit_headers(units):
  headers={}
  for unit in units:
@@ -98,7 +147,8 @@ def merged_unit_headers(units):
  return headers
 
 
-def build(output,native_client,vocab_fixture,results_dir):
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None):
+ validate_phase_arguments(phase,model,model_source,cpu_build)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
  b.validate_results_directory(results_dir)
@@ -129,6 +179,8 @@ def build(output,native_client,vocab_fixture,results_dir):
   for path,names in inventories.items():
    if sorted(str(p) for p in Path(path).rglob('*') if p.is_file() and '.git' not in p.relative_to(path).parts and '__pycache__' not in p.parts)!=names:raise ValueError('dependency inventory changed: '+path)
  bind(Path(__file__));bind(ROOT/'tests/llm_native_app_build_test.py')
+ model_test=Path(__file__).with_name('test_model_package.py')
+ bind(model_test if model_test.is_file() else ROOT/'tests/llm_native_model_package_test.py')
  for name,h in b.build_inputs().items():bind(ROOT/name,h)
  for module in list(sys.modules.values()):
   name=getattr(module,'__file__',None)
@@ -173,6 +225,8 @@ def build(output,native_client,vocab_fixture,results_dir):
    if name.startswith('/') and Path(name).is_file():bind(name)
  client=client_builder.app_objects(native_client);merge(client['inputs'])
  vocab=vocab_inputs(vocab_fixture);merge(vocab['inputs'])
+ model_info=model_inputs(model,model_source,cpu_build) if phase=='model-gate' else None
+ if model_info:merge(model_info['inputs'])
  output.mkdir(parents=True)
  original_run=b.run
  def recorded_run(out,label,argv):
@@ -238,39 +292,47 @@ def build(output,native_client,vocab_fixture,results_dir):
  b.run=recorded_run
  try:
   public=b.source_tree(output,'llm_client');tree(public)
-  units=b.compile_units(output,public,'llm_client')
+  units=b.compile_units(output,public,'llm_client',client_phase=phase)
   merge(merged_unit_headers(units))
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
   flags=b.compiler_flags(public)+['-I'+str(upstream_client/n) for n in ('include','ggml/include','ggml/src')]+['-I'+str(ROOT/'ports/ggml')]
   backend=b.compile_bound_unit(output,ROOT/'ports/ggml/ps5_backend.cpp',output/'ps5_backend.o',flags,'compile-ps5-backend');merge(backend['headers']);bind(output/backend['object'],backend['object_sha256']);units.append(backend)
+  if phase=='model-gate':
+   # llama_context destruction references the upstream optimizer cleanup even without training.
+   opt=b.compile_bound_unit(output,upstream_client/'ggml/src/ggml-opt.cpp',output/'ggml-opt.o',flags,'compile-ggml-opt');merge(opt['headers']);bind(output/opt['object'],opt['object_sha256']);units.append(opt)
   units.extend({'object':p,'object_sha256':inputs[p],'source':'authenticated-native-client'} for p in client['objects'])
-  if len(units)!=147:raise ValueError('expected147 app objects')
+  if len(units)!=(148 if phase=='model-gate' else 147):raise ValueError('unexpected app object count')
   b.native_stubs(output);recheck();b.link_title(output,units,'llm_client')
   bind(output/'title.elf');tool=b.native_tool(output);bind(tool);libc=b.clean_room_libc(output,tool);bind(libc)
   image,roundtrip=b.convert_title(output,tool,'llm_client')
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)
-  phase=output/'client-phase.txt';write_phase(phase);bind(phase)
-  package,files=b.package_title(output,image,libc,results_dir,client_assets={'vocab.gguf':vocab['asset'],'client-phase.txt':phase})
+  phase_file=output/'client-phase.txt';write_phase(phase_file,phase);bind(phase_file)
+  assets={'vocab.gguf':vocab['asset'],'client-phase.txt':phase_file}
+  if model_info:assets['model.gguf']=model_info['asset']
+  package,files=b.package_title(output,image,libc,results_dir,client_assets=assets)
   bind(package)
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
   audit=output/'llm-client-native-audit.json'
-  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit])
+  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase','model-gate'] if phase=='model-gate' else [])])
   ar=json.loads(audit.read_text())
-  if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!='vocab' or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
+  if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!=phase or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
+  if phase=='model-gate' and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   merge(ar['inputs']);bind(audit)
   # Re-run consumers to reject source or dependency changes during compilation.
-  if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab:raise ValueError('app prerequisite changed')
+  if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab or (model_info and model_inputs(model,model_source,cpu_build)!=model_info):raise ValueError('app prerequisite changed')
   for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
-  receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':'vocab','llm_client':{'phase':'vocab','vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':147,'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Vocabulary-only offline app; no complete model graph or inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
+  receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');return receipt
  finally:b.run=original_run
 
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for name in ('output','native-client','vocab-fixture'):parser.add_argument('--'+name,type=Path,required=True)
- parser.add_argument('--results-dir',required=True);a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir)
+ parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate'),default='vocab')
+ for name in ('model','model-source','cpu-build'):parser.add_argument('--'+name,type=Path)
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build)

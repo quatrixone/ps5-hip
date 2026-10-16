@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    h=hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda:stream.read(65536),b''):h.update(block)
+    return h.hexdigest()
 
 
 def validate_source_inputs(receipt):
@@ -46,13 +49,17 @@ def validate_client_package(build, receipt):
 
 def validate_client_units(original, receipt):
     inputs=receipt['inputs'];units=receipt.get('units',[]);expected_headers={}
-    if len(units)!=147:raise ValueError('client unit inventory differs')
+    model_phase=receipt.get('phase')=='model-gate'
+    count=148 if model_phase else 147
+    if len(units)!=count:raise ValueError('client unit inventory differs')
+    if model_phase and (ROOT/units[77]['source']).resolve()!=(ROOT/'.deps/sources/llama-client/ggml/src/ggml-opt.cpp').resolve():
+        raise ValueError('missing upstream model cleanup implementation')
     objects=[(original/u['object']).resolve() for u in units]
-    if len(set(objects))!=147:raise ValueError('duplicate client objects')
+    if len(set(objects))!=count:raise ValueError('duplicate client objects')
     for index,(unit,obj) in enumerate(zip(units,objects)):
         if inputs.get(str(obj))!=unit.get('object_sha256') or digest(obj)!=unit.get('object_sha256'):
             raise ValueError('client object identity omitted or changed')
-        if index<77:
+        if index<count-70:
             if not obj.is_relative_to(original.resolve()):raise ValueError('runtime object outside build')
             source=(ROOT/unit['source']).resolve();headers=unit.get('headers',{})
             if (not headers or headers.get(str(source))!=unit.get('source_sha256') or
@@ -354,6 +361,10 @@ def main():
     parser.add_argument('--baseline-log-preserved', action='store_true',
                         help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
     parser.add_argument('--baseline-log-fixture', choices=tuple(LOG_NAMES), default='bootstrap')
+    parser.add_argument('--client-phase', choices=('vocab','model-gate'), default='vocab')
+    parser.add_argument('--baseline-image-bytes', type=int)
+    parser.add_argument('--baseline-model-receipt', type=Path)
+    parser.add_argument('--transfer-seconds', type=int, default=1800)
     args = parser.parse_args()
     from build_public_hip import validate_results_directory
     try:
@@ -381,9 +392,18 @@ def main():
         validate_results_directory(receipt['results_dir'])
     except ValueError as error:
         parser.error(str(error))
-    if receipt['object_count'] != (147 if fixture=='llm_client' else 76):
+    if receipt['object_count'] != ((148 if args.client_phase=='model-gate' else 147) if fixture=='llm_client' else 76):
         parser.error('not the complete .40 candidate')
-    llm_client = validate_llm_client(args.build,receipt) if fixture=='llm_client' else None
+    model_phase=fixture=='llm_client' and args.client_phase=='model-gate'
+    if args.client_phase=='model-gate' and fixture!='llm_client':parser.error('model phase requires llm_client')
+    if fixture=='llm_client' and receipt.get('phase')!=args.client_phase:parser.error('explicit client phase differs from receipt')
+    validators={}
+    if model_phase:
+        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate
+        validators=validator_identities()
+        llm_client=validate_model_receipt(args.build,receipt)
+        if args.baseline_image_bytes is None or not 0<args.transfer_seconds<=1800:parser.error('model phase requires baseline size and bounded transfer seconds')
+    else:llm_client = validate_llm_client(args.build,receipt) if fixture=='llm_client' else None
     if fixture!='llm_client':validate_source_inputs(receipt)
     audit = (args.build/'llm-client-native-audit.json' if fixture=='llm_client' else
              validate_weighted_qkv_audit(args.build, receipt) if fixture == 'weighted_qkv' else
@@ -392,6 +412,13 @@ def main():
              validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None)
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
         parser.error('commit source before freezing')
+    model_transfer=baseline_transfer=None
+    if model_phase:
+        model_transfer={'bytes':receipt['package_bytes'],'sha256':receipt['package_sha256'],'deadline_seconds':args.transfer_seconds}
+        baseline_transfer={'bytes':args.baseline_image_bytes,'sha256':args.baseline_image_sha256,'deadline_seconds':args.transfer_seconds}
+        if args.baseline_model_receipt:
+            baseline_transfer.update(receipt=str(args.baseline_model_receipt.resolve()),receipt_sha256=digest(args.baseline_model_receipt))
+        model_contract({'fixture':fixture,'llm_client':llm_client,'model_transfer':model_transfer,'baseline_transfer':baseline_transfer,'baseline_image_sha256':args.baseline_image_sha256,'baseline_log_fixture':args.baseline_log_fixture})
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(args.build / 'package', output / 'package')
     shutil.copyfile(receipt_path, output / 'build-receipt.json')
@@ -400,7 +427,7 @@ def main():
     shutil.copytree(ROOT / 'build/controllers/PPSA99014', output / 'controllers')
     shutil.copytree(args.snapshot_build, output / 'snapshot')
     package = output / 'package/PPSA99014.ffpkg'
-    if package.stat().st_size > package_limit(fixture) or digest(package) != receipt['package_sha256']:
+    if package.stat().st_size > (619831552+33554432 if model_phase else package_limit(fixture)) or digest(package) != receipt['package_sha256']:
         parser.error('package hash mismatch')
     for name, expected in receipt['package_files'].items():
         if digest(output / 'package/app' / name) != expected:
@@ -443,6 +470,11 @@ def main():
         for name,h in receipt['inputs'].items():
             path=Path(name).resolve()
             if path.is_relative_to(ROOT):files[str(path.relative_to(ROOT))]=h
+    if model_phase:
+        if validator_identities()!=validators:parser.error('model validators changed during freeze')
+        for name,h in validators.items():
+            if name in files and files[name]!=h:parser.error('validator identity conflict')
+            files[name]=h
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_results_dir': args.baseline_results_dir,
@@ -484,6 +516,10 @@ def main():
         manifest['q4'] = q4
     if weighted_qkv is not None:
         manifest['weighted_qkv']=weighted_qkv
+    if model_phase:
+        manifest.update(model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
+            hypothesis='Source-authenticated full model loads without mmap/lazy loading; two same-position actual llama_process calls are rejected by mandatory wrapped scheduler before CPU/GPU computation, with measured graph reuse and zero final allocation/queue counters. This is rejection readiness, not inference.')
+        validate_model_candidate(output,manifest)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 

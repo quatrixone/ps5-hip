@@ -1,0 +1,22 @@
+{
+    "schema":  1,
+    "status":  "PASS_OFFLINE_MODEL_GATE_INTEGRATION_AND_LINK_CORRECTION",
+    "failed_build":  "build/llm-native-model-app-v1",
+    "failure":  "Undefined ggml_opt_free from actual llama_context destructor",
+    "failure_log_sha256":  "501fc11dd1007caad3aa224211cc5c4ecdffe563971c3f5920afa12da73d8e36",
+    "correction":  "Compile genuine locked upstream ggml-opt.cpp only for model-gate; authenticate its object/source/headers before the unchanged 70 borrowed client objects",
+    "model_objects":  148,
+    "vocabulary_objects":  147,
+    "python_suites":  15,
+    "python_tests":  134,
+    "independent_review_sha256":  "0a65cb4a3fb2407cefd4762bf6a2d044fff8380d292993953168fdd60b2d734a",
+    "link_probe_review_sha256":  "e9b5e75b678d9817d1e25d6fc9478520c34b6f3f1d91a3c6419bdd2ce592594d",
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "limits":  [
+                   "Diagnostic relink passes; fresh production model-app build and complete converted/extracted audit remain pending.",
+                   "Native full-model loading and actual initial/reused graph rejection are unproven.",
+                   "No model operator execution, training or inference claim."
+               ],
+    "qsort_converted_ownership_sha256":  "b00706338a455b9c4e196bc979b3f7a9ec5ea2334d4b3fe8f6bae7e40bec04e2"
+}

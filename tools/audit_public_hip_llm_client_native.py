@@ -9,6 +9,7 @@ import struct
 import subprocess
 import sys
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/"tools"))
 sys.path.insert(0,str(ROOT/'tests'))
 from audit_public_hip_rmsnorm_native import (audit_text,load_regions,require,symbol_values,blocks,section,
     import_slots,bound_calls,symbol_calls,ordered_calls)
@@ -20,7 +21,7 @@ DEVICE='_ZN2m013device_handleEv'
 # Reviewed LLVM18 O0 native wrapper: every nonempty graph reaches the false
 # supports predicate or an earlier rejection. Only the loop exit can forward.
 # Preserve all instruction operands/branch edges except relocated RIP addresses.
-WRAPPER_TEMPLATE='pushq %rbp\nmovq %rsp, %rbp\nsubq $0x60, %rsp\nmovq %rdi, -0x10(%rbp)\nmovq %rsi, -0x18(%rbp)\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl $0x0, -0x1c(%rbp)\nmovl -0x1c(%rbp), %eax\nmovl %eax, -0x34(%rbp)\nmovq -0x18(%rbp), %rdi\ncall\nmovl %eax, %ecx\nmovl -0x34(%rbp), %eax\ncmpl %ecx, %eax\njge 137\nmovq -0x18(%rbp), %rdi\nmovl -0x1c(%rbp), %esi\ncall\nmovq %rax, -0x28(%rbp)\nmovq -0x10(%rbp), %rdi\nmovq -0x28(%rbp), %rsi\ncall\nmovq %rax, -0x30(%rbp)\ncmpq $0x0, -0x30(%rbp)\nje ad\nmovq -0x30(%rbp), %rdi\ncall\nmovq %rax, -0x40(%rbp)\ncall\nmovq %rax, %rcx\nmovq -0x40(%rbp), %rax\ncmpq %rcx, %rax\njne ad\ncall\nmovq %rax, %rdi\nmovq -0x28(%rbp), %rsi\ncall\ntestb $0x1, %al\njne 124\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl -0x1c(%rbp), %eax\nmovl %eax, -0x4c(%rbp)\nmovq -0x28(%rbp), %rdi\ncall\nmovq %rax, -0x48(%rbp)\ncmpq $0x0, -0x30(%rbp)\nje ee\nmovq -0x30(%rbp), %rdi\ncall\nmovq %rax, -0x58(%rbp)\njmp fe\nleaq RIP, %rax\nmovq %rax, -0x58(%rbp)\njmp fe\nmovq -0x48(%rbp), %rdx\nmovl -0x4c(%rbp), %esi\nmovq -0x58(%rbp), %rcx\nleaq RIP, %rdi\nmovb $0x0, %al\ncall\nmovl $0xffffffff, -0x4(%rbp)\njmp 157\njmp 129\nmovl -0x1c(%rbp), %eax\naddl $0x1, %eax\nmovl %eax, -0x1c(%rbp)\njmp 26\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovq -0x10(%rbp), %rdi\nmovq -0x18(%rbp), %rsi\ncall\nmovl %eax, -0x4(%rbp)\nmovl -0x4(%rbp), %eax\naddq $0x60, %rsp\npopq %rbp\nretq\n'
+WRAPPER_TEMPLATE='pushq %rbp\nmovq %rsp, %rbp\nsubq $0x60, %rsp\nmovq %rdi, -0x10(%rbp)\nmovq %rsi, -0x18(%rbp)\nmovq -0x18(%rbp), %rax\nmovq %rax, RIP\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl $0x0, -0x1c(%rbp)\nmovl -0x1c(%rbp), %eax\nmovl %eax, -0x34(%rbp)\nmovq -0x18(%rbp), %rdi\ncall\nmovl %eax, %ecx\nmovl -0x34(%rbp), %eax\ncmpl %ecx, %eax\njge 142\nmovq -0x18(%rbp), %rdi\nmovl -0x1c(%rbp), %esi\ncall\nmovq %rax, -0x28(%rbp)\nmovq -0x10(%rbp), %rdi\nmovq -0x28(%rbp), %rsi\ncall\nmovq %rax, -0x30(%rbp)\ncmpq $0x0, -0x30(%rbp)\nje b8\nmovq -0x30(%rbp), %rdi\ncall\nmovq %rax, -0x40(%rbp)\ncall\nmovq %rax, %rcx\nmovq -0x40(%rbp), %rax\ncmpq %rcx, %rax\njne b8\ncall\nmovq %rax, %rdi\nmovq -0x28(%rbp), %rsi\ncall\ntestb $0x1, %al\njne 12f\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl -0x1c(%rbp), %eax\nmovl %eax, -0x4c(%rbp)\nmovq -0x28(%rbp), %rdi\ncall\nmovq %rax, -0x48(%rbp)\ncmpq $0x0, -0x30(%rbp)\nje f9\nmovq -0x30(%rbp), %rdi\ncall\nmovq %rax, -0x58(%rbp)\njmp 109\nleaq RIP, %rax\nmovq %rax, -0x58(%rbp)\njmp 109\nmovq -0x48(%rbp), %rdx\nmovl -0x4c(%rbp), %esi\nmovq -0x58(%rbp), %rcx\nleaq RIP, %rdi\nmovb $0x0, %al\ncall\nmovl $0xffffffff, -0x4(%rbp)\njmp 162\njmp 134\nmovl -0x1c(%rbp), %eax\naddl $0x1, %eax\nmovl %eax, -0x1c(%rbp)\njmp 31\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovq -0x10(%rbp), %rdi\nmovq -0x18(%rbp), %rsi\ncall\nmovl %eax, -0x4(%rbp)\nmovl -0x4(%rbp), %eax\naddq $0x60, %rsp\npopq %rbp\nretq\n'
 SOURCES=['tools/audit_public_hip_llm_client_native.py','tests/llm_client_native_audit_test.py',
  'tools/audit_public_hip_rmsnorm_native.py','tools/audit_public_hip_embedded_native.py',
  'tools/probe_host_registration.py','tools/native_multi_query.py','tests/fat_binary_fixture_test.py',
@@ -78,10 +79,23 @@ def lifecycle_imports(imports):
   require(imports.get(nid(name))==expected,'lifecycle import owner differs: '+name)
  return {name:expected for name in ('atexit','_init_env','printf')}
 
-def audit(raw,converted,extracted):
+def phase_contract(phase,model_gate,chain,bodies):
+ require(phase in ('vocab','model-gate'),'unknown client phase')
+ if phase=='vocab':
+  require(model_gate is None,'model gate retained in vocabulary phase')
+  return
+ require(model_gate is not None and len(chain)==7,'model gate caller chain missing')
+ for caller,callee in zip(chain,chain[1:]):
+  require(symbol_calls(bodies[caller],callee),'missing actual model call '+caller+' -> '+callee)
+ context=bodies[chain[-2]]
+ require(not symbol_calls(context,'ggml_backend_sched_graph_compute_async'),'unwrapped context compute call')
+
+def audit(raw,converted,extracted,phase="vocab"):
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
  tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
- identities={str(p):sha(p) for p in [*paths,tool.resolve(),*(ROOT/n for n in SOURCES)]}
+ staged=Path(__file__).resolve().parent
+ source_paths=[staged/n if (staged/n).is_file() else ROOT/n for n in SOURCES]
+ identities={str(p):sha(p) for p in [*paths,tool.resolve(),Path(__file__).resolve(),staged/'audit_test.py',*source_paths]}
  data=paths[0].read_bytes();values=symbol_values(data)
  def one(n):
   require(n in values and len(values[n])==1,'missing/ambiguous symbol '+n);return values[n][0]
@@ -89,6 +103,14 @@ def audit(raw,converted,extracted):
   names=[n for n in values if fragment in n and not n.startswith('_ZZ')];require(len(names)==1,'ambiguous symbol '+fragment);return names[0]
  finalized=match('finalizedEv');vocab=match('vocabulary_check');storage=match('storage_and_gate_check');gate=match('release_compute');registration=match('registrationEv')
  names=['_start','_init','main','ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer',finalized,vocab,storage,gate,registration,'llama_model_load_from_file','llama_tokenize','llama_model_free','hipInit','hipMalloc','hipMemcpy','hipFree','hipDeviceSynchronize','ggml_backend_sched_graph_compute','ggml_backend_graph_compute',WRAPPER,SUPPORTS,DEVICE]
+ model_names=[n for n in values if 'reject_actual_model' in n and not n.startswith('_ZZ')]
+ require(len(model_names)<=1,'ambiguous model gate')
+ model_gate=model_names[0] if model_names else None
+ chain=[]
+ if phase=='model-gate':
+  require(model_gate is not None,'model phase code not compiled')
+  chain=['main',model_gate,'llama_process',match('_ZN13llama_context6decode'),match('_ZN13llama_context14process_ubatch'),match('_ZN13llama_context13graph_compute'),WRAPPER]
+  names+=list(dict.fromkeys(n for n in chain if n not in names))
  text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
  sizes={};symtab=section(data,b'.symtab')
  for at in range(0,len(symtab),24):
@@ -96,6 +118,7 @@ def audit(raw,converted,extracted):
   if index and info&15==2 and size:sizes[value]=max(sizes.get(value,0),size)
  bodies={a:t for a,n,t in blocks(text)}
  def body(n):return bounded_body(bodies[one(n)],one(n),sizes.get(one(n),0))
+ phase_contract(phase,model_gate,chain,{n:body(n) for n in chain})
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
  env=bound_calls(body('_start'),slots['_init_env'],reader);require(len(env)==1 and positions[0]<env[0]<positions[1],'startup env ordering')
@@ -113,16 +136,17 @@ def audit(raw,converted,extracted):
  imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]
  require(imports[0]==imports[1],'converted/extracted import owners differ')
  require(all(sha(p)==h for p,h in identities.items()),'audit inputs changed')
- return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase='vocab',
+ return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase=phase,
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
-  wrapper_retained=True,wrapper_no_bypass=True,actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
-  limits=['Vocabulary-only image; actual llama_context caller is not required or proven here.',
+  wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase=='model-gate'),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
+  limits=['Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
   'Reviewed LLVM18 O0 wrapper template rejects nonempty graphs with current zero-op predicate; any codegen change requires review.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for n in ['raw','converted','extracted','output']:parser.add_argument('--'+n,type=Path,required=True)
+ parser.add_argument('--phase',choices=('vocab','model-gate'),default='vocab')
  args=parser.parse_args()
  if args.output.exists():parser.error('fresh output required')
- report=audit(args.raw,args.converted,args.extracted);args.output.parent.mkdir(parents=True,exist_ok=True)
+ report=audit(args.raw,args.converted,args.extracted,args.phase);args.output.parent.mkdir(parents=True,exist_ok=True)
  with args.output.open('x') as f:json.dump(report,f,indent=2);f.write('\n')

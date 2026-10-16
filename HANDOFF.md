@@ -26,12 +26,32 @@ current M0 work, weighted-QKV candidate/build, dependencies and models were not
 pruned. Historical receipts referencing these removed binaries require a fresh
 rebuild for full artifact revalidation. Follow AGENTS.md's disk retention rule.
 
+On 2026-10-16, 84 superseded app-v3 object files (27,828,992 bytes) were
+also pruned after independent active-consumer checks. Their exact hashes and
+paths are in `results/m0-app-v3-retention-review-v1/review.json` and
+`results/cleanup-2026-10-16.jsonl`. Historical app-v3 and consumed v1/v2 candidate
+receipts now need rebuilt objects for complete revalidation. Current app-v4,
+model-app inputs and all packages/logs/receipts were retained.
+
 Follow [LLM_V1_PLAN.md](docs/LLM_V1_PLAN.md): standalone TinyLlama 1.1B Q4_0,
 batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
+
+Immediate work: full-model phase has been promoted into production source.
+The first build `build/llm-native-model-app-v1` failed at link on `ggml_opt_free`.
+The real upstream optimizer cleanup is now compiled only for model-gate, with
+148 exact authenticated objects and required source/header checks. Diagnostic
+relink and 134 tests pass independently; see
+`evidence/offline-native-llm-model-link-correction.json`. Fresh build
+`build/llm-native-model-app-v2` is active through `.local/build_native_model_app_v2.py`;
+logs are in `results/m0-native-model-app-production-make-v2`. Poll the existing
+process/session; do not restart on silence. Wait for terminal success, then run
+independent real model receipt/image validation before a committed frozen
+candidate. Model app-v1 and its failure evidence are preserved. No full-model
+console validation or inference is established. Do not reapply the old staged patch.
 
 Latest: corrected native vocabulary candidate
 `results/source-public-llm-vocab-console-v3` completed execution with exit zero.
