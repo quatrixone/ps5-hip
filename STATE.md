@@ -28,9 +28,13 @@ Offline inspection found post-elevation `/app0` reads inconsistent with the
 helper's changed root and proven title asset paths. Phase/vocabulary/model reads
 now use `/system_ex/app/PPSA99014/`, with explicit failure diagnostics; 33 focused
 tests and independent review pass. See `evidence/offline-native-llm-asset-path-fix.json`.
-Rebuild a fresh vocabulary app and audit its images before another installed-title
-test. The prior transcript alone does not identify which assertion failed;
-native correction remains unproven. Full-model changes remain staged.
+The fresh app-v4 build now passes all 197 commands, 43 focused tests and the
+24-function image audit. Independent real freeze admission verified 147 objects,
+6,988 inputs and 2,395 artifacts; package size is 19,922,944 bytes. See
+`evidence/offline-native-llm-asset-path-rebuild.json`. Next freeze and review a new
+candidate before another installed-title test. The prior transcript alone does
+not identify which assertion failed; native correction remains unproven.
+Full-model changes remain staged.
 
 M0's source-only vocabulary application build and independent real candidate
 validation pass. `make llm-native-app` produced a 19,890,176-byte native package

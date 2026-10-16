@@ -18,6 +18,8 @@ boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-16 | M0 path correction | offline | pass: post-elevation title asset paths, explicit failure diagnostics, 33 tests and independent review | evidence/offline-native-llm-asset-path-fix.json | next: fresh native package/audit and installed-title test
 
+- 2026-10-16 | M0 corrected package | offline | pass: fresh 147-object app, 197 commands, 43 tests, 24-function audit and independent real freeze admission | evidence/offline-native-llm-asset-path-rebuild.json | next: fresh installed-title test; native correction remains unproven
+
 - 2026-10-16 | M0 deployment prerequisite | .40/offline | deployment rejected before upload for missing results-directory ancestor; fixed bounded ancestor creation, independent review and 52 tests pass | evidence/console40-vocab-deploy-directory-failure.json | next: fresh candidate and installed-title validation; no application execution claimed
 
 - 2026-10-15 | M0 prerequisites | offline | pass: source-only native payload link (71 objects, four checks) and vocabulary fixture (45 metadata fields, 32 tokenizer cases, six checks); independent reviews | evidence/offline-native-llm-client-link.json, evidence/offline-llm-vocab-fixture.json | next: native app and actual-client rejection; no native execution claimed

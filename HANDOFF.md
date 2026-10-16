@@ -38,11 +38,19 @@ reads use `/system_ex/app/PPSA99014/`; pre-elevation config/helper retain `/app0
 33 focused tests and independent review pass, including eight actual phase-parser
 cases. Failure messages now distinguish phase open/read/config and vocabulary
 load/size/token errors; success transcript and tokenizer expectations are unchanged.
-See `evidence/offline-native-llm-asset-path-fix.json`. Next run fresh Make output
-`build/llm-native-app-v4`, reusing current client-v3/vocabulary-v1 inputs, with
-results `/user/homebrew/ps5-hip/m0-vocab-v4`; local wrapper
-`.local/build_native_app_v4.py` records logs in `results/m0-native-app-production-make-v4`.
-Require final image/package audit and fresh candidate review. The next baseline
+See `evidence/offline-native-llm-asset-path-fix.json`. Fresh Make output
+`build/llm-native-app-v4` passed: 197 commands, 43 focused tests, 147 objects and
+24-function audit. Root session 17997 is terminal zero. Independent actual
+freeze-admission review session 99699 is terminal zero, report
+`results/m0-native-app-final-review-v4/review.json` (6,988 inputs/2,395 artifacts).
+Receipt SHA `7f84867f483e77def8080d2642f56b226e702ae01173ab1454d452670426d2db`;
+package 19,922,944 bytes, SHA
+`ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`.
+Current client-v3/vocabulary-v1 prerequisites are unchanged; results directory is
+`/user/homebrew/ps5-hip/m0-vocab-v4`. Build logs are in
+`results/m0-native-app-production-make-v4`; compact evidence is
+`evidence/offline-native-llm-asset-path-rebuild.json`. Next freeze a fresh
+`results/source-public-llm-vocab-console-v3` and obtain review. The next baseline
 is the installed vocabulary package and failed log SHA
 `f8a4a4848ef69cfe836c48bf71efaa92f74b9da70b78d976891cab4585aaa966`,
 fixture `llm_client`, results `/user/homebrew/ps5-hip/m0-vocab-v3`.
