@@ -17,7 +17,7 @@ gates remain open as previously recorded; historical evidence is unchanged.
 ## Plan review and resumption
 
 External model storage is implemented offline: new model-gate packages contain
-`model-path.txt` and use `/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf` by
+`model-path.txt` and use `/data/hip/models/tinyllama-q4_0.gguf` by
 default. The existing Eden/Lapy helper grants filesystem access. Deployment
 uploads missing weights once, verifies/reuses existing weights, and rejects
 mismatches without overwriting. Prelaunch still hashes the remote model.

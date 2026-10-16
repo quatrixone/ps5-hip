@@ -10,6 +10,8 @@ and executed operator inventory alongside QKV, then one layer and full logits.
 Implementation has resumed after plan review. M0 and M1 remain parallel
 priorities, with .40 validation and milestone pushes.
 
+- 2026-10-16 | External model path update | offline | owner-selected `/data/hip/models/tinyllama-q4_0.gguf`; Make/CLI defaults and app configuration agree, 45 focused tests pass | next: fresh package and console validation
+
 - 2026-10-16 | M0 external model storage | offline | persistent weights, Eden/Lapy access, verified upload/reuse and small app package contract | evidence/offline-external-model-storage.json | next: fresh package/audit and installed external-model validation; heap warning remains open
 
 - 2026-10-16 | M0 model storage | 539802f | .40 | partial: full load/context/reuse,219 balanced owners; heap warning rejects clean gate | evidence/console40-native-model-load-partial.json | next: trace scheduler malloc

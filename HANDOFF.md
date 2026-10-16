@@ -19,7 +19,7 @@ one-use E control remains inert pending revised lifecycle checks and review.
 ## First-release priority
 
 Latest offline change: external model storage, default
-`/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf`, configured by
+`/data/hip/models/tinyllama-q4_0.gguf`, configured by
 `LLM_NATIVE_APP_MODEL_REMOTE_PATH`. New app packages carry `model-path.txt`;
 the existing Eden/Lapy helper is unchanged. Deploy uploads only missing weights
 using verified staging, reuses matching weights, and refuses corrupt existing

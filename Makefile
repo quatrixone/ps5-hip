@@ -105,7 +105,7 @@ LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
 LLM_NATIVE_APP_PHASE ?= vocab
 LLM_NATIVE_APP_MODEL ?= $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_MODEL_SOURCE ?= $(LLM_MODEL_DIR)
-LLM_NATIVE_APP_MODEL_REMOTE_PATH ?= /user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf
+LLM_NATIVE_APP_MODEL_REMOTE_PATH ?= /data/hip/models/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_CPU_BUILD ?= $(LLM_CPU_BUILD_DIR)
 ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate),$(LLM_NATIVE_APP_PHASE))
 $(error LLM_NATIVE_APP_PHASE must be vocab or model-gate)

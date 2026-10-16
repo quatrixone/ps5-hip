@@ -3,7 +3,7 @@ import re
 
 MODEL_BYTES = 619831552
 MODEL_SHA = 'c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa'
-DEFAULT_MODEL_PATH = '/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf'
+DEFAULT_MODEL_PATH = '/data/hip/models/tinyllama-q4_0.gguf'
 
 
 def validate_model_path(path):

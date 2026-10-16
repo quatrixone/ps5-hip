@@ -12,7 +12,7 @@ import external_model
 import source_console as c
 
 DATA = b'locked model data'
-REMOTE = '/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf'
+REMOTE = '/data/hip/models/tinyllama-q4_0.gguf'
 
 class FTP:
     def __init__(self):

@@ -30,7 +30,7 @@ for prerequisite directory overrides and the distinction from the payload ELF.
 
 For the full-model loading/rejection test, set `LLM_NATIVE_APP_PHASE=model-gate`.
 The model is stored separately on the console at
-`/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf`. Override this with
+`/data/hip/models/tinyllama-q4_0.gguf`. Override this with
 `LLM_NATIVE_APP_MODEL_REMOTE_PATH` if necessary (a bounded `.gguf` path under
 `/user/homebrew/` or `/data/`). The package contains `model-path.txt`, not weights.
 The application uses the same bundled Eden/Lapy filesystem-elevation helper
