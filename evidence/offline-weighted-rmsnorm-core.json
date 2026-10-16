@@ -1,0 +1,47 @@
+{
+  "classification": "offline-weighted-rmsnorm-core-admission",
+  "status": "PASS",
+  "gpu_executed": false,
+  "descriptor": {
+    "rsrc1": "0x60af0184",
+    "rsrc2": "0x38c",
+    "kernarg_bytes": 488,
+    "kernarg_alignment": 8,
+    "max_workgroup_size": 1024,
+    "dynamic_lds_bytes": 128
+  },
+  "core_receipt": {
+    "path": "results/weighted-rmsnorm-core-v1/receipt.json",
+    "sha256": "6167031a1ee68f36af6ae9ae18ad7ba7af8eb8ef8faa71fbfb5ad30709047cff"
+  },
+  "probe_review": {
+    "path": "results/weighted-rmsnorm-probe-v1/review.json",
+    "sha256": "bdf83c25b2356cef52c128e5fc958a71b427b021423bbfe5de9df354a3270a9d"
+  },
+  "tests": {
+    "asan_ubsan_passed": 5,
+    "unsupported_register_combinations_rejected": 1007,
+    "original_rmsnorm_packet_and_owned_preparation": true,
+    "weighted_rmsnorm_packet_and_owned_preparation": true,
+    "original_reduction_canary": true,
+    "weight_buffer_retained_through_prepared_launch_lifetime": true
+  },
+  "source_sha256": {
+    "code_object.cpp": "a33b86244eb377c9410e9b36b2e9813167986a06e20960d57ba0e43bc3957f37",
+    "launch.cpp": "25bd29b15cf9c65014748e68853e509ff8e614df655ec9a5e39dffc0d6f8e532",
+    "rmsnorm_launch_test.cpp": "af3240d935bb1787733ab68437a2e0a0e1097b383972fca2ef93b732f6b4365d",
+    "native_rmsnorm_test.cpp": "cc7bd34c73887be53116da998203da87b05fb2becc3f457cbb826a680fa380aa",
+    "CMakeLists.txt": "89cdf1d985f3e1354482fd4b13607512d113c38e2e20108e65815a0ff7a1b61b"
+  },
+  "limitations": [
+    "No public CLR or GPU qualification for weighted RMSNorm.",
+    "Selected weighted object currently comes from an ignored offline probe; integrate authenticated source-only fixture generation next.",
+    "No full QKV or transformer layer numerical qualification."
+  ],
+  "independent_review": {
+    "path": "results/weighted-rmsnorm-admission-review-v1/review.json",
+    "sha256": "b02f1b67b1b8c9bc6a9dcb50092085b727fc47bec70bde22d3447e9cff1a48dd",
+    "status": "PASS"
+  },
+  "shared_q4_regression_tests_passed": 15
+}

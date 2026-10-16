@@ -366,9 +366,12 @@ std::vector<uint8_t> materialize_code_object(const uint8_t *data, size_t size) {
 }
 
 static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = false, bool flat_call = false, bool geometry = false, bool reduction = false) {
-    // Keep the measured mode bits; bound both register allocation fields to the measured envelope.
-    if (reduction && ((k.rsrc1 & 0xfffffc00u) != 0x60af0000u || (k.rsrc1 & 0x3fu) > 3 ||
-        ((k.rsrc1 >> 6) & 0xfu) > 3 || k.group_bytes || k.max_workgroup_size < 1024 ||
+    // Preserve the original envelope; weighted RMSNorm adds one measured tuple.
+    const bool weighted_norm = k.rsrc1 == 0x60af0184u && k.rsrc2 == 0x38cu &&
+        k.kernarg_size == 488 && k.kernarg_alignment == 8 && k.max_workgroup_size == 1024;
+    const bool original_reduction = (k.rsrc1 & 0xfffffc00u) == 0x60af0000u &&
+        (k.rsrc1 & 0x3fu) <= 3 && ((k.rsrc1 >> 6) & 0xfu) <= 3;
+    if (reduction && ((!original_reduction && !weighted_norm) || k.group_bytes || k.max_workgroup_size < 1024 ||
         k.sgpr_spills || k.vgpr_spills)) return "unsupported reduction resources";
     if (k.wave_size != 32) return "initial launch supports wave32 only";
     if (flat_call) {

@@ -6,14 +6,15 @@
 #include "ps5hip/hip_launch_profile.h"
 using namespace ps5hip;
 int main(int argc,char** argv) { try {
-    check(argc==2);std::ifstream input(argv[1],std::ios::binary);check(bool(input));
+    check(argc==2 || (argc==3 && std::string(argv[2])=="--weighted"));const bool weighted=argc==3;std::ifstream input(argv[1],std::ios::binary);check(bool(input));
     BundledCodeObject bundle;bundle.bytes={std::istreambuf_iterator<char>(input),{}};
     bundle.object=inspect_code_object(bundle.bytes.data(),bundle.bytes.size());
-    const std::string name="_ZL12rms_norm_f32ILi1024ELb0ELb0ELb0EEvPKfPfiiilllfS1_lll15HIP_vector_typeIjLj3EES4_S4_S4_S1_lllS4_S4_S4_S4_f";
+    const std::string name=std::string("_ZL12rms_norm_f32ILi1024ELb")+(weighted?"1":"0")+"ELb0ELb0EEvPKfPfiiilllfS1_lll15HIP_vector_typeIjLj3EES4_S4_S4_S1_lllS4_S4_S4_S4_f";
+    const uint32_t expected_rsrc1=weighted?0x60af0184u:0x60af00c3u;
     auto found=std::find_if(bundle.object.kernels.begin(),bundle.object.kernels.end(),[&](const Kernel& k){return k.name==name;});
     check(found!=bundle.object.kernels.end());const auto& kernel=*found;
     const size_t index=size_t(found-bundle.object.kernels.begin());
-    check(bundle.object.kernels.size()==16 && kernel.arguments.size()==26 && kernel.kernarg_size==488);
+    check(bundle.object.kernels.size()==(weighted?1u:16u) && kernel.arguments.size()==26 && kernel.kernarg_size==488);
     const unsigned offsets[]={0,8,16,20,24,32,40,48,56,64,72,80,88,96,108,120,132,144,152,160,168,176,188,200,212,224};
     const unsigned sizes[]={8,8,4,4,4,8,8,8,4,8,8,8,8,12,12,12,12,8,8,8,8,12,12,12,12,4};
     {
@@ -28,7 +29,7 @@ int main(int argc,char** argv) { try {
                 kernel.arguments[i].kind==(pointer?"global_buffer":"by_value"));
             host[i].resize(sizes[i]);
             // Diagnostic packing patterns; no claim these are numerical RMSNorm inputs.
-            if(pointer)put(offsets[i],i<2?uint64_t(bases[i]):0,8);
+            if(pointer)put(offsets[i],i<2?uint64_t(bases[i]):(weighted && i==9?uint64_t(bases[2]):0),8);
             else if(sizes[i]<=8)put(offsets[i],100+i,sizes[i]);
             else for(unsigned b=0;b<sizes[i];++b)expected[offsets[i]+b]=uint8_t(i+b);
             std::copy_n(expected.begin()+offsets[i],sizes[i],host[i].begin());
@@ -36,7 +37,7 @@ int main(int argc,char** argv) { try {
         }
         const auto values=capture_launch_arguments(kernel,NativeLaunchRoute::ReductionLds,
             {reinterpret_cast<const uint8_t*>(addresses.data()),addresses.size()*sizeof(void*)},spans,data.ranges());
-        check(values.size()==26 && values[9].value==0 && values[9].buffer_bytes==0 && values[17].value==0 && values[17].buffer_bytes==0);
+        check(values.size()==26 && values[9].value==(weighted?uint64_t(bases[2]):0) && (weighted?values[9].buffer_bytes>0:values[9].buffer_bytes==0) && values[17].value==0 && values[17].buffer_bytes==0);
         // Captured aggregate data must not alias caller storage.
         for(auto& bytes:host)std::fill(bytes.begin(),bytes.end(),0xee);
         for(unsigned rows:{1u,2u,17u}) {
@@ -45,10 +46,10 @@ int main(int argc,char** argv) { try {
             const auto released=releases;
             {
                 auto launch=prepare_native_launch(bundle,kernel,values,data,request);
-                check(launch.temporaries.size()==2 && launch.resources.size()==4 && allocations.size()==5);
+                check(launch.temporaries.size()==2 && launch.resources.size()==(weighted?5u:4u) && allocations.size()==5);
                 code=launch.temporaries[0];arguments=launch.temporaries[1];
                 const auto unused=data.resolve(bases[2],17*2048*4).memory;
-                check(std::find(launch.resources.begin(),launch.resources.end(),unused)==launch.resources.end());
+                check((std::find(launch.resources.begin(),launch.resources.end(),unused)!=launch.resources.end())==weighted);
                 for(unsigned i=0;i<2;++i) {
                     const auto used=data.resolve(bases[i],17*2048*4).memory;
                     check(std::count(launch.resources.begin(),launch.resources.end(),used)==1);
@@ -62,7 +63,7 @@ int main(int argc,char** argv) { try {
                     const auto& words=launch.commands;const auto h=words[at];const size_t n=((h>>16)&0x3fff)+1;
                     check(h>>30==3 && n<words.size()-at);
                     if((h&0xff00)==0x7600 && words[at+1]==(0xb848-0xb000)/4) {
-                        check(!resources && n==3 && words[at+2]==0x60af00c3 && words[at+3]==0x1038c);resources=true;
+                        check(!resources && n==3 && words[at+2]==expected_rsrc1 && words[at+3]==0x1038c);resources=true;
                     }
                     if((h&0xff00)==0x1500) {check(!dispatch && n==4 && words[at+1]==rows && words[at+2]==1 && words[at+3]==1);dispatch=true;}
                     at+=n+1;
@@ -86,12 +87,30 @@ int main(int argc,char** argv) { try {
                 else if(mutation==2)k.group_bytes=128;else k.private_bytes=4;
                 reject([&]{prepare_native_launch(altered,k,values,data,request);});
             }
-            auto bad=values;bad[9].buffer_bytes=1;reject([&]{prepare_native_launch(bundle,kernel,bad,data,request);});
+            if(weighted) {
+                for(uint32_t resource:{0x60af0183u,0x60af0144u,0x60af01c4u,0x60af0185u}) {
+                    auto altered=bundle;auto& k=altered.object.kernels[index];k.rsrc1=resource;
+                    reject([&]{prepare_native_launch(altered,k,values,data,request);});
+                }
+                auto invalid=values;invalid[9].value=1;
+                reject([&]{prepare_native_launch(bundle,kernel,invalid,data,request);});
+            }
+            auto bad=values;bad[17].buffer_bytes=1;reject([&]{prepare_native_launch(bundle,kernel,bad,data,request);});
             bad=values;bad[13].bytes.pop_back();reject([&]{prepare_native_launch(bundle,kernel,bad,data,request);});
             check(allocate_calls==before);
         }
-        for(auto base:bases)data.free(base);
+        if(weighted) {
+            std::weak_ptr<NativeMemory> retained_weight=data.resolve(bases[2],17*2048*4).memory;
+            {
+                auto request=select_hip_launch_profile(kernel,{1,1,1},{1024,1,1},128);
+                auto launch=prepare_native_launch(bundle,kernel,values,data,request);
+                data.free(bases[2]);bases[2]=nullptr;
+                check(!retained_weight.expired());
+            }
+            check(retained_weight.expired() && allocations.size()==2);
+        }
+        for(auto base:bases)if(base)data.free(base);
     }
     check(allocations.empty());
-    std::cout<<"NATIVE_RMSNORM_PREPARE_PASS rows=1,2,17 arguments=26 kernargs=488 hidden_lds_offset=352 dynamic_lds=128 rsrc2=0x1038c null_unretained=2 ownership_released=true gpu_execution=false\n";
+    std::cout<<"NATIVE_RMSNORM_PREPARE_PASS rows=1,2,17 arguments=26 kernargs=488 hidden_lds_offset=352 dynamic_lds=128 rsrc2=0x1038c ownership_released=true gpu_execution=false\n";
 } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;} }

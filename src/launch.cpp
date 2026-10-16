@@ -169,8 +169,11 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
     } else require(launch.threads == std::array<uint32_t, 3>{reduction ? 1024u : 64u, 1, 1} && launch.groups_x != 0 &&
                    launch.groups_x <= UINT32_MAX / (reduction ? 1024u : 64u), "invalid dispatch shape");
     if(reduction) {
-        require((launch.rsrc1 & 0xfffffc00u) == 0x60af0000u && (launch.rsrc1 & 0x3fu) <= 3 &&
-            ((launch.rsrc1 >> 6) & 0xfu) <= 3 && !scratch && !geometry && !flat_init && lds &&
+        const bool weighted_norm = launch.rsrc1 == 0x60af0184u && launch.kernargs.size() == 488 &&
+            (launch.rsrc2 & ~0x00ff8000u) == 0x38cu;
+        const bool original_reduction = (launch.rsrc1 & 0xfffffc00u) == 0x60af0000u &&
+            (launch.rsrc1 & 0x3fu) <= 3 && ((launch.rsrc1 >> 6) & 0xfu) <= 3;
+        require((original_reduction || weighted_norm) && !scratch && !geometry && !flat_init && lds &&
             launch.kernargs.size() >= 256 && launch.kernargs.size() <= 65536 && launch.kernargs.size() % 8 == 0,
             "invalid reduction dispatch ABI");
         std::array<uint8_t,256> expected{};

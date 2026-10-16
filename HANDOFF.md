@@ -23,6 +23,21 @@ batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
+## Weighted RMSNorm core admission qualified offline
+
+The parser and packet encoder admit the measured weighted RMSNorm descriptor
+`0x60af0184` with its 488-byte/1024-thread contract, preserving the original
+reduction envelope. Five sanitizer tests pass, including the original reduction
+canary, 1,007 unsupported register combinations and weight-buffer retention
+through prepared-launch lifetime. Independent review and 15 Q4 regressions also
+pass, including the original and halfword packet/ownership paths. See
+`evidence/offline-weighted-rmsnorm-core.json`.
+
+Next integrate authenticated source-only weighted fixture generation and public
+CLR qualification, then reference-checked weighted RMSNorm -> shared Q8 -> full
+Q/K/V. The ignored probe is `results/weighted-rmsnorm-probe-v1`; it is not yet a
+supported Make-built fixture. No weighted GPU result is claimed.
+
 ## Halfword Q4 diagnostic passed on .40
 
 The frozen candidate from `0dc45da` passed all 28 native stages: 592 Q4 values,

@@ -66,6 +66,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 bounded Q4 workaround | 0dc45da | .40 | pass: 28 stages/592 Q4 values/80640 Q8 bytes, raw checks and lifecycle | evidence/console40-public-q4-halfword-success.json | next: weighted norm/QKV
 
+- 2026-10-15 | V1.3 prerequisite | offline | exact weighted RMSNorm descriptor, packet/owned preparation and original reduction tests pass | evidence/offline-weighted-rmsnorm-core.json | next: source fixture/CLR/numerics
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate
