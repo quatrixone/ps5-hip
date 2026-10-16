@@ -16,6 +16,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The watchdog-corrected model-app-v4 is installed and independently verified on
+.40: 22 readbacks, two transfer records, nine mounted assets, preserved failed
+model package/log, idle snapshots, healthy services and both locks released.
+See `evidence/console40-native-model-watchdog-fixed-deployment.json`.
+Candidate `results/source-public-llm-model-console-v2` deployment is consumed;
+its approval now binds one bounded execution to the exact deployment receipt.
+Next run the installed PPSA99014 model/reuse test. No app launch or native model
+loading is claimed by this deployment milestone; M0 remains open.
+
 The watchdog-corrected model-app-v4 passes Make and independent real freeze
 admission: 148 objects, 199 commands, nine assets and the native call-chain audit.
 The 827,719,680-byte package is bound in

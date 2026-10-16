@@ -40,6 +40,18 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Corrected model-console-v2 deployment and independent review passed; see
+`evidence/console40-native-model-watchdog-fixed-deployment.json`.
+Both locks were released. The failed model-v1 package/log were preserved and
+rechecked; older vocabulary backups retain their prior verified provenance.
+The deploy-only approval is archived at
+`results/m0-model-deployment-review-v2/deploy-only-approval.json`; candidate
+`review.json` now binds one execution to this exact deployment and its review.
+Next use `.local/run_capture_control.py results/source-public-llm-model-console-v2 execute`,
+then after terminal completion run
+`results/m0-model-execution-review-v2/review_execution.py --execution-terminal-confirmed`.
+Do not redeploy or automatically retry. This milestone includes no app launch.
+
 The watchdog-corrected model-app-v4 build and independent admission are complete.
 See `evidence/offline-native-llm-model-watchdog-fixed-package.json` (148 objects,
 199 commands, nine assets, 145 focused tests). The package SHA256 is

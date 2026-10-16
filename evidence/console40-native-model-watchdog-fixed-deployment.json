@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "status": "PASS_DEPLOYMENT_ONLY",
+  "source_commit": "5e97e98e0e977d08c9fb7ddb2f552d6208dbfa50",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "phase": "model-gate",
+  "manifest_sha256": "9bf75fa31ae13389d9af0ebf03d8c2fd0c19e50dcf9799f0e0a1998b03af3892",
+  "deployment_receipt_sha256": "62a247d703a7c074fc51aebe21a29a82122d54cac453ef6c70abf81242a9285f",
+  "independent_review_sha256": "cf1f9ba658a16e53486713952fff8e4ad03b35568b1521c57ed1da5ab3dba041",
+  "secondary_lock_receipt_sha256": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+  "source_identities": {
+    "tools/source_console.py": "9ac7c9243c7af11356fe7197238d6b69dc902d73df5016e186f3adc2c5e7670f",
+    "tools/freeze_source_candidate.py": "445c2a42172a79efec3291fe54c2fcfffec428ab1664acec588bfb4a033a4694",
+    "tools/source_model_freeze.py": "6ac041bca6fba4e6f26457b3e13c91c0fb9d0dd2e9557e99d64cb6dffc39a682",
+    "tools/source_llm_model_log.py": "8064f3f8a3247df73f784f1872bac6d28ccbed99af55cc41bd13ad891431d5b5",
+    "tools/source_model_streaming.py": "b5ab4b5e6c9935e3e2bf83bdee1597c97b69ce351a08e5cf10c347b4e53bdb0c",
+    "tools/clr_gpu/watchdog.cpp": "0291b5129d01bb2f2b62e01eb62bb99d1cbbf74ba973a42f23355930e18ccb0c"
+  },
+  "package": {
+    "bytes": 827719680,
+    "sha256": "59fb3abe8f1df66c4144672c8e81580dccdc7fabdf6d89c931c5c68ad10cfc7d"
+  },
+  "model": {
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "ftp_readbacks": 22,
+  "transfer_records": 2,
+  "mounted_assets_verified": 9,
+  "baseline": {
+    "package_bytes": 827719680,
+    "package_sha256": "3132cec3f7eced69940aef431dd27324e4378f0054a2754bf7dbf58af1721e46",
+    "log_sha256": "313913b3d22ec98ae833ff0903be84aa56760467f020e919adecc7ddcd67a23b",
+    "preserved_and_rechecked": true,
+    "execution_failed_at": "watchdog-state before model load"
+  },
+  "older_vocabulary_backup": {
+    "package_path": "/data/homebrew/PPSA99014.ffpkg.source-rebuild-ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720.preserved",
+    "log_path": "/user/homebrew/ps5-hip/m0-vocab-v4/ps5-hip-m0-app.log.f02532deba69741e013edeb019960d1b4e200696ca1f47616dc4a1bb92d560ab.preserved",
+    "evidence": "Inherited prior verified preservation; paths excluded from this deployment mutations.",
+    "fresh_remote_readback": false
+  },
+  "results_directory": "/user/homebrew/ps5-hip/m0-model-v4",
+  "accepted": true,
+  "promoted": true,
+  "launched": false,
+  "healthy_after": true,
+  "primary_lock_released": true,
+  "secondary_lock_owned_and_released": true,
+  "locks_absent_at_review": true,
+  "idle_mount_snapshots_verified": true,
+  "limits": [
+    "Exact deployment/readbacks only; no application launch in this phase.",
+    "Corrected watchdog admission has not yet established native model loading, actual two-call rejection/reuse, or inference.",
+    "Older vocabulary recovery bytes were not newly read from console during this deployment.",
+    "One separately reviewed bounded execution; no automatic retry."
+  ]
+}
