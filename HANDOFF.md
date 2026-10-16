@@ -40,6 +40,24 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+The watchdog-corrected model-app-v4 build and independent admission are complete.
+See `evidence/offline-native-llm-model-watchdog-fixed-package.json` (148 objects,
+199 commands, nine assets, 145 focused tests). The package SHA256 is
+`59fb3abe8f1df66c4144672c8e81580dccdc7fabdf6d89c931c5c68ad10cfc7d`.
+Next run the prepared freeze arguments in `results/m0-model-console-case-v2/`,
+then `results/m0-model-candidate-review-v2/review_candidate.py` with explicit
+build/admission/freeze terminal-confirmation flags. Freeze has not run yet.
+Keep the failed model-v1 package/log and older vocabulary recovery artifacts.
+Use the installed PPSA99014 app for one bounded .40 test after reviewed deployment.
+No native model-load/reuse or corrected-watchdog success is claimed yet.
+
+Remaining M0 work has unapplied preparations in
+`results/m0-host-runner-preparation/` and `results/m0-calls-preparation/`.
+The host runner passed independent source review and seven focused tests, but
+still needs a fresh genuine CLR/llama build and eager/deferred execution. Apply
+only after the current candidate validation cycle; do not invalidate its source
+bindings. HIP-call profiles must be measured, never guessed. M1 remains complete.
+
 Historical model recovery admission now verifies the previous frozen candidate,
 accepted deployment/review bindings, exact package/nine assets, locked model and
 archived audited images without requiring old source to equal today's checkout.

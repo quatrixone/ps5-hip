@@ -15,6 +15,7 @@ Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-16 | M0 recovery | offline | pass: historical deployed-image authentication, 41 tests and real baseline check | evidence/offline-historical-model-baseline.json | next: fresh package
+- 2026-10-16 | M0 corrected package | offline | pass: 148 objects, 199 commands, 145 tests and real admission | evidence/offline-native-llm-model-watchdog-fixed-package.json | next: native model/reuse
 
 - 2026-10-16 | M0 watchdog | offline | pass: 120s contract, 33 lifecycle cases, 30 related tests and CTest | evidence/offline-native-llm-watchdog-fix.json | next: fresh native package
 

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "classification": "offline-source-built-native-model-rejection-app",
+  "status": "PASS",
+  "make_exit_code": 0,
+  "production_test_suites": 16,
+  "production_tests": 145,
+  "object_count": 148,
+  "input_count": 7006,
+  "artifact_count": 2403,
+  "command_count": 199,
+  "package_bytes": 827719680,
+  "package_sha256": "59fb3abe8f1df66c4144672c8e81580dccdc7fabdf6d89c931c5c68ad10cfc7d",
+  "package_assets": {
+    "client-phase.txt": "5d71d0c45955991af2f54e6124bdbc5609e43f0e6d50773d7c76cdb494631260",
+    "eboot.bin": "b4212ac2763cfd67c3051175cd20e4cd8f2a65c4fbfa23b6cf1187fbfa036a4f",
+    "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+    "model.gguf": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "results-dir.txt": "1ef66dea8d9cb92b4bd1fdbde772d1e3f6cfb3a9813ed472c5f373ba9515be13",
+    "vocab.gguf": "7894a7e863f7f09e7d17d53f658eb030e54b7a87d627d0a201c06da8a8a5696e",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071"
+  },
+  "model_bytes": 619831552,
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "model_conversion_receipt_sha256": "80f9b3426427efca13d90aef46690e6f41935e6b537b4b40dd4526275ff2a0b2",
+  "actual_client_call_chain_audited": true,
+  "audited_function_count": 29,
+  "native_executed": false,
+  "gpu_executed": false,
+  "evidence_sha256": {
+    "results/m0-native-model-app-production-make-v4/command.json": "b92a2d981bd59515324bd36d70f476a9b3a9674ec70b37e105ec040978fa1f53",
+    "results/m0-native-model-app-final-review-v4/review.json": "28dc8f5ac2c3c3f1818a3e9a0054bd269fe23e2c7e68acdf0672bf908667617c",
+    "results/m0-model-production-review-v5/review.json": "cb9ac8c8393586982c5feffcb2093a653ffa343fa7d8886555e973a3704f1d52",
+    "build/llm-native-model-app-v4/receipt.json": "ab07ed9ef50a17a6b681d6209d6e7a25d82699ce020339cf492ffb1c3dbb32ec",
+    "build/llm-native-model-app-v4/llm-client-native-audit.json": "43702219bc55fa09b707b45d9e44442265c685db45391fd1efdffdc556517768",
+    "evidence/offline-historical-model-baseline.json": "5642f1ea18488563c8a89caf9e43745b7f3d4ccd4e1b07805ee0700efc364bc8"
+  },
+  "watchdog_maximum_ms": 120000,
+  "historical_baseline_scope": "Recovery artifact authentication only; separate from strict fresh candidate admission and no execute permission.",
+  "limits": [
+    "Static native three-image call-chain audit and authenticated model packaging only.",
+    "Actual full-model load, two-call rejection and graph reuse on console remain unexecuted.",
+    "No inference, tensor GPU computation, performance or full-model memory acceptance claim.",
+    "A fresh reviewed frozen candidate and deployment are still required before any console experiment."
+  ]
+}

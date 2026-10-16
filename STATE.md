@@ -16,6 +16,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The watchdog-corrected model-app-v4 passes Make and independent real freeze
+admission: 148 objects, 199 commands, nine assets and the native call-chain audit.
+The 827,719,680-byte package is bound in
+`evidence/offline-native-llm-model-watchdog-fixed-package.json`; 16 focused suites
+(145 tests) pass. Next freeze `results/source-public-llm-model-console-v2`,
+independently review it, then deploy and run the installed PPSA99014 on idle .40.
+The corrected watchdog and actual model loading/rejection/reuse remain untested
+on console. M0 still needs per-HIP-call accounting; M1 remains complete.
+
 Historical model recovery admission now verifies the previous frozen candidate,
 accepted deployment/review bindings, exact package/nine assets, locked model and
 archived audited images without requiring old source to equal today's checkout.
