@@ -10,6 +10,13 @@ and executed operator inventory alongside QKV, then one layer and full logits.
 Implementation has resumed after plan review. M0 and M1 remain parallel
 priorities, with .40 validation and milestone pushes.
 
+- 2026-10-16 | M0 scheduler ownership | offline | 49 tests and six real lifecycle cases pass; paired aligned buffer, checked source adaptation | evidence/offline-native-scheduler-ownership.json | next: native package and .40
+
+Direct native safetensors/PyTorch checkpoint loading is now an explicit
+requirement in `LLM_V1_PLAN.md`. Desktop conversion does not satisfy it; readers
+remain unimplemented. M1 is already qualified; the M0 clean lifecycle gate and
+subsequent integrated inference gates remain open.
+
 - 2026-10-16 | External model load | 08857a6 | .40 | partial-pass: 21 MiB native app loads verified `/data/hip/models` weights; clean ownership/stop, prior heap warning persists | evidence/console40-native-external-model-load.json | next: scheduler malloc diagnosis
 
 - 2026-10-16 | External model path update | offline | owner-selected `/data/hip/models/tinyllama-q4_0.gguf`; Make/CLI defaults and app configuration agree, 45 focused tests pass | next: fresh package and console validation

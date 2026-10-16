@@ -51,8 +51,8 @@ Use the existing llama.cpp loader, tokenizer, graph construction and scheduling.
 Provide the smallest ggml backend adaptation that routes the required operations
 through genuine public HIP allocation, module loading, dispatch and synchronization.
 Reuse selected upstream kernels and existing adapter code where applicable.
-Do not replace the SDK with a private direct-submission inference runtime, write
-another model parser, or require the entire upstream HIP backend to compile all
+Do not replace the SDK with a private direct-submission inference runtime or
+require the entire upstream HIP backend to compile all
 unused operator specializations. The client integration gate below must settle
 the exact source selection and backend boundary before further expansion.
 
@@ -61,6 +61,56 @@ optimization, VMM, managed memory, RCCL and on-console compilation are not v1
 requirements. If an actual required operation needs a library function, either
 provide its real bounded implementation or adapt that operation explicitly.
 Never remove dependency checks and substitute success stubs.
+
+## Native source-format requirement (2026-10-16)
+
+The owner requires the installed PS5 app to read original `.safetensors` and
+PyTorch `.bin`, `.pt`, `.pth` weights directly. Desktop conversion does not
+satisfy this requirement. Keep the existing GGUF qualification baseline while
+implementing this additional loading path; do not call extension recognition
+or host import native support. A PyTorch runtime port is not a prerequisite.
+
+Use the pinned client's `llama_model_init_from_user` interface to supply model
+metadata in memory and fill allocated tensors from original files. This avoids
+a second inference engine and an intermediate GGUF weight file. The adapter must
+parse original configuration/tokenizer sidecars, validate tensor names/shapes,
+and perform the HF Q/K RoPE row permutation. A packaged vocabulary GGUF is only
+an intermediate, profile-bound test fixture, not complete source-format support.
+
+Implement in these reviewable stages alongside the existing M0-M5 work:
+
+1. Bounded native safetensors reader: validate header size, unique names, dtypes,
+   checked shape products, exact byte ranges and shard ownership. Read tensors
+   in bounded chunks without retaining a second complete model copy.
+2. TinyLlama/Llama metadata, tokenizer and tensor adapter. Compare original
+   checkpoint values, transformed Q/K rows, tokenization and resulting logits
+   against the locked host oracle. Handle optional tensors and tied embeddings
+   explicitly: the current callback API can create absent optional tensors and
+   has no boolean failure return. Reject incomplete loads before exposing a model.
+3. Restricted native PyTorch archive/state-dictionary reader for all three
+   extensions. Validate ZIP/storage ranges, strides, aliases and tensor types;
+   interpret only the supported tensor reconstruction records. Never execute
+   Python code or arbitrary pickle globals. Unsupported object checkpoints and
+   legacy serialization variants must produce explicit errors. Enumerate the
+   supported serialization variants in the implementation and tests.
+4. Integrate original bundles into persistent `/data/hip/models` storage,
+   authenticated deployment, native package lifecycle and strict receipts.
+   Qualify each format on .40: equivalent tensors/tokenization, bounded memory,
+   clean repeated loading/cleanup and, when the inference gate is ready,
+   equivalent generated results. No desktop-prepared weight file may be needed.
+
+Original F16/BF16 weights must either have a qualified computation path or be
+quantized on the console into the existing supported Q4_0 representation;
+parsing alone does not establish inference. Any optional cache must be keyed to
+all input identities and conversion settings, written atomically and invalidated
+on changes. The accepted architecture/profile remains explicit: supporting a
+serialization format does not support every model distributed in that format.
+
+Status: design reviewed against the pinned upstream API; native readers and
+adapter are not implemented or qualified. M0's clean context lifecycle remains
+the immediate blocker; M1 arithmetic is already qualified. The unshipped desktop
+conversion prototype was removed from active tools/Make targets after this
+clarification and retained locally under `results/deferred-host-checkpoint-prototype`.
 
 ## Evidence at this checkpoint
 

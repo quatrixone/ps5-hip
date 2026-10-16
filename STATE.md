@@ -16,6 +16,22 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The scheduler metadata allocation now uses the existing paired GGML aligned
+allocator through a checked build-local source adaptation. The dependency
+checkout remains unchanged. Real host scheduler/context tests pass at capacities
+64 and 1608: the latter requests 32,492,848 bytes. Injected original malloc
+failure causes repeated owned fallbacks; the fix borrows one buffer per scheduler
+and frees it once. Allocation failure aborts before context initialization.
+49 focused test methods and six real lifecycle cases pass; see
+`evidence/offline-native-scheduler-ownership.json`. Native-client-v4 is rebuilding;
+fresh packaging/image audit and .40 validation are still required. The console
+warning is not yet attributed or resolved, and M0 remains open.
+
+The owner's additional source-format requirement is direct native loading of
+safetensors and PyTorch checkpoints, not desktop conversion. The stages and
+acceptance criteria are in `docs/LLM_V1_PLAN.md`; native readers are unimplemented.
+The desktop prototype was removed from active targets and retained locally.
+
 External model loading is now validated on .40 with native model-app-v8
 (source `08857a6`). The 21 MiB package contains `model-path.txt`, not weights;
 the existing Eden/Lapy helper grants access to

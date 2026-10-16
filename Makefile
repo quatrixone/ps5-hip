@@ -32,6 +32,7 @@ help:
 	@echo 'make llm-executed-graph  Capture actual batch-one CPU graph through context512 (fresh output)'
 	@echo 'make llm-vocab-fixture  Build zero-tensor upstream vocabulary GGUF and verify tokenizer equivalence'
 	@echo 'make llm-native-client-link  Cross-build the real loader/tokenizer payload (no app execution)'
+	@echo 'make llm-native-scheduler-test  Exercise scheduler allocation/cleanup with the real host GGML runtime'
 	@echo 'make llm-native-app  Build/audit native app (default vocab; LLM_NATIVE_APP_PHASE=model-gate requires locked full model)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
@@ -171,12 +172,17 @@ llm-native-client-link: deps-build llm-deps-fetch
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR)
 
+.PHONY: llm-native-scheduler-test
+llm-native-scheduler-test: llm-cpu-reference
+	$(PYTHON) tests/llm_native_scheduler_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
+
 .PHONY: llm-native-app
 llm-native-app: deps-build llm-deps-fetch
 	@if ! test -f "$(LLM_NATIVE_CLIENT_BUILD_DIR)/receipt.json"; then $(MAKE) llm-native-client-link; fi
 	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
 	$(PYTHON) tests/watchdog_test.py
 	$(PYTHON) tests/llm_native_host_allocator_test.py
+	$(if $(filter model-gate,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/llm_native_scheduler_test.py --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)",@true)
 	$(PYTHON) tests/llm_native_app_build_test.py
 	$(PYTHON) tests/llm_native_model_package_test.py
 	$(PYTHON) tests/source_model_auth_test.py

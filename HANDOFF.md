@@ -18,6 +18,25 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
+Current offline change: the generated native scheduler source routes its large
+context buffer through paired aligned allocation/free with an immediate nonnull
+assertion. Upstream stays clean; producer/admission bind the original, helper,
+generated source, commands and dependencies. The image audit now checks scheduler
+calls as well as the existing context/buffer/threadpool pairs. Host regression
+passes six real scheduler lifecycle/failure cases and 49 focused test methods.
+See `evidence/offline-native-scheduler-ownership.json`. Native-client-v4 is being
+rebuilt; check its actual process/receipt before proceeding, never restart a live
+build. Next build a fresh model app using that client, audit/freeze/review and test
+on idle .40. Do not reuse consumed v8. No warning whitelist or native pass exists.
+
+The user clarified native loading of original safetensors/bin/pt/pth files.
+`docs/LLM_V1_PLAN.md` records the required native readers, metadata/tokenizer
+adapter, tensor transformations and format-specific qualification. The pinned
+`llama_model_init_from_user` API is a viable integration point with explicit
+optional-tensor and callback-failure handling. Native format support is not
+implemented. Abandoned desktop-import prototypes are retained only in ignored
+`results/deferred-host-checkpoint-prototype`, not active Make/tools.
+
 Latest validated storage milestone: external model storage, default
 `/data/hip/models/tinyllama-q4_0.gguf`, configured by
 `LLM_NATIVE_APP_MODEL_REMOTE_PATH`. New app packages carry `model-path.txt`;

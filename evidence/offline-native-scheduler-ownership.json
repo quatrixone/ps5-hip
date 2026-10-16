@@ -1,0 +1,116 @@
+{
+  "classification": "host-real-scheduler-lifecycle",
+  "native_executed": false,
+  "source_sha256": "43dea13b13c2a15afd83f53515f3488c17072fc107a6ba4a5e0370f90b4fe7ff",
+  "ggml_c_sha256": "42b238412cda218552812a37329fab95a2f94be6d8bff5139083450d432f796d",
+  "generated_source_sha256": "76845959212a1c128cffb41259f924f80f0add621d14a0bbc3157f35fcecc01f",
+  "libraries": {
+    "libggml-base.so": "38c31b187e5fe5b2fdb90d0ebcc58a75a074282c050506ea3d139387459b633d",
+    "libggml-cpu.so": "4e53a909bf359711c7d5899832af7d3764e977cd5047bc37a95447122ca4cef2"
+  },
+  "compilers": {
+    "cc": "cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0",
+    "c++": "c++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0"
+  },
+  "cases": {
+    "original_64": {
+      "graph_capacity": 64,
+      "context_buffer_bytes": 1292992,
+      "allocations": 15,
+      "releases": 15,
+      "context_initializations": 15,
+      "borrowed": 0,
+      "fallback": 15
+    },
+    "original_1608": {
+      "graph_capacity": 1608,
+      "context_buffer_bytes": 32492848,
+      "allocations": 15,
+      "releases": 15,
+      "context_initializations": 15,
+      "borrowed": 0,
+      "fallback": 15
+    },
+    "paired_64": {
+      "graph_capacity": 64,
+      "context_buffer_bytes": 1292992,
+      "allocations": 5,
+      "releases": 5,
+      "context_initializations": 15,
+      "borrowed": 15,
+      "fallback": 0
+    },
+    "paired_allocation_failure_64": {
+      "signal": "SIGABRT",
+      "before_context_init": true
+    },
+    "paired_1608": {
+      "graph_capacity": 1608,
+      "context_buffer_bytes": 32492848,
+      "allocations": 5,
+      "releases": 5,
+      "context_initializations": 15,
+      "borrowed": 15,
+      "fallback": 0
+    },
+    "paired_allocation_failure_1608": {
+      "signal": "SIGABRT",
+      "before_context_init": true
+    }
+  },
+  "schema": 1,
+  "status": "PASS_OFFLINE_SCHEDULER_OWNERSHIP",
+  "client_revision": "b76b13379d3b7d67ab0bc424516bb6fd2522bd8e",
+  "unit_tests": [
+    {
+      "test": "llm_native_client_build",
+      "exit_code": 0,
+      "methods": 13,
+      "log_sha256": "79f354dc68b1551a390e3c316fd678c1d979292da365b7fb65529b4c113fb94f"
+    },
+    {
+      "test": "llm_native_validation_cost",
+      "exit_code": 0,
+      "methods": 9,
+      "log_sha256": "7d21a407289990089a56b09a902b923514e40ba0582069895b9cd2268275e0ff"
+    },
+    {
+      "test": "llm_client_native_audit",
+      "exit_code": 0,
+      "methods": 18,
+      "log_sha256": "af81cd85f7605aa91b9cb4d1759ee2fcc605883b540853e27f4716c166fa5394"
+    },
+    {
+      "test": "llm_native_app_build",
+      "exit_code": 0,
+      "methods": 8,
+      "log_sha256": "6ff8cb6673e52248481ba0fa0eca3657ce430b443dbc93e93c7a3e25938b7877"
+    },
+    {
+      "test": "llm_native_host_allocator",
+      "exit_code": 0,
+      "methods": 1,
+      "log_sha256": "09577749469da9dade9435ea8c98c359d14f4ef8c19b8a460a306fdafcf92fea"
+    }
+  ],
+  "M0_complete": false,
+  "console_warning_resolved": false,
+  "inputs": {
+    "tools/prepare_llm_native_scheduler.py": "84b5798c070b381a3cee326ad19a37c36c5a14919367b8a05676d2e5ec0fc2e8",
+    "tools/build_llm_native_client.py": "44971625b6107246169f71e65c7245b81166f0b742c0be338fbf00dee547c40e",
+    "tools/build_llm_native_app.py": "da164cf18fec179a2304f844bdc22e4d447bb84b625fecf8f1cba7fb27c68337",
+    "tools/audit_public_hip_llm_client_native.py": "8bfbb9fd746aa9938ebd936579bb62906fe10a7923c0fa0d5e340dc2cd0478f2",
+    "tests/llm_native_scheduler_test.py": "1a062b21e77d070b1ee7d45b6608cc3af5d150c04185ea37d57e57fdc7e26508",
+    "tests/llm_native_client_build_test.py": "a56758cfbfdf2a4092acd7f5fb05bf875b0a4c931b0df261d0033584c516d3f6",
+    "tests/llm_client_native_audit_test.py": "0fb08cb94a25d669b50cc0e409950e9b68d6fa74a0de70eb57abbe96e9219ead",
+    "Makefile": "2d8ee512eef871d2a531417e94a1b60f5b7b42d506a1577085a790fceb73365c",
+    "results/m0-scheduler-offline-v1/lifecycle.json": "93731eb853a2b1672a693d380a333088c5005c24c256e32ad94444a5cda84792",
+    "results/m0-scheduler-offline-v1/tests.json": "20c50da10757153715c552db2b8a91674e35a4230bd429f155af1ece3d13299f"
+  },
+  "limits": [
+    "Host instrumentation forces the original context allocation to null; this does not prove which native allocation emitted the platform warning.",
+    "Actual scheduler/context code runs on host with allocation observers; native allocator kernel calls retain separate modeled coverage.",
+    "Fresh native package, image audit and installed .40 validation remain required. Strict warning rejection is unchanged.",
+    "Native checkpoint format support is planned, not implemented."
+  ]
+}

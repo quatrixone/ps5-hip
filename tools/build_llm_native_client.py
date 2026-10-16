@@ -14,6 +14,7 @@ import threading
 ROOT=next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json').is_file())
 sys.path.insert(0,str(ROOT/'tools'))
 from fetch_locked_deps import source,read
+import prepare_llm_native_scheduler as scheduler
 BASE=('ggml.c','ggml.cpp','ggml-alloc.c','ggml-backend.cpp','ggml-backend-meta.cpp','ggml-threading.cpp','ggml-quants.c','gguf.cpp','ggml-backend-reg.cpp','ggml-backend-dl.cpp')
 
 def sha(p):
@@ -65,7 +66,8 @@ def app_objects(folder):
  client=source('llama-client',lock,False);source('sdk',deps['sdk'],False);sdk=ROOT/'.deps/sdk'
  if (sdk/'.ps5-sdk-revision').read_text().strip()!=deps['sdk']['revision']:raise ValueError('SDK revision marker mismatch')
  ordinary,models=selection(client)
- units=ordinary+[folder/('unity-'+str(i)+'.cpp') for i in range(11)]+[Path(__file__).with_name('llm_native_client_main.cpp')]
+ scheduler_input=client/'ggml/src/ggml-backend.cpp';scheduler_output=folder/scheduler.GENERATED_NAME
+ units=[scheduler_output if p==scheduler_input else p for p in ordinary]+[folder/('unity-'+str(i)+'.cpp') for i in range(11)]+[Path(__file__).with_name('llm_native_client_main.cpp')]
  if r.get('units')!=list(map(str,units)) or r.get('model_sources')!=list(map(str,models)) or r.get('object_count')!=71:raise ValueError('native-client source/object selection differs')
  inputs=r.get('inputs');artifacts=r.get('artifacts');tools=r.get('tools')
  if not isinstance(inputs,dict) or not inputs or not isinstance(artifacts,dict) or not artifacts or not isinstance(tools,dict):raise ValueError('missing native-client identities')
@@ -76,8 +78,9 @@ def app_objects(folder):
  for name,digest in inputs.items():
   if not Path(name).is_absolute() or sha(name)!=digest:raise ValueError('stale native-client input: '+name)
   verified_inputs.add(name)
- required_sources=[Path(__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]
+ required_sources=[Path(__file__),Path(scheduler.__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*ordinary,*units,*models]
  for p in required_sources:required(p)
+ if r.get('scheduler_source')!=scheduler.provenance(scheduler_input,scheduler_output):raise ValueError('native scheduler provenance differs')
  for i in range(11):
   if units[59+i].read_text()!='\n'.join('#include "'+str(p)+'"' for p in models[i*16:(i+1)*16])+'\n':raise ValueError('unity source differs')
  for lib in ('llama','ggml'):
@@ -142,7 +145,7 @@ def build(output):
  deps=read('dependencies.json');lock=read('llm-inputs.json')['client'];client=source('llama-client',lock,False);sdk_source=source('sdk',deps['sdk'],False);sdk=ROOT/'.deps/sdk'
  if (sdk/'.ps5-sdk-revision').read_text().strip()!=deps['sdk']['revision']:raise ValueError('SDK revision marker mismatch')
  units,models=selection(client);inputs={};symlinks={};mutex=threading.Lock();commands=[]
- for p in [Path(__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]:bind(inputs,p)
+ for p in [Path(__file__),Path(scheduler.__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]:bind(inputs,p)
  sdk_files=sorted(p for p in sdk.rglob('*') if p.is_file())
  for p in sdk_files:
   bind(inputs,p)
@@ -159,6 +162,10 @@ def build(output):
    if name.startswith('/') and Path(name).is_file():bind(inputs,name)
  bind(inputs,sys.executable)
  output.mkdir(parents=True)
+ scheduler_input=client/'ggml/src/ggml-backend.cpp';scheduler_output=output/scheduler.GENERATED_NAME
+ scheduler_output.write_text(scheduler.render(scheduler_input.read_text()));bind(inputs,scheduler_output)
+ scheduler_identity=scheduler.provenance(scheduler_input,scheduler_output)
+ units=[scheduler_output if p==scheduler_input else p for p in units]
  def run(label,argv,timeout=240):
   row={'label':label,'argv':list(map(str,argv))}
   try:
@@ -235,6 +242,7 @@ def build(output):
   if sha(p)!=h:raise ValueError('input changed before publication: '+p)
  artifacts={str(p.relative_to(output)):{'sha256':sha(p),'bytes':p.stat().st_size} for p in output.rglob('*') if p.is_file()}
  receipt={'schema':1,'status':'PASS','classification':'source-only-native-client-payload-link','client_revision':lock['revision'],'sdk_revision':deps['sdk']['revision'],'inputs':inputs,'sdk_symlinks':symlinks,'tools':tools,'units':[str(p) for p in units],'objects':{str(p):sha(p) for p in objects},'object_count':71,'model_sources':[str(p) for p in models],'link_inputs':link_inputs,'commands':commands,'artifacts':artifacts,'dynamic_imports':names,'native_executed':False,'gpu_executed':False,'limits':['SDK payload ELF only; RWX segment is not accepted app packaging.','Vocab-only native caller; no model loaded or tokenized here and no public HIP backend integrated.','Installed SDK bytes and clean source revision bound; SDK source-build provenance is inherited from deps-build, not recreated by this target.','No general model support or inference claim from retaining all upstream factory implementations.']}
+ receipt['scheduler_source']=scheduler_identity
  (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('PASS',output/'receipt.json',flush=True);return receipt
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args();build(args.output)

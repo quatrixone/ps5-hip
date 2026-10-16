@@ -6,6 +6,35 @@ from unittest.mock import patch
 import json
 spec=importlib.util.spec_from_file_location('native_build',Path(__file__).resolve().parents[1]/'tools/build_llm_native_client.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)
 class NativeBuild(unittest.TestCase):
+ def test_scheduler_pair_only_changed_and_allocation_checked(self):
+  source=b.ROOT/'.deps/sources/llama-client/ggml/src/ggml-backend.cpp'
+  original=source.read_text();generated=b.scheduler.render(original)
+  allocation='    sched->context_buffer = (char *) ggml_aligned_malloc(sched->context_buffer_size);\n    GGML_ASSERT(sched->context_buffer != NULL);'
+  release='    ggml_aligned_free(sched->context_buffer, sched->context_buffer_size);'
+  self.assertEqual(generated.count(allocation),1);self.assertEqual(generated.count(release),1)
+  self.assertEqual(generated.replace(allocation,b.scheduler.ALLOCATE).replace(release,b.scheduler.RELEASE),original)
+  self.assertNotIn(b.scheduler.ALLOCATE,generated);self.assertNotIn(b.scheduler.RELEASE,generated)
+ def test_scheduler_upstream_drift_and_duplicate_rejected(self):
+  source=(b.ROOT/'.deps/sources/llama-client/ggml/src/ggml-backend.cpp').read_text()
+  for token in (b.scheduler.ALLOCATE,b.scheduler.RELEASE):
+   for changed in (source.replace(token,''),source+'\n'+token):
+    with self.subTest(token=token),self.assertRaisesRegex(ValueError,'pair changed'):b.scheduler.render(changed)
+  with self.assertRaisesRegex(ValueError,'pair changed'):b.scheduler.render(b.scheduler.render(source))
+ def test_scheduler_generated_source_provenance_and_tampering(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);source=folder/'upstream.cpp';generated=folder/b.scheduler.GENERATED_NAME
+   source.write_text(b.scheduler.ALLOCATE+'\n'+b.scheduler.RELEASE+'\n')
+   original=source.read_bytes();generated.write_text(b.scheduler.render(source.read_text()))
+   record=b.scheduler.provenance(source,generated)
+   self.assertEqual(record,{'classification':'native-scheduler-aligned-context','source':str(source),'source_sha256':b.sha(source),'generated':str(generated),'generated_sha256':b.sha(generated)})
+   self.assertEqual(source.read_bytes(),original)
+   generated.write_text(generated.read_text().replace('GGML_ASSERT(sched->context_buffer != NULL);',''))
+   with self.assertRaisesRegex(ValueError,'source differs'):b.scheduler.provenance(source,generated)
+ def test_scheduler_generated_symlink_rejected(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);source=folder/'upstream.cpp';target=folder/'target.cpp';generated=folder/b.scheduler.GENERATED_NAME
+   source.write_text(b.scheduler.ALLOCATE+'\n'+b.scheduler.RELEASE+'\n');target.write_text(b.scheduler.render(source.read_text()));generated.symlink_to(target)
+   with self.assertRaisesRegex(ValueError,'source differs'):b.scheduler.provenance(source,generated)
  def test_actual_locked_selection_has_unique_complete_source_units(self):
   units,models=b.selection(b.ROOT/'.deps/sources/llama-client')
   self.assertEqual(len(units),59);self.assertEqual(len(set(units)),59);self.assertEqual(len(models),161)

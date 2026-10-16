@@ -191,7 +191,8 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  required_sources=['tools/public_hip_llm_client_console_title.cpp','ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h','tools/audit_public_hip_llm_client_native.py']
  if phase=='model-gate':
   required_sources+=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
-   'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h']
+   'tests/llm_native_host_allocator_test.py','tests/llm_native_scheduler_test.py',
+   'src/native_memory.cpp','include/ps5hip/native_memory.h']
  for name in required_sources:bind(ROOT/name)
  specs=sources()
  for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)

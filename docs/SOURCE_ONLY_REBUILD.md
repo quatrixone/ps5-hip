@@ -16,6 +16,19 @@ fresh `LLM_NATIVE_CLIENT_BUILD_DIR`. It prepares dependencies and compiles all
 client objects from source. See [the native client boundary](LLM_NATIVE_CLIENT.md):
 the payload ELF is not yet a native application or an inference result.
 
+The native build generates a checked scheduler source copy with paired aligned
+metadata allocation; it leaves the pinned dependency checkout unchanged. Existing
+native-client receipts from before this change require a fresh client build.
+`make llm-native-scheduler-test` exercises the real host scheduler/context
+lifecycle, including allocation failure. Model-gate app builds run that test
+against `LLM_NATIVE_APP_CPU_BUILD` as well. This is an offline regression, not
+evidence that the PS5 context warning is resolved.
+
+Direct PS5 loading of safetensors and PyTorch checkpoints is planned in
+[the native source-format requirement](LLM_V1_PLAN.md#native-source-format-requirement-2026-10-16).
+The current app still accepts the qualified GGUF only. Desktop conversion is
+not the acceptance criterion for that new requirement.
+
 `make llm-vocab-fixture` builds a small weight-free GGUF using the locked
 upstream writer, then checks its tokenizer against the full model. Choose a
 fresh `LLM_VOCAB_FIXTURE_DIR`; see [the fixture contract](LLM_VOCAB_FIXTURE.md).

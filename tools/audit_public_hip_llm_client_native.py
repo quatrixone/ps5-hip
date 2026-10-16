@@ -29,7 +29,8 @@ SOURCES=['tools/audit_public_hip_llm_client_native.py','tests/llm_client_native_
  'tools/public_hip_llm_client_console_title.cpp','tools/public_hip_app_crt.cpp',
  'ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h']
 ALLOCATOR_SOURCES=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
- 'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h']
+ 'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h',
+ 'tools/prepare_llm_native_scheduler.py']
 
 def threadpool_indirect_malloc(body,target):
  # Exact observed LLVM18 O0 prefix: RIP-relative wrapper address, pool size,
@@ -56,6 +57,7 @@ def allocator_contract(bodies,roles):
  for caller,expected,count in [
   (roles['buffer_alloc'],malloc,1),(roles['buffer_free'],free,1),
   ('ggml_init',malloc,1),('ggml_free',free,1),
+  ('ggml_backend_sched_new',malloc,1),('ggml_backend_sched_free',free,1),
   ('ggml_threadpool_new_impl',malloc,1),('ggml_threadpool_free',free,2)]:
   calls=symbol_calls(bodies[caller],expected)
   if caller=='ggml_threadpool_new_impl':
@@ -167,6 +169,7 @@ def audit(raw,converted,extracted,phase="vocab"):
    require(aliases and len({one(n) for n in aliases})==1,'missing/ambiguous NativeMemory '+role)
    allocator_roles[role]=aliases
   allocator_names=['__wrap_ggml_aligned_malloc','__wrap_ggml_aligned_free','ggml_init','ggml_free',
+   'ggml_backend_sched_new','ggml_backend_sched_free',
    'ggml_threadpool_new_impl','ggml_threadpool_free','ps5hip_llm_fail',allocator_roles['buffer_alloc'],
    allocator_roles['buffer_free'],allocator_roles['stats'],allocator_roles['close'],allocator_roles['cpu'],
    *allocator_roles['constructors'],*allocator_roles['destructors']]
@@ -207,7 +210,7 @@ def audit(raw,converted,extracted,phase="vocab"):
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
   native_allocator_routing_audited=(phase=='model-gate'),
   wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase=='model-gate'),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
-  limits=['Selected GGML context, CPU-buffer and threadpool aligned pairs are checked in model mode; ordinary libc allocations are not intercepted and native ownership is unproven.',
+  limits=['Selected GGML context, CPU-buffer, scheduler context-buffer and threadpool aligned pairs are checked in model mode; ordinary libc allocations are not intercepted and native ownership is unproven.',
   'Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
   'Reviewed LLVM18 O0 wrapper template rejects nonempty graphs with current zero-op predicate; any codegen change requires review.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])

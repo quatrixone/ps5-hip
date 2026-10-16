@@ -24,6 +24,7 @@ class Audit(unittest.TestCase):
     auditor.audit(__file__,__file__,__file__,'model-gate')
   self.assertIn('tests/llm_client_native_audit_test.py',auditor.SOURCES)
   self.assertIn('tools/audit_public_hip_llm_client_native.py',auditor.SOURCES)
+  self.assertIn('tools/prepare_llm_native_scheduler.py',auditor.ALLOCATOR_SOURCES)
   self.assertTrue(all((auditor.ROOT/p).is_file() for p in auditor.SOURCES))
  def test_model_phase_chain(self):
   chain=['main','model','llama_process','decode','process_ubatch','context', '__wrap_ggml_backend_sched_graph_compute_async']
@@ -77,6 +78,8 @@ class Allocator(unittest.TestCase):
    constructors=['ctor1','ctor2'],destructors=['dtor1','dtor2'],close='close',cpu='cpu',malloc_address=0x800)
   edges={'cpu_alloc':['__wrap_ggml_aligned_malloc'],'cpu_free':['__wrap_ggml_aligned_free'],
    'ggml_init':['__wrap_ggml_aligned_malloc'],'ggml_free':['__wrap_ggml_aligned_free'],
+   'ggml_backend_sched_new':['__wrap_ggml_aligned_malloc'],
+   'ggml_backend_sched_free':['__wrap_ggml_aligned_free'],
    'ggml_threadpool_new_impl':['__wrap_ggml_aligned_malloc'],
    'ggml_threadpool_free':['__wrap_ggml_aligned_free','__wrap_ggml_aligned_free'],
    'main':['stats'],'finalized':['stats'],
@@ -97,6 +100,7 @@ class Allocator(unittest.TestCase):
   bodies,roles=self.fixture()
   for caller,target in [('cpu_alloc','ggml_aligned_malloc'),('cpu_free','ggml_aligned_free'),
    ('ggml_init','ggml_aligned_malloc'),('ggml_free','ggml_aligned_free'),
+   ('ggml_backend_sched_new','ggml_aligned_malloc'),('ggml_backend_sched_free','ggml_aligned_free'),
    ('__wrap_ggml_aligned_malloc','ggml_aligned_malloc'),('__wrap_ggml_aligned_free','ggml_aligned_free')]:
    bad=dict(bodies);bad[caller]+=f'\n90: callq 0x800 <{target}>'
    with self.subTest(caller=caller),self.assertRaises(RuntimeError):a.allocator_contract(bad,roles)
@@ -110,6 +114,13 @@ class Allocator(unittest.TestCase):
  def test_duplicate_routing_rejected(self):
   bodies,roles=self.fixture();bodies['cpu_alloc']+='\n90: callq 0x800 <__wrap_ggml_aligned_malloc>'
   with self.assertRaises(RuntimeError):a.allocator_contract(bodies,roles)
+ def test_scheduler_pair_cannot_revert_to_libc_or_duplicate(self):
+  bodies,roles=self.fixture()
+  for caller,wrapped,libc in [('ggml_backend_sched_new','__wrap_ggml_aligned_malloc','malloc'),
+                             ('ggml_backend_sched_free','__wrap_ggml_aligned_free','free')]:
+   for altered in [bodies[caller].replace(wrapped,libc),bodies[caller]+'\n90: callq 0x800 <'+wrapped+'>']:
+    bad=dict(bodies);bad[caller]=altered
+    with self.subTest(caller=caller,body=altered),self.assertRaises(RuntimeError):a.allocator_contract(bad,roles)
 class Relax(unittest.TestCase):
  def test_exact_direct(self):
   self.assertEqual(a.normalized_wrapper('1000: addr32 callq 0x1234 <ggml_graph_node>',0x1000),'call\n')
