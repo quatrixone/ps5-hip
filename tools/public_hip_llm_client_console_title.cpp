@@ -100,15 +100,36 @@ static void vocabulary_check() {
  m0::require(case_index==32); llama_model_free(model); llama_backend_free();
  std::printf("M0_APP VOCAB cases=%u tokens=%u vocabulary=32000 tensors=0 exact=true\n",case_index,total);
 }
+static void storage_call_snapshot() {
+ const auto counters=m0::hip_call_statistics();
+ const char* names[]={"init","device_count","allocate","free","cleanup_free","h2d","d2h","d2d","fill","clear","synchronize"};
+ const uint64_t counts[]={1,1,1,1,0,1,3,1,1,1,1};
+ const uint64_t bytes[]={0,0,512,512,0,64,192,64,16,512,0};
+ static_assert(sizeof(names)/sizeof(names[0])==static_cast<unsigned>(m0::HipCall::count));
+ for(unsigned i=0;i<static_cast<unsigned>(m0::HipCall::count);++i){
+  const auto& row=counters.calls[i];
+  m0::require(row.attempts==counts[i]&&row.completions==counts[i]&&row.successes==counts[i]&&
+              !row.failures&&row.requested_bytes==bytes[i]&&!row.last_result&&!row.first_error);
+  std::printf("M0_APP HIP_CALL scope=storage_fixture call=%s attempts=%llu completions=%llu successes=%llu failures=%llu requested_bytes=%llu last_result=%d first_error=%d\n",
+              names[i],static_cast<unsigned long long>(row.attempts),static_cast<unsigned long long>(row.completions),
+              static_cast<unsigned long long>(row.successes),static_cast<unsigned long long>(row.failures),
+              static_cast<unsigned long long>(row.requested_bytes),row.last_result,row.first_error);
+ }
+}
 static void storage_and_gate_check() {
+ const auto before=m0::hip_call_statistics();
+ for(const auto& row:before.calls)m0::require(!row.attempts&&!row.completions&&!row.successes&&!row.failures&&!row.requested_bytes&&!row.last_result&&!row.first_error);
  ggml_backend_register(m0::registration());auto ps5=ggml_backend_dev_init(ggml_backend_reg_dev_get(m0::registration(),0),nullptr);m0::require(ps5);
  ggml_init_params params{1<<20,nullptr,true};auto ctx=ggml_init(params);m0::require(ctx);
  auto a=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);auto b=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);
  auto storage=ggml_backend_alloc_ctx_tensors(ctx,ps5);m0::require(storage);
  float input[16],output[16];for(unsigned i=0;i<16;++i)input[i]=float(i+1);
  ggml_backend_tensor_set(a,input,0,sizeof(input));ggml_backend_tensor_copy(a,b);ggml_backend_tensor_get(b,output,0,sizeof(output));m0::require(!std::memcmp(input,output,sizeof(input)));
+ ggml_backend_tensor_memset(b,0xa5,8,16);ggml_backend_tensor_get(b,output,0,sizeof(output));
+ const auto* actual=reinterpret_cast<const unsigned char*>(output);const auto* original=reinterpret_cast<const unsigned char*>(input);
+ for(unsigned i=0;i<sizeof(output);++i)m0::require(actual[i]==((i>=8&&i<24)?0xa5:original[i]));
  ggml_backend_buffer_clear(storage,0);ggml_backend_tensor_get(a,output,0,sizeof(output));for(auto f:output)m0::require(f==0);ggml_backend_synchronize(ps5);
- ggml_backend_buffer_free(storage);ggml_free(ctx);
+ ggml_backend_buffer_free(storage);ggml_free(ctx);storage_call_snapshot();
  ctx=ggml_init(params);a=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);b=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);auto sum=ggml_add(ctx,a,b);auto graph=ggml_new_graph(ctx);ggml_build_forward_expand(graph,sum);
  auto cpu=ggml_backend_cpu_init();m0::require(cpu);ggml_backend_t backends[]={ps5,cpu};auto scheduler=ggml_backend_sched_new(backends,nullptr,2,128,false,false);m0::require(scheduler);
  m0::require(ggml_backend_sched_alloc_graph(scheduler,graph));ggml_backend_tensor_set(a,input,0,sizeof(input));ggml_backend_tensor_set(b,input,0,sizeof(input));float sentinel[16];for(auto& f:sentinel)f=-999;ggml_backend_tensor_set(sum,sentinel,0,sizeof(sentinel));
@@ -118,7 +139,7 @@ static void storage_and_gate_check() {
  m0::require(ggml_backend_graph_compute(ps5,graph)==GGML_STATUS_FAILED&&m0::statistics().direct_graph_calls==1);
  ggml_backend_sched_free(scheduler);ggml_backend_free(cpu);ggml_free(ctx);ggml_backend_free(ps5);
  m0::require(observed.allocations==observed.frees && !observed.terminal && !observed.uncertain && observed.launches==0);
- std::puts("M0_APP STORAGE copied=16 cleared=16 synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false");
+ std::puts("M0_APP STORAGE copied=16 cleared=16 partial_fill_bytes=16 surrounding_bytes_exact=true synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false");
 }
 
 extern "C" [[noreturn]] void ps5hip_llm_fail(const char* reason){ps5hip_clr_gpu_fail(reason);}

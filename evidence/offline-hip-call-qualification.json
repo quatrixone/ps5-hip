@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-16",
+  "status": "PASS",
+  "classification": "current-source-host-hip-call-qualification",
+  "source_base_commit": "ae96e99c46bd468b420f0a14e32570ca1fe6573e",
+  "source_state": "working tree changes authenticated by the hashes below; commit follows qualification",
+  "sources_sha256": {
+    "Makefile": "45b6a24ed9e3fe41fba508330f8f45e9cfce22eb7a1b95ca0a4479e1032a726a",
+    "ports/ggml/ps5_backend.cpp": "32db86ad6b6efadd2e42a0057d2cf965205a2bc10dc7a0757cfd96a29cce7638",
+    "ports/ggml/ps5_backend.h": "2d8fe4b28ba7a6d4a7989aa9433b63fce10d84ea017e8bef41c4d6529baecde3",
+    "tests/llm_client_native_audit_test.py": "223f9f3f6f7c7a5e077d146db95e50a762fea9bea258094cc1291c863e21ff25",
+    "tests/llm_ps5_backend_test.cpp": "02cb0d923017c0c7433f681fa46b3437ed67162771880e7e05bfb1e2b967e6d9",
+    "tools/audit_public_hip_llm_client_native.py": "426d259653844030d0030c41dbe2b1bf6e7460d0bb1b102da5c6c81520a3996a",
+    "tools/public_hip_llm_client_console_title.cpp": "976613b40bb5bb0625fbff0917f08964d6736e8aa28922197cc8cedf11b3edbd",
+    "tools/qualify_public_hip_source.py": "73ad844fef3b07e911eae4ec32d20ce4413fa89625fd9e60748ede85e0e12d0b",
+    "tools/source_public_hip_log.py": "02b4f1c38b7d28862ec823d6dddc47e030b735f4fb0771224cca32c6b1e3441a",
+    "tests/hip_call_coverage_test.cpp": "7d07111724e42d35bf1c21c33abc3f8755e1b61eb5ac74d98eba0eb7c50e7b58",
+    "tests/hip_call_coverage_test.py": "27474f70cdab54a68085dd9e482b63681b2cb9e1b3e1f3e4bcea92cf88acbc15",
+    "tests/native_call_transcript_test.py": "e87db17dec38bddb311a72b25b03bbe0f5a74fd06ad93cfd6c22f05dcf5cee2c",
+    "tests/public_hip_llm_qualification_test.py": "580fd4d28c1dc3e0cb18e557cd96b95629784b5a0b16c502a5b6a1785470d1e8",
+    "tools/qualify_public_hip_llm.py": "ef9c7d238b644a83c846d9413f3621882f669c091a0c0434ef384e09adacee10"
+  },
+  "receipt": {
+    "path": "results/public-hip-llm-fresh-v1/receipt.json",
+    "sha256": "ac15f214177927e53533f05437d5ef26099a24ed9a8c1eb12120d0bdc4be9297"
+  },
+  "fresh_build": {
+    "runtime_units": 71,
+    "llama_units": 44,
+    "nested_llm_compiled_units": 46,
+    "linked_objects": 116,
+    "legacy_top_level_total_compilations": 88,
+    "legacy_count_excludes_nested_llm_compiles": true,
+    "llm_bound_inputs": 847,
+    "compiler_workers": 4,
+    "reused_runtime_objects": false,
+    "reused_llama_objects": false,
+    "authenticated_cpu_reference_libraries_reused": true,
+    "executable_sha256": "f3a98a03585f8b5c451c68e574338f0f88f30f8a792fac880936313dd0e7a613",
+    "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "tests": {
+    "mock_hip_call_cases": 17,
+    "focused_runner_tests": 7,
+    "job_policy_tests": 5,
+    "make_dry_run": "PASS",
+    "full_public_runtime_suite": "PASS",
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "llm_modes": [
+      "deferred",
+      "eager"
+    ],
+    "actual_model_attempts_per_mode": 2,
+    "second_graph_reused": true,
+    "actual_caller_wrapping_audited": true,
+    "storage_copy_clear_bounds_and_partial_fill_accounting": "PASS"
+  },
+  "results": {
+    "first_rejected_operator": "GET_ROWS",
+    "scheduler_forwarded": 0,
+    "post_compute": 0,
+    "gpu_submits": 0,
+    "native_executed": false,
+    "gpu_executed": false,
+    "inference": false
+  },
+  "limits": [
+    "HIP transport is host modeled; this is not console or GPU operator evidence.",
+    "The 17 injected failure/accounting cases use mocked HIP calls with real GGML callbacks.",
+    "Each actual-client mode emits 518 bytes of deliberate log-policy/bounds negative-control diagnostics on stderr; manually inspected, with no sanitizer report.",
+    "CPU GGML libraries inherit authenticated CPU-v3 build provenance."
+  ],
+  "all_raw_logs": {
+    "count": 758,
+    "sorted_path_hash_manifest_sha256": "20ca75aceafcd03e97fa70701bbf35ca2b13eb4722fdc08b6b1df09545d14091",
+    "encoding": "UTF-8 canonical JSON mapping relative path to SHA256, sorted keys, compact separators, trailing LF"
+  },
+  "selected_raw_logs_sha256": {
+    "results/public-hip-llm-fresh-v1/llm-caller.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-hip-llm-fresh-v1/llm-caller.stdout": "c1e48906c29c28a3c229dfbfbe5f27dfd82f4a4d74c7ecd34d41d494000c165b",
+    "results/public-hip-llm-fresh-v1/llm-deferred.stderr": "d4715e7c8bd346478d5b1205e266f1592dfd2bc899ceee21a119fde1cb40da1d",
+    "results/public-hip-llm-fresh-v1/llm-deferred.stdout": "b1c0a1ca3eeb64312ffbc71b731fbb6f6508e639215796a5e6d86e1d4b6a3eba",
+    "results/public-hip-llm-fresh-v1/llm-eager.stderr": "d4715e7c8bd346478d5b1205e266f1592dfd2bc899ceee21a119fde1cb40da1d",
+    "results/public-hip-llm-fresh-v1/llm-eager.stdout": "b1c0a1ca3eeb64312ffbc71b731fbb6f6508e639215796a5e6d86e1d4b6a3eba",
+    "results/public-hip-llm-fresh-v1/llm-link.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-hip-llm-fresh-v1/llm-link.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-hip-llm-fresh-v1/llm-runtime-libraries.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-hip-llm-fresh-v1/llm-runtime-libraries.stdout": "407d9737ce740f741eb0867b2a7dfda8042de64b566407f755fd756267937fa8",
+    "results/public-hip-llm-fresh-v1.make-dry-run.txt": "9d1b450f423825335d173c61fe4462b02b12c457161337191c104c30472f1e6e",
+    "results/public-hip-llm-fresh-v1.mock-calls.json": "e0e539fcb0ec3d3f211fa49a4c211dfc7dba8fd6d231864871137f36345cb423",
+    "results/public-hip-llm-fresh-v1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/public-hip-llm-fresh-v1.stdout": "7e807428abac4ebba0bba5f50b606050cd1cadc06c43a4be8b1edf5d95962be7"
+  }
+}

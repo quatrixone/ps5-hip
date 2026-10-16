@@ -26,6 +26,24 @@ class Audit(unittest.TestCase):
   self.assertIn('tools/audit_public_hip_llm_client_native.py',auditor.SOURCES)
   self.assertIn('tools/prepare_llm_native_scheduler.py',auditor.ALLOCATOR_SOURCES)
   self.assertTrue(all((auditor.ROOT/p).is_file() for p in auditor.SOURCES))
+ def test_storage_snapshot_symbols_are_optional_only_in_model_phase(self):
+  import ast
+  tree=ast.parse((a.ROOT/'tools/audit_public_hip_llm_client_native.py').read_text())
+  function=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='audit')
+  def assignment(node,name):
+   return isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id==name for t in node.targets)
+  start=next(i for i,n in enumerate(function.body) if assignment(n,'snapshot_names'))
+  end=next(i for i,n in enumerate(function.body) if assignment(n,'model_names'))
+  code=compile(ast.Module(body=function.body[start:end],type_ignores=[]),'<actual-snapshot-selection>','exec')
+  for phase in ('vocab','model-gate'):
+   for present in (False,True):
+    values={'native_storage_call_snapshot':1,'native_hip_call_statistics':2} if present else {}
+    env=dict(values=values,phase=phase,names=[],require=a.require,match=lambda part:next(n for n in values if part in n))
+    if phase=='vocab' and not present:
+     with self.assertRaisesRegex(RuntimeError,'snapshot missing'):exec(code,env)
+    else:
+     exec(code,env)
+     self.assertEqual(len(env['names']),2 if present else 0)
  def test_model_phase_chain(self):
   chain=['main','model','llama_process','decode','process_ubatch','context', '__wrap_ggml_backend_sched_graph_compute_async']
   bodies={a:f'10: callq 0x20 <{b}>\n' for a,b in zip(chain,chain[1:])};bodies[chain[-1]]=''

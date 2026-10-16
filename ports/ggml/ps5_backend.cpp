@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <new>
+#include <atomic>
 namespace m0 {
 static ggml_backend_device device{};
 static ggml_backend_reg registry{};
@@ -15,30 +16,63 @@ static unsigned graph_calls=0;
 static const ggml_cgraph* last_graph=nullptr;
 static unsigned scheduled_compute_calls=0;
 static unsigned gate_calls=0, rejected=0;
+static HipCallStatistics hip_calls{};
+static std::atomic_flag hip_calls_lock=ATOMIC_FLAG_INIT;
+struct HipCallsGuard {
+ HipCallsGuard(){while(hip_calls_lock.test_and_set(std::memory_order_acquire)){}}
+ ~HipCallsGuard(){hip_calls_lock.clear(std::memory_order_release);}
+};
 void require(bool yes){if(!yes){std::fputs("M0 backend invariant/error\n",stderr);ps5hip_llm_fail("backend-invariant");}}
+HipCallStatistics hip_call_statistics(){HipCallsGuard guard;return hip_calls;}
+static void begin_call(HipCall call,size_t bytes=0){
+ bool valid;
+ {HipCallsGuard guard;auto& row=hip_calls.calls[static_cast<unsigned>(call)];
+  valid=row.attempts<UINT64_MAX&&bytes<=UINT64_MAX-row.requested_bytes;
+  if(valid){++row.attempts;row.requested_bytes+=bytes;}
+ }
+ require(valid);
+}
+static hipError_t finish_call(HipCall call,hipError_t result){
+ bool valid;
+ {HipCallsGuard guard;auto& row=hip_calls.calls[static_cast<unsigned>(call)];
+  valid=row.completions<row.attempts;
+  if(valid){++row.completions;row.last_result=int(result);
+   if(result==hipSuccess)++row.successes;else{++row.failures;if(!row.first_error)row.first_error=int(result);}
+  }
+ }
+ require(valid);
+ return result;
+}
 static void hip_ok(hipError_t e){if(e!=hipSuccess){std::fprintf(stderr,"M0 HIP error=%d\n",int(e));ps5hip_llm_fail("backend-invariant");}}
 static const char* name(ggml_backend_t){return "PS5HIP-M0-STORAGE-ONLY";}
 static const char* buffer_name(ggml_backend_buffer_type_t){return "PS5HIP";}
 static bool supports(ggml_backend_dev_t,const ggml_tensor*){return false;}
 static void* base(ggml_backend_buffer_t b){return b->context;}
-static void free_buffer(ggml_backend_buffer_t b){hip_ok(hipFree(b->context));}
+static void free_buffer(ggml_backend_buffer_t b){begin_call(HipCall::free,b->size);hip_ok(finish_call(HipCall::free,hipFree(b->context)));}
 static uint8_t* span(ggml_backend_buffer_t b,const ggml_tensor* t,size_t offset,size_t size){
  const auto begin=reinterpret_cast<uintptr_t>(b->context),p=reinterpret_cast<uintptr_t>(t->data);
  require(p>=begin&&p-begin<=b->size&&offset<=ggml_nbytes(t)&&size<=ggml_nbytes(t)-offset&&offset<=b->size-(p-begin)&&size<=b->size-(p-begin)-offset);
  return reinterpret_cast<uint8_t*>(p)+offset;
 }
-static void set(ggml_backend_buffer_t b,ggml_tensor* t,const void* data,size_t off,size_t size){hip_ok(hipMemcpy(span(b,t,off,size),data,size,hipMemcpyHostToDevice));}
-static void get(ggml_backend_buffer_t b,const ggml_tensor* t,void* data,size_t off,size_t size){hip_ok(hipMemcpy(data,span(b,t,off,size),size,hipMemcpyDeviceToHost));}
-static void fill(ggml_backend_buffer_t b,ggml_tensor* t,uint8_t value,size_t off,size_t size){hip_ok(hipMemset(span(b,t,off,size),value,size));}
-static void clear(ggml_backend_buffer_t b,uint8_t value){hip_ok(hipMemset(b->context,value,b->size));}
+static void set(ggml_backend_buffer_t b,ggml_tensor* t,const void* data,size_t off,size_t size){
+ auto* pointer=span(b,t,off,size);begin_call(HipCall::h2d,size);hip_ok(finish_call(HipCall::h2d,hipMemcpy(pointer,data,size,hipMemcpyHostToDevice)));
+}
+static void get(ggml_backend_buffer_t b,const ggml_tensor* t,void* data,size_t off,size_t size){
+ auto* pointer=span(b,t,off,size);begin_call(HipCall::d2h,size);hip_ok(finish_call(HipCall::d2h,hipMemcpy(data,pointer,size,hipMemcpyDeviceToHost)));
+}
+static void fill(ggml_backend_buffer_t b,ggml_tensor* t,uint8_t value,size_t off,size_t size){
+ auto* pointer=span(b,t,off,size);begin_call(HipCall::fill,size);hip_ok(finish_call(HipCall::fill,hipMemset(pointer,value,size)));
+}
+static void clear(ggml_backend_buffer_t b,uint8_t value){begin_call(HipCall::clear,b->size);hip_ok(finish_call(HipCall::clear,hipMemset(b->context,value,b->size)));}
 static bool copy(ggml_backend_buffer_t b,const ggml_tensor* src,ggml_tensor* dst){
  if(!src->buffer||src->buffer->buft!=&buffer_type||ggml_nbytes(src)!=ggml_nbytes(dst))return false;
- hip_ok(hipMemcpy(span(b,dst,0,ggml_nbytes(dst)),span(src->buffer,src,0,ggml_nbytes(src)),ggml_nbytes(dst),hipMemcpyDeviceToDevice));return true;
+ const auto size=ggml_nbytes(dst);auto* to=span(b,dst,0,size);auto* from=span(src->buffer,src,0,size);
+ begin_call(HipCall::d2d,size);hip_ok(finish_call(HipCall::d2d,hipMemcpy(to,from,size,hipMemcpyDeviceToDevice)));return true;
 }
 static ggml_backend_buffer_t allocate(ggml_backend_buffer_type_t type,size_t size){
- if(!size || size>allocation_limit)return nullptr;void* pointer=nullptr;if(hipMalloc(&pointer,size)!=hipSuccess)return nullptr;
+ if(!size || size>allocation_limit)return nullptr;void* pointer=nullptr;begin_call(HipCall::allocate,size);if(finish_call(HipCall::allocate,hipMalloc(&pointer,size))!=hipSuccess)return nullptr;
  ggml_backend_buffer_i iface{};iface.free_buffer=free_buffer;iface.get_base=base;iface.set_tensor=set;iface.get_tensor=get;iface.memset_tensor=fill;iface.clear=clear;iface.cpy_tensor=copy;
- auto b=ggml_backend_buffer_init(type,iface,pointer,size);if(!b)hip_ok(hipFree(pointer));return b;
+ auto b=ggml_backend_buffer_init(type,iface,pointer,size);if(!b){begin_call(HipCall::cleanup_free,size);hip_ok(finish_call(HipCall::cleanup_free,hipFree(pointer)));}return b;
 }
 static size_t maximum_size(ggml_backend_buffer_type_t){return allocation_limit;}
 static size_t alignment(ggml_backend_buffer_type_t){return 256;}
@@ -49,11 +83,12 @@ static enum ggml_backend_dev_type type(ggml_backend_dev_t){return GGML_BACKEND_D
 static void props(ggml_backend_dev_t d,ggml_backend_dev_props* p){*p={};p->name=dev_name(d);p->description=description(d);p->type=type(d);memory(d,&p->memory_free,&p->memory_total);}
 static ggml_backend_buffer_type_t buft(ggml_backend_dev_t){return &buffer_type;}
 static bool supports_buft(ggml_backend_dev_t,ggml_backend_buffer_type_t t){return t==&buffer_type;}
-static void sync(ggml_backend_t){hip_ok(hipDeviceSynchronize());}
+static void sync(ggml_backend_t){begin_call(HipCall::synchronize);hip_ok(finish_call(HipCall::synchronize,hipDeviceSynchronize()));}
 static void release(ggml_backend_t b){delete b;}
 static ggml_status graph(ggml_backend_t,ggml_cgraph* g){++graph_calls;return ggml_graph_n_nodes(g)==0?GGML_STATUS_SUCCESS:GGML_STATUS_FAILED;}
 static ggml_backend_t init(ggml_backend_dev_t d,const char*){
- if(hipInit(0)!=hipSuccess)return nullptr;int count=0;if(hipGetDeviceCount(&count)!=hipSuccess||count!=1)return nullptr;
+ begin_call(HipCall::init);if(finish_call(HipCall::init,hipInit(0))!=hipSuccess)return nullptr;
+ int count=0;begin_call(HipCall::device_count);if(finish_call(HipCall::device_count,hipGetDeviceCount(&count))!=hipSuccess||count!=1)return nullptr;
  auto* b=new(std::nothrow)ggml_backend{};if(!b)return nullptr;
  static uint8_t guid[16]={0x50,0x53,0x35,0x48,0x49,0x50,0x4d,0x30};b->guid=&guid;b->device=d;b->iface.get_name=name;b->iface.free=release;b->iface.synchronize=sync;b->iface.graph_compute=graph;return b;
 }

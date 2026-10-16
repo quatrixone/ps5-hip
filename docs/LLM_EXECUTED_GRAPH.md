@@ -33,7 +33,7 @@ require instrumentation when real backend routing is implemented.
 | GET_ROWS | llama-graph.cpp build_inp_embd; models/llama.cpp output selection | No | No | No | No |
 | DUP | llama-graph.cpp mixed embedding input | No | No | No | No |
 | SET_ROWS | llama-graph.cpp mixed input; llama-kv-cache.cpp cpy_k/cpy_v | No | No | No | No |
-| RMS_NORM | llama-graph.cpp build_norm | Diagnostic kernel | Yes, diagnostic | Unweighted diagnostic | No |
+| RMS_NORM | llama-graph.cpp build_norm | Diagnostic kernel | Yes, diagnostic | Weighted and unweighted diagnostics | No |
 | MUL | llama-graph.cpp build_norm learned weight | Weighted fusion diagnostic | Diagnostic | Weighted QKV chain | No |
 | MUL_MAT | llama-graph.cpp build_lora_mm/build_attn_mha | Q4 diagnostic subset; F16 attention missing | Q4 diagnostic | Q4 diagnostic subset | No |
 | RESHAPE | QKV and cache layout construction | No backend route | No | No | No |
@@ -82,14 +82,18 @@ belongs to M2; the existence of a task is not evidence of implementation.
 
 ### M0-CALLS
 
-Instrument the existing backend calls before declaring M0's call-coverage
-requirement complete. Add bounded per-call counters/results for initialization,
-allocation/free, each copy direction, fill/clear and synchronization; distinguish
-backend callbacks from calls made directly by the title. Exercise them through
-the existing host storage test, then bind their native observations to a reviewed
-application receipt. Error and cleanup paths must retain their actual return
-codes. Do not add a generic tracing framework or infer native calls from CPU
-callbacks.
+Eleven bounded per-call counters are now implemented, with attempts recorded
+before HIP entry and completions/results after return. Requested bytes, failures,
+last result and first observed error are retained. Invalid spans reject before
+counting a HIP attempt. Graph-statistics reset does not erase call accounting.
+
+Seventeen host injection cases cover success, bounds, every error/cleanup site,
+concurrent calls and a call that never returns. Fresh genuine-runtime host
+qualification also passes in eager/deferred modes with the actual loaded model.
+See `evidence/offline-hip-call-qualification.json`. Native snapshots are pending:
+the new fixture requires ten exercised sites and an explicitly zero cleanup-free
+row, partial-fill surroundings, clear, synchronization and balanced teardown.
+Only its accepted native receipt can promote those rows to native-tested.
 
 Current `GateStatistics` measures wrapper calls, rejection, forwarding, direct
 backend graph calls and the last graph pointer. The actual-client harness also
@@ -99,11 +103,11 @@ of the rejection/lifetime tests; they are not a per-HIP-call or kernel-route tra
 
 | Public HIP/library call | Current native backend caller | Existing evidence and remaining task |
 | --- | --- | --- |
-| `hipInit`, `hipGetDeviceCount` | `ps5_backend.cpp::init`; also title startup | Native vocabulary initialization passed. Add separate caller counts/results under M0-CALLS. |
-| `hipMalloc`, `hipFree` | `allocate`, `free_buffer`, allocation-error cleanup | Native vocabulary reports one allocation/free; buffer requests are capped at 64 MiB. Instrument calls/errors; full model GPU residency remains M3. |
-| `hipMemcpy` H2D/D2H/D2D | `set`, `get`, `copy` | Native vocabulary validates 16 copied values. Record each direction and byte count; the result is not general stride coverage. |
-| `hipMemset` | `fill`, `clear` | Native vocabulary validates clear. Instrument both callbacks; generic fill is not separately proven by that test. |
-| `hipDeviceSynchronize` | `sync` | Native storage lifecycle passed. Record the call/result rather than inferring its count from queue retirement. |
+| `hipInit`, `hipGetDeviceCount` | `ps5_backend.cpp::init`; also title startup | Native vocabulary initialization passed. Caller counts/results implemented and host-tested; new native snapshot pending. |
+| `hipMalloc`, `hipFree` | `allocate`, `free_buffer`, allocation-error cleanup | Native vocabulary reports one allocation/free; buffer requests are capped at 64 MiB. Calls/errors host-tested; native snapshot pending. Full model GPU residency remains M3. |
+| `hipMemcpy` H2D/D2H/D2D | `set`, `get`, `copy` | Native vocabulary validates 16 copied values. Directions and byte counts host-tested; native snapshot pending, not general stride coverage. |
+| `hipMemset` | `fill`, `clear` | Native vocabulary validates clear. Both callbacks host-tested; new guarded native partial-fill snapshot pending. |
+| `hipDeviceSynchronize` | `sync` | Native storage lifecycle passed. Call/result instrumentation host-tested; new native snapshot pending. |
 | Module load, function lookup, launch, synchronization and unload | No current tensor route in `ps5_backend.cpp::graph` | [M2-DISPATCH](#m2-dispatch): integrate existing genuine public HIP APIs and instrument selected routes. Isolated kernel diagnostics do not establish client calls. |
 | BLAS or other math-library calls | No current client math route | M2-MATMUL must select an explicit bounded implementation for attention. No required library call is established by the CPU trace; do not import an entire library or claim no library is needed without that decision. |
 

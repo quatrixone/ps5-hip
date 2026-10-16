@@ -27,7 +27,8 @@ SOURCES=['tools/audit_public_hip_llm_client_native.py','tests/llm_client_native_
  'tools/probe_host_registration.py','tools/native_multi_query.py','tests/fat_binary_fixture_test.py',
  'tests/public_hip_imports_test.py','tests/native_import_libraries_test.py','tools/build_native_vector_title.py',
  'tools/public_hip_llm_client_console_title.cpp','tools/public_hip_app_crt.cpp',
- 'ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h']
+ 'ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h',
+ 'tools/source_public_hip_log.py','tests/native_call_transcript_test.py']
 ALLOCATOR_SOURCES=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
  'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h',
  'tools/prepare_llm_native_scheduler.py']
@@ -150,6 +151,12 @@ def audit(raw,converted,extracted,phase="vocab"):
   names=[n for n in values if fragment in n and not n.startswith('_ZZ')];require(len(names)==1,'ambiguous symbol '+fragment);return names[0]
  finalized=match('finalizedEv');vocab=match('vocabulary_check');storage=match('storage_and_gate_check');gate=match('release_compute');registration=match('registrationEv')
  names=['_start','_init','main','ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer',finalized,vocab,storage,gate,registration,'llama_model_load_from_file','llama_tokenize','llama_model_free','hipInit','hipMalloc','hipMemcpy','hipFree','hipDeviceSynchronize','ggml_backend_sched_graph_compute','ggml_backend_graph_compute',WRAPPER,SUPPORTS,DEVICE]
+ snapshot_names=[n for n in values if 'storage_call_snapshot' in n and not n.startswith('_ZZ')]
+ require(len(snapshot_names)<=1,'ambiguous storage snapshot')
+ call_snapshot=snapshot_names[0] if snapshot_names else None
+ require(phase!='vocab' or call_snapshot is not None,'vocabulary storage snapshot missing')
+ if call_snapshot is not None:
+  hip_statistics=match('hip_call_statistics');names += [call_snapshot,hip_statistics]
  model_names=[n for n in values if 'reject_actual_model' in n and not n.startswith('_ZZ')]
  require(len(model_names)<=1,'ambiguous model gate')
  model_gate=model_names[0] if model_names else None
@@ -195,6 +202,9 @@ def audit(raw,converted,extracted,phase="vocab"):
  require(len(bound_calls(body('ps5hip_install_vector_title_finalizer'),slots['atexit'],reader))==1,'atexit callback')
  require(one(finalized) in {int(s,16) for s in re.findall(r'0x([0-9a-f]+)',body('ps5hip_install_vector_title_finalizer'))},'finalizer identity')
  ordered_calls(body('main'),[vocab,storage]);ordered_calls(body(vocab),['llama_model_load_from_file','llama_tokenize','llama_model_free'])
+ if call_snapshot is not None:
+  ordered_calls(body(storage),[call_snapshot,gate])
+  require(len(symbol_calls(body(call_snapshot),hip_statistics))==1,'storage HIP snapshot missing/duplicated')
  require(symbol_calls(body(storage),gate),'storage missing gate');require(symbol_calls(body(gate),'ggml_backend_sched_graph_compute'),'gate scheduler boundary missing')
  wrapper=body(WRAPPER);calls=[]
  for name in ['ggml_graph_n_nodes','ggml_graph_node','ggml_backend_sched_get_tensor_backend','ggml_backend_get_device',DEVICE,SUPPORTS,'ggml_op_desc','ggml_backend_name','ggml_backend_sched_graph_compute_async']:

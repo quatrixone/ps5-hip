@@ -164,13 +164,26 @@ LOG_NAMES['llm_client'] = 'ps5-hip-m0-app.log'
 LLM_CLIENT_LINES = (
     'PS5HIP START target=gfx1013 kernel=m0_client_boundary', LINES[1],
     'M0_APP VOCAB cases=32 tokens=236 vocabulary=32000 tensors=0 exact=true',
-    'M0_APP STORAGE copied=16 cleared=16 synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false',
+    'M0_APP STORAGE copied=16 cleared=16 partial_fill_bytes=16 surrounding_bytes_exact=true synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false',
     'M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending',
     *LINES[3:6],
     'M0_APP FINAL allocations=1 frees=1 queues=1 retired=1 gate_destroyed=true application_fini=pending',
     *LINES[7:],
 )
-LLM_CLIENT_EXPECTED = ('\n'.join(LLM_CLIENT_LINES) + '\n').encode('ascii')
+LLM_STORAGE_HIP_CALL_LINES = (
+    'M0_APP HIP_CALL scope=storage_fixture call=init attempts=1 completions=1 successes=1 failures=0 requested_bytes=0 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=device_count attempts=1 completions=1 successes=1 failures=0 requested_bytes=0 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=allocate attempts=1 completions=1 successes=1 failures=0 requested_bytes=512 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=free attempts=1 completions=1 successes=1 failures=0 requested_bytes=512 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=cleanup_free attempts=0 completions=0 successes=0 failures=0 requested_bytes=0 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=h2d attempts=1 completions=1 successes=1 failures=0 requested_bytes=64 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=d2h attempts=3 completions=3 successes=3 failures=0 requested_bytes=192 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=d2d attempts=1 completions=1 successes=1 failures=0 requested_bytes=64 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=fill attempts=1 completions=1 successes=1 failures=0 requested_bytes=16 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=clear attempts=1 completions=1 successes=1 failures=0 requested_bytes=512 last_result=0 first_error=0',
+    'M0_APP HIP_CALL scope=storage_fixture call=synchronize attempts=1 completions=1 successes=1 failures=0 requested_bytes=0 last_result=0 first_error=0',
+)
+LLM_CLIENT_EXPECTED = ('\n'.join((*LLM_CLIENT_LINES[:3], *LLM_STORAGE_HIP_CALL_LINES, *LLM_CLIENT_LINES[3:])) + '\n').encode('ascii')
 
 def package_limit(fixture):
     if fixture not in LOG_NAMES:

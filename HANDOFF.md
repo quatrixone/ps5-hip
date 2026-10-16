@@ -18,6 +18,27 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
+HIP-call accounting is implemented at eleven bounded backend call sites. The
+fresh source-only host qualification passed: 71 runtime units, 44 llama units,
+and 116 linked objects; eager/deferred runs loaded the real model and verified
+rejection/reuse with no model computation. Seventeen injected failure/accounting
+cases pass, including concurrent and unfinished calls. See
+`evidence/offline-hip-call-qualification.json`.
+
+Native-client-v6 also passed. The new vocabulary call-qualification application
+is building at `build/llm-native-call-app-v1`; inspect
+`results/m0-call-native-app-v1/command.json` before proceeding. Its eleven exact
+snapshot rows and guarded partial fill must pass on .40 before M0 call coverage
+is accepted. Cleanup-failure coverage remains host-only; a zero native counter
+is not an exercised path.
+
+Next freeze/audit that candidate against installed scheduler-v10, then deploy
+and execute once using the dual-lock controller. The offline preparation is in
+`results/m0-hip-call-console-preparation-v1`. M0 remains open; M1 is complete.
+Embedding/norm/QKV prototypes now select a six-node slice from actual TinyLlama
+graphs and pass host tests, but are not part of the tracked backend or a native
+GPU result. The full model still rejects before tensor computation.
+
 Scheduler v10 passed strict installed-title validation on 192.168.4.40 as
 PPSA99014. The app loaded the authenticated external model from
 `/data/hip/models/tinyllama-q4_0.gguf`, created its 512-token context, and rejected
@@ -36,8 +57,8 @@ no model tensor computation, HIP weight/KV residency, inference, or native
 safetensors/PyTorch loading is claimed.
 
 Handoff: this candidate's deployment/execution are consumed; do not replay them.
-Next integrate the reviewed call-counter draft and current-source host test,
-then prepare a fresh native application candidate for its new observations.
+The call-counter draft and current-source host test are now integrated as
+reported above; the new native call snapshot remains pending.
 Keep prior rejected runs and their raw evidence unchanged. The client backend still supports zero tensor operators; integrating GPU
 operators is the following M2 milestone.
 

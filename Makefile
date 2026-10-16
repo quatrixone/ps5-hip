@@ -48,6 +48,7 @@ help:
 	@echo 'make host-test   Build and run the host test suite'
 	@echo 'make public-hip-copy-gpu-package  Build captured copy/kernel graph fixture'
 	@echo 'make public-hip-host-test  Build and qualify genuine HIP/ROCclr with host sanitizers'
+	@echo 'make public-hip-llm-host-test  Qualify fresh runtime and actual llama client with sanitizers'
 	@echo 'make public-hip-q4-host-test  Qualify selected Q8/Q4 public HIP dispatch and ownership offline'
 	@echo 'make public-hip-aggregate-package Build native aggregate compiler-launch title offline (fresh outputs)'
 	@echo 'make public-hip-rmsnorm-package Build native RMSNorm numerical title and verified model/reference assets (fresh outputs)'
@@ -213,6 +214,7 @@ llm-native-app: deps-build llm-deps-fetch
 	$(PYTHON) tests/public_hip_compile_inputs_test.py
 	$(PYTHON) tests/public_hip_llm_client_build_test.py
 	$(PYTHON) tests/source_llm_client_controls_test.py
+	$(PYTHON) tests/native_call_transcript_test.py
 	$(PYTHON) tests/llm_client_native_audit_test.py
 	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS)
 
@@ -417,3 +419,11 @@ llm-vocab-fixture: llm-cpu-reference llm-conversion-env
 	@if ! test -f "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-convert; fi
 	$(PYTHON) tests/llm_vocab_fixture_test.py
 	$(LLM_CONVERSION_ENV)/venv/bin/python tools/build_llm_vocab_fixture.py --output $(LLM_VOCAB_FIXTURE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf --environment $(LLM_CONVERSION_ENV)
+
+# Fresh same-process runtime and actual llama host gate; output must not exist.
+LLM_HOST_QUALIFICATION_DIR ?= results/public-hip-llm
+.PHONY: public-hip-llm-host-test
+public-hip-llm-host-test: deps-build llm-cpu-reference
+	$(PYTHON) tests/hip_call_coverage_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
+	$(PYTHON) tests/public_hip_llm_qualification_test.py
+	$(PYTHON) tools/qualify_public_hip_source.py --output "$(LLM_HOST_QUALIFICATION_DIR)" --llm-cpu-build "$(LLM_CPU_BUILD_DIR)" --llm-model "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"

@@ -32,6 +32,14 @@ static void storage_and_gate_check() {
  auto saved=a->data;a->data=static_cast<char*>(ggml_backend_buffer_get_base(storage))+ggml_backend_buffer_get_size(storage);
  try {storage->iface.get_tensor(storage,a,output,0,1);}catch(const BackendFailure&){++invalid;}a->data=saved;
  m0::require(invalid==3);ggml_backend_tensor_get(b,output,0,sizeof(output));m0::require(!std::memcmp(input,output,sizeof(input)));
+ const auto before_fill=m0::hip_call_statistics();
+ storage->iface.memset_tensor(storage,b,0x5a,4,8);
+ ggml_backend_tensor_get(b,output,0,sizeof(output));
+ const auto* actual=reinterpret_cast<const unsigned char*>(output);const auto* expected=reinterpret_cast<const unsigned char*>(input);
+ for(size_t i=0;i<sizeof(output);++i)m0::require(actual[i]==(i>=4&&i<12?0x5a:expected[i]));
+ const auto fill=m0::hip_call_statistics().calls[static_cast<unsigned>(m0::HipCall::fill)];
+ const auto prior=before_fill.calls[static_cast<unsigned>(m0::HipCall::fill)];
+ m0::require(fill.attempts==prior.attempts+1&&fill.completions==prior.completions+1&&fill.successes==prior.successes+1&&fill.failures==prior.failures&&fill.requested_bytes==prior.requested_bytes+8);
  ggml_backend_buffer_clear(storage,0);ggml_backend_tensor_get(a,output,0,sizeof(output));for(auto f:output)m0::require(f==0);ggml_backend_synchronize(ps5);
  ggml_backend_buffer_free(storage);ggml_free(ctx);
  ctx=ggml_init(params);a=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);b=ggml_new_tensor_1d(ctx,GGML_TYPE_F32,16);auto sum=ggml_add(ctx,a,b);auto graph=ggml_new_graph(ctx);ggml_build_forward_expand(graph,sum);

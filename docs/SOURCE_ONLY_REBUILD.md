@@ -711,6 +711,31 @@ The bounded copy/kernel fixture passed on .40 at `ac93df8`; see
 `../evidence/console40-public-copy-kernel-graph-success.json`. Its candidate phases
 are consumed. Future experiments require a fresh frozen candidate.
 
+### Fresh runtime and actual-model host qualification
+
+After `make llm-model-convert` has produced the locked GGUF, run:
+
+```sh
+make public-hip-llm-host-test JOBS=4 \
+  LLM_CPU_BUILD_DIR=build/llm-cpu-reference \
+  LLM_GGUF_DIR=models/tinyllama-gguf \
+  LLM_HOST_QUALIFICATION_DIR=results/public-hip-llm-v1
+```
+
+The target builds normal dependencies and CPU reference tools, runs the 17
+injected HIP-call cases and runner tests, then compiles 71 runtime units and
+44 llama units afresh. `JOBS` controls both compiler pools. The qualification
+output must not exist; use fresh CPU output if its producer identities changed.
+The GGUF must already exist and match the approved conversion identity; this
+target deliberately does not download or reconvert model weights.
+
+Both deferred and eager loading run the actual model/context and graph-reuse
+gate under ASan/UBSan, with audited scheduler interception and authenticated
+CPU libraries. Successful storage/counter checks and expected `GET_ROWS`
+rejections prove the host boundary, not GPU computation or inference. The raw
+receipt preserves object, input, executable and transcript hashes; its legacy
+top-level compilation count excludes the nested LLM compilation inventory.
+
 ### Learned normalization and full Q/K/V CPU references
 
 `make llm-weighted-qkv-reference` fetches/converts the locked model, builds the

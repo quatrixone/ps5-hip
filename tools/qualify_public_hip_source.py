@@ -13,13 +13,23 @@ import shutil
 import shlex
 import threading
 
+from build_jobs import build_jobs
 from build_public_hip import ROOT, DEPS, SOURCE_UNITS, source_tree, compiler_flags, sha, build_inputs
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--llm-cpu-build', type=Path)
+    parser.add_argument('--llm-model', type=Path)
     args = parser.parse_args()
+    if bool(args.llm_cpu_build) != bool(args.llm_model):
+        parser.error('--llm-cpu-build and --llm-model must be provided together')
+    if args.llm_cpu_build:
+        from build_llm_executed_graph import cpu_inputs
+        args.llm_cpu_build = args.llm_cpu_build.resolve()
+        args.llm_model = args.llm_model.resolve()
+        cpu_inputs(args.llm_cpu_build, args.llm_model)
     output = args.output.resolve()
     if not output.is_relative_to(ROOT / 'results'):
         parser.error('output must be under results/')
@@ -40,7 +50,7 @@ def main():
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
                  'tests/public_hip_allocation_lifetime_model.cpp', 'tests/public_hip_command_stats_model.cpp',
                  'tests/public_hip_graph_model.cpp', 'tests/public_hip_graph_gpu_model.cpp', 'tests/public_hip_copy_graph_model.cpp', 'tests/public_hip_nested_update_fixture.h', 'tests/public_hip_copy_gpu_model.cpp', 'kernels/thread_words.hip',
-                 'tools/build_canaries.py', 'kernels/canary.hip'):
+                 'tools/build_canaries.py', 'tools/build_jobs.py', 'kernels/canary.hip'):
         inputs[name] = sha(ROOT / name)
     source = source_tree(output, 'copy')
     flags = [str(p) for p in compiler_flags(source)[1:]]
@@ -115,7 +125,7 @@ def main():
     code_hash = sha(code_object)
     wrong_target = output / 'canaries/gfx1030/canary.hsaco'
     wrong_target_hash = sha(wrong_target)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=build_jobs()) as pool:
         objects = list(pool.map(compile_one, enumerate(units)))
     run('link', [toolchain['clang++-18']['path'], *flags, '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
                  '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *objects, '-o', output / 'model'])
@@ -510,6 +520,11 @@ def main():
         'PUBLIC_COMMAND_STATS_FINAL live=0 balanced=true ownership=clean gpu_execution=false']:
         raise RuntimeError('CLR command lifetime accounting contract differs')
     print('public command lifetime accounting PASS', flush=True)
+    llm = None
+    if args.llm_cpu_build:
+        from qualify_public_hip_llm import qualify
+        llm = qualify(output, args.llm_cpu_build, args.llm_model,
+                      units, objects, flags, toolchain, run)
     for collection in (inputs, source_hashes):
         for name, expected in collection.items():
             if sha(ROOT / name) != expected:
@@ -567,6 +582,8 @@ def main():
                'leak_detection_disabled_modes': ['join-fail', 'self-destroy', 'reset-join-fail'],
                'gpu_executed': False, 'native_executed': False,
                'sanitizer': 'address,undefined', 'model_sha256': sha(output / 'model')}
+    if llm is not None:
+        receipt['llm'] = llm
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
     print(output / 'receipt.json')
 
