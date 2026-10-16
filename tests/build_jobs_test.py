@@ -20,7 +20,9 @@ class JobPolicy(unittest.TestCase):
    makefile=Path(directory)/'Makefile'
    text=(ROOT/'Makefile').read_text().replace('tools/build_jobs.py',str(ROOT/'tools/build_jobs.py'))
    makefile.write_text(text+'\nprint-jobs:\n\t@$(PYTHON) '+str(ROOT/'tools/build_jobs.py')+'\n')
-   env=dict(os.environ,PS5_HIP_BUILD_JOBS='5');env.pop('JOBS',None)
+   env=dict(os.environ,PS5_HIP_BUILD_JOBS='5')
+   # Test independent Make invocations without the parent recipe's overrides.
+   for key in ('JOBS','MAKEFLAGS','MFLAGS','MAKEOVERRIDES'):env.pop(key,None)
    command=['make','--no-print-directory','-s','-f',str(makefile),'print-jobs']
    result=subprocess.run(command+['JOBS=3'],cwd=ROOT,env=env,capture_output=True,text=True,timeout=20)
    self.assertEqual(result.returncode,0,result.stderr);self.assertEqual(result.stdout.strip(),'3')
