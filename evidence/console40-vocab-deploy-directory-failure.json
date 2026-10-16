@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "status": "REJECTED_BEFORE_UPLOAD",
+  "classification": "native-vocabulary-app-deployment-directory-preparation-failure",
+  "source_commit": "b75f9cae41965fe4e32e6a3927f264b656335862",
+  "raw_directory": "results/source-public-llm-vocab-console-v1",
+  "manifest_sha256": "1394a2402731d1eba8baf89a9f6f218092f44e87a0d626be92361ccf4ab991a2",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "candidate_package_sha256": "bc560fd9ee4b8fbbc8ebfc03f8381891af1cc4f35991f09168a244155f457946",
+  "error": "error_perm('550 No such file or directory')",
+  "failure_stage": "Results directory preparation assumed an existing immediate parent.",
+  "configured_results_dir": "/user/homebrew/ps5-hip/m0-vocab-v3",
+  "baseline_package_sha256": "3c3bf879696e2df5b9df4c165172af21640766e44da564d71e9f86ae7b4bd52c",
+  "application_launched": false,
+  "package_upload_attempted": false,
+  "healthy_after": true,
+  "both_locks_released": true,
+  "next_action": "Create and verify missing configured directory ancestors; validate the fix and freeze a fresh candidate.",
+  "evidence_sha256": {
+    "manifest.json": "1394a2402731d1eba8baf89a9f6f218092f44e87a0d626be92361ccf4ab991a2",
+    "review.json": "ec433073763e59892682713f2ef5fb51605faf45d3ff0acb4fb297d11e8567f0",
+    "deploy/receipt.json": "7f16e5ea3fb08979795f6ad713369e5f9da1e34777bf104a3a300fbcbb2693d9",
+    "deploy/snapshot.log": "612ae6722f68fc050692d21506c5baf598df7f3678416370de6bf63443719f70",
+    "deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163"
+  },
+  "limits": [
+    "No application execution or M0 native gate result.",
+    "No installation mutation follows from the recorded failure and authenticated controller ordering; no separate post-failure remote readback was performed."
+  ]
+}

@@ -23,8 +23,14 @@ image audit and final input checks passed. Independent review accepted all
 6,988 input identities, 2,395 artifacts and eight package assets. See
 `evidence/offline-native-llm-application.json` and `docs/LLM_NATIVE_CLIENT.md`.
 Vocabulary console controls also passed 38 legacy regression tests.
-Next freeze this committed package and validate the installed PPSA99014 title
-on idle .40. No installed application execution is claimed. Vocabulary loading
+The first deployment stopped before upload because a configured results-directory
+ancestor was missing. The baseline package matched; no application launched,
+services remained healthy and both locks were released. The controller now
+creates and verifies missing configured ancestors; independent review and 52
+focused tests pass. See `evidence/console40-vocab-deploy-directory-failure.json`.
+Prepare a fresh candidate with the repaired controller and validate the installed
+PPSA99014 title on idle .40; never replay the consumed v1 deployment.
+No installed application execution is claimed. Vocabulary loading
 and synthetic rejection cannot close the actual full-model/reuse gate.
 
 `make llm-native-client-link` now rebuilds the genuine loader/tokenizer payload

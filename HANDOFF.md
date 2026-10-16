@@ -33,6 +33,21 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Latest console attempt: `results/source-public-llm-vocab-console-v1` deployment
+is terminal failed before upload or application launch (missing results-directory
+parent). Preserve its consumed phase and receipts. Baseline readback matched M1;
+services were healthy and both locks released. The repaired controller verifies
+each configured path component and creates/readbacks only missing directories;
+41 lifecycle and 11 vocabulary-control tests pass independently. Review:
+`results/m0-vocab-results-directory-review-v1/review.json`. Compact failure
+evidence: `evidence/console40-vocab-deploy-directory-failure.json`.
+Next freeze a fresh `source-public-llm-vocab-console-v2` candidate from the unchanged
+`build/llm-native-app-v3` package with the new committed controller, obtain review,
+deploy once, then review the deployment receipt before executing the installed
+PPSA99014 app. The M1 baseline remains the expected deployment baseline; the failed
+attempt did not reach installation mutation. No app rebuild is needed for this
+controller-only correction. Native vocabulary execution remains unverified.
+
 The M0 native vocabulary application milestone follows the source-only prerequisite
 milestone `432a1d2`. The schema-1 client rebuild passed in
 `build/llm-native-client-v2`, with logs and eventual terminal command receipt

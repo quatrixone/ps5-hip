@@ -61,52 +61,81 @@ class ConfigurableResultsTest(unittest.TestCase):
 
 
 class ResultsDirectoryCreationTest(unittest.TestCase):
-    def make_control(self, present=False):
+    def make_control(self, present=False, ancestors=True):
         from unittest.mock import Mock
         control=Control.__new__(Control);control.phase='deploy'
         control.manifest={'results_dir':'/data/ps5-hip/new-results'};control.record={}
-        state={'present':present};calls=[]
+        directories={'/'} | ({'/data','/data/ps5-hip'} if ancestors else set())
+        if present:directories.add(control.manifest['results_dir'])
+        calls=[]
         def listing(path):
             calls.append(('LIST',path))
-            if path=='/data/ps5-hip':return ['drwx------ 1 root root 0 Jan 1 00:00 new-results'] if state['present'] else []
-            self.assertEqual(path,'/data/ps5-hip/new-results');return []
+            if path not in directories:raise RuntimeError('550 missing directory')
+            return ['drwx------ 1 root root 0 Jan 1 00:00 '+p.rsplit('/',1)[1]
+                    for p in sorted(directories) if p!='/' and (p.rsplit('/',1)[0] or '/')==path]
         def mkdir(path):
-            calls.append(('MKD',path));state['present']=True
+            calls.append(('MKD',path));directories.add(path)
         control.listing=listing;control.ftp=Mock();control.ftp.mkd.side_effect=mkdir
         return control,calls
 
     def test_existing_directory_never_created(self):
         control,calls=self.make_control(True);control.ensure_results_directory()
-        self.assertEqual(calls,[('LIST','/data/ps5-hip'),('LIST','/data/ps5-hip/new-results')])
+        self.assertEqual(calls,[('LIST',p) for p in ('/','/data','/data/ps5-hip','/data/ps5-hip/new-results')])
         control.ftp.mkd.assert_not_called();self.assertNotIn('results_directory_created',control.record)
 
     def test_absent_leaf_one_mkdir_and_readback(self):
         control,calls=self.make_control();control.ensure_results_directory()
-        self.assertEqual(calls,[('LIST','/data/ps5-hip'),('MKD','/data/ps5-hip/new-results'),('LIST','/data/ps5-hip'),('LIST','/data/ps5-hip/new-results')])
+        self.assertEqual(calls,[('LIST','/'),('LIST','/data'),('LIST','/data/ps5-hip'),('MKD','/data/ps5-hip/new-results'),('LIST','/data/ps5-hip'),('LIST','/data/ps5-hip/new-results')])
         self.assertEqual(control.record['results_directory_created'],control.record['results_directory_verified'])
+        self.assertEqual(control.record['results_directories_created'],['/data/ps5-hip/new-results'])
+        control.ftp.delete.assert_not_called();control.ftp.rmd.assert_not_called()
+
+    def test_multiple_missing_ancestors_verified_in_order(self):
+        control,calls=self.make_control(ancestors=False);control.ensure_results_directory()
+        paths=['/data','/data/ps5-hip','/data/ps5-hip/new-results']
+        self.assertEqual(control.record['results_directories_created'],paths)
+        self.assertEqual(calls,[('LIST','/'),('MKD',paths[0]),('LIST','/'),
+            ('LIST',paths[0]),('MKD',paths[1]),('LIST',paths[0]),
+            ('LIST',paths[1]),('MKD',paths[2]),('LIST',paths[1]),('LIST',paths[2])])
+        self.assertEqual(control.record['results_directory_created'],paths[-1])
         control.ftp.delete.assert_not_called();control.ftp.rmd.assert_not_called()
 
     def test_errors_not_interpreted_as_absence_or_cleaned_up(self):
         from unittest.mock import Mock
-        for step in ('parent','mkdir','readback','leaf'):
+        row='drwx------ 1 root root 0 Jan 1 00:00 data'
+        for step in ('parent','mkdir','readback','invisible','child'):
             with self.subTest(step=step):
-                control,calls=self.make_control()
+                control,calls=self.make_control(ancestors=False)
                 if step=='parent':control.listing=Mock(side_effect=RuntimeError('550 permission denied'))
                 elif step=='mkdir':control.ftp.mkd.side_effect=RuntimeError('MKD denied')
                 elif step=='readback':control.listing=Mock(side_effect=[[],RuntimeError('LIST failed')])
-                else:control.listing=Mock(side_effect=[[],['drwx------ 1 root root 0 Jan 1 00:00 new-results'],RuntimeError('leaf LIST failed')])
+                elif step=='invisible':control.listing=Mock(side_effect=[[],[]])
+                else:control.listing=Mock(side_effect=[[],[row],RuntimeError('child LIST failed')])
                 with self.assertRaises(RuntimeError):control.ensure_results_directory()
                 if step=='parent':control.ftp.mkd.assert_not_called()
+                if step in ('readback','invisible','child'):self.assertEqual(control.record['results_directories_created'],['/data'])
                 self.assertNotIn('results_directory_verified',control.record)
                 control.ftp.delete.assert_not_called();control.ftp.rmd.assert_not_called()
 
-    def test_file_collision_and_execute_refuse_creation(self):
+    def test_file_symlink_collision_and_ambiguous_ancestor(self):
         from unittest.mock import Mock
-        control,_=self.make_control();control.listing=Mock(return_value=['-rw------- 1 root root 1 Jan 1 00:00 new-results'])
-        with self.assertRaisesRegex(RuntimeError,'not a directory'):control.ensure_results_directory()
-        control.ftp.mkd.assert_not_called()
+        for rows in [['-rw------- 1 root root 1 Jan 1 00:00 data'],
+                     ['lrwx------ 1 root root 1 Jan 1 00:00 data -> other'],
+                     ['drwx------ 1 root root 0 Jan 1 00:00 data']*2]:
+            control,_=self.make_control();control.listing=Mock(return_value=rows)
+            with self.assertRaises(RuntimeError):control.ensure_results_directory()
+            control.ftp.mkd.assert_not_called()
+
+    def test_execute_refuses_creation(self):
+        from unittest.mock import Mock
         control,_=self.make_control();control.phase='execute';control.listing=Mock()
         with self.assertRaisesRegex(RuntimeError,'deploy-only'):control.ensure_results_directory()
+        control.listing.assert_not_called();control.ftp.mkd.assert_not_called()
+
+    def test_invalid_path_rejected_before_listing(self):
+        from unittest.mock import Mock
+        control,_=self.make_control();control.manifest['results_dir']='/data/../other';control.listing=Mock()
+        with self.assertRaises(ValueError):control.ensure_results_directory()
         control.listing.assert_not_called();control.ftp.mkd.assert_not_called()
 
 

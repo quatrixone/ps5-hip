@@ -480,18 +480,26 @@ class Control:
         from build_public_hip import validate_results_directory
         directory = self.manifest['results_dir']
         validate_results_directory(directory)
-        parent, leaf = directory.rsplit('/', 1)
-        parent = parent or '/'
-        matches = [row for row in self.listing(parent) if row.endswith(' ' + leaf)]
-        require(len(matches) <= 1, 'ambiguous results directory entry')
-        if matches:
-            require(matches[0].startswith('d'), 'results path is not a directory')
-        else:
-            self.ftp.mkd(directory)
-            self.record['results_directory_created'] = directory
-            matches = [row for row in self.listing(parent) if row.endswith(' ' + leaf)]
-            require(len(matches) == 1 and matches[0].startswith('d'),
-                    'created results directory not visible')
+        parent = '/'
+        for leaf in directory[1:].split('/'):
+            path = parent.rstrip('/') + '/' + leaf
+            def matches():
+                entries = [row.split(None, 8) for row in self.listing(parent)]
+                return [row for row in entries if len(row) == 9 and
+                        (row[8] == leaf or row[8].startswith(leaf + ' -> '))]
+            found = matches()
+            require(len(found) <= 1, 'ambiguous results directory entry')
+            if found:
+                require(found[0][0].startswith('d'), 'results path is not a directory')
+            else:
+                self.ftp.mkd(path)
+                self.record.setdefault('results_directories_created', []).append(path)
+                if path == directory:
+                    self.record['results_directory_created'] = directory
+                found = matches()
+                require(len(found) == 1 and found[0][0].startswith('d'),
+                        'created results directory not visible')
+            parent = path
         self.listing(directory)
         self.record['results_directory_verified'] = directory
 
