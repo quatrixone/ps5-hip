@@ -24,8 +24,13 @@ safety close restored idle, healthy services and both released locks. This is a
 failed vocabulary gate, not M0 completion. Preserve consumed candidate
 `results/source-public-llm-vocab-console-v2`; diagnose the first assertion offline
 before rebuilding. See `evidence/console40-native-vocab-invariant-failure.json`.
-Post-elevation asset paths are under investigation; the transcript alone does
-not identify which assertion failed. Full-model changes remain staged.
+Offline inspection found post-elevation `/app0` reads inconsistent with the
+helper's changed root and proven title asset paths. Phase/vocabulary/model reads
+now use `/system_ex/app/PPSA99014/`, with explicit failure diagnostics; 33 focused
+tests and independent review pass. See `evidence/offline-native-llm-asset-path-fix.json`.
+Rebuild a fresh vocabulary app and audit its images before another installed-title
+test. The prior transcript alone does not identify which assertion failed;
+native correction remains unproven. Full-model changes remain staged.
 
 M0's source-only vocabulary application build and independent real candidate
 validation pass. `make llm-native-app` produced a 19,890,176-byte native package

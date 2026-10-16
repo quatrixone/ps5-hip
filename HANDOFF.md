@@ -33,6 +33,20 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Asset-path correction is ready offline: post-elevation phase/vocabulary/model
+reads use `/system_ex/app/PPSA99014/`; pre-elevation config/helper retain `/app0`.
+33 focused tests and independent review pass, including eight actual phase-parser
+cases. Failure messages now distinguish phase open/read/config and vocabulary
+load/size/token errors; success transcript and tokenizer expectations are unchanged.
+See `evidence/offline-native-llm-asset-path-fix.json`. Next run fresh Make output
+`build/llm-native-app-v4`, reusing current client-v3/vocabulary-v1 inputs, with
+results `/user/homebrew/ps5-hip/m0-vocab-v4`; local wrapper
+`.local/build_native_app_v4.py` records logs in `results/m0-native-app-production-make-v4`.
+Require final image/package audit and fresh candidate review. The next baseline
+is the installed vocabulary package and failed log SHA
+`f8a4a4848ef69cfe836c48bf71efaa92f74b9da70b78d976891cab4585aaa966`,
+fixture `llm_client`, results `/user/homebrew/ps5-hip/m0-vocab-v3`.
+
 Current resume point: vocabulary v2 deployment passed, but execution failed after
 native startup/runtime checks with `M0 backend invariant/error`, before VOCAB.
 Watchdog quarantine followed; exact PPSA99014 safety close restored idle, services

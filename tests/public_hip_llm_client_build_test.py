@@ -1,6 +1,9 @@
 """Native vocabulary package boundaries and mandatory scheduler wrapper linkage."""
 from pathlib import Path
 import shutil
+import subprocess
+import re
+import json
 import sys
 import tempfile
 import unittest
@@ -11,6 +14,47 @@ import build_public_hip as b
 
 
 class ClientBuild(unittest.TestCase):
+    def test_asset_paths_follow_elevation_namespace(self):
+        source=(b.ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
+        title=json.loads((b.ROOT/'title.json').read_text())['title_id']
+        self.assertIn('title_root = "/system_ex/app/'+title+'/"',source)
+        self.assertEqual(re.findall(r'"(/app0/[^"\n]+)"',source),
+                         ['/app0/results-dir.txt','/app0/lapy.elf'])
+        main=source[source.index('int main()'):]
+        self.assertLess(main.index('"/app0/results-dir.txt"'),main.index('elevation::request'))
+        self.assertLess(main.index('elevation::request'),main.index('configured_model_phase()'))
+        for asset in ('client-phase.txt','vocab.gguf','model.gguf'):
+            self.assertIn('std::string(title_root)+"'+asset+'"',source)
+
+    def test_actual_phase_parser_valid_and_failure_boundaries(self):
+        source=(b.ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
+        start=source.index('static bool configured_model_phase()')
+        function=source[start:source.index('\nint main()',start)]
+        harness = ('#include <fstream>\n#include <string>\n#include <cstring>\n'
+                   '#include <cstdio>\n#include <stdexcept>\n'
+                   'static const char* title_root;\n'
+                   '[[noreturn]] void ps5hip_clr_gpu_fail(const char* why){throw std::runtime_error(why); }\n'
+                   +function+'\nint main(int argc,char**argv){title_root=argv[1];try{'
+                   'std::printf("phase=%d\\n",configured_model_phase());return 0;}'
+                   'catch(const std::exception&e){std::printf("reason=%s\\n",e.what());return 1;}}\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);cpp=root/'parser.cpp';exe=root/'parser';cpp.write_text(harness)
+            subprocess.run(['c++','-std=c++17',str(cpp),'-o',str(exe)],check=True,capture_output=True)
+            cases=[('vocab',b'vocab\n',0,'phase=0'),('model',b'model-gate\n',0,'phase=1'),
+                   ('missing',None,1,'reason=client-phase-open'),
+                   ('empty',b'',1,'reason=client-phase-config'),
+                   ('trailing',b'vocab\nx',1,'reason=client-phase-config'),
+                   ('long',b'x'*16,1,'reason=client-phase-config'),
+                   ('invalid',b'bad\n',1,'reason=client-phase-config'),
+                   ('directory','directory',1,'reason=client-phase-read')]
+            for name,data,code,message in cases:
+                with self.subTest(name=name):
+                    directory=root/name;directory.mkdir();phase=directory/'client-phase.txt'
+                    if data=='directory':phase.mkdir()
+                    elif data is not None:phase.write_bytes(data)
+                    result=subprocess.run([str(exe),str(directory)+'/'],capture_output=True,text=True)
+                    self.assertEqual((result.returncode,result.stdout.strip()),(code,message))
+
     def test_wrapper_link_and_required_symbols(self):
         names = ['hipInit', 'hipGetDeviceCount', 'ps5hip_clr_admit_device',
                  'hipMalloc', 'hipFree', 'hipMemcpy', 'hipMemset', 'hipDeviceSynchronize',

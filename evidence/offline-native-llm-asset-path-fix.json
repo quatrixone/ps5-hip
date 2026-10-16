@@ -1,0 +1,35 @@
+{
+    "status":  "PASS_SOURCE_AND_FOCUSED_REGRESSIONS",
+    "inputs":  {
+                   "tools/public_hip_llm_client_console_title.cpp":  "97ba40fc84bd2a393fef067790ecfa151e4b1af8a0ec745a4e3345a5bebbcca0",
+                   "tests/public_hip_llm_client_build_test.py":  "2c1e1b99db1373c3d63dcd066473b6f294d3cafaeb896569e2f5106bd4d3750d",
+                   "tools/audit_public_hip_llm_client_native.py":  "2dcd1fe137562606d169168d22236778d67e9cedf39af30bd0aadf9491ecf270",
+                   "tests/llm_client_native_audit_test.py":  "909314b4c145212951d76ea7526557e084b5022ca8e1f997f2af00722bf3ec09",
+                   "tests/source_llm_client_controls_test.py":  "6a6cd62ffde7acf41bc020c0d701e66dcb438b9e43d8d42187479f1daf63b71d",
+                   "tests/llm_native_app_build_test.py":  "99924b50e45d67f7e5cd382892bd92117ca8ef18a2ec9696aead86e02ca77147"
+               },
+    "tests":  {
+                  "public_hip_llm_client_build":  4,
+                  "llm_client_native_audit":  10,
+                  "source_llm_client_controls":  11,
+                  "llm_native_app_build":  8
+              },
+    "phase_parser_cases":  8,
+    "findings":  [
+
+                 ],
+    "checks":  [
+                   "All three post-elevation assets use committed title-specific system namespace; results-dir and elevation helper retain pre-elevation app0 paths.",
+                   "Strict phase open/read/exact-content handling preserves model/vocab distinction and authenticated-model gate.",
+                   "Token input/expected tables are byte-equivalent and storage/gate function unchanged; added errors fail closed without weakening counts/values.",
+                   "Auditor wrapper/false-support templates unchanged; existing ordered loader-tokenizer-free and vocab-before-storage checks remain compatible at source level.",
+                   "Fresh native raw/converted/extracted image audit remains mandatory because title bytes and imports/layout can change."
+               ],
+    "limits":  [
+                   "Evidence-supported namespace fix, not a proven diagnosis of the generic failed assertion until fresh native execution.",
+                   "No console contact, fresh package generation or model execution."
+               ],
+    "date":  "2026-10-16",
+    "failure_evidence":  "evidence/console40-native-vocab-invariant-failure.json",
+    "native_validation":  "Pending fresh package and installed-title test; generic prior transcript alone does not prove the failing assertion."
+}
