@@ -14,6 +14,19 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Full weighted normalization and Q/K/V references qualified offline
+
+The source-only `make llm-weighted-qkv-reference` target now builds missing CPU
+prerequisites and authenticates existing model/reference inputs before reuse.
+The learned layer-zero normalization and full Q2048/K256/V256 references repeat
+bitwise; five focused tests and independent numerical reconstruction pass. See
+`evidence/offline-weighted-qkv-reference.json`.
+
+These are CPU references, not GPU results. Native validation must check actual
+weighted GPU output against its frozen budget, then quantize that captured
+output for the chained Q8/Q4 oracle. The native five-stage harness, package and
+readback verification are the next gate; a complete transformer layer remains open.
+
 ## Weighted RMSNorm source and public HIP qualification passed offline
 
 The supported Make targets now build the selected weighted RMSNorm module from

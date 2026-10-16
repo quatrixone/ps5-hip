@@ -1,0 +1,112 @@
+{
+  "classification": "offline-weighted-rmsnorm-full-qkv-reference",
+  "status": "PASS",
+  "gpu_executed": false,
+  "native_executed": false,
+  "receipt": {
+    "path": "results/llm-weighted-qkv-reference-v1/receipt.json",
+    "sha256": "88aec974d3f21b3f518b316cd4ffe2a37b1aab5b5d44a2e1760710278380b227"
+  },
+  "independent_review": {
+    "path": "results/weighted-qkv-reference-review-v1/review.json",
+    "sha256": "c8a3dff7bc5d0f1f025793176fd57286ca97ee0845e359b6ecbe12111ba4de26"
+  },
+  "source_sha256": {
+    "tools/build_llm_weighted_qkv_reference.py": "3ba2cb9a8e50d5e7dd7376056e43e59e9b999a282fbcc3f5004ecee07be9bbdc",
+    "tests/llm_weighted_qkv_reference.cpp": "18161a4cfa8d55c7ebac20e767879b2e1330525887d4a4dfcc9f893ecfe742d7",
+    "tests/llm_weighted_qkv_reference_test.py": "420196061862a100804797d18558b58b75186a8d7fc99ffdab3a21f6ad2f2d53"
+  },
+  "profile": {
+    "schema": 1,
+    "width": 2048,
+    "rows": 1,
+    "epsilon_f32": 9.999999747378752e-06,
+    "input": "authenticated original RMSNorm embedding-1 input, token 1",
+    "weighted_budget": {
+      "norm_absolute": 2e-05,
+      "norm_relative": 0.0002,
+      "unit_roundoff": 5.960464477539063e-08,
+      "rule": "Bnorm=2e-5+2e-4*abs(norm64); Bweighted=abs(w)*Bnorm + u/(1-u)*abs(w)*(abs(norm64)+Bnorm) + 2^-126",
+      "derivation": "Original frozen norm envelope covers F32 reduction/rsqrt and scale*x. Multiplication by exact F32 learned weight scales that error by abs(w); one further rounded multiply contributes u/(1-u) times its maximum magnitude. Absolute 2^-126 covers gradual or flushed subnormal multiplication. FP64 semantic-reference error is negligible relative to the norm envelope; CPU baseline must use at most 1/32 of this budget.",
+      "status": "Declared before any weighted GPU observation; acceptance envelope, not a measured accuracy claim"
+    },
+    "q4_oracle": {
+      "schema": 2,
+      "widths": [
+        2048,
+        5632
+      ],
+      "q8_block_bytes": 36,
+      "q4_block_bytes": 18,
+      "q8_rounding": "F32 RN-even division; integer ties away; original XOR16,8,4,2,1 sum",
+      "q4_rounding": "two F32 fused operations per partial; stride64; waves1,2,3; XOR16,8,4,2,1",
+      "budget": "gamma_(ceil(blocks/64)+12) * sum_abs_uncancelled_partial_operands",
+      "unsupported": [
+        "nonfinite",
+        "F32 subnormal intermediates",
+        "binary16 underflow-to-zero/overflow",
+        "fused pointer arguments"
+      ],
+      "gpu_executed": false
+    },
+    "projections": {
+      "q": 2048,
+      "k": 256,
+      "v": 256
+    },
+    "chain": "Validate actual weighted GPU readback first; derive chained Q8 bytes and Q4 oracles from that readback. Never demand equality to quantized frozen CPU activation.",
+    "native_executed": false,
+    "gpu_executed": false
+  },
+  "weighted_metrics": {
+    "elements": 2048,
+    "maximum_absolute_error": 1.711003019821966e-08,
+    "maximum_budget_fraction": 0.0004953331432167777
+  },
+  "projections": {
+    "q": {
+      "rows": 2048,
+      "width": 2048,
+      "maximum_lane_error": 4.6407876652665436e-08
+    },
+    "k": {
+      "rows": 256,
+      "width": 2048,
+      "maximum_lane_error": 7.502967491745949e-08
+    },
+    "v": {
+      "rows": 256,
+      "width": 2048,
+      "maximum_lane_error": 3.937202563975006e-09
+    }
+  },
+  "cpu_repeats_bitwise_equal": true,
+  "validated_inputs": 382,
+  "validated_artifacts": 37,
+  "tests": "5 independent unit tests PASS",
+  "checks": [
+    "Exact learned F32 norm tensor and full Q/K/V Q4_0 row counts, metadata and absolute locked model offsets",
+    "Genuine CPU RMS_NORM then MUL graph, one thread, two byte-identical repetitions",
+    "Weighted budget declared before execution and propagates norm error through exact F32 weight plus final multiply rounding/subnormal allowance",
+    "Independently regenerated all weighted FP64 values/budgets and complete Q8/Q/K/V oracle artifacts byte-identically",
+    "Actual readback quantization helper consumes supplied activation bytes; discontinuity test proves CPU frozen Q8 equality is not demanded",
+    "All receipt input/artifact identities and successful command exits verified"
+  ],
+  "limitations": [
+    "No weighted GPU execution or complete transformer layer claim",
+    "Pure chained_reference requires caller to validate weighted readback budget, hardware provenance and guards first; it does not enforce those itself",
+    "Q/K/V oracles reuse previously reviewed Python arithmetic, not additional independent CPU matmul implementation",
+    "Historical CPU source/object provenance inherits authenticated prerequisite limitations",
+    "Make reproduction reused the locked converted model and built missing CPU/reference prerequisites; it was not a clean-network download test."
+  ],
+  "make_reproduction": {
+    "path": "results/llm-weighted-qkv-make-v1/receipt.json",
+    "sha256": "fb291ed69218e38679720b0e3628d5dac7e5ca0bef0ed2d82ea1bacfaf6fb4a9"
+  },
+  "make_review": {
+    "path": "results/weighted-qkv-make-review-v1/review.json",
+    "sha256": "903cac1aba6b77108b01ab198bf1515cac985e583a719e76b45b85715b8d79db"
+  },
+  "make_command": "make llm-weighted-qkv-reference LLM_RMSNORM_REFERENCE_DIR=results/llm-rmsnorm-reference LLM_WEIGHTED_QKV_REFERENCE_DIR=results/llm-weighted-qkv-make-v1",
+  "make_numeric_files_byte_identical": 23
+}

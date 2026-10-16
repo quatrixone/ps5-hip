@@ -25,6 +25,7 @@ help:
 	@echo 'make public-hip-weighted-rmsnorm-host-test  Qualify weighted RMSNorm through public HIP host model'
 	@echo 'make llm-q4-halfword-fixture  Build authenticated halfword-load diagnostic from original Q4 fixture'
 	@echo 'make llm-q4-fixture  Build selected upstream Q8_1 and Q4_0 kernels (fresh outputs required)'
+	@echo 'make llm-weighted-qkv-reference  Build learned normalization and full Q/K/V CPU oracles'
 	@echo 'make llm-q4-reference  Build authenticated GPU-format Q8/Q4 numerical references offline'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
@@ -134,6 +135,14 @@ llm-q4-reference: llm-q4-fixture
 	$(PYTHON) tests/llm_q4_reference_test.py
 	$(PYTHON) tests/llm_q4_reference_build_test.py
 	$(PYTHON) tools/build_llm_q4_reference.py --rmsnorm-reference $(LLM_RMSNORM_REFERENCE_DIR) --fixture $(LLM_Q4_FIXTURE_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf --output $(LLM_Q4_REFERENCE_DIR)
+
+LLM_WEIGHTED_QKV_REFERENCE_DIR ?= results/llm-weighted-qkv-reference
+.PHONY: llm-weighted-qkv-reference
+llm-weighted-qkv-reference:
+	@if ! test -f "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; fi
+	@if ! test -f "$(LLM_RMSNORM_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-reference; fi
+	$(PYTHON) tests/llm_weighted_qkv_reference_test.py
+	$(PYTHON) tools/build_llm_weighted_qkv_reference.py --rmsnorm-reference $(LLM_RMSNORM_REFERENCE_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf --output $(LLM_WEIGHTED_QKV_REFERENCE_DIR)
 
 .PHONY: llm-rmsnorm-reference
 llm-rmsnorm-reference: llm-cpu-reference

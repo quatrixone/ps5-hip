@@ -598,3 +598,26 @@ GPU-completion-dependent retirement. Buffers must remain valid for future replay
 The bounded copy/kernel fixture passed on .40 at `ac93df8`; see
 `../evidence/console40-public-copy-kernel-graph-success.json`. Its candidate phases
 are consumed. Future experiments require a fresh frozen candidate.
+
+### Learned normalization and full Q/K/V CPU references
+
+`make llm-weighted-qkv-reference` fetches/converts the locked model, builds the
+CPU RMSNorm prerequisite, and captures the learned layer-zero normalization and
+full Q (2048 rows), K and V (256 rows each) reference outputs. Existing model
+and RMSNorm references are reused only through the producer's full identity
+validation. Use a fresh `LLM_WEIGHTED_QKV_REFERENCE_DIR`; an existing output
+directory is rejected to preserve evidence.
+
+For an already authenticated RMSNorm reference and converted model, run:
+
+```sh
+python3 tools/build_llm_weighted_qkv_reference.py \
+  --rmsnorm-reference results/llm-rmsnorm-reference \
+  --model models/tinyllama-gguf/tinyllama-q4_0.gguf \
+  --output results/llm-weighted-qkv-reference
+```
+
+The receipt records CPU execution only. Native chained validation must first
+check the actual GPU weighted output against the frozen budget, then derive
+its Q8/Q4 oracle from that captured output: quantization can differ across a
+rounding threshold even when normalization is within budget.
