@@ -23,6 +23,23 @@ batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
+## Halfword Q4 diagnostic passed on .40
+
+The frozen candidate from `0dc45da` passed all 28 native stages: 592 Q4 values,
+80,640 exact Q8 bytes and 112 raw buffers (9,097,984 bytes). This includes
+model-width Q8 and chained Q4 consuming actual device Q8 output. Frozen budgets,
+inputs, weights, guards and inactive regions passed; maximum absolute error was
+7.11181201e-7 and maximum budget fraction 0.0166699232. Natural finalization,
+matched idle snapshots, installed identity, healthy services and both lock
+releases passed. See `evidence/console40-public-q4-halfword-success.json`.
+
+The candidate `results/source-public-q4-halfword-console-v1` is consumed: do not
+replay deployment or execution. The original failed package and logs remain
+preserved. The halfword variant also changes cache flags and scheduling; this
+qualifies a bounded workaround, not isolated alignment causality or full-model
+inference. Next qualify learned-weight RMSNorm and full Q/K/V projections,
+then the remaining layer operators, model-scale memory and complete client.
+
 ## Halfword Q4 diagnostic built and independently reviewed offline
 
 The authenticated halfword-load variant now passes genuine public HIP host
@@ -38,14 +55,8 @@ Build: `build/public-hip-q4-halfword-native-v1`; fixture/reference:
 Use separate results directory `/data/ps5-hip/results-q4-halfword-v1`.
 Fresh-directory controls pass 48 tests; candidate/baseline directories are
 validated separately and deployment creates only a missing leaf directory.
-The candidate from source commit `0dc45da` is now deployed and verified on .40,
-without launching it. The previous image and failed log were preserved; services
-are healthy and both locks released. See
-`evidence/console40-q4-halfword-deployment.json`. The local candidate is
-`results/source-public-q4-halfword-console-v1`; deployment is consumed and must
-not be replayed. Independent deployment review passed and bound the receipt in
-its local `review.json`. Next execute the frozen candidate once, with no automatic
-retry. GPU numerical acceptance remains open. This variant changes cache flags and scheduling
+Deployment and execution are now consumed; the outcome above supersedes the
+offline next action. This variant changes cache flags and scheduling
 as well as load width; success would not alone prove alignment as the cause.
 
 ## Q4 diagnostic resource admission tested offline

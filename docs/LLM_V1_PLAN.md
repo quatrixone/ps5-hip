@@ -116,14 +116,16 @@ configuration and emitted ISA must be inspected; flags alone do not establish
 PS5 compatibility. Preserve measured gfx1013 requirements; do not impersonate
 another GPU architecture to make compilation pass.
 
-The public adapter now supports the measured RMSNorm route, with native
-numerical evidence. Q8_1/Q4_0 dispatch and the numerical package qualify offline,
-but the first native Q4 comparison failed. Four standalone Q8 cases passed;
-model-width Q8 and chained Q4 were not reached. Resolve this numerical blocker
-before layer integration. Model-scale allocations, including the advertised
-64 MiB per-allocation limit, remain a separate blocker. Existing geometry/LDS/private-memory proofs and
-legacy GEMM tests do not establish support for all model tensors. Validate and
-implement each required route/limit; never merely raise advertised limits.
+The public adapter supports measured RMSNorm and bounded Q8_1/Q4_0 routes
+with native numerical evidence. The original Q4 kernel failed; the authenticated
+halfword-load workaround passed 28 stages with unchanged references and budgets,
+including model-width Q8 and chained Q4. See
+`../evidence/console40-public-q4-halfword-success.json`. Cache flags and scheduling
+also changed, so this does not isolate the original hardware failure mechanism.
+Weighted RMSNorm/full QKV projections and remaining operators are next.
+Model-scale allocations, including the advertised 64 MiB per-allocation limit,
+remain a separate blocker. Validate each required route and limit; never merely
+raise advertised limits or treat these bounded tests as full-model support.
 
 ## V1 validation contract
 
@@ -176,7 +178,7 @@ full SDK roadmap:
 | --- | --- |
 | Reproducible model and CPU oracle | Source weights, Q4_0 conversion and seven repeated CPU inference cases pass; native memory budget and complete client inventory remain open |
 | Native public HIP runtime | Compiler-generated launches and aggregate arguments pass on .40; real operator resource shapes and model-scale allocations remain open |
-| Required operators | Upstream RMSNorm passed six native cases and four standalone Q8 cases passed. The first native Q4 output failed its frozen tolerance; model-width Q8, chained Q4, remaining operators and full graph integration are open |
+| Required operators | Upstream RMSNorm passed six native cases; the halfword Q4 workaround passed 28 stages including model-width Q8/chained Q4. Weighted RMSNorm, full projections, remaining operators and graph integration are open |
 | Complete inference | Native client link, GPU prefill/decode, reference logits and generated tokens remain open |
 | Release qualification | Repeated requests, lifecycle/failure tests, clean source-only client build and measured performance remain open |
 
@@ -187,16 +189,13 @@ correct inference path works. Training is a separately scoped follow-up release.
 
 ## Immediate next action
 
-1. Resolve the native Q4 numerical failure recorded in
-   [the failure evidence](../evidence/console40-public-q4-failure.json).
-   Use retained operands and exact ISA to isolate the cause; build and review a
-   fresh diagnostic candidate before another bounded .40 run. Preserve the
-   failed candidate and original tolerance. Passing offline dispatch tests does
-   not qualify GPU arithmetic.
-2. Qualify model-width Q8 and isolated/chained Q4 against the frozen references,
-   then complete weighted RMSNorm and the required Q/K/V projections. Integrate
-   one reference-checked transformer layer, including RoPE, attention, KV updates,
-   residuals and feed-forward operations, before expanding to the full model.
+1. Preserve the original failed Q4 candidate and the passing halfword workaround
+   evidence, with unchanged tolerances. Use the qualified diagnostic module only
+   within its measured ABI/resource contract; exact failure causality remains open.
+2. Complete weighted RMSNorm and the full Q/K/V projections using one shared
+   device-produced Q8 activation. Integrate one reference-checked transformer
+   layer, including RoPE, attention, KV updates, residuals and feed-forward
+   operations, before expanding to the full model.
 3. In parallel where independent, finish the actual client call/operator inventory,
    native client link and measured model/KV/workspace allocation budget. Use
    [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) and

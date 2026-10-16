@@ -64,14 +64,16 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 diagnostic | 0dc45da | .40 | deployed and verified; no launch, baseline preserved, health/locks pass | evidence/console40-q4-halfword-deployment.json | next: reviewed one-shot execution
 
+- 2026-10-15 | V1.3 bounded Q4 workaround | 0dc45da | .40 | pass: 28 stages/592 Q4 values/80640 Q8 bytes, raw checks and lifecycle | evidence/console40-public-q4-halfword-success.json | next: weighted norm/QKV
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate
 - 2026-10-15 | V1.3 reference | CPU only | eight Q4 cases / 296 outputs, four Q8 cases, 16 corruption controls and repeated genuine GGUF extraction pass | evidence/offline-llm-q4-numerical-reference.json | next: isolated and chained GPU arithmetic with full raw-buffer verification
 
-These are bounded offline gates. Q8/Q4 numerical GPU execution, remaining
-operators, model-scale memory, the complete client and full-model inference
-remain unproven. The first release still requires all V1.1-V1.5 exit evidence.
+The halfword diagnostic above now qualifies bounded native Q8/Q4 arithmetic.
+Remaining operators, model-scale memory, the complete client and full-model
+inference remain unproven. The first release still requires all V1.1-V1.5 exit evidence.
 
 ## Static module failure handling qualified offline
 
