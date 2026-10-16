@@ -16,6 +16,23 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Current resume: CPU-reference-v3, regenerated model conversion, and
+`results/llm-vocab-fixture-v2` now pass under the new build pipeline. The Q4
+bytes match the existing qualified model, and all 32 tokenizer comparisons
+match. See `evidence/offline-cached-model-prerequisites.json`.
+Native-client-v5 is running via `.local/build_cached_prerequisites_v3.py`;
+check its process and `results/m0-cached-prerequisites-v3` before resuming.
+The earlier v1/v2 attempts stopped in test fixtures before native compilation;
+the fixture fixes are pushed. Do not restart v5 while it is live.
+
+Conversion files are in `/tmp/ps5-hip-tinyllama-gguf-v3` to avoid another permanent
+F16 copy on C:. Receipts and command logs are preserved in
+`results/m0-model-revalidation-v3`; original model files remain untouched.
+The prepared `.local/build_native_model_app_v10.py` uses this model, CPU-v3,
+vocab-v2 and client-v5. Run it only after client-v5 succeeds. It has not run yet.
+If volatile model files disappear, regenerate prerequisites rather than editing
+receipts. No .40 contact occurred in this prerequisite refresh.
+
 The build pipeline now supports bounded `JOBS` parallelism and optional native
 ccache (`CCACHE=auto|0|1`), plus link validation that resolves consumed inputs
 instead of every bound path for each helper link. The Linux cache is limited

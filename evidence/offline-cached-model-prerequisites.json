@@ -1,0 +1,51 @@
+{
+  "status": "PASS_CPU_MODEL_VOCAB_PREREQUISITES",
+  "source_commit": "967d878a20df43f6a7383a7a4b8a59d4284f05d1",
+  "native_executed": false,
+  "gpu_executed": false,
+  "cpu": {
+    "receipt_sha256": "d8583b35c2c2c4822f2851e2b27b1314b06777ba39d028427d15ac78915df87f",
+    "classification": "host-cpu-reference-tools-built",
+    "commands": [
+      {
+        "label": "configure",
+        "exit_code": 0
+      },
+      {
+        "label": "build",
+        "exit_code": 0
+      },
+      {
+        "label": "completion-version",
+        "exit_code": 0
+      },
+      {
+        "label": "quantize-fns",
+        "exit_code": 0
+      },
+      {
+        "label": "rope",
+        "exit_code": 0
+      }
+    ],
+    "make_elapsed_seconds": 94.854
+  },
+  "conversion": {
+    "receipt_sha256": "4916d5b67e0868c526db22178a958e1dc759e60348bbf95fcb146c357612cbfc",
+    "q4_bytes": 619831552,
+    "q4_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "matches_previous_qualified_model": true,
+    "elapsed_seconds": 155.975
+  },
+  "vocabulary": {
+    "receipt_sha256": "b26497b2cc823d03d7ce3a7ec07c02739ebaf518ed28f647240b9fc2a597b5e1",
+    "metadata_fields": 45,
+    "tokenization_cases": 32,
+    "bitwise_equal": true
+  },
+  "limits": [
+    "Native-client-v5 and model-app-v10 are not qualified by this record",
+    "Conversion outputs are in volatile /tmp; receipt and command logs preserved in workspace",
+    "No console run, heap-warning resolution or inference claim"
+  ]
+}
