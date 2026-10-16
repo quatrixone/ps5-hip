@@ -7,7 +7,7 @@ Updated: 2026-10-15, America/New_York.
 The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
 within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
 and executed operator inventory alongside QKV, then one layer and full logits.
-Implementation remains paused until the owner resumes it.
+The owner has resumed M0 and M1 in parallel, with .40 validation and milestone pushes.
 
 
 Per the owner's 2026-10-15 direction, follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md)
@@ -79,6 +79,8 @@ source-inspected blockers. Native inference remains unqualified.
 - 2026-10-15 | V1.3 reference | offline CPU | learned weighted RMSNorm and full Q2048/K256/V256 frozen references, independent reconstruction and Make reproduction pass | evidence/offline-weighted-qkv-reference.json | next: native chained numerical validation
 
 - 2026-10-15 | V1.3 native controls | offline | weighted/shared-Q8/full-QKV title compiles; package/controller source review, six registered test groups and synthetic readback validation pass | evidence/offline-weighted-qkv-package-controls.json | next: fresh native package audit and frozen .40 gate
+
+- 2026-10-15 | M1 package | offline | 76 native objects, 21-function three-image audit and independent 16-file package extraction pass | evidence/offline-native-weighted-qkv-package.json | next: freeze and .40 numerical gate; M0 tracing/link in parallel
 
 ## Q8/Q4 offline dispatch and numerical references
 

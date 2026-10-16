@@ -1,0 +1,31 @@
+{
+  "classification": "offline-native-weighted-qkv-package",
+  "status": "PASS",
+  "gpu_executed": false,
+  "source_commit": "e3eebf6",
+  "package_sha256": "3c3bf879696e2df5b9df4c165172af21640766e44da564d71e9f86ae7b4bd52c",
+  "build": {
+    "path": "build/public-hip-weighted-qkv-native-v1/link-receipt.json",
+    "sha256": "5956ede37e22368a7ce09c36e8ab061b72e1ce908f2b52b14c3eeb6f6394a8a5"
+  },
+  "audit": {
+    "path": "build/public-hip-weighted-qkv-native-v1/weighted-qkv-native-audit.json",
+    "sha256": "6800656028cc70f6f6d26040fff9424e0f79f4dff354d2cbde3424b3f0807229"
+  },
+  "independent_review": {
+    "path": "results/weighted-qkv-native-package-review-v1/review.json",
+    "sha256": "5fda775751bc32655d460dd0abb18f3084f533e037833cb64990895e6f734cdc"
+  },
+  "assets_review": {
+    "path": "results/weighted-qkv-final-assets-review-v1/review.json",
+    "sha256": "4042bce10d23821be51045e990b1daf309439671aa6343de0b528b6b3b40c97c"
+  },
+  "object_count": 76,
+  "audited_functions": 21,
+  "package_file_count": 16,
+  "numerical_asset_count": 10,
+  "limits": [
+    "Offline package and static image qualification only",
+    "Weighted/QKV GPU numerics, execution freshness and clean console lifecycle remain unqualified"
+  ]
+}

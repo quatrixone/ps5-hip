@@ -1,8 +1,8 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-Implementation and console testing remain paused at the owner's request while
-this plan is reviewed. Updating the plan does not resume them.
+The owner has resumed implementation: prioritize M0 and M1 in parallel, use
+idle .40 for validation, and push each completed milestone to main.
 
 ## Outcome and scope
 

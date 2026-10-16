@@ -14,16 +14,28 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
-## Plan review and pause
+## Plan review and resumption
 
-Implementation and console testing are paused at the owner's request. The
+The owner resumed M0 and M1 in parallel, with .40 validation authorized. The
 revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an
 executed graph inventory immediate priorities alongside the current QKV gate.
 Use a narrow ggml/public-HIP integration and sequential single-token GPU prefill
 initially; then qualify a complete layer, model memory, full logits, generation
 and release behavior. No full ROCm or general BLAS port is a prerequisite.
-The previously started native package build is an outstanding offline process;
-its outcome must be checked on resumption, not assumed successful.
+The native QKV package build completed; independent package review and the
+frozen console gate are next. M0 graph tracing and native client linkage proceed
+in parallel without changing the candidate inputs.
+
+## Native weighted QKV package passed offline
+
+The 76-object native package and 21-function three-image audit pass. Independent
+review reauthenticated 1,405 inputs and independently extracted all 16 package
+files, including the exact 10 module/reference assets. See
+`evidence/offline-native-weighted-qkv-package.json`. The candidate is ready for
+freeze review and a bounded .40 cycle; no weighted QKV GPU result is claimed.
+
+M0 proceeds in parallel: executed CPU graph inventory and a real native client
+compile/link investigation. Both work in ignored staging while M1 is frozen.
 
 ## Weighted QKV package and console controls ready offline
 
