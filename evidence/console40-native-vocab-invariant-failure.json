@@ -1,0 +1,48 @@
+{
+    "status":  "FAIL_NATIVE_VOCAB_BOUNDARY_RECOVERED_BY_EXACT_TITLE_CLOSE",
+    "manifest_sha256":  "abf8dd9edc920153e03a377de5f3ece2809fc6724a272ed3834364fb75b76d49",
+    "execute_receipt_sha256":  "671150e461ef05661846d80ebddf896e68fa0e3efe2fa944a05860311d65c2d7",
+    "inputs":  {
+                   "results/source-public-llm-vocab-console-v2/execute/after-safety-close.log":  "9b871981f9971f184c24495cd74629aadfa6fbf4dc8981140d531aad647792d8",
+                   "results/source-public-llm-vocab-console-v2/execute/application.log":  "f8a4a4848ef69cfe836c48bf71efaa92f74b9da70b78d976891cab4585aaa966",
+                   "results/source-public-llm-vocab-console-v2/execute/before-launch.log":  "2b1a00f7f5a96c74b0245768b218c30243a08ae19e9f272f00a648054a677f19",
+                   "results/source-public-llm-vocab-console-v2/execute/before-safety-close.log":  "d8271f3fb53b6f7234e126105b78c5114ef06e02614a8604023867aaf4287432",
+                   "results/source-public-llm-vocab-console-v2/execute/close-consumed":  "b93ee8c88cc3a4e235940cbd60d69673069f0e91daca660d8f98e20a69fdb009",
+                   "results/source-public-llm-vocab-console-v2/execute/close.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                   "results/source-public-llm-vocab-console-v2/execute/klog.log":  "1d2ca229f546bd1370c4a6789deaa6df83c4d98af488bf6a62ba11496ac74d87",
+                   "results/source-public-llm-vocab-console-v2/execute/launch-consumed":  "b93ee8c88cc3a4e235940cbd60d69673069f0e91daca660d8f98e20a69fdb009",
+                   "results/source-public-llm-vocab-console-v2/execute/launch.log":  "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+                   "results/source-public-llm-vocab-console-v2/execute/observed.log":  "d8271f3fb53b6f7234e126105b78c5114ef06e02614a8604023867aaf4287432",
+                   "results/source-public-llm-vocab-console-v2/execute/receipt.json":  "671150e461ef05661846d80ebddf896e68fa0e3efe2fa944a05860311d65c2d7",
+                   "results/source-public-llm-vocab-console-v2/execute/snapshot-consumed":  "b93ee8c88cc3a4e235940cbd60d69673069f0e91daca660d8f98e20a69fdb009",
+                   "results/source-public-llm-vocab-console-v2/execute/snapshot.log":  "037bcd8276dd2e6587cd84d1486ae751b576b5464775e233dbf69c83513821f8",
+                   "results/source-public-llm-vocab-console-v2/execute-secondary-lock.json":  "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f"
+               },
+    "application_bytes":  287,
+    "application_text":  "PS5HIP START target=gfx1013 kernel=m0_client_boundary\nPS5HIP RUNTIME constructors=pass heap=pass unwind=pass tls=pass clock=pass\nM0 backend invariant/error\nM0_APP QUARANTINED reason=backend-invariant no_shell_request=true\nM0_APP QUARANTINED reason=watchdog-timeout no_shell_request=true\n",
+    "native_fault_marker_in_captured_postlaunch_klog":  false,
+    "classification":  [
+                           "App native startup/runtime checks passed; generic m0::require rejected before vocabulary completion.",
+                           "No vocabulary32-case proof, storage proof, natural finalization or inference success.",
+                           "Watchdog also quarantined; controller40s observation failed then exact-title close restored idle."
+                       ],
+    "root_cause":  "Unresolved: generic require marker does not identify phase-file EOF vs vocabulary load/count/token assertion. Add precise bounded checkpoints/require labels offline before a fresh candidate.",
+    "cleanup":  {
+                    "exact_title":  "PPSA99014",
+                    "pid":  300,
+                    "safety_close_sent":  true,
+                    "idle_after_safety_close":  true,
+                    "healthy_after":  true,
+                    "both_locks_released":  true
+                },
+    "next_gate":  "Preserve consumed candidate, diagnose first assertion offline; no automatic rerun/model promotion.",
+    "limits":  [
+                   "No new console contact.",
+                   "No post-normal-finalization snapshot or successful lifecycle claim; failure cleanup receipt is the terminal evidence."
+               ],
+    "source_commit":  "810e949379d71d6527668d92e3ad4a50a13fe42f",
+    "package_sha256":  "bc560fd9ee4b8fbbc8ebfc03f8381891af1cc4f35991f09168a244155f457946",
+    "deployment_receipt_sha256":  "d683c4dcde6948cc1494e4c91d7473f43b40c742e7370cb1e83d84f260137730",
+    "date":  "2026-10-16",
+    "raw_directory":  "results/source-public-llm-vocab-console-v2"
+}

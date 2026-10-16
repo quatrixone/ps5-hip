@@ -33,6 +33,32 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Current resume point: vocabulary v2 deployment passed, but execution failed after
+native startup/runtime checks with `M0 backend invariant/error`, before VOCAB.
+Watchdog quarantine followed; exact PPSA99014 safety close restored idle, services
+healthy, both locks released. Both phases are terminal/consumed; never replay.
+Evidence: `evidence/console40-native-vocab-invariant-failure.json`; independent
+review `results/m0-vocab-execution-review-v2/review.json`. Installed package is now
+the vocabulary package SHA `bc560fd9ee4b8fbbc8ebfc03f8381891af1cc4f35991f09168a244155f457946`;
+the prior M1 package/log are preserved. Next diagnose phase-file/vocabulary
+assertions offline, especially `/app0` reads after elevation compared with proven
+`/system_ex/app/PPSA99014/` asset paths. Do not infer the exact failure site from
+the generic invariant message or promote the full-model gate yet.
+
+The complete ignored model overlay is `.local/m0-model-integrated/production.patch`
+(24 files), with promotion guide beside it. Independent source review and 129
+tests pass in `results/m0-model-integrated-independent-review-v1/review.json`.
+It retains the directory fix but still requires fresh qualified builds and native
+model-package/call-chain validation after the vocabulary issue is resolved.
+
+Additional scoped cleanup removed 226 superseded `.o` files (132,231,056 bytes)
+from app-v2/client-v1/client-v2 after current-receipt and live-process exclusion.
+Ledger: `results/cleanup-2026-10-16.jsonl`; inventory:
+`results/m0-retention-candidates-v1/review.json`. Receipts/logs/packages remain;
+historical object inventories now require rebuilding for full reauthentication.
+
+The earlier deployment notes below are historical and superseded by v2 above.
+
 Latest console attempt: `results/source-public-llm-vocab-console-v1` deployment
 is terminal failed before upload or application launch (missing results-directory
 parent). Preserve its consumed phase and receipts. Baseline readback matched M1;

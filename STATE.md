@@ -16,6 +16,17 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The installed native vocabulary app was tested on .40. Deployment passed,
+including directory creation, all eight asset readbacks and recovery preservation.
+PPSA99014 reached native startup/runtime checks, then a generic backend invariant
+failed before vocabulary completion. The watchdog quarantined it; exact-title
+safety close restored idle, healthy services and both released locks. This is a
+failed vocabulary gate, not M0 completion. Preserve consumed candidate
+`results/source-public-llm-vocab-console-v2`; diagnose the first assertion offline
+before rebuilding. See `evidence/console40-native-vocab-invariant-failure.json`.
+Post-elevation asset paths are under investigation; the transcript alone does
+not identify which assertion failed. Full-model changes remain staged.
+
 M0's source-only vocabulary application build and independent real candidate
 validation pass. `make llm-native-app` produced a 19,890,176-byte native package
 from 147 objects; all 197 commands, 41 focused Python tests, the 24-function

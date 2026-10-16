@@ -14,6 +14,8 @@ M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
+- 2026-10-16 | M0 vocabulary | .40 | failed: installed native startup/runtime passed, then pre-VOCAB invariant and watchdog quarantine; exact-title close restored healthy idle | evidence/console40-native-vocab-invariant-failure.json | next: offline assertion/path diagnosis; no replay or M0 completion
+
 - 2026-10-16 | M0 deployment prerequisite | .40/offline | deployment rejected before upload for missing results-directory ancestor; fixed bounded ancestor creation, independent review and 52 tests pass | evidence/console40-vocab-deploy-directory-failure.json | next: fresh candidate and installed-title validation; no application execution claimed
 
 - 2026-10-15 | M0 prerequisites | offline | pass: source-only native payload link (71 objects, four checks) and vocabulary fixture (45 metadata fields, 32 tokenizer cases, six checks); independent reviews | evidence/offline-native-llm-client-link.json, evidence/offline-llm-vocab-fixture.json | next: native app and actual-client rejection; no native execution claimed
