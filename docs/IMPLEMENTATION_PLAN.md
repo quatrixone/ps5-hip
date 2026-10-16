@@ -14,6 +14,8 @@ M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
+- 2026-10-16 | M0 vocabulary | .40 | pass: installed tokenizer, HIP storage, synthetic rejection and natural lifecycle | evidence/console40-native-vocab-success.json | next: actual model/reuse gate
+
 - 2026-10-16 | M0 vocabulary | .40 | failed: installed native startup/runtime passed, then pre-VOCAB invariant and watchdog quarantine; exact-title close restored healthy idle | evidence/console40-native-vocab-invariant-failure.json | next: offline assertion/path diagnosis; no replay or M0 completion
 
 - 2026-10-16 | M0 path correction | offline | pass: post-elevation title asset paths, explicit failure diagnostics, 33 tests and independent review | evidence/offline-native-llm-asset-path-fix.json | next: fresh native package/audit and installed-title test

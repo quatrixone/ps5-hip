@@ -16,6 +16,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Current checkpoint: the corrected installed PPSA99014 vocabulary app passed on
+.40, including 32 exact tokenizer cases (236 tokens), HIP copy/clear, synthetic
+unsupported-compute rejection and natural shutdown. The terminal controller
+accepted the run with healthy services and owned-lock release. See
+`evidence/console40-native-vocab-success.json`. Candidate v3 is consumed; do not
+replay it. Next validate full-model loading and actual-client graph rejection,
+including reuse. M0 remains open; this test performed no model tensor computation.
+The failure and offline-build paragraphs below describe earlier checkpoints.
+
 The installed native vocabulary app was tested on .40. Deployment passed,
 including directory creation, all eight asset readbacks and recovery preservation.
 PPSA99014 reached native startup/runtime checks, then a generic backend invariant

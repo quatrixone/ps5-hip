@@ -70,7 +70,7 @@ Never remove dependency checks and substitute success stubs.
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Source-only Make CPU graph trace through 512 positions; native vocabulary application package with independent real freeze admission | Installed-title loading/tokenization, actual model routing/reuse and runtime qualification |
+| Client | Source-only Make CPU graph trace through 512 positions; installed native vocabulary/tokenizer, HIP storage and synthetic rejection passed on .40 | Full-model loading, actual model routing/reuse and runtime qualification |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -97,11 +97,12 @@ are not current capability declarations. No native LLM inference is claimed.
 5. Connect sampling and incremental decode, then qualify repeated requests,
    errors, source-only rebuilds and measured performance under M4/M5.
 
-The source-only native vocabulary package is 19,890,176 bytes. Its reviewed
+The corrected source-only native vocabulary package is 19,922,944 bytes. Its reviewed
 32 MiB transfer ceiling is specific to this fixture; legacy fixture limits
 remain unchanged. Source/input provenance and real freeze admission pass in
 `evidence/offline-native-llm-application.json`. Neither packaging nor tokenizer
-success establishes inference; installed-title validation remains pending.
+success establishes inference. Installed vocabulary-title validation passed;
+see `evidence/console40-native-vocab-success.json`. Actual-model validation remains open.
 
 ## Required computation, in model order
 
@@ -143,9 +144,9 @@ of M0; the native application and actual backend routing remain open.
 
 The source-only payload-link prerequisite and weight-free vocabulary fixture
 also pass Make reproduction. See [native linkage](LLM_NATIVE_CLIENT.md) and
-[vocabulary fixture](LLM_VOCAB_FIXTURE.md). Neither has executed on PS5, and
-the vocabulary fixture cannot construct a real model graph. M0 still requires
-the native application and rejection in the actual client execution path.
+[vocabulary fixture](LLM_VOCAB_FIXTURE.md). The installed vocabulary app now
+passes on PS5, but the fixture cannot construct a real model graph. M0 still
+requires full-model loading and rejection in the actual client execution path.
 
 - Link a native minimal client using the existing GGUF loader, tokenizer and
   graph builder with the chosen narrow ggml/public-HIP backend integration.

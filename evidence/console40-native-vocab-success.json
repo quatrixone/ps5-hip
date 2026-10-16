@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "classification": "native-vocabulary-tokenizer-hip-storage-boundary-success",
+  "status": "PASS",
+  "source_commit": "3625830e4ef849282fc39863afbb5b6aa86b6e8b",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "manifest_sha256": "fb90d0ffda0896f0b0ef053c36d84c9ff7fd13bf64dd6ab68c1a1890c38f5689",
+  "execute_receipt_sha256": "5615885c970636470780ba269198d4d27783e9e5a775a4ea0595d2f2e84956e5",
+  "independent_review_sha256": "7e7c32a7b89c062ed3c48ff4c410cf1a3da859bf625e174dd4a2529c2bdbc578",
+  "package_sha256": "ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720",
+  "package_bytes": 19922944,
+  "application_log_sha256": "f02532deba69741e013edeb019960d1b4e200696ca1f47616dc4a1bb92d560ab",
+  "application_log_bytes": 720,
+  "tokenizer_cases": 32,
+  "tokenizer_tokens": 236,
+  "vocabulary": 32000,
+  "model_tensors": 0,
+  "storage_floats_copied": 16,
+  "storage_floats_cleared": 16,
+  "synthetic_add_rejected": true,
+  "cpu_compute_calls": 0,
+  "gpu_dispatches": 0,
+  "allocations": 1,
+  "frees": 1,
+  "queues": 1,
+  "retired_queues": 1,
+  "natural_stop": true,
+  "unchanged_mounts": true,
+  "healthy_services": true,
+  "both_locks_released": true,
+  "native_executed": true,
+  "limits": [
+    "Vocabulary-only GGUF has zero tensors; no full-model loading, actual llama_process rejection/reuse on console, token generation or inference.",
+    "Synthetic ADD rejection and HIP storage do not demonstrate tensor-operator GPU execution.",
+    "Successful native run supports the post-elevation asset-path correction; prior generic assertion alone did not locate its failing source line."
+  ],
+  "evidence_sha256": {
+    "results/m0-vocab-execution-review-v3/review.json": "7e7c32a7b89c062ed3c48ff4c410cf1a3da859bf625e174dd4a2529c2bdbc578",
+    "results/source-public-llm-vocab-console-v3/execute/klog.log": "065462399a2039fd680caba11549345165ea5e50a1cf5e05b8f97f86f4253b95",
+    "results/source-public-llm-vocab-console-v3/execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f"
+  }
+}

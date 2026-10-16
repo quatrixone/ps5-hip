@@ -33,6 +33,18 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Latest: corrected native vocabulary candidate
+`results/source-public-llm-vocab-console-v3` completed execution with exit zero.
+All 32 tokenizer cases/236 tokens, HIP storage, synthetic rejection and natural
+finalization passed. Controller receipt accepts the run, with healthy services
+and lock release; see `evidence/console40-native-vocab-success.json`.
+Do not replay this consumed candidate. The installed recovery baseline is now
+the 19,922,944-byte app-v4 package, SHA256
+`ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`.
+Next promote the reviewed full-model changes and build a fresh model-gate app;
+actual model loading/reused-graph rejection and native inference remain unproven.
+Earlier failure/build notes below are historical.
+
 Asset-path correction is ready offline: post-elevation phase/vocabulary/model
 reads use `/system_ex/app/PPSA99014/`; pre-elevation config/helper retain `/app0`.
 33 focused tests and independent review pass, including eight actual phase-parser
