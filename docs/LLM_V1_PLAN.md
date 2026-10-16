@@ -1,8 +1,9 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-The owner has resumed implementation: prioritize M0 and M1 in parallel, use
-idle .40 for validation, and push each completed milestone to main.
+Implementation and console activity are paused for the owner's plan review.
+On resumption, prioritize M0 and M1 in parallel, use idle .40 for validation,
+and push each completed, validated milestone to main.
 
 ## Outcome and scope
 
@@ -64,8 +65,8 @@ Never remove dependency checks and substitute success stubs.
 | Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm and Q8/Q4, including Q4 consuming device-produced Q8, passed on .40 | Weighted RMSNorm plus full Q/K/V native outcome |
-| Weighted QKV | Source-built modules, full CPU references, native title compilation, package/controller tests and independent reviews | Finished package/image audit, frozen deployment and native numerical validation |
-| Client | Locked upstream sources and partial compile/link investigations | Runnable native ggml/llama client, complete backend routing and real graph trace |
+| Weighted QKV | Source-built modules, full CPU references, native package/image audit and independently approved frozen deployment candidate | Deployment, separately reviewed execution and native numerical validation |
+| Client | Local CPU graph trace through 512 positions; limited native payload link; storage-only public-HIP backend prototype | Reproducible production integration, runnable native app, tensor routing and runtime qualification |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -108,17 +109,27 @@ Start immediately when implementation resumes, in parallel with M1.
 - Link a native minimal client using the existing GGUF loader, tokenizer and
   graph builder with the chosen narrow ggml/public-HIP backend integration.
 - Capture the executed CPU graph for the exact target settings: op, dtype,
-  shape, stride, views, kernel specialization, public HIP call and library call.
-  Trace prompt processing and incremental decode, including cache growth.
+  shape, stride, views and operation parameters. Trace prompt processing and
+  incremental decode, including cache growth. Separately map and instrument
+  GPU kernel specializations, public HIP calls and library calls in the native
+  backend; CPU callbacks cannot establish that coverage.
 - Maintain one coverage table with states: observed, implemented, host-tested,
   native-tested, integrated. Every missing item must point to its actual caller.
 - Prove native loading/tokenization and backend selection with bounded assets;
   reject unsupported graph operations instead of silently falling back.
 - Resolve coherent production headers/source selection. Diagnostic old hipBLAS
   headers and partial translation-unit compilation do not close client linkage.
+- Promote the local graph-trace and link prototypes into reproducible Make
+  targets. Bind every linked object, compiler, SDK and generated/header input
+  into build receipts; qualify application imports, packaging and startup.
+- Enforce the no-fallback rule in the actual llama execution path after graph
+  placement and before computation. A standalone rejection test is insufficient.
+  The genuine CPU backend may remain for upstream initialization, but no model
+  tensor operation may execute there in the release configuration.
 
-Exit: native client links, backend boundary is concrete, and every required
-operation/call has an implementation task. This is not yet an inference claim.
+Exit: the native application builds reproducibly, loads/tokenizes on PS5,
+selects the backend and rejects unsupported computation before execution;
+every required operation/call has an implementation task. This is not inference.
 If full upstream HIP linkage adds unused libraries or kernels, select only the
 needed sources/backend operations rather than expanding the SDK to satisfy them.
 
@@ -148,6 +159,13 @@ Include a small dense floating-point fixture to isolate indexing/numerics,
 then real Q4 weights. Test grouped-query mapping, causal masking, cache strides,
 reset and representative extreme inputs. Position zero alone cannot qualify RoPE
 or attention. Do not introduce optional fusions or throughput work at this gate.
+
+The local CPU trace observes padded attention extents of 256 and then 512,
+strided F16 K/V layouts and 32-to-4 grouped-query mapping. Include positions
+255/256 as well as 0/1/511, and ensure padded/unwritten entries are masked.
+Port the traced SET_ROWS, gather, conversion and layout semantics explicitly;
+simple contiguous matvec tests cannot qualify these paths. Independently review
+and reproduce the trace when promoting its ignored prototype into the build.
 
 ### M3 ? Model-scale memory and full forward pass (V1.2 / V1.4)
 
@@ -206,9 +224,12 @@ Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-After resumption: finish the already-started package build, review its outcome,
-then perform M1 on .40 when idle. In parallel, prioritize M0's native link and
-executed graph inventory. Every additional SDK capability must name the model
+After resumption: validate the reviewed M1 candidate on idle .40, with separate
+deployment and execution reviews. Recheck its source/freeze identity after any
+repository changes; do not reuse an approval against changed candidate inputs.
+In parallel, promote M0's graph inventory and native link/backend prototypes
+into the supported build and qualify the actual application boundary.
+Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.
 

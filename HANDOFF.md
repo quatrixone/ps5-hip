@@ -25,6 +25,17 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Current owner request pauses implementation and console work for plan review.
+Follow the tightened M0-M5 criteria in the release plan. Ignored M0 work includes
+`results/m0-executed-graph-v2/receipt.json`,
+`results/m0-native-link-independent-review-v1/review.json`, and
+`results/m0-public-hip-backend-v2/receipt.json`. These are local prototypes,
+not source-only production milestones: complete link provenance, native app
+qualification and actual llama no-fallback enforcement remain open. M1 freeze
+review is at `results/source-public-weighted-qkv-console-v1/review.json`;
+deployment and execution have not occurred. Recheck freeze/source identity
+after documentation changes. This checkpoint supersedes older next actions.
+
 The owner resumed M0 and M1 in parallel, with .40 validation authorized. The
 revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an
 executed graph inventory immediate priorities alongside the current QKV gate.

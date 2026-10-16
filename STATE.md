@@ -16,6 +16,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Current owner request: pause implementation and console work for plan review.
+The updated release plan tightens M0 to a reproducible native application with
+loading/tokenization and enforced backend routing. Local ignored prototypes
+now provide a 512-position CPU graph trace, a limited native payload link and
+a storage-only HIP backend; none establishes native inference. The link review
+found incomplete object/tool/header provenance. The frozen M1 candidate has
+deployment approval, but has not been deployed or executed. These facts
+supersede the older next-action paragraphs below. Recheck freeze identity after
+this documentation change before resuming console work.
+
 The owner resumed M0 and M1 in parallel, with .40 validation authorized. The
 revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an
 executed graph inventory immediate priorities alongside the current QKV gate.
