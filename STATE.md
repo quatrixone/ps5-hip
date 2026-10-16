@@ -16,6 +16,19 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+`make llm-native-client-link` now rebuilds the genuine loader/tokenizer payload
+from source: 71 objects, 161 factory-referenced model implementations and four
+focused checks pass. The production ELF matches the earlier prototype exactly.
+See `docs/LLM_NATIVE_CLIENT.md`. This is a payload-link prerequisite only:
+native application startup, backend routing and inference remain unqualified.
+The next step is source-only native application integration, with the bounded
+vocabulary fixture and actual-client no-fallback boundary kept distinct.
+
+`make llm-vocab-fixture` also passes production reproduction and independent
+review: 45 exact metadata fields, zero tensors, and 32 tokenizer cases match
+the original model. The 725,614-byte asset is a native loader-test prerequisite,
+not a model graph or inference result. See `docs/LLM_VOCAB_FIXTURE.md`.
+
 M0's executed CPU graph inventory is now reproducible with
 `make llm-executed-graph`: all 512 positions, 410,112 completed nodes and
 16,384,000 finite logits pass independent review. The 14-case test suite and

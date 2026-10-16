@@ -33,6 +33,20 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+The source-only native client payload build completed successfully:
+`build/llm-native-client-v1/receipt.json`, with command/log evidence in
+`results/m0-native-production-make-v1`. Use `make llm-native-client-link` and
+a fresh `LLM_NATIVE_CLIENT_BUILD_DIR` to reproduce. All 71 objects are built
+from source; no old experiment's object files are needed. This payload is not
+an accepted native application and has not loaded/tokenized on PS5. Preserve
+this current build for application integration. See `docs/LLM_NATIVE_CLIENT.md`.
+
+The production vocabulary fixture is `results/llm-vocab-fixture-v1`; its Make
+logs/command receipt are `results/m0-vocab-production-make-v1`, and independent
+review is `results/m0-vocab-production-final-review-v1/review.json`. Preserve
+the 725,614-byte asset for application integration; reproduce with
+`make llm-vocab-fixture` and a fresh output directory. It contains no tensors.
+
 Production M0 CPU tracing now passes `make llm-executed-graph` and independent
 review; see `evidence/offline-llm-executed-graph.json`. Local final results are
 `results/llm-executed-graph-v1`, with Make evidence in

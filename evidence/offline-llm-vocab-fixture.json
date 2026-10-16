@@ -1,0 +1,40 @@
+{
+    "status":  "PASS_PRODUCTION_VOCABULARY_FIXTURE",
+    "receipt_sha256":  "fed18e4f4bdc8be36cc43d63c41a6dedde335bc15b578eeabbffaff164b5cf58",
+    "verified_inputs":  463,
+    "verified_artifacts":  16,
+    "metadata_fields":  45,
+    "tensor_count":  0,
+    "tokenization_cases":  32,
+    "vocab_bytes":  725614,
+    "asset_sha256":  "7894a7e863f7f09e7d17d53f658eb030e54b7a87d627d0a201c06da8a8a5696e",
+    "identical_to_reviewed_staged_v2":  [
+                                            "source text except newline normalization",
+                                            "vocabulary GGUF bytes",
+                                            "original and derived32case token outputs"
+                                        ],
+    "make_exit":  0,
+    "tests":  {
+                  "count":  6,
+                  "exit_code":  0
+              },
+    "make_evidence":  {
+                          "command.json":  "9486289de7486c6a41aefcc6d25e45576dffaad1e8ec58a21464702840b75f11",
+                          "stdout.log":  "58f002b72472f0f058d64d8e7edf8dbdfad563fea45787a1001ed310f7851c43",
+                          "stderr.log":  "38fbc2f9acd445007218d1ea50561b6257932d4fd91188137303caab7d47ccb6"
+                      },
+    "findings":  [
+
+                 ],
+    "limits":  [
+                   "Host vocabulary-only upstream loading/tokenization; no native or GPU inference claim.",
+                   "Final application separately enforces package size and authenticates this asset.",
+                   "Nonblocking future improvement: preserve subprocess timeout partial logs/command evidence."
+               ],
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "schema":  1,
+    "date":  "2026-10-15",
+    "raw_directory":  "results/llm-vocab-fixture-v1",
+    "review_sha256":  "ae0976b70a673d62c0387da0ae7278ca8b4f573e2af708d4a03f0b569407e40c"
+}

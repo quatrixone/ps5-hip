@@ -1,0 +1,36 @@
+{
+    "schema":  1,
+    "date":  "2026-10-15",
+    "status":  "PASS",
+    "classification":  "source-only-native-client-payload-link",
+    "receipt_sha256":  "8b0f3540d8a6c5df1afe06c4133dbdf4cd9fff629f26af910124a88c4704fca3",
+    "raw_directory":  "build/llm-native-client-v1",
+    "make_command":  "make llm-native-client-link LLM_NATIVE_CLIENT_BUILD_DIR=build/llm-native-client-v1",
+    "make_exit_code":  0,
+    "unit_tests_passed":  4,
+    "inputs":  3400,
+    "artifacts":  520,
+    "object_count":  71,
+    "model_source_count":  161,
+    "command_count":  146,
+    "dynamic_import_count":  116,
+    "elf":  {
+                "sha256":  "4507cfd784e2c7de8d53d4b3187821de0637b3642eb375614947eef0c11f6379",
+                "bytes":  12466792
+            },
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "limitations":  [
+                        "SDK payload ELF only; RWX segment is not accepted app packaging.",
+                        "Vocab-only native caller; no model loaded or tokenized here and no public HIP backend integrated.",
+                        "Installed SDK bytes and clean source revision bound; SDK source-build provenance is inherited from deps-build, not recreated by this target.",
+                        "No general model support or inference claim from retaining all upstream factory implementations."
+                    ],
+    "independent_review_sha256":  "8750f59d43db8747be2851b3d5cefb436b79b4e1d89e4c6f867992b88312284b",
+    "independent_review_status":  "PASS_NATIVE_CLIENT_LINK_MILESTONE",
+    "make_evidence":  {
+                          "command.json":  "2f868f69f09c856b43bb97b8a210e5899e3518805fc58c4f24fa0db59d536d6a",
+                          "stdout":  "9a4cc69214d0cd7c00766548b3804885ab47f70c954c46e3e3553748f13e1048",
+                          "stderr":  "6030ee8d02d2c1110c03e7dd2745ac1ebce7c37a655167122206cabe9a5e3642"
+                      }
+}

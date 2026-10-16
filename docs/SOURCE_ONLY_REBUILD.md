@@ -10,6 +10,17 @@ It prepares missing model prerequisites, authenticates existing model bytes,
 and executes all 512 positions. Use a fresh `LLM_EXECUTED_GRAPH_DIR` for each
 run. See [the trace contract and operator coverage](LLM_EXECUTED_GRAPH.md).
 This inventories required computation; it does not run inference on the PS5.
+
+For native loader/tokenizer linkage, run `make llm-native-client-link` with a
+fresh `LLM_NATIVE_CLIENT_BUILD_DIR`. It prepares dependencies and compiles all
+client objects from source. See [the native client boundary](LLM_NATIVE_CLIENT.md):
+the payload ELF is not yet a native application or an inference result.
+
+`make llm-vocab-fixture` builds a small weight-free GGUF using the locked
+upstream writer, then checks its tokenizer against the full model. Choose a
+fresh `LLM_VOCAB_FIXTURE_DIR`; see [the fixture contract](LLM_VOCAB_FIXTURE.md).
+This prepares the native loader test asset, not a model that can run inference.
+
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed
 PyTorch. These optional targets do not establish native inference; the default
