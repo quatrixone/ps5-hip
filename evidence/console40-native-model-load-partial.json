@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "status": "partial-pass",
+  "classification": "native-full-model-loading-and-owned-memory",
+  "source_commit": "539802f0711d2c898b7c682fbc97af9859236e09",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_sha256": "500ce53f2fae3b58e0c18d781ec26f676d4912154a7cee4fd99fd4054aa909ee",
+  "package_bytes": 827719680,
+  "controller_accepted": false,
+  "controller_error": "ValueError('model-gate transcript differs')",
+  "native_model_loading_observed": true,
+  "native_context_creation_observed": true,
+  "context_tokens": 512,
+  "model": "TinyLlama 1.1B Chat Q4_0",
+  "model_bytes": 619831552,
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "memory_snapshots": [
+    {
+      "phase": "before_load",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12882804736,
+      "total_free_bytes": null,
+      "alignment": 16384
+    },
+    {
+      "phase": "after_load",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12261605376,
+      "total_free_bytes": null,
+      "alignment": 16384
+    },
+    {
+      "phase": "after_context",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12214861824,
+      "total_free_bytes": null,
+      "alignment": 16384
+    },
+    {
+      "phase": "after_cleanup",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12882804736,
+      "total_free_bytes": null,
+      "alignment": 16384
+    }
+  ],
+  "host_storage": {
+    "allocations": 219,
+    "releases": 219,
+    "peak_requested_bytes": 663545360,
+    "live_requested_bytes": 0,
+    "failures": 0,
+    "poisoned": false
+  },
+  "rejection_reuse": {
+    "actual_calls": 2,
+    "second_graph_reused": true,
+    "forwarded": 0,
+    "post_compute": 0
+  },
+  "warning": {
+    "text": "[ScePthread/System] Internal Memory is running out.",
+    "phase": "context creation",
+    "cause": "unresolved; not whitelisted or accepted"
+  },
+  "lifecycle": {
+    "title": "PPSA99014",
+    "pid": 340,
+    "application_finalizers_observed": true,
+    "application_requested_shell_exit": true,
+    "shell_request_return": 0,
+    "service_termination_observed": true,
+    "process_exit_zero_observed": false,
+    "host_close_consumed": false,
+    "healthy_after": true,
+    "owned_locks_released": true,
+    "source_semantics": "application_finished runs _fini, requests sceShellCoreUtilExitApp then waits forever for service termination; direct process exit(0) is not the intended path"
+  },
+  "M0_complete": false,
+  "native_inference": false,
+  "gpu_tensor_execution": false,
+  "post_snapshot_observed": false,
+  "second_installed_asset_verification": false,
+  "evidence_sha256": {
+    "tools/native_shell_exit_probe.cpp": "87a16b801c34defaf5fab7302a297ea8f52d28bb7a3696cb96bdf40457813de0",
+    "tools/source_llm_model_log.py": "1d5be4bbd1de50476142a3a95807fa8ff5a919f9b3f7aee941c4e7f29391dd73",
+    "tools/source_console.py": "9ac7c9243c7af11356fe7197238d6b69dc902d73df5016e186f3adc2c5e7670f",
+    "results/source-public-llm-model-console-v3/manifest.json": "17a427a90b8da5f56c1ef8882cb467a0840ed770d7023a05e92492a9b130dc6d",
+    "results/source-public-llm-model-console-v3/build-receipt.json": "43ae269645a25a75cc351c601481dbb2fac2c4c9a6702aee0a04fc4e6dfbd77d",
+    "results/source-public-llm-model-console-v3/execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "results/source-public-llm-model-console-v3/execute/application.log": "19ea3bdfbb533c9f8fb45cf07957c9d1b388dc44099fbc6344a43ff638d506e5",
+    "results/source-public-llm-model-console-v3/execute/before-launch.log": "28bed9b6f84b1206cab814498e5f653b8dadc67d418f6d0040c1a96fbf87b212",
+    "results/source-public-llm-model-console-v3/execute/klog.log": "5b677c4226adb7d75d500989f3604b621f6f0df35dd034b5c43d08ffb146767d",
+    "results/source-public-llm-model-console-v3/execute/launch-consumed": "197041034808e2f792f81176e77bd4b67a86b22250fa516fb778d2e422cd5898",
+    "results/source-public-llm-model-console-v3/execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "results/source-public-llm-model-console-v3/execute/observed.log": "821c08e70b281d9227f15d2f13b96b0507d345cba1411f1e39811e55c1b84449",
+    "results/source-public-llm-model-console-v3/execute/receipt.json": "6bf2ebda69a6530dc809fd02cc986526bbe573710ba4662365c2bfd20eb6f531",
+    "results/source-public-llm-model-console-v3/execute/snapshot-consumed": "197041034808e2f792f81176e77bd4b67a86b22250fa516fb778d2e422cd5898",
+    "results/source-public-llm-model-console-v3/execute/snapshot.log": "58852b1219e9f82d4a118b16ad82635c1a938863a45472242934043635e329c2",
+    "results/m0-model-load-partial-review-v1/review.json": "e917442c6f466aaeda8b3df1c992de1ccb788850efbd5af5e94dfbb71d335a58"
+  },
+  "diagnostic_transcript_comparison": "Only an in-memory copy with the one warning removed matches the expected transcript. Raw evidence and frozen rejection are unchanged.",
+  "next_step": "Trace scheduler context-buffer ordinary malloc and ggml_init null-buffer fallback; do not whitelist warning. Fresh candidate required for correction.",
+  "limits": [
+    "Original frozen parser and receipt remain rejected; diagnostic removal of one warning identifies remaining exact transcript only.",
+    "Unresolved platform warning during context creation prevents full execution acceptance.",
+    "Controller stopped validation before post snapshot and second installed image/asset readbacks.",
+    "Observed model loading and balanced aligned allocations do not complete M0 or prove inference."
+  ]
+}

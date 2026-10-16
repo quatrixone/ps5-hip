@@ -16,6 +16,28 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Current checkpoint: installed model-app-v7 loaded the full locked TinyLlama
+model on .40 and created its 512-token context. Both mandatory graph rejections
+and second-call reuse completed, with 219 owned allocations/releases, zero
+live owned bytes/failures, and a 663,545,360-byte requested peak. The measured
+direct pool was 12 GiB; its largest free extent returned from 12,214,861,824
+bytes after context creation to the original 12,882,804,736 bytes after cleanup.
+
+Overall execution acceptance remains false: context creation emitted one
+`[ScePthread/System] Internal Memory is running out.` warning. The strict parser
+rejected it; post-execution mount/asset checks consequently did not run.
+Application finalizers and its shell-exit request completed, the title stopped,
+services remained healthy, and both locks were released. This is validated
+model-loading/allocator progress, not a clean M0 pass or GPU inference.
+See `evidence/console40-native-model-load-partial.json`.
+
+Next trace the scheduler's unchecked ordinary `malloc(context_buffer_size)`:
+its null result can cause `ggml_init` to obtain owned aligned backing instead.
+This is a source-supported explanation for the warning, not proven attribution.
+Do not whitelist the warning or replay consumed model-console-v3. A correction
+needs a fresh candidate. Per-HIP-call accounting and M2-M5 remain open; M1 is complete.
+The older checkpoints below are historical, not the current next action.
+
 Model-app-v5 linked and packaged, but Make failed its final audit: the earlier
 external-only wrapping assumption was wrong. lld also redirects same-unit GGML
 context allocation/free calls; the original aligned allocator symbols are removed.

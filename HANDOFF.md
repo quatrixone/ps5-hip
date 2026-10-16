@@ -18,9 +18,39 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
-Work is paused at the owner's request. V6 compilation and application linking
-passed, but its process was stopped during packaging-tool preparation; there is
-no successful v6 receipt. Do not deploy or treat this interrupted build as complete.
+The owner resumed work. Fresh v7 completed Make (149 objects, 201 commands,
+16 suites/118 methods), real admission, the 46-function image audit, freeze,
+review and verified installation on .40. Source candidate is `539802f`; package
+SHA256 is `500ce53f2fae3b58e0c18d781ec26f676d4912154a7cee4fd99fd4054aa909ee`.
+The installed results directory is `/user/homebrew/ps5-hip/m0-model-v7`.
+
+Full model loading and 512-token context creation succeeded. Both expected
+graph rejections and graph reuse completed. Owned storage balanced 219/219 with
+zero live bytes/failures and a 663,545,360-byte requested peak. Direct-memory
+capacity measured 12 GiB and the largest free extent returned exactly to its
+pre-load value. However, one platform heap warning during context creation
+caused strict transcript rejection; the run is partial, not accepted. No warning
+was suppressed. Application finalizers/shell-exit request and title stop were
+observed; services stayed healthy and both locks were released. Post-run mount
+and asset readbacks were skipped after parser rejection, so do not claim them.
+
+Consumed candidate: `results/source-public-llm-model-console-v3` (both deploy
+and execute). Preserve its package, receipts, raw application/klog/lifecycle
+evidence and older model/vocabulary recovery copies. Do not replay it. Current
+compact evidence: `evidence/console40-native-model-load-partial.json`.
+Review: `results/m0-model-load-partial-review-v1/review.json`.
+
+Next investigate the scheduler's unchecked ordinary context-buffer malloc and
+ggml_init's null-buffer aligned allocation fallback; this could explain the
+warning despite successful owned storage, but is not hardware-proven. Do not
+assume a thread-creation failure from the ScePthread prefix. Keep the exact log
+parser strict. Any fix needs fresh packaging and validation. The shell-exit
+probe deliberately requests shell termination after application finalization;
+a direct process exit(0) requirement in the local prepared success reviewer is
+inconsistent with that design and needs correction before a future run.
+
+V6 remains interrupted and has no successful receipt. The preparation/history
+below is retained for provenance; v7 supersedes the old v6 next-action text.
 
 On the subsequent cleanup request, four duplicate outputs were removed from
 `build/llm-native-model-app-v3/package` and `build/llm-native-model-app-v4/package`:

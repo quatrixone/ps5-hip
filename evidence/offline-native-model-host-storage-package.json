@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-model-host-storage-package",
+  "make_exit_code": 0,
+  "test_suites": [
+    "tests/watchdog_test.py",
+    "tests/llm_native_host_allocator_test.py",
+    "tests/llm_native_app_build_test.py",
+    "tests/llm_native_model_package_test.py",
+    "tests/source_model_auth_test.py",
+    "tests/source_model_callsites_test.py",
+    "tests/source_model_cleanup_budget_test.py",
+    "tests/source_model_execute_test.py",
+    "tests/source_model_phase_budget_test.py",
+    "tests/source_model_storage_edges_test.py",
+    "tests/source_model_streaming_test.py",
+    "tests/llm_native_validation_cost_test.py",
+    "tests/public_hip_compile_inputs_test.py",
+    "tests/public_hip_llm_client_build_test.py",
+    "tests/source_llm_client_controls_test.py",
+    "tests/llm_client_native_audit_test.py"
+  ],
+  "test_methods": 118,
+  "object_count": 149,
+  "command_count": 201,
+  "input_count": 7010,
+  "artifact_count": 2410,
+  "package_bytes": 827719680,
+  "package_sha256": "500ce53f2fae3b58e0c18d781ec26f676d4912154a7cee4fd99fd4054aa909ee",
+  "package_assets": {
+    "client-phase.txt": "5d71d0c45955991af2f54e6124bdbc5609e43f0e6d50773d7c76cdb494631260",
+    "eboot.bin": "d3bcf9425fb4db66e957acd53fe7bb7d8ffbe2d191beb872bc6327898147188a",
+    "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+    "model.gguf": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "results-dir.txt": "6b9b31f226845701eeac569500fbc6ede2912bec40c29ee32f93e09889ce024f",
+    "vocab.gguf": "7894a7e863f7f09e7d17d53f658eb030e54b7a87d627d0a201c06da8a8a5696e",
+    "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+    "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071"
+  },
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "audited_function_count": 46,
+  "native_allocator_routing_audited": true,
+  "native_executed": false,
+  "gpu_executed": false,
+  "M0_complete": false,
+  "evidence_sha256": {
+    "results/m0-native-model-app-production-make-v7/command.json": "d9926549b7ad3d75e3d1df3d2ead1e294698bba2ffcbdc78ad94b54c4d55a148",
+    "results/m0-native-model-app-final-review-v7/review.json": "424a7490afd55d72ebedb7e1e6642452f07f81379d71e041f4370185824e1555",
+    "build/llm-native-model-app-v7/receipt.json": "43ae269645a25a75cc351c601481dbb2fac2c4c9a6702aee0a04fc4e6dfbd77d",
+    "build/llm-native-model-app-v7/llm-client-native-audit.json": "c556690f3c70eecaf6205d302a90859a37dd4db86427ae8e304cadb1215efc9f",
+    "results/m0-native-model-app-production-make-v7/stdout": "f13bb9d748fd2745f881e5ec1e56e376702be5236fe7c801044c9da6922d551d",
+    "results/m0-native-model-app-production-make-v7/stderr": "fd492c5f530240a53a21eebf6b264a85362e622b005c3aeddd9f5527fa36b187"
+  },
+  "limits": [
+    "Three-image static preservation and paired allocator routing only; direct-memory model loading remains unproven.",
+    "Fresh frozen candidate and independent review required before installed-title validation on idle .40.",
+    "No inference, performance, full-model memory capacity or successful native lifecycle claim."
+  ]
+}

@@ -70,7 +70,7 @@ Never remove dependency checks and substitute success stubs.
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Source-only Make CPU graph trace through 512 positions; installed native vocabulary/tokenizer, HIP storage and synthetic rejection passed on .40 | Full-model loading, actual model routing/reuse and runtime qualification |
+| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 219 balanced owned allocations observed on .40; vocabulary/tokenizer and HIP storage previously passed | Resolve context heap warning, complete accepted post-run checks and per-HIP-call qualification; current full-model run is partial |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -145,8 +145,10 @@ of M0; the native application and actual backend routing remain open.
 The source-only payload-link prerequisite and weight-free vocabulary fixture
 also pass Make reproduction. See [native linkage](LLM_NATIVE_CLIENT.md) and
 [vocabulary fixture](LLM_VOCAB_FIXTURE.md). The installed vocabulary app now
-passes on PS5, but the fixture cannot construct a real model graph. M0 still
-requires full-model loading and rejection in the actual client execution path.
+passes on PS5, but the fixture cannot construct a real model graph. The v7
+full-model test now demonstrates loading, context creation and actual-client
+rejection/reuse. A context heap warning rejected its strict transcript, leaving
+clean-run/post-execution acceptance and per-HIP-call qualification open.
 
 - Link a native minimal client using the existing GGUF loader, tokenizer and
   graph builder with the chosen narrow ggml/public-HIP backend integration.
