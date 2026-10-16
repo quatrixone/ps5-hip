@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "classification": "offline-prefix-freeze-validation-deduplication",
+  "status": "PASS",
+  "native_executed": false,
+  "gpu_executed": false,
+  "tests": 46,
+  "independent_review": "No blocking findings; public candidate validation remains independent, private evidence is produced locally during freeze.",
+  "before": {
+    "freeze_aggregate_validations": 6,
+    "freeze_reference_authentications": 9
+  },
+  "after": {
+    "freeze_aggregate_validations": 2,
+    "freeze_reference_authentications": 3
+  },
+  "preserved": [
+    "Original input validation before and after copy",
+    "Per-file copy hashes",
+    "Copied reference authentication",
+    "Exact copied inventory, symlink, size and hash checks",
+    "Final input and validator identities"
+  ],
+  "unchanged_native_package_sha256": "736e2cf57cee3b507f94add584f34688ea5bf58a5dbbc5a8a952c4343ea67f4b",
+  "requires": "Fresh freeze and review; no native rebuild required."
+}

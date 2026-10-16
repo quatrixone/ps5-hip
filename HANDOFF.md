@@ -50,8 +50,13 @@ the next build can reuse its compiler paths after fresh source comparison via
 Its final check failed because command instrumentation expanded the reference
 dependency graph; restoring the original runner before authentication fixes
 that tooling error (41 focused tests pass). Preserve both failed builds.
-Build a fresh v3 candidate with the same prepared-source path, then freeze
-and validate on .40. No integrated-prefix console result exists yet.
+The v3 native build now passes (149 objects, 201 commands), package
+SHA-256 `736e2cf57cee3b507f94add584f34688ea5bf58a5dbbc5a8a952c4343ea67f4b`.
+The first freeze also passed but exposed six repeated aggregate validations.
+The reviewed validator fix reduces those to two without changing the package;
+46 tests pass. Create a fresh v2 freeze/review before deployment. The v1 frozen
+candidate is superseded and has never contacted .40. No integrated-prefix
+console result exists yet.
 The consumed call candidate is `results/source-public-llm-call-console-v1`;
 do not replay its deployment or execution. Preserve its current package and
 the prior v10/v8 recovery artifacts. Source: `c988245`; package SHA-256:

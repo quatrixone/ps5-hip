@@ -81,7 +81,7 @@ def audit_sources():
  from audit_public_hip_llm_client_native import SOURCES
  return [ROOT/n for n in SOURCES]
 
-def validate_model_receipt(build,receipt):
+def _validate_model_receipt(build,receipt):
  import sys
  sys.path.insert(0,str(ROOT/'tools'))
  import freeze_source_candidate as legacy
@@ -126,7 +126,10 @@ def validate_model_receipt(build,receipt):
  if prefix:
   require({n:receipt['package_files'][n] for n in prefix_data['assets']}=={n:stream_digest(p) for n,p in prefix_data['assets'].items()},'packaged prefix modules differ')
  for name,h in inputs.items():require(stream_digest(name)==h,'input changed during admission')
- return bound
+ return bound,prefix_data
+
+def validate_model_receipt(build,receipt):
+ return _validate_model_receipt(build,receipt)[0]
 
 def validator_identities():
  import sys,types,importlib
@@ -153,17 +156,26 @@ def validator_identities():
  return {str(p.relative_to(ROOT)):stream_digest(p) for p in paths}
 
 def validate_model_candidate(candidate,manifest):
+ return _validate_model_candidate(candidate,manifest)
+
+def _validate_model_candidate(candidate,manifest,freeze_evidence=None):
  require(manifest.get('deadline_seconds')==150 and manifest.get('control_phase_seconds')==1800,'model phase budget differs')
  initial=validator_identities()
  require(all(manifest['files'].get(n)==h for n,h in initial.items()),'live validator identity not frozen')
  model_contract(manifest)
  receipt=json.loads((candidate/'build-receipt.json').read_text())
- bound=validate_model_receipt(candidate,receipt)
+ bound,prefix_data=_validate_model_receipt(candidate,receipt)
  require(bound==manifest['llm_client'] and receipt['external_model']==manifest.get('external_model'),'manifest provenance differs')
  require(manifest['model_transfer']['bytes']==receipt['package_bytes'] and manifest['model_transfer']['sha256']==receipt['package_sha256'],'transfer identity differs')
  require(manifest['package_files']==receipt['package_files'],'manifest package inventory differs')
  if bound['phase']=='model-prefix':
-  expected=frozen_prefix_manifest(candidate,bound,receipt['inputs'])
+  if freeze_evidence is None:
+   from build_llm_prefix_reference import authenticate_prefix_reference
+   copied=authenticate_prefix_reference(candidate/'prefix-reference')
+  else:
+   original,copied=freeze_evidence
+   require(original==prefix_data,'prefix closure changed during freeze')
+  expected=_frozen_prefix_manifest(candidate,prefix_data,copied)
   require(manifest.get('model_prefix')==expected,'frozen prefix manifest differs')
   copied=candidate/'prefix-reference'
   for path in copied.rglob('*'):
@@ -197,10 +209,22 @@ def prefix_binding(bound,inputs):
 def frozen_prefix_manifest(candidate,bound,inputs):
  from build_llm_prefix_reference import authenticate_prefix_reference
  data=prefix_binding(bound,inputs)
- reference=candidate/'prefix-reference';copied,closure=authenticate_prefix_reference(reference)
+ return _frozen_prefix_manifest(candidate,data,authenticate_prefix_reference(candidate/'prefix-reference'))
+
+
+def _frozen_prefix_manifest(candidate,data,authenticated):
+ """Construct from local authentication evidence; recheck exact copied bytes."""
+ reference=candidate/'prefix-reference';copied,closure=authenticated
  original=Path(data['reference'])/'receipt.json'
  require(copied['receipt_sha256']==stream_digest(original) and copied['model']==data['model'],'frozen prefix reference differs')
- require(sum(p.stat().st_size for p in reference.rglob('*') if p.is_file())<=PREFIX_REFERENCE_LIMIT,'prefix reference too large')
+ require(not reference.is_symlink() and reference.is_dir(),'unsafe frozen prefix reference')
+ paths=list(reference.rglob('*'))
+ require(not any(p.is_symlink() for p in paths),'unsafe frozen prefix reference symlink')
+ files={str(p):p for p in paths if p.is_file()}
+ expected={name for name in closure if Path(name).is_relative_to(reference)}
+ require(set(files)==expected,'frozen prefix reference inventory differs')
+ require(sum(p.stat().st_size for p in files.values())<=PREFIX_REFERENCE_LIMIT,'prefix reference too large')
+ for name,path in files.items():require(stream_digest(path)==closure[name],'frozen prefix reference file changed')
  return {'aggregate':str(Path(data['receipt']).relative_to(ROOT)),'aggregate_sha256':data['receipt_sha256'],
          'reference':str(reference.relative_to(ROOT)),'reference_receipt_sha256':copied['receipt_sha256'],
          'module_sha256':{n:stream_digest(data['assets']['model-prefix/'+n+'.hsaco']) for n in PREFIX_MODULES},

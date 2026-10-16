@@ -361,11 +361,11 @@ def freeze_weighted_qkv_reference(build,receipt,output):
 
 
 
-def freeze_prefix_reference(build,receipt,output):
-    from source_model_freeze import prefix_binding,frozen_prefix_manifest,PREFIX_REFERENCE_LIMIT
+def _freeze_prefix_reference(receipt,output,data):
+    from source_model_freeze import _frozen_prefix_manifest,PREFIX_REFERENCE_LIMIT
     from build_llm_prefix_reference import authenticate_prefix_reference
-    bound=receipt['llm_client'];data=prefix_binding(bound,receipt['inputs'])
-    original=Path(data['reference']);reference,closure=authenticate_prefix_reference(original)
+    original=Path(data['reference']);closure=data['inputs']
+    if original.is_symlink() or not original.is_dir():raise ValueError('unsafe prefix reference')
     planned=[];total=0
     for source in original.rglob('*'):
         if source.is_symlink():raise ValueError('unsafe prefix reference symlink')
@@ -373,13 +373,27 @@ def freeze_prefix_reference(build,receipt,output):
         relative=source.relative_to(original);total+=source.stat().st_size
         if closure.get(str(source))!=digest(source):raise ValueError('prefix reference artifact unbound')
         planned.append((source,relative,closure[str(source)]))
+    expected={name for name in closure if Path(name).is_relative_to(original)}
+    if {str(source) for source,_,_ in planned}!=expected:raise ValueError('prefix reference inventory changed')
     if total>PREFIX_REFERENCE_LIMIT:raise ValueError('prefix reference exceeds16MiB bound')
     destination=output/'prefix-reference';destination.mkdir()
     for source,relative,h in planned:
-        target=destination/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
+        target=destination/relative;target.parent.mkdir(parents=True,exist_ok=True)
+        if digest(source)!=h:raise ValueError('prefix reference changed before copy')
+        shutil.copyfile(source,target)
         if digest(target)!=h:raise ValueError('prefix reference changed during copy')
-    if prefix_binding(bound,receipt['inputs'])!=data:raise ValueError('prefix closure changed during freeze')
-    return frozen_prefix_manifest(output,bound,receipt['inputs'])
+    copied=authenticate_prefix_reference(destination)
+    return _frozen_prefix_manifest(output,data,copied),(data,copied)
+
+
+def freeze_prefix_reference(build,receipt,output):
+    # Standalone use still authenticates independently at both copy boundaries.
+    from source_model_freeze import prefix_binding,_frozen_prefix_manifest
+    data=prefix_binding(receipt['llm_client'],receipt['inputs'])
+    _,evidence=_freeze_prefix_reference(receipt,output,data)
+    final=prefix_binding(receipt['llm_client'],receipt['inputs'])
+    if final!=data:raise ValueError('prefix closure changed during freeze')
+    return _frozen_prefix_manifest(output,final,evidence[1])
 
 
 def main():
@@ -432,9 +446,9 @@ def main():
     if fixture=='llm_client' and receipt.get('phase')!=args.client_phase:parser.error('explicit client phase differs from receipt')
     validators={}
     if model_phase:
-        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate
+        from source_model_freeze import _validate_model_receipt, validator_identities, model_contract, _validate_model_candidate
         validators=validator_identities()
-        llm_client=validate_model_receipt(args.build,receipt)
+        llm_client,prefix_data=_validate_model_receipt(args.build,receipt)
         if args.baseline_image_bytes is None or not 0<args.transfer_seconds<=1800:parser.error('model phase requires baseline size and bounded transfer seconds')
     else:llm_client = validate_llm_client(args.build,receipt) if fixture=='llm_client' else None
     if fixture!='llm_client':validate_source_inputs(receipt)
@@ -468,7 +482,9 @@ def main():
     rmsnorm = freeze_rmsnorm_reference(args.build, receipt, output) if fixture == 'rmsnorm' else None
     q4 = freeze_q4_reference(args.build, receipt, output) if fixture == 'q4' else None
     weighted_qkv = freeze_weighted_qkv_reference(args.build, receipt, output) if fixture == 'weighted_qkv' else None
-    model_prefix = freeze_prefix_reference(args.build,receipt,output) if model_phase and args.client_phase=='model-prefix' else None
+    model_prefix=prefix_evidence=None
+    if model_phase and args.client_phase=='model-prefix':
+        model_prefix,prefix_evidence=_freeze_prefix_reference(receipt,output,prefix_data)
     files = {str(path.relative_to(ROOT)): digest(path) for path in output.rglob('*') if path.is_file()}
     for name in ('tools/source_console.py', 'tools/source_public_hip_log.py', 'tools/freeze_source_candidate.py',
                  'dependencies.json', 'elevation-inputs.json', 'controller-inputs.json', 'title.json'):
@@ -556,7 +572,7 @@ def main():
         if model_prefix is not None:
             manifest['model_prefix']=model_prefix
             manifest['hypothesis']='Actual model graph embedding, normalization and QKV prefix runs through public HIP for four tokens. Require authenticated 24 raw readbacks, original full graph rejection and balanced native cleanup; this does not establish one complete layer or inference.'
-        validate_model_candidate(output,manifest)
+        _validate_model_candidate(output,manifest,prefix_evidence)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 
