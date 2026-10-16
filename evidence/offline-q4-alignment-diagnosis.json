@@ -1,0 +1,73 @@
+{
+  "status": "OFFLINE_DIAGNOSIS_NOT_HARDWARE_FIX",
+  "gpu_executed": false,
+  "original_failure": "evidence/console40-public-q4-failure.json",
+  "observed_f32": 0.1636260598897934,
+  "unaltered_lane_model_f32": 0.21718880534172058,
+  "hypothetical_rounddown4_f32": 0.1636260598897934,
+  "hypothesis": "Q4 payload loads at 2-mod-4 addresses behave as rounded down to four-byte boundaries; exact numerical match is evidence, not hardware proof.",
+  "codegen_receipt": "results\\q4-alignment-codegen-v6\\receipt.json",
+  "codegen_receipt_sha256": "1930cc87bda1085ea7c39e32a0370a16f5c44e222ea3f13e2b212b0ffc3c6809",
+  "modules": {
+    "baseline": {
+      "sha256": "643329633c5de09417a452dc96c79e7dd8fa3780b93f40e2065d3abcad3a0c58",
+      "descriptor": {
+        "group_bytes": 384,
+        "private_bytes": 0,
+        "kernarg_bytes": 192,
+        "rsrc1": 1622081731,
+        "rsrc2": 2956,
+        "rsrc3": 0,
+        "properties": 1033,
+        "preload": 0
+      },
+      "global_loads": [
+        "global_load_dwordx2 v[15:16], v[13:14], off offset:2       // 000000001D7C: DC348002 0F7D000D",
+        "global_load_dwordx2 v[17:18], v[9:10], off offset:4        // 000000001D88: DC348004 117D0009",
+        "global_load_dwordx2 v[19:20], v[9:10], off offset:20       // 000000001D90: DC348014 137D0009",
+        "global_load_dword v21, v[2:3], off                         // 000000001D98: DC308000 157D0002",
+        "global_load_ushort v22, v[11:12], off                      // 000000001DA0: DC288000 167D000B"
+      ]
+    },
+    "volatile-u16": {
+      "sha256": "a759b32b4d546635b090828b54dec63ec9d756512cf301c8a815028ef99b5e15",
+      "descriptor": {
+        "group_bytes": 384,
+        "private_bytes": 0,
+        "kernarg_bytes": 192,
+        "rsrc1": 1622081732,
+        "rsrc2": 2956,
+        "rsrc3": 0,
+        "properties": 1033,
+        "preload": 0
+      },
+      "global_loads": [
+        "global_load_ushort v22, v[14:15], off glc dlc              // 000000001D98: DC299000 167D000E",
+        "global_load_ushort v23, v[14:15], off offset:2 glc dlc     // 000000001DA4: DC299002 177D000E",
+        "global_load_dwordx2 v[18:19], v[10:11], off offset:4       // 000000001DB4: DC348004 127D000A",
+        "global_load_dwordx2 v[20:21], v[10:11], off offset:20      // 000000001DBC: DC348014 147D000A",
+        "global_load_ushort v24, v[16:17], off glc dlc              // 000000001DC4: DC299000 187D0010",
+        "global_load_ushort v25, v[16:17], off offset:2 glc dlc     // 000000001DD0: DC299002 197D0010",
+        "global_load_dword v26, v[2:3], off                         // 000000001DDC: DC308000 1A7D0002",
+        "global_load_ushort v27, v[12:13], off                      // 000000001DE4: DC288000 1B7D000C"
+      ]
+    }
+  },
+  "checks": [
+    "Original module rebuilt byte-for-byte.",
+    "Same 19-argument ABI, 192 kernarg bytes, 384 LDS bytes, Wave32, zero private bytes.",
+    "Four Q4 i16 reads made volatile; generated four separate ushort payload loads plus scale load.",
+    "All bound inputs unchanged across build."
+  ],
+  "rejected_experiments": [
+    "Disabling unaligned-buffer-access via llc flags produced empty kernel inventory.",
+    "Disabling unaligned access in target attributes also produced empty kernel inventory.",
+    "Local v4 experiment still applied feature attributes due script replacement error; no volatile-load result claimed from v4."
+  ],
+  "next": "Review changed resource/cache semantics and prepare a separate bounded load-alignment diagnostic for .40; never replay consumed candidate.",
+  "limits": [
+    "Volatile i16 loads change cache flags and scheduling; not a proven hardware fix.",
+    "Resource descriptor changes require independent runtime admission and native audit.",
+    "No numerical tolerance or original fixture modified."
+  ]
+}

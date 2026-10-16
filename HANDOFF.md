@@ -23,6 +23,17 @@ batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
+## Q4 alignment hypothesis narrowed offline
+
+The unchanged lane model reproduces the failed Q4 output bit-for-bit when
+only nibble-load addresses are rounded down to four-byte alignment. A separate
+compiler experiment preserves the original ABI and emits halfword payload
+loads when four i16 reads are volatile, but changes register usage/cache flags.
+This is not a hardware fix or a passed numerical gate. See
+`evidence/offline-q4-alignment-diagnosis.json` and
+`tools/probe_llm_q4_alignment.py`. Next review a fresh bounded alignment
+diagnostic; original candidate and tolerances remain unchanged.
+
 ## Q4 console validation failed; analyze offline before another candidate
 
 The frozen Q4 candidate deployed successfully on .40, including 78 verified

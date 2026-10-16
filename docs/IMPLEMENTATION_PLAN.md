@@ -56,6 +56,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 | 1abebce | .40 | failed: first Q4 numeric output; four standalone Q8 cases passed; safety-close/health/locks verified | evidence/console40-public-q4-failure.json | next: offline ISA/raw diagnosis
 
+- 2026-10-15 | V1.3 diagnosis | offline | four-byte address-rounddown model reproduces failed Q4 output exactly; halfword-load variant compiles with unchanged ABI but changed resources | evidence/offline-q4-alignment-diagnosis.json | next: reviewed alignment diagnostic, no hardware fix claimed
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate
