@@ -16,6 +16,16 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The watchdog contract correction passes independent offline review: the shared
+maximum now admits the intended 120-second model budget; all existing shorter
+budgets and timeout/state/join checks remain intact. The production-code test
+passes 33 boundary/lifecycle cases, 30 related test methods and registered CTest.
+Make runs the regression before native assembly and binds its source in receipts.
+See `evidence/offline-native-llm-watchdog-fix.json`. Next build fresh
+`build/llm-native-model-app-v4` via `.local/build_native_model_app_v4.py`, then
+validate and freeze a new candidate. The correction is not yet native-tested.
+
+
 The first installed full-model run failed before HIP/model setup: the title
 requested a 120,000 ms watchdog, while the shared watchdog rejected values above
 60,000 ms. Its exact `watchdog-state` quarantine followed successful startup

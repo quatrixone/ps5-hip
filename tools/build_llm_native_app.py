@@ -178,7 +178,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    if str(Path(p).resolve())!=target:raise ValueError('input symlink changed: '+p)
   for path,names in inventories.items():
    if sorted(str(p) for p in Path(path).rglob('*') if p.is_file() and '.git' not in p.relative_to(path).parts and '__pycache__' not in p.parts)!=names:raise ValueError('dependency inventory changed: '+path)
- bind(Path(__file__));bind(ROOT/'tests/llm_native_app_build_test.py')
+ bind(Path(__file__));bind(ROOT/'tests/llm_native_app_build_test.py');bind(ROOT/'tests/watchdog_test.py')
  model_test=Path(__file__).with_name('test_model_package.py')
  bind(model_test if model_test.is_file() else ROOT/'tests/llm_native_model_package_test.py')
  for name,h in b.build_inputs().items():bind(ROOT/name,h)

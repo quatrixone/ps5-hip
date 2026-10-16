@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "status": "PASS_OFFLINE_SOURCE_CORRECTION",
+  "review_sha256": "ee8f4604c040c9dd50a34340aba1699db25f466100aef45c35ed1d2a55f7c8d7",
+  "source_identities": {
+    "tools/clr_gpu/watchdog.cpp": "0291b5129d01bb2f2b62e01eb62bb99d1cbbf74ba973a42f23355930e18ccb0c",
+    "tools/clr_gpu/watchdog.h": "f3e94ef41538019ac3763c5e45425953f410caed14990fc90140731ed83ec1c9",
+    "tests/watchdog_test.py": "9bc08777db9694c182cec17cb70c1f49df5e034deb5ae643e16698fe487e1958",
+    "Makefile": "51708575f87aa772371d50949fa31c7b6a5a7ede427e08ea9995f27577e9f9d4",
+    "CMakeLists.txt": "9e34fda1f8c244e1e120418529e1b024772e716bcc93e065d7096bd285dad8bd",
+    "tools/build_llm_native_app.py": "8b03986d8332082a3ded45bbd913ba098f1a0051f8cf364d503eaff85414faac"
+  },
+  "production_watchdog_cases": 33,
+  "test_suites": 4,
+  "test_methods": 34,
+  "maximum_ms": 120000,
+  "controller_observation_seconds": 150,
+  "runtime_change": "Raise inclusive allowed watchdog request maximum from60000 to120000ms; retain deadline/state/join/error behavior.",
+  "limits": [
+    "Deterministic syscall wrappers prove production control logic, not native pthread scheduling or120second elapsed operation.",
+    "Fresh native app/package and one-use candidate required; consumed failed candidate not reusable.",
+    "No native build, console access, model loading or inference validation."
+  ],
+  "ctest_registration_passed": true,
+  "ctest_log_sha256": "4240edf31b7d29943e62dc4c58a5eb8e814b10dcfbd7c0ac438fb653cd7ba0e6"
+}
