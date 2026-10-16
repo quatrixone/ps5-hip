@@ -8,6 +8,7 @@ import shutil
 import subprocess
 
 from fetch_locked_deps import ROOT, git, read, source
+from build_jobs import build_jobs
 
 
 def sha(path):
@@ -15,6 +16,7 @@ def sha(path):
 
 
 def main():
+    jobs = build_jobs()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -48,7 +50,7 @@ def main():
     targets = ['llama-completion', 'llama-tokenize', 'llama-quantize', 'llama-perplexity',
                'test-quantize-fns', 'test-rope']
     inputs = {name: sha(ROOT / name) for name in ('llm-inputs.json',
-              'tools/build_llm_cpu_reference.py', 'tools/fetch_locked_deps.py')}
+              'tools/build_llm_cpu_reference.py', 'tools/build_jobs.py', 'tools/fetch_locked_deps.py')}
     identity = dict(source_revision=spec['revision'], source_url=spec['source_url'],
                     tools=tools, flags=flags, targets=targets, inputs=inputs)
     output.mkdir(parents=True, exist_ok=True)
@@ -79,7 +81,7 @@ def main():
         print(label + ' PASS', flush=True)
 
     run('configure', [tools['cmake']['path'], '-S', client, '-B', output / 'cmake', *flags])
-    run('build', [tools['cmake']['path'], '--build', output / 'cmake', '--parallel', '4',
+    run('build', [tools['cmake']['path'], '--build', output / 'cmake', '--parallel', str(jobs),
                   '--target', *targets], timeout=1800)
     bins = output / 'cmake/bin'
     run('completion-version', [bins / 'llama-completion', '--version'])

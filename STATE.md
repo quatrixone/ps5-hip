@@ -16,16 +16,27 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
-The scheduler metadata allocation now uses the existing paired GGML aligned
-allocator through a checked build-local source adaptation. The dependency
-checkout remains unchanged. Real host scheduler/context tests pass at capacities
-64 and 1608: the latter requests 32,492,848 bytes. Injected original malloc
-failure causes repeated owned fallbacks; the fix borrows one buffer per scheduler
-and frees it once. Allocation failure aborts before context initialization.
-49 focused test methods and six real lifecycle cases pass; see
-`evidence/offline-native-scheduler-ownership.json`. Native-client-v4 is rebuilding;
-fresh packaging/image audit and .40 validation are still required. The console
-warning is not yet attributed or resolved, and M0 remains open.
+The build pipeline now supports bounded `JOBS` parallelism and optional native
+ccache (`CCACHE=auto|0|1`), plus link validation that resolves consumed inputs
+instead of every bound path for each helper link. The Linux cache is limited
+to 1 GiB. See `docs/SOURCE_ONLY_REBUILD.md` for controls and receipt migration.
+This is a build-tool milestone, not GPU inference or M0 completion.
+All 162 tests across 18 suites passed, including a real SDK cache hit/invalidation
+test; see `evidence/offline-build-performance.json`. Full-package timing remains
+unmeasured.
+
+Scheduler native-client-v4 and model-app-v9 completed at source `9079ae6` before
+these build changes: all 201 app commands and the native image audit passed.
+Those artifacts are retained locally; v9 was not frozen, deployed or executed.
+The new builder identities require fresh CPU/client/app receipts and refreshed
+dependent model/vocabulary evidence. Do not treat the old v9 receipt as a pass
+for the revised pipeline or replay the consumed installed v8 candidate.
+
+The scheduler metadata fix uses paired GGML aligned allocation with a nonnull
+assertion. Six real host lifecycle/failure cases and 49 focused tests passed
+previously; see `evidence/offline-native-scheduler-ownership.json`. The PS5 heap
+warning remains unresolved pending a fresh authenticated console candidate.
+M0 remains open; M1 is complete.
 
 The owner's additional source-format requirement is direct native loading of
 safetensors and PyTorch checkpoints, not desktop conversion. The stages and

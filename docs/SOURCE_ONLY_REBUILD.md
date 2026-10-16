@@ -1,5 +1,53 @@
 # Build the native public HIP package from GitHub source
 
+Native compilation uses ccache when available (`sudo apt install ccache` on
+Ubuntu). Run `make llm-native-app JOBS=8 CCACHE=1` to require it, or
+`CCACHE=0` to disable it. The default is `CCACHE=auto`, with an ordinary compiler
+fallback when ccache is absent. Direct Python builds use `PS5_HIP_CCACHE`.
+The isolated cache defaults to `~/.cache/ps5-hip/ccache` on the Linux filesystem,
+limited to 1 GiB; `PS5_HIP_CCACHE_DIR` overrides the location. Inspect it with
+`ccache --dir "$HOME/.cache/ps5-hip/ccache" --show-stats`.
+
+Cache hits retain dependency-file and source/header verification. The cache key
+includes the actual LLVM compiler and SDK wrapper chain; receipts authenticate
+the cache configuration and tools. Ambient ccache settings cannot enable sloppy
+or remote caching. Header scans and links bypass the cache. Fresh package output
+directories can reuse compiled objects without reusing an old build receipt.
+Host CPU-reference compiler caching is not included; its parallelism is configurable.
+Run `PS5_HIP_CACHE_INTEGRATION=1 python3 tests/native_ccache_test.py` for the real
+SDK cache hit/invalidation test, and `python3 tests/build_jobs_test.py` for worker
+limit and ordering checks. Full cold/warm package timings are not yet measured.
+
+Compiler parallelism is configured through Make's `JOBS` variable, for example
+`make llm-native-app JOBS=8` or `JOBS=1` for serial compilation in the stages below. Make exports the
+same value as `PS5_HIP_BUILD_JOBS` to the public HIP builder, native client, and
+CPU reference builder; direct Python invocations accept that environment
+variable. Host/native CMake builds use the same worker limit. Values must be
+integers from 1 through 64.
+
+The default uses CPU affinity and Linux available memory, leaves approximately
+2 GiB for other work, budgets 2 GiB per compiler worker, and caps the result at
+eight workers. Without available-memory information it caps at two. This is a
+conservative scheduling heuristic, not a memory guarantee; use fewer workers
+when running other memory-intensive work. Explicit `JOBS` overrides it.
+The Makefile serializes outer recipes even with `make -j`; parallelism happens
+inside compiler stages, avoiding simultaneous writes to shared prerequisite
+directories. Linking, package conversion and signing remain ordered.
+Older diagnostic builders and dependency preparations such as host-zlib retain
+their own worker settings; this setting covers the active native package/client,
+CPU reference, and host/native CMake stages.
+
+The scheduling change adds authenticated builder inputs. Existing CPU reference
+configuration identities and native-client receipts therefore need fresh output
+directories when rebuilding with these tools; preserve installed recovery
+artifacts. Changing only `JOBS` later does not change CPU reference configuration
+identity. Compiler command arguments, source/header verification, stable object
+ordering, and source mutation rejection are retained.
+The CPU reference identity is also inherited by conversion, vocabulary and model
+validation evidence. Refresh that prerequisite chain when adopting this builder
+revision; do not edit old receipts to make them pass. Preserve model files and
+installed-package recovery evidence while preparing fresh outputs.
+
 For the optional inference-v1 CPU tools, source-weight download and locked
 F16/Q4_0 conversion, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). Run
 `make llm-model-fetch`, then `make llm-model-convert`, then

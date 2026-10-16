@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build the native public-HIP startup title from this checkout and locked sources."""
+import native_ccache as cache
 import argparse
 import concurrent.futures
 import hashlib
@@ -21,6 +22,7 @@ from qualify_public_hip_rmsnorm import fixture_inputs as rmsnorm_fixture_inputs,
 import build_llm_rmsnorm_reference as rms_reference
 from public_hip_q4_assets import assets as q4_assets
 from public_hip_weighted_qkv_assets import assets as weighted_qkv_assets
+from build_jobs import build_jobs
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json').is_file())
 DEPS = ROOT / ".deps"
@@ -56,7 +58,7 @@ def sha(path):
 
 
 def build_inputs():
-    names = {"dependencies.json", "elevation-inputs.json", "controller-inputs.json",
+    names = {"tools/native_ccache.py", "dependencies.json", "elevation-inputs.json", "controller-inputs.json",
              "title.json", "assets/param.json", "assets/icon0.png",
              "tools/public_hip_weighted_qkv_console_title.cpp", "tools/public_hip_weighted_qkv_assets.py",
              "tools/audit_public_hip_weighted_qkv_native.py", "tools/audit_public_hip_rmsnorm_native.py",
@@ -72,7 +74,7 @@ def build_inputs():
              "tools/public_hip_rmsnorm_console_title.cpp", "tools/qualify_public_hip_rmsnorm.py",
              "tools/build_llm_rmsnorm_fixture.py", "tools/build_llm_rmsnorm_reference.py",
              "tests/public_hip_rmsnorm_build_test.py", "tests/rmsnorm_dump_test.py",
-             "tools/build_public_hip.py", "tools/prepare_clr_gpu_source.py",
+             "tools/build_public_hip.py", "tools/build_jobs.py", "tests/build_jobs_test.py", "tools/prepare_clr_gpu_source.py",
              "tools/public_hip_embedded_console_title.cpp", "tools/embedded_module_linker.py",
              "tools/audit_public_hip_embedded_native.py", "tools/build_public_hip_embedded_fixture.py",
              "tools/probe_host_registration.py", "tools/native_multi_query.py",
@@ -217,6 +219,7 @@ def compile_bound_unit(output, path, obj, flags, label):
 
 
 def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
+    jobs = build_jobs()
     if client_phase not in ("vocab", "model-gate") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
     object_dir = output / "objects"
@@ -251,7 +254,7 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
     # Fail quickly on the selected client before spending time on the upstream closure.
     title_index = units.index(ROOT / ("tools/public_hip_" + fixture + "_console_title.cpp"))
     title_record = compile_one((title_index, units[title_index]))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         records = list(pool.map(compile_one, ((index, path) for index, path in enumerate(units)
                                               if index != title_index)))
     records.insert(title_index, title_record)
@@ -755,6 +758,7 @@ def main():
     q4 = q4_assets(args.q4_fixture, args.q4_reference) if args.fixture == "q4" else None
     weighted_qkv = weighted_qkv_assets(args.weighted_rmsnorm_fixture, args.q4_fixture, args.weighted_qkv_reference) if args.fixture == "weighted_qkv" else None
     initial_inputs = build_inputs()
+    cache_record, _ = cache.configuration(ROOT, os.environ)
     validate_results_directory(args.results_dir)
     output = args.output.resolve()
     if not output.is_relative_to((ROOT / "build").resolve()) and not output.is_relative_to((ROOT / ".local").resolve()):
@@ -766,6 +770,8 @@ def main():
     source = source_tree(output, args.fixture)
     if cached.exists():
         previous = json.loads(cached.read_text())
+        if "tools/native_ccache.py" in previous.get("input_sha256", {}):
+            cache.verify(ROOT, previous.get("compiler_cache"))
         if previous.get("fixture", "bootstrap") != args.fixture:
             raise RuntimeError("cached fixture differs; use a fresh output")
         if previous.get("embedded_compiler") != embedded:
@@ -871,7 +877,8 @@ def main():
            sha(ROOT / unit["source"]) != unit["source_sha256"] or
            sha(output / unit["object"]) != unit["object_sha256"] for unit in units):
         raise RuntimeError("native compilation inputs or objects changed before publication")
-    receipt = {"classification": "offline-public-hip-native-link", "source_commit":
+    cache.verify(ROOT, cache_record)
+    receipt = {"compiler_cache": cache_record, "classification": "offline-public-hip-native-link", "source_commit":
                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "fixture": args.fixture, "units": units, "object_count": len(units), "title_elf_sha256": sha(output / "title.elf"),
                "fself_sha256": sha(image), "fself_roundtrip": roundtrip,

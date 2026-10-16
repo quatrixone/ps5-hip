@@ -1,6 +1,12 @@
 PYTHON ?= python3
 CMAKE ?= cmake
 CTEST ?= ctest
+CCACHE ?= auto
+export PS5_HIP_CCACHE := $(CCACHE)
+JOBS ?= $(shell $(PYTHON) tools/build_jobs.py)
+export PS5_HIP_BUILD_JOBS := $(JOBS)
+# Parallelize compiler workers, not recipes sharing dependency/build directories.
+.NOTPARALLEL:
 UFS_REV := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies.json"))["ufs2tool"]["revision"])')
 ZLIB_VERSION := $(shell $(PYTHON) -c 'import json; print(json.load(open("dependencies.json"))["host_zlib"]["version"])')
 TITLE_ID := $(shell $(PYTHON) -c 'import json; print(json.load(open("title.json"))["title_id"])')
@@ -13,6 +19,8 @@ export RESULTS_DIR
 all: host-test native-core public-hip-package
 
 help:
+	@echo 'CCACHE=auto uses native compiler caching when installed; 0 disables, 1 requires it'
+	@echo 'JOBS=N controls compiler workers (JOBS=1 is serial); default is bounded by CPU/available memory, capped at 8'
 	@echo 'make deps-fetch  Fetch and verify locked upstream sources and archives'
 	@echo 'make llm-deps-fetch  Fetch the optional locked standalone inference client'
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
@@ -93,8 +101,11 @@ build/canaries/resources-build.json: tools/build_canaries.py kernels/resources.h
 device-fixtures: build/canaries/build.json build/canaries/resources-build.json
 
 host-test: deps-build device-fixtures
+	$(PYTHON) tools/build_jobs.py >/dev/null
+	$(PYTHON) tests/build_jobs_test.py
+	$(PYTHON) tests/native_ccache_test.py
 	$(CMAKE) -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Debug
-	$(CMAKE) --build build/host
+	$(CMAKE) --build build/host --parallel $(PS5_HIP_BUILD_JOBS)
 	$(CTEST) --test-dir build/host --output-on-failure
 
 # A separate fresh directory preserves every sanitizer run's evidence.
@@ -168,6 +179,8 @@ llm-rmsnorm-reference: llm-cpu-reference
 
 .PHONY: llm-native-client-link
 llm-native-client-link: deps-build llm-deps-fetch
+	$(PYTHON) tests/build_jobs_test.py
+	$(PYTHON) tests/native_ccache_test.py
 	$(PYTHON) tests/llm_native_client_build_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR)
@@ -178,6 +191,8 @@ llm-native-scheduler-test: llm-cpu-reference
 
 .PHONY: llm-native-app
 llm-native-app: deps-build llm-deps-fetch
+	$(PYTHON) tests/build_jobs_test.py
+	$(PYTHON) tests/native_ccache_test.py
 	@if ! test -f "$(LLM_NATIVE_CLIENT_BUILD_DIR)/receipt.json"; then $(MAKE) llm-native-client-link; fi
 	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
 	$(PYTHON) tests/watchdog_test.py
@@ -286,8 +301,9 @@ $(SNAPSHOT_BUILD_DIR)/receipt.json: tools/teardown_snapshot.cpp tools/teardown_s
 	$(PYTHON) tools/build_teardown_snapshot.py --sdk .deps/sdk --output $(SNAPSHOT_BUILD_DIR)
 
 native-core: .deps/sdk/.ps5-sdk-revision
+	$(PYTHON) tools/build_jobs.py >/dev/null
 	$(CMAKE) -S . -B build/native -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps5-toolchain.cmake -DBUILD_TESTING=OFF
-	$(CMAKE) --build build/native --target ps5hip_native_memory
+	$(CMAKE) --build build/native --parallel $(PS5_HIP_BUILD_JOBS) --target ps5hip_native_memory
 
 PUBLIC_BUILD_DIR ?= build/public-hip
 public-hip-package: deps-build

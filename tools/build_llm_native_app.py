@@ -184,6 +184,9 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  bind(ROOT/'tests/native_model_path_test.py');bind(ROOT/'tests/source_external_model_test.py')
  model_test=Path(__file__).with_name('test_model_package.py')
  bind(model_test if model_test.is_file() else ROOT/'tests/llm_native_model_package_test.py')
+ cache_record,_=b.cache.configuration(ROOT,os.environ)
+ for name,h in b.cache.bound_inputs(cache_record).items():bind(name,h)
+ bind("/usr/bin/python3")
  for name,h in b.build_inputs().items():bind(ROOT/name,h)
  for module in list(sys.modules.values()):
   name=getattr(module,'__file__',None)
@@ -281,15 +284,23 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    for p,h in row['temporary_package_inputs'].items():
     if b.sha(p)!=h:raise ValueError('temporary package input changed during command')
    if label=='link' or host_link:
-    selected=[]
-    authenticated_paths={name:Path(name).resolve() for name in inputs}
-    authenticated_targets=set(authenticated_paths.values())
+    selected=[];authenticated=dict(inputs);authenticated_paths={};checked=set()
+    def resolved(name):
+     if name not in authenticated_paths:authenticated_paths[name]=Path(name).resolve()
+     return authenticated_paths[name]
     for line in (out/(label+'.stdout')).read_text().splitlines():
      name=line.split('(',1)[0].strip();p=Path(name)
      if not p.is_absolute():p=ROOT/p
      if p.is_file():
-      if p.resolve() not in authenticated_targets:raise ValueError('unbound selected linker input: '+str(p))
-      bind(p);selected.append(str(p))
+      name=str(p);target=resolved(name)
+      if name not in checked:
+       identity=name if name in authenticated else str(target) if str(target) in authenticated else None
+       if identity is None:
+        identity=next((n for n in authenticated if resolved(n)==target),None)
+       if identity is None:raise ValueError('unbound selected linker input: '+str(p))
+       resolved(identity)
+       bind(p,authenticated[identity]);checked.add(name)
+      selected.append(name)
     if not selected:raise ValueError('missing actual linker trace')
     for name,target in authenticated_paths.items():
      if Path(name).resolve()!=target:raise ValueError('link input resolution changed during validation')
@@ -340,6 +351,8 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
   receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
+  b.cache.verify(ROOT,cache_record)
+  receipt['compiler_cache']=cache_record
   if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');return receipt
  finally:b.run=original_run

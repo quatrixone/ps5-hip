@@ -15,6 +15,8 @@ ROOT=next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json')
 sys.path.insert(0,str(ROOT/'tools'))
 from fetch_locked_deps import source,read
 import prepare_llm_native_scheduler as scheduler
+import build_jobs as jobs_policy
+import native_ccache as cache
 BASE=('ggml.c','ggml.cpp','ggml-alloc.c','ggml-backend.cpp','ggml-backend-meta.cpp','ggml-threading.cpp','ggml-quants.c','gguf.cpp','ggml-backend-reg.cpp','ggml-backend-dl.cpp')
 
 def sha(p):
@@ -78,9 +80,11 @@ def app_objects(folder):
  for name,digest in inputs.items():
   if not Path(name).is_absolute() or sha(name)!=digest:raise ValueError('stale native-client input: '+name)
   verified_inputs.add(name)
- required_sources=[Path(__file__),Path(scheduler.__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*ordinary,*units,*models]
+ required_sources=[Path(__file__),Path(scheduler.__file__),Path(jobs_policy.__file__),Path(cache.__file__),Path("/usr/bin/python3"),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*ordinary,*units,*models]
  for p in required_sources:required(p)
  if r.get('scheduler_source')!=scheduler.provenance(scheduler_input,scheduler_output):raise ValueError('native scheduler provenance differs')
+ cache.verify(ROOT,r.get('compiler_cache'))
+ for p in cache.bound_inputs(r['compiler_cache']):required(p)
  for i in range(11):
   if units[59+i].read_text()!='\n'.join('#include "'+str(p)+'"' for p in models[i*16:(i+1)*16])+'\n':raise ValueError('unity source differs')
  for lib in ('llama','ggml'):
@@ -140,12 +144,15 @@ def app_objects(folder):
  return {'objects':list(map(str,objects[:70])),'receipt':str(receipt_path),'receipt_sha256':receipt_hash,'inputs':{**inputs,**{str(folder/n):a['sha256'] for n,a in artifacts.items()},str(receipt_path):receipt_hash}}
 
 def build(output):
+ jobs=jobs_policy.build_jobs()
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
  deps=read('dependencies.json');lock=read('llm-inputs.json')['client'];client=source('llama-client',lock,False);sdk_source=source('sdk',deps['sdk'],False);sdk=ROOT/'.deps/sdk'
  if (sdk/'.ps5-sdk-revision').read_text().strip()!=deps['sdk']['revision']:raise ValueError('SDK revision marker mismatch')
  units,models=selection(client);inputs={};symlinks={};mutex=threading.Lock();commands=[]
- for p in [Path(__file__),Path(scheduler.__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]:bind(inputs,p)
+ cache_record,_=cache.configuration(ROOT,os.environ)
+ for p,h in cache.bound_inputs(cache_record).items():bind(inputs,p)
+ for p in [Path(__file__),Path(scheduler.__file__),Path(jobs_policy.__file__),Path(cache.__file__),Path("/usr/bin/python3"),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]:bind(inputs,p)
  sdk_files=sorted(p for p in sdk.rglob('*') if p.is_file())
  for p in sdk_files:
   bind(inputs,p)
@@ -202,7 +209,7 @@ def build(output):
   print('compiled',i,p.name,flush=True)
   with mutex:bind(inputs,obj)
   return obj
- with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:objects=list(pool.map(compile,enumerate(units)))
+ with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:objects=list(pool.map(compile,enumerate(units)))
  run('driver-plan',[compiler,'-###','-Wl,--gc-sections','-Wl,--trace',*objects,'-o',output/'client.elf'])
  plan_lines=[shlex.split(line) for line in (output/'driver-plan.stderr').read_text().splitlines() if line.lstrip().startswith('\"')]
  if len(plan_lines)!=1:raise ValueError('unexpected linker driver plan')
@@ -243,6 +250,8 @@ def build(output):
  artifacts={str(p.relative_to(output)):{'sha256':sha(p),'bytes':p.stat().st_size} for p in output.rglob('*') if p.is_file()}
  receipt={'schema':1,'status':'PASS','classification':'source-only-native-client-payload-link','client_revision':lock['revision'],'sdk_revision':deps['sdk']['revision'],'inputs':inputs,'sdk_symlinks':symlinks,'tools':tools,'units':[str(p) for p in units],'objects':{str(p):sha(p) for p in objects},'object_count':71,'model_sources':[str(p) for p in models],'link_inputs':link_inputs,'commands':commands,'artifacts':artifacts,'dynamic_imports':names,'native_executed':False,'gpu_executed':False,'limits':['SDK payload ELF only; RWX segment is not accepted app packaging.','Vocab-only native caller; no model loaded or tokenized here and no public HIP backend integrated.','Installed SDK bytes and clean source revision bound; SDK source-build provenance is inherited from deps-build, not recreated by this target.','No general model support or inference claim from retaining all upstream factory implementations.']}
  receipt['scheduler_source']=scheduler_identity
+ cache.verify(ROOT,cache_record)
+ receipt['compiler_cache']=cache_record
  (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('PASS',output/'receipt.json',flush=True);return receipt
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args();build(args.output)

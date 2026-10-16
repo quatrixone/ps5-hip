@@ -18,16 +18,29 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
-Current offline change: the generated native scheduler source routes its large
-context buffer through paired aligned allocation/free with an immediate nonnull
-assertion. Upstream stays clean; producer/admission bind the original, helper,
-generated source, commands and dependencies. The image audit now checks scheduler
-calls as well as the existing context/buffer/threadpool pairs. Host regression
-passes six real scheduler lifecycle/failure cases and 49 focused test methods.
-See `evidence/offline-native-scheduler-ownership.json`. Native-client-v4 is being
-rebuilt; check its actual process/receipt before proceeding, never restart a live
-build. Next build a fresh model app using that client, audit/freeze/review and test
-on idle .40. Do not reuse consumed v8. No warning whitelist or native pass exists.
+Build-performance milestone: Make exports bounded `JOBS` to the active native
+client/public runtime/CPU-reference and host/native CMake stages. Native compiler
+caching uses `CCACHE=auto|0|1`, a 1 GiB Linux cache, authenticated compiler/tool
+identities and unchanged dependency checks. Link validation now resolves only
+consumed inputs normally, while preserving alias/digest/symlink checks.
+See `docs/SOURCE_ONLY_REBUILD.md` for commands and prerequisite regeneration.
+Validation: 162 tests across 18 suites pass, including the real SDK cache test;
+compact evidence is `evidence/offline-build-performance.json`.
+
+Before these source edits, native-client-v4 and model-app-v9 completed at
+`9079ae6`. `results/m0-native-model-app-production-make-v9/command.json` records
+Make exit 0; `build/llm-native-model-app-v9/receipt.json` records 149 objects,
+201 commands and the passing image audit. No v9 console freeze/deploy/execute
+occurred. Preserve these artifacts, installed v8 recovery and all model files.
+Prepared ignored review/freeze scripts still target `9079ae6` and v9: they are
+not approvals for a new builder revision. Never replay consumed v8.
+
+Next implementation validation needs fresh CPU-reference/native-client/app
+receipts and refreshed dependent conversion/vocabulary/model evidence under
+the new source identities. Do not modify old receipts or infer a full warm-build
+speedup from the small cache test. Then audit/freeze a fresh native candidate and
+validate the scheduler fix on idle .40. M0 clean lifecycle, call coverage and
+integrated inference remain open; no PS5 warning resolution is claimed.
 
 The user clarified native loading of original safetensors/bin/pt/pth files.
 `docs/LLM_V1_PLAN.md` records the required native readers, metadata/tokenizer

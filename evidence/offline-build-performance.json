@@ -1,0 +1,176 @@
+{
+  "status": "PASS_OFFLINE_BUILD_PERFORMANCE",
+  "base_commit": "9079ae6",
+  "classification": "native-compiler-cache-parallelism-and-link-validation",
+  "native_executed": false,
+  "gpu_executed": false,
+  "test_methods": 162,
+  "suites": [
+    {
+      "suite": "build_jobs_test",
+      "exit_code": 0,
+      "tests": 5,
+      "seconds": 0.983,
+      "log_sha256": "989e0a5501cdd4dd8c1696780e144abb123ea43dbeb1bb7a92d5d4f0d3081b87"
+    },
+    {
+      "suite": "native_ccache_test",
+      "exit_code": 0,
+      "tests": 11,
+      "seconds": 1.627,
+      "log_sha256": "6bad47c3cc1aeb662d787558a9c677aa181f6107bf1e4b68053956a730a145be"
+    },
+    {
+      "suite": "llm_native_client_build_test",
+      "exit_code": 0,
+      "tests": 13,
+      "seconds": 0.499,
+      "log_sha256": "234d2255208f010cd2d926d69ee5dbfc4e1bc25c92738044b3bef6981a5c1d29"
+    },
+    {
+      "suite": "llm_native_app_build_test",
+      "exit_code": 0,
+      "tests": 8,
+      "seconds": 0.482,
+      "log_sha256": "8511476ade8de90f5517cc722fe4e78a712af4c32884f34c51335fc83e873772"
+    },
+    {
+      "suite": "llm_native_validation_cost_test",
+      "exit_code": 0,
+      "tests": 11,
+      "seconds": 0.509,
+      "log_sha256": "6e679d5456cba512f2b8b1c3c9ae6615236e2c39906d5b7d801f822cb25ae512"
+    },
+    {
+      "suite": "public_hip_compile_inputs_test",
+      "exit_code": 0,
+      "tests": 1,
+      "seconds": 0.395,
+      "log_sha256": "a626407facf1102b512cc38f00f6e7d889aa6280a5c03d1722ac6d1c4eb08dc5"
+    },
+    {
+      "suite": "public_hip_llm_client_build_test",
+      "exit_code": 0,
+      "tests": 5,
+      "seconds": 0.971,
+      "log_sha256": "0f70dee30388df67ac13300526e776be2953210d69e72aa070985efa24a2af70"
+    },
+    {
+      "suite": "llm_client_native_audit_test",
+      "exit_code": 0,
+      "tests": 18,
+      "seconds": 0.442,
+      "log_sha256": "980e40963a7a8ea8b0784223ac94d76354030abf2a7e6cb01b8e4b90baf7fbc4"
+    },
+    {
+      "suite": "llm_native_model_package_test",
+      "exit_code": 0,
+      "tests": 10,
+      "seconds": 0.551,
+      "log_sha256": "3ab25c16a2e8728f4658a1a67c4a537f59eedf439e8ae22101c138fa2c5a00a1"
+    },
+    {
+      "suite": "source_model_auth_test",
+      "exit_code": 0,
+      "tests": 27,
+      "seconds": 1.373,
+      "log_sha256": "34094869bf291af349d3aec665b4773461134d594c199edf82d8335d809ab6cb"
+    },
+    {
+      "suite": "source_model_callsites_test",
+      "exit_code": 0,
+      "tests": 3,
+      "seconds": 0.395,
+      "log_sha256": "e004ff78ea07bb5d97f6bf5fbf31a64a4979ff4ba1319be9f01d5135021972bc"
+    },
+    {
+      "suite": "source_model_cleanup_budget_test",
+      "exit_code": 0,
+      "tests": 7,
+      "seconds": 0.233,
+      "log_sha256": "80a06c356c7cd107eeb4e369e3aaf37a3c413b15af4146967881b2aa305c7a6d"
+    },
+    {
+      "suite": "source_model_execute_test",
+      "exit_code": 0,
+      "tests": 7,
+      "seconds": 0.474,
+      "log_sha256": "e0231b44f4db091dbc3a2a0b5c3bef844102baee295afdf46e07279fe6c24899"
+    },
+    {
+      "suite": "source_model_phase_budget_test",
+      "exit_code": 0,
+      "tests": 4,
+      "seconds": 0.247,
+      "log_sha256": "d094b1bd2c8318c96097f80c50da282add5b2972970a77046de8db6c8935f6ca"
+    },
+    {
+      "suite": "source_model_storage_edges_test",
+      "exit_code": 0,
+      "tests": 4,
+      "seconds": 0.224,
+      "log_sha256": "d094b1bd2c8318c96097f80c50da282add5b2972970a77046de8db6c8935f6ca"
+    },
+    {
+      "suite": "source_model_streaming_test",
+      "exit_code": 0,
+      "tests": 8,
+      "seconds": 0.203,
+      "log_sha256": "8642a1ac72c63530bbaa2c1f2526767cc3b14a928c117e4bff18cd4c4a88ad42"
+    },
+    {
+      "suite": "source_external_model_test",
+      "exit_code": 0,
+      "tests": 9,
+      "seconds": 0.413,
+      "log_sha256": "44437238c95af89b31f2ef99b952c0ef7658fe4d16c6797c69bd74d159289df8"
+    },
+    {
+      "suite": "source_llm_client_controls_test",
+      "exit_code": 0,
+      "tests": 11,
+      "seconds": 0.796,
+      "log_sha256": "7c09eecd805d846939e9539f90e7059a8541b61cf5cacda607e55fd3edbde215"
+    }
+  ],
+  "inputs": {
+    "Makefile": "b611f4412873d91205c7ed87798038cc7262881c5d9a43cd6d06ae3632503972",
+    "tests/build_jobs_test.py": "16342f1588f96c6cfd93da0654cd36bf017394e2bb57938fb9053403b6be209b",
+    "tests/llm_native_validation_cost_test.py": "efbc9b105654be8e9929c8558394b715400861362f5d59e2bf571da3beb0a36f",
+    "tests/native_ccache_test.py": "ec31ebf5e65eb2477a921f205e227f5e7d36e6be6d0c412201571f823d6e8d91",
+    "tests/source_model_auth_test.py": "49124219ad479ea2fbeae3827d5d757139d2509ea0180e8d2a50aa3d7c4d89e4",
+    "tools/build_jobs.py": "748eebaa1f161ccd9667d41c18c4ae119f830f6533da162aa8f6aec9dc55a97f",
+    "tools/build_llm_cpu_reference.py": "5c62bfdd781e91b106e927681e6cb7e562b2213fd26744c9c7dc4f55e375382d",
+    "tools/build_llm_native_app.py": "b314ac156146f10a35cbb539442d9ab2c4aeefedb490b0473fcb0f2dbab64019",
+    "tools/build_llm_native_client.py": "32f1d89b9efdf5e5dec83ba6bd175d59aa5bb2625b09753f4a463c34ccb4a86e",
+    "tools/build_public_hip.py": "e05d6ace191f451acfc8f22b3812a4d330de2307eb720f9504c07934c03b9741",
+    "tools/freeze_source_candidate.py": "54c0e9679a3d029764265009ce76e6594647b559d62a228459edf6f3d5088311",
+    "tools/native_ccache.py": "865e4079c4ea3d61632156735b9deac99142659215450e5afc458c5736038240",
+    "tools/ps5-clangxx": "3eebcf603cf403db068582c23c62ff8e1e63d93d97f6b2b4f40de6a02fc965f6",
+    "tools/source_model_freeze.py": "8388c23e4776781e44043acb4f4109d338f81b5a9d3e05d5f5b6f11d7ff8b7a4"
+  },
+  "verified": [
+    "Real SDK cache miss then hit across distinct output directories, equal object bytes/dependency sets",
+    "Source and header edits cause misses; disabling cache preserves object bytes",
+    "Inherited unsafe cache settings scrubbed; cache tool, shared-library and policy changes rejected",
+    "Worker limit and stable object ordering; invalid settings and title compilation failure fail closed",
+    "Selected linker input, alias, digest and symlink drift checks; repeated-input fixture resolution count falls from 24 to 2"
+  ],
+  "prior_build": {
+    "source_commit": "9079ae6",
+    "directory": "build/llm-native-model-app-v9",
+    "receipt_sha256": "ee83b1319a292b4599e4743b4c887ff9de6727306f118a243ceac7c0478e1fcd",
+    "status": "PASS",
+    "object_count": 149,
+    "command_count": 201,
+    "package_bytes": 21987328,
+    "package_sha256": "6f53e6328b4a9a4c4ad6bec037d03f92a4eb5a9bbc6180ecbccc4d02dc600552",
+    "new_build_pipeline": false,
+    "console_executed": false
+  },
+  "limits": [
+    "No full cold/warm package benchmark or new-pipeline full application build",
+    "Old CPU/native receipts and dependent model/vocabulary evidence must be regenerated",
+    "No console validation or inference progress claimed"
+  ]
+}

@@ -2,4 +2,4 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 llvm_config=$(command -v llvm-config-18)
-exec env LLVM_CONFIG="$llvm_config" "$root/.deps/sdk/bin/prospero-clang++" "$@"
+exec env LLVM_CONFIG="$llvm_config" /usr/bin/python3 "$root/tools/native_ccache.py" "$root/.deps/sdk/bin/prospero-clang++" "$@"

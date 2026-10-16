@@ -90,6 +90,9 @@ def validate_model_receipt(build,receipt):
  external=receipt.get('external_model');validate_external_model(external)
  bound=receipt['llm_client'];require(bound.get('phase')=='model-gate','wrong bound phase')
  inputs=receipt.get('inputs');require(isinstance(inputs,dict) and inputs,'missing input closure')
+ import native_ccache as cache
+ cache.verify(ROOT,receipt.get('compiler_cache'))
+ for name,h in cache.bound_inputs(receipt['compiler_cache']).items():require(inputs.get(name)==h,'unbound compiler cache identity')
  for name,h in inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'input changed')
  for name,target in receipt.get('symlinks',{}).items():require(str(Path(name).resolve())==target,'symlink changed')
  vocab,client,model=prerequisites(bound)

@@ -21,6 +21,9 @@ def validate_source_inputs(receipt):
     inputs = receipt.get('input_sha256')
     if not isinstance(inputs, dict) or not inputs:
         raise ValueError('candidate lacks source input identities')
+    if 'tools/native_ccache.py' in inputs:
+        import native_ccache as cache
+        cache.verify(ROOT, receipt.get('compiler_cache'))
     for name, expected in inputs.items():
         path = (ROOT / name).resolve()
         if not path.is_relative_to(ROOT) or digest(path) != expected:

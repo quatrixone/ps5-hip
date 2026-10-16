@@ -38,20 +38,20 @@ class Cost(unittest.TestCase):
  def test_changed_depfile_pair_still_rejected(self):
   node=next(n for n in ast.walk(FUNCTION) if isinstance(n,ast.If) and 'paths[0] != paths[1]' in ast.unparse(n.test))
   with self.assertRaisesRegex(ValueError,'dependency closure'):execute(node,{'paths':[{Path('/a')},{Path('/b')}],'p':Path('/a')})
- def test_link_trace_resolves_input_union_once_and_checks_end_mapping(self):
+ def test_link_trace_resolves_only_consumed_inputs_once_each_epoch(self):
   node=next(n for n in ast.walk(APP) if isinstance(n,ast.If) and ast.unparse(n.test)=="label == 'link' or host_link")
   with tempfile.TemporaryDirectory() as directory:
    folder=Path(directory);a=folder/'a';b=folder/'b';a.write_bytes(b'a');b.write_bytes(b'b');(folder/'link.stdout').write_text((str(a)+'\n')*20)
-   env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(a):'a',str(b):'b'},'out':folder,'row':{},'bind':lambda p:None}
+   env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(a):'a',str(b):'b'},'out':folder,'row':{},'bind':lambda p,expected:None}
    original=Path.resolve;calls=[]
    def resolve(p,*args,**kwargs):calls.append(str(p));return original(p,*args,**kwargs)
    with patch.object(Path,'resolve',resolve):execute(node,env)
-   self.assertEqual(len(calls),24);self.assertEqual(len(env['row']['selected_inputs']),20)
+   self.assertEqual(len(calls),2);self.assertEqual(len(env['row']['selected_inputs']),20)
  def test_link_trace_rejects_unknown_selected_input(self):
   node=next(n for n in ast.walk(APP) if isinstance(n,ast.If) and ast.unparse(n.test)=="label == 'link' or host_link")
   with tempfile.TemporaryDirectory() as directory:
    folder=Path(directory);known=folder/'known';unknown=folder/'unknown';known.write_bytes(b'k');unknown.write_bytes(b'u');(folder/'link.stdout').write_text(str(unknown)+'\n')
-   bound=[];env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(known):'k'},'out':folder,'row':{},'bind':lambda p:bound.append(p)}
+   bound=[];env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(known):'k'},'out':folder,'row':{},'bind':lambda p,expected:bound.append(p)}
    with self.assertRaisesRegex(ValueError,'unbound selected linker input'):execute(node,env)
    self.assertFalse(bound);self.assertNotIn('selected_inputs',env['row'])
  def test_link_trace_rejects_changed_symlink_route_after_binding(self):
@@ -59,11 +59,28 @@ class Cost(unittest.TestCase):
   with tempfile.TemporaryDirectory() as directory:
    folder=Path(directory);a=folder/'a';b=folder/'b';link=folder/'link';a.write_bytes(b'same');b.write_bytes(b'same');link.symlink_to(a);(folder/'link.stdout').write_text(str(link)+'\n')
    bound=[]
-   def bind(p):
+   def bind(p,expected):
     bound.append(p);link.unlink();link.symlink_to(b)
    env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(link):'same'},'out':folder,'row':{},'bind':bind}
    with self.assertRaisesRegex(ValueError,'link input resolution changed'):execute(node,env)
    self.assertEqual(bound,[link]);self.assertNotIn('selected_inputs',env['row'])
+ def test_link_trace_accepts_bound_target_or_bound_alias_and_passes_expected_digest(self):
+  node=next(n for n in ast.walk(APP) if isinstance(n,ast.If) and ast.unparse(n.test)=="label == 'link' or host_link")
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);target=folder/'target';alias=folder/'alias';target.write_bytes(b'content');alias.symlink_to(target)
+   for known,selected in ((target,alias),(alias,target)):
+    (folder/'link.stdout').write_text(str(selected)+'\n');calls=[]
+    env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(known):'expected'},'out':folder,'row':{},'bind':lambda p,h:calls.append((p,h))}
+    execute(node,env);self.assertEqual(calls,[(selected,'expected')])
+ def test_link_trace_checks_selected_digest_and_rejects_drift(self):
+  node=next(n for n in ast.walk(APP) if isinstance(n,ast.If) and ast.unparse(n.test)=="label == 'link' or host_link")
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);p=folder/'input';p.write_bytes(b'old');digest=hashlib.sha256(p.read_bytes()).hexdigest();p.write_bytes(b'new');(folder/'link.stdout').write_text(str(p)+'\n')
+   def bind(path,expected):
+    if hashlib.sha256(path.read_bytes()).hexdigest()!=expected:raise ValueError('identity differs')
+   env={'Path':Path,'ROOT':folder,'label':'link','host_link':False,'inputs':{str(p):digest},'out':folder,'row':{},'bind':bind}
+   with self.assertRaisesRegex(ValueError,'identity differs'):execute(node,env)
+   self.assertNotIn('selected_inputs',env['row'])
 BUILD=next(n for n in APP.body if isinstance(n,ast.FunctionDef) and n.name=='build')
 BIND=next(n for n in BUILD.body if isinstance(n,ast.FunctionDef) and n.name=='bind')
 def binder():

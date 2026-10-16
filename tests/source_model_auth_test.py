@@ -33,6 +33,14 @@ class Auth(unittest.TestCase):
   ap=put(self.build/'llm-client-native-audit.json',json.dumps(audit).encode())
   bound=dict(phase='model-gate',vocabulary={k:self.v[k] for k in ('receipt','receipt_sha256','asset')},native_client={k:self.c[k] for k in ('receipt','receipt_sha256')},model={k:v for k,v in self.m.items() if k!='inputs'},audit={'path':str(ap),'sha256':f.stream_digest(ap)})
   self.r=dict(schema=1,status='PASS',classification='source-only-model-rejection-native-client-app',fixture='llm_client',phase='model-gate',native_executed=False,gpu_executed=False,object_count=149,units=units,inputs=self.inputs,llm_client=bound,package_bytes=2,package_sha256=f.stream_digest(package),package_files={n:f.stream_digest(self.app/n) for n in names},results_dir='/data/test',external_model=dict(path=em.DEFAULT_MODEL_PATH,bytes=1,sha256=self.sha))
+  self.r['compiler_cache']={'enabled':False,'requested':'0'}
+ def test_cache_record_required(self):
+  self.r.pop('compiler_cache')
+  with self.assertRaisesRegex(ValueError,'compiler cache record'):self.validate()
+ def test_cache_tool_must_be_bound(self):
+  import native_ccache as cache
+  self.r['compiler_cache']={'enabled':True,'inputs':{},'tool':'/cache-tool','tool_sha256':'missing'}
+  with patch.object(cache,'verify'),self.assertRaisesRegex(ValueError,'unbound compiler cache identity'):self.validate()
  def validate(self):
   # Tiny complete file-backed receipt; only expensive prerequisite authentication and fixed model size substituted.
   with patch.object(em,'MODEL_BYTES',1),patch.object(em,'MODEL_SHA',self.sha),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(legacy,'ROOT',self.root):return f.validate_model_receipt(self.build,self.r)
