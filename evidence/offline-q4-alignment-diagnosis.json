@@ -6,8 +6,8 @@
   "unaltered_lane_model_f32": 0.21718880534172058,
   "hypothetical_rounddown4_f32": 0.1636260598897934,
   "hypothesis": "Q4 payload loads at 2-mod-4 addresses behave as rounded down to four-byte boundaries; exact numerical match is evidence, not hardware proof.",
-  "codegen_receipt": "results\\q4-alignment-codegen-v6\\receipt.json",
-  "codegen_receipt_sha256": "1930cc87bda1085ea7c39e32a0370a16f5c44e222ea3f13e2b212b0ffc3c6809",
+  "codegen_receipt": "results/q4-alignment-codegen-v9/receipt.json",
+  "codegen_receipt_sha256": "6e3a67b2dfa0dcedb6a83b2de0c3442e4b317b0338fcc4ee1e163e06acda019b",
   "modules": {
     "baseline": {
       "sha256": "643329633c5de09417a452dc96c79e7dd8fa3780b93f40e2065d3abcad3a0c58",
@@ -62,7 +62,9 @@
   "rejected_experiments": [
     "Disabling unaligned-buffer-access via llc flags produced empty kernel inventory.",
     "Disabling unaligned access in target attributes also produced empty kernel inventory.",
-    "Local v4 experiment still applied feature attributes due script replacement error; no volatile-load result claimed from v4."
+    "Local v4 experiment still applied feature attributes due script replacement error; no volatile-load result claimed from v4.",
+    "Tooling v7 resolved the ld.lld symlink for invocation and failed generic-driver version lookup; corrected to preserve driver name.",
+    "Tooling v8 exposed a leftover flags variable; corrected, then v9 completed all checks."
   ],
   "next": "Review changed resource/cache semantics and prepare a separate bounded load-alignment diagnostic for .40; never replay consumed candidate.",
   "limits": [

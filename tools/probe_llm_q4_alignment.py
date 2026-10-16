@@ -22,7 +22,7 @@ tool_versions={}
 for name in ['llc-18','ld.lld-18','llvm-readobj-18','llvm-objdump-18']:
  tool=Path(shutil.which(name)).resolve()
  inputs[str(tool)]=sha(tool)
- version=subprocess.check_output([str(tool),'--version'],text=True)
+ version=subprocess.check_output([name,'--version'],text=True)
  assert '18.1.8' in version,name
  tool_versions[name]=version.strip()
 commands=[]
@@ -42,7 +42,7 @@ for name in ['baseline','volatile-u16']:
   ir=(f/'q4.ll').read_text()
   assert ir.count('load i16, ptr addrspace(1)')==4
   source.write_text(ir.replace('load i16, ptr addrspace(1)', 'load volatile i16, ptr addrspace(1)'))
- run(name+'-compile',['llc-18','-mtriple=amdgcn-amd-amdhsa','-mcpu=gfx1013',*flags,'-filetype=obj',str(source),'-o',str(obj)])
+ run(name+'-compile',['llc-18','-mtriple=amdgcn-amd-amdhsa','-mcpu=gfx1013','-filetype=obj',str(source),'-o',str(obj)])
  run(name+'-link',['ld.lld-18','-shared',str(obj),'-o',str(module)])
  notes=run(name+'-notes',['llvm-readobj-18','--notes',str(module)])
  isa=run(name+'-isa',['llvm-objdump-18','--disassemble','--mcpu=gfx1013',str(module)])
