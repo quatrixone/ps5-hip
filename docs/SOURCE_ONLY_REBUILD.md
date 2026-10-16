@@ -48,9 +48,11 @@ hash check. Interrupted upload staging files are retained for diagnosis.
 
 Historical embedded-model packages remain valid recovery artifacts. Keep them
 until a new external-model candidate is independently validated and supersedes
-them. This storage change has offline tests and a native compile check; its
-first installed-app validation is pending. The previous context heap warning
-remains an independent blocker to clean M0 acceptance.
+them. Native model-app-v8 validated loading from `/data/hip/models` on .40:
+the app package is 21 MiB, and the model was uploaded separately once, then
+verified again before launch. Full model/context loading and cleanup completed.
+The previous context heap warning recurred and still prevents clean M0
+acceptance; see `evidence/console40-native-external-model-load.json`.
 
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed

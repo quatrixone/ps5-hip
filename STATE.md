@@ -16,16 +16,25 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
-External model storage is implemented offline: new model-gate packages contain
-`model-path.txt` and use `/data/hip/models/tinyllama-q4_0.gguf` by
-default. The existing Eden/Lapy helper grants filesystem access. Deployment
-uploads missing weights once, verifies/reuses existing weights, and rejects
-mismatches without overwriting. Prelaunch still hashes the remote model.
-Legacy embedded packages remain recovery artifacts. The first fresh package
-build/audit and installed external-model validation are pending; no new console
-result or resolution of the context warning is claimed.
+External model loading is now validated on .40 with native model-app-v8
+(source `08857a6`). The 21 MiB package contains `model-path.txt`, not weights;
+the existing Eden/Lapy helper grants access to
+`/data/hip/models/tinyllama-q4_0.gguf`. Deployment uploaded the locked
+619,831,552-byte model once and verified its SHA-256; execution verified it
+again without uploading. The app loaded the full model, created the 512-token
+context, completed both expected graph rejections/reuse and balanced 219/219
+owned allocations. The largest free extent returned to its pre-load value.
 
-Current checkpoint: installed model-app-v7 loaded the full locked TinyLlama
+The same context heap warning still rejects strict M0 acceptance. Finalizers,
+shell-exit request and ordered title stop completed; services remained healthy
+and both locks were released. Post-run mount/asset checks were skipped after
+transcript rejection. This validates external loading, not inference or a clean
+M0 pass. See `evidence/console40-native-external-model-load.json`.
+Candidate `results/source-public-llm-external-console-v1` is consumed for both
+deploy and execute. Preserve its recovery files and installed v8 package.
+Next investigate the scheduler malloc warning offline; do not replay this run.
+
+Previous checkpoint: model-app-v7 loaded the full locked TinyLlama
 model on .40 and created its 512-token context. Both mandatory graph rejections
 and second-call reuse completed, with 219 owned allocations/releases, zero
 live owned bytes/failures, and a 663,545,360-byte requested peak. The measured

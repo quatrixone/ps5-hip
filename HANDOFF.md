@@ -18,18 +18,37 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
-Latest offline change: external model storage, default
+Latest validated storage milestone: external model storage, default
 `/data/hip/models/tinyllama-q4_0.gguf`, configured by
 `LLM_NATIVE_APP_MODEL_REMOTE_PATH`. New app packages carry `model-path.txt`;
 the existing Eden/Lapy helper is unchanged. Deploy uploads only missing weights
 using verified staging, reuses matching weights, and refuses corrupt existing
 files. Prelaunch verifies model SHA-256 separately. No automatic old-model
 deletion or migration occurs. Historical embedded recovery remains supported.
-See `docs/SOURCE_ONLY_REBUILD.md` and
-`evidence/offline-external-model-storage.json` for validation and limitations.
-Next build/audit/freeze a fresh external-model app before its first .40 run;
-preserve all installed v7 recovery evidence. The heap-warning investigation
-below remains open, and its strict parser must not be relaxed for this change.
+Fresh `build/llm-native-model-app-v8` passed Make (149 objects, 201 commands,
+134 test methods), independent admission and the 46-function image audit.
+Package size is 21,987,328 bytes (21 MiB), down from 827,719,680 bytes.
+Package SHA-256: `d22d65cbcd09a0a77f2b8ca75db02d7e1d69f02e11d37191313b5ceca89ea14f`.
+Source: `08857a6`; frozen manifest SHA-256:
+`2c07790b5b0b3f61ad8f980a99d01b6274e457ba47b6316bb48e8d36007d1d9a`.
+
+Deployment and independent review passed on .40. The model was uploaded once
+to the requested path and hash-verified again before execution without another
+upload. The app loaded the model and 512-token context; both expected graph
+rejections/reuse completed, with 219/219 owned allocations/releases and full
+restoration of the measured largest free extent. The same context heap warning
+still rejects strict acceptance. App finalizers and ordered stop completed,
+services were healthy, and both locks were released; post-run mount/asset
+checks were skipped after the warning rejection. No inference is claimed.
+
+Consumed candidate: `results/source-public-llm-external-console-v1`; do not
+replay either phase. Installed results: `/user/homebrew/ps5-hip/m0-model-v8`.
+Reviews: `results/m0-external-model-package-review-v1`; compact evidence:
+`evidence/console40-native-external-model-load.json`. Preserve v8 and v7
+recovery artifacts. Next investigate the scheduler malloc warning offline;
+keep the strict parser unchanged. See `docs/SOURCE_ONLY_REBUILD.md` for builds.
+
+The following v7 checkpoint is historical:
 
 The owner resumed work. Fresh v7 completed Make (149 objects, 201 commands,
 16 suites/118 methods), real admission, the 46-function image audit, freeze,

@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "status": "partial-pass",
+  "classification": "native-external-model-loading",
+  "source_commit": "08857a64ac57041184e58a54abe8ad7642f2302c",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_bytes": 21987328,
+  "package_sha256": "d22d65cbcd09a0a77f2b8ca75db02d7e1d69f02e11d37191313b5ceca89ea14f",
+  "previous_embedded_package_bytes": 827719680,
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "external_provision_action": "upload",
+  "external_model_verified_before_launch": true,
+  "native_model_loading_observed": true,
+  "native_context_creation_observed": true,
+  "context_tokens": 512,
+  "external_path_proof": "Authenticated mounted model-path.txt and native source load call; no embedded model; full external file readback authenticated before launch.",
+  "controller_accepted": false,
+  "controller_error": "ValueError('model-gate transcript differs')",
+  "model_gate_diagnostic": {
+    "status": "PASS",
+    "phase": "model-gate",
+    "actual_calls": 2,
+    "second_graph_reused": true,
+    "expected_errors": 4,
+    "forwarded": 0,
+    "post_compute": 0,
+    "gpu_submits": 0,
+    "inference": false,
+    "final_counts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "memory": [
+      {
+        "phase": "before_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12261605376,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_context",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12214861824,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_cleanup",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      }
+    ],
+    "host_storage": {
+      "allocations": 219,
+      "releases": 219,
+      "peak_requested_bytes": 663545360,
+      "live_requested_bytes": 0,
+      "failures": 0,
+      "poisoned": false
+    }
+  },
+  "diagnostic_warning_removed_only_in_memory": true,
+  "title_ordered_stop": true,
+  "healthy_after": true,
+  "owned_locks_released": true,
+  "post_snapshot_observed": false,
+  "second_installed_asset_verification": false,
+  "M0_complete": false,
+  "native_inference": false,
+  "gpu_tensor_execution": false,
+  "evidence_sha256": {
+    "results/source-public-llm-external-console-v1/manifest.json": "2c07790b5b0b3f61ad8f980a99d01b6274e457ba47b6316bb48e8d36007d1d9a",
+    "results/source-public-llm-external-console-v1/build-receipt.json": "2431ae356357ec498f50330a76f845da3d3b10a1eeac4d2319b7f37c9bdab035",
+    "results/source-public-llm-external-console-v1/deploy/receipt.json": "7d1cf1b2e98300dfe4662e8f59d625b1518dcd510f32141b513918e1ccf0af6d",
+    "results/source-public-llm-external-console-v1/execute/receipt.json": "e7515d2c7fbed7e01ac17782c54e1d7f4b5417400ec0c0dcbce3c80f665b8646",
+    "results/source-public-llm-external-console-v1/execute/application.log": "19ea3bdfbb533c9f8fb45cf07957c9d1b388dc44099fbc6344a43ff638d506e5",
+    "results/source-public-llm-external-console-v1/execute/klog.log": "a03a691beb6f81344eed0dab96685dd49eab2ed2f78e6f7c4749444c623d43ab",
+    "results/m0-external-model-package-review-v1/review.json": "ac25badafc9fc134bd38299dbcf8065fc6ff3b2c76ce577fa26576828d6b2100",
+    "results/m0-external-model-package-review-v1/candidate-review.json": "f034c67ea272647cf68275c836b7a5383794fef11857631638c82e47de15d381",
+    "results/m0-external-model-package-review-v1/deployment-review.json": "d18ead317fd3ff211fda12f17c9983475c726a69c4d598c47be3b43441a97001",
+    "results/m0-external-model-package-review-v1/execution-review.json": "314c972ba56bc3f4196b365e77d372ac62887bc9b0cbca844d953d5cad64b2c2"
+  },
+  "limits": [
+    "Raw receipt and transcript remain unchanged; diagnostic warning removal is not strict acceptance.",
+    "External file pathname is established by bound configuration and load call, not a runtime pathname log.",
+    "A context heap warning, if present, remains unresolved; no inference or M0 completion claimed."
+  ]
+}
