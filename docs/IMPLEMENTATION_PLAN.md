@@ -14,6 +14,8 @@ M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
+- 2026-10-16 | M0 model test | .40 | failed: 120s request rejected by 60s watchdog ceiling; healthy safety close | evidence/console40-native-model-watchdog-failure.json | next: offline fix
+
 - 2026-10-16 | M0 model deployment | .40 | pass: exact package/nine assets, recovery and healthy idle | evidence/console40-native-model-deployment.json | next: native execution
 
 - 2026-10-16 | M0 model package | offline | pass: 148 objects, 199 commands, 139 tests and real admission | evidence/offline-native-llm-model-gate.json | next: installed model/reuse gate

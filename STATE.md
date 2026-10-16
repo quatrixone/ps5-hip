@@ -16,6 +16,17 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The first installed full-model run failed before HIP/model setup: the title
+requested a 120,000 ms watchdog, while the shared watchdog rejected values above
+60,000 ms. Its exact `watchdog-state` quarantine followed successful startup
+and runtime checks. The 150-second controller deadline led to exact-title safety
+close; .40 returned idle with healthy services and both locks released. See
+`evidence/console40-native-model-watchdog-failure.json`. Candidate v1 execution
+is consumed; do not replay it. Correct the watchdog contract and test boundaries
+offline, then build and review a fresh native candidate. No model load, graph
+reuse, natural finalization or post-run mount equality was established.
+
+
 The full-model candidate is now installed and independently verified on .40.
 All nine mounted assets, the 827,719,680-byte package, preserved vocabulary
 package/log, idle snapshots, healthy services and both released locks pass.
