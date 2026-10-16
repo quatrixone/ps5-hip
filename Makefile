@@ -175,6 +175,7 @@ llm-native-app: deps-build llm-deps-fetch
 	@if ! test -f "$(LLM_NATIVE_CLIENT_BUILD_DIR)/receipt.json"; then $(MAKE) llm-native-client-link; fi
 	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
 	$(PYTHON) tests/watchdog_test.py
+	$(PYTHON) tests/llm_native_host_allocator_test.py
 	$(PYTHON) tests/llm_native_app_build_test.py
 	$(PYTHON) tests/llm_native_model_package_test.py
 	$(PYTHON) tests/source_model_auth_test.py

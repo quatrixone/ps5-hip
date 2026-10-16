@@ -73,6 +73,22 @@ class ClientBuild(unittest.TestCase):
                         self.assertIn('--wrap=ggml_backend_sched_graph_compute_async', args)
                         self.assertIn('--undefined=__wrap_ggml_backend_sched_graph_compute_async', args)
 
+    def test_native_allocator_link_is_explicit_and_paired(self):
+        names=['hipInit','hipGetDeviceCount','ps5hip_clr_admit_device','hipMalloc','hipFree','hipMemcpy','hipMemset','hipDeviceSynchronize','llama_model_load_from_file','llama_tokenize','__wrap_ggml_backend_sched_graph_compute_async']
+        wrappers=['__wrap_ggml_aligned_malloc','__wrap_ggml_aligned_free']
+        with tempfile.TemporaryDirectory() as tmp, patch.object(b,'run') as run:
+            for enabled in (False,True):
+                with patch.object(b.subprocess,'check_output',return_value='\n'.join('DEF '+n for n in names+wrappers)):
+                    b.link_title(Path(tmp),[],'llm_client',native_host_allocator=enabled)
+                args=run.call_args.args[2]
+                for symbol in ('ggml_aligned_malloc','ggml_aligned_free'):
+                    self.assertEqual('--wrap='+symbol in args,enabled)
+                    self.assertEqual('--undefined=__wrap_'+symbol in args,enabled)
+            for absent in wrappers:
+                with patch.object(b.subprocess,'check_output',return_value='\n'.join('DEF '+n for n in names+wrappers if n!=absent)):
+                    with self.assertRaisesRegex(RuntimeError,absent):b.link_title(Path(tmp),[],'llm_client',native_host_allocator=True)
+            with self.assertRaisesRegex(ValueError,'requires llm_client'):b.link_title(Path(tmp),[],'bootstrap',native_host_allocator=True)
+
     def test_vocab_package_exact_inventory_and_phase(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

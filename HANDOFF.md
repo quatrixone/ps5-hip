@@ -40,6 +40,21 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Current offline correction: model-only external GGML aligned allocations use
+`ports/ggml/native_host_allocator.cpp` and the existing `NativeMemory` owner.
+The bounded owner ledger quarantines failed cleanup without destructor retry.
+Main and finalizer require balanced ownership; the transcript records measured
+counts/peak bytes separately from HIP observations. The 149-object builder and
+image auditor enforce paired routing; vocabulary stays at 147 objects and
+historical recovery accepts the prior model packages.
+
+Next full build: `.local/build_native_model_app_v5.py` runs the supported Make
+target into `build/llm-native-model-app-v5`, with results directory
+`/user/homebrew/ps5-hip/m0-model-v5`. Independently audit/admit the resulting
+package before freezing a fresh candidate and using idle .40. No native allocator
+success is claimed. Preserve v4 recovery and all failed evidence. The source-only
+Make target, rather than the local convenience script, remains authoritative.
+
 The model-console-v2 execution is now consumed and failed. Its 835-byte app log
 reaches `LLM_GATE PHASE load_begin`, then reports ENOMEM allocating the
 619,094,016-byte CPU model buffer, followed by backend-invariant quarantine and

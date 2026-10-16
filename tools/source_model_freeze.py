@@ -87,7 +87,7 @@ def validate_model_receipt(build,receipt):
   require({k:actual[k] for k in fields}==bound[key],'prerequisite differs')
   require(all(inputs.get(p)==h for p,h in actual['inputs'].items()),'prerequisite closure omitted')
  require(model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA,'wrong model profile')
- require(receipt.get('object_count')==148 and [u['object'] for u in receipt['units'][-70:]]==client['objects'],'object inventory differs')
+ require(receipt.get('object_count')==149 and [u['object'] for u in receipt['units'][-70:]]==client['objects'],'object inventory differs')
  original=Path(bound['audit']['path']).parent
  legacy.validate_client_units(original,receipt);legacy.validate_client_image_assets(original,receipt)
  audit_path=build/'llm-client-native-audit.json';require(stream_digest(audit_path)==bound['audit']['sha256'],'audit hash differs')

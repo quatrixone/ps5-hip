@@ -16,6 +16,8 @@ boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-16 | M0 model load | .40 | failed: 619094016-byte CPU allocation ENOMEM; healthy safety close | evidence/console40-native-model-allocation-failure.json | next: native allocation fix
 
+- 2026-10-16 | M0 owned model storage | offline | pass: 16 suites/115 methods, 13 allocator scenarios and PS5 object compile; paired routing audit added | evidence/offline-native-model-host-storage.json | next: fresh native package and actual image audit
+
 - 2026-10-16 | M0 corrected deployment | .40 | pass: 22 readbacks, nine assets, recovery and healthy idle | evidence/console40-native-model-watchdog-fixed-deployment.json | next: native model/reuse
 
 - 2026-10-16 | M0 recovery | offline | pass: historical deployed-image authentication, 41 tests and real baseline check | evidence/offline-historical-model-baseline.json | next: fresh package

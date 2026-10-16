@@ -186,6 +186,9 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   name=getattr(module,'__file__',None)
   if name and Path(name).is_file():bind(Path(name).resolve())
  required_sources=['tools/public_hip_llm_client_console_title.cpp','ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h','tools/audit_public_hip_llm_client_native.py']
+ if phase=='model-gate':
+  required_sources+=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
+   'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h']
  for name in required_sources:bind(ROOT/name)
  specs=sources()
  for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
@@ -300,9 +303,10 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if phase=='model-gate':
    # llama_context destruction references the upstream optimizer cleanup even without training.
    opt=b.compile_bound_unit(output,upstream_client/'ggml/src/ggml-opt.cpp',output/'ggml-opt.o',flags,'compile-ggml-opt');merge(opt['headers']);bind(output/opt['object'],opt['object_sha256']);units.append(opt)
+   allocator=b.compile_bound_unit(output,ROOT/'ports/ggml/native_host_allocator.cpp',output/'native_host_allocator.o',flags,'compile-native-host-allocator');merge(allocator['headers']);bind(output/allocator['object'],allocator['object_sha256']);units.append(allocator)
   units.extend({'object':p,'object_sha256':inputs[p],'source':'authenticated-native-client'} for p in client['objects'])
-  if len(units)!=(148 if phase=='model-gate' else 147):raise ValueError('unexpected app object count')
-  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client')
+  if len(units)!=(149 if phase=='model-gate' else 147):raise ValueError('unexpected app object count')
+  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client',native_host_allocator=(phase=='model-gate'))
   bind(output/'title.elf');tool=b.native_tool(output);bind(tool);libc=b.clean_room_libc(output,tool);bind(libc)
   image,roundtrip=b.convert_title(output,tool,'llm_client')
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)

@@ -50,10 +50,16 @@ def validate_client_package(build, receipt):
 def validate_client_units(original, receipt):
     inputs=receipt['inputs'];units=receipt.get('units',[]);expected_headers={}
     model_phase=receipt.get('phase')=='model-gate'
-    count=148 if model_phase else 147
+    count=149 if model_phase else 147
     if len(units)!=count:raise ValueError('client unit inventory differs')
     if model_phase and (ROOT/units[77]['source']).resolve()!=(ROOT/'.deps/sources/llama-client/ggml/src/ggml-opt.cpp').resolve():
         raise ValueError('missing upstream model cleanup implementation')
+    if model_phase and (ROOT/units[78]['source']).resolve()!=(ROOT/'ports/ggml/native_host_allocator.cpp').resolve():
+        raise ValueError('missing native model host allocator')
+    if model_phase:
+        for name in ('ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h','tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h'):
+            path=ROOT/name
+            if inputs.get(str(path))!=digest(path):raise ValueError('native host allocator input omitted or changed')
     objects=[(original/u['object']).resolve() for u in units]
     if len(set(objects))!=count:raise ValueError('duplicate client objects')
     for index,(unit,obj) in enumerate(zip(units,objects)):
@@ -392,7 +398,7 @@ def main():
         validate_results_directory(receipt['results_dir'])
     except ValueError as error:
         parser.error(str(error))
-    if receipt['object_count'] != ((148 if args.client_phase=='model-gate' else 147) if fixture=='llm_client' else 76):
+    if receipt['object_count'] != ((149 if args.client_phase=='model-gate' else 147) if fixture=='llm_client' else 76):
         parser.error('not the complete .40 candidate')
     model_phase=fixture=='llm_client' and args.client_phase=='model-gate'
     if args.client_phase=='model-gate' and fixture!='llm_client':parser.error('model phase requires llm_client')

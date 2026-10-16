@@ -1,0 +1,38 @@
+{
+  "status": "PASS_OFFLINE_SOURCE_CONTROLS",
+  "classification": "native-model-owned-host-storage-correction",
+  "replaces_failed_allocation_bytes": 619094016,
+  "scope": "External GGML aligned allocations in native model app only; existing NativeMemory ownership; no GPU tensor computation",
+  "model_object_count": 149,
+  "vocabulary_object_count": 147,
+  "tests": {
+    "focused_suites": 16,
+    "test_methods": 115,
+    "allocator_sanitized_scenarios": 13,
+    "native_wrapper_compile_exit": 0
+  },
+  "inputs": {
+    "tools/audit_public_hip_llm_client_native.py": "487c2d33cde177057dbc798f312a2921e74484e2ff9ee85d49a415dff15c7644",
+    "tests/llm_client_native_audit_test.py": "1258e505435f5373876c58fb53a7a2c25422a1c3962c0d3ed3df417ae24775ab",
+    "tools/build_llm_native_app.py": "27a1864f7b260823d72a473312bb32090fbf9e02cce04709271dced22f693178",
+    "ports/ggml/native_host_allocator.cpp": "9f43daebff63047d7fe1fdbfcc80039f938c4fcda00c66ca6686cb639604ef5b",
+    "ports/ggml/native_host_allocator.h": "a1318ae1e40f011dd5e18792cb2c96cf4e178ff5fba86289dea2f63f333ca9ba",
+    "tests/llm_native_host_allocator_test.py": "352e87063c0ba7a1e9dd827eb07166ffb9114af810f65890159db55295443d44",
+    "src/native_memory.cpp": "a3cb3c20773f5295a264bed5d90d9260ee34e256672f7cdad492f1d398497f48",
+    "include/ps5hip/native_memory.h": "ae3cad4c530f3b2f4fd7ac380a8a87a90320e3690b20d38bd4f53d94fe304572"
+  },
+  "local_evidence": {
+    "results/m0-native-allocator-root-tests-v1/report.json": "24f64eb06c8f2d1514898afbcbc0055886e233523815b57a2cf55bc7812f65f8",
+    "results/m0-native-allocator-audit-review-v1/review.json": "bca14632d0080cce330fdc258cc0f53ede5af55a8f61407ba6509a1a04bca666",
+    "results/m0-native-allocator-compile-v1/command.json": "2598786f0a286fec4bd8d93b5e10c1dd10c209a8bb40105b992af3ae4d675dce",
+    "results/m0-native-allocator-integration-review-v2/review.json": "f8ee38f3467bf140e2fedeae3ff34e7be9a79f4b94d889cb8937442ac6937a83"
+  },
+  "native_executed": false,
+  "full_image_audit_passed": false,
+  "M0_complete": false,
+  "limits": [
+    "Modeled kernel lifecycle is not native memory availability or loading proof.",
+    "Fresh full package and three-image audit required before freeze/deploy.",
+    "Per-HIP-call accounting and actual model/reuse/lifecycle acceptance remain open."
+  ]
+}

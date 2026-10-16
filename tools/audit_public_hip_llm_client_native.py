@@ -28,6 +28,29 @@ SOURCES=['tools/audit_public_hip_llm_client_native.py','tests/llm_client_native_
  'tests/public_hip_imports_test.py','tests/native_import_libraries_test.py','tools/build_native_vector_title.py',
  'tools/public_hip_llm_client_console_title.cpp','tools/public_hip_app_crt.cpp',
  'ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h']
+ALLOCATOR_SOURCES=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
+ 'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h']
+
+def allocator_contract(bodies,roles):
+ """Audit concrete external routing, not a claim that every allocation is wrapped."""
+ malloc='__wrap_ggml_aligned_malloc';free='__wrap_ggml_aligned_free'
+ for caller,expected,forbidden in [
+  (roles['buffer_alloc'],malloc,'ggml_aligned_malloc'),
+  (roles['buffer_free'],free,'ggml_aligned_free'),
+  ('ggml_init','ggml_aligned_malloc',malloc),
+  ('ggml_free','ggml_aligned_free',free)]:
+  require(len(symbol_calls(bodies[caller],expected))==1,'allocator routing missing/duplicated: '+caller)
+  require(not symbol_calls(bodies[caller],forbidden),'allocator ownership pair bypass: '+caller)
+ for caller in ('main',roles['finalized']):
+  require(symbol_calls(bodies[caller],roles['stats']),'allocator observation missing: '+caller)
+ for caller,targets in [(malloc,roles['constructors']),(free,roles['destructors']),
+                         (free,[roles['close']]),(malloc,[roles['cpu']]),(free,[roles['cpu']])]:
+  require(any(symbol_calls(bodies[caller],target) for target in targets),'NativeMemory ownership call missing: '+caller)
+ for caller in (malloc,free):
+  require(symbol_calls(bodies[caller],'ps5hip_llm_fail'),'allocator fatal path missing: '+caller)
+  for target in ('ggml_aligned_malloc','ggml_aligned_free'):
+   require(not symbol_calls(bodies[caller],target),'allocator unexpectedly falls back to libc pair')
+
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def normalized_wrapper(body,base):
  lines=[]
@@ -93,7 +116,7 @@ def phase_contract(phase,model_gate,chain,bodies):
 def audit(raw,converted,extracted,phase="vocab"):
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
  tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
- source_paths=[ROOT/n for n in SOURCES]
+ source_paths=[ROOT/n for n in SOURCES+(ALLOCATOR_SOURCES if phase=='model-gate' else [])]
  identities={str(p):sha(p) for p in [*paths,tool.resolve(),*source_paths]}
  data=paths[0].read_bytes();values=symbol_values(data)
  def one(n):
@@ -106,10 +129,25 @@ def audit(raw,converted,extracted,phase="vocab"):
  require(len(model_names)<=1,'ambiguous model gate')
  model_gate=model_names[0] if model_names else None
  chain=[]
+ allocator_roles=None
  if phase=='model-gate':
   require(model_gate is not None,'model phase code not compiled')
   chain=['main',model_gate,'llama_process',match('_ZN13llama_context6decode'),match('_ZN13llama_context14process_ubatch'),match('_ZN13llama_context13graph_compute'),WRAPPER]
   names+=list(dict.fromkeys(n for n in chain if n not in names))
+  allocator_roles=dict(buffer_alloc=match('ggml_backend_cpu_buffer_type_alloc_buffer'),
+   buffer_free=match('ggml_backend_cpu_buffer_free_buffer'),finalized=finalized,
+   stats=match('native_host_allocator_stats'),close=match('NativeMemory5closeEv'),
+   cpu=match('NativeMemory3cpuEv'))
+  for role,fragments in [('constructors',('NativeMemoryC1Emmb','NativeMemoryC2Emmb')),
+                         ('destructors',('NativeMemoryD1Ev','NativeMemoryD2Ev'))]:
+   aliases=[n for n in values if any(fragment in n for fragment in fragments)]
+   require(aliases and len({one(n) for n in aliases})==1,'missing/ambiguous NativeMemory '+role)
+   allocator_roles[role]=aliases
+  allocator_names=['__wrap_ggml_aligned_malloc','__wrap_ggml_aligned_free','ggml_init','ggml_free',
+   'ggml_aligned_malloc','ggml_aligned_free','ps5hip_llm_fail',allocator_roles['buffer_alloc'],
+   allocator_roles['buffer_free'],allocator_roles['stats'],allocator_roles['close'],allocator_roles['cpu'],
+   *allocator_roles['constructors'],*allocator_roles['destructors']]
+  names+=list(dict.fromkeys(n for n in allocator_names if n not in names))
  text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
  sizes={};symtab=section(data,b'.symtab')
  for at in range(0,len(symtab),24):
@@ -118,6 +156,7 @@ def audit(raw,converted,extracted,phase="vocab"):
  bodies={a:t for a,n,t in blocks(text)}
  def body(n):return bounded_body(bodies[one(n)],one(n),sizes.get(one(n),0))
  phase_contract(phase,model_gate,chain,{n:body(n) for n in chain})
+ if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
  env=bound_calls(body('_start'),slots['_init_env'],reader);require(len(env)==1 and positions[0]<env[0]<positions[1],'startup env ordering')
@@ -137,8 +176,10 @@ def audit(raw,converted,extracted,phase="vocab"):
  require(all(sha(p)==h for p,h in identities.items()),'audit inputs changed')
  return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase=phase,
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
+  native_allocator_routing_audited=(phase=='model-gate'),
   wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase=='model-gate'),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
-  limits=['Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
+  limits=['External CPU buffer allocation/free wrapping and same-TU original pairing are checked only in model mode; this is not all-allocation interception or runtime ownership proof.',
+  'Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
   'Reviewed LLVM18 O0 wrapper template rejects nonempty graphs with current zero-op predicate; any codegen change requires review.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])
 if __name__=='__main__':

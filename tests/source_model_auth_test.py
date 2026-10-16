@@ -13,10 +13,13 @@ class Auth(unittest.TestCase):
   def put(p,data=b'x'):
    p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data);self.inputs[str(p)]=f.stream_digest(p);return p
   self.put=put;src=put(self.root/'source.cpp');units=[]
-  for i in range(148):
+  for i in range(149):
    p=put(self.build/f'{i}.o');units.append(dict(object=str(p),object_sha256=self.inputs[str(p)],source=str(src),source_sha256=self.inputs[str(src)],headers={str(src):self.inputs[str(src)]}))
   opt=put(self.root/'.deps/sources/llama-client/ggml/src/ggml-opt.cpp')
   units[77].update(source=str(opt),source_sha256=self.inputs[str(opt)],headers={str(opt):self.inputs[str(opt)]})
+  allocator=put(self.root/'ports/ggml/native_host_allocator.cpp')
+  units[78].update(source=str(allocator),source_sha256=self.inputs[str(allocator)],headers={str(allocator):self.inputs[str(allocator)]})
+  for n in ('ports/ggml/native_host_allocator.h','tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h'):put(self.root/n)
   for n in ('build_llm_native_app.py','build_public_hip.py','build_llm_native_client.py','build_llm_vocab_fixture.py'):put(self.root/'tools'/n)
   names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model.gguf'}
   for n in names:put(self.app/n,b'model-gate\n' if n=='client-phase.txt' else b'/data/test' if n=='results-dir.txt' else b'x')
@@ -27,7 +30,7 @@ class Auth(unittest.TestCase):
   audit=dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase='model-gate',wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=True,actual_client_gate_executed=False,native_executed=False,gpu_executed=False,inputs={str(self.build/n):self.inputs[str(self.build/n)] for n in ('title.elf','eboot.elf','extracted.elf')});self.audit=audit
   ap=put(self.build/'llm-client-native-audit.json',json.dumps(audit).encode())
   bound=dict(phase='model-gate',vocabulary={k:self.v[k] for k in ('receipt','receipt_sha256','asset')},native_client={k:self.c[k] for k in ('receipt','receipt_sha256')},model={k:v for k,v in self.m.items() if k!='inputs'},audit={'path':str(ap),'sha256':f.stream_digest(ap)})
-  self.r=dict(schema=1,status='PASS',classification='source-only-model-rejection-native-client-app',fixture='llm_client',phase='model-gate',native_executed=False,gpu_executed=False,object_count=148,units=units,inputs=self.inputs,llm_client=bound,package_bytes=2,package_sha256=f.stream_digest(package),package_files={n:f.stream_digest(self.app/n) for n in names},results_dir='/data/test')
+  self.r=dict(schema=1,status='PASS',classification='source-only-model-rejection-native-client-app',fixture='llm_client',phase='model-gate',native_executed=False,gpu_executed=False,object_count=149,units=units,inputs=self.inputs,llm_client=bound,package_bytes=2,package_sha256=f.stream_digest(package),package_files={n:f.stream_digest(self.app/n) for n in names},results_dir='/data/test')
  def validate(self):
   # Tiny complete file-backed receipt; only expensive prerequisite authentication and fixed model size substituted.
   with patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(legacy,'ROOT',self.root):return f.validate_model_receipt(self.build,self.r)
@@ -122,6 +125,18 @@ class Auth(unittest.TestCase):
  def test_model_cleanup_headers_required(self):
   self.r['units'][77]['headers']={}
   with self.assertRaisesRegex(ValueError,'source/header'):self.validate()
+ def test_missing_native_allocator_unit(self):
+  self.r['units'].pop(78);self.r['object_count']=148
+  with self.assertRaisesRegex(ValueError,'object inventory'):self.validate()
+ def test_substituted_native_allocator_source(self):
+  self.r['units'][78]['source']=self.r['units'][0]['source']
+  with self.assertRaisesRegex(ValueError,'native model host allocator'):self.validate()
+ def test_native_allocator_source_closure_required(self):
+  self.inputs.pop(str(self.root/'tests/llm_native_host_allocator_test.py'))
+  with self.assertRaisesRegex(ValueError,'native host allocator input'):self.validate()
+ def test_historical_148_unit_baseline_still_supported(self):
+  self.r['units'].pop(78);self.r['object_count']=148
+  self.assertEqual(self.historical()['object_count'],148)
  def test_wrong_model_asset(self):
   (self.app/'model.gguf').write_bytes(b'y')
   with self.assertRaises(ValueError):self.validate()

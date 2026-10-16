@@ -71,6 +71,35 @@ class Audit(unittest.TestCase):
   for middle in [read(b'abd',1),read(b'abc',5),read(b'abc',3)]:
    with self.assertRaises(RuntimeError):audit_text([read(b'abc',5),middle,read(b'abc',1)],{10},{10:3})
 import audit_public_hip_llm_client_native as a
+class Allocator(unittest.TestCase):
+ def fixture(self):
+  roles=dict(buffer_alloc='cpu_alloc',buffer_free='cpu_free',finalized='finalized',stats='stats',
+   constructors=['ctor1','ctor2'],destructors=['dtor1','dtor2'],close='close',cpu='cpu')
+  edges={'cpu_alloc':['__wrap_ggml_aligned_malloc'],'cpu_free':['__wrap_ggml_aligned_free'],
+   'ggml_init':['ggml_aligned_malloc'],'ggml_free':['ggml_aligned_free'],
+   'main':['stats'],'finalized':['stats'],
+   '__wrap_ggml_aligned_malloc':['ctor2','cpu','ps5hip_llm_fail'],
+   '__wrap_ggml_aligned_free':['cpu','close','dtor2','ps5hip_llm_fail']}
+  bodies={caller:'\n'.join(f'{16+i*8:x}: addr32 callq 0x800 <{callee}>' for i,callee in enumerate(callees)) for caller,callees in edges.items()}
+  return bodies,roles
+ def test_paired_external_and_original_internal(self):
+  a.allocator_contract(*self.fixture())
+ def test_missing_ownership_or_observation_edge(self):
+  bodies,roles=self.fixture()
+  for caller,body in bodies.items():
+   for line in body.splitlines():
+    bad=dict(bodies);bad[caller]=body.replace(line,'')
+    with self.subTest(caller=caller,line=line),self.assertRaises(RuntimeError):a.allocator_contract(bad,roles)
+ def test_mixed_allocator_pair_rejected(self):
+  bodies,roles=self.fixture()
+  for caller,target in [('cpu_alloc','ggml_aligned_malloc'),('cpu_free','ggml_aligned_free'),
+   ('ggml_init','__wrap_ggml_aligned_malloc'),('ggml_free','__wrap_ggml_aligned_free'),
+   ('__wrap_ggml_aligned_malloc','ggml_aligned_malloc'),('__wrap_ggml_aligned_free','ggml_aligned_free')]:
+   bad=dict(bodies);bad[caller]+=f'\n90: callq 0x800 <{target}>'
+   with self.subTest(caller=caller),self.assertRaises(RuntimeError):a.allocator_contract(bad,roles)
+ def test_duplicate_routing_rejected(self):
+  bodies,roles=self.fixture();bodies['cpu_alloc']+='\n90: callq 0x800 <__wrap_ggml_aligned_malloc>'
+  with self.assertRaises(RuntimeError):a.allocator_contract(bodies,roles)
 class Relax(unittest.TestCase):
  def test_exact_direct(self):
   self.assertEqual(a.normalized_wrapper('1000: addr32 callq 0x1234 <ggml_graph_node>',0x1000),'call\n')

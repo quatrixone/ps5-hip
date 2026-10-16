@@ -16,6 +16,17 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The model-only GGML host allocator now uses owned `NativeMemory` direct-memory
+storage for external aligned allocations. Host sanitizer lifecycle checks and
+PS5-toolchain compilation pass. Build integration requires 149 objects, paired
+allocator wrappers, source/test hashes, balanced runtime storage and a finalizer
+check. The image auditor checks external CPU-buffer routing and preserves the
+original internal GGML allocation/free pair. Full fresh-image audit and native
+loading remain unproven; do not count this as M0 completion or inference.
+Next build model-app-v5, authenticate its three images/package, then freeze and
+review a new installed-app candidate for idle .40. Keep the consumed v2 candidate
+and installed v4 recovery package/log. Per-HIP-call accounting remains open.
+
 The corrected native model run failed during model loading. Startup and the
 watchdog guard passed, then `posix_memalign` returned ENOMEM for the
 619,094,016-byte CPU model buffer. The app quarantined; the controller's bounded

@@ -469,7 +469,9 @@ def rmsnorm_assets(fixture, reference):
                 assets={"rmsnorm/norm.hsaco":module, **reference["assets"]})
 
 
-def link_title(output, units, fixture="bootstrap", embedded=None):
+def link_title(output, units, fixture="bootstrap", embedded=None, native_host_allocator=False):
+    if native_host_allocator and fixture != "llm_client":
+        raise ValueError("native host allocator requires llm_client")
     sdk = DEPS / "sdk/target/lib"
     static = ["libc++.a", "libc++abi.a", "libunwind.a", "libc.a",
               "libps5platform.a", "libdl.a", "libpthread.a"]
@@ -503,9 +505,14 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
     if fixture == "llm_client":
         command += ["--wrap=ggml_backend_sched_graph_compute_async",
                     "--undefined=__wrap_ggml_backend_sched_graph_compute_async"]
+    if native_host_allocator:
+        command += ["--wrap=ggml_aligned_malloc", "--wrap=ggml_aligned_free",
+                    "--undefined=__wrap_ggml_aligned_malloc", "--undefined=__wrap_ggml_aligned_free"]
     run(output, "link", command)
     symbols = subprocess.check_output(["llvm-readelf-18", "-Ws", str(output / "title.elf")], text=True)
     required = ["hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"]
+    if native_host_allocator:
+        required += ["__wrap_ggml_aligned_malloc", "__wrap_ggml_aligned_free"]
     if fixture == "llm_client":
         required += ["hipMalloc", "hipFree", "hipMemcpy", "hipMemset", "hipDeviceSynchronize",
                      "llama_model_load_from_file", "llama_tokenize",

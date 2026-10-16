@@ -14,6 +14,7 @@
 #include "ggml-alloc.h"
 #include "ps5_backend.h"
 #include "model_gate.h"
+#include "native_host_allocator.h"
 #include <sys/stat.h>
 #include <cstring>
 #include <vector>
@@ -32,6 +33,15 @@ std::unique_ptr<ps5hip::SubmissionBackend> backend() {
   return std::make_unique<ps5hip::AgcBackend>();
 }
 void finalized() {
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
+  const auto host = ps5hip::llm::native_host_allocator_stats();
+  if (host.poisoned || host.failures || host.live_allocations ||
+      host.live_requested_bytes || host.allocations != host.releases) {
+    std::puts("M0_APP FAIL finalizer-host-storage");
+    (void)ps5hip_canary::sync_log();
+    for (;;) ::sleep(1);
+  }
+#endif
   if (!completed || observed.terminal ||
       observed.allocations != observed.frees ||
       observed.queues != observed.retired_queues ||
@@ -156,6 +166,16 @@ int main() {
       const auto gate=m0::reject_actual_model(model_path.c_str());
       m0::require(gate.attempts==2&&gate.graph_reused&&gate.result==-3);
       m0::require(observed.launches==0&&!observed.uncertain&&observed.allocations==observed.frees);
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
+      const auto host=ps5hip::llm::native_host_allocator_stats();
+      m0::require(host.allocations>0&&host.allocations==host.releases&&
+                  !host.live_allocations&&!host.live_requested_bytes&&!host.failures&&
+                  !host.poisoned&&host.peak_requested_bytes>=619094016);
+      std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false external_ggml_only=true\n",
+                  static_cast<unsigned long long>(host.allocations),
+                  static_cast<unsigned long long>(host.releases),
+                  static_cast<unsigned long long>(host.peak_requested_bytes));
+#endif
     }else{
       vocabulary_check();storage_and_gate_check();
     }
