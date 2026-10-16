@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "status": "PASS_OFFLINE_IMAGE_AUDIT",
+  "classification": "native-model-prefix-audit-correction",
+  "compiled_source_commit": "2f7a675",
+  "audited_function_count": 102,
+  "actual_prefix_call_chain_audited": true,
+  "prefix_callback_dataflow_proven": false,
+  "native_executed": false,
+  "gpu_numerics_verified": false,
+  "changes": [
+    "Accept complete/base constructor and destructor labels only after verifying identical unique symbol addresses and the actual call target.",
+    "Recognize the emitted GOT-load/register-call writer imports only when relocation slot, instruction displacement and unclobbered target register match."
+  ],
+  "regression_methods": 26,
+  "image_bytes_changed": false,
+  "report": {
+    "path": "results/m2-native-prefix-review-v1/alias-corrected-audit.json",
+    "sha256": "34859079bf1d8e914b821c9edd52c4f509a9b7787794f4b855c8e6888ece70d5"
+  },
+  "next": "Complete authenticated package receipt, freeze and validate actual model readbacks on console40."
+}

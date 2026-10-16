@@ -150,7 +150,48 @@ def merged_unit_headers(units):
  return headers
 
 
-def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None):
+def select_prepared_source(output, fresh, previous):
+ """Reuse only a byte-equivalent prepared tree, preserving its compiler paths."""
+ if previous is None:return fresh
+ previous=Path(previous).absolute()
+ if not any(previous.is_relative_to(ROOT/n) for n in ('build','results')) or previous==output:
+  raise ValueError('prepared source build must be a distinct build/results directory')
+ if any(p.is_symlink() for p in (previous,*previous.parents)) or previous.resolve()!=previous:
+  raise ValueError('prepared source build path is ambiguous')
+ old=previous/'source-public'
+ for folder in (previous,output):
+  receipt=folder/'source-base/receipt.json'
+  if not receipt.is_file():raise ValueError('prepared source base receipt missing')
+  data=json.loads(receipt.read_text())
+  if data.get('classification')!='exact-combined-native-clr-gpu-source':raise ValueError('prepared source base receipt differs')
+ if (previous/'source-base/receipt.json').read_bytes()!=(output/'source-base/receipt.json').read_bytes():
+  raise ValueError('prepared source base identity differs')
+ def inventory(folder):
+  if not folder.is_dir():raise ValueError('prepared source tree missing')
+  paths=list(folder.rglob('*'))
+  if any(p.is_symlink() for p in [folder,*paths]):raise ValueError('prepared source tree symlink')
+  return {str(p.relative_to(folder)):b.sha(p) for p in paths if p.is_file()}
+ old_files,new_files=inventory(old),inventory(fresh)
+ name='public-hip-preparation.json'
+ if set(old_files)!=set(new_files) or name not in old_files:raise ValueError('prepared source inventory differs')
+ old_receipt=json.loads((old/name).read_text());new_receipt=json.loads((fresh/name).read_text())
+ if old_receipt.get('classification')!='exact-public-hip-patch-roundtrip':raise ValueError('prepared public receipt differs')
+ # Only this producer's source-base input keys legitimately depend on output location.
+ inputs={}
+ for path,digest in old_receipt['inputs'].items():
+  candidate=Path(path)
+  if candidate.is_relative_to(previous/'source-base/source'):
+   path=str(output/'source-base/source'/candidate.relative_to(previous/'source-base/source'))
+  elif str(previous) in path:raise ValueError('unexpected prepared receipt reference')
+  if path in inputs:raise ValueError('ambiguous prepared receipt reference')
+  inputs[path]=digest
+ old_receipt['inputs']=inputs
+ if old_receipt!=new_receipt:raise ValueError('prepared public receipt identity differs')
+ if any(old_files[n]!=new_files[n] for n in old_files if n!=name):raise ValueError('prepared source content differs')
+ return old
+
+
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None):
  validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
@@ -319,6 +360,9 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  b.run=recorded_run
  try:
   public=b.source_tree(output,'llm_client');tree(public)
+  public=select_prepared_source(output,public,prepared_source_build)
+  if prepared_source_build is not None:
+   tree(public);bind(public.parent/'source-base/receipt.json');bind(output/'source-base/receipt.json')
   units=b.compile_units(output,public,'llm_client',client_phase=phase)
   merge(merged_unit_headers(units))
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
@@ -358,11 +402,13 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab or (model_info and model_inputs(model,model_source,cpu_build)!=model_info):raise ValueError('app prerequisite changed')
   if prefix_info and prefix_inputs(prefix_fixture)!=prefix_info:raise ValueError('prefix prerequisite changed')
   for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
+  if prepared_source_build is not None:select_prepared_source(output,output/'source-public',prepared_source_build)
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
   receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
   b.cache.verify(ROOT,cache_record)
   receipt['compiler_cache']=cache_record
+  if prepared_source_build is not None:receipt['prepared_source_build']=str(public.parent)
   if prefix_info:receipt['llm_client']['prefix']={k:prefix_info[k] for k in ('receipt','receipt_sha256','reference')}
   if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');return receipt
@@ -374,5 +420,6 @@ if __name__=='__main__':
  parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix'),default='vocab')
  for name in ('model','model-source','cpu-build'):parser.add_argument('--'+name,type=Path)
  parser.add_argument('--prefix-fixture',type=Path)
+ parser.add_argument('--prepared-source-build',type=Path,help='Reuse compiler paths only after fresh preparation proves identical source bytes')
  parser.add_argument('--model-remote-path',default=DEFAULT_MODEL_PATH)
- a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture)
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build)

@@ -153,6 +153,43 @@ def prefix_roles(match):
   'scope_constructor':'ActualPrefixQualificationC1','scope_destructor':'ActualPrefixQualificationD1',
   'backend_init':'_ZN2m0L4initE','owned':'prefix_owned','fail':'prefix_fail'}.items()}
 
+def prefix_writer_import_calls(text,slots,reader):
+ found=bound_calls(text,slots,reader)
+ rows=list(re.finditer(r'^\s*([0-9a-f]+):\s*(.*?)\s*$',text,re.M))
+ for i,row in enumerate(rows[:-1]):
+  load=re.fullmatch(r'movq\s+(-?0x[0-9a-f]+)\(%rip\),\s*%(rax|rcx)\s+#\s+0x([0-9a-f]+)(?:\s+.*)?',row[2])
+  if not load:continue
+  address=int(rows[i+1][1],16)+int(load[1],16)
+  if address not in slots:continue
+  require(int(load[3],16)==address,'prefix import GOT comment differs')
+  register=load[2];family='(?:rax|eax|ax|al|ah)' if register=='rax' else '(?:rcx|ecx|cx|cl|ch)'
+  for following in rows[i+1:i+6]:
+   if re.fullmatch(r'callq?\s+\*%'+register,following[2]):found.append(following.start());break
+   if re.search(r'%'+family+r'(?![a-z0-9])|\b(?:callq?|j[a-z]+|loop[a-z]*|retq?)\b',following[2]):break
+ return sorted(found)
+
+
+def prefix_scope_aliases(text,roles,values):
+ # LLVM may print either ABI name for identical complete/base ctor/dtor bodies.
+ for role,first,second in [('scope_constructor','C1','C2'),('scope_destructor','D1','D2')]:
+  canonical=roles[role];alias=canonical.replace('ActualPrefixQualification'+first,'ActualPrefixQualification'+second)
+  require(alias!=canonical and len(values.get(canonical,()))==1 and
+          values.get(alias)==values[canonical],'prefix scope aliases differ: '+canonical)
+  address=next(iter(values[canonical]))
+  pattern=r'((?:addr32 )?callq?\s+0x([0-9a-f]+)\s+)<('+re.escape(canonical)+'|'+re.escape(alias)+r')>'
+  def normalize(match):
+   require(int(match[2],16)==address,'prefix scope call address differs: '+match[3])
+   return match[1]+'<'+canonical+'>'
+  text=re.sub(pattern,normalize,text)
+  lea=r'(\bleaq\s+(-?0x[0-9a-f]+)\(%rip\),\s*%[a-z0-9]+\s+#\s+0x([0-9a-f]+)\s+)<('+re.escape(canonical)+'|'+re.escape(alias)+r')>([^\n]*\n\s*([0-9a-f]+):)'
+  def normalize_lea(match):
+   require(int(match[3],16)==address and int(match[6],16)+int(match[2],16)==address,
+           'prefix scope LEA address differs: '+match[4])
+   return match[1]+'<'+canonical+'>'+match[5]
+  text=re.sub(lea,normalize_lea,text)
+ return text
+
+
 def prefix_contract(bodies,roles):
  edges=dict(PREFIX_DISPATCH_EDGES)
  edges.update({
@@ -237,7 +274,7 @@ def audit(raw,converted,extracted,phase="vocab"):
  phase_contract(phase,model_gate,chain,{n:body(n) for n in chain})
  if prefix is not None:
   phase_contract(phase,prefix['run'],prefix_chain,{n:body(n) for n in prefix_chain})
-  prefix_contract({n:body(n) for n in names},prefix)
+  prefix_contract({n:prefix_scope_aliases(body(n),prefix,values) for n in names},prefix)
  if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
@@ -265,7 +302,7 @@ def audit(raw,converted,extracted,phase="vocab"):
   for caller,target in [('main',prefix['writer']),(prefix['run'],prefix['readback']),(prefix['backend_init'],prefix['graph'])]:
    require(one(target) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',body(caller))},'prefix callback address missing: '+target)
   for name in ('open','write','fsync','close'):
-   require(len(bound_calls(body(prefix['writer']),import_slots(data,name),reader))==1,'prefix raw writer import missing/duplicated: '+name)
+   require(len(prefix_writer_import_calls(body(prefix['writer']),import_slots(data,name),reader))==1,'prefix raw writer import missing/duplicated: '+name)
  audit_text([load_regions(p)[0] for p in paths],{one(n) for n in names},sizes)
  layouts=[dict(file=str(p),segments=load_layout(p.read_bytes())) for p in paths]
  imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]

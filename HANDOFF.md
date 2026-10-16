@@ -39,6 +39,14 @@ proof. Build and audit the native model-prefix package, then validate its 24
 raw tensors and lifecycle on .40. The full model still rejects unsupported work.
 See `docs/LLM_MODEL_PREFIX.md` for the reproducible Make targets and
 `evidence/offline-model-prefix-integration.json` for the bounded host evidence.
+
+The first prefix package compiled and packaged, but its audit rejected valid
+C++ constructor aliases and GOT-loaded writer calls. The corrected audit passes
+102 functions on the unchanged images; see
+`evidence/offline-model-prefix-image-audit.json`. No console run occurred.
+The failed build has no final receipt. Preserve `build/llm-native-prefix-app-v1`;
+the next build can reuse its compiler paths after fresh source comparison via
+`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD`. Cache savings are not yet measured.
 The consumed call candidate is `results/source-public-llm-call-console-v1`;
 do not replay its deployment or execution. Preserve its current package and
 the prior v10/v8 recovery artifacts. Source: `c988245`; package SHA-256:

@@ -54,3 +54,16 @@ The model stays external at `/data/hip/models/tinyllama-q4_0.gguf` by default. `
 Package creation alone is not validation. The source-only freezer, final-image audit and console controller must authenticate the selected package/assets/model before launching the native app. A fresh results directory is required because readbacks are created exclusively and synced. The four runs retain 24 F32 tensors, totaling 139264 bytes. Native completion, balanced cleanup and shell return must all appear in the strict transcript; those lines still leave numerical verification pending. The separate numerical consumer must authenticate the original model/reference and compare the readbacks before accepting this milestone.
 
 The expected final observed data-buffer counts are five allocations/frees and one created/retired default queue. The transcript also measures largest-free direct-memory extents; these are not total-free-memory measurements. A discrepancy after first-time AGC initialization requires investigation rather than assuming either a successful cleanup or a proven model-buffer leak.
+
+## Reusing prepared compiler paths
+
+For an unchanged runtime source tree, optionally pass
+`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior-app` to `make llm-native-app`,
+while selecting a fresh `LLM_NATIVE_APP_BUILD_DIR`. The builder independently
+prepares a fresh tree, compares file inventories and content with the prior
+prepared tree, and uses the prior absolute compiler paths only on an exact
+match. This permits existing ccache entries to match without weakening header,
+toolchain, model, package or final-image checks. A changed runtime tree rejects
+this selection; omit the option to prepare and compile new sources normally.
+The selected prior build becomes a receipt dependency and must be retained.
+The option does not restore a missing final receipt or guarantee a cache hit.

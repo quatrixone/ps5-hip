@@ -52,4 +52,10 @@ class PrefixMake(unittest.TestCase):
      self.assertIn('python3 tests/'+test,text)
      self.assertLess(text.index('tests/'+test),text.index('tools/build_llm_native_app.py'))
     else:self.assertNotIn('tests/'+test,text)
+ def test_prepared_source_override_and_default(self):
+  text=self.run_make('llm-native-app')
+  self.assertNotIn('--prepared-source-build',text)
+  text=self.run_make('llm-native-app','LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior source')
+  line=next(line for line in text.splitlines() if 'tools/build_llm_native_app.py' in line)
+  self.assertIn('--prepared-source-build "build/prior source"',line)
 if __name__=='__main__':unittest.main()

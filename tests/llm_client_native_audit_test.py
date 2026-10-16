@@ -157,6 +157,44 @@ class Relax(unittest.TestCase):
    self.assertNotEqual(a.normalized_wrapper('1000: '+prefix+' callq 0x1234 <name>',0x1000),'call\n')
 
 class PrefixWrapper(unittest.TestCase):
+ def test_writer_got_register_binding(self):
+  reader=lambda address,size:(bytes(size),(0,1))
+  text='10: movq 0xe9(%rip), %rcx # 0x100 <misleading_name>\n17: xorl %eax, %eax\n19: movl $0xa01, %esi\n1e: movl $0x180, %edx\n23: callq *%rcx\n'
+  self.assertEqual(len(a.prefix_writer_import_calls(text,{0x100},reader)),1)
+  self.assertEqual(a.prefix_writer_import_calls(text,{0x101},reader),[])
+  for bad in (text.replace('0xe9','0xe8'),text.replace('callq *%rcx','callq *%rax'),text.replace('xorl %eax, %eax','xorl %ecx, %ecx'),text.replace('xorl %eax, %eax','jmp 0x23')):
+   self.assertEqual(a.prefix_writer_import_calls(bad,{0x100},reader),[])
+  with self.assertRaises(RuntimeError):a.prefix_writer_import_calls(text.replace('# 0x100','# 0x101'),{0x100},reader)
+  self.assertEqual(len(a.prefix_writer_import_calls(text+text,{0x100},reader)),2)
+ def test_scope_aliases_require_identical_addresses(self):
+  roles={'scope_constructor':'ActualPrefixQualificationC1args','scope_destructor':'ActualPrefixQualificationD1Ev'}
+  values={'ActualPrefixQualificationC1args':{0x100},'ActualPrefixQualificationC2args':{0x100},'ActualPrefixQualificationD1Ev':{0x200},'ActualPrefixQualificationD2Ev':{0x200}}
+  for ctor in ('C1','C2'):
+   for dtor in ('D1','D2'):
+    text=f'10: addr32 callq 0x100 <ActualPrefixQualification{ctor}args>\n20: callq 0x200 <ActualPrefixQualification{dtor}Ev>'
+    normalized=a.prefix_scope_aliases(text,roles,values)
+    self.assertEqual(len(a.symbol_calls(normalized,roles['scope_constructor'])),1)
+    self.assertEqual(len(a.symbol_calls(normalized,roles['scope_destructor'])),1)
+  for name in values:
+   for addresses in (set(),{0x300},{0x100,0x200}):
+    bad=dict(values);bad[name]=addresses
+    with self.subTest(name=name,addresses=addresses),self.assertRaises(RuntimeError):a.prefix_scope_aliases('',roles,bad)
+ def test_scope_alias_call_operand_must_match(self):
+  roles={'scope_constructor':'ActualPrefixQualificationC1args','scope_destructor':'ActualPrefixQualificationD1Ev'}
+  values={name:{address} for name,address in [('ActualPrefixQualificationC1args',0x100),('ActualPrefixQualificationC2args',0x100),('ActualPrefixQualificationD1Ev',0x200),('ActualPrefixQualificationD2Ev',0x200)]}
+  for name in values:
+   with self.subTest(name=name),self.assertRaises(RuntimeError):a.prefix_scope_aliases('10: callq 0x300 <'+name+'>',roles,values)
+  text='10: callq 0x100 <unrelated>\n20: callq *%rax'
+  self.assertEqual(a.prefix_scope_aliases(text,roles,values),text)
+ def test_scope_alias_indirect_address_and_register_flow(self):
+  roles={'scope_constructor':'ActualPrefixQualificationC1args','scope_destructor':'ActualPrefixQualificationD1Ev'}
+  values={name:{address} for name,address in [('ActualPrefixQualificationC1args',0x100),('ActualPrefixQualificationC2args',0x100),('ActualPrefixQualificationD1Ev',0x200),('ActualPrefixQualificationD2Ev',0x200)]}
+  text='10: leaq 0xe9(%rip), %rax # 0x100 <ActualPrefixQualificationC2args>\n17: leaq -0x20(%rbp), %rdi\n1b: callq *%rax\n'
+  self.assertEqual(len(a.symbol_calls(a.prefix_scope_aliases(text,roles,values),roles['scope_constructor'])),1)
+  for bad in (text.replace('0xe9','0xe8'),text.replace('# 0x100','# 0x101'),text.replace('17:','18:')):
+   with self.assertRaises(RuntimeError):a.prefix_scope_aliases(bad,roles,values)
+  for bad in (text.replace('1b:','19: xorl %eax, %eax\n1b:'),text.replace('callq *%rax','callq *%rcx')):
+   self.assertEqual(a.symbol_calls(a.prefix_scope_aliases(bad,roles,values),roles['scope_constructor']),[])
  def fixture(self):
   body,base,support,calls=fixture();lines=[]
   for index,line in enumerate(a.PREFIX_WRAPPER_TEMPLATE.splitlines()):

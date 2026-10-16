@@ -115,6 +115,7 @@ QUALIFICATION_DIR ?= results/public-hip-host
 LLM_EXECUTED_GRAPH_DIR ?= results/llm-executed-graph
 LLM_NATIVE_CLIENT_BUILD_DIR ?= build/llm-native-client
 LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
+LLM_NATIVE_APP_PREPARED_SOURCE_BUILD ?=
 LLM_NATIVE_APP_PHASE ?= vocab
 LLM_NATIVE_APP_PREFIX_FIXTURE ?= $(LLM_PREFIX_FIXTURE_DIR)
 LLM_NATIVE_APP_MODEL ?= $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
@@ -221,7 +222,7 @@ llm-native-app: deps-build llm-deps-fetch
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_prefix_console_test.py,@true)
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_prefix_authentication_test.py,@true)
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_PREFIX_FIXTURE)/receipt.json"; then $(MAKE) llm-prefix-assets LLM_PREFIX_FIXTURE_DIR="$(LLM_NATIVE_APP_PREFIX_FIXTURE)" LLM_PREFIX_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; fi,@true)
-	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)")
+	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
 
 .PHONY: llm-executed-graph
 llm-executed-graph: llm-cpu-reference

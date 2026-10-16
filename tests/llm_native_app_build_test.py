@@ -1,5 +1,6 @@
 import importlib.util,json,tempfile,unittest
 from pathlib import Path
+from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('driver',Path(__file__).resolve().parents[1]/'tools/build_llm_native_app.py');d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
 class Driver(unittest.TestCase):
  def test_phase_exact(self):
@@ -54,4 +55,48 @@ class Driver(unittest.TestCase):
    self.assertEqual(persistent,[other]);self.assertEqual(temporary,[scratch]);digest=d.b.sha(scratch);scratch.unlink();self.assertEqual(digest,d.b.sha(final))
    persistent,temporary=d.command_file_inputs(out,'package-extract',['dotnet',str(final)],'PPSA99014');self.assertEqual(persistent,[final]);self.assertFalse(temporary)
    scratch.write_bytes(b'package');persistent,temporary=d.command_file_inputs(out,'unrelated',['tool',str(scratch)],'PPSA99014');self.assertEqual(persistent,[scratch]);self.assertFalse(temporary)
+class PreparedSource(unittest.TestCase):
+ def setUp(self):
+  self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name)
+  self.old=self.root/'build/old';self.new=self.root/'build/new'
+  for folder in (self.old,self.new):
+   (folder/'source-base/source').mkdir(parents=True);(folder/'source-public').mkdir()
+   (folder/'source-base/receipt.json').write_text(json.dumps({'classification':'exact-combined-native-clr-gpu-source'}))
+   (folder/'source-public/unit.cpp').write_text('int x;')
+   (folder/'source-public/public-hip-preparation.json').write_text(json.dumps({'classification':'exact-public-hip-patch-roundtrip','inputs':{str(folder/'source-base/source/unit.cpp'):'a'*64}}))
+  self.mock=patch.object(d,'ROOT',self.root);self.mock.start();self.addCleanup(self.mock.stop)
+ def select(self):return d.select_prepared_source(self.new,self.new/'source-public',self.old)
+ def test_identical_tree_preserves_exact_compiler_paths(self):
+  before={str(p):p.read_bytes() for p in self.old.rglob('*') if p.is_file()}
+  selected=self.select();self.assertEqual(selected,self.old/'source-public')
+  with patch.object(Path,'is_dir',return_value=True):
+   self.assertEqual(d.b.compiler_flags(selected),d.b.compiler_flags(self.old/'source-public'))
+   self.assertNotEqual(d.b.compiler_flags(selected),d.b.compiler_flags(self.new/'source-public'))
+  self.assertEqual(before,{str(p):p.read_bytes() for p in self.old.rglob('*') if p.is_file()})
+  self.assertEqual(d.select_prepared_source(self.new,self.new/'source-public',None),self.new/'source-public')
+ def test_content_and_new_file_rejected(self):
+  p=self.old/'source-public/unit.cpp';p.write_text('changed')
+  with self.assertRaisesRegex(ValueError,'content'):self.select()
+  p.write_text('int x;');(self.old/'source-public/extra.h').touch()
+  with self.assertRaisesRegex(ValueError,'inventory'):self.select()
+ def test_missing_and_changed_receipt_rejected(self):
+  p=self.old/'source-base/receipt.json';p.unlink()
+  with self.assertRaisesRegex(ValueError,'receipt missing'):self.select()
+  p.write_text(json.dumps({'classification':'exact-combined-native-clr-gpu-source','extra':True}))
+  with self.assertRaisesRegex(ValueError,'base identity'):self.select()
+ def test_symlink_rejected(self):
+  (self.old/'source-public/alias').symlink_to(self.old/'source-public/unit.cpp')
+  with self.assertRaisesRegex(ValueError,'symlink'):self.select()
+ def test_outside_and_alias_path_rejected(self):
+  with self.assertRaisesRegex(ValueError,'distinct'):d.select_prepared_source(self.new,self.new/'source-public',self.root/'outside')
+  with self.assertRaisesRegex(ValueError,'distinct'):d.select_prepared_source(self.new,self.new/'source-public',self.new)
+  alias=self.root/'build/alias';alias.symlink_to(self.old,target_is_directory=True)
+  with self.assertRaisesRegex(ValueError,'ambiguous'):d.select_prepared_source(self.new,self.new/'source-public',alias)
+ def test_unexpected_or_colliding_receipt_reference_rejected(self):
+  p=self.old/'source-public/public-hip-preparation.json';data=json.loads(p.read_text())
+  data['inputs'][str(self.old/'unexpected')]='a'*64;p.write_text(json.dumps(data))
+  with self.assertRaisesRegex(ValueError,'unexpected'):self.select()
+  del data['inputs'][str(self.old/'unexpected')];data['inputs'][str(self.new/'source-base/source/unit.cpp')]='a'*64;p.write_text(json.dumps(data))
+  with self.assertRaisesRegex(ValueError,'ambiguous'):self.select()
+
 if __name__=='__main__':unittest.main()
