@@ -1,8 +1,8 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-M1 is complete; M0 native application/backend integration is the immediate
-priority. Use idle .40 for meaningful validation and push each completed,
+M0 bounded client-boundary qualification and M1 are complete. Integrating
+the actual-model prefix, then one transformer layer, is the immediate priority. Use idle .40 for meaningful validation and push each completed,
 validated milestone to main. This review does not itself initiate a console run.
 
 ## Outcome and scope
@@ -107,7 +107,7 @@ on changes. The accepted architecture/profile remains explicit: supporting a
 serialization format does not support every model distributed in that format.
 
 Status: design reviewed against the pinned upstream API; native readers and
-adapter are not implemented or qualified. M0's per-HIP-call qualification remains
+adapter are not implemented or qualified. M0's bounded per-HIP-call qualification is complete; M2 remains
 the immediate blocker; M1 arithmetic is already qualified. The unshipped desktop
 conversion prototype was removed from active tools/Make targets after this
 clarification and retained locally under `results/deferred-host-checkpoint-prototype`.
@@ -120,7 +120,7 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 213 balanced owned allocations passed strict v10 validation on .40; vocabulary/tokenizer and HIP storage previously passed | Complete per-HIP-call qualification; v10 now passes strict clean lifecycle and post-run checks |
+| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 213 balanced owned allocations passed strict v10 validation on .40; vocabulary/tokenizer and HIP storage previously passed | Bounded per-HIP-call qualification passed; integrate actual GPU model operations in M2 |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -133,8 +133,8 @@ are not current capability declarations. No native LLM inference is claimed.
    and native application package now passes with independent freeze admission.
    Preserve that path without dependencies on historical build objects or
    local-only assets. Offline package success is not PS5 startup evidence.
-2. Validate native loading, tokenization and real HIP storage on .40. Enforce
-   rejection in the actual client graph execution path, including graph reuse.
+2. Native loading, tokenization, real HIP storage and bounded call counters
+   now pass on .40, including actual graph rejection and graph reuse.
    A vocabulary-only asset and a rejected synthetic ADD are useful preliminary
    tests, but cannot alone close M0's model graph routing requirement.
 3. Integrate GPU embedding and the proven normalization/QKV chain into that
@@ -152,7 +152,8 @@ The corrected source-only native vocabulary package is 19,922,944 bytes. Its rev
 remain unchanged. Source/input provenance and real freeze admission pass in
 `evidence/offline-native-llm-application.json`. Neither packaging nor tokenizer
 success establishes inference. Installed vocabulary-title validation passed;
-see `evidence/console40-native-vocab-success.json`. Actual-model validation remains open.
+see `evidence/console40-native-vocab-success.json`. Actual-model loading/context/rejection/reuse also passed scheduler-v10; model
+tensor computation and inference remain open.
 
 ## Required computation, in model order
 
@@ -190,7 +191,8 @@ Start immediately when implementation resumes, in parallel with M1.
 CPU inventory is complete for the fixed configuration: `make llm-executed-graph`
 and [the operator coverage table](LLM_EXECUTED_GRAPH.md) reproduce all 512
 positions and the 14 observed operations. This closes only the CPU trace part
-of M0; the native application and actual backend routing remain open.
+of M0; native loading/rejection/reuse and bounded storage calls have since
+passed their separately recorded .40 gates. Model GPU computation remains M2.
 
 The source-only payload-link prerequisite and weight-free vocabulary fixture
 also pass Make reproduction. See [native linkage](LLM_NATIVE_CLIENT.md) and
@@ -199,7 +201,8 @@ passes on PS5, but the fixture cannot construct a real model graph. The v7
 full-model test now demonstrates loading, context creation and actual-client
 rejection/reuse. That older run was rejected for a context heap warning. Scheduler v10 now passes
 strict clean-run/post-execution acceptance with 213 balanced owned allocations;
-per-HIP-call qualification remains open. See
+bounded per-HIP-call qualification now passes. See
+`evidence/console40-native-hip-call-success.json` and
 `evidence/console40-native-scheduler-model-success.json`.
 
 - Link a native minimal client using the existing GGUF loader, tokenizer and
@@ -325,9 +328,8 @@ Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-M1 and M0's source-only CPU graph inventory are complete. Promote M0's native
-link/backend prototypes into the supported build and qualify the actual
-application boundary.
+M0's bounded native client boundary and M1 are complete. Integrate the
+actual-model prefix, then qualify one complete transformer layer under M2.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.

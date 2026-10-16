@@ -18,57 +18,32 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
-HIP-call accounting is implemented at eleven bounded backend call sites. The
-fresh source-only host qualification passed: 71 runtime units, 44 llama units,
-and 116 linked objects; eager/deferred runs loaded the real model and verified
-rejection/reuse with no model computation. Seventeen injected failure/accounting
-cases pass, including concurrent and unfinished calls. See
-`evidence/offline-hip-call-qualification.json`.
+M0's bounded HIP-call qualification passed on .40 as native title PPSA99014.
+All eleven exact counter rows matched: ten successful sites and the expected
+zero cleanup-free row. The guarded 16-byte fill preserved all 48 surrounding
+bytes; copies, full clear, synchronization and 1/1 allocation/queue cleanup
+passed. The app exited normally, mounts matched, all eight installed assets
+were checked twice, services stayed healthy and both owned locks were released.
+See `evidence/console40-native-hip-call-success.json`.
 
-Native-client-v6 also passed. The new vocabulary call-qualification application
-is building at `build/llm-native-call-app-v1`; inspect
-`results/m0-call-native-app-v1/command.json` before proceeding. Its eleven exact
-snapshot rows and guarded partial fill must pass on .40 before M0 call coverage
-is accepted. Cleanup-failure coverage remains host-only; a zero native counter
-is not an exercised path.
+Together with scheduler-v10's full-model/context/rejection/reuse result and the
+fresh host failure cases, this closes the bounded M0 client-boundary gate.
+Cleanup-failure paths remain host-tested only. M1 remains complete. Neither
+result demonstrates model GPU tensor computation or inference.
 
-Next freeze/audit that candidate against installed scheduler-v10, then deploy
-and execute once using the dual-lock controller. The offline preparation is in
-`results/m0-hip-call-console-preparation-v1`. M0 remains open; M1 is complete.
-Embedding/norm/QKV prototypes now select a six-node slice from actual TinyLlama
-graphs and pass host tests, but are not part of the tracked backend or a native
-GPU result. The full model still rejects before tensor computation.
+Next integrate the actual-model embedding/norm/QKV prefix for M2. Its six-node
+host prototype passes; it remains an ignored draft until promoted, rebuilt,
+audited and validated on .40. The full model still rejects unsupported work.
+The consumed call candidate is `results/source-public-llm-call-console-v1`;
+do not replay its deployment or execution. Preserve its current package and
+the prior v10/v8 recovery artifacts. Source: `c988245`; package SHA-256:
+`363c817513c92ba565d1dc5e361a5e34646ada65f70a4a09b6afb8de09499995`.
 
-Scheduler v10 passed strict installed-title validation on 192.168.4.40 as
-PPSA99014. The app loaded the authenticated external model from
-`/data/hip/models/tinyllama-q4_0.gguf`, created its 512-token context, and rejected
-both actual model graph attempts before computation, including graph reuse.
-The raw transcript passed without warning removal; post-run snapshots and
-second installed-asset verification passed. Owned allocations/releases were
-213/213, with 663545360
-peak requested bytes and zero remaining requested bytes. The title stopped
-normally; services remained healthy and both owned locks were released.
-See `evidence/console40-native-scheduler-model-success.json`.
-
-This closes the clean model/context/rejection lifecycle experiment. M0 remains
-open for bounded per-HIP-call accounting and its host/native qualification.
-Reuse the accepted vocabulary/tokenizer/storage and M1 weighted-QKV evidence;
-no model tensor computation, HIP weight/KV residency, inference, or native
-safetensors/PyTorch loading is claimed.
-
-Handoff: this candidate's deployment/execution are consumed; do not replay them.
-The call-counter draft and current-source host test are now integrated as
-reported above; the new native call snapshot remains pending.
-Keep prior rejected runs and their raw evidence unchanged. The client backend still supports zero tensor operators; integrating GPU
-operators is the following M2 milestone.
-
-Identity: source `d0fd5c49563413f981a2b80558ef1bf0e7d332d5`, package `93587aec9b57009b6906dceb265612a185dbccefea2caafe0bf69c9468ac1c74`
-(21987328 bytes), manifest `9e60df1f1efa846fe86c02c8d46adcef1f49814ac77388fef29a4acf4e8c0eb6`.
-
-CPU-reference-v3, native-client-v5, vocabulary-v2 and model-app-v10 all passed.
-Preserve their receipts, active model files and installed recovery artifacts.
-The C compiler cache fix made afterward is host-tested; a future native build
-requires new receipts for the changed wrapper identity.
+Disk cleanup removed 3167 superseded native/experiment object files (1.06 GiB).
+Receipts, sources, models, logs and recovery packages were retained; old
+receipts referencing pruned objects require a rebuild for full reauthentication.
+The active call candidate's inputs were excluded. Local deletion ledgers are
+under `results/m0-hip-call-console-preparation-v1`.
 
 Build-performance milestone: Make exports bounded `JOBS` to the active native
 client/public runtime/CPU-reference and host/native CMake stages. Native compiler

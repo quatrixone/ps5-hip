@@ -59,8 +59,8 @@ rejected without replacement. The trace output directory itself must be new.
 
 The tasks below turn the observed inventory into backend work. They are not
 implemented routes. The evidence states in the table above remain unchanged.
-M0 still requires the native actual-client rejection result and the call
-instrumentation described in [M0-CALLS](#m0-calls). Completing the operators
+M0 now has native actual-client rejection and the bounded call
+qualification described in [M0-CALLS](#m0-calls). Completing the operators
 belongs to M2; the existence of a task is not evidence of implementation.
 
 | Observed operation | Backend task and specialization | Actual locked-client caller |
@@ -90,10 +90,10 @@ counting a HIP attempt. Graph-statistics reset does not erase call accounting.
 Seventeen host injection cases cover success, bounds, every error/cleanup site,
 concurrent calls and a call that never returns. Fresh genuine-runtime host
 qualification also passes in eager/deferred modes with the actual loaded model.
-See `evidence/offline-hip-call-qualification.json`. Native snapshots are pending:
-the new fixture requires ten exercised sites and an explicitly zero cleanup-free
-row, partial-fill surroundings, clear, synchronization and balanced teardown.
-Only its accepted native receipt can promote those rows to native-tested.
+See `evidence/offline-hip-call-qualification.json`. Native qualification now passes:
+ten exercised sites and an explicitly zero cleanup-free row, exact partial-fill
+surroundings, clear, synchronization and balanced teardown. See
+`evidence/console40-native-hip-call-success.json`; cleanup-free remains host-only.
 
 Current `GateStatistics` measures wrapper calls, rejection, forwarding, direct
 backend graph calls and the last graph pointer. The actual-client harness also
@@ -103,11 +103,11 @@ of the rejection/lifetime tests; they are not a per-HIP-call or kernel-route tra
 
 | Public HIP/library call | Current native backend caller | Existing evidence and remaining task |
 | --- | --- | --- |
-| `hipInit`, `hipGetDeviceCount` | `ps5_backend.cpp::init`; also title startup | Native vocabulary initialization passed. Caller counts/results implemented and host-tested; new native snapshot pending. |
-| `hipMalloc`, `hipFree` | `allocate`, `free_buffer`, allocation-error cleanup | Native vocabulary reports one allocation/free; buffer requests are capped at 64 MiB. Calls/errors host-tested; native snapshot pending. Full model GPU residency remains M3. |
-| `hipMemcpy` H2D/D2H/D2D | `set`, `get`, `copy` | Native vocabulary validates 16 copied values. Directions and byte counts host-tested; native snapshot pending, not general stride coverage. |
-| `hipMemset` | `fill`, `clear` | Native vocabulary validates clear. Both callbacks host-tested; new guarded native partial-fill snapshot pending. |
-| `hipDeviceSynchronize` | `sync` | Native storage lifecycle passed. Call/result instrumentation host-tested; new native snapshot pending. |
+| `hipInit`, `hipGetDeviceCount` | `ps5_backend.cpp::init`; also title startup | Native vocabulary initialization passed. Caller counts/results implemented and host-tested; exact native snapshot passed. |
+| `hipMalloc`, `hipFree` | `allocate`, `free_buffer`, allocation-error cleanup | Native vocabulary reports one allocation/free; buffer requests are capped at 64 MiB. Calls/errors host-tested; native successful snapshot passed; cleanup failure remains host-only. Full model GPU residency remains M3. |
+| `hipMemcpy` H2D/D2H/D2D | `set`, `get`, `copy` | Native vocabulary validates 16 copied values. Directions and byte counts host-tested; native snapshot passed for H2D 64/D2H 192/D2D 64 requested bytes; no general stride coverage. |
+| `hipMemset` | `fill`, `clear` | Native vocabulary validates clear. Both callbacks host-tested; guarded native 16-byte fill and 512-byte clear snapshot passed. |
+| `hipDeviceSynchronize` | `sync` | Native storage lifecycle passed. Call/result instrumentation host-tested; exact native snapshot passed. |
 | Module load, function lookup, launch, synchronization and unload | No current tensor route in `ps5_backend.cpp::graph` | [M2-DISPATCH](#m2-dispatch): integrate existing genuine public HIP APIs and instrument selected routes. Isolated kernel diagnostics do not establish client calls. |
 | BLAS or other math-library calls | No current client math route | M2-MATMUL must select an explicit bounded implementation for attention. No required library call is established by the CPU trace; do not import an entire library or claim no library is needed without that decision. |
 
