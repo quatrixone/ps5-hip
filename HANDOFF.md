@@ -40,7 +40,7 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
-Current offline correction: model-only external GGML aligned allocations use
+Current offline correction: model-only GGML aligned allocation pairs use
 `ports/ggml/native_host_allocator.cpp` and the existing `NativeMemory` owner.
 The bounded owner ledger quarantines failed cleanup without destructor retry.
 Main and finalizer require balanced ownership; the transcript records measured
@@ -48,9 +48,20 @@ counts/peak bytes separately from HIP observations. The 149-object builder and
 image auditor enforce paired routing; vocabulary stays at 147 objects and
 historical recovery accepts the prior model packages.
 
-Next full build: `.local/build_native_model_app_v5.py` runs the supported Make
-target into `build/llm-native-model-app-v5`, with results directory
-`/user/homebrew/ps5-hip/m0-model-v5`. Independently audit/admit the resulting
+V5 Make failed its final audit after successful linking/packaging. lld also wraps
+same-unit `ggml_init/free` calls, contrary to the original external-only assumption.
+The corrected audit covers all selected aligned pairs, including the indirect
+threadpool allocation. Seventeen tests and a retained-image diagnostic pass
+45 functions; v5 has no successful build receipt and must not be deployed.
+See `results/m0-native-allocator-routing-audit-v1/` and the failed v5 Make logs.
+Only v5's undeployed package and duplicate model were pruned (1,447,551,232 bytes);
+hashes are in `results/m0-native-model-v5-package-retention.json`. Raw images,
+failure logs and installed v4 recovery artifacts remain. Compact correction
+evidence is `evidence/offline-native-ggml-routing-correction.json`.
+
+Next full build: `.local/build_native_model_app_v6.py` runs the supported Make
+target into `build/llm-native-model-app-v6`, with results directory
+`/user/homebrew/ps5-hip/m0-model-v6`. Independently audit/admit the resulting
 package before freezing a fresh candidate and using idle .40. No native allocator
 success is claimed. Preserve v4 recovery and all failed evidence. The source-only
 Make target, rather than the local convenience script, remains authoritative.

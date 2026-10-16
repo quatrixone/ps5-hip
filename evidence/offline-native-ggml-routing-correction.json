@@ -1,0 +1,38 @@
+{
+  "status": "PASS_OFFLINE_ROUTING_CORRECTION",
+  "classification": "native-ggml-aligned-routing-diagnosis",
+  "failed_make_exit_code": 2,
+  "failure": "Prior auditor assumed same-translation-unit GGML aligned calls bypass linker wrapping; actual lld PLT32 relocations route both sides to wrappers and discard originals.",
+  "corrected_contract": "Selected GGML context, CPU buffer and threadpool aligned allocation/free pairs use NativeMemory ownership. Ordinary libc allocation unchanged.",
+  "diagnostic_audited_functions": 45,
+  "test_suites": 16,
+  "test_methods": 116,
+  "diagnostic_only": true,
+  "fresh_build_required": true,
+  "native_executed": false,
+  "M0_complete": false,
+  "deleted_rebuildable_bytes": 1447551232,
+  "evidence_sha256": {
+    "results/m0-native-model-app-production-make-v5/command.json": "ae6e5da848a1a0759ce6adf0d87dd18088ea8e79542e6c21be1c71e75e51d130",
+    "build/llm-native-model-app-v5/audit-client.stderr": "a522666ae82f431092be396557aeaff70e7e944a98a81647f5d6bf4e4bad0cd9",
+    "results/m0-native-allocator-routing-audit-v1/audit.json": "4d9fa437e840cbbcf7632d68be037053a53c092ecd6b22a2508d096ed402eff4",
+    "results/m0-native-allocator-routing-audit-v1/review.json": "f34c7f30338865c42b4b51ead74ed89294024eb0b28d72ee2463817c3cdef686",
+    "results/m0-native-allocator-routing-independent-review-v1/review.json": "48cd6aad3796b0775f417d892392b3be85a8353af2398d5d7325c6de2c8e253f",
+    "results/m0-native-allocator-root-tests-v2/report.json": "e592727ac0f20e2bef75a71eb2038b48a29ad31e2d7cb00f7ade6173be933eeb",
+    "results/m0-native-model-v5-package-retention.json": "82fc6074c09a770af3796d752b2b2ce37fdcdea0b965319a196a98b57f324cea"
+  },
+  "source_sha256": {
+    "tools/audit_public_hip_llm_client_native.py": "6ec9fab0a58cb973132b6903a2bf2faaa902eec383a36375520512c659fd1461",
+    "tests/llm_client_native_audit_test.py": "e97c681f79f5d81febf144d3d5b7606285f74605a6de36f687c51a95b496e068",
+    "tools/source_llm_model_log.py": "66faef5e84827a9409a5f28c55258ffb2227586ae262b2ae0696dcd3024fb673",
+    "tools/public_hip_llm_client_console_title.cpp": "0f7b3c397ec452d6d8a46806d899aa8ef95ed0b6e87f93f17c6bce3a5c63494d",
+    "ports/ggml/native_host_allocator.h": "04749238ede7866ad93aab85623a13023410b8235ef24a85e67d6dc2c02d8a64",
+    "ports/ggml/model_gate.h": "df354de65a14a01a9f3802f282931ef215b60e2e9e54541628b02383d75b353d",
+    "tests/source_model_execute_test.py": "1e915246ab6103077f260ec68a93e6f08a9910f994359513146264ba36d8a78a"
+  },
+  "limits": [
+    "V5 has no successful receipt and must not be deployed; preserved images are diagnostic evidence only.",
+    "Capacity, mapping overhead, model loading, reuse and natural shutdown remain native validation requirements.",
+    "Failed v5 package and duplicate model pruned after hash recording; images/logs and installed v4 recovery preserved."
+  ]
+}

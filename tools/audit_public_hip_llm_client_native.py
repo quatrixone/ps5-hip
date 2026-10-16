@@ -31,16 +31,39 @@ SOURCES=['tools/audit_public_hip_llm_client_native.py','tests/llm_client_native_
 ALLOCATOR_SOURCES=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
  'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h']
 
+def threadpool_indirect_malloc(body,target):
+ # Exact observed LLVM18 O0 prefix: RIP-relative wrapper address, pool size,
+ # then indirect call. Resolve the LEA using its actual next instruction address.
+ instructions=[]
+ for line in body.splitlines():
+  m=re.match(r'^\s*([0-9a-f]+):\s+(.*)$',line)
+  if m:instructions.append((int(m[1],16),m[2].split('#')[0].strip()))
+ hits=[]
+ for i,(address,text) in enumerate(instructions):
+  if text not in ('callq\t*%rax','callq *%rax'):continue
+  require(i>=2,'unbound threadpool indirect allocator')
+  lea=re.fullmatch(r'leaq\s+(-?0x[0-9a-f]+)\(%rip\),\s*%rax',instructions[i-2][1])
+  require(lea is not None and re.fullmatch(r'movl\s+\$0x100,\s*%edi',instructions[i-1][1]) is not None,
+          'threadpool allocator register flow differs')
+  require(instructions[i-1][0]+int(lea[1],16)==target,'threadpool allocator LEA target differs')
+  hits.append(address)
+ require(len(hits)==1,'threadpool first allocation call missing/duplicated')
+ return hits
+
 def allocator_contract(bodies,roles):
- """Audit concrete external routing, not a claim that every allocation is wrapped."""
+ """All selected GGML aligned pairs, not ordinary libc allocations."""
  malloc='__wrap_ggml_aligned_malloc';free='__wrap_ggml_aligned_free'
- for caller,expected,forbidden in [
-  (roles['buffer_alloc'],malloc,'ggml_aligned_malloc'),
-  (roles['buffer_free'],free,'ggml_aligned_free'),
-  ('ggml_init','ggml_aligned_malloc',malloc),
-  ('ggml_free','ggml_aligned_free',free)]:
-  require(len(symbol_calls(bodies[caller],expected))==1,'allocator routing missing/duplicated: '+caller)
-  require(not symbol_calls(bodies[caller],forbidden),'allocator ownership pair bypass: '+caller)
+ for caller,expected,count in [
+  (roles['buffer_alloc'],malloc,1),(roles['buffer_free'],free,1),
+  ('ggml_init',malloc,1),('ggml_free',free,1),
+  ('ggml_threadpool_new_impl',malloc,1),('ggml_threadpool_free',free,2)]:
+  calls=symbol_calls(bodies[caller],expected)
+  if caller=='ggml_threadpool_new_impl':
+   calls=list(re.finditer(r'\bcallq?\s+0x[0-9a-f]+\s+<'+re.escape(expected)+r'>',bodies[caller]))
+  require(len(calls)==count,'allocator routing missing/duplicated: '+caller)
+  for original in ('ggml_aligned_malloc','ggml_aligned_free'):
+   require(not symbol_calls(bodies[caller],original),'original allocator pair bypass: '+caller)
+ threadpool_indirect_malloc(bodies['ggml_threadpool_new_impl'],roles['malloc_address'])
  for caller in ('main',roles['finalized']):
   require(symbol_calls(bodies[caller],roles['stats']),'allocator observation missing: '+caller)
  for caller,targets in [(malloc,roles['constructors']),(free,roles['destructors']),
@@ -137,14 +160,14 @@ def audit(raw,converted,extracted,phase="vocab"):
   allocator_roles=dict(buffer_alloc=match('ggml_backend_cpu_buffer_type_alloc_buffer'),
    buffer_free=match('ggml_backend_cpu_buffer_free_buffer'),finalized=finalized,
    stats=match('native_host_allocator_stats'),close=match('NativeMemory5closeEv'),
-   cpu=match('NativeMemory3cpuEv'))
+   cpu=match('NativeMemory3cpuEv'),malloc_address=one('__wrap_ggml_aligned_malloc'))
   for role,fragments in [('constructors',('NativeMemoryC1Emmb','NativeMemoryC2Emmb')),
                          ('destructors',('NativeMemoryD1Ev','NativeMemoryD2Ev'))]:
    aliases=[n for n in values if any(fragment in n for fragment in fragments)]
    require(aliases and len({one(n) for n in aliases})==1,'missing/ambiguous NativeMemory '+role)
    allocator_roles[role]=aliases
   allocator_names=['__wrap_ggml_aligned_malloc','__wrap_ggml_aligned_free','ggml_init','ggml_free',
-   'ggml_aligned_malloc','ggml_aligned_free','ps5hip_llm_fail',allocator_roles['buffer_alloc'],
+   'ggml_threadpool_new_impl','ggml_threadpool_free','ps5hip_llm_fail',allocator_roles['buffer_alloc'],
    allocator_roles['buffer_free'],allocator_roles['stats'],allocator_roles['close'],allocator_roles['cpu'],
    *allocator_roles['constructors'],*allocator_roles['destructors']]
   names+=list(dict.fromkeys(n for n in allocator_names if n not in names))
@@ -178,7 +201,7 @@ def audit(raw,converted,extracted,phase="vocab"):
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
   native_allocator_routing_audited=(phase=='model-gate'),
   wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase=='model-gate'),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
-  limits=['External CPU buffer allocation/free wrapping and same-TU original pairing are checked only in model mode; this is not all-allocation interception or runtime ownership proof.',
+  limits=['Selected GGML context, CPU-buffer and threadpool aligned pairs are checked in model mode; ordinary libc allocations are not intercepted and native ownership is unproven.',
   'Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
   'Reviewed LLVM18 O0 wrapper template rejects nonempty graphs with current zero-op predicate; any codegen change requires review.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])

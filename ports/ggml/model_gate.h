@@ -33,7 +33,7 @@ inline ModelGateResult reject_actual_model(const char* path){
  ModelGateLog logs;llama_log_set(ModelGateLog::callback,&logs);
  llama_backend_init();ggml_backend_register(registration());
  auto mp=llama_model_default_params();mp.n_gpu_layers=0;mp.use_extra_bufts=false;mp.check_tensors=true;
- // CPU reads only; native external GGML storage is owned direct memory, without file mapping or page locking.
+ // CPU reads only; native GGML aligned storage is owned direct memory, without file mapping or page locking.
  mp.load_mode=LLAMA_LOAD_MODE_NONE;mp.lazy_mode=LLAMA_LAZY_MODE_OFF;
  ggml_backend_dev_t devices[]={device_handle(),nullptr};mp.devices=devices;
  std::unique_ptr<llama_model,decltype(&llama_model_free)> model(llama_model_load_from_file(path,mp),llama_model_free);require(bool(model)&&!logs.unexpected.load());

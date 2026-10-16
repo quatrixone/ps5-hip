@@ -74,13 +74,16 @@ import audit_public_hip_llm_client_native as a
 class Allocator(unittest.TestCase):
  def fixture(self):
   roles=dict(buffer_alloc='cpu_alloc',buffer_free='cpu_free',finalized='finalized',stats='stats',
-   constructors=['ctor1','ctor2'],destructors=['dtor1','dtor2'],close='close',cpu='cpu')
+   constructors=['ctor1','ctor2'],destructors=['dtor1','dtor2'],close='close',cpu='cpu',malloc_address=0x800)
   edges={'cpu_alloc':['__wrap_ggml_aligned_malloc'],'cpu_free':['__wrap_ggml_aligned_free'],
-   'ggml_init':['ggml_aligned_malloc'],'ggml_free':['ggml_aligned_free'],
+   'ggml_init':['__wrap_ggml_aligned_malloc'],'ggml_free':['__wrap_ggml_aligned_free'],
+   'ggml_threadpool_new_impl':['__wrap_ggml_aligned_malloc'],
+   'ggml_threadpool_free':['__wrap_ggml_aligned_free','__wrap_ggml_aligned_free'],
    'main':['stats'],'finalized':['stats'],
    '__wrap_ggml_aligned_malloc':['ctor2','cpu','ps5hip_llm_fail'],
    '__wrap_ggml_aligned_free':['cpu','close','dtor2','ps5hip_llm_fail']}
   bodies={caller:'\n'.join(f'{16+i*8:x}: addr32 callq 0x800 <{callee}>' for i,callee in enumerate(callees)) for caller,callees in edges.items()}
+  bodies['ggml_threadpool_new_impl']+='\n100: leaq 0x6f9(%rip), %rax\n107: movl $0x100, %edi\n10c: callq *%rax'
   return bodies,roles
  def test_paired_external_and_original_internal(self):
   a.allocator_contract(*self.fixture())
@@ -93,10 +96,17 @@ class Allocator(unittest.TestCase):
  def test_mixed_allocator_pair_rejected(self):
   bodies,roles=self.fixture()
   for caller,target in [('cpu_alloc','ggml_aligned_malloc'),('cpu_free','ggml_aligned_free'),
-   ('ggml_init','__wrap_ggml_aligned_malloc'),('ggml_free','__wrap_ggml_aligned_free'),
+   ('ggml_init','ggml_aligned_malloc'),('ggml_free','ggml_aligned_free'),
    ('__wrap_ggml_aligned_malloc','ggml_aligned_malloc'),('__wrap_ggml_aligned_free','ggml_aligned_free')]:
    bad=dict(bodies);bad[caller]+=f'\n90: callq 0x800 <{target}>'
    with self.subTest(caller=caller),self.assertRaises(RuntimeError):a.allocator_contract(bad,roles)
+ def test_indirect_target_and_register_flow_rejected(self):
+  bodies,roles=self.fixture();original=bodies['ggml_threadpool_new_impl']
+  for bad in [original.replace('0x6f9','0x6f8'),original.replace('%rax','%rcx'),
+   original.replace('$0x100','$0x200'),original.replace('10c: callq','109: xorq %rax, %rax\n10c: callq'),
+   original.replace('leaq','movq'),original+'\n200: callq *%rax']:
+   altered=dict(bodies);altered['ggml_threadpool_new_impl']=bad
+   with self.subTest(body=bad),self.assertRaises(RuntimeError):a.allocator_contract(altered,roles)
  def test_duplicate_routing_rejected(self):
   bodies,roles=self.fixture();bodies['cpu_alloc']+='\n90: callq 0x800 <__wrap_ggml_aligned_malloc>'
   with self.assertRaises(RuntimeError):a.allocator_contract(bodies,roles)

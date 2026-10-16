@@ -171,7 +171,7 @@ int main() {
       m0::require(host.allocations>0&&host.allocations==host.releases&&
                   !host.live_allocations&&!host.live_requested_bytes&&!host.failures&&
                   !host.poisoned&&host.peak_requested_bytes>=619094016);
-      std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false external_ggml_only=true\n",
+      std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false scope=ggml_aligned\n",
                   static_cast<unsigned long long>(host.allocations),
                   static_cast<unsigned long long>(host.releases),
                   static_cast<unsigned long long>(host.peak_requested_bytes));

@@ -3,8 +3,8 @@
 #include <cstdint>
 
 namespace ps5hip::llm {
-// External GGML aligned allocations only. Same-TU ggml.c allocations retain
-// their original allocator/free pair. This does not change the HIP allocation cap.
+// GGML aligned allocation pairs, including contexts, CPU buffers and threadpools.
+// Ordinary libc allocation and the HIP allocation cap are unchanged.
 struct NativeHostAllocatorStats {
   uint64_t allocations, releases, live_allocations;
   uint64_t live_requested_bytes, peak_requested_bytes, failures;
