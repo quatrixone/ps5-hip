@@ -1,0 +1,36 @@
+{
+  "classification": "offline-weighted-qkv-package-and-console-controls",
+  "status": "PASS",
+  "gpu_executed": false,
+  "native_package_built": false,
+  "package_review": {
+    "path": "results/weighted-qkv-package-source-review-v1/review.json",
+    "sha256": "e68dd0a4ccf81deb606f49321163e0bdce7b194d4b8542b2ba12c760b86cac0f"
+  },
+  "controller_review": {
+    "path": "results/weighted-qkv-controller-review-v1/review.json",
+    "sha256": "3e663a09010ad77abea00504becaf50543e12620a9e82ef2bde011a13ffa8d93"
+  },
+  "author_package_tests": {
+    "path": "results/weighted-qkv-build-controls-v1/receipt.json",
+    "sha256": "11546db298d25fa03178a62aead7d642794ce7cd63349c3ae5c5aed8a2570803"
+  },
+  "author_controller_tests": {
+    "path": "results/weighted-qkv-controls-tests-v1/review.json",
+    "sha256": "ac18418d93f871cd04132a168aed5feb8f426679f5e6bfaa5b95da20d5df0f7d"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/weighted-qkv-controls-v1 -R weighted_qkv --output-on-failure",
+    "passed": 6,
+    "failed": 0
+  },
+  "limits": [
+    "Source integration and offline controls only; actual package/image outcome still pending",
+    "Native weighted/QKV numerical gate remains unqualified",
+    "Second PS5-Claude workspace lock requires separate operator coordination"
+  ],
+  "native_source_review": {
+    "path": "results/weighted-qkv-native-source-review-v1/review.json",
+    "sha256": "ac7cb90930c2cba059d9073112377b2d8ad4400560fd280e25d56860fe7ef01f"
+  }
+}

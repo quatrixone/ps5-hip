@@ -136,15 +136,40 @@ def check_q4_lines(raw):
     return dict(max_abs=maximum,max_budget_fraction=fraction,stages=metrics)
 
 
+LOG_NAMES['weighted_qkv']='ps5-hip-public-weighted-qkv.log'
+
+def check_weighted_qkv_lines(raw):
+    lines=raw.decode('ascii').splitlines()
+    if raw!=('\n'.join(lines)+'\n').encode('ascii') or len(lines)!=20:
+        raise ValueError('weighted QKV transcript framing')
+    expected=[LINES[0].replace('bootstrap','weighted_qkv'),LINES[1]]
+    for stage in ('weighted','q8','q','k','v'):
+        rows=2048 if stage=='q' else 256 if stage in ('k','v') else 0
+        expected.append(f'HIP_WEIGHTED_QKV DUMP stage={stage} files=6 bytes=2394560 exclusive=true synced=true')
+        expected.append(f'HIP_WEIGHTED_QKV STAGE stage={stage} weighted_values={2048 if stage=="weighted" else 0} q8_bytes={2304 if stage=="q8" else 0} projection_values={rows} unchanged=true guards=true inactive=true shared_intermediates=true numerical_verification=pending')
+    number=r'([0-9]+(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?)'
+    line=lines[len(expected)]
+    pattern=('HIP_WEIGHTED_QKV TRANSPORT_COMPLETE stages=5 launches=5 weighted_values=2048 projection_values=2560 q8_bytes=2304 raw_files=30 raw_bytes=11972800 weighted_max_abs='+number+' weighted_max_budget_fraction='+number+' allocations=6 frees=6 modules_unloaded=3 watchdog_joined=true numerical_verification=pending finalization=pending')
+    match=re.fullmatch(pattern,line)
+    if not match:raise ValueError('weighted QKV transport totals differ')
+    error,fraction=map(float,match.groups())
+    if not math.isfinite(error) or not math.isfinite(fraction) or not 0<=fraction<=1:
+        raise ValueError('weighted QKV reported error')
+    expected.extend([line,*LINES[3:6],'HIP_WEIGHTED_QKV FINAL allocations=6 frees=6 queues=1 retired=1 gate_destroyed=true application_fini=pending',*LINES[7:]])
+    if lines!=expected:raise ValueError('weighted QKV lifecycle or stages differ')
+    return {'max_abs':error,'max_budget_fraction':fraction}
+
+
 def check_log(raw, fixture='bootstrap'):
     if not isinstance(raw, bytes) or len(raw) > 65536:
         raise ValueError('public HIP transcript type or size')
-    if fixture in ('rmsnorm', 'q4'):
+    if fixture in ('rmsnorm', 'q4', 'weighted_qkv'):
         try:
-            metrics = check_rmsnorm_lines(raw) if fixture == 'rmsnorm' else check_q4_lines(raw)
+            metrics = (check_weighted_qkv_lines(raw) if fixture == 'weighted_qkv' else
+                       check_rmsnorm_lines(raw) if fixture == 'rmsnorm' else check_q4_lines(raw))
         except (UnicodeError, IndexError) as error:
             raise ValueError(fixture+' transcript invalid') from error
-        return {'application_result': 'application-pass', 'kernel': 'public_hip_'+fixture,
+        return {'application_result': 'transport-complete' if fixture=='weighted_qkv' else 'application-pass', 'kernel': 'public_hip_'+fixture,
                 'target': 'gfx1013', 'log_sha256': hashlib.sha256(raw).hexdigest(),
                 'bytes': len(raw), 'hardware_gate_passed': False, 'reported_metrics': metrics,
                 'unproven': ['independent raw-buffer numerical validation', 'freshness',

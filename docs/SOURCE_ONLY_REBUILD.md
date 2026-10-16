@@ -621,3 +621,42 @@ The receipt records CPU execution only. Native chained validation must first
 check the actual GPU weighted output against the frozen budget, then derive
 its Q8/Q4 oracle from that captured output: quantization can differ across a
 rounding threshold even when normalization is within budget.
+
+### Native weighted normalization and full Q/K/V diagnostic
+
+`make public-hip-weighted-qkv-package` builds the learned-weight RMSNorm module,
+the qualified halfword Q4 variant and Q8 module, real-model reference assets,
+and the native five-stage title. It audits the raw, converted and extracted
+images. Choose fresh compiler-fixture, reference and package directories:
+
+```sh
+make public-hip-weighted-qkv-package \
+  LLM_RMSNORM_FIXTURE_DIR=results/qkv-norm-fixture \
+  LLM_WEIGHTED_RMSNORM_FIXTURE_DIR=results/qkv-weighted-fixture \
+  LLM_Q4_FIXTURE_DIR=results/qkv-q4-fixture \
+  LLM_Q4_HALFWORD_FIXTURE_DIR=results/qkv-halfword-fixture \
+  LLM_WEIGHTED_QKV_REFERENCE_DIR=results/qkv-reference \
+  WEIGHTED_QKV_BUILD_DIR=build/qkv-native \
+  RESULTS_DIR=/data/ps5-hip/results-weighted-qkv
+```
+
+`RESULTS_DIR` is configurable and must meet the runtime path rules. This command
+builds a package; it does not deploy or launch it. Preserve previous receipts:
+source changes can require fresh fixtures even when module bytes stay identical.
+
+The title keeps weighted activation and Q8 allocations on the GPU across all
+five stages and writes 30 complete buffer captures. Its completion marker means
+transport finished; final numerical acceptance requires authenticated captures:
+
+```sh
+python3 tools/verify_weighted_qkv_readbacks.py \
+  --reference results/qkv-reference \
+  --dumps results/qkv-console-raw \
+  --output results/qkv-readback-comparison.json
+```
+
+The raw directory must contain exactly the 30 expected files. This verifier
+checks guards, unchanged inputs, shared-buffer continuity and frozen error
+budgets. File comparisons alone do not establish console origin or exclude an
+identical-byte reupload; deployment, execution and package evidence are separate
+requirements. No weighted Q/K/V console outcome is claimed by the build.

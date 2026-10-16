@@ -1,0 +1,32 @@
+{
+  "classification": "offline-weighted-qkv-readback-verifier",
+  "status": "PASS",
+  "gpu_executed": false,
+  "review": {
+    "path": "results/weighted-qkv-readback-source-review-v2/review.json",
+    "sha256": "840425c64657c82b21bb8a9e70839ca06639dfaa4a42466ec10d8d437eb899be"
+  },
+  "synthetic_validation": {
+    "path": "results/weighted-qkv-verifier-synthetic-v2/review.json",
+    "sha256": "54e124d99c99374e7166920d50f80306cea5c58152f93e0c39887c51cf0a6413"
+  },
+  "checks": [
+    "Eight focused tests, including tool-identity conflict regression",
+    "Synthetic CPU-origin full-size 30-buffer comparison",
+    "2048 weighted outputs validated against frozen error budget before exact Q8 derivation",
+    "All 2560 Q/K/V outputs compared against unchanged Q4 oracle",
+    "Guards, inactive bytes, inputs and shared-intermediate byte continuity checked"
+  ],
+  "counts": {
+    "raw_files": 30,
+    "raw_bytes": 11972800,
+    "weighted_values": 2048,
+    "q8_bytes": 2304,
+    "projection_values": 2560
+  },
+  "limits": [
+    "Synthetic CPU-origin data only; not native arithmetic validation",
+    "File equality cannot establish hardware origin or exclude identical-byte reuploads",
+    "Native package, execution freshness, lifecycle and console health require separate evidence"
+  ]
+}

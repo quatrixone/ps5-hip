@@ -190,6 +190,52 @@ def freeze_q4_reference(build, receipt, output):
             'module_sha256':{name:expected['q4/'+name+'.hsaco'] for name in ('q8','q4')}}
 
 
+WEIGHTED_QKV_REFERENCE_LIMIT=16*1024*1024
+WEIGHTED_QKV_VERIFY_SOURCES=('tools/verify_weighted_qkv_readbacks.py','tools/public_hip_weighted_qkv_assets.py',
+    'tools/build_llm_weighted_qkv_reference.py','tools/llm_q4_reference.py','tools/build_public_hip.py',
+    'tests/weighted_qkv_readbacks_test.py','tests/source_weighted_qkv_controls_test.py')
+
+def validate_weighted_qkv_audit(build,receipt):
+    from build_public_hip import validate_weighted_qkv_audit as validate
+    if not receipt.get("weighted_qkv_audit_sha256"):raise ValueError("missing weighted audit identity")
+    validate(build,receipt["weighted_qkv_audit_sha256"])
+    roundtrip=receipt.get("fself_roundtrip",{})
+    for name,h in (("title.elf",receipt.get("title_elf_sha256")),("eboot.elf",roundtrip.get("elf_sha256")),("extracted.elf",roundtrip.get("extracted_sha256"))):
+        if h is None or digest(build/name)!=h:raise ValueError("weighted audited image differs from receipt")
+    return build/'weighted-qkv-native-audit.json'
+
+def freeze_weighted_qkv_reference(build,receipt,output):
+    from public_hip_weighted_qkv_assets import assets
+    bound=receipt.get('weighted_qkv',{})
+    original=Path(bound.get('reference',{}).get('receipt','')).resolve()
+    module_paths={n:Path(bound.get('assets',{}).get('weighted-qkv/'+n+'.hsaco','')).resolve() for n in ('weighted','q8','q4')}
+    weighted=module_paths['weighted'].parent;q4=module_paths['q4'].parent
+    if (not original.is_file() or any(not p.is_file() or not p.is_relative_to(ROOT) or p.name!=n+'.hsaco' for n,p in module_paths.items()) or module_paths['q8'].parent!=q4 or assets(weighted,q4,original.parent)!=bound):
+        raise ValueError('weighted QKV build inputs changed')
+    expected={name:digest(Path(source)) for name,source in bound['assets'].items()}
+    if len(expected)!=10 or {n:h for n,h in receipt['package_files'].items() if n.startswith('weighted-qkv/')}!=expected:
+        raise ValueError('weighted QKV exact10 packaged assets required')
+    if any(digest(build/'package/app'/n)!=h for n,h in expected.items()):raise ValueError('weighted QKV packaged asset differs')
+    report=json.loads(original.read_text());planned=[];total=original.stat().st_size
+    for name,row in report['artifacts'].items():
+        source=original.parent/name
+        if Path(name).is_absolute() or not source.resolve().is_relative_to(original.parent) or any(p.is_symlink() for p in (source,*source.parents)) or not source.is_file():raise ValueError('unsafe weighted reference path')
+        size=source.stat().st_size;total+=size
+        if size!=row['bytes'] or digest(source)!=row['sha256']:raise ValueError('weighted reference changed')
+        planned.append((name,source,row['sha256']))
+    if total>WEIGHTED_QKV_REFERENCE_LIMIT:raise ValueError('weighted reference exceeds16MiB bound')
+    destination=output/'weighted-qkv-reference';destination.mkdir()
+    shutil.copyfile(original,destination/'receipt.json')
+    for name,source,h in planned:
+        target=destination/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
+        if digest(target)!=h:raise ValueError('weighted reference copy changed')
+    copied=assets(weighted,q4,destination)
+    if copied['reference']['receipt_sha256']!=bound['reference']['receipt_sha256'] or assets(weighted,q4,original.parent)!=bound:raise ValueError('weighted QKV closure changed during freeze')
+    return {'weighted_fixture':str(weighted.relative_to(ROOT)),'q4_fixture':str(q4.relative_to(ROOT)),
+            'reference':str(destination.relative_to(ROOT)),'reference_receipt_sha256':copied['reference']['receipt_sha256'],
+            'module_sha256':{n:expected['weighted-qkv/'+n+'.hsaco'] for n in module_paths}}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
@@ -230,7 +276,8 @@ def main():
     if receipt['object_count'] != 76:
         parser.error('not the complete .40 candidate')
     validate_source_inputs(receipt)
-    audit = (validate_q4_audit(args.build, receipt) if fixture == 'q4' else
+    audit = (validate_weighted_qkv_audit(args.build, receipt) if fixture == 'weighted_qkv' else
+             validate_q4_audit(args.build, receipt) if fixture == 'q4' else
              validate_rmsnorm_audit(args.build, receipt) if fixture == 'rmsnorm' else
              validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None)
     if subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=normal'], cwd=ROOT):
@@ -250,6 +297,7 @@ def main():
             parser.error('package stage hash mismatch: ' + name)
     rmsnorm = freeze_rmsnorm_reference(args.build, receipt, output) if fixture == 'rmsnorm' else None
     q4 = freeze_q4_reference(args.build, receipt, output) if fixture == 'q4' else None
+    weighted_qkv = freeze_weighted_qkv_reference(args.build, receipt, output) if fixture == 'weighted_qkv' else None
     files = {str(path.relative_to(ROOT)): digest(path) for path in output.rglob('*') if path.is_file()}
     for name in ('tools/source_console.py', 'tools/source_public_hip_log.py', 'tools/freeze_source_candidate.py',
                  'dependencies.json', 'elevation-inputs.json', 'controller-inputs.json', 'title.json'):
@@ -275,6 +323,12 @@ def main():
                 path = Path(name).resolve()
                 if path.is_relative_to(ROOT):
                     files[str(path.relative_to(ROOT))] = expected
+    if weighted_qkv is not None:
+        for name in WEIGHTED_QKV_VERIFY_SOURCES:files[name]=digest(ROOT/name)
+        for source_inputs in (json.loads(audit.read_text())['inputs'],receipt['weighted_qkv']['inputs']):
+            for name,expected in source_inputs.items():
+                path=Path(name).resolve()
+                if path.is_relative_to(ROOT):files[str(path.relative_to(ROOT))]=expected
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_results_dir': args.baseline_results_dir,
@@ -288,7 +342,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Selected Q8_1 and nonfused Q4_0 kernels, including any diagnostic load-width/cache/scheduling changes declared in the bound fixture receipt, compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
+                'hypothesis': ('Weighted RMSNorm produces2048values consumed in-place by Q8_1 and full Q/K/V projections2048/256/256. Require30full raw files11972800bytes, frozen weighted budget then exact Q8 and unchanged Q4 bounds from actual weighted readback, unchanged shared intermediates/inputs/guards/tails,5launches6allocations/frees3moduleunloads1retiredqueue. Transport transcript alone never establishes numerical success.' if fixture == 'weighted_qkv' else
+                               'Selected Q8_1 and nonfused Q4_0 kernels, including any diagnostic load-width/cache/scheduling changes declared in the bound fixture receipt, compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
                                'Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
                                'Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
                                'Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else
@@ -310,6 +365,8 @@ def main():
         manifest['rmsnorm'] = rmsnorm
     if q4 is not None:
         manifest['q4'] = q4
+    if weighted_qkv is not None:
+        manifest['weighted_qkv']=weighted_qkv
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 

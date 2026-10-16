@@ -14,6 +14,21 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Weighted QKV package and console controls ready offline
+
+The five-stage native harness compiles and passes independent source review.
+Package integration requires three authenticated modules, seven reference assets
+and a matching three-image audit. All six registered QKV test groups pass;
+independent package/controller review and full-size synthetic readback checks
+also pass. See `evidence/offline-weighted-qkv-package-controls.json` and
+`evidence/offline-weighted-qkv-readback-verifier.json`.
+
+The controller accepts the transport transcript only after all 30 full buffers
+pass numerical and continuity checks. It owns the primary workspace lock; the
+second PS5-Claude workspace lock still requires separate operator coordination.
+Fresh compiler fixtures are building. Actual native package/image validation,
+frozen deployment and the .40 numerical run remain pending.
+
 ## Full weighted normalization and Q/K/V references qualified offline
 
 The source-only `make llm-weighted-qkv-reference` target now builds missing CPU

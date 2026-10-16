@@ -72,6 +72,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 reference | offline CPU | learned weighted RMSNorm and full Q2048/K256/V256 frozen references, independent reconstruction and Make reproduction pass | evidence/offline-weighted-qkv-reference.json | next: native chained numerical validation
 
+- 2026-10-15 | V1.3 native controls | offline | weighted/shared-Q8/full-QKV title compiles; package/controller source review, six registered test groups and synthetic readback validation pass | evidence/offline-weighted-qkv-package-controls.json | next: fresh native package audit and frozen .40 gate
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate

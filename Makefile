@@ -25,6 +25,7 @@ help:
 	@echo 'make public-hip-weighted-rmsnorm-host-test  Qualify weighted RMSNorm through public HIP host model'
 	@echo 'make llm-q4-halfword-fixture  Build authenticated halfword-load diagnostic from original Q4 fixture'
 	@echo 'make llm-q4-fixture  Build selected upstream Q8_1 and Q4_0 kernels (fresh outputs required)'
+	@echo 'make public-hip-weighted-qkv-package  Build and audit native weighted normalization/QKV diagnostic'
 	@echo 'make llm-weighted-qkv-reference  Build learned normalization and full Q/K/V CPU oracles'
 	@echo 'make llm-q4-reference  Build authenticated GPU-format Q8/Q4 numerical references offline'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
@@ -323,3 +324,13 @@ public-hip-q4-package: deps-build llm-q4-reference
 	$(PYTHON) tests/public_hip_q4_native_audit_test.py
 	$(PYTHON) tools/build_public_hip.py --fixture q4 --q4-fixture $(LLM_Q4_FIXTURE_DIR) --q4-reference $(LLM_Q4_REFERENCE_DIR) --output $(Q4_BUILD_DIR) --results-dir "$(RESULTS_DIR)"
 	$(PYTHON) tools/audit_public_hip_q4_native.py --raw $(Q4_BUILD_DIR)/title.elf --converted $(Q4_BUILD_DIR)/eboot.elf --extracted $(Q4_BUILD_DIR)/extracted.elf --output $(Q4_BUILD_DIR)/q4-native-audit.json
+
+WEIGHTED_QKV_BUILD_DIR ?= build/public-hip-weighted-qkv-native
+.PHONY: public-hip-weighted-qkv-package
+public-hip-weighted-qkv-package: deps-build llm-weighted-rmsnorm-fixture llm-q4-halfword-fixture llm-weighted-qkv-reference
+	$(PYTHON) tests/public_hip_weighted_qkv_assets_test.py
+	$(PYTHON) tests/public_hip_weighted_qkv_build_test.py
+	$(PYTHON) tests/public_hip_weighted_qkv_native_audit_test.py
+	$(PYTHON) tests/weighted_qkv_readbacks_test.py
+	$(PYTHON) tests/source_weighted_qkv_controls_test.py
+	$(PYTHON) tools/build_public_hip.py --fixture weighted_qkv --weighted-rmsnorm-fixture $(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR) --q4-fixture $(LLM_Q4_HALFWORD_FIXTURE_DIR) --weighted-qkv-reference $(LLM_WEIGHTED_QKV_REFERENCE_DIR) --output $(WEIGHTED_QKV_BUILD_DIR) --results-dir "$(RESULTS_DIR)"

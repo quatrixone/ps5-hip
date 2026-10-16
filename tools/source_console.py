@@ -113,6 +113,8 @@ class Control:
                     bound['reference_receipt_sha256'], 'RMSNorm reference identity changed')
         if self.fixture == 'q4':
             self.authenticate_q4()
+        if self.fixture == 'weighted_qkv':
+            self.authenticate_weighted_qkv()
         self.out = candidate / phase
         self.out.mkdir(exist_ok=False)
         self.record = {'phase': phase, 'host': HOST, 'title_id': TITLE, 'accepted': False, 'launched': False,
@@ -154,6 +156,21 @@ class Control:
                     'Q4 packaged asset differs: '+name)
         require({n for n in self.manifest['package_files'] if n.startswith('q4/')}==set(authenticated['assets']),
                 'Q4 packaged asset inventory differs')
+
+    def authenticate_weighted_qkv(self):
+        from public_hip_weighted_qkv_assets import assets
+        bound=self.manifest.get('weighted_qkv',{})
+        reference=(ROOT/bound.get('reference','')).resolve()
+        weighted=(ROOT/bound.get('weighted_fixture','')).resolve();q4=(ROOT/bound.get('q4_fixture','')).resolve()
+        require(reference.is_relative_to(self.candidate.resolve()) and weighted.is_relative_to(ROOT) and q4.is_relative_to(ROOT),'weighted QKV scope differs')
+        require(self.manifest['files'].get(str((reference/'receipt.json').relative_to(ROOT)))==bound.get('reference_receipt_sha256'),'weighted reference not frozen')
+        authenticated=assets(weighted,q4,reference)
+        require(authenticated['reference']['receipt_sha256']==bound.get('reference_receipt_sha256'),'weighted reference changed')
+        for name,folder in (('weighted',weighted),('q8',q4),('q4',q4)):
+            require(sha((folder/(name+'.hsaco')).read_bytes())==bound.get('module_sha256',{}).get(name),'weighted QKV module changed')
+        expected={n:sha(Path(p).read_bytes()) for n,p in authenticated['assets'].items()}
+        require(len(expected)==10 and {n:h for n,h in self.manifest['package_files'].items() if n.startswith('weighted-qkv/')}==expected,'weighted QKV exact10 assets required')
+        for n,h in expected.items():require(sha((self.candidate/'package/app'/n).read_bytes())==h,'weighted QKV packaged asset changed')
 
     def owned_lock(self):
         require(self.owned and LOCK.read_text() == self.token, 'console lock changed')
@@ -396,6 +413,54 @@ class Control:
                 'Q4 transcript metrics differ from raw readbacks')
         self.record['q4_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
 
+    def fresh_weighted_qkv_dumps(self):
+        if self.fixture!='weighted_qkv':return
+        from verify_weighted_qkv_readbacks import DUMP_NAMES
+        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        require(not any(n.startswith('weighted-qkv-') and n.endswith('.raw') for n in names),'weighted QKV dump already exists')
+        self.record['weighted_qkv_raw_absent_before_launch']=sorted(DUMP_NAMES)
+
+    def collect_weighted_qkv_dumps(self,partial=False):
+        if self.fixture!='weighted_qkv':return
+        from verify_weighted_qkv_readbacks import DUMP_NAMES,CAPACITIES,STAGES
+        if not hasattr(self,'weighted_qkv_capture_deadline'):
+            self.weighted_qkv_capture_deadline=time.monotonic()+120
+            self.record['weighted_qkv_raw_capture_limit_seconds']=120
+        folder=self.out/'raw';folder.mkdir(exist_ok=True)
+        records=self.record.setdefault('weighted_qkv_raw_files',{})
+        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        if not partial:require({n for n in names if n.startswith('weighted-qkv-') and n.endswith('.raw')}==DUMP_NAMES,'weighted QKV remote inventory differs')
+        for stage in STAGES:
+            for buffer,capacity in CAPACITIES.items():
+                name=f'weighted-qkv-{stage}.{buffer}.raw'
+                if name in records or (partial and name not in names):continue
+                remaining=self.weighted_qkv_capture_deadline-time.monotonic()
+                if remaining<=0:
+                    self.record['weighted_qkv_raw_capture_deadline_exceeded']=True
+                    if partial:return
+                    raise RuntimeError('weighted QKV total raw capture deadline')
+                try:
+                    raw=self.fetch(self.manifest['results_dir']+'/'+name,capacity+32,deadline_seconds=min(30,remaining))
+                    with (folder/name).open('xb') as stream:stream.write(raw)
+                    require(len(raw)==capacity+32,'weighted QKV dump length: '+name)
+                    require(time.monotonic()<self.weighted_qkv_capture_deadline,'weighted QKV total raw capture deadline')
+                    records[name]={'bytes':len(raw),'sha256':sha(raw)}
+                except Exception as error:
+                    self.record.setdefault('weighted_qkv_raw_capture_errors',{})[name]=repr(error)
+                    if not partial:raise
+        if not partial:require(set(records)==DUMP_NAMES,'incomplete weighted QKV readbacks')
+
+    def verify_weighted_qkv_dumps(self):
+        if self.fixture!='weighted_qkv':return
+        self.verify()
+        from verify_weighted_qkv_readbacks import verify
+        output=self.out/'numerical/receipt.json'
+        result=verify(ROOT/self.manifest['weighted_qkv']['reference'],self.out/'raw',output)
+        require(result.get('status')=='PASS' and result.get('raw_files')==30 and result.get('projection_values')==2560,'weighted QKV numerical verification failed')
+        values=result['weighted_metrics'];metrics={key:float(format(values[field],'.9g')) for key,field in (('max_abs','maximum_absolute_error'),('max_budget_fraction','maximum_budget_fraction'))}
+        require(self.record.get('application',{}).get('reported_metrics')==metrics,'weighted QKV transcript metrics differ')
+        self.record['weighted_qkv_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
+
     def ensure_results_directory(self):
         require(self.phase == 'deploy', 'results directory creation is deploy-only')
         from build_public_hip import validate_results_directory
@@ -475,7 +540,7 @@ class Control:
                 deployment.get('lock_released') is True and deployment.get('phase') == 'deploy' and
                 deployment.get('manifest_sha256') == self.manifest_sha and
                 deployment.get('package_sha256') == self.record['package_sha256'], 'fresh deployment not complete')
-        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps()
+        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps()
         before = snapshot(self.send('snapshot'))
         baseline = self.history_read('before-launch')
         sock = socket.create_connection((HOST, 3232), timeout=3)
@@ -495,7 +560,7 @@ class Control:
         worker.start()
         launch_offset = 0
         try:
-            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps()
+            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps()
             require(not self.capture_errors and worker.is_alive(), 'klog unavailable before launch')
             launch_offset = len(self.klog)
             self.record['klog_launch_offset'] = launch_offset
@@ -515,10 +580,10 @@ class Control:
             self.idle()
             application = self.fetch(self.log, 65536)
             (self.out / 'application.log').write_bytes(application)
-            self.collect_rmsnorm_dumps(); self.collect_q4_dumps()
+            self.collect_rmsnorm_dumps(); self.collect_q4_dumps(); self.collect_weighted_qkv_dumps()
             from source_public_hip_log import check_log
             self.record['application'] = check_log(application, self.fixture)
-            self.verify_rmsnorm_dumps(); self.verify_q4_dumps()
+            self.verify_rmsnorm_dumps(); self.verify_q4_dumps(); self.verify_weighted_qkv_dumps()
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
             require(before == after, 'matching title mounts changed')
@@ -553,6 +618,11 @@ class Control:
                     self.collect_q4_dumps(partial=True)
                 except Exception as error:
                     self.record['q4_raw_capture_error'] = repr(error)
+            if self.fixture == 'weighted_qkv' and not self.record.get('weighted_qkv_numerical'):
+                try:
+                    self.collect_weighted_qkv_dumps(partial=True)
+                except Exception as error:
+                    self.record['weighted_qkv_raw_capture_error']=repr(error)
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:

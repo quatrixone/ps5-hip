@@ -20,6 +20,7 @@ from qualify_public_hip_aggregate import compiler_inputs as aggregate_compiler_i
 from qualify_public_hip_rmsnorm import fixture_inputs as rmsnorm_fixture_inputs, checked_inputs, checked_tools
 import build_llm_rmsnorm_reference as rms_reference
 from public_hip_q4_assets import assets as q4_assets
+from public_hip_weighted_qkv_assets import assets as weighted_qkv_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPS = ROOT / ".deps"
@@ -56,6 +57,14 @@ def sha(path):
 def build_inputs():
     names = {"dependencies.json", "elevation-inputs.json", "controller-inputs.json",
              "title.json", "assets/param.json", "assets/icon0.png",
+             "tools/public_hip_weighted_qkv_console_title.cpp", "tools/public_hip_weighted_qkv_assets.py",
+             "tools/audit_public_hip_weighted_qkv_native.py", "tools/audit_public_hip_rmsnorm_native.py",
+             "tests/public_hip_weighted_qkv_assets_test.py", "tests/public_hip_weighted_qkv_build_test.py",
+             "tests/public_hip_weighted_qkv_native_audit_test.py", "tools/verify_weighted_qkv_readbacks.py",
+             "tests/weighted_qkv_readbacks_test.py", "tools/build_llm_weighted_qkv_reference.py",
+             "tests/llm_weighted_qkv_reference.cpp", "tests/llm_weighted_qkv_reference_test.py",
+             "tools/build_llm_weighted_rmsnorm_fixture.py", "tests/llm_weighted_rmsnorm_fixture_test.py",
+             "tools/build_llm_q4_halfword_fixture.py", "tests/llm_q4_halfword_fixture_test.py",
              "tools/public_hip_q4_console_title.cpp", "tools/public_hip_q4_assets.py",
              "tests/public_hip_q4_assets_test.py", "tests/public_hip_q4_build_test.py",
              "tools/verify_public_hip_q4.py", "tests/q4_dump_test.py",
@@ -471,7 +480,7 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
         required += ["hipMemcpy"]
     if fixture in ("module", "launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipModuleLoad", "hipModuleGetFunction", "hipModuleUnload"]
-    if fixture in ("rmsnorm", "q4"):
+    if fixture in ("rmsnorm", "q4", "weighted_qkv"):
         required += ["hipMalloc", "hipFree", "hipMemcpy", "hipModuleLoad", "hipModuleGetFunction",
                      "hipModuleUnload", "hipModuleLaunchKernel", "hipDeviceSynchronize"]
     if fixture == "launch":
@@ -585,7 +594,7 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
     for name, path in (extra_assets or {}).items():
-        if (not name.startswith(("rmsnorm/", "q4/")) or ".." in Path(name).parts or
+        if (not name.startswith(("rmsnorm/", "q4/", "weighted-qkv/")) or ".." in Path(name).parts or
                 "\\" in name or Path(name).is_absolute()):
             raise ValueError("invalid numerical asset destination")
         sources[name] = Path(path)
@@ -628,15 +637,36 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
     return final, before
 
 
+def validate_weighted_qkv_audit(output, expected_sha=None):
+    from audit_public_hip_weighted_qkv_native import SOURCES
+    path = output / "weighted-qkv-native-audit.json"
+    digest = sha(path)
+    if expected_sha is not None and digest != expected_sha:
+        raise RuntimeError("weighted QKV audit identity changed")
+    audit = json.loads(path.read_text())
+    inputs = audit.get("inputs")
+    required = [output / n for n in ("title.elf", "eboot.elf", "extracted.elf")]
+    required += [ROOT / n for n in SOURCES]
+    if (audit.get("status") != "PASS" or audit.get("classification") != "offline-public-hip-weighted-qkv-native-image-audit" or
+            audit.get("native_executed") is not False or audit.get("audited_function_count") != 21 or
+            not isinstance(inputs, dict) or not inputs or
+            any(inputs.get(str(p.resolve())) != sha(p) for p in required) or
+            any(sha(p) != h for p, h in inputs.items())):
+        raise RuntimeError("weighted QKV image audit contract or inputs differ")
+    return digest
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/public-hip")
-    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate", "rmsnorm", "q4"), default="bootstrap")
+    parser.add_argument("--fixture", choices=("bootstrap", "memory", "copy", "module", "launch", "fill", "graph", "stream", "graph_gpu", "capture_gpu", "copy_gpu", "embedded", "aggregate", "rmsnorm", "q4", "weighted_qkv"), default="bootstrap")
     parser.add_argument("--compiler-fixture", type=Path, help="Verified compiler fixture required for embedded or aggregate title")
     parser.add_argument("--rmsnorm-fixture", type=Path)
     parser.add_argument("--rmsnorm-reference", type=Path)
     parser.add_argument("--q4-fixture", type=Path)
     parser.add_argument("--q4-reference", type=Path)
+    parser.add_argument("--weighted-rmsnorm-fixture", type=Path)
+    parser.add_argument("--weighted-qkv-reference", type=Path)
     parser.add_argument("--results-dir", default=os.environ.get("RESULTS_DIR", "/user/homebrew/ps5-hip"))
     args = parser.parse_args()
     if (args.fixture in ("embedded", "aggregate")) != (args.compiler_fixture is not None):
@@ -646,10 +676,14 @@ def main():
             (args.fixture == "rmsnorm") != (args.rmsnorm_reference is not None)):
         parser.error("--rmsnorm-fixture and --rmsnorm-reference are required only for rmsnorm")
     rmsnorm = rmsnorm_assets(args.rmsnorm_fixture, args.rmsnorm_reference) if args.fixture == "rmsnorm" else None
-    if ((args.fixture == "q4") != (args.q4_fixture is not None) or
+    if ((args.fixture in ("q4", "weighted_qkv")) != (args.q4_fixture is not None) or
             (args.fixture == "q4") != (args.q4_reference is not None)):
-        parser.error("--q4-fixture and --q4-reference are required only for q4")
+        parser.error("--q4-fixture requires q4 or weighted_qkv; --q4-reference requires q4")
+    if ((args.fixture == "weighted_qkv") != (args.weighted_rmsnorm_fixture is not None) or
+            (args.fixture == "weighted_qkv") != (args.weighted_qkv_reference is not None)):
+        parser.error("weighted_qkv requires --weighted-rmsnorm-fixture, --q4-fixture and --weighted-qkv-reference")
     q4 = q4_assets(args.q4_fixture, args.q4_reference) if args.fixture == "q4" else None
+    weighted_qkv = weighted_qkv_assets(args.weighted_rmsnorm_fixture, args.q4_fixture, args.weighted_qkv_reference) if args.fixture == "weighted_qkv" else None
     initial_inputs = build_inputs()
     validate_results_directory(args.results_dir)
     output = args.output.resolve()
@@ -670,6 +704,8 @@ def main():
             raise RuntimeError("cached RMSNorm assets differ; use a fresh output")
         if previous.get("q4") != q4:
             raise RuntimeError("cached Q4 assets differ; use a fresh output")
+        if previous.get("weighted_qkv") != weighted_qkv:
+            raise RuntimeError("cached weighted QKV assets differ; use a fresh output")
         units = previous["units"]
         if (len(units) != 76 or previous["title_elf_sha256"] != sha(output / "title.elf") or
                 any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
@@ -693,6 +729,13 @@ def main():
                     raise RuntimeError("cached Q4 package inventory differs")
                 if q4_assets(args.q4_fixture, args.q4_reference) != q4:
                     raise RuntimeError("cached Q4 inputs changed")
+            if weighted_qkv is not None:
+                expected_assets = {name: sha(path) for name, path in weighted_qkv["assets"].items()}
+                if {n: d for n, d in previous["package_files"].items() if n.startswith("weighted-qkv/")} != expected_assets:
+                    raise RuntimeError("cached weighted QKV package inventory differs")
+                if weighted_qkv_assets(args.weighted_rmsnorm_fixture, args.q4_fixture, args.weighted_qkv_reference) != weighted_qkv:
+                    raise RuntimeError("cached weighted QKV inputs changed")
+                validate_weighted_qkv_audit(output, previous["weighted_qkv_audit_sha256"])
             if embedded is not None:
                 audit_path = output / "embedded-native-audit.json"
                 if sha(audit_path) != previous["embedded_audit_sha256"]:
@@ -724,10 +767,16 @@ def main():
         run(output, "audit-embedded-native", [sys.executable, ROOT / "tools/audit_public_hip_embedded_native.py",
             "--fixture", args.fixture, "--raw", output / "title.elf", "--converted", output / "eboot.elf", "--extracted", output / "extracted.elf",
             "--compiler-object", embedded["object"], "--output", output / "embedded-native-audit.json"])
+    if weighted_qkv is not None:
+        audit_path = output / "weighted-qkv-native-audit.json"
+        if not audit_path.exists():
+            run(output, "audit-weighted-qkv-native", [sys.executable, ROOT / "tools/audit_public_hip_weighted_qkv_native.py",
+                "--raw", output / "title.elf", "--converted", output / "eboot.elf", "--extracted", output / "extracted.elf", "--output", audit_path])
+        weighted_audit_sha = validate_weighted_qkv_audit(output)
     package, files = package_title(output, image, libc, args.results_dir,
                                    output / "canaries/gfx1013/canary.hsaco" if args.fixture == "module" else
                                    output / "canaries/gfx1013/thread_words/thread_words.hsaco" if args.fixture in ("launch", "stream", "graph_gpu", "capture_gpu", "copy_gpu") else None,
-                                   extra_assets=q4["assets"] if q4 else rmsnorm["assets"] if rmsnorm else None)
+                                   extra_assets=weighted_qkv["assets"] if weighted_qkv else q4["assets"] if q4 else rmsnorm["assets"] if rmsnorm else None)
     if embedded is not None:
         audit = json.loads((output / "embedded-native-audit.json").read_text())
         if (audit.get("fixture", "embedded") != args.fixture or
@@ -738,6 +787,10 @@ def main():
         raise RuntimeError("RMSNorm assets changed before publication")
     if q4 is not None and q4_assets(args.q4_fixture, args.q4_reference) != q4:
         raise RuntimeError("Q4 assets changed before publication")
+    if weighted_qkv is not None:
+        if weighted_qkv_assets(args.weighted_rmsnorm_fixture, args.q4_fixture, args.weighted_qkv_reference) != weighted_qkv:
+            raise RuntimeError("weighted QKV assets changed before publication")
+        validate_weighted_qkv_audit(output, weighted_audit_sha)
     if initial_inputs != build_inputs() or (embedded is not None and
             compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded):
         raise RuntimeError("native build inputs changed before publication")
@@ -755,6 +808,8 @@ def main():
         receipt["rmsnorm"] = rmsnorm
     if q4 is not None:
         receipt["q4"] = q4
+    if weighted_qkv is not None:
+        receipt.update(weighted_qkv=weighted_qkv, weighted_qkv_audit_sha256=weighted_audit_sha)
     if embedded is not None:
         receipt.update(embedded_compiler=embedded, compiler_object_count=1, total_linked_object_count=len(units)+1,
                        embedded_linker_sha256=sha(output / "embedded-pie.ld"),
