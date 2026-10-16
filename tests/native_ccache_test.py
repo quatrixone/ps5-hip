@@ -40,8 +40,11 @@ class Cache(unittest.TestCase):
         args = ['compiler', '-MD', '-MF', '/fresh/a.d', '-c', 'unit.cpp', '-o', '/fresh/a.o']
         with patch.object(c, 'configuration', return_value=({}, ['/bin/ccache', 'sloppiness='])):
             command, env = c.invocation(Path('/repo'), args, {'CCACHE_PREFIX': 'untrusted', 'PS5_HIP_CCACHE': 'auto'})
-        self.assertEqual(command, ['/bin/ccache', 'sloppiness=', *args])
+        self.assertEqual(command, ['/bin/ccache', 'sloppiness=', args[0],
+            '--start-no-unused-arguments', '-nostartfiles', '--end-no-unused-arguments', *args[1:]])
         self.assertNotIn('CCACHE_PREFIX', env)
+        with patch.object(c, 'configuration', return_value=({}, [])):
+            self.assertEqual(c.invocation(Path('/repo'), args, {})[0], args)
 
     def test_actual_compiler_and_sdk_chain_bound(self):
         with patch.object(c.shutil, 'which', return_value='/usr/bin/ccache'), \
@@ -105,6 +108,11 @@ class Cache(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get('PS5_HIP_CACHE_INTEGRATION') == '1', 'opt-in real SDK cache test')
     def test_real_wrapper_cache_and_dependency_identity(self):
+        for language in ('c', 'c++'):
+            with self.subTest(language=language):
+                self.check_real_wrapper_cache(language)
+
+    def check_real_wrapper_cache(self, language):
         root = ROOT
         if shutil.which('ccache') is None or not (root / '.deps/sdk/bin/prospero-clang++').is_file():
             self.skipTest('ccache and prepared PS5 SDK required')
@@ -134,13 +142,15 @@ class Cache(unittest.TestCase):
                     source.write_text('#include "value.h"\nint value(){return VALUE+1;}\n')
                 if name == 'disabled':
                     environment['PS5_HIP_CCACHE'] = '0'
-                subprocess.run([str(work / 'tools/ps5-clangxx'), '-O0', '-fPIC', '-I' + str(output),
+                compiled = subprocess.run([str(work / 'tools/ps5-clangxx'), '-x', language, '-O0', '-fPIC', '-I' + str(output),
                     '-MD', '-MF', str(output / 'unit.d'), '-c', str(source), '-o', str(output / 'unit.o')],
                     env=environment, check=True, capture_output=True, timeout=60)
+                self.assertEqual(compiled.stderr, b'')
                 clean = {key: value for key, value in os.environ.items() if not key.startswith('CCACHE_')}
                 stats_text = subprocess.check_output(['ccache', '--dir', str(work / 'cache'),
                     '--print-stats'], env=clean, text=True, timeout=10)
                 stats = {key: int(value) for key, value in (line.split() for line in stats_text.splitlines())}
+                self.assertEqual(stats.get('preprocessor_error', 0), 0)
                 counts.append((stats['cache_miss'], stats['preprocessed_cache_hit']))
                 objects.append(c.sha(output / 'unit.o'))
                 dependencies.append((output / 'unit.d').read_text().split(':', 1)[1])

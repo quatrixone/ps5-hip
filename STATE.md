@@ -16,27 +16,45 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
-Current resume: CPU-reference-v3, regenerated model conversion, and
-`results/llm-vocab-fixture-v2` now pass under the new build pipeline. The Q4
-bytes match the existing qualified model, and all 32 tokenizer comparisons
-match. See `evidence/offline-cached-model-prerequisites.json`.
-Native-client-v5 is running via `.local/build_cached_prerequisites_v3.py`;
-check its process and `results/m0-cached-prerequisites-v3` before resuming.
-The earlier v1/v2 attempts stopped in test fixtures before native compilation;
-the fixture fixes are pushed. Do not restart v5 while it is live.
+Scheduler v10 passed strict installed-title validation on 192.168.4.40 as
+PPSA99014. The app loaded the authenticated external model from
+`/data/hip/models/tinyllama-q4_0.gguf`, created its 512-token context, and rejected
+both actual model graph attempts before computation, including graph reuse.
+The raw transcript passed without warning removal; post-run snapshots and
+second installed-asset verification passed. Owned allocations/releases were
+213/213, with 663545360
+peak requested bytes and zero remaining requested bytes. The title stopped
+normally; services remained healthy and both owned locks were released.
+See `evidence/console40-native-scheduler-model-success.json`.
 
-Conversion files are in `/tmp/ps5-hip-tinyllama-gguf-v3` to avoid another permanent
-F16 copy on C:. Receipts and command logs are preserved in
-`results/m0-model-revalidation-v3`; original model files remain untouched.
-The prepared `.local/build_native_model_app_v10.py` uses this model, CPU-v3,
-vocab-v2 and client-v5. Run it only after client-v5 succeeds. It has not run yet.
-If volatile model files disappear, regenerate prerequisites rather than editing
-receipts. No .40 contact occurred in this prerequisite refresh.
+This closes the clean model/context/rejection lifecycle experiment. M0 remains
+open for bounded per-HIP-call accounting and its host/native qualification.
+Reuse the accepted vocabulary/tokenizer/storage and M1 weighted-QKV evidence;
+no model tensor computation, HIP weight/KV residency, inference, or native
+safetensors/PyTorch loading is claimed.
+
+Handoff: this candidate's deployment/execution are consumed; do not replay them.
+Next integrate the reviewed call-counter draft and current-source host test,
+then prepare a fresh native application candidate for its new observations.
+Keep prior rejected runs and their raw evidence unchanged. The client backend still supports zero tensor operators; integrating GPU
+operators is the following M2 milestone.
+
+Identity: source `d0fd5c49563413f981a2b80558ef1bf0e7d332d5`, package `93587aec9b57009b6906dceb265612a185dbccefea2caafe0bf69c9468ac1c74`
+(21987328 bytes), manifest `9e60df1f1efa846fe86c02c8d46adcef1f49814ac77388fef29a4acf4e8c0eb6`.
+
+CPU-reference-v3, native-client-v5, vocabulary-v2 and model-app-v10 all passed.
+Preserve their receipts, active model files and installed recovery artifacts.
+The C compiler cache fix made afterward is host-tested; a future native build
+requires new receipts for the changed wrapper identity.
 
 The build pipeline now supports bounded `JOBS` parallelism and optional native
 ccache (`CCACHE=auto|0|1`), plus link validation that resolves consumed inputs
 instead of every bound path for each helper link. The Linux cache is limited
 to 1 GiB. See `docs/SOURCE_ONLY_REBUILD.md` for controls and receipt migration.
+C and C++ cache reuse now pass real SDK tests, including header/source
+invalidation, equal uncached objects and preserved dependency files. The C
+preprocessing startup-object fix passes 37 focused tests; see
+`evidence/offline-native-c-cache.json`.
 This is a build-tool milestone, not GPU inference or M0 completion.
 All 162 tests across 18 suites passed, including a real SDK cache hit/invalidation
 test; see `evidence/offline-build-performance.json`. Full-package timing remains
@@ -51,8 +69,7 @@ for the revised pipeline or replay the consumed installed v8 candidate.
 
 The scheduler metadata fix uses paired GGML aligned allocation with a nonnull
 assertion. Six real host lifecycle/failure cases and 49 focused tests passed
-previously; see `evidence/offline-native-scheduler-ownership.json`. The PS5 heap
-warning remains unresolved pending a fresh authenticated console candidate.
+previously; see `evidence/offline-native-scheduler-ownership.json`. The fresh v10 transcript contains no heap warning and passes strict acceptance.
 M0 remains open; M1 is complete.
 
 The owner's additional source-format requirement is direct native loading of

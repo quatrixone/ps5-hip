@@ -107,7 +107,7 @@ on changes. The accepted architecture/profile remains explicit: supporting a
 serialization format does not support every model distributed in that format.
 
 Status: design reviewed against the pinned upstream API; native readers and
-adapter are not implemented or qualified. M0's clean context lifecycle remains
+adapter are not implemented or qualified. M0's per-HIP-call qualification remains
 the immediate blocker; M1 arithmetic is already qualified. The unshipped desktop
 conversion prototype was removed from active tools/Make targets after this
 clarification and retained locally under `results/deferred-host-checkpoint-prototype`.
@@ -120,7 +120,7 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 219 balanced owned allocations observed on .40; vocabulary/tokenizer and HIP storage previously passed | Resolve context heap warning, complete accepted post-run checks and per-HIP-call qualification; current full-model run is partial |
+| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 213 balanced owned allocations passed strict v10 validation on .40; vocabulary/tokenizer and HIP storage previously passed | Complete per-HIP-call qualification; v10 now passes strict clean lifecycle and post-run checks |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -197,8 +197,10 @@ also pass Make reproduction. See [native linkage](LLM_NATIVE_CLIENT.md) and
 [vocabulary fixture](LLM_VOCAB_FIXTURE.md). The installed vocabulary app now
 passes on PS5, but the fixture cannot construct a real model graph. The v7
 full-model test now demonstrates loading, context creation and actual-client
-rejection/reuse. A context heap warning rejected its strict transcript, leaving
-clean-run/post-execution acceptance and per-HIP-call qualification open.
+rejection/reuse. That older run was rejected for a context heap warning. Scheduler v10 now passes
+strict clean-run/post-execution acceptance with 213 balanced owned allocations;
+per-HIP-call qualification remains open. See
+`evidence/console40-native-scheduler-model-success.json`.
 
 - Link a native minimal client using the existing GGUF loader, tokenizer and
   graph builder with the chosen narrow ggml/public-HIP backend integration.

@@ -11,11 +11,12 @@ limited to 1 GiB; `PS5_HIP_CCACHE_DIR` overrides the location. Inspect it with
 Cache hits retain dependency-file and source/header verification. The cache key
 includes the actual LLVM compiler and SDK wrapper chain; receipts authenticate
 the cache configuration and tools. Ambient ccache settings cannot enable sloppy
-or remote caching. Header scans and links bypass the cache. Fresh package output
+or remote caching. Header scans and links bypass the cache. Cached compilation suppresses SDK startup
+objects during ccache preprocessing; uncached compiler arguments are unchanged. Fresh package output
 directories can reuse compiled objects without reusing an old build receipt.
 Host CPU-reference compiler caching is not included; its parallelism is configurable.
 Run `PS5_HIP_CACHE_INTEGRATION=1 python3 tests/native_ccache_test.py` for the real
-SDK cache hit/invalidation test, and `python3 tests/build_jobs_test.py` for worker
+SDK C/C++ cache hit/invalidation test, and `python3 tests/build_jobs_test.py` for worker
 limit and ordering checks. Full cold/warm package timings are not yet measured.
 
 Compiler parallelism is configured through Make's `JOBS` variable, for example

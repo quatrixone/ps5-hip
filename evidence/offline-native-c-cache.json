@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "scope": "SDK C/C++ compiler caching",
+  "tests": 37,
+  "suites": [
+    "native_ccache_test (real SDK integration enabled)",
+    "build_jobs_test",
+    "llm_native_client_build_test",
+    "llm_native_app_build_test"
+  ],
+  "verified": [
+    "C and C++: first compile misses, identical compile hits, source/header changes miss",
+    "Cached and disabled compilation produce identical object bytes",
+    "Dependency files preserved; zero preprocessing errors and empty compiler stderr",
+    "Disabled compilation and link arguments unchanged"
+  ],
+  "inputs": {
+    "tools/native_ccache.py": "07b57fc8760b42fcbfec4eab7567b0e7f7bcb57a6b4fbdc9a2c91c8038e96d38",
+    "tests/native_ccache_test.py": "88c7519ae04df0a5df5d8ee42e959af3b4c10cf949c16ac5773d1070ff263b82"
+  },
+  "limits": [
+    "No full cold/warm package timing comparison",
+    "C-cache follow-up not included in the d0fd5c4 native package; real SDK object tests only"
+  ]
+}

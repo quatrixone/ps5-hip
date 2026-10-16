@@ -10,6 +10,8 @@ and executed operator inventory alongside QKV, then one layer and full logits.
 Implementation has resumed after plan review. M0 and M1 remain parallel
 priorities, with .40 validation and milestone pushes.
 
+- 2026-10-16 | Native scheduler lifecycle | d0fd5c4 | .40 | strict pass: external model/context/reuse, 213 balanced owners, clean stop and post-run checks | evidence/console40-native-scheduler-model-success.json | next: per-HIP-call qualification; M0 open
+
 - 2026-10-16 | Build performance | offline | configurable parallel workers, native ccache with authenticated identities, consumed-input link validation | next: fresh prerequisite chain and native candidate; no inference advancement
 
 - 2026-10-16 | M0 scheduler ownership | offline | 49 tests and six real lifecycle cases pass; paired aligned buffer, checked source adaptation | evidence/offline-native-scheduler-ownership.json | next: native package and .40

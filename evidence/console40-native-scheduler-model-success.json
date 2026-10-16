@@ -1,0 +1,124 @@
+{
+  "status": "PASS",
+  "controller_accepted": true,
+  "controller_error": null,
+  "source_commit": "d0fd5c49563413f981a2b80558ef1bf0e7d332d5",
+  "manifest_sha256": "9e60df1f1efa846fe86c02c8d46adcef1f49814ac77388fef29a4acf4e8c0eb6",
+  "package_sha256": "93587aec9b57009b6906dceb265612a185dbccefea2caafe0bf69c9468ac1c74",
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "external_model_verified_before_launch": true,
+  "native_model_loading_observed": true,
+  "native_context_creation_observed": true,
+  "external_path_proof": "Authenticated mounted model-path.txt and native source load call; no embedded model; full external file readback authenticated before launch.",
+  "diagnostic_warning_removed_only_in_memory": false,
+  "model_gate_diagnostic": {
+    "status": "PASS",
+    "phase": "model-gate",
+    "actual_calls": 2,
+    "second_graph_reused": true,
+    "expected_errors": 4,
+    "forwarded": 0,
+    "post_compute": 0,
+    "gpu_submits": 0,
+    "inference": false,
+    "final_counts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "memory": [
+      {
+        "phase": "before_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12261605376,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_context",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12214861824,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_cleanup",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      }
+    ],
+    "host_storage": {
+      "allocations": 213,
+      "releases": 213,
+      "peak_requested_bytes": 663545360,
+      "live_requested_bytes": 0,
+      "failures": 0,
+      "poisoned": false
+    }
+  },
+  "pid": "358",
+  "post_snapshot_observed": true,
+  "second_installed_asset_verification": true,
+  "title_ordered_stop": true,
+  "host_close_consumed": false,
+  "healthy_after": true,
+  "owned_locks_released": true,
+  "native_inference": false,
+  "gpu_tensor_execution": false,
+  "M0_complete": false,
+  "limits": [
+    "Strict controller and raw transcript acceptance are both required; no warning removal is performed.",
+    "External file pathname is established by bound configuration and load call, not a runtime pathname log.",
+    "This proves the clean model/context/rejection lifecycle, not inference or all M0 criteria.",
+    "Per-HIP-call native accounting remains open; prior vocabulary/tokenizer/storage evidence remains separately valid.",
+    "n_gpu_layers=0 and GPU offload disabled establish host-owned model loading, not HIP weight/KV residency.",
+    "The original platform warning cause is not established solely by its absence in this corrected run."
+  ],
+  "schema": 1,
+  "classification": "native-scheduler-external-model-lifecycle-success",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "package_bytes": 21987328,
+  "execute_receipt_sha256": "eae3448ea796968dfff8fdc69a898eb82b062da5301fd848a465de3a3fc50293",
+  "independent_review_sha256": "f71bce31c62d14f542f27d3f359095f2a03df6c3732b21fbe1ee61b1ec6cf68a",
+  "application_log_sha256": "647e18db77487cacc5b5cd476845ee314e7971b945b738ad23889801e9ddc95c",
+  "application_log_bytes": 1833,
+  "per_hip_call_qualification_complete": false,
+  "evidence_sha256": {
+    "results/m0-scheduler-package-review-v2/review_execution.py": "338625e893594d73c3f6b8d2883966ccf671052a474ac05cb8dcc241a0e51359",
+    "results/source-public-llm-scheduler-console-v2/manifest.json": "9e60df1f1efa846fe86c02c8d46adcef1f49814ac77388fef29a4acf4e8c0eb6",
+    "results/source-public-llm-scheduler-console-v2/build-receipt.json": "a3c95eb3f2275998a7cd49eca47a7ba259406dccf5a56c406d77ea2e8db0df25",
+    "results/source-public-llm-scheduler-console-v2/review.json": "fe9a2d4c4b5e3b204441ed6b9e1f16511b115605568b42a094a6b3b9577df0e2",
+    "results/source-public-llm-scheduler-console-v2/execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "results/m0-scheduler-package-review-v2/deployment-review.json": "71cb1350293a3f13fd2d24597e6482ee0a11a430b7f25de8812e073a798c91fc",
+    "tools/source_llm_model_log.py": "1d5be4bbd1de50476142a3a95807fa8ff5a919f9b3f7aee941c4e7f29391dd73",
+    "tools/source_console.py": "2b4245019969fe6637b4350530059a9c950a5154c5aad8684ea21f9386e19c0a",
+    "tools/public_hip_llm_client_console_title.cpp": "ba5ca8da2bb2a591609cdd3b14ad1a3a933bd722809cc2c9a0c819a00434c48e",
+    "results/source-public-llm-scheduler-console-v2/execute/application.log": "647e18db77487cacc5b5cd476845ee314e7971b945b738ad23889801e9ddc95c",
+    "results/source-public-llm-scheduler-console-v2/execute/before-launch.log": "5fdb0052f84fd37689eb36f8f2d865c23e150c72afc6194a46a5658d59e15ca0",
+    "results/source-public-llm-scheduler-console-v2/execute/klog.log": "fe0c1d0ee1dc783bf4088b08b41886d730c53bd2e21bb249b98b16ac2c9f1c81",
+    "results/source-public-llm-scheduler-console-v2/execute/launch-consumed": "282d746f155aa59ab72cbd2be7d8875c2d89ef2f819ab7d26e2faefc12bd5e3b",
+    "results/source-public-llm-scheduler-console-v2/execute/launch.log": "d126f749589c0ea0290dbe06ce2c08bbb26fd511569c07a58d657efe58ba3df0",
+    "results/source-public-llm-scheduler-console-v2/execute/observed.log": "1d1e12f985ab44205f831bd7ab586c88c660884c5d6c12de994073ff206ca866",
+    "results/source-public-llm-scheduler-console-v2/execute/post_snapshot-consumed": "282d746f155aa59ab72cbd2be7d8875c2d89ef2f819ab7d26e2faefc12bd5e3b",
+    "results/source-public-llm-scheduler-console-v2/execute/post_snapshot.log": "4ee7f7f534e22868f032693aa6b8eab78210a066cb7777e9802d08406a208538",
+    "results/source-public-llm-scheduler-console-v2/execute/receipt.json": "eae3448ea796968dfff8fdc69a898eb82b062da5301fd848a465de3a3fc50293",
+    "results/source-public-llm-scheduler-console-v2/execute/snapshot-consumed": "282d746f155aa59ab72cbd2be7d8875c2d89ef2f819ab7d26e2faefc12bd5e3b",
+    "results/source-public-llm-scheduler-console-v2/execute/snapshot.log": "4ee7f7f534e22868f032693aa6b8eab78210a066cb7777e9802d08406a208538",
+    "results/m0-scheduler-package-review-v2/execution-review.json": "f71bce31c62d14f542f27d3f359095f2a03df6c3732b21fbe1ee61b1ec6cf68a"
+  }
+}

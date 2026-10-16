@@ -86,6 +86,10 @@ def invocation(root, argv, env):
     if '-c' not in argv or any(option in argv for option in ('-M', '-MM', '-E', '-###')):
         return argv, clean
     _, prefix = configuration(root, clean, identities=False)
+    # ccache removes -c for preprocessing; keep the SDK from adding crt1.o then.
+    if prefix:
+        argv = [argv[0], '--start-no-unused-arguments', '-nostartfiles',
+                '--end-no-unused-arguments', *argv[1:]]
     return [*prefix, *argv], clean
 
 
