@@ -398,6 +398,8 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   merge(ar['inputs']);bind(audit)
+  # Source-closure authentication must inspect the original runner, not our instrumentation.
+  b.run=original_run
   # Re-run consumers to reject source or dependency changes during compilation.
   if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab or (model_info and model_inputs(model,model_source,cpu_build)!=model_info):raise ValueError('app prerequisite changed')
   if prefix_info and prefix_inputs(prefix_fixture)!=prefix_info:raise ValueError('prefix prerequisite changed')

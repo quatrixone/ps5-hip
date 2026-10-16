@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "classification": "offline-native-builder-authentication-fix",
+  "status": "PASS",
+  "native_executed": false,
+  "gpu_executed": false,
+  "failure": "Final reference source traversal followed the temporary command recorder into unrelated consumer modules; no reference input changed.",
+  "fix": "Restore original runner after final recorded audit and before prerequisite authentication; preserve finally restoration.",
+  "tests": {
+    "builder": 15,
+    "reference": 16,
+    "model_package": 10
+  },
+  "failed_build": {
+    "directory": "build/llm-native-prefix-app-v2",
+    "exit_code": 2,
+    "elapsed_seconds": 1698.9506528610073,
+    "cache_hits": 79,
+    "cache_misses": 2
+  },
+  "next": "Fresh authenticated native build, freeze and .40 validation; no fabricated final receipt."
+}

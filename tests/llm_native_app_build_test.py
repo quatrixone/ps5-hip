@@ -55,6 +55,24 @@ class Driver(unittest.TestCase):
    self.assertEqual(persistent,[other]);self.assertEqual(temporary,[scratch]);digest=d.b.sha(scratch);scratch.unlink();self.assertEqual(digest,d.b.sha(final))
    persistent,temporary=d.command_file_inputs(out,'package-extract',['dotnet',str(final)],'PPSA99014');self.assertEqual(persistent,[final]);self.assertFalse(temporary)
    scratch.write_bytes(b'package');persistent,temporary=d.command_file_inputs(out,'unrelated',['tool',str(scratch)],'PPSA99014');self.assertEqual(persistent,[scratch]);self.assertFalse(temporary)
+class RunnerSourceClosure(unittest.TestCase):
+ def test_recorded_runner_restored_before_final_authentication(self):
+  import ast,sys
+  import build_llm_prefix_reference as reference
+  # The loader above must register its module for the ownership walk to match a real CLI run.
+  with patch.dict(sys.modules,{'driver':d}):
+   original=set(reference.sources())
+   with patch.object(d.b,'run',d.build):
+    instrumented=set(reference.sources())
+    self.assertIn(Path(d.__file__).resolve(),instrumented-original)
+   self.assertEqual(set(reference.sources()),original)
+  node=next(n for n in ast.parse(Path(d.__file__).read_text()).body if isinstance(n,ast.FunctionDef) and n.name=='build')
+  guarded=next(n for n in node.body if isinstance(n,ast.Try))
+  restore=next(i for i,n in enumerate(guarded.body) if isinstance(n,ast.Assign) and ast.unparse(n)=='b.run = original_run')
+  audit=next(i for i,n in enumerate(guarded.body) if isinstance(n,ast.Expr) and ast.unparse(n).startswith("merge(ar['inputs'])"))
+  final_auth=next(i for i,n in enumerate(guarded.body) if isinstance(n,ast.If) and 'app prerequisite changed' in ast.unparse(n))
+  self.assertLess(audit,restore);self.assertLess(restore,final_auth)
+
 class PreparedSource(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name)
