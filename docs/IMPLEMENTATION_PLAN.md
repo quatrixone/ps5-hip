@@ -14,6 +14,8 @@ M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
+- 2026-10-16 | M0 model load | .40 | failed: 619094016-byte CPU allocation ENOMEM; healthy safety close | evidence/console40-native-model-allocation-failure.json | next: native allocation fix
+
 - 2026-10-16 | M0 corrected deployment | .40 | pass: 22 readbacks, nine assets, recovery and healthy idle | evidence/console40-native-model-watchdog-fixed-deployment.json | next: native model/reuse
 
 - 2026-10-16 | M0 recovery | offline | pass: historical deployed-image authentication, 41 tests and real baseline check | evidence/offline-historical-model-baseline.json | next: fresh package

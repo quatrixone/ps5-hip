@@ -40,6 +40,20 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+The model-console-v2 execution is now consumed and failed. Its 835-byte app log
+reaches `LLM_GATE PHASE load_begin`, then reports ENOMEM allocating the
+619,094,016-byte CPU model buffer, followed by backend-invariant quarantine and
+watchdog timeout. The controller ended with title-observation deadline and
+exact-title safety close; idle/health and both lock releases were verified.
+Saved independent review:
+`results/m0-model-execution-review-v2/review.json`.
+No model-load completion, context, rejection/reuse, natural finalization or
+post-execution mount equality was established. Do not rerun the consumed candidate.
+Next investigate the locked native libc allocation route, correct host model
+storage offline with explicit ownership/cleanup, then build a fresh native app.
+Keep the installed v4 package, failed log, all receipts and recovery backups.
+Compact evidence: `evidence/console40-native-model-allocation-failure.json`.
+
 Corrected model-console-v2 deployment and independent review passed; see
 `evidence/console40-native-model-watchdog-fixed-deployment.json`.
 Both locks were released. The failed model-v1 package/log were preserved and

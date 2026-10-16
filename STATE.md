@@ -16,6 +16,17 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+The corrected native model run failed during model loading. Startup and the
+watchdog guard passed, then `posix_memalign` returned ENOMEM for the
+619,094,016-byte CPU model buffer. The app quarantined; the controller's bounded
+exact-title close restored idle, healthy services and released both locks.
+Candidate model-console-v2 execution is consumed: do not replay it.
+Model loading, graph rejection/reuse and natural finalization remain unproven.
+Next diagnose the native allocator route and implement/test an owned host-storage
+correction offline before a fresh package. This is not evidence of insufficient
+total console RAM. M0 remains open; M1 remains complete.
+See `evidence/console40-native-model-allocation-failure.json`.
+
 The watchdog-corrected model-app-v4 is installed and independently verified on
 .40: 22 readbacks, two transfer records, nine mounted assets, preserved failed
 model package/log, idle snapshots, healthy services and both locks released.

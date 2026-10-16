@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "status": "FAIL_NATIVE_CPU_MODEL_BUFFER_ALLOCATION_CLEANUP_VERIFIED",
+  "source_commit": "5e97e98e0e977d08c9fb7ddb2f552d6208dbfa50",
+  "manifest_sha256": "9bf75fa31ae13389d9af0ebf03d8c2fd0c19e50dcf9799f0e0a1998b03af3892",
+  "execution_receipt_sha256": "b1a0fa4006450d7f967c0d448a7165f31fe73590bd8b7c1003e55dd7726d460d",
+  "independent_review_sha256": "36c71d389f81332e857822dd9225ed630078d52b0826f02dcbdd1bf4e1ad026b",
+  "secondary_lock_receipt_sha256": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+  "application_bytes": 835,
+  "application_sha256": "75637caa456e2fb992dff72c1e10111abfe8ef952e8e98b822025b7048468342",
+  "klog_sha256": "94c2b803d266f781bcd1bf7af8f85618613540ca4d8d3d17cf7a5719c529139d",
+  "klog_launch_offset": 59261,
+  "klog_launch_slice_sha256": "ac92d8c26ec4c1b325cd8f846f00165df6efffbc437024059550cbc893105a15",
+  "package": {
+    "bytes": 827719680,
+    "sha256": "59fb3abe8f1df66c4144672c8e81580dccdc7fabdf6d89c931c5c68ad10cfc7d",
+    "deadline_seconds": 1800
+  },
+  "model": {
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "observed": [
+    "Corrected watchdog accepted; runtime checks passed and full-model loader emitted load_begin.",
+    "ScePthread Internal Memory is running out; ggml aligned allocation reported insufficient memory for619094016B CPU model buffer.",
+    "Loader failed, backend invariant quarantined; watchdog later timed out and controller performed exact-title safety close."
+  ],
+  "allocation_analysis": {
+    "requested_bytes": 619094016,
+    "alignment": 64,
+    "upstream_call": "ggml.c posix_memalign returns nonzero classified ENOMEM by insufficient-memory log",
+    "provider_observation": "native-tools runtime initializer registers imported malloc/free/posix_memalign as application heap API",
+    "unresolved": "Exact target allocator import/provider and configured heap capacity require further verification; this does not prove physical RAM exhaustion."
+  },
+  "cleanup": {
+    "safety_close_sent": true,
+    "idle_after_safety_close": true,
+    "healthy_after": true,
+    "lock_released": true
+  },
+  "secondary_owned_released": true,
+  "native_model_loading_completed": false,
+  "native_rejection_reuse_proved": false,
+  "native_inference": false,
+  "limits": [
+    "Loader entry only; no load_complete/context/gate markers.",
+    "No clean native finalization or postexecution mount/asset equality proof.",
+    "SceShellCore heap-status log concerns shell process, not application heap capacity.",
+    "No automatic retry authorized; preserve original failed evidence."
+  ]
+}
