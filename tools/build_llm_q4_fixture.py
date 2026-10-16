@@ -24,6 +24,8 @@ PROFILES={
  'q8':dict(source='quantize.cu',symbol=Q8,offsets=[0,8,16,24,32,40,48,56,60],sizes=[8,8,8,8,8,8,8,4,12],pointers=[0,1],explicit=72,implicit=256,static=0,threads=256,rsrc1=0x60af00c1,rsrc2=0x38c),
  'q4':dict(source='mmvq.cu',symbol=Q4,offsets=[0,8,16,24,104,112,116,128,132,136,140,152,156,160,164,176,180,184,188],sizes=[8,8,8,80,8,4,12,4,4,4,12,4,4,4,12,4,4,4,4],pointers=[0,1,2,4],explicit=192,implicit=0,static=384,threads=128,rsrc1=0x60af00c3,rsrc2=0xb8c)}
 
+GET_ROWS=dict(source='getrows.cu',symbol='_ZL10k_get_rowsILi32ELi2EXadL_ZL15dequantize_q4_0PKvliR15HIP_vector_typeIfLj2EEEEfEvS1_PKiPT2_llS2_IjLj3EEmmmmmmmmm',offsets=[0,8,16,24,32,40,56,64,72,80,88,96,104,112,120],sizes=[8,8,8,8,8,12,8,8,8,8,8,8,8,8,8],pointers=[0,1,2],explicit=128,implicit=256,static=0,threads=1024,rsrc1=0x60af01c1,rsrc2=0x38c)
+
 def sha(path):
     with Path(path).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 
@@ -123,7 +125,7 @@ def descriptor_contract(descriptor,profile):
     expected=dict(group_bytes=profile['static'],private_bytes=0,kernarg_bytes=profile['explicit']+profile['implicit'],rsrc1=profile['rsrc1'],rsrc2=profile['rsrc2'],rsrc3=0,properties=0x409,preload=0)
     if descriptor!=expected:raise ValueError('descriptor changed: '+repr(descriptor))
 
-def build(prerequisite,output):
+def build(prerequisite,output,get_rows_only=False):
     prerequisite=Path(prerequisite).resolve();output=Path(output).resolve()
     if not any(output.is_relative_to(ROOT/p) for p in ('build','results')):raise ValueError('output must stay below build/ or results/')
     def locked_sources():
@@ -133,6 +135,7 @@ def build(prerequisite,output):
     original_inputs=fixture_inputs(prerequisite);inputs=dict(original_inputs)
     for name in ('tools/build_llm_q4_fixture.py','tests/llm_q4_fixture_test.py','tools/qualify_public_hip_rmsnorm.py'):
         bind(inputs,ROOT/name)
+    if get_rows_only:bind(inputs,ROOT/'tests/llm_getrows_fixture_test.py')
     bind(inputs,sys.executable)
     tools={}
     for name in ('clang++-18','llvm-config-18','llvm-dis-18','llvm-extract-18','llc-18','ld.lld-18','llvm-nm-18','llvm-readobj-18','llvm-objdump-18'):
@@ -163,7 +166,7 @@ def build(prerequisite,output):
     order=['ockl-workitem-only','mul_hi','ocml',*(n for n in CONSTANTS if n!='oclc_isa_version_1030')]
     flags+=['--hip-device-lib='+n+'.bc' for n in order]
     profiles={}
-    for name,profile in PROFILES.items():
+    for name,profile in ({'getrows':GET_ROWS} if get_rows_only else PROFILES).items():
         print('Building '+name+' unchanged '+profile['source'],flush=True)
         tu_source=client/'ggml/src/ggml-cuda'/profile['source'];bind(inputs,tu_source)
         run(name+'-dependencies',flags+[tu_source,'-M','-MF',output/(name+'.d')])
@@ -187,9 +190,10 @@ def build(prerequisite,output):
     if fixture_inputs(prerequisite)!=original_inputs:raise ValueError('prerequisite changed')
     for path,digest in inputs.items():
         if sha(path)!=digest:raise ValueError('build input changed: '+path)
-    receipt=dict(schema=1,status='PASS',classification='source-only-selected-upstream-q4-q8-fixture',prerequisite=str(prerequisite/'receipt.json'),inputs=inputs,tools=tools,profiles=profiles,library_order=order,commands=commands,native_executed=False,gpu_executed=False,artifacts={str(p.relative_to(output)):dict(sha256=sha(p),bytes=p.stat().st_size) for p in output.rglob('*') if p.is_file()},limits=['Selected operator compile/link proof only; no runtime admission, numerical execution or inference claim.','Unchanged upstream translation units, recursive LLVM extraction; unreachable unrelated kernels excluded. Selected and retained helper bodies, attributes, metadata and named types unchanged; only exact uninitialized384-byte LDS external declaration transformation allowed and recorded.','HIP6.2 diagnostic hipBLAS headers inherited from authenticated prerequisite; modern header integration remains separate.','Q4 selection is nonfused with null nested fusion pointers; fused gate/up lifetime unqualified.'])
+    receipt=dict(schema=1,status='PASS',classification='source-only-selected-upstream-getrows-fixture' if get_rows_only else 'source-only-selected-upstream-q4-q8-fixture',prerequisite=str(prerequisite/'receipt.json'),inputs=inputs,tools=tools,profiles=profiles,library_order=order,commands=commands,native_executed=False,gpu_executed=False,artifacts={str(p.relative_to(output)):dict(sha256=sha(p),bytes=p.stat().st_size) for p in output.rglob('*') if p.is_file()},limits=['Selected operator compile/link proof only; no runtime admission, numerical execution or inference claim.','Unchanged upstream translation units, recursive LLVM extraction; unreachable unrelated kernels excluded. Selected and retained helper bodies, attributes, metadata and named types unchanged; only exact uninitialized384-byte LDS external declaration transformation allowed and recorded.','HIP6.2 diagnostic hipBLAS headers inherited from authenticated prerequisite; modern header integration remains separate.','GET_ROWS Q4_0-to-F32 selection; metadata permits1024threads but only256threads/grid(1,4,1) proposed for separate runtime qualification.' if get_rows_only else 'Q4 selection is nonfused with null nested fusion pointers; fused gate/up lifetime unqualified.'])
     (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('PASS '+str(output/'receipt.json'),flush=True)
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--rmsnorm-fixture',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
-    args=parser.parse_args();build(args.rmsnorm_fixture,args.output)
+    parser.add_argument('--get-rows-only',action='store_true',help='Build only unchanged upstream Q4_0-to-F32 embedding lookup')
+    args=parser.parse_args();build(args.rmsnorm_fixture,args.output,args.get_rows_only)

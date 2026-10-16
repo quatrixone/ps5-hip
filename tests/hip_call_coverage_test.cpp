@@ -52,6 +52,12 @@ extern "C" hipError_t hipMemset(void* dst,int value,size_t n){
  if(fill_error!=hipSuccess)return fill_error;std::memset(dst,value,n);return hipSuccess;
 }
 extern "C" hipError_t hipDeviceSynchronize(){entered(m0::HipCall::synchronize);return sync_error;}
+// M0 never configures a prefix. Resolve its new backend imports and fail if reached.
+extern "C" hipError_t hipModuleLoad(hipModule_t*,const char*){std::abort();}
+extern "C" hipError_t hipModuleGetFunction(hipFunction_t*,hipModule_t,const char*){std::abort();}
+extern "C" hipError_t hipModuleUnload(hipModule_t){std::abort();}
+extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,hipStream_t,void**,void**){std::abort();}
+
 extern "C" ggml_backend_buffer_t __real_ggml_backend_buffer_init(ggml_backend_buffer_type_t,ggml_backend_buffer_i,void*,size_t);
 extern "C" ggml_backend_buffer_t __wrap_ggml_backend_buffer_init(ggml_backend_buffer_type_t type,ggml_backend_buffer_i iface,void* p,size_t size){
  if(fail_buffer_init)return nullptr;return __real_ggml_backend_buffer_init(type,iface,p,size);

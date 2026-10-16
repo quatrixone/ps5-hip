@@ -220,7 +220,7 @@ def compile_bound_unit(output, path, obj, flags, label):
 
 def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
     jobs = build_jobs()
-    if client_phase not in ("vocab", "model-gate") or (fixture != "llm_client" and client_phase != "vocab"):
+    if client_phase not in ("vocab", "model-gate", "model-prefix") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
@@ -244,8 +244,10 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
                  if path.stem in ("hip_api_trace", "hip_table_interface",
                                   "hip_table_interface_c") else [])
         if fixture == "llm_client" and path.name == "public_hip_llm_client_console_title.cpp":
-            if client_phase == "model-gate":
+            if client_phase in ("model-gate", "model-prefix"):
                 extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_GATE=1")
+            if client_phase == "model-prefix":
+                extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX=1")
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]
@@ -630,13 +632,15 @@ def validate_results_directory(results_dir):
 def validate_client_assets(assets):
     phase = Path(assets["client-phase.txt"]).read_bytes() if "client-phase.txt" in assets else b""
     expected = {"vocab.gguf", "client-phase.txt"}
-    if phase == b"model-gate\n":
+    if phase in (b"model-gate\n", b"model-prefix\n"):
         expected.add("model-path.txt")
+        if phase == b"model-prefix\n":
+            expected.update("model-prefix/" + name + ".hsaco" for name in ("getrows", "normalized", "weighted", "q8", "q4"))
     elif phase != b"vocab\n":
         raise ValueError("invalid client phase bytes")
     if set(assets) != expected or any(Path(p).is_symlink() or not Path(p).is_file() for p in assets.values()):
         raise ValueError("invalid phase-specific client assets")
-    if phase == b"model-gate\n":
+    if phase in (b"model-gate\n", b"model-prefix\n"):
         from external_model import encode_model_path
         data = Path(assets["model-path.txt"]).read_bytes()
         if encode_model_path(data.decode("ascii")) != data:

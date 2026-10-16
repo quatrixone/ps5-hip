@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 from qualify_public_hip_rmsnorm import ROOT, sha, checked_inputs, checked_tools, mapping, base_inputs, fixture_inputs as prerequisite_inputs
-from build_llm_q4_fixture import PROFILES, metadata_contract, descriptor_contract, preserved_definitions, preserved_data
+from build_llm_q4_fixture import PROFILES, GET_ROWS, metadata_contract, descriptor_contract, preserved_definitions, preserved_data
 
 
 def fixture_inputs(folder):
@@ -17,12 +17,15 @@ def fixture_inputs(folder):
     if report.get('classification')=='diagnostic-q4-halfword-fixture':
         from build_llm_q4_halfword_fixture import fixture_inputs as halfword_inputs
         return halfword_inputs(folder)
-    if (report.get('classification')!='source-only-selected-upstream-q4-q8-fixture' or report.get('status')!='PASS' or
+    getrows=report.get('classification')=='source-only-selected-upstream-getrows-fixture'
+    if ((not getrows and report.get('classification')!='source-only-selected-upstream-q4-q8-fixture') or report.get('status')!='PASS' or
             report.get('native_executed') is not False or report.get('gpu_executed') is not False):
-        raise ValueError('unqualified Q8/Q4 fixture')
-    required=['tools/build_llm_q4_fixture.py','tests/llm_q4_fixture_test.py',
-              'tools/qualify_public_hip_rmsnorm.py','.deps/sources/llama-client/ggml/src/ggml-cuda/mmvq.cu',
-              '.deps/sources/llama-client/ggml/src/ggml-cuda/quantize.cu']
+        raise ValueError('unqualified selected operator fixture')
+    profiles={'getrows':GET_ROWS} if getrows else PROFILES
+    if set(report.get('profiles',{}))!=set(profiles):raise ValueError('wrong selected module inventory')
+    required=['tools/build_llm_q4_fixture.py','tests/llm_q4_fixture_test.py','tools/qualify_public_hip_rmsnorm.py']
+    required += ['.deps/sources/llama-client/ggml/src/ggml-cuda/'+p['source'] for p in profiles.values()]
+    if getrows:required.append('tests/llm_getrows_fixture_test.py')
     inputs=checked_inputs(report,'inputs',[ROOT/n for n in required])
     prerequisite=Path(report['prerequisite']).resolve()
     verified=prerequisite_inputs(prerequisite.parent)
@@ -33,7 +36,7 @@ def fixture_inputs(folder):
         path=(folder/name).resolve()
         if Path(name).is_absolute() or not path.is_relative_to(folder) or sha(path)!=row.get('sha256') or path.stat().st_size!=row.get('bytes'):raise ValueError('fixture artifact changed')
         inputs[str(path)]=row['sha256']
-    for name,profile in PROFILES.items():
+    for name,profile in profiles.items():
         for suffix in ('.hsaco','.ll','-full.ll','.d','-notes.stdout','-isa.stdout','-undefined.stdout'):
             if name+suffix not in artifacts:raise ValueError('required fixture artifact missing')
         for path in shlex.split((folder/(name+'.d')).read_text().replace(chr(92)+chr(10),' ').split(':',1)[1]):

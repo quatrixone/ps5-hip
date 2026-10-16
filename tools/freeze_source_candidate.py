@@ -52,7 +52,7 @@ def validate_client_package(build, receipt):
 
 def validate_client_units(original, receipt):
     inputs=receipt['inputs'];units=receipt.get('units',[]);expected_headers={}
-    model_phase=receipt.get('phase')=='model-gate'
+    model_phase=receipt.get('phase') in ('model-gate','model-prefix')
     count=149 if model_phase else 147
     if len(units)!=count:raise ValueError('client unit inventory differs')
     if model_phase and (ROOT/units[77]['source']).resolve()!=(ROOT/'.deps/sources/llama-client/ggml/src/ggml-opt.cpp').resolve():
@@ -360,6 +360,28 @@ def freeze_weighted_qkv_reference(build,receipt,output):
             'module_sha256':{n:expected['weighted-qkv/'+n+'.hsaco'] for n in module_paths}}
 
 
+
+def freeze_prefix_reference(build,receipt,output):
+    from source_model_freeze import prefix_binding,frozen_prefix_manifest,PREFIX_REFERENCE_LIMIT
+    from build_llm_prefix_reference import authenticate_prefix_reference
+    bound=receipt['llm_client'];data=prefix_binding(bound,receipt['inputs'])
+    original=Path(data['reference']);reference,closure=authenticate_prefix_reference(original)
+    planned=[];total=0
+    for source in original.rglob('*'):
+        if source.is_symlink():raise ValueError('unsafe prefix reference symlink')
+        if not source.is_file():continue
+        relative=source.relative_to(original);total+=source.stat().st_size
+        if closure.get(str(source))!=digest(source):raise ValueError('prefix reference artifact unbound')
+        planned.append((source,relative,closure[str(source)]))
+    if total>PREFIX_REFERENCE_LIMIT:raise ValueError('prefix reference exceeds16MiB bound')
+    destination=output/'prefix-reference';destination.mkdir()
+    for source,relative,h in planned:
+        target=destination/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
+        if digest(target)!=h:raise ValueError('prefix reference changed during copy')
+    if prefix_binding(bound,receipt['inputs'])!=data:raise ValueError('prefix closure changed during freeze')
+    return frozen_prefix_manifest(output,bound,receipt['inputs'])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
@@ -372,7 +394,7 @@ def main():
     parser.add_argument('--baseline-log-preserved', action='store_true',
                         help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
     parser.add_argument('--baseline-log-fixture', choices=tuple(LOG_NAMES), default='bootstrap')
-    parser.add_argument('--client-phase', choices=('vocab','model-gate'), default='vocab')
+    parser.add_argument('--client-phase', choices=('vocab','model-gate','model-prefix'), default='vocab')
     parser.add_argument('--baseline-image-bytes', type=int)
     parser.add_argument('--baseline-model-receipt', type=Path)
     parser.add_argument('--transfer-seconds', type=int, default=1800)
@@ -403,10 +425,10 @@ def main():
         validate_results_directory(receipt['results_dir'])
     except ValueError as error:
         parser.error(str(error))
-    if receipt['object_count'] != ((149 if args.client_phase=='model-gate' else 147) if fixture=='llm_client' else 76):
+    if receipt['object_count'] != ((149 if args.client_phase in ('model-gate','model-prefix') else 147) if fixture=='llm_client' else 76):
         parser.error('not the complete .40 candidate')
-    model_phase=fixture=='llm_client' and args.client_phase=='model-gate'
-    if args.client_phase=='model-gate' and fixture!='llm_client':parser.error('model phase requires llm_client')
+    model_phase=fixture=='llm_client' and args.client_phase in ('model-gate','model-prefix')
+    if args.client_phase in ('model-gate','model-prefix') and fixture!='llm_client':parser.error('model phase requires llm_client')
     if fixture=='llm_client' and receipt.get('phase')!=args.client_phase:parser.error('explicit client phase differs from receipt')
     validators={}
     if model_phase:
@@ -446,6 +468,7 @@ def main():
     rmsnorm = freeze_rmsnorm_reference(args.build, receipt, output) if fixture == 'rmsnorm' else None
     q4 = freeze_q4_reference(args.build, receipt, output) if fixture == 'q4' else None
     weighted_qkv = freeze_weighted_qkv_reference(args.build, receipt, output) if fixture == 'weighted_qkv' else None
+    model_prefix = freeze_prefix_reference(args.build,receipt,output) if model_phase and args.client_phase=='model-prefix' else None
     files = {str(path.relative_to(ROOT)): digest(path) for path in output.rglob('*') if path.is_file()}
     for name in ('tools/source_console.py', 'tools/source_public_hip_log.py', 'tools/freeze_source_candidate.py',
                  'dependencies.json', 'elevation-inputs.json', 'controller-inputs.json', 'title.json'):
@@ -530,6 +553,9 @@ def main():
     if model_phase:
         manifest.update(external_model=receipt['external_model'],model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
             hypothesis='Source-authenticated full model loads without mmap/lazy loading; two same-position actual llama_process calls are rejected by mandatory wrapped scheduler before CPU/GPU computation, with measured graph reuse and zero final allocation/queue counters. This is rejection readiness, not inference.')
+        if model_prefix is not None:
+            manifest['model_prefix']=model_prefix
+            manifest['hypothesis']='Actual model graph embedding, normalization and QKV prefix runs through public HIP for four tokens. Require authenticated 24 raw readbacks, original full graph rejection and balanced native cleanup; this does not establish one complete layer or inference.'
         validate_model_candidate(output,manifest)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')

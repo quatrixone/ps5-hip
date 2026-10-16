@@ -22,7 +22,8 @@ def main():
     ggml = ROOT / '.deps/sources/llama-client/ggml'
     lib = args.cpu_build.resolve() / 'cmake/bin'
     sources = [ROOT / 'ports/ggml/ps5_backend.cpp', ROOT / 'ports/ggml/ps5_backend.h',
-               Path(__file__), Path(__file__).with_suffix('.cpp'), lib / 'libggml-base.so']
+               Path(__file__), Path(__file__).with_suffix('.cpp'), lib / 'libggml-base.so',
+               *[ROOT/'ports/ggml'/n for n in ('model_prefix.h','prefix_calls.h','prefix_dispatch.h','prefix_qualification.h')]]
     def identities():
         return {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     before = identities()

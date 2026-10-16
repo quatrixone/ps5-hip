@@ -29,19 +29,20 @@ class ClientBuild(unittest.TestCase):
 
     def test_actual_phase_parser_valid_and_failure_boundaries(self):
         source=(b.ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
-        start=source.index('static bool configured_model_phase()')
-        function=source[start:source.index('\nint main()',start)]
+        start=source.index('enum class ClientPhase')
+        function=source[start:source.index('static std::string configured_model_path',start)]
         harness = ('#include <fstream>\n#include <string>\n#include <cstring>\n'
                    '#include <cstdio>\n#include <stdexcept>\n'
                    'static const char* title_root;\n'
                    '[[noreturn]] void ps5hip_clr_gpu_fail(const char* why){throw std::runtime_error(why); }\n'
                    +function+'\nint main(int argc,char**argv){title_root=argv[1];try{'
-                   'std::printf("phase=%d\\n",configured_model_phase());return 0;}'
+                   'std::printf("phase=%d\\n",static_cast<int>(configured_model_phase()));return 0;}'
                    'catch(const std::exception&e){std::printf("reason=%s\\n",e.what());return 1;}}\n')
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);cpp=root/'parser.cpp';exe=root/'parser';cpp.write_text(harness)
             subprocess.run(['c++','-std=c++17',str(cpp),'-o',str(exe)],check=True,capture_output=True)
             cases=[('vocab',b'vocab\n',0,'phase=0'),('model',b'model-gate\n',0,'phase=1'),
+                   ('prefix',b'model-prefix\n',0,'phase=2'),
                    ('missing',None,1,'reason=client-phase-open'),
                    ('empty',b'',1,'reason=client-phase-config'),
                    ('trailing',b'vocab\nx',1,'reason=client-phase-config'),

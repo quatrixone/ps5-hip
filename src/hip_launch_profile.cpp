@@ -32,7 +32,7 @@ NativeLaunchRequest select_hip_launch_profile(const Kernel &kernel,std::array<ui
     else request.route=NativeLaunchRoute::Initial;
     validate_capture_layout(kernel,request.route);
     if(geometry) {
-        request.shape.dimensions=threads==std::array<uint32_t,3>{256,1,1}?1u:(threads[2]==1?2u:3u);
+        request.shape.dimensions=threads==std::array<uint32_t,3>{256,1,1}?(kernel.rsrc1==0x60af01c1u && kernel.kernarg_size==384?2u:1u):(threads[2]==1?2u:3u);
         validate_geometry_entry(kernel,request.shape,request.route==NativeLaunchRoute::GeometryLds);
     } else {
         require(groups[0] && groups[0]<=UINT32_MAX/(reduction ? 1024u : 64u) && groups[1]==1 && groups[2]==1,"unsupported 1D extent");

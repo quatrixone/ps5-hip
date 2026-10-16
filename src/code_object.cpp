@@ -382,7 +382,18 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
             return "unsupported buffer-scratch entry contract";
     } else if (k.private_bytes || (k.rsrc2 & 1) || (k.properties & (0x20 | 0x40 | 0x800)))
         return "private storage requires a qualified scratch implementation";
-    const bool q8 = geometry && !lds && k.rsrc2 == 0x38cu;
+    const bool getrows = geometry && !lds && k.rsrc2 == 0x38cu && k.rsrc1 == 0x60af01c1u;
+    if (getrows) {
+        if (k.kernarg_size != 384 || k.kernarg_alignment != 8 || k.max_workgroup_size != 1024 ||
+            k.arguments.size() != 15 || k.hidden_arguments.size() != 13)
+            return "unsupported embedding geometry ABI";
+        constexpr std::array<uint32_t,15> offsets{0,8,16,24,32,40,56,64,72,80,88,96,104,112,120};
+        for (size_t i=0;i<offsets.size();++i)
+            if (k.arguments[i].offset != offsets[i] || k.arguments[i].size != (i==5 ? 12u : 8u) ||
+                k.arguments[i].kind != (i<3 ? "global_buffer" : "by_value"))
+                return "unsupported embedding argument layout";
+    }
+    const bool q8 = geometry && !lds && k.rsrc2 == 0x38cu && !getrows;
     const bool q4 = geometry && lds && k.rsrc2 == 0xb8cu;
     if ((q8 || q4) && ((q8 ? k.rsrc1 != 0x60af00c1u : (k.rsrc1 != 0x60af00c3u && k.rsrc1 != 0x60af00c4u)) ||
         k.kernarg_size != (q8 ? 328u : 192u) || k.kernarg_alignment != 8 ||
@@ -399,7 +410,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
     const uint32_t user_sgprs = (k.rsrc2 >> 1) & 31;
     if (user_sgprs != (flat_call ? 8u : ((k.properties & 1) ? 6u : 2u))) return "user-SGPR count mismatch";
     if (geometry) {
-        if (k.rsrc2 != (lds ? (q4 ? 0xb8cu : 0x98cu) : (q8 ? 0x38cu : 0x138cu)) || k.properties != 0x409 || (!q4 && k.hidden_arguments.empty()) || k.sgpr_spills || k.vgpr_spills)
+        if (k.rsrc2 != (lds ? (q4 ? 0xb8cu : 0x98cu) : ((q8 || getrows) ? 0x38cu : 0x138cu)) || k.properties != 0x409 || (!q4 && k.hidden_arguments.empty()) || k.sgpr_spills || k.vgpr_spills)
             return "unsupported measured XYZ entry contract";
     } else if ((k.rsrc2 & ~(reduction ? 0x3beu : scratch ? 0xbfu : 0xbeu)) || !(k.rsrc2 & 0x80))
         return "unsupported system-SGPR/work-item contract";

@@ -31,9 +31,14 @@ fresh host failure cases, this closes the bounded M0 client-boundary gate.
 Cleanup-failure paths remain host-tested only. M1 remains complete. Neither
 result demonstrates model GPU tensor computation or inference.
 
-Next integrate the actual-model embedding/norm/QKV prefix for M2. Its six-node
-host prototype passes; it remains an ignored draft until promoted, rebuilt,
-audited and validated on .40. The full model still rejects unsupported work.
+The actual-model embedding/norm/QKV prefix is now integrated in source for M2.
+Four real model graphs pass the host HIP-mock route (36 dispatches), and 361
+Python regression methods pass. Genuine GET_ROWS/Q8/Q4 object admission also
+passes sanitized runtime tests. These are offline results, not GPU numerical
+proof. Build and audit the native model-prefix package, then validate its 24
+raw tensors and lifecycle on .40. The full model still rejects unsupported work.
+See `docs/LLM_MODEL_PREFIX.md` for the reproducible Make targets and
+`evidence/offline-model-prefix-integration.json` for the bounded host evidence.
 The consumed call candidate is `results/source-public-llm-call-console-v1`;
 do not replay its deployment or execution. Preserve its current package and
 the prior v10/v8 recovery artifacts. Source: `c988245`; package SHA-256:

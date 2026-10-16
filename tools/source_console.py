@@ -92,8 +92,9 @@ class PhaseFTP:
 class Control:
     def __init__(self, candidate, phase):
         self.candidate, self.phase = candidate, phase
-        self.manifest_sha = sha((candidate / 'manifest.json').read_bytes())
-        self.manifest = json.loads((candidate / 'manifest.json').read_text())
+        manifest_bytes = (candidate / 'manifest.json').read_bytes()
+        self.manifest_sha = sha(manifest_bytes)
+        self.manifest = json.loads(manifest_bytes)
         self.fixture = self.manifest.get('fixture', 'bootstrap')
         baseline_fixture = self.manifest.get('baseline_log_fixture', 'bootstrap')
         self.baseline_fixture = baseline_fixture
@@ -119,6 +120,7 @@ class Control:
         if phase == 'execute':
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
+        if self.prefix_phase():self.preload_prefix_validators()
         self.verify()
         require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() and 'external_model' not in self.manifest else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
         if self.fixture == 'llm_client':
@@ -174,7 +176,10 @@ class Control:
         return result
 
     def model_phase(self):
-        return getattr(self,'fixture',None) == 'llm_client' and self.manifest.get('llm_client', {}).get('phase') == 'model-gate'
+        return getattr(self,'fixture',None) == 'llm_client' and self.manifest.get('llm_client', {}).get('phase') in ('model-gate','model-prefix')
+
+    def prefix_phase(self):
+        return self.model_phase() and self.manifest['llm_client']['phase'] == 'model-prefix'
 
     def authenticate_llm_client(self):
         if self.model_phase():
@@ -327,6 +332,33 @@ class Control:
         (self.out / (name + '.log')).write_bytes(raw)
         return raw
 
+    def preload_prefix_validators(self):
+        # All prefix-specific lazy imports must be resident before the first full authentication.
+        import source_llm_prefix_log
+        import verify_llm_prefix_readbacks
+        import build_llm_prefix_reference
+        import public_hip_prefix_assets
+
+    def frozen_controller_payload(self,name):
+        require(name in ('snapshot','post_snapshot','launch','close'),'unknown controller payload')
+        manifest_bytes=(self.candidate/'manifest.json').read_bytes()
+        require(sha(manifest_bytes)==self.manifest_sha,'controller manifest changed')
+        relative=self.manifest[name];path=(ROOT/relative).resolve()
+        require(not Path(relative).is_absolute() and path.is_relative_to(self.candidate.resolve()),'controller payload outside candidate')
+        payload=path.read_bytes()
+        require(len(payload)<=262144 and self.manifest['files'].get(relative)==sha(payload),'controller payload differs')
+        return payload
+
+    def final_prefix_authentication(self):
+        require(self.record.get('accepted') is True,'prefix phase has not passed')
+        self.record['accepted']=False
+        self.phase_remaining();started=time.monotonic()
+        self.verify()
+        self.authenticate_llm_client()
+        self.phase_remaining();self.owned_lock()
+        self.record['prefix_final_authentication']={'status':'PASS','elapsed_seconds':time.monotonic()-started}
+        self.record['accepted']=True
+
     def verify_close_payload(self):
         require(sha((self.candidate/'manifest.json').read_bytes())==self.manifest_sha,'cleanup manifest changed')
         path=(ROOT/self.manifest['close']).resolve()
@@ -334,13 +366,18 @@ class Control:
 
     def send(self, name, bound=262144):
         if name != 'close':self.phase_remaining()
-        if name == 'close' and self.model_phase():self.verify_close_payload()
-        else:self.verify()
+        prefix=self.prefix_phase()
+        if prefix:
+            payload=self.frozen_controller_payload(name)
+        else:
+            if name == 'close' and self.model_phase():self.verify_close_payload()
+            else:self.verify()
         if name == 'close' and self.model_phase():self.cleanup_remaining()
         else:self.phase_remaining()
         self.owned_lock()
-        payload = (ROOT / self.manifest[name]).read_bytes()
-        if name == 'close' and self.model_phase():require(sha(payload)==self.manifest['files'].get(self.manifest['close']),'cleanup payload changed after verification')
+        if not prefix:
+            payload = (ROOT / self.manifest[name]).read_bytes()
+            if name == 'close' and self.model_phase():require(sha(payload)==self.manifest['files'].get(self.manifest['close']),'cleanup payload changed after verification')
         data = bytearray()
         with (self.out / (name + '-consumed')).open('x') as stream:
             stream.write(self.token)
@@ -353,6 +390,7 @@ class Control:
                 sock.settimeout(8)
                 if name == 'close' and self.model_phase():self.cleanup_remaining()
                 else:self.phase_remaining()
+                if prefix:self.owned_lock()
                 sock.sendall(payload)
                 while True:
                     if name == 'close' and self.model_phase():self.cleanup_remaining()
@@ -596,6 +634,51 @@ class Control:
         require(self.record.get('application',{}).get('reported_metrics')==metrics,'weighted QKV transcript metrics differ')
         self.record['weighted_qkv_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
 
+    def fresh_prefix_dumps(self):
+        if not self.prefix_phase():return
+        from source_llm_prefix_log import FILES
+        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        require(not any(n.startswith('token-') and n.endswith('.f32le') for n in names),'prefix raw files already exist')
+        self.record['prefix_raw_absent_before_launch']=sorted(FILES)
+
+    def collect_prefix_dumps(self,partial=False):
+        if not self.prefix_phase():return
+        from source_llm_prefix_log import FILES
+        if not hasattr(self,'prefix_capture_deadline'):
+            self.prefix_capture_deadline=time.monotonic()+120
+            self.record['prefix_raw_capture_limit_seconds']=120
+        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        records=self.record.setdefault('prefix_raw_files',{})
+        folder=self.out/'raw';folder.mkdir(exist_ok=True)
+        if not partial:require({n for n in names if n.startswith('token-') and n.endswith('.f32le')}==set(FILES),'prefix raw inventory differs')
+        for name,size in FILES.items():
+            if name in records or (partial and name not in names):continue
+            remaining=self.prefix_capture_deadline-time.monotonic()
+            if remaining<=0:
+                self.record['prefix_raw_capture_deadline_exceeded']=True
+                if partial:break
+                raise RuntimeError('prefix total raw capture deadline')
+            try:
+                raw=self.fetch(self.manifest['results_dir']+'/'+name,size,self.phase_remaining(min(15,remaining)))
+                require(len(raw)==size,'prefix raw byte count differs: '+name)
+                require(time.monotonic()<self.prefix_capture_deadline,'prefix total raw capture deadline')
+                with (folder/name).open('xb') as stream:stream.write(raw)
+                records[name]={'bytes':len(raw),'sha256':sha(raw)}
+            except Exception as error:
+                if not partial:raise
+                self.record.setdefault('prefix_raw_capture_errors',{})[name]=repr(error)
+        if not partial:require(set(records)==set(FILES),'incomplete prefix raw capture')
+
+    def verify_prefix_dumps(self):
+        if not self.prefix_phase():return
+        from verify_llm_prefix_readbacks import verify
+        output=self.out/'prefix-numerical.json'
+        result=verify(ROOT/self.manifest['model_prefix']['reference'],self.out/'raw',output)
+        require(result.get('status')=='PASS' and result.get('raw_files')==24 and result.get('raw_bytes')==139264,'prefix numerical verification failed')
+        require(result.get('reference_receipt_sha256')==self.manifest['model_prefix']['reference_receipt_sha256'],'prefix numerical reference differs')
+        require(result.get('raw_sha256')=={name:entry['sha256'] for name,entry in self.record['prefix_raw_files'].items()},'prefix compared bytes differ from captured bytes')
+        self.record['prefix_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
+
     def ensure_results_directory(self):
         require(self.phase == 'deploy', 'results directory creation is deploy-only')
         from build_public_hip import validate_results_directory
@@ -789,6 +872,9 @@ class Control:
         return 150 if self.model_phase() else 40
 
     def check_application(self, raw):
+        if self.prefix_phase():
+            from source_llm_prefix_log import check_prefix_log
+            return check_prefix_log(raw)
         if self.model_phase(): return check_model_log(raw)
         from source_public_hip_log import check_log
         return check_log(raw, self.fixture)
@@ -802,7 +888,7 @@ class Control:
                 deployment.get('lock_released') is True and deployment.get('phase') == 'deploy' and
                 deployment.get('manifest_sha256') == self.manifest_sha and
                 deployment.get('package_sha256') == self.record['package_sha256'], 'fresh deployment not complete')
-        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps()
+        self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps(); self.fresh_prefix_dumps()
         self.verify_external_model()
         before = snapshot(self.send('snapshot'))
         baseline = self.history_read('before-launch')
@@ -823,7 +909,7 @@ class Control:
         worker.start()
         launch_offset = 0
         try:
-            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps()
+            self.idle(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps(); self.fresh_prefix_dumps()
             require(not self.capture_errors and worker.is_alive(), 'klog unavailable before launch')
             launch_offset = len(self.klog)
             self.record['klog_launch_offset'] = launch_offset
@@ -846,10 +932,10 @@ class Control:
             self.idle()
             application = self.fetch(self.log, 65536)
             (self.out / 'application.log').write_bytes(application)
-            self.collect_rmsnorm_dumps(); self.collect_q4_dumps(); self.collect_weighted_qkv_dumps()
+            self.collect_rmsnorm_dumps(); self.collect_q4_dumps(); self.collect_weighted_qkv_dumps(); self.collect_prefix_dumps()
             from source_public_hip_log import check_log
             self.record['application'] = self.check_application(application)
-            self.verify_rmsnorm_dumps(); self.verify_q4_dumps(); self.verify_weighted_qkv_dumps()
+            self.verify_rmsnorm_dumps(); self.verify_q4_dumps(); self.verify_weighted_qkv_dumps(); self.verify_prefix_dumps()
             # Snapshot uses another marker name so pre/post are each one-use.
             after = snapshot(self.send('post_snapshot'))
             require(before == after, 'matching title mounts changed')
@@ -892,6 +978,9 @@ class Control:
                     self.collect_weighted_qkv_dumps(partial=True)
                 except Exception as error:
                     self.record['weighted_qkv_raw_capture_error']=repr(error)
+            if self.prefix_phase() and not self.record.get('prefix_numerical'):
+                try:self.collect_prefix_dumps(partial=True)
+                except Exception as error:self.record['prefix_raw_capture_error']=repr(error)
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:
@@ -915,6 +1004,7 @@ class Control:
             if self.model_phase():self.phase_remaining();self.ftp=PhaseFTP(self.ftp,self.phase_remaining)
             require(self.ftp.sendcmd('SELF') == '226 SELF transfer mode disabled', 'raw SELF transfer mode unavailable')
             getattr(self, self.phase)()
+            if self.prefix_phase():self.final_prefix_authentication()
         except Exception as error:
             self.record['accepted'] = False
             self.record['error'] = repr(error)

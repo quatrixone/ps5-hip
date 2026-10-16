@@ -27,7 +27,7 @@ class Tests(unittest.TestCase):
    with self.assertRaises(ValueError):check_model_log(raw)
  def test_native_memory_snapshot_checks_kernel_results(self):
   source=(Path(__file__).resolve().parents[1]/'tools/public_hip_llm_client_console_title.cpp').read_text()
-  function=source[source.index('__attribute__((noinline)) static void model_memory_snapshot'):source.index('static bool configured_model_phase')]
+  function=source[source.index('__attribute__((noinline)) static void model_memory_snapshot'):source.index('enum class ClientPhase')]
   harness='''#include <cstdio>
 #include <cstdint>
 #include <cstddef>

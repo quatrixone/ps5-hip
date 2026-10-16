@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "status": "PASS_OFFLINE_INTEGRATION",
+  "classification": "actual-model-prefix-host-integration",
+  "base_commit": "89771232185db43864e0b78b055553caefabe613",
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "tokens": [
+    0,
+    1,
+    2,
+    31999
+  ],
+  "nodes_per_graph": 6,
+  "host_mock_launches": 36,
+  "readback_files": 24,
+  "readback_bytes": 139264,
+  "regression_suites": 43,
+  "regression_methods": 361,
+  "additional_make_integration_methods": 54,
+  "additional_tests_overlap_regressions": true,
+  "runtime_admission_executions": 10,
+  "cpu_reference_repeat_bitwise": true,
+  "fresh_q8_q4_objects_identical_to_tested": true,
+  "native_executed": false,
+  "gpu_numerics_verified": false,
+  "evidence": [
+    {
+      "path": "results/m2-prefix-host-tests-v1/receipt.json",
+      "sha256": "0105e084bb845cc0f648f21b3cc84906ccee0d08209a4678102702da09fcc370"
+    },
+    {
+      "path": "results/m2-prefix-reference-v1/receipt.json",
+      "sha256": "6f875537d88bf508bdba2a48a81607b9b3a43cb4dd9f1cce601871ef64114a6e"
+    },
+    {
+      "path": "results/m2-getrows-core-v1/receipt.json",
+      "sha256": "39ab597d94695cb8cae20e3621da6e723f0a5c52b87348ff1326714f6f760eab"
+    },
+    {
+      "path": "results/m2-getrows-core-v1/fresh-fixture-equivalence.json",
+      "sha256": "483b889c88a5756f121013cb894b049def231a0585a9ec795b94a858d757a2eb"
+    },
+    {
+      "path": "results/m2-canonical-regressions-v1/final-summary.json",
+      "sha256": "2529a54715feb857ea8a5c0454e89668a5eaa0f7244254d6246beb9bee73a21c"
+    },
+    {
+      "path": "results/m2-controller-auth-optimization/make-integration/results.json",
+      "sha256": "aba45274e9d645752e07a82d1f370c397d44d4531219f2c033e041f4506bf153"
+    }
+  ],
+  "limits": [
+    "Host HIP mocks deliberately produce zero outputs; no GPU result is claimed.",
+    "Only newly built host test/backend translation units are sanitizer-instrumented; existing CPU libraries are unchanged.",
+    "Native package, final image audit and console lifecycle/numerical validation remain required.",
+    "Full model graph remains unsupported; RoPE, attention, KV and FFN integration remain open."
+  ]
+}

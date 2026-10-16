@@ -7,8 +7,10 @@ Updated: 2026-10-16, America/New_York.
 The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
 within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
 and executed operator inventory alongside QKV, then one layer and full logits.
-Implementation has resumed after plan review. M0 and M1 remain parallel
-priorities, with .40 validation and milestone pushes.
+M0 and M1 are validated on .40. The immediate priority is the actual-model
+M2 prefix, followed by one whole transformer layer, with milestone pushes.
+
+- 2026-10-16 | M2 actual-model prefix | offline | four real graphs, 36 mocked HIP dispatches, sanitized admission and repeatable CPU reference | evidence/offline-model-prefix-integration.json | next: native package and .40 numerical/lifecycle validation
 
 - 2026-10-16 | M0 HIP calls | c988245 | .40 | pass:11 exact rows, guarded fill, clean lifecycle/postchecks | evidence/console40-native-hip-call-success.json | next: integrated M2 prefix
 
@@ -22,8 +24,8 @@ priorities, with .40 validation and milestone pushes.
 
 Direct native safetensors/PyTorch checkpoint loading is now an explicit
 requirement in `LLM_V1_PLAN.md`. Desktop conversion does not satisfy it; readers
-remain unimplemented. M1 is already qualified; the M0 clean lifecycle gate and
-subsequent integrated inference gates remain open.
+remain unimplemented. M0 and M1 are qualified; subsequent integrated
+inference gates remain open.
 
 - 2026-10-16 | External model load | 08857a6 | .40 | partial-pass: 21 MiB native app loads verified `/data/hip/models` weights; clean ownership/stop, prior heap warning persists | evidence/console40-native-external-model-load.json | next: scheduler malloc diagnosis
 
@@ -34,8 +36,8 @@ subsequent integrated inference gates remain open.
 - 2026-10-16 | M0 model storage | 539802f | .40 | partial: full load/context/reuse,219 balanced owners; heap warning rejects clean gate | evidence/console40-native-model-load-partial.json | next: trace scheduler malloc
 
 M1 now passed independently on .40: weighted normalization, shared Q8 and full
-Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
-boundary and integrate M2's remaining layer operations next.
+Q/K/V, with all raw buffers and clean lifecycle. M0's native application
+boundary also passed; integrate M2's remaining layer operations next.
 
 - 2026-10-16 | M0 model load | .40 | failed: 619094016-byte CPU allocation ENOMEM; healthy safety close | evidence/console40-native-model-allocation-failure.json | next: native allocation fix
 

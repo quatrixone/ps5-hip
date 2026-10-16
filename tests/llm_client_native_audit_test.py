@@ -155,4 +155,32 @@ class Relax(unittest.TestCase):
    with self.subTest(arg=arg),self.assertRaises(RuntimeError):a.normalized_wrapper('1000: addr32 '+arg,0x1000)
   for prefix in ('data16','rep','lock'):
    self.assertNotEqual(a.normalized_wrapper('1000: '+prefix+' callq 0x1234 <name>',0x1000),'call\n')
+
+class PrefixWrapper(unittest.TestCase):
+ def fixture(self):
+  body,base,support,calls=fixture();lines=[]
+  for index,line in enumerate(a.PREFIX_WRAPPER_TEMPLATE.splitlines()):
+   op,*tail=line.split(' ',1);arg=tail[0] if tail else ''
+   if op.startswith('j'):arg='0x'+format(base+int(arg,16),'x')
+   elif op=='call':op='callq';arg='0x5000 <target>'
+   else:arg=arg.replace('RIP','0x450(%rip)')
+   lines.append(f'{base+index*6:x}: {op} {arg}')
+  return '\n'.join(lines),base,support,list(enumerate([a.PREFIX_HOOK,*[n for _,n in calls]]))
+ def test_reviewed_prefix_wrapper(self):a.wrapper_contract(*self.fixture())
+ def test_changed_hook_and_rejection_branches(self):
+  body,base,support,calls=self.fixture()
+  for bad in [body.replace('je 0x1041','jne 0x1041'),body.replace('jge 0x1159','jge 0x1142'),body.replace('jmp 0x1048','jmp 0x1031'),body.replace('cmpq $0x0, 0x450(%rip)','cmpq $0x1, 0x450(%rip)')]:
+   with self.subTest(body=bad),self.assertRaises(RuntimeError):a.wrapper_contract(bad,base,support,calls)
+  for bad in [calls[1:],[(i,'wrong' if n==a.PREFIX_HOOK else n) for i,n in calls]]:
+   with self.assertRaises(RuntimeError):a.wrapper_contract(body,base,support,bad)
+ def test_prefix_model_chain_keeps_wrapped_boundary(self):
+  chain=['main','prefix','llama_process','decode','process_ubatch','context',a.WRAPPER]
+  bodies={caller:f'10: callq 0x20 <{callee}>\n' for caller,callee in zip(chain,chain[1:])};bodies[chain[-1]]=''
+  a.phase_contract('model-prefix','prefix',chain,bodies)
+  for caller in chain[:-1]:
+   bad=dict(bodies);bad[caller]=''
+   with self.assertRaises(RuntimeError):a.phase_contract('model-prefix','prefix',chain,bad)
+  bad=dict(bodies);bad['context']+='20: callq 0x40 <ggml_backend_sched_graph_compute_async>\n'
+  with self.assertRaises(RuntimeError):a.phase_contract('model-prefix','prefix',chain,bad)
+
 if __name__=='__main__':unittest.main()

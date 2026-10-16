@@ -16,7 +16,8 @@ bool overlaps(GpuRange a, GpuRange b) {
 }
 }
 void validate_geometry_shape(const GeometryShape &shape) {
-    require((shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{8,8,1} && shape.groups[2] == 1) ||
+    require((shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{256,1,1} && shape.groups == std::array<uint32_t,3>{1,4,1}) ||
+            (shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{8,8,1} && shape.groups[2] == 1) ||
             (shape.dimensions == 3 && shape.threads == std::array<uint32_t,3>{8,4,2}) ||
             (shape.dimensions == 1 && shape.threads == std::array<uint32_t,3>{256,1,1} && shape.groups[1] == 1 && shape.groups[2] == 1) ||
             (shape.dimensions == 2 && shape.threads == std::array<uint32_t,3>{32,4,1} && shape.groups[2] == 1), "unsupported measured geometry shape");
@@ -33,6 +34,9 @@ void validate_geometry_entry(const Kernel &k, const GeometryShape &shape, bool l
     const auto rejection = lds ? geometry_lds_launch_rejection(k) : geometry_launch_rejection(k);
     if (!rejection.empty()) throw ObjectError(rejection);
     const bool q8 = shape.threads == std::array<uint32_t,3>{256,1,1};
+    const bool getrows = k.rsrc1 == 0x60af01c1u && k.kernarg_size == 384;
+    require(!q8 || (getrows ? shape.dimensions == 2 && shape.groups == std::array<uint32_t,3>{1,4,1} : shape.dimensions == 1), "embedding/quantization shape mismatch");
+    require(!getrows || q8, "embedding block mismatch");
     const bool q4 = shape.threads == std::array<uint32_t,3>{32,4,1};
     require(k.rsrc2 == (lds ? (q4 ? 0xb8cu : 0x98cu) : (q8 ? 0x38cu : 0x138cu)) &&
         (!q8 || !lds) && (!q4 || lds) && (!lds || shape.dimensions == 2), "geometry entry/shape mismatch");
@@ -163,7 +167,8 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
                 "geometry implicit arguments disagree with dispatch shape");
         }
         if (geometry->threads == std::array<uint32_t,3>{256,1,1})
-            require(!lds && launch.kernargs.size()==328 && launch.rsrc1==0x60af00c1u &&
+            require(!lds && ((geometry->dimensions==1 && launch.kernargs.size()==328 && launch.rsrc1==0x60af00c1u) ||
+                (geometry->dimensions==2 && geometry->groups==std::array<uint32_t,3>{1,4,1} && launch.kernargs.size()==384 && launch.rsrc1==0x60af01c1u)) &&
                 std::all_of(launch.user_sgprs.begin(),launch.user_sgprs.begin()+4,[](uint32_t v){return v==0;}),
                 "invalid quantization geometry ABI");
     } else require(launch.threads == std::array<uint32_t, 3>{reduction ? 1024u : 64u, 1, 1} && launch.groups_x != 0 &&
