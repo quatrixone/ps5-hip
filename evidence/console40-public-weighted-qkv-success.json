@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "manifest_sha256": "6cfdcebcf5b739dbb464ded9b9ec0af359b5be0f829b3c00f6b9dceb2ccc31cc",
+  "execute_receipt_sha256": "15ad529c1c6177aba3eaa8cc72c77e85492308821cd02a500eb6dec29fd98158",
+  "numerical_receipt_sha256": "7a2f47fed343c4b70daf378732e25b9d7034e045d3125ed4d7dfd553cf09cf67",
+  "independent_numerics_equal_controller": true,
+  "application_log_sha256": "815cfe0ff0615fdfb14e7cba2561f04268b3ad5fa0b06622be1fe42ce6d22ca6",
+  "secondary_lock_receipt_sha256": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+  "raw_files": 30,
+  "raw_bytes": 11972800,
+  "weighted_values": 2048,
+  "q8_bytes": 2304,
+  "projection_values": 2560,
+  "weighted_metrics": {
+    "elements": 2048,
+    "maximum_absolute_error": 1.711003019821966e-08,
+    "maximum_budget_fraction": 0.0004953331432167777
+  },
+  "projections": [
+    {
+      "projection": "q",
+      "values": 2048,
+      "maximum_absolute_error": 4.6407876652665436e-08,
+      "maximum_budget_fraction": 0.04154165016142566
+    },
+    {
+      "projection": "k",
+      "values": 256,
+      "maximum_absolute_error": 7.502967491745949e-08,
+      "maximum_budget_fraction": 0.030144534443946578
+    },
+    {
+      "projection": "v",
+      "values": 256,
+      "maximum_absolute_error": 3.937202563975006e-09,
+      "maximum_budget_fraction": 0.021131966799647357
+    }
+  ],
+  "natural_stop": true,
+  "both_locks_released": true,
+  "services_healthy": true,
+  "native_executed": true,
+  "scope": "One layer-zero learned RMSNorm row, in-place Q8, and full Q/K/V for token 1 embedding, using the qualified halfword Q4 variant.",
+  "schema": 1,
+  "classification": "native-weighted-rmsnorm-shared-q8-full-qkv-success",
+  "source_commit": "101744f43f2d915e9c910b4d2f9d7d3815322a04",
+  "package_sha256": "3c3bf879696e2df5b9df4c165172af21640766e44da564d71e9f86ae7b4bd52c",
+  "kernel_variant": "weighted upstream RMSNorm + upstream Q8 + authenticated Q4 halfword-load adaptation",
+  "dispatches": 5,
+  "allocations": 6,
+  "frees": 6,
+  "modules_unloaded": 3,
+  "queues_retired": 1,
+  "limits": [
+    "Single fixed activation; no RoPE, attention, FFN, transformer layer or full-model inference.",
+    "No throughput or model-scale memory claim.",
+    "Raw bytes alone cannot exclude identical reuploads; the reviewed native title performs no intermediate reupload."
+  ],
+  "date": "2026-10-15",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "raw_directory": "results/source-public-weighted-qkv-console-v1",
+  "evidence_sha256": {
+    "results/weighted-qkv-console-outcome-review-v1/review.json": "a84526b6327f37b9725327d07364c2173d9d8559dac86b82ec71a3779bfe46e0",
+    "results/source-public-weighted-qkv-console-v1/manifest.json": "6cfdcebcf5b739dbb464ded9b9ec0af359b5be0f829b3c00f6b9dceb2ccc31cc",
+    "results/source-public-weighted-qkv-console-v1/deploy/receipt.json": "e7ae16935870d07a97f4c2f4f7505edda20effb2ba831507db7e85c70633aadf",
+    "results/source-public-weighted-qkv-console-v1/execute/receipt.json": "15ad529c1c6177aba3eaa8cc72c77e85492308821cd02a500eb6dec29fd98158",
+    "results/source-public-weighted-qkv-console-v1/execute/numerical/receipt.json": "7a2f47fed343c4b70daf378732e25b9d7034e045d3125ed4d7dfd553cf09cf67",
+    "results/source-public-weighted-qkv-console-v1/execute/application.log": "815cfe0ff0615fdfb14e7cba2561f04268b3ad5fa0b06622be1fe42ce6d22ca6",
+    "results/source-public-weighted-qkv-console-v1/execute/klog.log": "b8c52df69e913ffc10ebd2870e1d2133d576ccf27f0de8c4d66158d92296cd87",
+    "results/source-public-weighted-qkv-console-v1/execute/snapshot.log": "612ae6722f68fc050692d21506c5baf598df7f3678416370de6bf63443719f70",
+    "results/source-public-weighted-qkv-console-v1/execute/post_snapshot.log": "612ae6722f68fc050692d21506c5baf598df7f3678416370de6bf63443719f70",
+    "results/source-public-weighted-qkv-console-v1/deploy-secondary-lock.json": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "results/source-public-weighted-qkv-console-v1/execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f"
+  }
+}

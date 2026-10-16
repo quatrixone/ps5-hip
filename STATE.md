@@ -16,15 +16,22 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
-Current owner request: pause implementation and console work for plan review.
+Implementation resumed after the owner's plan review.
 The updated release plan tightens M0 to a reproducible native application with
 loading/tokenization and enforced backend routing. Local ignored prototypes
 now provide a 512-position CPU graph trace, a limited native payload link and
 a storage-only HIP backend; none establishes native inference. The link review
-found incomplete object/tool/header provenance. The frozen M1 candidate has
-deployment approval, but has not been deployed or executed. These facts
-supersede the older next-action paragraphs below. Recheck freeze identity after
-this documentation change before resuming console work.
+found incomplete object/tool/header provenance; source-only promotion is in
+progress. M1 passed on .40 with independent outcome review. Its five stages and 30 raw buffers
+passed numerical checks, with natural shutdown, healthy services and both locks
+released. Do not replay its consumed deploy/execute phases. These facts
+supersede the older next-action paragraphs below.
+
+See `evidence/console40-public-weighted-qkv-success.json`: all 2,048 weighted
+values, 2,304 Q8 bytes and 2,560 Q/K/V values passed frozen comparisons. Maximum
+projection error was 7.50296749e-8; maximum budget fraction was 0.0415416502.
+This proves one fixed-input layer-zero QKV chain, not attention or a full layer.
+Next finish M0 native application/backend integration, then M2 layer operators.
 
 The owner resumed M0 and M1 in parallel, with .40 validation authorized. The
 revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an

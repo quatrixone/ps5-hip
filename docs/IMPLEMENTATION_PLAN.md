@@ -7,8 +7,14 @@ Updated: 2026-10-15, America/New_York.
 The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
 within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
 and executed operator inventory alongside QKV, then one layer and full logits.
-The current owner request pauses implementation for plan review. On resumption,
-M0 and M1 remain parallel priorities, with .40 validation and milestone pushes.
+Implementation has resumed after plan review. M0 and M1 remain parallel
+priorities, with .40 validation and milestone pushes.
+
+M1 now passed independently on .40: weighted normalization, shared Q8 and full
+Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
+boundary and integrate M2's remaining layer operations next.
+
+- 2026-10-15 | M1 | 101744f | .40 | pass: 2048 weighted values, 2304 Q8 bytes, 2560 QKV values, 30 buffers and clean lifecycle | evidence/console40-public-weighted-qkv-success.json | next: M0 client, M2 layer
 
 
 Per the owner's 2026-10-15 direction, follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md)

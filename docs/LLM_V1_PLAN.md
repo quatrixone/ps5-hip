@@ -1,9 +1,9 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-Implementation and console activity are paused for the owner's plan review.
-On resumption, prioritize M0 and M1 in parallel, use idle .40 for validation,
-and push each completed, validated milestone to main.
+Implementation has resumed after the plan review. Prioritize M0 and M1 in
+parallel, use idle .40 for validation, and push each completed, validated
+milestone to main.
 
 ## Outcome and scope
 
@@ -64,8 +64,8 @@ Never remove dependency checks and substitute success stubs.
 | --- | --- | --- |
 | Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
-| Native arithmetic | Unweighted RMSNorm and Q8/Q4, including Q4 consuming device-produced Q8, passed on .40 | Weighted RMSNorm plus full Q/K/V native outcome |
-| Weighted QKV | Source-built modules, full CPU references, native package/image audit and independently approved frozen deployment candidate | Deployment, separately reviewed execution and native numerical validation |
+| Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
+| Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
 | Client | Local CPU graph trace through 512 positions; limited native payload link; storage-only public-HIP backend prototype | Reproducible production integration, runnable native app, tensor routing and runtime qualification |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
@@ -134,6 +134,11 @@ If full upstream HIP linkage adds unused libraries or kernels, select only the
 needed sources/backend operations rather than expanding the SDK to satisfy them.
 
 ### M1 ? Finish the current weighted QKV chain (V1.3)
+
+Completed on .40 on 2026-10-15. See
+`evidence/console40-public-weighted-qkv-success.json`. The candidate's deployment
+and execution phases are consumed; the procedure below records acceptance,
+not an instruction to replay it.
 
 Use the already prepared candidate workflow. Audit the actual native package,
 freeze its source and bytes, then run once on idle .40 under the console protocol.
@@ -224,10 +229,7 @@ Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-After resumption: validate the reviewed M1 candidate on idle .40, with separate
-deployment and execution reviews. Recheck its source/freeze identity after any
-repository changes; do not reuse an approval against changed candidate inputs.
-In parallel, promote M0's graph inventory and native link/backend prototypes
+M1 is complete. Promote M0's graph inventory and native link/backend prototypes
 into the supported build and qualify the actual application boundary.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless

@@ -25,7 +25,7 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
-Current owner request pauses implementation and console work for plan review.
+Implementation resumed after the owner's plan review.
 Follow the tightened M0-M5 criteria in the release plan. Ignored M0 work includes
 `results/m0-executed-graph-v2/receipt.json`,
 `results/m0-native-link-independent-review-v1/review.json`, and
@@ -33,8 +33,16 @@ Follow the tightened M0-M5 criteria in the release plan. Ignored M0 work include
 not source-only production milestones: complete link provenance, native app
 qualification and actual llama no-fallback enforcement remain open. M1 freeze
 review is at `results/source-public-weighted-qkv-console-v1/review.json`;
-deployment and execution have not occurred. Recheck freeze/source identity
-after documentation changes. This checkpoint supersedes older next actions.
+deployment and execution are now consumed and controller-accepted. The five
+stages and 30 raw buffers passed numerical checks, with natural shutdown,
+healthy services and both locks released. Independent outcome review passed;
+see `evidence/console40-public-weighted-qkv-success.json`. Never replay either
+phase. Installed package SHA256 is
+`3c3bf879696e2df5b9df4c165172af21640766e44da564d71e9f86ae7b4bd52c`,
+and its application log SHA256 is
+`815cfe0ff0615fdfb14e7cba2561f04268b3ad5fa0b06622be1fe42ce6d22ca6`.
+Results directory: `/data/ps5-hip/results-weighted-qkv-v1`.
+This checkpoint supersedes older next actions.
 
 The owner resumed M0 and M1 in parallel, with .40 validation authorized. The
 revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an
