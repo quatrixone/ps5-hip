@@ -1,9 +1,9 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-Implementation has resumed after the plan review. Prioritize M0 and M1 in
-parallel, use idle .40 for validation, and push each completed, validated
-milestone to main.
+M1 is complete; M0 native application/backend integration is the immediate
+priority. Use idle .40 for meaningful validation and push each completed,
+validated milestone to main. This review does not itself initiate a console run.
 
 ## Outcome and scope
 
@@ -72,6 +72,33 @@ Never remove dependency checks and substitute success stubs.
 See STATE.md and the referenced compact evidence for individual outcomes.
 A running package build is not a passed build. Historical compile-probe limits
 are not current capability declarations. No native LLM inference is claimed.
+
+## Next implementation checkpoints
+
+1. Finish source-only Make reproduction of the real native client and bounded
+   vocabulary fixture, then the native application package. Promote reviewed
+   prototypes without dependencies on historical build objects or local-only
+   assets. Existing offline link/package success is not PS5 startup evidence.
+2. Validate native loading, tokenization and real HIP storage on .40. Enforce
+   rejection in the actual client graph execution path, including graph reuse.
+   A vocabulary-only asset and a rejected synthetic ADD are useful preliminary
+   tests, but cannot alone close M0's model graph routing requirement.
+3. Integrate GPU embedding and the proven normalization/QKV chain into that
+   backend. Then add RoPE, KV writes, attention, output/residual and FFN until
+   one complete layer passes sequence-level comparison. Do not build a separate
+   diagnostic implementation of each operation.
+4. In parallel with layer integration, validate full weight/KV residency,
+   64 MiB buffer chunking and cleanup. Finish all 22 layers and full logits
+   before adding generation behavior or optimizing throughput.
+5. Connect sampling and incremental decode, then qualify repeated requests,
+   errors, source-only rebuilds and measured performance under M4/M5.
+
+The offline native application prototype is approximately 19.9 MB and exceeds
+the current 16 MiB diagnostic transfer ceiling. Review a bounded transport
+increase before deploying it; do not confuse that policy with a PS5 memory
+limit or remove real client implementations to make the package smaller.
+Prototype source/input provenance and source-only application reproduction
+remain open. Neither packaging nor tokenizer success establishes inference.
 
 ## Required computation, in model order
 
@@ -234,8 +261,9 @@ Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-M1 is complete. Promote M0's graph inventory and native link/backend prototypes
-into the supported build and qualify the actual application boundary.
+M1 and M0's source-only CPU graph inventory are complete. Promote M0's native
+link/backend prototypes into the supported build and qualify the actual
+application boundary.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.
