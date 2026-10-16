@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "PASS_OFFLINE_HISTORICAL_RECOVERY_ADMISSION",
+  "source_identities": {
+    "tools/source_model_freeze.py": "6ac041bca6fba4e6f26457b3e13c91c0fb9d0dd2e9557e99d64cb6dffc39a682",
+    "tests/source_model_auth_test.py": "2ca8d9332e3415bb2122c137d9dd0b0815b00174488e885151f39b5a0863a0ba"
+  },
+  "focused_suites": 5,
+  "focused_tests": 41,
+  "focused_review_sha256": "3307981846b6e9f9f3d11dc737322870242df4964f0425def639a7609ae1e592",
+  "real_review_sha256": "6b1fc44b9f951ff7f9f2bf8339a36ca936489a35ce8680c4d0aecdbf587809d3",
+  "independent_review_sha256": "dee237b63279490422c6951cf55b1bd49c1ccb76cf06924cb0cbf7a27e279e75",
+  "real_validation_seconds": 12.266708917013602,
+  "baseline": {
+    "package_bytes": 827719680,
+    "package_sha256": "3132cec3f7eced69940aef431dd27324e4378f0054a2754bf7dbf58af1721e46",
+    "assets": 9,
+    "model_bytes": 619831552,
+    "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "historical_bindings": {
+    "results/source-public-llm-model-console-v1/build-receipt.json": "f1607cc23df1251f6a49796b8a6453b7e4796bcb84e63b68d04e55214ff80ca2",
+    "results/source-public-llm-model-console-v1/manifest.json": "0cdfb15f04827cb1170c2d89dbf11770c1b89ce73df809d63322b2e847163e13",
+    "results/source-public-llm-model-console-v1/deploy/receipt.json": "d6091723f3efa4d0ec57646c14dcc3552efc0229af99e32c841e63fc30fa9feb",
+    "results/source-public-llm-model-console-v1/review.json": "151d1d7a8b531de7f1c9b0b05bcdf6260eb141b284667d969a841c451ad4f249",
+    "results/source-public-llm-model-console-v1/llm-client-native-audit.json": "050b6fb750f8cc0b01479eb91f5fd02b672a2b458c00c89f7db46cc383c2c797"
+  },
+  "contract": [
+    "Previously frozen candidate receipt/manifest and independently reviewed successful deployment required.",
+    "Exact package/model/nineassets/audit/threeimage identities retained; old source need not match corrected current source for recovery.",
+    "New candidate strict live-source validator remains unchanged."
+  ],
+  "limits": [
+    "Recovery preservation only; no execution authorization or recursion into older baselines.",
+    "No console contact, model execution, inference, or native rebuild."
+  ]
+}

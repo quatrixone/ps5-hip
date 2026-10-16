@@ -23,9 +23,46 @@ def model_contract(manifest):
  from source_public_hip_log import package_limit
  if b['bytes']>package_limit(manifest.get('baseline_log_fixture','bootstrap')):
   path=Path(b['receipt']);require(stream_digest(path)==b['receipt_sha256'],'large baseline receipt differs')
-  receipt=json.loads(path.read_text());validate_model_receipt(path.parent,receipt)
+  receipt=validate_historical_baseline(path)
   require(receipt['package_bytes']==b['bytes'] and receipt['package_sha256']==b['sha256'],'large baseline identity differs')
 ROOT=Path(__file__).resolve().parents[1]
+def validate_historical_baseline(path):
+ """Authenticate a previously reviewed deployment for recovery, never execution."""
+ import freeze_source_candidate as legacy
+ path=Path(path).resolve();folder=path.parent
+ require(path.name=='build-receipt.json','baseline requires frozen candidate build receipt')
+ receipt=json.loads(path.read_text());manifest_path=folder/'manifest.json'
+ manifest=json.loads(manifest_path.read_text());deployment_path=folder/'deploy/receipt.json'
+ deployment=json.loads(deployment_path.read_text());review=json.loads((folder/'review.json').read_text())
+ require(review.get('approved') is True and review.get('manifest_sha256')==stream_digest(manifest_path) and review.get('deployment_receipt_sha256')==stream_digest(deployment_path),'baseline deployment review differs')
+ require(deployment.get('phase')=='deploy' and all(deployment.get(k) is True for k in ('accepted','promoted','healthy_after','lock_released')) and deployment.get('launched') is False,'baseline deployment not accepted')
+ require(deployment.get('host')==manifest.get('host')=='192.168.4.40' and deployment.get('title_id')==manifest.get('title_id')=='PPSA99014' and deployment.get('manifest_sha256')==review['manifest_sha256'],'baseline environment differs')
+ require(receipt.get('schema')==1 and receipt.get('status')=='PASS' and receipt.get('classification')=='source-only-model-rejection-native-client-app' and receipt.get('fixture')=='llm_client' and receipt.get('phase')=='model-gate','baseline receipt phase differs')
+ require(receipt.get('native_executed') is False and receipt.get('gpu_executed') is False,'baseline receipt execution claims')
+ bound=receipt['llm_client'];model=bound['model']
+ require(bound.get('phase')=='model-gate' and model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA and manifest.get('llm_client')==bound,'baseline locked model differs')
+ files=manifest['files']
+ def frozen(p,expected):
+  require(p.resolve().is_relative_to(ROOT) and not p.is_symlink(),'baseline artifact path')
+  require(files.get(str(p.relative_to(ROOT)))==expected and stream_digest(p)==expected,'baseline frozen artifact differs')
+ frozen(path,stream_digest(path))
+ package=folder/'package/PPSA99014.ffpkg';size=receipt['package_bytes'];digest=receipt['package_sha256']
+ require(type(size) is int and MODEL_BYTES<size<=MODEL_PACKAGE_LIMIT and package.stat().st_size==size and deployment.get('package_sha256')==digest,'baseline package identity differs')
+ require(manifest.get('package')==str(package.relative_to(ROOT)) and manifest.get('model_transfer',{}).get('bytes')==size and manifest['model_transfer'].get('sha256')==digest,'baseline transfer differs')
+ frozen(package,digest)
+ app=folder/'package/app';names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model.gguf'}
+ require(set(receipt['package_files'])==names and manifest.get('package_files')==receipt['package_files'] and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'baseline nine assets required')
+ for name,h in receipt['package_files'].items():frozen(app/name,h)
+ require((app/'model.gguf').stat().st_size==MODEL_BYTES and receipt['package_files']['model.gguf']==MODEL_SHA and (app/'client-phase.txt').read_bytes()==b'model-gate\n','baseline model asset differs')
+ require((app/'results-dir.txt').read_text()==receipt['results_dir']==manifest.get('results_dir'),'baseline results directory differs')
+ audit_path=folder/'llm-client-native-audit.json';frozen(audit_path,bound['audit']['sha256']);audit=json.loads(audit_path.read_text())
+ require(audit.get('status')=='PASS' and audit.get('classification')=='offline-public-hip-llm-client-native-image-audit' and audit.get('phase')=='model-gate','baseline audit differs')
+ require(all(audit.get(k) is True for k in ('wrapper_retained','wrapper_no_bypass','actual_client_call_chain_audited')) and all(audit.get(k) is False for k in ('actual_client_gate_executed','native_executed','gpu_executed')),'baseline audit claims differ')
+ original=Path(bound['audit']['path']).parent
+ for name in ('title.elf','eboot.elf','extracted.elf'):
+  image=original/name;h=audit['inputs'].get(str(image));require(h is not None and receipt['inputs'].get(str(image))==h and stream_digest(image)==h,'baseline image provenance differs')
+ return receipt
+
 def prerequisites(bound):
  import build_llm_native_app as driver
  model=driver.model_inputs(Path(bound['model']['asset']),Path(bound['model']['source_dir']),Path(bound['model']['cpu_build']))

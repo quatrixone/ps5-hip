@@ -55,6 +55,38 @@ class Auth(unittest.TestCase):
    return Sized()
   with patch.object(Path,'stat',sized_stat),patch.object(f,'ROOT',self.root),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(f,'validator_identities',return_value=validators),patch.object(legacy,'ROOT',self.root),patch.object(legacy.subprocess,'check_output',side_effect=git),patch.object(sys,'argv',argv):legacy.main()
   manifest=json.loads((output/'manifest.json').read_text());self.assertEqual(manifest['llm_client']['phase'],'model-gate');self.assertEqual(manifest['deadline_seconds'],150);self.assertEqual(manifest['control_phase_seconds'],1800);self.assertEqual(manifest['model_transfer']['bytes'],package_bytes);self.assertIn('tools/helper.py',manifest['files']);self.assertFalse((output/'review.json').exists())
+ def historical(self, mutate=None):
+  candidate=self.build;rp=candidate/'build-receipt.json';rp.write_text(json.dumps(self.r))
+  manifest={'host':'192.168.4.40','title_id':'PPSA99014','llm_client':self.r['llm_client'],'results_dir':self.r['results_dir'],'package':'build/package/PPSA99014.ffpkg','package_files':self.r['package_files'],'model_transfer':{'bytes':2,'sha256':self.r['package_sha256']}}
+  manifest['files']={str(p.relative_to(self.root)):f.stream_digest(p) for p in candidate.rglob('*') if p.is_file()}
+  mp=candidate/'manifest.json';mp.write_text(json.dumps(manifest));(candidate/'deploy').mkdir()
+  dp=candidate/'deploy/receipt.json';deployment=dict(phase='deploy',accepted=True,promoted=True,healthy_after=True,lock_released=True,launched=False,host=manifest['host'],title_id=manifest['title_id'],manifest_sha256=f.stream_digest(mp),package_sha256=self.r['package_sha256']);dp.write_text(json.dumps(deployment))
+  review=dict(approved=True,manifest_sha256=f.stream_digest(mp),deployment_receipt_sha256=f.stream_digest(dp));(candidate/'review.json').write_text(json.dumps(review))
+  if mutate:mutate(candidate)
+  with patch.object(f,'ROOT',self.root),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha):return f.validate_historical_baseline(rp)
+ def test_historical_baseline_accepts_changed_source_only_for_recovery(self):
+  def change(candidate):
+   Path(self.r['units'][0]['source']).write_bytes(b'new corrected current source')
+  self.assertEqual(self.historical(change)['package_sha256'],self.r['package_sha256'])
+  with self.assertRaises(ValueError):self.validate()
+ def test_historical_baseline_rejects_tampering(self):
+  # Each subcase gets fresh complete archived files and review bindings.
+  mutations={
+   'receipt':lambda c:(c/'build-receipt.json').write_text('{}'),
+   'package':lambda c:(c/'package/PPSA99014.ffpkg').write_bytes(b'yy'),
+   'asset':lambda c:(c/'package/app/vocab.gguf').write_bytes(b'z'),
+   'model':lambda c:(c/'package/app/model.gguf').write_bytes(b'z'),
+   'audit':lambda c:(c/'llm-client-native-audit.json').write_text('{}'),
+   'image':lambda c:(c/'title.elf').write_bytes(b'z'),
+   'deployment':lambda c:(c/'deploy/receipt.json').write_text('{}'),
+   'review':lambda c:(c/'review.json').write_text('{}'),
+   'manifest':lambda c:(c/'manifest.json').write_text('{}')}
+  for name,mutation in mutations.items():
+   with self.subTest(name=name):
+    case=Auth();case.setUp()
+    try:
+     with self.assertRaises((ValueError,KeyError)):case.historical(mutation)
+    finally:case.doCleanups()
  def test_default_vocab_cli_rejects_model_receipt(self):
   import sys
   (self.build/'receipt.json').write_text(json.dumps(self.r));output=self.root/'results/candidate'

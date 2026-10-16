@@ -40,6 +40,19 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Historical model recovery admission now verifies the previous frozen candidate,
+accepted deployment/review bindings, exact package/nine assets, locked model and
+archived audited images without requiring old source to equal today's checkout.
+Strict current-source validation for new candidates is unchanged. Forty-one
+focused tests, actual installed-baseline artifact validation and independent
+review pass; see `evidence/offline-historical-model-baseline.json`.
+The next baseline receipt is
+`results/source-public-llm-model-console-v1/build-receipt.json`; preserve its
+192-byte failed log and the older successful vocabulary backups. Prepared case
+and freeze arguments are in `results/m0-model-console-case-v2/`; run them only
+after the current model-app-v4 build and independent admission pass.
+
+
 The watchdog contract correction passes independent offline review: the shared
 maximum now admits the intended 120-second model budget; all existing shorter
 budgets and timeout/state/join checks remain intact. The production-code test
