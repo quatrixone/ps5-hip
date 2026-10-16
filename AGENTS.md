@@ -34,6 +34,18 @@ the entire workspace, dependency trees or historical logs by default.
 - Update current state and one concise milestone entry after a completed gate.
   Preserve raw logs locally and commit compact, sanitized evidence with provenance.
 
+## Local disk retention
+
+After a validated milestone supersedes a host build, remove its rebuildable
+object files and host-test executables when they are no longer inputs to active
+work. Preserve receipts, reviews, logs, sources, numerical references and raw
+console evidence, including failed experiments. Keep current candidates,
+installed-package recovery artifacts, toolchains, models and active build
+inputs. Check running builds and receipt dependencies before deletion; record
+deleted paths, sizes and hashes in a local cleanup ledger. Never blanket-delete
+`results/` or assume an older directory is unused. Note that pruned receipts
+cannot be fully rehashed without rebuilding their removed artifacts.
+
 ## Console work
 
 The planning request did not request a console run. When later work is authorized,

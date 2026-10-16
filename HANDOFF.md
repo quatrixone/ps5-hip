@@ -18,6 +18,14 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
+Local disk cleanup on 2026-10-15 removed 2,406 rebuildable host-test ELF/object
+files (13.378 GiB) from 24 superseded result directories. The local ledger is
+`results/cleanup-2026-10-15.jsonl` with paths, sizes and SHA256 identities.
+Receipts, logs, sources, numerical references and console evidence were kept;
+current M0 work, weighted-QKV candidate/build, dependencies and models were not
+pruned. Historical receipts referencing these removed binaries require a fresh
+rebuild for full artifact revalidation. Follow AGENTS.md's disk retention rule.
+
 Follow [LLM_V1_PLAN.md](docs/LLM_V1_PLAN.md): standalone TinyLlama 1.1B Q4_0,
 batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
