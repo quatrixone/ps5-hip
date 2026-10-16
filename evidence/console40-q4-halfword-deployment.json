@@ -1,0 +1,23 @@
+{
+  "classification": "q4-halfword-deployment-only",
+  "source_commit": "0dc45dac238ddaec1628a1dc412a6713768cc645",
+  "manifest_sha256": "a935e5afb9af1dfc77c1e5804561d3526e69d7d2ac5cc43c1b6a8406083d0d9e",
+  "package_sha256": "bb8be0ff0eda5dfff2cd7ae6388aba95b8eeafbfd30d2047e7932c7ac5d90471",
+  "accepted": true,
+  "launched": false,
+  "healthy_after": true,
+  "both_locks_released": true,
+  "complete_readbacks": 78,
+  "results_directory": "/data/ps5-hip/results-q4-halfword-v1",
+  "receipt": {
+    "path": "results/source-public-q4-halfword-console-v1/deploy/receipt.json",
+    "sha256": "c2d63b034310519cb04d2f7414b249ab2e5abf08f405b522faa16ecb68670198"
+  },
+  "secondary_lock_receipt_sha256": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+  "next": "Execute the deployment-receipt-bound frozen candidate once; no automatic retry. GPU numerical acceptance remains open.",
+  "independent_review": {
+    "path": "results/q4-halfword-deployment-review-v1/review.json",
+    "sha256": "c7f056510e2ad890139a11978953ddf12afda77413e6c37e9b948980047a55db",
+    "result": "PASS"
+  }
+}

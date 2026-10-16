@@ -29,8 +29,14 @@ Build: `build/public-hip-q4-halfword-native-v1`; fixture/reference:
 Use separate results directory `/data/ps5-hip/results-q4-halfword-v1`.
 Fresh-directory controls pass 48 tests; candidate/baseline directories are
 validated separately and deployment creates only a missing leaf directory.
-Next commit/freeze/review a new candidate and validate once on idle .40. The installed image and failed original
-results below remain unchanged. This variant changes cache flags and scheduling
+The candidate from source commit `0dc45da` is now deployed and verified on .40,
+without launching it. The previous image and failed log were preserved; services
+are healthy and both locks released. See
+`evidence/console40-q4-halfword-deployment.json`. The local candidate is
+`results/source-public-q4-halfword-console-v1`; deployment is consumed and must
+not be replayed. Independent deployment review passed and bound the receipt in
+its local `review.json`. Next execute the frozen candidate once, with no automatic
+retry. GPU numerical acceptance remains open. This variant changes cache flags and scheduling
 as well as load width; success would not alone prove alignment as the cause.
 
 ## Q4 diagnostic resource admission tested offline
