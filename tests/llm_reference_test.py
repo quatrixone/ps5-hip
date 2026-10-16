@@ -14,7 +14,7 @@ class ReferenceTest(unittest.TestCase):
     def test_driver_alias_and_failed_rerun_receipt(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            for name in ('llm-inputs.json', 'tools/build_llm_cpu_reference.py', 'tools/fetch_locked_deps.py'):
+            for name in ('llm-inputs.json', 'tools/build_llm_cpu_reference.py', 'tools/build_jobs.py', 'tools/fetch_locked_deps.py'):
                 target = root / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text('test input')
