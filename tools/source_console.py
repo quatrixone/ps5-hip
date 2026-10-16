@@ -120,7 +120,7 @@ class Control:
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
         self.verify()
-        require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
+        require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() and 'external_model' not in self.manifest else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
         if self.fixture == 'llm_client':
             self.authenticate_llm_client()
         if self.fixture == 'rmsnorm':
@@ -392,6 +392,55 @@ class Control:
             local_identity(path,path.stat().st_size,digest)
             self.model_readback(MOUNT+'/'+name,path.stat().st_size,digest,self.record.setdefault('ftp_reads',[]),transfer['deadline_seconds'])
 
+    def external_model_entry(self, path):
+        entries = [row.split(None, 8) for row in self.listing(str(Path(path).parent))]
+        found = [row for row in entries if len(row) == 9 and
+                 (row[8] == Path(path).name or row[8].startswith(Path(path).name + ' -> '))]
+        require(len(found) <= 1, 'ambiguous external model entry')
+        if found:
+            require(found[0][0].startswith('-'), 'external model must be a regular file')
+        return bool(found)
+
+    def verify_external_model(self):
+        if 'external_model' not in self.manifest:
+            return
+        from external_model import validate_external_model
+        model = self.manifest['external_model']
+        validate_external_model(model)
+        require(self.external_model_entry(model['path']), 'external model is missing')
+        self.model_readback(model['path'], model['bytes'], model['sha256'],
+                            self.record.setdefault('external_model_reads', []), 1800)
+
+    def provision_external_model(self):
+        if 'external_model' not in self.manifest:
+            return
+        require(self.phase == 'deploy', 'model provisioning is deploy-only')
+        from external_model import validate_external_model
+        model = self.manifest['external_model']
+        validate_external_model(model)
+        self.ensure_directory(str(Path(model['path']).parent), 'model')
+        evidence = self.record['external_model'] = {**model, 'complete': False}
+        if self.external_model_entry(model['path']):
+            evidence['action'] = 'reuse'
+            self.verify_external_model()
+        else:
+            evidence['action'] = 'upload'
+            temporary = str(Path(model['path']).parent) + '/.model-' + sha(self.token.encode())[:32] + '.upload'
+            evidence['temporary'] = temporary
+            require(not self.external_model_entry(temporary), 'model staging path already exists')
+            source = Path(self.manifest['llm_client']['model']['asset'])
+            self.model_upload(source, temporary, model['bytes'], model['sha256'],
+                              self.record.setdefault('external_model_transfers', []), 1800)
+            self.idle()
+            require(not self.external_model_entry(model['path']), 'external model appeared before promotion')
+            # Shared-console ownership and the final absence check guard FTP rename.
+            self.phase_remaining()
+            self.ftp.rename(temporary, model['path'])
+            self.phase_remaining()
+            evidence['promoted'] = True
+            self.verify_external_model()
+        evidence['complete'] = True
+
     def fresh_log(self):
         require(not any(row.endswith(' ' + Path(self.log).name) for row in self.listing(str(Path(self.log).parent))), 'result log already exists')
 
@@ -552,6 +601,10 @@ class Control:
         from build_public_hip import validate_results_directory
         directory = self.manifest['results_dir']
         validate_results_directory(directory)
+        self.ensure_directory(directory, 'results')
+
+    def ensure_directory(self, directory, kind):
+        require(self.phase == 'deploy', 'directory creation is deploy-only')
         parent = '/'
         for leaf in directory[1:].split('/'):
             path = parent.rstrip('/') + '/' + leaf
@@ -565,15 +618,15 @@ class Control:
                 require(found[0][0].startswith('d'), 'results path is not a directory')
             else:
                 self.ftp.mkd(path)
-                self.record.setdefault('results_directories_created', []).append(path)
+                self.record.setdefault(kind + '_directories_created', []).append(path)
                 if path == directory:
-                    self.record['results_directory_created'] = directory
+                    self.record[kind + '_directory_created'] = directory
                 found = matches()
                 require(len(found) == 1 and found[0][0].startswith('d'),
                         'created results directory not visible')
             parent = path
         self.listing(directory)
-        self.record['results_directory_verified'] = directory
+        self.record[kind + '_directory_verified'] = directory
 
     def deploy(self):
         if self.model_phase():return self.deploy_model()
@@ -637,6 +690,7 @@ class Control:
         model_contract(self.manifest)
         self.idle()
         snapshot(self.send('snapshot'))
+        self.provision_external_model()
         baseline_log = self.manifest.get('baseline_log_sha256')
         old_sha = self.manifest['baseline_image_sha256']
         require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
@@ -749,6 +803,7 @@ class Control:
                 deployment.get('manifest_sha256') == self.manifest_sha and
                 deployment.get('package_sha256') == self.record['package_sha256'], 'fresh deployment not complete')
         self.idle(); self.installed(); self.fresh_log(); self.fresh_rmsnorm_dumps(); self.fresh_q4_dumps(); self.fresh_weighted_qkv_dumps()
+        self.verify_external_model()
         before = snapshot(self.send('snapshot'))
         baseline = self.history_read('before-launch')
         sock = socket.create_connection((HOST, 3232), timeout=3)

@@ -1,6 +1,8 @@
 """Authenticate model-rejection packages and frozen controller dependencies."""
 import hashlib,json,re
 from pathlib import Path
+from external_model import validate_external_model, encode_model_path
+from source_public_hip_log import package_limit
 from source_model_streaming import require,CHUNK
 MODEL_BYTES=619831552
 MODEL_PACKAGE_LIMIT=1024*1024*1024  # UFS metadata and 20% free space; exact image size/hash still required.
@@ -15,12 +17,14 @@ def model_contract(manifest):
  model=manifest['llm_client']['model']
  require(model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA,'wrong locked model')
  t=manifest['model_transfer'];b=manifest['baseline_transfer']
- require(type(t['bytes']) is int and MODEL_BYTES<t['bytes']<=MODEL_PACKAGE_LIMIT,'model package bound')
+ external=manifest.get('external_model')
+ if external is not None:validate_external_model(external)
+ # Historical embedded transfer contracts remain readable; new receipt admission requires external storage.
+ require(type(t['bytes']) is int and (0<t['bytes']<=package_limit('llm_client') if external is not None else MODEL_BYTES<t['bytes']<=MODEL_PACKAGE_LIMIT),'model package bound')
  for v in (t,b):
   require(type(v['bytes']) is int and v['bytes']>0 and re.fullmatch('[0-9a-f]{64}',v['sha256']) and 0<v['deadline_seconds']<=1800,'invalid exact transfer')
  require(b['sha256']==manifest['baseline_image_sha256'],'baseline digest differs')
  # Legacy/vocab baselines remain bounded; larger baseline needs independently authenticated model phase.
- from source_public_hip_log import package_limit
  if b['bytes']>package_limit(manifest.get('baseline_log_fixture','bootstrap')):
   path=Path(b['receipt']);require(stream_digest(path)==b['receipt_sha256'],'large baseline receipt differs')
   receipt=validate_historical_baseline(path)
@@ -47,13 +51,18 @@ def validate_historical_baseline(path):
   require(files.get(str(p.relative_to(ROOT)))==expected and stream_digest(p)==expected,'baseline frozen artifact differs')
  frozen(path,stream_digest(path))
  package=folder/'package/PPSA99014.ffpkg';size=receipt['package_bytes'];digest=receipt['package_sha256']
- require(type(size) is int and MODEL_BYTES<size<=MODEL_PACKAGE_LIMIT and package.stat().st_size==size and deployment.get('package_sha256')==digest,'baseline package identity differs')
+ external=receipt.get('external_model')
+ if external is not None:
+  validate_external_model(external);require(manifest.get('external_model')==external,'baseline external model differs')
+ require(type(size) is int and (0<size<=package_limit('llm_client') if external is not None else MODEL_BYTES<size<=MODEL_PACKAGE_LIMIT) and package.stat().st_size==size and deployment.get('package_sha256')==digest,'baseline package identity differs')
  require(manifest.get('package')==str(package.relative_to(ROOT)) and manifest.get('model_transfer',{}).get('bytes')==size and manifest['model_transfer'].get('sha256')==digest,'baseline transfer differs')
  frozen(package,digest)
- app=folder/'package/app';names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model.gguf'}
+ app=folder/'package/app';names=legacy.LLM_CLIENT_PACKAGE_FILES|({'model-path.txt'} if external is not None else {'model.gguf'})
  require(set(receipt['package_files'])==names and manifest.get('package_files')==receipt['package_files'] and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'baseline nine assets required')
  for name,h in receipt['package_files'].items():frozen(app/name,h)
- require((app/'model.gguf').stat().st_size==MODEL_BYTES and receipt['package_files']['model.gguf']==MODEL_SHA and (app/'client-phase.txt').read_bytes()==b'model-gate\n','baseline model asset differs')
+ require((app/'client-phase.txt').read_bytes()==b'model-gate\n','baseline phase differs')
+ if external is not None:require((app/'model-path.txt').read_bytes()==encode_model_path(external['path']),'baseline model path differs')
+ else:require((app/'model.gguf').stat().st_size==MODEL_BYTES and receipt['package_files']['model.gguf']==MODEL_SHA,'baseline model asset differs')
  require((app/'results-dir.txt').read_text()==receipt['results_dir']==manifest.get('results_dir'),'baseline results directory differs')
  audit_path=folder/'llm-client-native-audit.json';frozen(audit_path,bound['audit']['sha256']);audit=json.loads(audit_path.read_text())
  require(audit.get('status')=='PASS' and audit.get('classification')=='offline-public-hip-llm-client-native-image-audit' and audit.get('phase')=='model-gate','baseline audit differs')
@@ -78,6 +87,7 @@ def validate_model_receipt(build,receipt):
  import freeze_source_candidate as legacy
  require(receipt.get('schema')==1 and receipt.get('status')=='PASS' and receipt.get('classification')=='source-only-model-rejection-native-client-app','wrong model receipt')
  require(receipt.get('fixture')=='llm_client' and receipt.get('phase')=='model-gate' and receipt.get('native_executed') is False and receipt.get('gpu_executed') is False,'wrong phase/execution')
+ external=receipt.get('external_model');validate_external_model(external)
  bound=receipt['llm_client'];require(bound.get('phase')=='model-gate','wrong bound phase')
  inputs=receipt.get('inputs');require(isinstance(inputs,dict) and inputs,'missing input closure')
  for name,h in inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'input changed')
@@ -100,12 +110,12 @@ def validate_model_receipt(build,receipt):
   h=stream_digest(path);require(audit_inputs.get(str(path))==h and inputs.get(str(path))==h,'missing audit identity')
  for name,h in audit_inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'audit input changed')
  app=build/'package/app';package=build/'package/PPSA99014.ffpkg'
- names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model.gguf'}
+ names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model-path.txt'}
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact9 assets required')
- require(MODEL_BYTES<receipt['package_bytes']<=MODEL_PACKAGE_LIMIT and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
+ require(type(receipt['package_bytes']) is int and 0<receipt['package_bytes']<=package_limit('llm_client') and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
  for name,h in receipt['package_files'].items():require(not (app/name).is_symlink() and stream_digest(app/name)==h,'package asset differs')
  require((app/'client-phase.txt').read_bytes()==b'model-gate\n' and (app/'results-dir.txt').read_text()==receipt['results_dir'],'package configuration differs')
- require((app/'model.gguf').stat().st_size==MODEL_BYTES and receipt['package_files']['model.gguf']==model['sha256'] and receipt['package_files']['vocab.gguf']==stream_digest(vocab['asset']),'packaged model/vocabulary differs')
+ require((app/'model-path.txt').read_bytes()==encode_model_path(external['path']) and receipt['package_files']['vocab.gguf']==stream_digest(vocab['asset']),'packaged model path/vocabulary differs')
  for name,h in inputs.items():require(stream_digest(name)==h,'input changed during admission')
  return bound
 
@@ -114,6 +124,7 @@ def validator_identities():
  driver=importlib.import_module('build_llm_native_app')
  pending=[driver,importlib.import_module('freeze_source_candidate'),importlib.import_module('fetch_llm_model')]
  paths={Path(__file__).resolve(),ROOT/'tests/llm_native_app_build_test.py'}
+ paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
  seen=set()
  while pending:
@@ -138,7 +149,7 @@ def validate_model_candidate(candidate,manifest):
  model_contract(manifest)
  receipt=json.loads((candidate/'build-receipt.json').read_text())
  bound=validate_model_receipt(candidate,receipt)
- require(bound==manifest['llm_client'],'manifest provenance differs')
+ require(bound==manifest['llm_client'] and receipt['external_model']==manifest.get('external_model'),'manifest provenance differs')
  require(manifest['model_transfer']['bytes']==receipt['package_bytes'] and manifest['model_transfer']['sha256']==receipt['package_sha256'],'transfer identity differs')
  require(manifest['package_files']==receipt['package_files'],'manifest package inventory differs')
  require(validator_identities()==initial,'validator changed during authentication')

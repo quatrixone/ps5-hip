@@ -7,6 +7,8 @@ import build_public_hip as b
 import build_llm_native_client as client_builder
 import build_llm_executed_graph as graph
 from fetch_locked_deps import source,sources,read
+from external_model import DEFAULT_MODEL_PATH, validate_external_model, encode_model_path
+from source_public_hip_log import package_limit
 
 
 def file_inputs(argv):
@@ -147,7 +149,7 @@ def merged_unit_headers(units):
  return headers
 
 
-def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None):
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH):
  validate_phase_arguments(phase,model,model_source,cpu_build)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
@@ -179,6 +181,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for path,names in inventories.items():
    if sorted(str(p) for p in Path(path).rglob('*') if p.is_file() and '.git' not in p.relative_to(path).parts and '__pycache__' not in p.parts)!=names:raise ValueError('dependency inventory changed: '+path)
  bind(Path(__file__));bind(ROOT/'tests/llm_native_app_build_test.py');bind(ROOT/'tests/watchdog_test.py')
+ bind(ROOT/'tests/native_model_path_test.py');bind(ROOT/'tests/source_external_model_test.py')
  model_test=Path(__file__).with_name('test_model_package.py')
  bind(model_test if model_test.is_file() else ROOT/'tests/llm_native_model_package_test.py')
  for name,h in b.build_inputs().items():bind(ROOT/name,h)
@@ -229,6 +232,8 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  client=client_builder.app_objects(native_client);merge(client['inputs'])
  vocab=vocab_inputs(vocab_fixture);merge(vocab['inputs'])
  model_info=model_inputs(model,model_source,cpu_build) if phase=='model-gate' else None
+ external_model={'path':model_remote_path,'bytes':model_info['bytes'],'sha256':model_info['sha256']} if model_info else None
+ if external_model:validate_external_model(external_model)
  if model_info:merge(model_info['inputs'])
  output.mkdir(parents=True)
  original_run=b.run
@@ -312,8 +317,11 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)
   phase_file=output/'client-phase.txt';write_phase(phase_file,phase);bind(phase_file)
   assets={'vocab.gguf':vocab['asset'],'client-phase.txt':phase_file}
-  if model_info:assets['model.gguf']=model_info['asset']
+  if external_model:
+   model_path_file=output/'model-path.txt';model_path_file.write_bytes(encode_model_path(external_model['path']));bind(model_path_file)
+   assets['model-path.txt']=model_path_file
   package,files=b.package_title(output,image,libc,results_dir,client_assets=assets)
+  if not 0<package.stat().st_size<=package_limit('llm_client'):raise ValueError('native client package exceeds small package limit')
   bind(package)
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
@@ -331,6 +339,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
   receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
+  if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');return receipt
  finally:b.run=original_run
 
@@ -339,4 +348,5 @@ if __name__=='__main__':
  for name in ('output','native-client','vocab-fixture'):parser.add_argument('--'+name,type=Path,required=True)
  parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate'),default='vocab')
  for name in ('model','model-source','cpu-build'):parser.add_argument('--'+name,type=Path)
- a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build)
+ parser.add_argument('--model-remote-path',default=DEFAULT_MODEL_PATH)
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path)

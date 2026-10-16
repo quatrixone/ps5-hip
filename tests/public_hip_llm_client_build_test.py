@@ -23,7 +23,8 @@ class ClientBuild(unittest.TestCase):
         main=source[source.index('int main()'):]
         self.assertLess(main.index('"/app0/results-dir.txt"'),main.index('elevation::request'))
         self.assertLess(main.index('elevation::request'),main.index('configured_model_phase()'))
-        for asset in ('client-phase.txt','vocab.gguf','model.gguf'):
+        self.assertLess(main.index('elevation::request'),main.index('configured_model_path('))
+        for asset in ('client-phase.txt','vocab.gguf','model-path.txt'):
             self.assertIn('std::string(title_root)+"'+asset+'"',source)
 
     def test_actual_phase_parser_valid_and_failure_boundaries(self):

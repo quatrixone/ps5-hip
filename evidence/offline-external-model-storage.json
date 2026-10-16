@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "status": "PASS_OFFLINE",
+  "classification": "external-model-storage",
+  "default_remote_path": "/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf",
+  "helper": "existing Eden/Lapy filesystem capability, unchanged",
+  "test_suites": 19,
+  "test_methods": 175,
+  "tests": [
+    {
+      "test": "watchdog_test.py",
+      "methods": 4,
+      "log": "results/external-model-offline-tests-v1/watchdog_test.py.log",
+      "sha256": "90a5f33142d267a01c112b3733624939304f632d0ea03ce6996de1c04a6af63d"
+    },
+    {
+      "test": "llm_native_host_allocator_test.py",
+      "methods": 1,
+      "log": "results/external-model-offline-tests-v1/llm_native_host_allocator_test.py.log",
+      "sha256": "e9365861891493dce7696903da718c43bc3b094ab26af503da00614cb95f63cc"
+    },
+    {
+      "test": "llm_native_app_build_test.py",
+      "methods": 8,
+      "log": "results/external-model-offline-tests-v1/llm_native_app_build_test.py.log",
+      "sha256": "fc23540c8545d4075fe2f0420accd022e74e5566176c3bd4c597964ff02c2e14"
+    },
+    {
+      "test": "llm_native_model_package_test.py",
+      "methods": 10,
+      "log": "results/external-model-offline-tests-v1/llm_native_model_package_test.py.log",
+      "sha256": "74c79e7e0709501019852d7103a16bf6348c7c7fd4847f2776f66b966f9dcbe9"
+    },
+    {
+      "test": "source_model_auth_test.py",
+      "methods": 25,
+      "log": "results/external-model-offline-tests-v1/source_model_auth_test.py.log",
+      "sha256": "54968754c23085e915b804fef7ebd091d6891dff852f0112d3005bffb1bce725"
+    },
+    {
+      "test": "source_model_callsites_test.py",
+      "methods": 3,
+      "log": "results/external-model-offline-tests-v1/source_model_callsites_test.py.log",
+      "sha256": "5c7655790055daa8df43a45d0f9bf8cec3337dcfe9818954af2d3fafe0190d62"
+    },
+    {
+      "test": "source_model_cleanup_budget_test.py",
+      "methods": 7,
+      "log": "results/external-model-offline-tests-v1/source_model_cleanup_budget_test.py.log",
+      "sha256": "65f041a3d4a8b6d2b19f072a800261a3ebfb8ea078c878c4b0d6429af60b2ca7"
+    },
+    {
+      "test": "source_model_execute_test.py",
+      "methods": 7,
+      "log": "results/external-model-offline-tests-v1/source_model_execute_test.py.log",
+      "sha256": "08b0f9d1c57e01d3fbf35eceadfb8058ee818ef657c16360615dbf0640db6244"
+    },
+    {
+      "test": "source_model_phase_budget_test.py",
+      "methods": 4,
+      "log": "results/external-model-offline-tests-v1/source_model_phase_budget_test.py.log",
+      "sha256": "d094b1bd2c8318c96097f80c50da282add5b2972970a77046de8db6c8935f6ca"
+    },
+    {
+      "test": "source_model_storage_edges_test.py",
+      "methods": 4,
+      "log": "results/external-model-offline-tests-v1/source_model_storage_edges_test.py.log",
+      "sha256": "d094b1bd2c8318c96097f80c50da282add5b2972970a77046de8db6c8935f6ca"
+    },
+    {
+      "test": "source_model_streaming_test.py",
+      "methods": 8,
+      "log": "results/external-model-offline-tests-v1/source_model_streaming_test.py.log",
+      "sha256": "8642a1ac72c63530bbaa2c1f2526767cc3b14a928c117e4bff18cd4c4a88ad42"
+    },
+    {
+      "test": "source_external_model_test.py",
+      "methods": 9,
+      "log": "results/external-model-offline-tests-v1/source_external_model_test.py.log",
+      "sha256": "a8632d71b7fb64bb6b2cf753986d26cb4901427994b1dec9634fb01f0c911e76"
+    },
+    {
+      "test": "native_model_path_test.py",
+      "methods": 1,
+      "log": "results/external-model-offline-tests-v2/native_model_path_test.py.log",
+      "sha256": "ad1c2477e590aef3abe33921feb7ab6c3bf0ed4e1f161cc3f93727ef4f345abe"
+    },
+    {
+      "test": "llm_native_validation_cost_test.py",
+      "methods": 9,
+      "log": "results/external-model-offline-tests-v1/llm_native_validation_cost_test.py.log",
+      "sha256": "092f3ef0c082b5e2a61888b77b1f68ffbd0afb7284e19601ea6250cb7141c478"
+    },
+    {
+      "test": "public_hip_compile_inputs_test.py",
+      "methods": 1,
+      "log": "results/external-model-offline-tests-v1/public_hip_compile_inputs_test.py.log",
+      "sha256": "24cefc2bc38a1c71e18591075993695fc72546b32ff6b5baab3d98032ce96fb5"
+    },
+    {
+      "test": "public_hip_llm_client_build_test.py",
+      "methods": 5,
+      "log": "results/external-model-offline-tests-v2/public_hip_llm_client_build_test.py.log",
+      "sha256": "5b496fea7ecf5cece01b012e3013b95410aae4699b5f5c5b7452651c22096f45"
+    },
+    {
+      "test": "source_llm_client_controls_test.py",
+      "methods": 11,
+      "log": "results/external-model-offline-tests-v1/source_llm_client_controls_test.py.log",
+      "sha256": "567ea1522c55ce7af4ede2f581b0acfc02708fbc5006736cad01b1a7d128fd61"
+    },
+    {
+      "test": "llm_client_native_audit_test.py",
+      "methods": 17,
+      "log": "results/external-model-offline-tests-v1/llm_client_native_audit_test.py.log",
+      "sha256": "220a533db7a8f3f006e878ddd7ab4fc18eb53adc22c11b219d8992b4f2ecec7f"
+    },
+    {
+      "test": "source_console_test.py",
+      "methods": 41,
+      "log": "results/external-model-offline-tests-v1/source_console_test.py.log",
+      "sha256": "434620f8709943c15fd79847c36320f65f0aa6c4d058182fec9b51cb8b1710da"
+    }
+  ],
+  "native_compile": {
+    "status": "PASS",
+    "command": "results/external-model-native-compile-v1/command.json",
+    "command_sha256": "8d41d4084343a6875ad0f225aea57f67eef5d8c8f51d8db55b6fb4ed424732b2",
+    "object_sha256": "5203cb5f390f5dd14a67e79b7d7ed2b9a8c89122afe4626be9715329a1294da4",
+    "source_sha256": "ba5ca8da2bb2a591609cdd3b14ad1a3a933bd722809cc2c9a0c819a00434c48e",
+    "warning": "Existing DEPRECATED macro redefinition between llama and HIP headers"
+  },
+  "package_built": false,
+  "native_executed": false,
+  "gpu_executed": false,
+  "limitations": [
+    "Fresh complete package build, audit, freeze and installed-app external model test pending.",
+    "Previous context heap warning remains unresolved; strict acceptance unchanged.",
+    "Controller hashes external weights before launch; runtime validates path and file size, not SHA-256.",
+    "FTP promotion relies on shared console ownership and immediate absence check, not an atomic no-replace rename."
+  ]
+}

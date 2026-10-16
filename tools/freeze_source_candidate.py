@@ -57,6 +57,8 @@ def validate_client_units(original, receipt):
     if model_phase and (ROOT/units[78]['source']).resolve()!=(ROOT/'ports/ggml/native_host_allocator.cpp').resolve():
         raise ValueError('missing native model host allocator')
     if model_phase:
+        path=ROOT/'tools/external_model.py'
+        if inputs.get(str(path))!=digest(path):raise ValueError('external model contract input omitted or changed')
         for name in ('ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h','tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h'):
             path=ROOT/name
             if inputs.get(str(path))!=digest(path):raise ValueError('native host allocator input omitted or changed')
@@ -405,7 +407,7 @@ def main():
     if fixture=='llm_client' and receipt.get('phase')!=args.client_phase:parser.error('explicit client phase differs from receipt')
     validators={}
     if model_phase:
-        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate, MODEL_PACKAGE_LIMIT
+        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate
         validators=validator_identities()
         llm_client=validate_model_receipt(args.build,receipt)
         if args.baseline_image_bytes is None or not 0<args.transfer_seconds<=1800:parser.error('model phase requires baseline size and bounded transfer seconds')
@@ -424,7 +426,7 @@ def main():
         baseline_transfer={'bytes':args.baseline_image_bytes,'sha256':args.baseline_image_sha256,'deadline_seconds':args.transfer_seconds}
         if args.baseline_model_receipt:
             baseline_transfer.update(receipt=str(args.baseline_model_receipt.resolve()),receipt_sha256=digest(args.baseline_model_receipt))
-        model_contract({'fixture':fixture,'llm_client':llm_client,'model_transfer':model_transfer,'baseline_transfer':baseline_transfer,'baseline_image_sha256':args.baseline_image_sha256,'baseline_log_fixture':args.baseline_log_fixture})
+        model_contract({'fixture':fixture,'llm_client':llm_client,'external_model':receipt['external_model'],'model_transfer':model_transfer,'baseline_transfer':baseline_transfer,'baseline_image_sha256':args.baseline_image_sha256,'baseline_log_fixture':args.baseline_log_fixture})
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(args.build / 'package', output / 'package')
     shutil.copyfile(receipt_path, output / 'build-receipt.json')
@@ -433,7 +435,7 @@ def main():
     shutil.copytree(ROOT / 'build/controllers/PPSA99014', output / 'controllers')
     shutil.copytree(args.snapshot_build, output / 'snapshot')
     package = output / 'package/PPSA99014.ffpkg'
-    if package.stat().st_size > (MODEL_PACKAGE_LIMIT if model_phase else package_limit(fixture)) or digest(package) != receipt['package_sha256']:
+    if package.stat().st_size > package_limit(fixture) or digest(package) != receipt['package_sha256']:
         parser.error('package hash mismatch')
     for name, expected in receipt['package_files'].items():
         if digest(output / 'package/app' / name) != expected:
@@ -523,7 +525,7 @@ def main():
     if weighted_qkv is not None:
         manifest['weighted_qkv']=weighted_qkv
     if model_phase:
-        manifest.update(model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
+        manifest.update(external_model=receipt['external_model'],model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
             hypothesis='Source-authenticated full model loads without mmap/lazy loading; two same-position actual llama_process calls are rejected by mandatory wrapped scheduler before CPU/GPU computation, with measured graph reuse and zero final allocation/queue counters. This is rejection readiness, not inference.')
         validate_model_candidate(output,manifest)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')

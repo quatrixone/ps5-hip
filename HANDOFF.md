@@ -18,6 +18,19 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
+Latest offline change: external model storage, default
+`/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf`, configured by
+`LLM_NATIVE_APP_MODEL_REMOTE_PATH`. New app packages carry `model-path.txt`;
+the existing Eden/Lapy helper is unchanged. Deploy uploads only missing weights
+using verified staging, reuses matching weights, and refuses corrupt existing
+files. Prelaunch verifies model SHA-256 separately. No automatic old-model
+deletion or migration occurs. Historical embedded recovery remains supported.
+See `docs/SOURCE_ONLY_REBUILD.md` and
+`evidence/offline-external-model-storage.json` for validation and limitations.
+Next build/audit/freeze a fresh external-model app before its first .40 run;
+preserve all installed v7 recovery evidence. The heap-warning investigation
+below remains open, and its strict parser must not be relaxed for this change.
+
 The owner resumed work. Fresh v7 completed Make (149 objects, 201 commands,
 16 suites/118 methods), real admission, the 46-function image audit, freeze,
 review and verified installation on .40. Source candidate is `539802f`; package

@@ -105,11 +105,12 @@ LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
 LLM_NATIVE_APP_PHASE ?= vocab
 LLM_NATIVE_APP_MODEL ?= $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_MODEL_SOURCE ?= $(LLM_MODEL_DIR)
+LLM_NATIVE_APP_MODEL_REMOTE_PATH ?= /user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_CPU_BUILD ?= $(LLM_CPU_BUILD_DIR)
 ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate),$(LLM_NATIVE_APP_PHASE))
 $(error LLM_NATIVE_APP_PHASE must be vocab or model-gate)
 endif
-LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)")
+LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)" --model-remote-path "$(LLM_NATIVE_APP_MODEL_REMOTE_PATH)")
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
@@ -185,6 +186,8 @@ llm-native-app: deps-build llm-deps-fetch
 	$(PYTHON) tests/source_model_phase_budget_test.py
 	$(PYTHON) tests/source_model_storage_edges_test.py
 	$(PYTHON) tests/source_model_streaming_test.py
+	$(PYTHON) tests/source_external_model_test.py
+	$(PYTHON) tests/native_model_path_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tests/public_hip_compile_inputs_test.py
 	$(PYTHON) tests/public_hip_llm_client_build_test.py

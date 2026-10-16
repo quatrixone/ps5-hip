@@ -22,8 +22,9 @@ class ModelPackage(unittest.TestCase):
    with self.assertRaises(ValueError):d.b.validate_client_assets({**base,'model.gguf':model})
    d.write_phase(phase,'model-gate');self.assertEqual(phase.read_bytes(),b'model-gate\n')
    with self.assertRaises(ValueError):d.b.validate_client_assets(base)
-   with patch('fetch_llm_model.verify') as verify:
-    d.b.validate_client_assets({**base,'model.gguf':model});self.assertEqual(verify.call_args.args[1],619831552)
+   model.write_bytes(d.encode_model_path(d.DEFAULT_MODEL_PATH))
+   d.b.validate_client_assets({**base,'model-path.txt':model})
+   with self.assertRaises(ValueError):d.b.validate_client_assets({**base,'model.gguf':model})
    phase.write_bytes(b'model-gate')
    with self.assertRaises(ValueError):d.b.validate_client_assets({**base,'model.gguf':model})
  def test_short_and_symlink_models_reject_before_receipt_or_hash(self):
@@ -33,13 +34,12 @@ class ModelPackage(unittest.TestCase):
     with self.assertRaisesRegex(ValueError,'size differs'):d.model_inputs(model,folder,folder)
     with self.assertRaisesRegex(ValueError,'regular'):d.model_inputs(link,folder,folder)
    cpu.assert_not_called()
- def test_corrupt_packaged_model_rejected_with_small_fake_profile(self):
+ def test_invalid_external_path_rejected(self):
   with tempfile.TemporaryDirectory() as name:
-   root=Path(name);(root/'evidence').mkdir();model=root/'model';model.write_bytes(b'right');expected={'bytes':5,'sha256':d.b.sha(model)}
-   (root/'evidence/offline-llm-model-conversion.json').write_text(json.dumps({'outputs':{'tinyllama-q4_0.gguf':expected}}));phase=root/'phase';d.write_phase(phase,'model-gate');vocab=root/'vocab';vocab.write_bytes(b'vocab');assets={'vocab.gguf':vocab,'client-phase.txt':phase,'model.gguf':model}
-   with patch.object(d.b,'ROOT',root):
-    d.b.validate_client_assets(assets);model.write_bytes(b'wrong')
-    with self.assertRaisesRegex(ValueError,'SHA256'):d.b.validate_client_assets(assets)
+   root=Path(name);model=root/'path';phase=root/'phase';d.write_phase(phase,'model-gate');vocab=root/'vocab';vocab.write_bytes(b'vocab');assets={'vocab.gguf':vocab,'client-phase.txt':phase,'model-path.txt':model}
+   for value in (b'/data/../model.gguf',b'/data/model.gguf\n',b'/system_ex/app/PPSA99014/model.gguf',b'/data/model.gguf\x00'):
+    model.write_bytes(value)
+    with self.subTest(value=value),self.assertRaises(ValueError):d.b.validate_client_assets(assets)
  def test_missing_conversion_closure_rejected_without_model_hash(self):
   with tempfile.TemporaryDirectory() as name:
    folder=Path(name);model=folder/'tinyllama-q4_0.gguf'

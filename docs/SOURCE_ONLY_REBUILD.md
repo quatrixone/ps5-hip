@@ -28,6 +28,30 @@ The target packages and audits the native executable; it does not deploy or
 launch it. See [the application build](LLM_NATIVE_CLIENT.md#vocabulary-application-build)
 for prerequisite directory overrides and the distinction from the payload ELF.
 
+For the full-model loading/rejection test, set `LLM_NATIVE_APP_PHASE=model-gate`.
+The model is stored separately on the console at
+`/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf`. Override this with
+`LLM_NATIVE_APP_MODEL_REMOTE_PATH` if necessary (a bounded `.gguf` path under
+`/user/homebrew/` or `/data/`). The package contains `model-path.txt`, not weights.
+The application uses the same bundled Eden/Lapy filesystem-elevation helper
+before reading that configuration and opening the external model.
+
+The reviewed deployment controller provisions the model automatically from the
+authenticated local `LLM_NATIVE_APP_MODEL`: missing weights are uploaded to a
+temporary file, read back and SHA-256 verified before promotion. Existing weights
+are reused only if their size and SHA-256 match; a mismatch stops deployment
+without overwriting them. App updates therefore do not upload the weights again.
+Deploy and prelaunch verification still read the full remote model; this is not
+a repeated upload. The runtime checks the path and file size, while the controller
+authenticates its hash before launch. Direct manual launches bypass that host
+hash check. Interrupted upload staging files are retained for diagnosis.
+
+Historical embedded-model packages remain valid recovery artifacts. Keep them
+until a new external-model candidate is independently validated and supersedes
+them. This storage change has offline tests and a native compile check; its
+first installed-app validation is pending. The previous context heap warning
+remains an independent blocker to clean M0 acceptance.
+
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed
 PyTorch. These optional targets do not establish native inference; the default

@@ -16,6 +16,15 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+External model storage is implemented offline: new model-gate packages contain
+`model-path.txt` and use `/user/homebrew/ps5-hip/models/tinyllama-q4_0.gguf` by
+default. The existing Eden/Lapy helper grants filesystem access. Deployment
+uploads missing weights once, verifies/reuses existing weights, and rejects
+mismatches without overwriting. Prelaunch still hashes the remote model.
+Legacy embedded packages remain recovery artifacts. The first fresh package
+build/audit and installed external-model validation are pending; no new console
+result or resolution of the context warning is claimed.
+
 Current checkpoint: installed model-app-v7 loaded the full locked TinyLlama
 model on .40 and created its 512-token context. Both mandatory graph rejections
 and second-call reuse completed, with 219 owned allocations/releases, zero

@@ -148,6 +148,27 @@ static bool configured_model_phase(){
  if(n==11&&std::memcmp(phase,"model-gate\n",11)==0)return true;
  ps5hip_clr_gpu_fail("client-phase-config");
 }
+static std::string configured_model_path(const std::string& config_path){
+ std::ifstream file(config_path,std::ios::binary);
+ char bytes[241]{};file.read(bytes,sizeof(bytes));
+ const auto n=file.gcount();
+ if(file.bad()||!file.eof()||n<1||n>240)ps5hip_clr_gpu_fail("model-path-read");
+ const std::string path(bytes,static_cast<size_t>(n));
+ if((path.compare(0,15,"/user/homebrew/")!=0&&path.compare(0,6,"/data/")!=0)||
+    path.size()<5||path.compare(path.size()-5,5,".gguf")!=0)
+   ps5hip_clr_gpu_fail("model-path-config");
+ for(const unsigned char c:path)
+   if(!((c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||
+        c=='_'||c=='-'||c=='.'||c=='/'))ps5hip_clr_gpu_fail("model-path-config");
+ for(size_t begin=1;begin<path.size();){
+   const auto end=path.find('/',begin);
+   const auto part=path.substr(begin,end==std::string::npos?end:end-begin);
+   if(part.empty()||part=="."||part=="..")ps5hip_clr_gpu_fail("model-path-config");
+   if(end==std::string::npos)break;
+   begin=end+1;
+ }
+ return path;
+}
 int main() {
   try {
     std::ifstream config("/app0/results-dir.txt", std::ios::binary);
@@ -173,7 +194,7 @@ int main() {
     if(full_model){
       // Builder and freeze controller must authenticate locked model bytes before enabling this phase.
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
-      const std::string model_path=std::string(title_root)+"model.gguf";
+      const std::string model_path=configured_model_path(std::string(title_root)+"model-path.txt");
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
       // This helper accepts only the two exact errors after each observed gate rejection.
       const auto gate=m0::reject_actual_model(model_path.c_str(),model_memory_snapshot);

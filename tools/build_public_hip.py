@@ -628,15 +628,16 @@ def validate_client_assets(assets):
     phase = Path(assets["client-phase.txt"]).read_bytes() if "client-phase.txt" in assets else b""
     expected = {"vocab.gguf", "client-phase.txt"}
     if phase == b"model-gate\n":
-        expected.add("model.gguf")
+        expected.add("model-path.txt")
     elif phase != b"vocab\n":
         raise ValueError("invalid client phase bytes")
     if set(assets) != expected or any(Path(p).is_symlink() or not Path(p).is_file() for p in assets.values()):
         raise ValueError("invalid phase-specific client assets")
     if phase == b"model-gate\n":
-        from fetch_llm_model import verify
-        evidence = json.loads((ROOT / "evidence/offline-llm-model-conversion.json").read_text())["outputs"]["tinyllama-q4_0.gguf"]
-        verify(Path(assets["model.gguf"]), evidence["bytes"], evidence["sha256"])
+        from external_model import encode_model_path
+        data = Path(assets["model-path.txt"]).read_bytes()
+        if encode_model_path(data.decode("ascii")) != data:
+            raise ValueError("invalid model path bytes")
 
 
 def copy_checked_package(packed, final):
