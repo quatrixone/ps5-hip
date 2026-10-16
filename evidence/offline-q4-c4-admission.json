@@ -1,0 +1,51 @@
+{
+  "status": "PASS_TARGETED_WITH_UNRELATED_FIXTURE_FAILURE",
+  "gpu_executed": false,
+  "tests_passed": 61,
+  "tests_failed": 1,
+  "negative_controls": [
+    {
+      "test": "q4_launch_test",
+      "exit_code": 1,
+      "reason": "original c3 object rejected as optional c4 diagnostic"
+    },
+    {
+      "test": "native_q4_test",
+      "exit_code": 1,
+      "reason": "original c3 object rejected as optional c4 diagnostic"
+    }
+  ],
+  "unrelated_failure": {
+    "test": "hip_reduction_compiler",
+    "configured_fixture": "results/reduction-compiler-v2",
+    "actual_classification": "upstream-reduction-compiler-observation",
+    "required_classification": "bound-upstream-reduction-compiler-proof",
+    "runtime_invoked": false
+  },
+  "inputs": {
+    "src/code_object.cpp": "6244ae2ae854306b288eafdd14ca7e03fefbe7de98a1afbdadf6fe012e88a07a",
+    "src/launch.cpp": "e97e297e5a5cfbdcb03d2c0dc68a13bd6b6598421b75b25a5c225cafbe31e600",
+    "tests/q4_launch_test.cpp": "a80a4d5d7154de4ecf0cd1b7ffc7197fba4cb704b1af8e3e5214feb595036862",
+    "tests/native_q4_test.cpp": "bad41c1491d2abaad9d5bed9ad6a9fcc74d82ddf5605a3cffba0c68087c5e7f1",
+    "CMakeLists.txt": "c3e8097249c5e88946c200328629f5f79e529ed2af2c128434b4adadb6d30b9c",
+    "results/llm-q4-fixture-v3/q8.hsaco": "8f85a6c063c5e03ea6319c316fe4eef134a954aae7a2dd73a075f8e5c97bdd29",
+    "results/llm-q4-fixture-v3/q4.hsaco": "643329633c5de09417a452dc96c79e7dd8fa3780b93f40e2065d3abcad3a0c58",
+    "results/q4-alignment-codegen-v9/volatile-u16.hsaco": "a759b32b4d546635b090828b54dec63ec9d756512cf301c8a815028ef99b5e15"
+  },
+  "logs": {
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout": "f912c4fb3c1e525e7c003ea98a4fa9d9473c46111395c5084b6289ac8ef5922c",
+    "configure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "configure.stdout": "59da09cd0a2c039aff101c6f8a6f486fdc3327886e04c21977dc1642308127cc",
+    "native_q4_test-wrong-third.stderr": "a6d744345c690958bdec5190b9a3fec062f48b4c2735b6e5c105af682135ec69",
+    "native_q4_test-wrong-third.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "q4_launch_test-wrong-third.stderr": "9301c7b335e7c95430b629dc5d8899e4b22fcd4b0da709eeac4ac8e0f1a8c8d7",
+    "q4_launch_test-wrong-third.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests.stderr": "18e00877dc1071c85cd4f479d451bebeef8309022e46cf8c63b0bed5151984a4",
+    "tests.stdout": "d64c78f1d0b6e30220b0fb91be4289371204ca0a8d0960f47e071edad71e6703"
+  },
+  "receipt": "results/q4-c4-admission-tests-v1/receipt.json",
+  "receipt_sha256": "dbfc00dd278fafa67d2004712819ff4425f64ef95f86e09d0966b147b49128f2",
+  "scope": "Exact Q4 c3/c4 admission through core parser, geometry packet encoder and owned native preparation; no public CLR qualification or hardware execution.",
+  "next": "Prepare a fresh authenticated native diagnostic; preserve original Q4 failure and numerical tolerances."
+}

@@ -6,11 +6,12 @@
 #include "ps5hip/hip_launch_profile.h"
 using namespace ps5hip;
 
-static void qualify(const char* path, bool q4) {
+static void qualify(const char* path, bool q4, uint32_t expected_rsrc1=0) {
     std::ifstream input(path,std::ios::binary);check(bool(input));
     BundledCodeObject bundle;bundle.bytes={std::istreambuf_iterator<char>(input),{}};
     bundle.object=inspect_code_object(bundle.bytes.data(),bundle.bytes.size());
     check(bundle.object.kernels.size()==1);const auto& kernel=bundle.object.kernels.front();
+    check(kernel.rsrc1==(expected_rsrc1?expected_rsrc1:q4?0x60af00c3u:0x60af00c1u));
     const std::vector<unsigned> offsets=q4?std::vector<unsigned>{0,8,16,24,104,112,116,128,132,136,140,152,156,160,164,176,180,184,188}:std::vector<unsigned>{0,8,16,24,32,40,48,56,60};
     const std::vector<unsigned> sizes=q4?std::vector<unsigned>{8,8,8,80,8,4,12,4,4,4,12,4,4,4,12,4,4,4,4}:std::vector<unsigned>{8,8,8,8,8,8,8,4,12};
     check(kernel.arguments.size()==sizes.size() && kernel.kernarg_size==(q4?192u:328u));
@@ -62,7 +63,7 @@ static void qualify(const char* path, bool q4) {
                     const auto address=words[at+1];
                     if(address==(0xb854-0xb000)/4){check(!limits&&n==2&&words[at+2]==(1u<<22));limits=true;}
                     if(address==(0xb81c-0xb000)/4){check(!shape&&n==4&&std::equal(threads.begin(),threads.end(),words.begin()+at+2));shape=true;}
-                    if(address==(0xb848-0xb000)/4){check(!resources&&n==3&&words[at+2]==(q4?0x60af00c3u:0x60af00c1u)&&words[at+3]==(q4?0x10b8cu:0x38cu));resources=true;}
+                    if(address==(0xb848-0xb000)/4){check(!resources&&n==3&&words[at+2]==kernel.rsrc1&&words[at+3]==(q4?0x10b8cu:0x38cu));resources=true;}
                 }
                 if((h&0xff00)==0x1500){check(!dispatch&&n==4&&words[at+1]==groups&&words[at+2]==1&&words[at+3]==1);dispatch=true;}
                 at+=n+1;
@@ -98,6 +99,6 @@ static void qualify(const char* path, bool q4) {
     check(allocations.empty());
 }
 int main(int argc,char** argv) {try {
-    check(argc==3);qualify(argv[1],false);qualify(argv[2],true);
-    std::cout<<"NATIVE_Q4_PREPARE_PASS objects=2 groups=1,8,22 capture=owned null_unretained=true packet=checked allocation_failures=clean gpu_execution=false\n";
+    check(argc==3||argc==4);qualify(argv[1],false);qualify(argv[2],true);if(argc==4)qualify(argv[3],true,0x60af00c4u);
+    std::cout<<"NATIVE_Q4_PREPARE_PASS groups=1,8,22 capture=owned null_unretained=true packet=checked allocation_failures=clean gpu_execution=false\n";
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

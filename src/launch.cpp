@@ -145,7 +145,8 @@ static std::vector<uint32_t> encode_dispatch(const InitialLaunch &launch, const 
         validate_geometry_shape(*geometry);
         require(launch.threads == geometry->threads && launch.groups_x == geometry->groups[0], "geometry plan shape mismatch");
         const bool explicit_q4 = geometry->threads == std::array<uint32_t,3>{32,4,1};
-        if (explicit_q4) require(lds && launch.kernargs.size() == 192 && launch.rsrc1 == 0x60af00c3u,
+        if (explicit_q4) require(lds && launch.kernargs.size() == 192 &&
+                                (launch.rsrc1 == 0x60af00c3u || launch.rsrc1 == 0x60af00c4u),
                                 "invalid explicit geometry ABI");
         else {
         require(launch.kernargs.size() >= 256 && launch.kernargs.size() <= 65536,

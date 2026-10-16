@@ -63,3 +63,27 @@ Next build the numerical package with complete raw input/output readbacks,
 guards and clean lifecycle checks, review its frozen identities, and validate
 on idle .40 under the existing console protocol. No numerical tolerance is
 accepted merely because a candidate output fits it.
+
+## Halfword-load diagnostic resource envelope
+
+The first native Q4 comparison failed; see
+[the retained failure](../evidence/console40-public-q4-failure.json).
+An offline address-rounddown model matches that result exactly. The separate
+`probe_llm_q4_alignment.py` experiment preserves the original object and emits
+four volatile halfword payload loads in a diagnostic variant. It changes
+VGPR usage from 32 to 33 (allocation 32 to 40), so core admission accepts exactly
+resource1 `0x60af00c3` or `0x60af00c4` for the existing Q4 ABI. Other modes,
+geometry, LDS and argument checks remain unchanged. This does not qualify
+GPU arithmetic, the new variant through public CLR, or a new console package.
+
+The packet and owned native preparation tests accept an optional third object,
+which must use c4. Set `PS5HIP_Q4_ALIGNMENT_OBJECT` to the diagnostic object
+when configuring CMake to register both additional tests. Packet tests exercise
+both allowed allocation fields and reject the other 62 values. The native
+model checks exact descriptor propagation, owned arguments and cleanup for
+both original and diagnostic modules.
+
+The variant also changes cache flags and scheduling. A successful numerical
+run alone would not establish alignment as the cause. Prefer a matched raw-load
+canary with identical cache flags for causal diagnosis; any workaround run
+must retain the frozen numerical oracle and undergo fresh package review.

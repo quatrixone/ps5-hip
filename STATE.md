@@ -14,6 +14,16 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Q4 diagnostic resource admission tested offline
+
+The core parser and packet encoder now admit exactly c3/c4 for the existing
+Q4 ABI. Real original and halfword-load objects pass packet and owned native
+preparation tests; all other 62 VGPR allocation fields reject. The optional
+diagnostic object must be c4. Of 62 selected checks, 61 passed; the historical
+reduction compiler check rejected its configured old observation-only receipt.
+See `evidence/offline-q4-c4-admission.json`; no public CLR qualification or
+new hardware run is claimed. Next prepare a fresh authenticated diagnostic.
+
 ## Q4 alignment hypothesis narrowed offline
 
 The unchanged lane model reproduces the failed Q4 output bit-for-bit when

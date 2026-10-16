@@ -381,7 +381,7 @@ static std::string launch_rejection(const Kernel &k, bool scratch, bool lds = fa
         return "private storage requires a qualified scratch implementation";
     const bool q8 = geometry && !lds && k.rsrc2 == 0x38cu;
     const bool q4 = geometry && lds && k.rsrc2 == 0xb8cu;
-    if ((q8 || q4) && (k.rsrc1 != (q8 ? 0x60af00c1u : 0x60af00c3u) ||
+    if ((q8 || q4) && ((q8 ? k.rsrc1 != 0x60af00c1u : (k.rsrc1 != 0x60af00c3u && k.rsrc1 != 0x60af00c4u)) ||
         k.kernarg_size != (q8 ? 328u : 192u) || k.kernarg_alignment != 8 ||
         k.max_workgroup_size != (q8 ? 256u : 128u) ||
         k.hidden_arguments.size() != (q8 ? 13u : 0u))) return "unsupported measured quantized geometry ABI";

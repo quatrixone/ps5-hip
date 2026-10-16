@@ -7,9 +7,10 @@
 using namespace ps5hip;
 void check(bool b){if(!b)throw std::runtime_error("quantized packet invariant");}
 template<class F>void reject(F f){try{f();}catch(const ObjectError&){return;}throw std::runtime_error("invalid quantized packet accepted");}
-void exercise(const char* path,bool q4){
+void exercise(const char* path,bool q4,uint32_t expected_rsrc1=0){
  std::ifstream in(path,std::ios::binary);check(bool(in));std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(in),{}};
  auto o=inspect_code_object(bytes.data(),bytes.size());check(o.kernels.size()==1);const auto& k=o.kernels[0];
+ check(k.rsrc1==(expected_rsrc1?expected_rsrc1:q4?0x60af00c3u:0x60af00c1u));
  check(k.arguments.size()==(q4?19u:9u)&&k.kernarg_size==(q4?192u:328u));
  const GeometryShape shape{{8,1,1},q4?std::array<uint32_t,3>{32,4,1}:std::array<uint32_t,3>{256,1,1},q4?2u:1u};
  const auto profile=select_hip_launch_profile(k,shape.groups,shape.threads,0);
@@ -25,6 +26,12 @@ void exercise(const char* path,bool q4){
  auto prepare=[&](const CodeObject& object,const GeometryShape& s){if(q4)return prepare_geometry_lds_launch(object,k.name,{0x200000000,0x200000},{0x300000000,4096},s,args).geometry;return prepare_geometry_launch(object,k.name,{0x200000000,0x200000},{0x300000000,4096},s,args);};
  auto launch=prepare(o,shape);check(launch.state.kernargs==expected);
  auto encode=[&](const GeometryLaunch& l){return q4?encode_geometry_lds_dispatch({l,plan_lds(384,0)}):encode_geometry_dispatch(l);};
+ if(q4)for(unsigned field=0;field<64;++field){
+  auto changed=o;changed.kernels[0].rsrc1=0x60af00c0u|field;
+  auto packet=launch;packet.state.rsrc1=changed.kernels[0].rsrc1;
+  if(field==3||field==4){prepare(changed,shape);encode(packet);}
+  else {reject([&]{prepare(changed,shape);});reject([&]{encode(packet);});}
+ }
  auto words=encode(launch);std::map<uint32_t,uint32_t> regs;size_t at=10;
  while(at<words.size()-5){auto n=(words.at(at++)>>16)&0x3fff;auto addr=0xb000+words.at(at++)*4;for(unsigned i=0;i<n;++i)check(regs.emplace(addr+4*i,words.at(at++)).second);}
  check(regs.at(0xb84c)==(q4?0x10b8cu:0x38cu)&&regs.at(0xb854)==0x400000);
@@ -37,4 +44,4 @@ void exercise(const char* path,bool q4){
  if(q4){auto wrong=plan_lds(512,0);reject([&]{encode_geometry_lds_dispatch({launch,wrong});});}
  // Aggregate bytes are deliberately packing patterns, not numerical/fused arguments.
 }
-int main(int argc,char**argv){try{check(argc==3);exercise(argv[1],false);exercise(argv[2],true);std::cout<<"actual Q8/Q4 packing/resources/negative controls passed; no GPU execution\n";}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+int main(int argc,char**argv){try{check(argc==3||argc==4);exercise(argv[1],false);exercise(argv[2],true);if(argc==4)exercise(argv[3],true,0x60af00c4u);std::cout<<"actual Q8/Q4 packing/resources/negative controls passed; no GPU execution\n";}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
