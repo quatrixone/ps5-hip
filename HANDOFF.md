@@ -40,6 +40,16 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+The full-model candidate is now installed and independently verified on .40.
+All nine mounted assets, the 827,719,680-byte package, preserved vocabulary
+package/log, idle snapshots, healthy services and both released locks pass.
+See `evidence/console40-native-model-deployment.json`. No app launch occurred.
+Candidate `results/source-public-llm-model-console-v1` deployment is consumed;
+its reviewed receipt permits one bounded native execution. Do not redeploy it.
+The next gate is real model loading, two-call rejection/reuse and clean shutdown.
+M0 remains open, including per-call instrumentation; inference is unimplemented.
+
+
 Current checkpoint: `build/llm-native-model-app-v3` completed successfully.
 Independent real model admission passed: 148 objects, 7,005 inputs, 2,403
 artifacts, 199 commands and 29 audited functions. Package SHA256 is

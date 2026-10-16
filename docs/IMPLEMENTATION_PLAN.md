@@ -14,6 +14,8 @@ M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
+- 2026-10-16 | M0 model deployment | .40 | pass: exact package/nine assets, recovery and healthy idle | evidence/console40-native-model-deployment.json | next: native execution
+
 - 2026-10-16 | M0 model package | offline | pass: 148 objects, 199 commands, 139 tests and real admission | evidence/offline-native-llm-model-gate.json | next: installed model/reuse gate
 
 - 2026-10-16 | M0 vocabulary | .40 | pass: installed tokenizer, HIP storage, synthetic rejection and natural lifecycle | evidence/console40-native-vocab-success.json | next: actual model/reuse gate
