@@ -93,9 +93,8 @@ def phase_contract(phase,model_gate,chain,bodies):
 def audit(raw,converted,extracted,phase="vocab"):
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
  tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
- staged=Path(__file__).resolve().parent
- source_paths=[staged/n if (staged/n).is_file() else ROOT/n for n in SOURCES]
- identities={str(p):sha(p) for p in [*paths,tool.resolve(),Path(__file__).resolve(),staged/'audit_test.py',*source_paths]}
+ source_paths=[ROOT/n for n in SOURCES]
+ identities={str(p):sha(p) for p in [*paths,tool.resolve(),*source_paths]}
  data=paths[0].read_bytes();values=symbol_values(data)
  def one(n):
   require(n in values and len(values[n])==1,'missing/ambiguous symbol '+n);return values[n][0]

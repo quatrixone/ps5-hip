@@ -18,6 +18,8 @@ boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-16 | M0 model integration | offline | 134 tests and diagnostic relink pass; real upstream context cleanup added | evidence/offline-native-llm-model-link-correction.json | next: fresh package/audit
 
+- 2026-10-16 | M0 model audit | offline | production source-path fix, 40 tests and 29-function diagnostic audit pass | evidence/offline-native-llm-audit-path-correction.json | next: full Make package
+
 - 2026-10-16 | M0 vocabulary | .40 | failed: installed native startup/runtime passed, then pre-VOCAB invariant and watchdog quarantine; exact-title close restored healthy idle | evidence/console40-native-vocab-invariant-failure.json | next: offline assertion/path diagnosis; no replay or M0 completion
 
 - 2026-10-16 | M0 path correction | offline | pass: post-elevation title asset paths, explicit failure diagnostics, 33 tests and independent review | evidence/offline-native-llm-asset-path-fix.json | next: fresh native package/audit and installed-title test

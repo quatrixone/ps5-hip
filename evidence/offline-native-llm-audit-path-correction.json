@@ -1,0 +1,22 @@
+{
+    "schema":  1,
+    "status":  "PASS_PRODUCTION_AUDITOR_AND_DIAGNOSTIC_IMAGES",
+    "failure":  "Auditor referenced missing staged tools/audit_test.py",
+    "correction":  "Hash the checked-in SOURCES paths only; retain actual auditor and production test identities",
+    "regression":  "Actual audit entry failed before correction and reaches image inspection after correction",
+    "focused_suites":  4,
+    "focused_tests":  40,
+    "audited_functions":  29,
+    "actual_client_call_chain_audited":  true,
+    "wrapper_no_bypass":  true,
+    "independent_review_sha256":  "114cd883ff1d483e1f30f85965bdcbe44ec64c678abeccf99ecefd634f500455",
+    "cancelled_build":  "build/llm-native-model-app-v2",
+    "cancellation":  "Intentionally terminated once the early audit proved a deterministic final-audit failure; not a timeout or console failure",
+    "fresh_build":  "build/llm-native-model-app-v3",
+    "native_executed":  false,
+    "gpu_executed":  false,
+    "limits":  [
+                   "Audit used diagnostic relink/converted/extracted images; fresh complete Make package and admission remain pending.",
+                   "Native full-model loading/reuse and inference are unproven."
+               ]
+}

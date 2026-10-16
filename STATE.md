@@ -16,6 +16,14 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+Latest correction: the early full-model audit exposed a stale staged test path.
+The production auditor now hashes only checked-in source/test identities; an
+actual-entry regression and 40 focused tests pass. The diagnostic raw/converted/
+extracted model images pass all 29 function checks. Model-app-v2 was deliberately
+stopped before that known audit failure; fresh model-app-v3 is running. See
+`evidence/offline-native-llm-audit-path-correction.json`. This is diagnostic image
+evidence, not a complete package or console result.
+
 Full-model gate integration is now in production source. Fifteen offline suites
 (134 tests) and independent review pass. The first model-app build failed at
 link because real context destruction needs `ggml_opt_free`; compiling the

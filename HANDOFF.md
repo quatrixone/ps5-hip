@@ -40,6 +40,15 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Current build supersedes the v2 note below: `build/llm-native-model-app-v3`,
+runner `.local/build_native_model_app_v3.py`, logs
+`results/m0-native-model-app-production-make-v3`. Model-app-v2 was deliberately
+terminated after an early diagnostic audit found a stale `tools/audit_test.py`
+path. That production-path bug is fixed; 40 focused tests and the actual
+production three-image audit (29 functions) pass. See
+`evidence/offline-native-llm-audit-path-correction.json`. Await fresh full Make
+completion and independent admission; diagnostic images cannot substitute.
+
 Immediate work: full-model phase has been promoted into production source.
 The first build `build/llm-native-model-app-v1` failed at link on `ggml_opt_free`.
 The real upstream optimizer cleanup is now compiled only for model-gate, with

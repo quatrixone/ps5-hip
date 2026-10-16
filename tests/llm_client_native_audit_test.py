@@ -15,6 +15,16 @@ def fixture():
  names=['ggml_graph_n_nodes','ggml_graph_node','ggml_backend_sched_get_tensor_backend','ggml_backend_get_device',DEVICE,DEVICE,SUPPORTS,'ggml_op_desc','ggml_backend_name','printf','ggml_backend_sched_graph_compute_async']
  return '\n'.join(lines),base,support,list(enumerate(names))
 class Audit(unittest.TestCase):
+ def test_production_audit_input_paths(self):
+  from unittest.mock import patch
+  import audit_public_hip_llm_client_native as auditor
+  # Reach image inspection using only checked-in source identities, with no staged test file.
+  with patch.object(auditor.shutil,'which',return_value=sys.executable),patch.object(auditor,'symbol_values',side_effect=RuntimeError('reached image inspection')):
+   with self.assertRaisesRegex(RuntimeError,'reached image inspection'):
+    auditor.audit(__file__,__file__,__file__,'model-gate')
+  self.assertIn('tests/llm_client_native_audit_test.py',auditor.SOURCES)
+  self.assertIn('tools/audit_public_hip_llm_client_native.py',auditor.SOURCES)
+  self.assertTrue(all((auditor.ROOT/p).is_file() for p in auditor.SOURCES))
  def test_model_phase_chain(self):
   chain=['main','model','llama_process','decode','process_ubatch','context', '__wrap_ggml_backend_sched_graph_compute_async']
   bodies={a:f'10: callq 0x20 <{b}>\n' for a,b in zip(chain,chain[1:])};bodies[chain[-1]]=''
