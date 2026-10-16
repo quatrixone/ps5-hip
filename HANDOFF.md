@@ -18,6 +18,20 @@ one-use E control remains inert pending revised lifecycle checks and review.
 
 ## First-release priority
 
+Work is paused at the owner's request. V6 compilation and application linking
+passed, but its process was stopped during packaging-tool preparation; there is
+no successful v6 receipt. Do not deploy or treat this interrupted build as complete.
+
+On the subsequent cleanup request, four duplicate outputs were removed from
+`build/llm-native-model-app-v3/package` and `build/llm-native-model-app-v4/package`:
+each original package and its duplicate `app/model.gguf` (2,895,102,464 bytes).
+Identical frozen copies in model-console-v1/v2 remain, as do original three-image
+audits, receipts and all logs. Both historical recovery validators passed after
+pruning. Exact paths/hashes and validation are in
+`results/cleanup-model-package-duplicates-20261016.json` and its `-validation.json`
+companion. Full revalidation of the original build receipts requires restoring
+their pruned duplicates from the retained copies or rebuilding.
+
 Local disk cleanup on 2026-10-15 removed 2,406 rebuildable host-test ELF/object
 files (13.378 GiB) from 24 superseded result directories. The local ledger is
 `results/cleanup-2026-10-15.jsonl` with paths, sizes and SHA256 identities.
