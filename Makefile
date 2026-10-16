@@ -32,6 +32,7 @@ help:
 	@echo 'make llm-executed-graph  Capture actual batch-one CPU graph through context512 (fresh output)'
 	@echo 'make llm-vocab-fixture  Build zero-tensor upstream vocabulary GGUF and verify tokenizer equivalence'
 	@echo 'make llm-native-client-link  Cross-build the real loader/tokenizer payload (no app execution)'
+	@echo 'make llm-native-app  Build the vocabulary-only native app and audit its package (fresh output)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
@@ -100,6 +101,7 @@ QUALIFICATION_DIR ?= results/public-hip-host
 
 LLM_EXECUTED_GRAPH_DIR ?= results/llm-executed-graph
 LLM_NATIVE_CLIENT_BUILD_DIR ?= build/llm-native-client
+LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
@@ -157,7 +159,20 @@ llm-rmsnorm-reference: llm-cpu-reference
 .PHONY: llm-native-client-link
 llm-native-client-link: deps-build llm-deps-fetch
 	$(PYTHON) tests/llm_native_client_build_test.py
+	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR)
+
+.PHONY: llm-native-app
+llm-native-app: deps-build llm-deps-fetch
+	@if ! test -f "$(LLM_NATIVE_CLIENT_BUILD_DIR)/receipt.json"; then $(MAKE) llm-native-client-link; fi
+	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
+	$(PYTHON) tests/llm_native_app_build_test.py
+	$(PYTHON) tests/llm_native_validation_cost_test.py
+	$(PYTHON) tests/public_hip_compile_inputs_test.py
+	$(PYTHON) tests/public_hip_llm_client_build_test.py
+	$(PYTHON) tests/source_llm_client_controls_test.py
+	$(PYTHON) tests/llm_client_native_audit_test.py
+	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)"
 
 .PHONY: llm-executed-graph
 llm-executed-graph: llm-cpu-reference

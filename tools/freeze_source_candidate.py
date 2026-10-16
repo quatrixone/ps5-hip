@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-from source_public_hip_log import LOG_NAMES
+from source_public_hip_log import LOG_NAMES, package_limit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,6 +22,112 @@ def validate_source_inputs(receipt):
         path = (ROOT / name).resolve()
         if not path.is_relative_to(ROOT) or digest(path) != expected:
             raise ValueError('candidate source input changed: ' + name)
+
+
+LLM_CLIENT_PACKAGE_FILES = {'eboot.bin','lapy.elf','sce_module/libc.prx','sce_sys/param.json',
+                            'sce_sys/icon0.png','results-dir.txt','vocab.gguf','client-phase.txt'}
+
+def validate_client_package(build, receipt):
+    package = build/'package/PPSA99014.ffpkg'
+    app = build/'package/app'
+    if (not 0 < package.stat().st_size <= package_limit('llm_client') or
+            digest(package) != receipt.get('package_sha256') or
+            set(receipt.get('package_files',{})) != LLM_CLIENT_PACKAGE_FILES or
+            {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()} != LLM_CLIENT_PACKAGE_FILES):
+        raise ValueError('vocabulary package inventory/size/hash differs')
+    for name, expected in receipt['package_files'].items():
+        path=app/name
+        if path.is_symlink() or digest(path)!=expected:
+            raise ValueError('vocabulary package file differs')
+    if (app/'client-phase.txt').read_bytes()!=b'vocab\n':
+        raise ValueError('full model phase is not authorized')
+    if (app/'results-dir.txt').read_text()!=receipt['results_dir']:
+        raise ValueError('vocabulary results path differs')
+
+def validate_client_units(original, receipt):
+    inputs=receipt['inputs'];units=receipt.get('units',[]);expected_headers={}
+    if len(units)!=147:raise ValueError('client unit inventory differs')
+    objects=[(original/u['object']).resolve() for u in units]
+    if len(set(objects))!=147:raise ValueError('duplicate client objects')
+    for index,(unit,obj) in enumerate(zip(units,objects)):
+        if inputs.get(str(obj))!=unit.get('object_sha256') or digest(obj)!=unit.get('object_sha256'):
+            raise ValueError('client object identity omitted or changed')
+        if index<77:
+            if not obj.is_relative_to(original.resolve()):raise ValueError('runtime object outside build')
+            source=(ROOT/unit['source']).resolve();headers=unit.get('headers',{})
+            if (not headers or headers.get(str(source))!=unit.get('source_sha256') or
+                    inputs.get(str(source))!=unit.get('source_sha256')):
+                raise ValueError('runtime source/header identity omitted')
+            for name,h in headers.items():
+                if name in expected_headers and expected_headers[name]!=h:
+                    raise ValueError('conflicting runtime header identities')
+                expected_headers[name]=h
+    for name,h in expected_headers.items():
+        if not Path(name).is_absolute() or inputs.get(name)!=h or digest(Path(name))!=h:
+            raise ValueError('runtime header identity omitted or changed')
+    for name in ('tools/build_llm_native_app.py','tools/build_public_hip.py',
+                 'tools/build_llm_native_client.py','tools/build_llm_vocab_fixture.py'):
+        path=ROOT/name
+        if inputs.get(str(path))!=digest(path):raise ValueError('required client producer identity omitted')
+
+def validate_client_image_assets(original, receipt):
+    for name,source in (('eboot.bin','eboot.bin'),('sce_module/libc.prx','libc.prx')):
+        path=original/source;h=digest(path)
+        if receipt['inputs'].get(str(path))!=h or receipt['package_files'].get(name)!=h:
+            raise ValueError('packaged native image/provider differs')
+
+
+def validate_llm_client(build, receipt, frozen=False):
+    from build_llm_native_app import vocab_inputs
+    from build_llm_native_client import app_objects
+    from audit_public_hip_llm_client_native import SOURCES
+    if (receipt.get('schema')!=1 or receipt.get('status')!='PASS' or
+            receipt.get('classification')!='source-only-vocabulary-native-client-app' or
+            receipt.get('fixture')!='llm_client' or receipt.get('phase')!='vocab' or
+            receipt.get('native_executed') is not False or receipt.get('gpu_executed') is not False or
+            receipt.get('object_count')!=147 or len(receipt.get('units',[]))!=147):
+        raise ValueError('not a complete vocabulary-only native app')
+    bound=receipt.get('llm_client',{})
+    if bound.get('phase')!='vocab':raise ValueError('full model phase is not authorized')
+    identities=receipt.get('inputs',{})
+    if not identities:raise ValueError('client lacks input identities')
+    for name,expected in identities.items():
+        if not Path(name).is_absolute() or digest(Path(name))!=expected:
+            raise ValueError('client input differs: '+name)
+    for name,target in receipt.get('symlinks',{}).items():
+        if str(Path(name).resolve())!=target:raise ValueError('client symlink differs')
+    vocab=vocab_inputs(Path(bound['vocabulary']['receipt']).parent)
+    client=app_objects(Path(bound['native_client']['receipt']).parent)
+    if ({k:vocab[k] for k in ('receipt','receipt_sha256','asset')}!=bound['vocabulary'] or
+            {k:client[k] for k in ('receipt','receipt_sha256')}!=bound['native_client']):
+        raise ValueError('client prerequisite differs')
+    for closure in (vocab['inputs'],client['inputs']):
+        if any(identities.get(name)!=h for name,h in closure.items()):
+            raise ValueError('client prerequisite closure omitted')
+    if [u['object'] for u in receipt['units'][-70:]]!=client['objects']:
+        raise ValueError('client object list differs')
+    original=Path(bound['audit']['path']).parent
+    validate_client_units(original,receipt)
+    validate_client_image_assets(original,receipt)
+    audit_path=build/'llm-client-native-audit.json'
+    if digest(audit_path)!=bound['audit']['sha256']:raise ValueError('client audit identity differs')
+    audit=json.loads(audit_path.read_text())
+    if (audit.get('status')!='PASS' or audit.get('classification')!='offline-public-hip-llm-client-native-image-audit' or
+            audit.get('phase')!='vocab' or audit.get('wrapper_retained') is not True or
+            audit.get('wrapper_no_bypass') is not True or audit.get('actual_client_gate_executed') is not False or
+            audit.get('native_executed') is not False or audit.get('gpu_executed') is not False):
+        raise ValueError('client audit not accepted')
+    audit_inputs=audit.get('inputs',{})
+    original=Path(bound['audit']['path']).parent
+    for path in [original/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/n for n in SOURCES]:
+        if audit_inputs.get(str(path))!=digest(path) or identities.get(str(path))!=digest(path):
+            raise ValueError('client audit required identity differs')
+    for name,h in audit_inputs.items():
+        if digest(Path(name))!=h:raise ValueError('client audit input differs')
+    validate_client_package(build,receipt)
+    if receipt['package_files']['vocab.gguf']!=digest(Path(vocab['asset'])):
+        raise ValueError('packaged vocabulary differs from authenticated asset')
+    return bound
 
 
 def validate_embedded_audit(build, receipt):
@@ -263,7 +369,9 @@ def main():
     output = args.output.resolve()
     if not output.is_relative_to(ROOT / 'results'):
         parser.error('candidate must be under results/')
-    receipt = json.loads((args.build / 'link-receipt.json').read_text())
+    receipt_path = args.build / 'link-receipt.json'
+    if not receipt_path.exists():receipt_path=args.build/'receipt.json'
+    receipt = json.loads(receipt_path.read_text())
     fixture = receipt.get('fixture', 'bootstrap')
     if fixture not in LOG_NAMES:
         parser.error('unknown fixture')
@@ -273,10 +381,12 @@ def main():
         validate_results_directory(receipt['results_dir'])
     except ValueError as error:
         parser.error(str(error))
-    if receipt['object_count'] != 76:
+    if receipt['object_count'] != (147 if fixture=='llm_client' else 76):
         parser.error('not the complete .40 candidate')
-    validate_source_inputs(receipt)
-    audit = (validate_weighted_qkv_audit(args.build, receipt) if fixture == 'weighted_qkv' else
+    llm_client = validate_llm_client(args.build,receipt) if fixture=='llm_client' else None
+    if fixture!='llm_client':validate_source_inputs(receipt)
+    audit = (args.build/'llm-client-native-audit.json' if fixture=='llm_client' else
+             validate_weighted_qkv_audit(args.build, receipt) if fixture == 'weighted_qkv' else
              validate_q4_audit(args.build, receipt) if fixture == 'q4' else
              validate_rmsnorm_audit(args.build, receipt) if fixture == 'rmsnorm' else
              validate_embedded_audit(args.build, receipt) if fixture in ('embedded', 'aggregate') else None)
@@ -284,13 +394,13 @@ def main():
         parser.error('commit source before freezing')
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(args.build / 'package', output / 'package')
-    shutil.copyfile(args.build / 'link-receipt.json', output / 'build-receipt.json')
+    shutil.copyfile(receipt_path, output / 'build-receipt.json')
     if audit is not None:
         shutil.copyfile(audit, output / audit.name)
     shutil.copytree(ROOT / 'build/controllers/PPSA99014', output / 'controllers')
     shutil.copytree(args.snapshot_build, output / 'snapshot')
     package = output / 'package/PPSA99014.ffpkg'
-    if digest(package) != receipt['package_sha256']:
+    if package.stat().st_size > package_limit(fixture) or digest(package) != receipt['package_sha256']:
         parser.error('package hash mismatch')
     for name, expected in receipt['package_files'].items():
         if digest(output / 'package/app' / name) != expected:
@@ -329,6 +439,10 @@ def main():
             for name,expected in source_inputs.items():
                 path=Path(name).resolve()
                 if path.is_relative_to(ROOT):files[str(path.relative_to(ROOT))]=expected
+    if llm_client is not None:
+        for name,h in receipt['inputs'].items():
+            path=Path(name).resolve()
+            if path.is_relative_to(ROOT):files[str(path.relative_to(ROOT))]=h
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
                 'baseline_results_dir': args.baseline_results_dir,
@@ -342,7 +456,8 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Weighted RMSNorm produces2048values consumed in-place by Q8_1 and full Q/K/V projections2048/256/256. Require30full raw files11972800bytes, frozen weighted budget then exact Q8 and unchanged Q4 bounds from actual weighted readback, unchanged shared intermediates/inputs/guards/tails,5launches6allocations/frees3moduleunloads1retiredqueue. Transport transcript alone never establishes numerical success.' if fixture == 'weighted_qkv' else
+                'hypothesis': ('Vocabulary-only upstream loader/tokenizer matches32cases236tokens; real publicHIP storage copies/clears16floats; unsupportedADD rejects beforeCPUcompute; no complete model/inference/GPUdispatch. Require1allocation/free and1retiredqueue with clean application lifecycle.' if fixture=='llm_client' else
+                               'Weighted RMSNorm produces2048values consumed in-place by Q8_1 and full Q/K/V projections2048/256/256. Require30full raw files11972800bytes, frozen weighted budget then exact Q8 and unchanged Q4 bounds from actual weighted readback, unchanged shared intermediates/inputs/guards/tails,5launches6allocations/frees3moduleunloads1retiredqueue. Transport transcript alone never establishes numerical success.' if fixture == 'weighted_qkv' else
                                'Selected Q8_1 and nonfused Q4_0 kernels, including any diagnostic load-width/cache/scheduling changes declared in the bound fixture receipt, compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
                                'Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
                                'Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
@@ -363,6 +478,8 @@ def main():
                 'deadline_seconds': 40, 'public_hip_gpu_execution_claimed': False}
     if rmsnorm is not None:
         manifest['rmsnorm'] = rmsnorm
+    if llm_client is not None:
+        manifest['llm_client']=llm_client
     if q4 is not None:
         manifest['q4'] = q4
     if weighted_qkv is not None:

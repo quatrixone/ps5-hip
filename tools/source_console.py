@@ -10,7 +10,7 @@ import socket
 import threading
 import time
 import uuid
-from source_public_hip_log import LOG_NAMES
+from source_public_hip_log import LOG_NAMES, package_limit
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = '192.168.4.40'
@@ -79,6 +79,7 @@ class Control:
         self.manifest = json.loads((candidate / 'manifest.json').read_text())
         self.fixture = self.manifest.get('fixture', 'bootstrap')
         baseline_fixture = self.manifest.get('baseline_log_fixture', 'bootstrap')
+        self.baseline_fixture = baseline_fixture
         require(self.fixture in LOG_NAMES and baseline_fixture in LOG_NAMES, 'unknown log fixture')
         from build_public_hip import validate_results_directory
         results_dir = self.manifest['results_dir']
@@ -102,6 +103,9 @@ class Control:
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
         self.verify()
+        require((ROOT/self.manifest['package']).stat().st_size <= package_limit(self.fixture), 'candidate package size exceeds fixture bound')
+        if self.fixture == 'llm_client':
+            self.authenticate_llm_client()
         if self.fixture == 'rmsnorm':
             from build_public_hip import rmsnorm_reference_inputs
             bound = self.manifest.get('rmsnorm', {})
@@ -133,6 +137,16 @@ class Control:
         for name, digest in self.manifest['files'].items():
             path = ROOT / name
             require(path.resolve().is_relative_to(ROOT) and sha(path.read_bytes()) == digest, 'frozen input changed: ' + name)
+
+    def authenticate_llm_client(self):
+        from freeze_source_candidate import validate_llm_client
+        bound = self.manifest.get('llm_client', {})
+        require(bound.get('phase') == 'vocab', 'full model phase is not authorized')
+        receipt_path = self.candidate / 'build-receipt.json'
+        receipt = json.loads(receipt_path.read_text())
+        # Validate frozen package/audit and original authenticated producer closure again before network access.
+        result = validate_llm_client(self.candidate, receipt, frozen=True)
+        require(result == bound, 'frozen client provenance differs')
 
     def authenticate_q4(self):
         from public_hip_q4_assets import assets
@@ -487,7 +501,7 @@ class Control:
         baseline_log = self.manifest.get('baseline_log_sha256')
         old_sha = self.manifest['baseline_image_sha256']
         require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
-        old = self.fetch_image(REMOTE, 16777216)
+        old = self.fetch_image(REMOTE, package_limit(self.baseline_fixture))
         require(sha(old) == old_sha, 'historical baseline differs; replan')
         (self.out / 'old.ffpkg').write_bytes(old)
         self.ensure_results_directory()

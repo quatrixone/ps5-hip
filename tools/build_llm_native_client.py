@@ -39,6 +39,103 @@ def selection(client):
  if any(not p.is_file() for p in units):raise ValueError('source missing')
  return units,models
 
+def verify_artifacts(folder,artifacts,receipt_path):
+ for name,identity in artifacts.items():
+  p=folder/name
+  if Path(name).is_absolute() or '..' in Path(name).parts or not p.resolve().is_relative_to(folder) or p.is_symlink():raise ValueError('unsafe native artifact path')
+  if not isinstance(identity,dict) or identity.get('sha256')!=sha(p) or identity.get('bytes')!=p.stat().st_size:raise ValueError('native artifact differs: '+name)
+ if set(artifacts)!={str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file() and p!=receipt_path}:raise ValueError('native artifact inventory differs')
+
+def verify_commands(commands,expected,record,artifacts):
+ if not isinstance(commands,list) or len(commands)!=len(expected) or len({c.get('label') for c in commands})!=len(expected):raise ValueError('native command inventory differs')
+ if record!=commands:raise ValueError('native command record differs')
+ for c in commands:
+  if c.get('exit_code')!=0 or c.get('timed_out') or c.get('argv')!=expected.get(c.get('label')):raise ValueError('native command failed or differs')
+  for suffix in ('.stdout','.stderr'):
+   if c['label']+suffix not in artifacts:raise ValueError('missing command output')
+
+def app_objects(folder):
+ """Authenticate a completed native build; return upstream objects, never payload CRT/caller."""
+ folder=Path(folder).resolve();receipt_path=folder/'receipt.json';receipt_hash=sha(receipt_path)
+ r=json.loads(receipt_path.read_text())
+ if r.get('schema')!=1 or r.get('status')!='PASS' or r.get('classification')!='source-only-native-client-payload-link' or r.get('native_executed') is not False or r.get('gpu_executed') is not False:
+  raise ValueError('unsupported native-client receipt')
+ deps=read('dependencies.json');lock=read('llm-inputs.json')['client']
+ if r.get('client_revision')!=lock['revision'] or r.get('sdk_revision')!=deps['sdk']['revision']:raise ValueError('native-client locked revision differs')
+ client=source('llama-client',lock,False);source('sdk',deps['sdk'],False);sdk=ROOT/'.deps/sdk'
+ if (sdk/'.ps5-sdk-revision').read_text().strip()!=deps['sdk']['revision']:raise ValueError('SDK revision marker mismatch')
+ ordinary,models=selection(client)
+ units=ordinary+[folder/('unity-'+str(i)+'.cpp') for i in range(11)]+[Path(__file__).with_name('llm_native_client_main.cpp')]
+ if r.get('units')!=list(map(str,units)) or r.get('model_sources')!=list(map(str,models)) or r.get('object_count')!=71:raise ValueError('native-client source/object selection differs')
+ inputs=r.get('inputs');artifacts=r.get('artifacts');tools=r.get('tools')
+ if not isinstance(inputs,dict) or not inputs or not isinstance(artifacts,dict) or not artifacts or not isinstance(tools,dict):raise ValueError('missing native-client identities')
+ verified_inputs=set()
+ def required(p):
+  p=Path(p).absolute()
+  if str(p) not in verified_inputs:raise ValueError('missing or stale native-client input: '+str(p))
+ for name,digest in inputs.items():
+  if not Path(name).is_absolute() or sha(name)!=digest:raise ValueError('stale native-client input: '+name)
+  verified_inputs.add(name)
+ required_sources=[Path(__file__),Path(__file__).with_name('llm_native_client_main.cpp'),ROOT/'tools/fetch_locked_deps.py',ROOT/'tools/ps5-clangxx',ROOT/'dependencies.json',ROOT/'llm-inputs.json',client/'src/CMakeLists.txt',client/'ggml/src/CMakeLists.txt',client/'ggml/src/ggml-cpu/CMakeLists.txt',*units,*models]
+ for p in required_sources:required(p)
+ for i in range(11):
+  if units[59+i].read_text()!='\n'.join('#include "'+str(p)+'"' for p in models[i*16:(i+1)*16])+'\n':raise ValueError('unity source differs')
+ for lib in ('llama','ggml'):
+  template=client/('src/llama-version.h.in' if lib=='llama' else 'ggml/src/ggml-version.h.in');required(template);generated=folder/(lib+'-version.h');required(generated)
+  if generated.read_text()!=template.read_text().replace('@'+lib.upper()+'_VERSION@','ps5-hip-native-link').replace('@'+lib.upper()+'_BUILD_COMMIT@',lock['revision']):raise ValueError('generated version differs')
+ sdk_files=sorted(p for p in sdk.rglob('*') if p.is_file())
+ if {str(p) for p in sdk_files}!={p for p in inputs if Path(p).is_relative_to(sdk)}:raise ValueError('SDK inventory differs')
+ for p in sdk_files:required(p)
+ if r.get('sdk_symlinks')!={str(p):str(p.resolve()) for p in sdk_files if p.is_symlink()}:raise ValueError('SDK symlink inventory differs')
+ names=('clang++-18','ld.lld-18','llvm-config-18','llvm-readobj-18','llvm-nm-18','bash','sh','readlink','realpath','dirname','basename','cut')
+ if set(tools)!=set(names):raise ValueError('tool inventory differs')
+ for name,t in tools.items():
+  p=Path(shutil.which(name,path='/usr/bin:/bin'));required(p)
+  if t.get('path')!=str(p) or t.get('resolved')!=str(p.resolve()) or t.get('sha256')!=sha(p):raise ValueError('tool identity differs: '+name)
+  if name.endswith('-18') and '18.1.8' not in t.get('version',''):raise ValueError('tool version differs')
+ verify_artifacts(folder,artifacts,receipt_path)
+ objects=[folder/(str(i)+'.o') for i in range(71)]
+ if r.get('objects')!={str(p):sha(p) for p in objects}:raise ValueError('native object inventory differs')
+ for p in objects:required(p)
+ flags=['-O0','-fPIC','-ffunction-sections','-fdata-sections','-pthread','-DGGML_SCHED_MAX_COPIES=4','-DGGML_USE_CPU']+['-I'+str(p) for p in [folder,client/'include',client/'src',client/'ggml/include',client/'ggml/src',client/'ggml/src/ggml-cpu']]
+ compiler=ROOT/'tools/ps5-clangxx';expected={}
+ resolved_dependencies={}
+ def resolve_dependency(name):
+  if name not in resolved_dependencies:resolved_dependencies[name]=Path(name).resolve()
+  return resolved_dependencies[name]
+ for i,p in enumerate(units):
+  args=[str(compiler),*flags,*(['-x','c','-std=c11'] if p.suffix=='.c' else ['-std=c++17'])]
+  expected['headers-'+str(i)]=[*args,'-c','-M',str(p),'-MF',str(folder/(str(i)+'.d'))]
+  expected['compile-'+str(i)]=[*args,'-MD','-MF',str(folder/(str(i)+'.compiled.d')),'-c',str(p),'-o',str(objects[i])]
+  paths=[]
+  for suffix in ('.d','.compiled.d'):
+   dep=folder/(str(i)+suffix)
+   if dep.name not in artifacts:raise ValueError('missing compile depfile')
+   paths.append({resolve_dependency(n) for n in shlex.split(dep.read_text().replace('\\\n',' ').split(':',1)[1])})
+  if paths[0]!=paths[1] or p.resolve() not in paths[0]:raise ValueError('compile dependency closure differs')
+  for header in paths[0]:required(header)
+ expected['driver-plan']=[str(compiler),'-###','-Wl,--gc-sections','-Wl,--trace',*map(str,objects),'-o',str(folder/'client.elf')]
+ expected['link']=[str(compiler),'-Wl,--gc-sections','-Wl,--trace',*map(str,objects),'-o',str(folder/'client.elf')]
+ expected['headers']=['llvm-readobj-18','--file-headers','--program-headers','--needed-libs',str(folder/'client.elf')]
+ expected['imports']=['llvm-nm-18','--dynamic','--undefined-only',str(folder/'client.elf')]
+ commands=r.get('commands')
+ verify_commands(commands,expected,json.loads((folder/'commands.json').read_text()),artifacts)
+ if not r.get('link_inputs'):raise ValueError('missing actual link inputs')
+ for p in r['link_inputs']:required(p)
+ # Re-resolve every distinct dependency spelling; detect changed symlink routes too.
+ for name,target in resolved_dependencies.items():
+  if Path(name).resolve()!=target:raise ValueError('dependency resolution changed during validation')
+ # Recheck after all reads, including the receipt. No stale-producer compatibility exemption.
+ for p,h in inputs.items():
+  if sha(p)!=h:raise ValueError('native input changed during validation: '+p)
+ verify_artifacts(folder,artifacts,receipt_path)
+ if r['sdk_symlinks']!={str(p):str(p.resolve()) for p in sdk.rglob('*') if p.is_file() and p.is_symlink()}:raise ValueError('SDK links changed during validation')
+ for t in tools.values():
+  if str(Path(t['path']).resolve())!=t['resolved']:raise ValueError('tool link changed during validation')
+ source('llama-client',lock,False);source('sdk',deps['sdk'],False)
+ if sha(receipt_path)!=receipt_hash:raise ValueError('native receipt changed during validation')
+ return {'objects':list(map(str,objects[:70])),'receipt':str(receipt_path),'receipt_sha256':receipt_hash,'inputs':{**inputs,**{str(folder/n):a['sha256'] for n,a in artifacts.items()},str(receipt_path):receipt_hash}}
+
 def build(output):
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
@@ -137,7 +234,7 @@ def build(output):
  for p,h in inputs.items():
   if sha(p)!=h:raise ValueError('input changed before publication: '+p)
  artifacts={str(p.relative_to(output)):{'sha256':sha(p),'bytes':p.stat().st_size} for p in output.rglob('*') if p.is_file()}
- receipt={'status':'PASS','classification':'source-only-native-client-payload-link','client_revision':lock['revision'],'sdk_revision':deps['sdk']['revision'],'inputs':inputs,'sdk_symlinks':symlinks,'tools':tools,'units':[str(p) for p in units],'objects':{str(p):sha(p) for p in objects},'object_count':71,'model_sources':[str(p) for p in models],'link_inputs':link_inputs,'commands':commands,'artifacts':artifacts,'dynamic_imports':names,'native_executed':False,'gpu_executed':False,'limits':['SDK payload ELF only; RWX segment is not accepted app packaging.','Vocab-only native caller; no model loaded or tokenized here and no public HIP backend integrated.','Installed SDK bytes and clean source revision bound; SDK source-build provenance is inherited from deps-build, not recreated by this target.','No general model support or inference claim from retaining all upstream factory implementations.']}
+ receipt={'schema':1,'status':'PASS','classification':'source-only-native-client-payload-link','client_revision':lock['revision'],'sdk_revision':deps['sdk']['revision'],'inputs':inputs,'sdk_symlinks':symlinks,'tools':tools,'units':[str(p) for p in units],'objects':{str(p):sha(p) for p in objects},'object_count':71,'model_sources':[str(p) for p in models],'link_inputs':link_inputs,'commands':commands,'artifacts':artifacts,'dynamic_imports':names,'native_executed':False,'gpu_executed':False,'limits':['SDK payload ELF only; RWX segment is not accepted app packaging.','Vocab-only native caller; no model loaded or tokenized here and no public HIP backend integrated.','Installed SDK bytes and clean source revision bound; SDK source-build provenance is inherited from deps-build, not recreated by this target.','No general model support or inference claim from retaining all upstream factory implementations.']}
  (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print('PASS',output/'receipt.json',flush=True);return receipt
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args();build(args.output)

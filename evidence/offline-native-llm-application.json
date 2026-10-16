@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "status": "PASS",
+  "classification": "source-only-vocabulary-native-client-app",
+  "raw_directory": "build/llm-native-app-v3",
+  "receipt_sha256": "ae0ed602d306029da056698642297a8873c2431c44d6fb239b3519608e1e4eda",
+  "make_argv": [
+    "make",
+    "llm-native-app",
+    "LLM_NATIVE_CLIENT_BUILD_DIR=build/llm-native-client-v3",
+    "LLM_VOCAB_FIXTURE_DIR=results/llm-vocab-fixture-v1",
+    "LLM_NATIVE_APP_BUILD_DIR=build/llm-native-app-v3",
+    "RESULTS_DIR=/user/homebrew/ps5-hip/m0-vocab-v3"
+  ],
+  "make_exit_code": 0,
+  "focused_python_tests_passed": 41,
+  "object_count": 147,
+  "input_count": 6988,
+  "artifact_count": 2395,
+  "command_count": 197,
+  "package": {
+    "bytes": 19890176,
+    "sha256": "bc560fd9ee4b8fbbc8ebfc03f8381891af1cc4f35991f09168a244155f457946",
+    "files": {
+      "client-phase.txt": "9e5e90102c699455e9039ff903284e0689394dd345bb11456706f087984d2eb7",
+      "eboot.bin": "0acab9c16f64e11197ed8ec5a3d9a940e91735a27ff328de7ef8d8d760a7b83a",
+      "lapy.elf": "577735778f5f620d12e952e60ef504e786f7af3da0b8a1598a2190f8dd366726",
+      "results-dir.txt": "c5c222ef674845ac9bb4c477563f1dbce1f7cfc10988b54fa7b3bccf4902d957",
+      "vocab.gguf": "7894a7e863f7f09e7d17d53f658eb030e54b7a87d627d0a201c06da8a8a5696e",
+      "sce_module/libc.prx": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+      "sce_sys/icon0.png": "14a8b16ad0c36b024f1c0302965e1caff1aba877be223779da5d7e134f15281d",
+      "sce_sys/param.json": "e3ba4557cd3c47fd9c0000e691c3a75b819fbe75f091a291d3bda18121079071"
+    }
+  },
+  "audit": {
+    "sha256": "2345b9f4e8d22d18c33428070764ca3382c3cf52390e65649296c7e0f4856b2b",
+    "functions": 24,
+    "wrapper_retained": true,
+    "wrapper_no_bypass": true
+  },
+  "independent_review": {
+    "status": "PASS_OFFLINE_APP_AND_REAL_FREEZE_ADMISSION",
+    "sha256": "39710caa89ba8cd2b7df044df1e9b1730abb5392ffb7bae72ce11dd6ed7bcab4",
+    "real_freeze_admission_passed": true
+  },
+  "make_evidence": {
+    "command.json": "f6e97bab137a4897c047fded2f461f126af2e60673b7ff4134d31b713308165e",
+    "stdout": "0fbe6b7ad593ef0ff3bf26150681c565bf05f0285a98011011f4dc85ca73dcec",
+    "stderr": "bd83c5979488f0502c631587a87dbd6d8d0505453957589b664e7e47c43b9f54"
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "limitations": [
+    "Vocabulary-only native application package; installed-title execution remains unqualified.",
+    "Synthetic graph rejection cannot close the full-model caller and graph-reuse gate.",
+    "No supported model tensor operations or native inference claim.",
+    "Installed SDK/elevation runtime provenance is inherited from the dependency build."
+  ]
+}

@@ -160,6 +160,24 @@ def check_weighted_qkv_lines(raw):
     return {'max_abs':error,'max_budget_fraction':fraction}
 
 
+LOG_NAMES['llm_client'] = 'ps5-hip-m0-app.log'
+LLM_CLIENT_LINES = (
+    'PS5HIP START target=gfx1013 kernel=m0_client_boundary', LINES[1],
+    'M0_APP VOCAB cases=32 tokens=236 vocabulary=32000 tensors=0 exact=true',
+    'M0_APP STORAGE copied=16 cleared=16 synthetic_add_rejected=true cpu_compute_calls=0 hip_launches=0 client_graph_executed=false',
+    'M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending',
+    *LINES[3:6],
+    'M0_APP FINAL allocations=1 frees=1 queues=1 retired=1 gate_destroyed=true application_fini=pending',
+    *LINES[7:],
+)
+LLM_CLIENT_EXPECTED = ('\n'.join(LLM_CLIENT_LINES) + '\n').encode('ascii')
+
+def package_limit(fixture):
+    if fixture not in LOG_NAMES:
+        raise ValueError('unknown package fixture')
+    return (32 if fixture == 'llm_client' else 16) * 1024 * 1024
+
+
 def check_log(raw, fixture='bootstrap'):
     if not isinstance(raw, bytes) or len(raw) > 65536:
         raise ValueError('public HIP transcript type or size')
@@ -175,10 +193,10 @@ def check_log(raw, fixture='bootstrap'):
                 'unproven': ['independent raw-buffer numerical validation', 'freshness',
                              'installed identity', 'native process lifecycle', 'visible mount state',
                              'service health', 'owned lock cleanup']}
-    expected = {'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'embedded': EMBEDDED_EXPECTED, 'aggregate': AGGREGATE_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED, 'capture_gpu': CAPTURE_GPU_EXPECTED, 'copy_gpu': COPY_GPU_EXPECTED}.get(fixture)
+    expected = {'llm_client': LLM_CLIENT_EXPECTED, 'bootstrap': EXPECTED, 'memory': MEMORY_EXPECTED, 'copy': COPY_EXPECTED, 'module': MODULE_EXPECTED, 'launch': LAUNCH_EXPECTED, 'embedded': EMBEDDED_EXPECTED, 'aggregate': AGGREGATE_EXPECTED, 'fill': FILL_EXPECTED, 'graph': GRAPH_EXPECTED, 'stream': STREAM_EXPECTED, 'graph_gpu': GRAPH_GPU_EXPECTED, 'capture_gpu': CAPTURE_GPU_EXPECTED, 'copy_gpu': COPY_GPU_EXPECTED}.get(fixture)
     if expected is None or not isinstance(raw, bytes) or len(raw) > 65536 or raw != expected:
         raise ValueError('public HIP transcript incomplete, changed, wrong fixture or contaminated')
-    return {'application_result': 'application-pass', 'kernel': 'public_hip_' + fixture,
+    return {'application_result': 'application-pass', 'kernel': 'm0_client_boundary' if fixture=='llm_client' else 'public_hip_' + fixture,
             'target': 'gfx1013', 'log_sha256': hashlib.sha256(raw).hexdigest(),
             'bytes': len(raw), 'hip_init': 0, 'device_count': 1,
             'hardware_gate_passed': False,

@@ -1,6 +1,6 @@
 # ps5-hip agent handoff
 
-Updated: 2026-10-15, America/New_York. This is the resume point for the private
+Updated: 2026-10-16, America/New_York. This is the resume point for the private
 `ps5-hip` repository. Read `AGENTS.md`, `STATE.md`, and the active goal in
 `docs/IMPLEMENTATION_PLAN.md` before working. The mission is a native PS5 HIP /
 ROCm compute stack; a bounded result does not close a broader acceptance gate.
@@ -32,6 +32,140 @@ operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
+
+The M0 native vocabulary application milestone follows the source-only prerequisite
+milestone `432a1d2`. The schema-1 client rebuild passed in
+`build/llm-native-client-v2`, with logs and eventual terminal command receipt
+in `results/m0-native-production-make-v2` (root session 47870, terminal zero).
+The first application Make attempt was deliberately stopped after measured
+validation overhead: session 8134 is terminal, Make exit 2, with its interruption
+inside repeated dependency-path resolution. Logs and the cancellation reason
+are in `results/m0-native-app-production-make-v1`. The reviewed optimization
+preserves initial/final hashes and dependency-route checks. The replacement
+Make run is session 7522, with logs/terminal receipt in
+`results/m0-native-app-production-make-v2`. Fresh
+`build/llm-native-client-v3/receipt.json` now passed (all 71 objects); the same
+Make run completed `build/llm-native-app-v2` packaging but failed its final audit
+(Make exit 2, PID 758402 terminal). Independent inspection found two audit-parser
+issues: `addr32 callq` normalization and alignment bytes included beyond ELF
+function symbol sizes. The corrected diagnostic audit passed all three actual
+images and 24 functions; evidence is in `results/m0-native-app-final-review-v1`.
+This does not qualify the failed build or authorize its deployment.
+
+Both fixes are now promoted with ten audit tests. The reviewed header-union
+optimization is also promoted with nine validation-cost tests; all eight app
+driver tests pass. Fresh Make run session **70692** completed successfully
+(exit 0, PID 776191 terminal): `build/llm-native-app-v3/receipt.json` is PASS,
+with 147 objects and 197 successful commands. Logs are in
+`results/m0-native-app-production-make-v3`. Package SHA256 is
+`bc560fd9ee4b8fbbc8ebfc03f8381891af1cc4f35991f09168a244155f457946`
+(19,890,176 bytes); all 24 audited functions pass. The real candidate validator
+and independent artifact review passed (session **85462**, terminal zero),
+accepting 6,988 input identities, 2,395 artifacts and eight package assets.
+Review is in `results/m0-native-app-final-review-v3`; compact committed evidence
+is `evidence/offline-native-llm-application.json`. Next freeze the committed
+package and validate the installed title on idle .40. No current M0 package
+has been deployed.
+The older v1 client receipt is
+historical; the new strict application object consumer intentionally rejects it.
+Promoted `ports/ggml` and native title sources implement HIP storage and a
+mandatory no-fallback wrapper, with host verification in
+`results/m0-promoted-host-gate-v1`. Application assembly is promoted as
+`tools/build_llm_native_app.py`; its converter/link/runtime and vocabulary
+provenance fixes passed source review before this production Make attempt.
+The title now suppresses expected vocabulary info/warnings and preserves errors;
+its updated bytes passed the new package audit. No new console
+candidate is frozen. The actual native full-model gate remains unvalidated.
+
+Vocabulary console controls are now promoted to the production paths:
+`source_public_hip_log.py`, `source_console.py`, and `freeze_source_candidate.py`.
+Independent review and production tests pass (11 focused plus 38 legacy cases);
+see `results/m0-vocab-controls-production-v1/review.json`. They authenticate all
+147 objects and the packaged executable/provider, and limit the 32 MiB transfer
+allowance to this vocabulary fixture. Full freeze/authentication against the
+actual completed application receipt is still pending. The application driver
+and native image auditor also pass their registered CTest checks.
+
+The first application build spends substantial time validating prerequisites
+before creating its output directory. A bounded diagnosis found 105,216 depfile
+path entries but only 1,324 unique paths; see
+`results/m0-app-validation-cost-v1/review.json` and `header-volume.json`.
+Six focused optimization tests cover duplicate-work reduction plus changed
+bytes, dependency sets, unknown linker inputs and changed symlink routes.
+The native producer self-hash remains enforced, so applying this optimization
+requires a fresh native-client build rather than editing the v2 receipt.
+
+The remaining native model-gate checklist is recorded locally in
+`results/m0-native-model-gate-plan-v1/review.json`. A bounded host experiment in
+`results/m0-repeat-gate-v1` demonstrates two rejected `llama_process` calls on
+the same context at position zero: both return -3 with zero forwarding,
+completed tensor callbacks or GPU submissions. The second call uses the same
+graph and increments `n_reused` from zero to one in eager and deferred modes.
+This uses authenticated borrowed host objects and is not native evidence;
+independent review passed in `results/m0-repeat-gate-independent-review-v1`.
+A production reuse/error-policy patch remains staged in
+`.local/m0-reuse-promotion`; its host checks pass, but promotion needs a renewed
+native wrapper audit and must not silently change the vocabulary candidate.
+The model phase also needs exact handling of expected upstream rejection errors,
+authenticated full-GGUF packaging, bounded streaming transfer and a suitable
+loader watchdog before its console candidate can be prepared.
+
+Remaining model-phase work is isolated from the live vocabulary build:
+`.local/m0-model-package` extends the existing builders, `.local/model-streaming`
+extends freeze/transfer/authentication, and `.local/m0-reuse-promotion` holds the
+two-call gate, phase error policy and native auditor. Real model authentication
+passed in `results/m0-model-auth-staged-v1` (49 identities); no model package or
+native execution is claimed. `results/m0-model-phase-counters-v3` confirms the
+host model-only final counters are zero allocations/frees/queues/retirements,
+with gate destruction and two rejected calls including reuse. The staged title
+uses a 120-second model watchdog (vocabulary remains 30 seconds); the exact
+transcript and 150-second model controller policy now pass staged tests and
+independent review (`results/model-streaming-execute-independent-review-v1`). These
+are experimental bounds, not measured native loading performance. Keep failed
+counter v1 evidence; v2 fixes its test-only missing include. V3 explicitly sets
+the locked API's `LLAMA_LOAD_MODE_NONE` and `LLAMA_LAZY_MODE_OFF`, disabling
+both normal and lazy mappings. Heap peak and native loading time remain unmeasured.
+
+Updated model title/backend native compilation passed in
+`results/m0-reuse-native-compile-v3`, with 896 bound source/header inputs and
+explicit `LLAMA_LOAD_MODE_NONE` / `LLAMA_LAZY_MODE_OFF`. The current staged
+wrapper passes instruction, call-relocation and function-extent checks; all 11
+auditor tests pass, including relaxed `addr32` calls. V2 evidence is preserved.
+This is compile-only evidence: final model application image/package auditing
+and native execution remain unproven.
+
+Model promotion destinations and identities are tracked in
+`results/m0-model-promotion-readiness-v1`. The rebased builder patch and ignored
+`.local/m0-model-build-integration/integration.patch` apply to current production;
+seven CLI/Make checks and ten model-package tests pass in
+`results/m0-model-build-wiring-v1`. The production-target model controls patch is
+`.local/model-controls-promotion/production.patch`, including production imports,
+validator identities and explicit model freeze CLI. Initial independent review
+found a restarted upload/readback budget; the repair has 47 tests passing in
+`results/model-controls-production-port-v2` and independent PASS_SOURCE_REVIEW
+in `results/m0-model-controls-promotion-review-v1/review.json`. The initial
+finding is preserved in that directory. It is not promoted. Keep vocabulary
+as the default mode.
+
+The freeze unit-header optimization is now promoted (11 focused tests rerun;
+38 legacy tests passed during staging). It removes repeated hashes within one
+unit-validation call while retaining conflict, drift, object and producer
+checks. These controller/test files are outside the running app's input closure.
+The staged model controls patch is rebased to preserve the same optimization.
+The staged model controller now has a shared 1,800-second phase budget rather
+than a separate full budget for each transfer. Review found that its first
+implementation could prevent cleanup after expiry; the repair has 31 staged
+and 38 legacy checks passing in `results/model-streaming-cleanup-budget-v1`.
+Independent rereview then found a payload-send boundary issue: full verification
+could exhaust a deadline before socket creation. That repair now passes all
+34 staged checks and independent review in
+`results/model-streaming-cleanup-independent-review-v2`. Exact emergency close
+authenticates only its immutable manifest and bound close payload, avoiding
+unrelated model revalidation; real send paths check deadlines after verification
+and before socket/send/receive. Its primary deadline
+must never reset or permit a new launch/promotion after expiry; bounded
+exact-title emergency cleanup, health, lock release and receipt persistence
+must still run. No staged model controller is a console-approved candidate.
 
 The source-only native client payload build completed successfully:
 `build/llm-native-client-v1/receipt.json`, with command/log evidence in

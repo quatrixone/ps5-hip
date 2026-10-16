@@ -21,6 +21,13 @@ upstream writer, then checks its tokenizer against the full model. Choose a
 fresh `LLM_VOCAB_FIXTURE_DIR`; see [the fixture contract](LLM_VOCAB_FIXTURE.md).
 This prepares the native loader test asset, not a model that can run inference.
 
+`make llm-native-app` builds the installed PPSA99014 vocabulary application,
+preparing missing client and vocabulary prerequisites from source. Use a fresh
+`LLM_NATIVE_APP_BUILD_DIR` and set `RESULTS_DIR` to the console log directory.
+The target packages and audits the native executable; it does not deploy or
+launch it. See [the application build](LLM_NATIVE_CLIENT.md#vocabulary-application-build)
+for prerequisite directory overrides and the distinction from the payload ELF.
+
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed
 PyTorch. These optional targets do not establish native inference; the default

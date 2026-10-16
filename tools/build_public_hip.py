@@ -60,7 +60,7 @@ def build_inputs():
              "tools/public_hip_weighted_qkv_console_title.cpp", "tools/public_hip_weighted_qkv_assets.py",
              "tools/audit_public_hip_weighted_qkv_native.py", "tools/audit_public_hip_rmsnorm_native.py",
              "tests/public_hip_weighted_qkv_assets_test.py", "tests/public_hip_weighted_qkv_build_test.py",
-             "tests/public_hip_weighted_qkv_native_audit_test.py", "tools/verify_weighted_qkv_readbacks.py",
+             "tests/public_hip_weighted_qkv_native_audit_test.py", "tests/public_hip_compile_inputs_test.py", "tools/verify_weighted_qkv_readbacks.py",
              "tests/weighted_qkv_readbacks_test.py", "tools/build_llm_weighted_qkv_reference.py",
              "tests/llm_weighted_qkv_reference.cpp", "tests/llm_weighted_qkv_reference_test.py",
              "tools/build_llm_weighted_rmsnorm_fixture.py", "tests/llm_weighted_rmsnorm_fixture_test.py",
@@ -192,6 +192,29 @@ def compiler_flags(source):
             "-ffunction-sections", "-fdata-sections", *["-D" + d for d in defines]]
 
 
+def compile_bound_unit(output, path, obj, flags, label):
+    """Bind the compiler's header closure before compiling, then verify it."""
+    def dependencies(depfile):
+        text = depfile.read_text().replace("\\\n", " ")
+        return {str(Path(p).resolve()) for p in shlex.split(text.split(":", 1)[1])}
+
+    before = obj.with_suffix(".headers.d")
+    actual = obj.with_suffix(".compiled.d")
+    run(output, label + "-headers", [*flags, "-c", "-M", path, "-MF", before])
+    headers = {p: sha(p) for p in dependencies(before)}
+    if str(path.resolve()) not in headers:
+        raise RuntimeError("compiler dependency inventory omits source")
+    run(output, label, [*flags, "-MD", "-MF", actual, "-c", path, "-o", obj])
+    if dependencies(actual) != set(headers):
+        raise RuntimeError("actual compiler dependencies changed")
+    if any(sha(p) != digest for p, digest in headers.items()):
+        raise RuntimeError("compiler input changed during compilation")
+    return {"source": str(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path),
+            "source_sha256": headers[str(path.resolve())],
+            "object": str(obj.relative_to(output)), "object_sha256": sha(obj),
+            "headers": headers}
+
+
 def compile_units(output, source, fixture="bootstrap"):
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
@@ -214,10 +237,11 @@ def compile_units(output, source, fixture="bootstrap"):
                   "-include", "hip/amd_detail/amd_hip_gl_interop.h"]
                  if path.stem in ("hip_api_trace", "hip_table_interface",
                                   "hip_table_interface_c") else [])
-        run(output, f"compile-{index:02d}", [*flags, *extra, "-c", path, "-o", obj])
-        return {"source": str(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path),
-                "source_sha256": sha(path), "object": str(obj.relative_to(output)),
-                "object_sha256": sha(obj)}
+        if fixture == "llm_client" and path.name == "public_hip_llm_client_console_title.cpp":
+            client = DEPS / "sources/llama-client"
+            extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
+                      client / "ggml/include", client / "ggml/src")]
+        return compile_bound_unit(output, path, obj, [*flags, *extra], f"compile-{index:02d}")
 
     # Fail quickly on the selected client before spending time on the upstream closure.
     title_index = units.index(ROOT / ("tools/public_hip_" + fixture + "_console_title.cpp"))
@@ -471,9 +495,16 @@ def link_title(output, units, fixture="bootstrap", embedded=None):
                "-o", output / "title.elf", *[output / item["object"] for item in units], *extra_objects,
                "--start-group", *[sdk / name for name in static], "--end-group",
                "--as-needed", *imports]
+    if fixture == "llm_client":
+        command += ["--wrap=ggml_backend_sched_graph_compute_async",
+                    "--undefined=__wrap_ggml_backend_sched_graph_compute_async"]
     run(output, "link", command)
     symbols = subprocess.check_output(["llvm-readelf-18", "-Ws", str(output / "title.elf")], text=True)
     required = ["hipInit", "hipGetDeviceCount", "ps5hip_clr_admit_device"]
+    if fixture == "llm_client":
+        required += ["hipMalloc", "hipFree", "hipMemcpy", "hipMemset", "hipDeviceSynchronize",
+                     "llama_model_load_from_file", "llama_tokenize",
+                     "__wrap_ggml_backend_sched_graph_compute_async"]
     if fixture in ("memory", "copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
         required += ["hipMalloc", "hipFree"]
     if fixture in ("copy", "launch", "fill", "stream", "graph_gpu", "capture_gpu", "copy_gpu"):
@@ -581,7 +612,7 @@ def validate_results_directory(results_dir):
         raise ValueError("results directory must be a bounded absolute console path")
 
 
-def package_title(output, image, libc, results_dir, code_object=None, extra_assets=None):
+def package_title(output, image, libc, results_dir, code_object=None, extra_assets=None, client_assets=None):
     title = json.loads((ROOT / "title.json").read_text())["title_id"]
     validate_results_directory(results_dir)
     stage = output / "package"
@@ -593,6 +624,12 @@ def package_title(output, image, libc, results_dir, code_object=None, extra_asse
         "sce_sys/param.json": ROOT / "assets/param.json",
         "sce_sys/icon0.png": ROOT / "assets/icon0.png",
     }
+    if client_assets is not None:
+        if (set(client_assets) != {"vocab.gguf", "client-phase.txt"} or
+                Path(client_assets["client-phase.txt"]).read_bytes() != b"vocab\n" or
+                code_object is not None or extra_assets):
+            raise ValueError("invalid vocabulary client assets")
+        sources.update({name: Path(path) for name, path in client_assets.items()})
     for name, path in (extra_assets or {}).items():
         if (not name.startswith(("rmsnorm/", "q4/", "weighted-qkv/")) or ".." in Path(name).parts or
                 "\\" in name or Path(name).is_absolute()):
@@ -708,7 +745,9 @@ def main():
             raise RuntimeError("cached weighted QKV assets differ; use a fresh output")
         units = previous["units"]
         if (len(units) != 76 or previous["title_elf_sha256"] != sha(output / "title.elf") or
-                any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
+                any(not unit.get("headers") or
+                    any(sha(p) != h for p, h in unit["headers"].items()) or
+                    sha(ROOT / unit["source"]) != unit["source_sha256"] or
                     sha(output / unit["object"]) != unit["object_sha256"] for unit in units)):
             raise RuntimeError("cached native link or its source changed; use a fresh output")
         if "package_sha256" in previous:
@@ -794,7 +833,9 @@ def main():
     if initial_inputs != build_inputs() or (embedded is not None and
             compiler_fixture_inputs(args.compiler_fixture, args.fixture) != embedded):
         raise RuntimeError("native build inputs changed before publication")
-    if any(sha(ROOT / unit["source"]) != unit["source_sha256"] or
+    if any(not unit.get("headers") or
+           any(sha(p) != h for p, h in unit["headers"].items()) or
+           sha(ROOT / unit["source"]) != unit["source_sha256"] or
            sha(output / unit["object"]) != unit["object_sha256"] for unit in units):
         raise RuntimeError("native compilation inputs or objects changed before publication")
     receipt = {"classification": "offline-public-hip-native-link", "source_commit":

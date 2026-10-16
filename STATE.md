@@ -1,6 +1,6 @@
 # Current state
 
-Updated: 2026-10-15, America/New_York. See `HANDOFF.md` for the exact
+Updated: 2026-10-16, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
 ## Current scope
@@ -16,13 +16,24 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+M0's source-only vocabulary application build and independent real candidate
+validation pass. `make llm-native-app` produced a 19,890,176-byte native package
+from 147 objects; all 197 commands, 41 focused Python tests, the 24-function
+image audit and final input checks passed. Independent review accepted all
+6,988 input identities, 2,395 artifacts and eight package assets. See
+`evidence/offline-native-llm-application.json` and `docs/LLM_NATIVE_CLIENT.md`.
+Vocabulary console controls also passed 38 legacy regression tests.
+Next freeze this committed package and validate the installed PPSA99014 title
+on idle .40. No installed application execution is claimed. Vocabulary loading
+and synthetic rejection cannot close the actual full-model/reuse gate.
+
 `make llm-native-client-link` now rebuilds the genuine loader/tokenizer payload
 from source: 71 objects, 161 factory-referenced model implementations and four
 focused checks pass. The production ELF matches the earlier prototype exactly.
 See `docs/LLM_NATIVE_CLIENT.md`. This is a payload-link prerequisite only:
 native application startup, backend routing and inference remain unqualified.
-The next step is source-only native application integration, with the bounded
-vocabulary fixture and actual-client no-fallback boundary kept distinct.
+The application package now passes offline; installed-title validation is next,
+with the bounded vocabulary fixture and actual-client boundary kept distinct.
 
 `make llm-vocab-fixture` also passes production reproduction and independent
 review: 45 exact metadata fields, zero tensors, and 32 tokenizer cases match

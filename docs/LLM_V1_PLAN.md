@@ -11,6 +11,10 @@ Deliver a standalone native PS5 example that loads the locked TinyLlama 1.1B
 Chat Q4_0 GGUF and generates tokens using ps5-hip for all model tensor computation.
 This is a useful inference release, not completion of the wider ROCm SDK.
 
+Validate the installed PPSA99014 application through its normal title lifecycle.
+Raw ELF linkage is an intermediate build check; ELF-loader diagnostics and
+deployment helpers cannot satisfy application startup or inference acceptance.
+
 The fixed initial configuration is one request, one GPU, 22 layers, hidden width
 2048, feed-forward width 5632, 32 query heads, four KV heads, head width 64,
 vocabulary 32000, and a maximum combined prompt/output context of 512 tokens.
@@ -66,7 +70,7 @@ Never remove dependency checks and substitute success stubs.
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Source-only Make CPU graph trace through 512 positions; source-only native payload link; host vocabulary fixture; storage-only HIP prototype | Reproducible native application, tensor routing and runtime qualification |
+| Client | Source-only Make CPU graph trace through 512 positions; native vocabulary application package with independent real freeze admission | Installed-title loading/tokenization, actual model routing/reuse and runtime qualification |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -75,10 +79,10 @@ are not current capability declarations. No native LLM inference is claimed.
 
 ## Next implementation checkpoints
 
-1. Finish source-only Make reproduction of the real native client and bounded
-   vocabulary fixture, then the native application package. Promote reviewed
-   prototypes without dependencies on historical build objects or local-only
-   assets. Existing offline link/package success is not PS5 startup evidence.
+1. Source-only Make reproduction of the native client, bounded vocabulary fixture
+   and native application package now passes with independent freeze admission.
+   Preserve that path without dependencies on historical build objects or
+   local-only assets. Offline package success is not PS5 startup evidence.
 2. Validate native loading, tokenization and real HIP storage on .40. Enforce
    rejection in the actual client graph execution path, including graph reuse.
    A vocabulary-only asset and a rejected synthetic ADD are useful preliminary
@@ -93,12 +97,11 @@ are not current capability declarations. No native LLM inference is claimed.
 5. Connect sampling and incremental decode, then qualify repeated requests,
    errors, source-only rebuilds and measured performance under M4/M5.
 
-The offline native application prototype is approximately 19.9 MB and exceeds
-the current 16 MiB diagnostic transfer ceiling. Review a bounded transport
-increase before deploying it; do not confuse that policy with a PS5 memory
-limit or remove real client implementations to make the package smaller.
-Prototype source/input provenance and source-only application reproduction
-remain open. Neither packaging nor tokenizer success establishes inference.
+The source-only native vocabulary package is 19,890,176 bytes. Its reviewed
+32 MiB transfer ceiling is specific to this fixture; legacy fixture limits
+remain unchanged. Source/input provenance and real freeze admission pass in
+`evidence/offline-native-llm-application.json`. Neither packaging nor tokenizer
+success establishes inference; installed-title validation remains pending.
 
 ## Required computation, in model order
 

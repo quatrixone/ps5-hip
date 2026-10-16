@@ -2,6 +2,8 @@
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+import json
 spec=importlib.util.spec_from_file_location('native_build',Path(__file__).resolve().parents[1]/'tools/build_llm_native_client.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)
 class NativeBuild(unittest.TestCase):
  def test_actual_locked_selection_has_unique_complete_source_units(self):
@@ -21,4 +23,37 @@ class NativeBuild(unittest.TestCase):
   with tempfile.TemporaryDirectory() as directory:
    client=Path(directory);(client/'src').mkdir();(client/'src/CMakeLists.txt').write_text('set(LLAMA_CORE_SOURCES ../outside.cpp)')
    with self.assertRaisesRegex(ValueError,'unexpected core'):b.selection(client)
+ def test_app_receipt_admission(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);r={'schema':1,'status':'PASS','classification':'source-only-native-client-payload-link','native_executed':False,'gpu_executed':False}
+   for key,value in [('schema',0),('status','FAIL'),('classification','prototype'),('native_executed',True),('gpu_executed',True)]:
+    (folder/'receipt.json').write_text(json.dumps({**r,key:value}))
+    with self.subTest(key=key),self.assertRaisesRegex(ValueError,'unsupported'),patch.object(b,'source') as fetch:
+     b.app_objects(folder)
+    fetch.assert_not_called()
+ def test_app_locked_revision_rejection(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);r={'schema':1,'status':'PASS','classification':'source-only-native-client-payload-link','native_executed':False,'gpu_executed':False,'client_revision':'wrong','sdk_revision':'wrong'}
+   (folder/'receipt.json').write_text(json.dumps(r))
+   with self.assertRaisesRegex(ValueError,'locked revision'),patch.object(b,'source') as fetch:b.app_objects(folder)
+   fetch.assert_not_called()
+ def test_artifact_bytes_size_inventory_and_paths(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);p=folder/'0.o';p.write_bytes(b'object');receipt=folder/'receipt.json';receipt.write_text('{}')
+   a={'0.o':{'sha256':b.sha(p),'bytes':6}};b.verify_artifacts(folder,a,receipt)
+   for broken in ({'0.o':{'sha256':'0'*64,'bytes':6}},{'0.o':{'sha256':b.sha(p),'bytes':5}},{str(p):a['0.o']},{'../0.o':a['0.o']}):
+    with self.subTest(broken=broken),self.assertRaises(ValueError):b.verify_artifacts(folder,broken,receipt)
+   (folder/'extra.o').write_bytes(b'extra')
+   with self.assertRaisesRegex(ValueError,'inventory'):b.verify_artifacts(folder,a,receipt)
+ def test_artifact_symlink_rejected(self):
+  with tempfile.TemporaryDirectory() as directory:
+   folder=Path(directory);p=folder/'target';p.write_bytes(b'x');link=folder/'0.o';link.symlink_to(p)
+   with self.assertRaisesRegex(ValueError,'unsafe'):b.verify_artifacts(folder,{'0.o':{'sha256':b.sha(p),'bytes':1}},folder/'receipt.json')
+ def test_command_success_inventory_and_arguments(self):
+  row={'label':'compile-0','argv':['compiler','-c','source','-o','0.o'],'exit_code':0};expected={'compile-0':row['argv']};artifacts={'compile-0.stdout':{},'compile-0.stderr':{}}
+  b.verify_commands([row],expected,[row],artifacts)
+  for bad in ([],[row,row],[{**row,'exit_code':1}],[{**row,'timed_out':True}],[{**row,'argv':['compiler','other']}],[{**row,'label':'other'}]):
+   with self.subTest(bad=bad),self.assertRaises(ValueError):b.verify_commands(bad,expected,bad,artifacts)
+  with self.assertRaisesRegex(ValueError,'record'):b.verify_commands([row],expected,[],artifacts)
+  with self.assertRaisesRegex(ValueError,'output'):b.verify_commands([row],expected,[row],{})
 if __name__=='__main__':unittest.main()

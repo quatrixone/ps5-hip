@@ -1,6 +1,6 @@
 # Native HIP and ROCm capabilities on PlayStation 5
 
-Updated: 2026-10-15, America/New_York.
+Updated: 2026-10-16, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
@@ -15,6 +15,8 @@ Q/K/V, with all raw buffers and clean lifecycle. Finish M0's native application
 boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-15 | M0 prerequisites | offline | pass: source-only native payload link (71 objects, four checks) and vocabulary fixture (45 metadata fields, 32 tokenizer cases, six checks); independent reviews | evidence/offline-native-llm-client-link.json, evidence/offline-llm-vocab-fixture.json | next: native app and actual-client rejection; no native execution claimed
+
+- 2026-10-16 | M0 application prerequisite | offline | pass: source-only installed-app package, 147 objects, 197 commands, 41 tests, 24-function image audit and independent real freeze admission | evidence/offline-native-llm-application.json | next: installed vocabulary title on .40, then actual-model rejection/reuse; no native execution claimed
 
 - 2026-10-15 | M1 | 101744f | .40 | pass: 2048 weighted values, 2304 Q8 bytes, 2560 QKV values, 30 buffers and clean lifecycle | evidence/console40-public-weighted-qkv-success.json | next: M0 client, M2 layer
 
