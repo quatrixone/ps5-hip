@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import qualify_public_hip_rmsnorm as q
@@ -40,6 +41,18 @@ class Receipts(unittest.TestCase):
         (self.base/'receipt.json').write_text(json.dumps(j));return q.base_inputs(self.base)
     def test_complete(self):
         self.assertTrue(self.fixture_check(self.fixture));self.assertTrue(self.base_check(self.report))
+    def test_weighted_qualification_is_explicit_and_strict(self):
+        report={'classification':'source-only-selected-upstream-weighted-rmsnorm-fixture'}
+        (self.folder/'receipt.json').write_text(json.dumps(report))
+        with patch.dict(sys.modules,{'build_llm_weighted_rmsnorm_fixture':SimpleNamespace(fixture_inputs=lambda p:{'weighted':'digest'})}):
+            self.assertEqual(q.qualification_fixture_inputs(self.folder),({'weighted':'digest'},True))
+        with self.assertRaises(ValueError):q.fixture_inputs(self.folder)
+        def reject(folder):raise ValueError('weighted identity rejected')
+        with patch.dict(sys.modules,{'build_llm_weighted_rmsnorm_fixture':SimpleNamespace(fixture_inputs=reject)}):
+            with self.assertRaisesRegex(ValueError,'weighted identity rejected'):q.qualification_fixture_inputs(self.folder)
+    def test_original_qualification_stays_unweighted(self):
+        expected=self.fixture_check(self.fixture)
+        self.assertEqual(q.qualification_fixture_inputs(self.folder),(expected,False))
     def test_empty_groups(self):
         for check,report,groups in ((self.fixture_check,self.fixture,('inputs','tools','artifacts')),(self.base_check,self.report,('inputs','prepared_sources','included_files','toolchain'))):
             for group in groups:

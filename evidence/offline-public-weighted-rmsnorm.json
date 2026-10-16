@@ -1,0 +1,56 @@
+{
+  "classification": "offline-source-built-weighted-rmsnorm-public-hip",
+  "status": "PASS",
+  "gpu_executed": false,
+  "numerical_executed": false,
+  "evidence": {
+    "base": {
+      "path": "results/source-public-weighted-rmsnorm-v3/receipt.json",
+      "sha256": "69a4024836a04ff60bb63debda5f119c12362e594a9368af16a6aaf195bf6d55"
+    },
+    "fixture": {
+      "path": "results/llm-weighted-rmsnorm-fixture-v2/receipt.json",
+      "sha256": "9521dd85688f7c8e0554e28d15f4a3189983af94cec832d3bfc844d5d0373948"
+    },
+    "weighted": {
+      "path": "results/public-weighted-rmsnorm-model-v1/receipt.json",
+      "sha256": "0c2bd7415a5c7bfdffebc65ebcb0dd0343851f08e747dfd8bfc496d397b652a6"
+    },
+    "original_regression": {
+      "path": "results/public-original-rmsnorm-regression-v1/receipt.json",
+      "sha256": "70d3e0c2dc6fe351a0d87f02689f212b27c43bdb5661e166ce2889a56f4391a9"
+    },
+    "fixture_review": {
+      "path": "results/weighted-rmsnorm-fixture-review-v1/review.json",
+      "sha256": "2a869ecb96eb3ce0199ae7596d88ed68030588d72cfb112918b85b1339723298"
+    },
+    "pointer_review": {
+      "path": "results/public-pointer-preflight-independent-review-v1/review.json",
+      "sha256": "d56d16044346e27bae0a4c95dcfbaa1c3e293b0b57bfde19f8f9b9c4f3e3f619"
+    },
+    "base_review": {
+      "path": "results/weighted-public-base-review-v1/review.json",
+      "sha256": "7c687ead0328d482ac97862e75ca2e6d6c5ecd1e7d8f35ee56a230c138de3851"
+    },
+    "outcome_review": {
+      "path": "results/weighted-rmsnorm-public-outcome-review-v1/review.json",
+      "sha256": "8e16fffef0abfc1de65e1de6159dae0bbfb24649f1bc99e6846b77e71b4c81ee"
+    }
+  },
+  "total_compilations": 88,
+  "sanitizer": "ASan/UBSan",
+  "module_sha256": "8dc54f13100af14147eeae1f472f3a6790bd41adaf1add8978f300859db89c97",
+  "checks": [
+    "Authenticated source-only unchanged weighted RMSNorm fixture and exact 488-byte ABI",
+    "Weighted and original public HIP models pass eager/deferred and reject intentional packet mismatch",
+    "Unknown, one-past and freed nonnull buffer pointers rejected before enqueue",
+    "Stalled first dispatch does not block second asynchronous enqueue; old gated implementation fails negative control",
+    "Full base reviewed: 266 command records, 19 expected failure controls, all 88 compilation indices"
+  ],
+  "limits": [
+    "Host modeled transport, no weighted GPU execution or numerical qualification",
+    "Pointer admission is point-in-time membership, not concurrent-free retention or algorithm-specific extent validation",
+    "General asynchronous command-error propagation remains open",
+    "Full Q/K/V, transformer layer, model residency and inference remain unqualified"
+  ]
+}

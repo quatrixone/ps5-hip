@@ -68,6 +68,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 prerequisite | offline | exact weighted RMSNorm descriptor, packet/owned preparation and original reduction tests pass | evidence/offline-weighted-rmsnorm-core.json | next: source fixture/CLR/numerics
 
+- 2026-10-15 | V1.2/V1.3 prerequisite | offline | source-built weighted norm, 88-compilation public HIP sanitizer suite, nonblocking pointer admission and original/weighted packet models pass | evidence/offline-public-weighted-rmsnorm.json | next: weighted/shared-Q8/full-QKV native numerical gate
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate

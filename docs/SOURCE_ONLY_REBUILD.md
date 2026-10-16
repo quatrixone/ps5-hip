@@ -17,6 +17,16 @@ with a fresh `LLM_RMSNORM_FIXTURE_DIR`. This builds authenticated upstream devic
 libraries and the real operator from source; see the same inference profile for
 requirements and limits. It is a compiler fixture, not a runnable LLM client.
 
+For selected learned-weight RMSNorm, run `make llm-weighted-rmsnorm-fixture`
+with fresh `LLM_RMSNORM_FIXTURE_DIR` and `LLM_WEIGHTED_RMSNORM_FIXTURE_DIR`.
+It selects the unchanged weighted kernel and its helpers from source, validates
+all 40 metadata arguments and the measured resource descriptor, and retains the
+compiler/tool/input identities. No historical probe files are required.
+`make public-hip-weighted-rmsnorm-host-test` also builds the genuine public HIP
+host suite and checks eager/deferred launches with a live weight buffer.
+These are compiler and host-packet checks; weighted GPU arithmetic and the
+normalization-to-Q/K/V chain require separate numerical validation.
+
 For selected upstream Q8_1 activation preparation and nonfused Q4_0
 matrix/vector multiplication, use fresh output directories:
 

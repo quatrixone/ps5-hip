@@ -1,0 +1,41 @@
+{
+  "classification": "offline-llm-v1-memory-inventory",
+  "gpu_memory_measured": false,
+  "inventory_sha256": "294c78f6f85b5b59d8de50192fae456b23cb70b94ef8af5dfe8ef4ae181bbc8e",
+  "inventory_path": "results/llm-v1-memory-inventory-v1/review.json",
+  "model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "tensor_count": 201,
+  "tensor_payload_bytes": 619094016,
+  "largest_tensor_bytes": 36864000,
+  "kv_f16_context512_bytes": 11534336,
+  "persistent_payload_plus_kv_bytes": 630628352,
+  "allocation_limit_bytes": 67108864,
+  "runtime_cap_source_sha256": "e3c05f4061b8d693b17a5bd9ba03ce3004851c7432c46f04ab88a3cab34dc3a4",
+  "all_weights_example_chunks_bytes": [
+    36872192,
+    66969600,
+    62562304,
+    61382656,
+    62562304,
+    61382656,
+    62562304,
+    61382656,
+    62562304,
+    61382656,
+    19472384
+  ],
+  "upstream_sources": {
+    ".deps/sources/llama-client/ggml/src/ggml-backend.cpp": "43dea13b13c2a15afd83f53515f3488c17072fc107a6ba4a5e0370f90b4fe7ff",
+    ".deps/sources/llama-client/ggml/src/ggml-alloc.c": "9664bda3e9c4223f5c94ebfeb3c0381f0065a5091ddae707c09a800f7e419a39",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/ggml-cuda.cu": "572e5facba2c6b2ce2f7c6a4c43566d5a719d6e984f7265f1895410cc82d31ec",
+    ".deps/sources/llama-client/ggml/src/ggml-cuda/common.cuh": "01ec28a5866346886a5ddd74efc1703b86cacdc31990522733d79ea035ace86b",
+    ".deps/sources/llama-client/src/llama-model.cpp": "a83d3367793f0aa40a869e0ea067a365a6a6bf4b90ea59460ff827efa1dcdd9a",
+    ".deps/sources/llama-client/src/llama-kv-cache.cpp": "d0739eaf00d8457f4109a616e0beb1cf07ea074c9b460d92a7b6d48c4519d294"
+  },
+  "decision": "Expose the measured backend allocation cap to existing upstream tensor-boundary chunking; validate actual cumulative GPU residency, graph workspace and cleanup before claiming model fit.",
+  "limits": [
+    "Example chunks follow GGUF order, not a predicted client allocation trace.",
+    "CPU compute workspace84.5156MiB is not a HIP workspace measurement.",
+    "No native total-memory or model-fit proof."
+  ]
+}

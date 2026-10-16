@@ -355,7 +355,24 @@ public:
     }
     bool validateKernel(const amd::Kernel& k,const amd::device::VirtualDevice* v,bool cooperative)override{
         const auto* selected=dynamic_cast<const Kernel*>(k.getDeviceKernel(*this));
-        return !state_->observed.terminal&&v&&&v->device()==this&&!cooperative&&selected&&k.parameters().check();
+        if(state_->observed.terminal||(v&&&v->device()!=this)||cooperative||!selected||!k.parameters().check())return false;
+        // The single PS5 device registers only its allocations in MemObjMap. Its lookup
+        // lock is independent of the native gate, which can be held by an in-flight GPU.
+        const auto& signature=selected->signature();
+        const auto* values=reinterpret_cast<const uint8_t*>(k.parameters().values());
+        if(!values||signature.numParameters()!=selected->native.arguments.size())return false;
+        for(size_t i=0;i<selected->native.arguments.size();++i){
+            const auto& a=selected->native.arguments[i];const auto& d=signature.at(i);
+            if(d.offset_!=a.offset||d.size_!=a.size||d.offset_>signature.paramsSize()||d.size_>signature.paramsSize()-d.offset_)return false;
+            if(a.kind=="global_buffer"){
+                if(d.type_!=T_POINTER||d.size_!=sizeof(void*))return false;
+                const void* pointer=nullptr;std::memcpy(&pointer,values+d.offset_,sizeof(pointer));
+                // Membership only: never dereference the unretained lookup result.
+                // Capture retains storage later; callers must not concurrently free it.
+                if(pointer&&!amd::MemObjMap::FindMemObj(pointer))return false;
+            }
+        }
+        return true;
     }
 #include "ps5-device-unsupported.inc"
 };

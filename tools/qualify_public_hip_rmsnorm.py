@@ -85,6 +85,14 @@ def fixture_inputs(folder):
     if not j.get('commands') or any(c.get('exit_code')!=0 for c in j['commands']): raise ValueError('fixture commands incomplete')
     return inputs
 
+def qualification_fixture_inputs(folder):
+    report=json.loads((Path(folder)/'receipt.json').read_text())
+    if report.get('classification')=='source-only-selected-upstream-weighted-rmsnorm-fixture':
+        from build_llm_weighted_rmsnorm_fixture import fixture_inputs as weighted_inputs
+        return weighted_inputs(folder), True
+    return fixture_inputs(folder), False
+
+
 def base_inputs(base):
     base=Path(base).resolve();p=base/'receipt.json';j=json.loads(p.read_text())
     if j.get('classification')!='source-only-genuine-public-hip-model' or j.get('gpu_executed') is not False or j.get('native_executed') is not False: raise ValueError('unexpected base qualification')
@@ -99,10 +107,10 @@ def base_inputs(base):
 
 def qualify(base, fixture, output):
     base, fixture, output = (Path(p).resolve() for p in (base,fixture,output))
-    norm = fixture/'norm.hsaco'
     if not output.is_relative_to(ROOT/'results'):
         raise ValueError('output must be under results/')
-    inputs = fixture_inputs(fixture)
+    inputs, weighted = qualification_fixture_inputs(fixture)
+    norm = fixture/('weighted.hsaco' if weighted else 'norm.hsaco')
     original_fixture=dict(inputs)
     original_base=base_inputs(base)
     for name,digest in original_base.items():
@@ -182,27 +190,28 @@ def qualify(base, fixture, output):
     binary = output/'model';argv[argv.index('-o')+1] = str(binary)
     run('model-link', argv)
     inputs[str(binary)]=sha(binary)
-    expected = ['PUBLIC_RMSNORM_PASS rows=1,2,17 arguments=26 kernargs=488 dynamic_lds=128 packed_nulls=2 caller_mutation=true unsupported_absent=true modules_rejected=true numerical_execution=false gpu_execution=false',
+    expected = [f'PUBLIC_RMSNORM_PASS rows=1,2,17 arguments=26 kernargs=488 dynamic_lds=128 packed_nulls={1 if weighted else 2} caller_mutation=true unsupported_absent=true modules_rejected=true numerical_execution=false gpu_execution=false',
                 'PUBLIC_RMSNORM_FINAL ownership=clean gpu_execution=false']
+    extra=['--weighted'] if weighted else []
     for eager in (False, True):
         label = 'eager' if eager else 'deferred'
         case = output/label;case.mkdir()
-        text = run(label, [binary,norm,'normal',case], eager=eager)
+        text = run(label, [binary,norm,'normal',case]+extra, eager=eager)
         if text.splitlines() != expected:
             raise RuntimeError('RMSNorm packet/teardown transcript differs')
     case = output/'mismatch';case.mkdir()
-    run('mismatch',[binary,norm,'mismatch',case],negative=True)
-    if fixture_inputs(fixture)!=original_fixture or base_inputs(base)!=original_base:
+    run('mismatch',[binary,norm,'mismatch',case]+extra,negative=True)
+    if qualification_fixture_inputs(fixture)!=(original_fixture,weighted) or base_inputs(base)!=original_base:
         raise RuntimeError('fixture/base identities changed during qualification')
     for name,digest in inputs.items():
         if sha(name) != digest:
             raise RuntimeError('input changed during qualification: '+name)
-    result = dict(classification='public-clr-rmsnorm-packet-host-model', inputs=inputs,
+    result = dict(classification='public-clr-rmsnorm-packet-host-model', weighted=weighted, inputs=inputs,
                   artifacts={str(p.relative_to(output)):sha(p) for p in output.rglob('*') if p.is_file()},
                   runtime_executed=True, native_executed=False, gpu_executed=False, numerical_executed=False,
                   cases=['unchanged-dynamic-module','26-arguments-488-kernargs','rows-1-2-17','1024-threads-128-dynamic-LDS',
-                         'optional-null-pointers','caller-mutation-after-enqueue','supported-function-attributes',
-                         'unsupported-sibling-lookup-repeated','absent-handle-attribute-rejected',
+                         'live-weight-and-null-add' if weighted else 'optional-null-pointers','caller-mutation-after-enqueue','supported-function-attributes',
+                         'missing-name-lookup-repeated' if weighted else 'unsupported-sibling-lookup-repeated','absent-handle-attribute-rejected',
                          'all-unsupported-and-malformed-modules-rejected','deferred-and-eager','packet-mismatch-rejected'],
                   mutations={'all-unsupported.hsaco':'Set bit20 in every kernel descriptor rsrc1; structurally reinspected before public load.',
                              'malformed.hsaco':'XOR bit0 of ELF magic byte0; all other bytes unchanged.'},

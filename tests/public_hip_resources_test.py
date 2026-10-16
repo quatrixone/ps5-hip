@@ -97,4 +97,80 @@ int main(){
             subprocess.run([str(binary)],check=True,capture_output=True)
 
 
+    def test_actual_adapter_pointer_preflight_and_error_publication(self):
+        source=(resources.ROOT/'ports/clr/ps5-device.cpp').read_text()
+        start=source.index('    bool validateKernel(')
+        method=source[start:source.index('#include "ps5-device-unsupported.inc"',start)]
+        diff=(resources.ROOT/'ports/clr/ps5-public-resources.patch').read_text()
+        after='\n'.join(line[1:] for line in diff.splitlines()
+                        if line.startswith(('+',' ')) and not line.startswith('+++'))
+        start=after.index('  // Reject non-owned pointers synchronously')
+        hook=after[start:after.index('#endif',start)]
+        self.assertIn('#if defined(WITH_PS5_DEVICE)\n'+hook,after)
+        program=r"""
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
+#include <vector>
+#include <string>
+constexpr int T_POINTER=1, hipErrorInvalidValue=1;
+struct ObjectError:std::runtime_error{using std::runtime_error::runtime_error;};
+struct Desc{size_t offset_,size_;int type_;};
+struct Arg{size_t offset,size;std::string kind;};
+struct Signature{std::vector<Desc> args{{0,8,T_POINTER}};size_t bytes=8;
+ size_t numParameters()const{return args.size();}size_t paramsSize()const{return bytes;}
+ const Desc& at(size_t i)const{return args.at(i);}};
+struct DeviceKernel{virtual ~DeviceKernel()=default;};
+struct Kernel:DeviceKernel{struct{std::vector<Arg> arguments{{0,8,"global_buffer"}};}native;
+ Signature sig;const Signature& signature()const{return sig;}};
+namespace amd{
+struct MemObjMap{static inline bool live=true;static inline int checks=0;static void* FindMemObj(const void* p){++checks;auto v=reinterpret_cast<uintptr_t>(p);return live&&v>=0x10000&&v<0x10020?reinterpret_cast<void*>(1):nullptr;}};
+namespace device{struct VirtualDevice{const void* owner;const int& device()const{return *static_cast<const int*>(owner);}};}
+struct Params{alignas(8) uint8_t bytes[8]{};bool okay=true;bool check()const{return okay;}const void* values()const{return bytes;}};
+struct Kernel{::Kernel selected;Params params;bool present=true;
+ const DeviceKernel* getDeviceKernel(const auto&)const{return present?&selected:nullptr;}
+ const Params& parameters()const{return params;}};
+struct NDRangeKernelCommand{enum{CooperativeGroups=1};};
+}
+struct State{struct{bool terminal=false;}observed;bool locked=false;int operations=0;
+ struct Data{State* state;uintptr_t base=0x10000;size_t size=32;bool live=true;int checks=0;
+  int resolve(const void* p,size_t n){assert(state->locked&&n==1);++checks;auto v=reinterpret_cast<uintptr_t>(p);
+   if(!live||v<base||v-base>=size)throw ObjectError("not owned");return 1;}}data{this};
+ template<class F>int operation(F f){++operations;locked=true;try{f();locked=false;return 0;}catch(...){locked=false;return -1;}}};
+struct Base{virtual bool validateKernel(const amd::Kernel&,const amd::device::VirtualDevice*,bool)=0;};
+struct Device:Base{State* state_;
+"""+method+r"""
+};
+struct HipDevice{Device* d;std::vector<Device*> devices(){return {d};}};
+int preflight(Device& dev,amd::Kernel* kernel){
+ HipDevice hd{&dev};HipDevice* g_devices[]={&hd};int deviceId=0;uint32_t params=0;
+"""+hook+r"""
+ return 0;
+}
+int main(){State state;state.locked=true;Device d;d.state_=&state;amd::Kernel k;
+ auto pointer=[&](uintptr_t v){std::memcpy(k.params.bytes,&v,8);};
+ for(uintptr_t v:{uintptr_t(0),uintptr_t(0x10000),uintptr_t(0x10001),uintptr_t(0x1001f)}){pointer(v);assert(!preflight(d,&k));}
+ for(uintptr_t v:{uintptr_t(1),uintptr_t(0xffff),uintptr_t(0x10020),uintptr_t(0x20000)}){pointer(v);assert(preflight(d,&k)==hipErrorInvalidValue);assert(!state.observed.terminal&&state.locked&&state.operations==0);}
+ pointer(0x10000);amd::MemObjMap::live=false;assert(preflight(d,&k)==hipErrorInvalidValue);amd::MemObjMap::live=true;assert(!preflight(d,&k));
+ int checks=amd::MemObjMap::checks;k.selected.sig.bytes=7;assert(preflight(d,&k)==hipErrorInvalidValue);assert(amd::MemObjMap::checks==checks);k.selected.sig.bytes=8;
+ k.selected.sig.args[0].offset_=1;assert(preflight(d,&k)==hipErrorInvalidValue);k.selected.sig.args[0].offset_=0;
+ k.selected.sig.args[0].type_=0;assert(preflight(d,&k)==hipErrorInvalidValue);k.selected.sig.args[0].type_=T_POINTER;
+ k.params.okay=false;assert(preflight(d,&k)==hipErrorInvalidValue);k.params.okay=true;
+ k.present=false;assert(preflight(d,&k)==hipErrorInvalidValue);k.present=true;
+ assert(!d.validateKernel(k,nullptr,true));state.observed.terminal=true;assert(!d.validateKernel(k,nullptr,false));state.observed.terminal=false;
+ amd::device::VirtualDevice wrong{&state};assert(!d.validateKernel(k,&wrong,false));
+ amd::device::VirtualDevice same{&d};assert(d.validateKernel(k,&same,false));
+ assert(!preflight(d,&k));assert(state.operations==0&&state.locked);
+}
+"""
+        # VirtualDevice::device is only used for identity; match its address type to Device.
+        program=program.replace('namespace amd{','struct Device;\nnamespace amd{',1).replace('const int& device()const{return *static_cast<const int*>(owner);}','const Device& device()const{return *static_cast<const Device*>(owner);}')
+        with tempfile.TemporaryDirectory() as directory:
+            cpp=Path(directory)/'pointer.cpp';binary=Path(directory)/'pointer';cpp.write_text(program)
+            compiler=shutil.which('clang++-18') or shutil.which('c++')
+            subprocess.run([compiler,'-std=c++20','-Wall','-Wextra','-Werror',str(cpp),'-o',str(binary)],check=True,capture_output=True)
+            subprocess.run([str(binary)],check=True,capture_output=True)
+
+
 if __name__=='__main__':unittest.main()

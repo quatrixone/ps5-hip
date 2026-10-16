@@ -23,20 +23,25 @@ batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
-## Weighted RMSNorm core admission qualified offline
+## Weighted RMSNorm source and public HIP qualification passed offline
 
-The parser and packet encoder admit the measured weighted RMSNorm descriptor
-`0x60af0184` with its 488-byte/1024-thread contract, preserving the original
-reduction envelope. Five sanitizer tests pass, including the original reduction
-canary, 1,007 unsupported register combinations and weight-buffer retention
-through prepared-launch lifetime. Independent review and 15 Q4 regressions also
-pass, including the original and halfword packet/ownership paths. See
-`evidence/offline-weighted-rmsnorm-core.json`.
+The supported Make targets now build the selected weighted RMSNorm module from
+unchanged upstream source. Its complete ABI, compiler inputs and generated ISA
+are authenticated. The fresh 88-compilation sanitizer qualification and both
+weighted/original public HIP packet models pass in eager and deferred modes,
+including intentional packet mismatch rejection. See
+`evidence/offline-public-weighted-rmsnorm.json`.
 
-Next integrate authenticated source-only weighted fixture generation and public
-CLR qualification, then reference-checked weighted RMSNorm -> shared Q8 -> full
-Q/K/V. The ignored probe is `results/weighted-rmsnorm-probe-v1`; it is not yet a
-supported Make-built fixture. No weighted GPU result is claimed.
+Invalid nonnull kernel buffer pointers now reject before enqueue through the
+shared public launch validator. A stalled-first-dispatch regression proves this
+check does not block a second asynchronous enqueue. This is point-in-time pointer
+admission, not concurrent-free protection or general asynchronous error reporting;
+the latter remains open.
+
+Next qualify weighted RMSNorm -> shared Q8 -> full Q/K/V numerically on .40.
+The CPU reference producer has passed independent review locally; its native
+harness and build integration are still in progress. No weighted GPU result,
+complete transformer layer or full-model inference is claimed.
 
 ## Halfword Q4 diagnostic passed on .40
 

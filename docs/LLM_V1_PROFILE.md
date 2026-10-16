@@ -151,10 +151,16 @@ CPU token/logit fixtures are now frozen as described above. Next measure native
 client allocations and operator results; file size alone still does not
 establish native memory fit or native model correctness.
 
-The current public adapter caps individual allocations at 64 MiB. Dense
-embeddings exceed that; quantizing may reduce individual tensors, but packed
-model buffers can still exceed the cap. Do not infer a required single buffer
-size from total weight bytes or simply raise an advertised capability.
+The current public adapter caps individual allocations at 64 MiB. In the locked
+Q4_0 model, all 201 tensors fit individually: the largest is 35.15625 MiB.
+Weights total 590.4140625 MiB and F16 KV at context512 adds 11 MiB. Upstream HIP
+currently advertises no backend-buffer maximum and groups weights into buffers
+larger than the cap. Its existing allocator can split at tensor boundaries when
+the backend exposes a maximum; use that path before raising runtime limits.
+An offline GGUF-order simulation fits all weights into eleven bounded buffers,
+but actual client ordering, cumulative residency and HIP workspace still need
+validation. The observed 84.5156 MiB CPU workspace is not a GPU measurement.
+See `../evidence/offline-llm-v1-memory-inventory.json`; no native model-fit claim.
 
 ## Source-inspected client blockers
 

@@ -35,7 +35,7 @@ def main():
                           'version': subprocess.check_output([path, '--version'], text=True)}
     inputs = build_inputs()
     for name in ('tools/qualify_public_hip_source.py', 'tests/hip_admission_model.cpp',
-                 'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp',
+                 'tests/clr_adapter_model.cpp', 'tests/public_hip_launch_model.cpp', 'tests/public_hip_pointer_preflight_model.cpp',
                  'tests/public_hip_stream_model.cpp', 'tests/public_hip_stream_gpu_model.cpp', 'tests/public_hip_fill_model.cpp',
                  'tests/public_hip_retirement_model.cpp', 'tests/public_hip_rect_copy_model.cpp',
                  'tests/public_hip_allocation_lifetime_model.cpp', 'tests/public_hip_command_stats_model.cpp',
@@ -156,6 +156,23 @@ def main():
     launch_code_hash = sha(launch_code)
     env = dict(os.environ, ASAN_OPTIONS='protect_shadow_gap=0:halt_on_error=1:detect_leaks=1',
                UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1', HIP_USE_RUNTIME_UNBUNDLER='0')
+    pointer_source = ROOT / 'tests/public_hip_pointer_preflight_model.cpp'
+    source_hashes[str(pointer_source.relative_to(ROOT))] = sha(pointer_source)
+    pointer_object = compile_one((len(units) + 16, pointer_source))
+    pointer_objects = [pointer_object if unit.name == 'hip_admission_model.cpp' else obj
+                       for unit, obj in zip(units, objects)]
+    run('pointer-preflight-link', [toolchain['clang++-18']['path'], *flags,
+        '-fuse-ld=' + toolchain['ld.lld-18']['path'], '-Wl,--gc-sections', '-Wl,-z,defs',
+        '-Wl,--wrap=pthread_create', '-Wl,--wrap=pthread_join', *pointer_objects,
+        '-o', output / 'pointer-preflight-model'])
+    for eager in (False, True):
+        pointer_env = dict(env, HIP_ENABLE_DEFERRED_LOADING='0' if eager else '1')
+        result = run('pointer-preflight-' + ('eager' if eager else 'deferred'),
+                     [output / 'pointer-preflight-model', launch_code], pointer_env)
+        if result.splitlines() != [
+            'PUBLIC_POINTER_PASS unknown_onepast_freed_rejected=true null_interior_graph=true stalled_second_enqueue=true gpu_execution=false',
+            'PUBLIC_POINTER_FINAL ownership=clean gpu_execution=false']:
+            raise RuntimeError('public pointer admission/nonblocking contract differs')
     result = run('launch-normal', [output / 'launch-model', launch_code, 'normal'], env)
     if result.splitlines() != [
         'PUBLIC_NULL_LAUNCH_PASS packed_null=true count=0 user_allocations=0 retained=0 gpu_execution=false',
@@ -516,7 +533,9 @@ def main():
                                 'async-d2d-event-ordered', 'async-d2d-bypass-stale-data',
                                 'default-blocking', 'default-nonblocking',
                                 'default-reverse-blocking', 'default-reverse-nonblocking'],
-               'total_compilations': len(units) + 16,
+               'total_compilations': len(units) + 17,
+               'pointer_preflight_model_sha256': sha(output / 'pointer-preflight-model'),
+               'pointer_preflight_cases': ['unknown-onepast-freed-rejected-before-enqueue', 'null-interior-graph-setters', 'stalled-first-dispatch-second-enqueue', 'eager-deferred', 'clean-teardown'],
                'command_stats_model_sha256': sha(output / 'command-stats-model'),
                'command_stats_cases': ['both-base-constructors', 'both-derived-constructor-failures',
                                        'retained-reference', 'retained-zero-reference',

@@ -34,7 +34,21 @@
    // Make sure the launch params are not larger than if specified launch_bounds
    // If it exceeds, then return a failure
    if (blockDimX * blockDimY * blockDimZ >
-@@ -482,7 +496,7 @@
+@@ -317,6 +331,13 @@
+                                desc.type_ == T_POINTER /*svmBound*/);
+     }
+   }
++#if defined(WITH_PS5_DEVICE)
++  // Reject non-owned pointers synchronously, including graph create/update validation.
++  if (!g_devices[deviceId]->devices()[0]->validateKernel(
++          *kernel, nullptr, params & amd::NDRangeKernelCommand::CooperativeGroups)) {
++    return hipErrorInvalidValue;
++  }
++#endif
+   return hipSuccess;
+ }
+ 
+@@ -482,7 +503,7 @@
                                      hipStream_t hStream, void** kernelParams, void** extra,
                                      hipEvent_t startEvent, hipEvent_t stopEvent, uint32_t flags) {
  #if defined(WITH_PS5_DEVICE)
@@ -43,7 +57,7 @@
  #endif
  
    HIP_INIT_API(hipExtModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
-@@ -514,7 +528,7 @@
+@@ -514,7 +535,7 @@
                                      size_t sharedMemBytes, hipStream_t hStream, void** kernelParams,
                                      void** extra, hipEvent_t startEvent, hipEvent_t stopEvent) {
  #if defined(WITH_PS5_DEVICE)
@@ -52,7 +66,7 @@
  #endif
  
    HIP_INIT_API(hipHccModuleLaunchKernel, f, globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ,
-@@ -705,7 +719,7 @@
+@@ -705,7 +726,7 @@
                                               void** args, size_t sharedMemBytes,
                                               hipStream_t stream) {
  #if defined(WITH_PS5_DEVICE)
@@ -61,7 +75,7 @@
  #endif
  
  #if defined(WITH_PS5_DEVICE)
-@@ -736,7 +750,7 @@
+@@ -736,7 +757,7 @@
                                           void** args, size_t sharedMemBytes, hipStream_t stream,
                                           hipEvent_t startEvent, hipEvent_t stopEvent, int flags) {
  #if defined(WITH_PS5_DEVICE)
