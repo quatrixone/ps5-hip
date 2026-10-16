@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-import unittest,tempfile,json,threading
+import unittest,tempfile,json,threading,subprocess
 from pathlib import Path
 from unittest.mock import patch
 import source_console as c
@@ -14,6 +14,45 @@ class Worker:
 class Sock:
  def close(self):pass
 class Tests(unittest.TestCase):
+ def test_memory_snapshots_preserve_measurements(self):
+  raw=EXPECTED.replace(b'largest_free_bytes=10737418240',b'largest_free_bytes=0',1)
+  memory=check_model_log(raw)['memory']
+  self.assertEqual([m['phase'] for m in memory],['before_load','after_load','after_context','after_cleanup'])
+  self.assertEqual(memory[0]['largest_free_bytes'],0)
+  self.assertIsNone(memory[0]['total_free_bytes'])
+  for old,new in [(b'largest_free_bytes=10737418240',b'largest_free_bytes=12884901889'),(b'pool_bytes=12884901888',b'pool_bytes=0'),(b'pool_bytes=12884901888',b'pool_bytes=9223372036854775808'),(b'pool_bytes=12884901888',b'pool_bytes=12884901889'),(b'total_free_bytes=unknown',b'total_free_bytes=10737418240'),(b'alignment=16384',b'alignment=65536'),(b'phase=before_load',b'phase=after_load')]:
+   with self.assertRaises(ValueError):check_model_log(EXPECTED.replace(old,new,1))
+  line=next(line for line in EXPECTED.splitlines(keepends=True) if line.startswith(b'M0_APP MEMORY'))
+  for raw in (EXPECTED.replace(line,b''),EXPECTED.replace(line,line+line),EXPECTED.replace(line,b'')+line):
+   with self.assertRaises(ValueError):check_model_log(raw)
+ def test_native_memory_snapshot_checks_kernel_results(self):
+  source=(Path(__file__).resolve().parents[1]/'tools/public_hip_llm_client_console_title.cpp').read_text()
+  function=source[source.index('__attribute__((noinline)) static void model_memory_snapshot'):source.index('static bool configured_model_phase')]
+  harness='''#include <cstdio>
+#include <cstdint>
+#include <cstddef>
+#include <cstring>
+#include <cassert>
+int64_t pool=12884901888LL,start=0;size_t largest=10737418240ULL;int rc=0;
+int64_t sceKernelGetDirectMemorySize(){return pool;}
+int sceKernelAvailableDirectMemorySize(int64_t lo,int64_t hi,size_t align,int64_t* out,size_t* bytes){assert(lo==0&&hi==pool&&align==16384);*out=start;*bytes=largest;return rc;}
+[[noreturn]] void ps5hip_clr_gpu_fail(const char* reason){assert(!std::strcmp(reason,"memory-query"));throw 1;}
+'''+function+'''
+int main(){
+ model_memory_snapshot("before_load");
+ largest=0;model_memory_snapshot("after_cleanup");
+ for(int i=0;i<6;++i){pool=12884901888LL;start=0;largest=1;rc=0;
+  if(i==0)pool=0;if(i==1)pool=-1;if(i==2)rc=-1;if(i==3)start=-1;if(i==4)start=pool+1;if(i==5){start=pool;largest=1;}
+  bool failed=false;try{model_memory_snapshot("before_load");}catch(int){failed=true;}assert(failed);
+ }
+}
+'''
+  with tempfile.TemporaryDirectory() as t:
+   p=Path(t);(p/'test.cpp').write_text(harness)
+   subprocess.run(['c++','-std=c++17',str(p/'test.cpp'),'-o',str(p/'test')],check=True,capture_output=True)
+   result=subprocess.run([str(p/'test')],check=True,capture_output=True,text=True)
+   self.assertIn('pool_bytes=12884901888 largest_free_bytes=10737418240 total_free_bytes=unknown',result.stdout)
+   self.assertEqual(result.stdout.count('MEMORY_QUERY_FAILED'),6)
  def test_host_storage_requires_balanced_owned_memory(self):
   raw=EXPECTED.replace(b'HOST_STORAGE allocations=1 releases=1',b'HOST_STORAGE allocations=7 releases=7').replace(b'peak_requested_bytes=619094016',b'peak_requested_bytes=700000000')
   self.assertEqual(check_model_log(raw)['host_storage']['allocations'],7)

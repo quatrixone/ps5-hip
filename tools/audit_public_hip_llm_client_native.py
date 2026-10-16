@@ -171,6 +171,8 @@ def audit(raw,converted,extracted,phase="vocab"):
    allocator_roles['buffer_free'],allocator_roles['stats'],allocator_roles['close'],allocator_roles['cpu'],
    *allocator_roles['constructors'],*allocator_roles['destructors']]
   names+=list(dict.fromkeys(n for n in allocator_names if n not in names))
+  memory_snapshot=match('model_memory_snapshot')
+  names.append(memory_snapshot)
  text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
  sizes={};symtab=section(data,b'.symtab')
  for at in range(0,len(symtab),24):
@@ -182,6 +184,10 @@ def audit(raw,converted,extracted,phase="vocab"):
  if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
+ if phase=='model-gate':
+  for query in ('sceKernelGetDirectMemorySize','sceKernelAvailableDirectMemorySize'):
+   require(len(bound_calls(body(memory_snapshot),import_slots(data,query),reader))==1,
+           'memory measurement query missing/duplicated: '+query)
  env=bound_calls(body('_start'),slots['_init_env'],reader);require(len(env)==1 and positions[0]<env[0]<positions[1],'startup env ordering')
  require(len(bound_calls(body('ps5hip_install_vector_title_finalizer'),slots['atexit'],reader))==1,'atexit callback')
  require(one(finalized) in {int(s,16) for s in re.findall(r'0x([0-9a-f]+)',body('ps5hip_install_vector_title_finalizer'))},'finalizer identity')

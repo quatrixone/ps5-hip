@@ -28,8 +28,9 @@ struct ModelGateLog {
  void finish(){active.store(false);require(!unexpected.load()&&expected==2);}
 };
 static bool count_completed(ggml_tensor*,bool ask,void* state){if(!ask)++*static_cast<unsigned*>(state);return true;}
-inline ModelGateResult reject_actual_model(const char* path){
+inline ModelGateResult reject_actual_model(const char* path,void (*memory_snapshot)(const char*)=nullptr){
  std::puts("LLM_GATE PHASE load_begin");
+ if(memory_snapshot)memory_snapshot("before_load");
  ModelGateLog logs;llama_log_set(ModelGateLog::callback,&logs);
  llama_backend_init();ggml_backend_register(registration());
  auto mp=llama_model_default_params();mp.n_gpu_layers=0;mp.use_extra_bufts=false;mp.check_tensors=true;
@@ -38,12 +39,14 @@ inline ModelGateResult reject_actual_model(const char* path){
  ggml_backend_dev_t devices[]={device_handle(),nullptr};mp.devices=devices;
  std::unique_ptr<llama_model,decltype(&llama_model_free)> model(llama_model_load_from_file(path,mp),llama_model_free);require(bool(model)&&!logs.unexpected.load());
  std::puts("LLM_GATE PHASE load_complete");
+ if(memory_snapshot)memory_snapshot("after_load");
  std::puts("LLM_GATE PHASE context_begin");
  auto cp=llama_context_default_params();cp.n_ctx=512;cp.n_batch=cp.n_ubatch=cp.n_seq_max=1;
  cp.n_threads=cp.n_threads_batch=4;cp.type_k=cp.type_v=GGML_TYPE_F16;cp.flash_attn_type=LLAMA_FLASH_ATTN_TYPE_DISABLED;
  cp.offload_kqv=false;cp.op_offload=false;cp.no_perf=false;unsigned completed=0;cp.cb_eval=count_completed;cp.cb_eval_user_data=&completed;
  std::unique_ptr<llama_context,decltype(&llama_free)> context(llama_init_from_model(model.get(),cp),llama_free);require(bool(context)&&!logs.unexpected.load());
  std::puts("LLM_GATE PHASE context_complete");
+ if(memory_snapshot)memory_snapshot("after_context");
  std::puts("LLM_GATE PHASE gate_begin");
  const ggml_cgraph* first=nullptr;GateStatistics gate{};int result=0;bool reused=false;
  for(unsigned attempt=0;attempt<2;++attempt){
@@ -60,6 +63,7 @@ inline ModelGateResult reject_actual_model(const char* path){
  std::puts("LLM_GATE PHASE cleanup_begin");
  context.reset();model.reset();llama_backend_free();llama_log_set(nullptr,nullptr);require(!logs.unexpected.load());
  std::puts("LLM_GATE PHASE cleanup_complete");
+ if(memory_snapshot)memory_snapshot("after_cleanup");
  return {result,completed,gate,2,reused};
 }
 }

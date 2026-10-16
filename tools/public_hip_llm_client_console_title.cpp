@@ -5,6 +5,7 @@
 #include "elevation.hpp"
 #include <hip/hip_runtime_api.h>
 #include <ps5platform/libc.h>
+#include <ps5platform/kernel.h>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -124,6 +125,18 @@ extern "C" [[noreturn]] void ps5hip_llm_fail(const char* reason){ps5hip_clr_gpu_
 #ifndef PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
 #define PS5HIP_LLM_AUTHENTICATED_MODEL_GATE 0
 #endif
+__attribute__((noinline)) static void model_memory_snapshot(const char* phase){
+  const int64_t pool=sceKernelGetDirectMemorySize();
+  int64_t start=0;size_t largest=0;
+  const int rc=pool>0?sceKernelAvailableDirectMemorySize(0,pool,0x4000,&start,&largest):-1;
+  if(rc || pool<=0 || start<0 || start>pool || largest>static_cast<uint64_t>(pool-start)) {
+    std::printf("M0_APP MEMORY_QUERY_FAILED phase=%s pool_bytes=%lld rc=%d\n",phase,static_cast<long long>(pool),rc);
+    ps5hip_clr_gpu_fail("memory-query");
+  }
+  // This API reports one largest free extent, not the sum of all free memory.
+  std::printf("M0_APP MEMORY phase=%s pool_bytes=%llu largest_free_bytes=%llu total_free_bytes=unknown alignment=16384\n",
+              phase,static_cast<unsigned long long>(pool),static_cast<unsigned long long>(largest));
+}
 static bool configured_model_phase(){
  std::ifstream file(std::string(title_root)+"client-phase.txt",std::ios::binary);
  if(!file.is_open())ps5hip_clr_gpu_fail("client-phase-open");
@@ -163,7 +176,7 @@ int main() {
       const std::string model_path=std::string(title_root)+"model.gguf";
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
       // This helper accepts only the two exact errors after each observed gate rejection.
-      const auto gate=m0::reject_actual_model(model_path.c_str());
+      const auto gate=m0::reject_actual_model(model_path.c_str(),model_memory_snapshot);
       m0::require(gate.attempts==2&&gate.graph_reused&&gate.result==-3);
       m0::require(observed.launches==0&&!observed.uncertain&&observed.allocations==observed.frees);
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
