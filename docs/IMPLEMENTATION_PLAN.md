@@ -16,6 +16,8 @@ boundary and integrate M2's remaining layer operations next.
 
 - 2026-10-15 | M1 | 101744f | .40 | pass: 2048 weighted values, 2304 Q8 bytes, 2560 QKV values, 30 buffers and clean lifecycle | evidence/console40-public-weighted-qkv-success.json | next: M0 client, M2 layer
 
+- 2026-10-15 | M0 CPU inventory | offline | pass: source-only Make, 512 positions, 14 operations, 16384000 finite logits, independent review | evidence/offline-llm-executed-graph.json | next: native app and backend routing
+
 
 Per the owner's 2026-10-15 direction, follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md)
 for the first release: one native standalone Llama-family inference client,

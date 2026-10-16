@@ -16,11 +16,18 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
+M0's executed CPU graph inventory is now reproducible with
+`make llm-executed-graph`: all 512 positions, 410,112 completed nodes and
+16,384,000 finite logits pass independent review. The 14-case test suite and
+Make/CMake integration pass. See `evidence/offline-llm-executed-graph.json` and
+`docs/LLM_EXECUTED_GRAPH.md` for the 14-operation coverage table. This is CPU
+graph evidence only; native application/backend integration still remains.
+
 Implementation resumed after the owner's plan review.
 The updated release plan tightens M0 to a reproducible native application with
 loading/tokenization and enforced backend routing. Local ignored prototypes
-now provide a 512-position CPU graph trace, a limited native payload link and
-a storage-only HIP backend; none establishes native inference. The link review
+also provide a limited native payload link and a storage-only HIP backend;
+none establishes native inference. The link review
 found incomplete object/tool/header provenance; source-only promotion is in
 progress. M1 passed on .40 with independent outcome review. Its five stages and 30 raw buffers
 passed numerical checks, with natural shutdown, healthy services and both locks

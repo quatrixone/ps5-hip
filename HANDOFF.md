@@ -25,6 +25,14 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
+Production M0 CPU tracing now passes `make llm-executed-graph` and independent
+review; see `evidence/offline-llm-executed-graph.json`. Local final results are
+`results/llm-executed-graph-v1`, with Make evidence in
+`results/m0-graph-production-make-v1` and independent review in
+`results/m0-graph-production-review-v1`. Repeat with a fresh output directory.
+The operator coverage table is `docs/LLM_EXECUTED_GRAPH.md`; it deliberately
+distinguishes CPU observation from native diagnostics and client integration.
+
 Implementation resumed after the owner's plan review.
 Follow the tightened M0-M5 criteria in the release plan. Ignored M0 work includes
 `results/m0-executed-graph-v2/receipt.json`,

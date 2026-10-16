@@ -66,7 +66,7 @@ Never remove dependency checks and substitute success stubs.
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Local CPU graph trace through 512 positions; limited native payload link; storage-only public-HIP backend prototype | Reproducible production integration, runnable native app, tensor routing and runtime qualification |
+| Client | Source-only Make CPU graph trace through 512 positions, independently reviewed; limited native payload link and storage-only HIP prototypes | Reproducible native application, tensor routing and runtime qualification |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -105,6 +105,11 @@ whole-layer and full-logit comparisons to detect accumulated error.
 ### M0 ? Establish the actual client boundary (V1.1 / V1.2)
 
 Start immediately when implementation resumes, in parallel with M1.
+
+CPU inventory is complete for the fixed configuration: `make llm-executed-graph`
+and [the operator coverage table](LLM_EXECUTED_GRAPH.md) reproduce all 512
+positions and the 14 observed operations. This closes only the CPU trace part
+of M0; the native application and actual backend routing remain open.
 
 - Link a native minimal client using the existing GGUF loader, tokenizer and
   graph builder with the chosen narrow ggml/public-HIP backend integration.

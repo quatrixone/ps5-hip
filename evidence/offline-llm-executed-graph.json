@@ -1,0 +1,80 @@
+{
+  "status": "PASS",
+  "receipt_sha256": "803ef783850fe19b5438dbbef0be87cc35523a406b69ca5feef195201f81d653",
+  "inputs_rehashed": 333,
+  "artifacts_rehashed": 16,
+  "steps": {
+    "positions": 512,
+    "completed_nodes": 410112,
+    "finite_logits": 16384000,
+    "greedy_tie": "lowest token ID"
+  },
+  "checkpoint_positions": [
+    0,
+    1,
+    2,
+    3,
+    31,
+    32,
+    255,
+    256,
+    510,
+    511
+  ],
+  "trace_nodes": 8010,
+  "ops": {
+    "GET_ROWS": 40,
+    "DUP": 10,
+    "SET_ROWS": 450,
+    "RMS_NORM": 450,
+    "MUL": 450,
+    "MUL_MAT": 1990,
+    "RESHAPE": 1320,
+    "ROPE": 440,
+    "VIEW": 880,
+    "PERMUTE": 880,
+    "SOFT_MAX": 220,
+    "CONT": 220,
+    "ADD": 440,
+    "SWIGLU": 220
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "hip_calls_observed": false,
+  "integration": "Make builds CPU prerequisites, fetches/converts a missing model, authenticates existing model bytes, and requires fresh trace output. CMake registers the 14-case unit suite as one test.",
+  "schema": 1,
+  "classification": "executed-cpu-graph-inventory",
+  "configuration": {
+    "context": 512,
+    "batch": 1,
+    "ubatch": 1,
+    "threads": 4,
+    "prefill": 4,
+    "decode": 508,
+    "prompt_tokens": [
+      1,
+      9038,
+      2501,
+      263
+    ],
+    "kv": "F16",
+    "flash": false,
+    "cpu_only": true,
+    "use_extra_weight_buffers": false
+  },
+  "limitations": [
+    "CPU scheduler callback synchronizes individual graph nodes; fusion and timing are diagnostic.",
+    "All 512 positions execute; detailed tensor metadata is retained at ten checkpoints only.",
+    "No tensor-value oracle, native inference, HIP kernel/library/call coverage, or context-reset proof."
+  ],
+  "date": "2026-10-15",
+  "raw_directory": "results/llm-executed-graph-v1",
+  "unit_tests_passed": 14,
+  "ctest_tests_passed": 1,
+  "evidence_sha256": {
+    "results/m0-graph-production-review-v1/review.json": "4c9c95b5254e99deaa036b0aface173cfc12455b26818cb06d1a9d8f44fe95c7",
+    "results/llm-executed-graph-v1/receipt.json": "803ef783850fe19b5438dbbef0be87cc35523a406b69ca5feef195201f81d653",
+    "results/m0-graph-production-make-v1/command.json": "c56689a5a3315c005e69e9c2824e7a5c94b818845b8d207b3a151a27b387699e",
+    "build/m0-graph-controls-v1/Testing/Temporary/LastTest.log": "162f88f7a4541618f39c6f072f2bd4e31ec9a246cf8c994ffe002cd8366db1bf"
+  }
+}

@@ -29,6 +29,7 @@ help:
 	@echo 'make llm-weighted-qkv-reference  Build learned normalization and full Q/K/V CPU oracles'
 	@echo 'make llm-q4-reference  Build authenticated GPU-format Q8/Q4 numerical references offline'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
+	@echo 'make llm-executed-graph  Capture actual batch-one CPU graph through context512 (fresh output)'
 	@echo 'make llm-reference-fixtures  Capture repeated CPU logits/tokens from the locked Q4_0 model (fresh output required)'
 	@echo 'make deps-build  Build SDK, zlib, UFS2Tool, Lapy helper, and controllers'
 	@echo 'make device-fixtures  Compile the host suite device objects'
@@ -95,6 +96,7 @@ host-test: deps-build device-fixtures
 # A separate fresh directory preserves every sanitizer run's evidence.
 QUALIFICATION_DIR ?= results/public-hip-host
 
+LLM_EXECUTED_GRAPH_DIR ?= results/llm-executed-graph
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
@@ -148,6 +150,13 @@ llm-weighted-qkv-reference:
 .PHONY: llm-rmsnorm-reference
 llm-rmsnorm-reference: llm-cpu-reference
 	$(PYTHON) tools/build_llm_rmsnorm_reference.py --output $(LLM_RMSNORM_REFERENCE_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
+
+.PHONY: llm-executed-graph
+llm-executed-graph: llm-cpu-reference
+	@if ! test -f "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch; fi
+	@if ! test -f "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-convert; fi
+	$(PYTHON) tests/llm_executed_graph_test.py
+	$(PYTHON) tools/build_llm_executed_graph.py --output $(LLM_EXECUTED_GRAPH_DIR) --cpu-build $(LLM_CPU_BUILD_DIR) --model $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
 
 .PHONY: llm-reference-fixtures
 llm-reference-fixtures: llm-cpu-reference

@@ -4,6 +4,12 @@ For the optional inference-v1 CPU tools, source-weight download and locked
 F16/Q4_0 conversion, see [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md). Run
 `make llm-model-fetch`, then `make llm-model-convert`, then
 `make llm-reference-fixtures` in WSL/Linux x86-64.
+
+For the actual batch-one CPU graph inventory, run `make llm-executed-graph`.
+It prepares missing model prerequisites, authenticates existing model bytes,
+and executes all 512 positions. Use a fresh `LLM_EXECUTED_GRAPH_DIR` for each
+run. See [the trace contract and operator coverage](LLM_EXECUTED_GRAPH.md).
+This inventories required computation; it does not run inference on the PS5.
 The converter target fetches isolated, hash-locked Python/CPU dependencies and
 builds its host tools; it needs no copied environment or globally installed
 PyTorch. These optional targets do not establish native inference; the default
