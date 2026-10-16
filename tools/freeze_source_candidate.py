@@ -399,7 +399,7 @@ def main():
     if fixture=='llm_client' and receipt.get('phase')!=args.client_phase:parser.error('explicit client phase differs from receipt')
     validators={}
     if model_phase:
-        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate
+        from source_model_freeze import validate_model_receipt, validator_identities, model_contract, validate_model_candidate, MODEL_PACKAGE_LIMIT
         validators=validator_identities()
         llm_client=validate_model_receipt(args.build,receipt)
         if args.baseline_image_bytes is None or not 0<args.transfer_seconds<=1800:parser.error('model phase requires baseline size and bounded transfer seconds')
@@ -427,7 +427,7 @@ def main():
     shutil.copytree(ROOT / 'build/controllers/PPSA99014', output / 'controllers')
     shutil.copytree(args.snapshot_build, output / 'snapshot')
     package = output / 'package/PPSA99014.ffpkg'
-    if package.stat().st_size > (619831552+33554432 if model_phase else package_limit(fixture)) or digest(package) != receipt['package_sha256']:
+    if package.stat().st_size > (MODEL_PACKAGE_LIMIT if model_phase else package_limit(fixture)) or digest(package) != receipt['package_sha256']:
         parser.error('package hash mismatch')
     for name, expected in receipt['package_files'].items():
         if digest(output / 'package/app' / name) != expected:

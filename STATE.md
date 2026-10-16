@@ -16,25 +16,19 @@ gates remain open as previously recorded; historical evidence is unchanged.
 
 ## Plan review and resumption
 
-Latest correction: the early full-model audit exposed a stale staged test path.
-The production auditor now hashes only checked-in source/test identities; an
-actual-entry regression and 40 focused tests pass. The diagnostic raw/converted/
-extracted model images pass all 29 function checks. Model-app-v2 was deliberately
-stopped before that known audit failure; fresh model-app-v3 is running. See
-`evidence/offline-native-llm-audit-path-correction.json`. This is diagnostic image
-evidence, not a complete package or console result.
+The full-model native app now passes Make and independent real freeze admission:
+148 objects, 7,005 inputs, 2,403 artifacts, all 199 commands and the 29-function
+three-image call-chain audit. The package is 827,719,680 bytes. Fifteen control
+and build suites (139 tests) pass. Model package controls now share a 1 GiB
+ceiling accounting for UFS metadata/free space; exact bytes, hashes and all nine
+assets remain mandatory. See `evidence/offline-native-llm-model-gate.json`.
+Next freeze and review a fresh candidate, then validate the installed PPSA99014
+full-model load and initial/reused graph rejection on idle .40. M0 remains open;
+this offline milestone proves neither native model loading nor inference.
 
-Full-model gate integration is now in production source. Fifteen offline suites
-(134 tests) and independent review pass. The first model-app build failed at
-link because real context destruction needs `ggml_opt_free`; compiling the
-unchanged upstream `ggml-opt.cpp` resolves the diagnostic relink. Model builds
-now require 148 authenticated objects; vocabulary builds retain 147. See
-`evidence/offline-native-llm-model-link-correction.json`. A fresh model-app-v2
-build is running; complete package/audit and installed full-model validation
-remain pending. Preserve failed model-app-v1 and do not treat the relink as a
-packaged/native result. Earlier statements about staged-only model changes are
-superseded.
-
+Earlier model-app-v1 failed on the missing upstream optimizer cleanup object;
+model-app-v2 was deliberately stopped for a proven audit source-path bug.
+Both are preserved. The corrected model-app-v3 is complete and validated.
 Current checkpoint: the corrected installed PPSA99014 vocabulary app passed on
 .40, including 32 exact tokenizer cases (236 tokens), HIP copy/clear, synthetic
 unsupported-compute rejection and natural shutdown. The terminal controller

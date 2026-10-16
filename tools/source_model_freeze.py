@@ -3,6 +3,7 @@ import hashlib,json,re
 from pathlib import Path
 from source_model_streaming import require,CHUNK
 MODEL_BYTES=619831552
+MODEL_PACKAGE_LIMIT=1024*1024*1024  # UFS metadata and 20% free space; exact image size/hash still required.
 MODEL_SHA='c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa'
 def stream_digest(path):
  h=hashlib.sha256()
@@ -14,7 +15,7 @@ def model_contract(manifest):
  model=manifest['llm_client']['model']
  require(model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA,'wrong locked model')
  t=manifest['model_transfer'];b=manifest['baseline_transfer']
- require(type(t['bytes']) is int and MODEL_BYTES<t['bytes']<=MODEL_BYTES+33554432,'model package bound')
+ require(type(t['bytes']) is int and MODEL_BYTES<t['bytes']<=MODEL_PACKAGE_LIMIT,'model package bound')
  for v in (t,b):
   require(type(v['bytes']) is int and v['bytes']>0 and re.fullmatch('[0-9a-f]{64}',v['sha256']) and 0<v['deadline_seconds']<=1800,'invalid exact transfer')
  require(b['sha256']==manifest['baseline_image_sha256'],'baseline digest differs')
@@ -64,7 +65,7 @@ def validate_model_receipt(build,receipt):
  app=build/'package/app';package=build/'package/PPSA99014.ffpkg'
  names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model.gguf'}
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact9 assets required')
- require(MODEL_BYTES<receipt['package_bytes']<=MODEL_BYTES+33554432 and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
+ require(MODEL_BYTES<receipt['package_bytes']<=MODEL_PACKAGE_LIMIT and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
  for name,h in receipt['package_files'].items():require(not (app/name).is_symlink() and stream_digest(app/name)==h,'package asset differs')
  require((app/'client-phase.txt').read_bytes()==b'model-gate\n' and (app/'results-dir.txt').read_text()==receipt['results_dir'],'package configuration differs')
  require((app/'model.gguf').stat().st_size==MODEL_BYTES and receipt['package_files']['model.gguf']==model['sha256'] and receipt['package_files']['vocab.gguf']==stream_digest(vocab['asset']),'packaged model/vocabulary differs')

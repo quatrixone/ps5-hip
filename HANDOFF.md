@@ -40,28 +40,25 @@ Training and broad SDK coverage are later milestones, not prerequisites.
 
 ## Plan review and resumption
 
-Current build supersedes the v2 note below: `build/llm-native-model-app-v3`,
-runner `.local/build_native_model_app_v3.py`, logs
-`results/m0-native-model-app-production-make-v3`. Model-app-v2 was deliberately
-terminated after an early diagnostic audit found a stale `tools/audit_test.py`
-path. That production-path bug is fixed; 40 focused tests and the actual
-production three-image audit (29 functions) pass. See
-`evidence/offline-native-llm-audit-path-correction.json`. Await fresh full Make
-completion and independent admission; diagnostic images cannot substitute.
+Current checkpoint: `build/llm-native-model-app-v3` completed successfully.
+Independent real model admission passed: 148 objects, 7,005 inputs, 2,403
+artifacts, 199 commands and 29 audited functions. Package SHA256 is
+`3132cec3f7eced69940aef431dd27324e4378f0054a2754bf7dbf58af1721e46`,
+827,719,680 bytes. See `evidence/offline-native-llm-model-gate.json`;
+local review: `results/m0-native-model-app-final-review-v3/review.json`.
+The shared model-only 1 GiB ceiling accommodates UFS overhead without relaxing
+exact identity checks. Fifteen suites/139 tests pass; changed controls are not
+native build inputs, so no package rebuild is required.
 
-Immediate work: full-model phase has been promoted into production source.
-The first build `build/llm-native-model-app-v1` failed at link on `ggml_opt_free`.
-The real upstream optimizer cleanup is now compiled only for model-gate, with
-148 exact authenticated objects and required source/header checks. Diagnostic
-relink and 134 tests pass independently; see
-`evidence/offline-native-llm-model-link-correction.json`. Fresh build
-`build/llm-native-model-app-v2` is active through `.local/build_native_model_app_v2.py`;
-logs are in `results/m0-native-model-app-production-make-v2`. Poll the existing
-process/session; do not restart on silence. Wait for terminal success, then run
-independent real model receipt/image validation before a committed frozen
-candidate. Model app-v1 and its failure evidence are preserved. No full-model
-console validation or inference is established. Do not reapply the old staged patch.
-
+Next freeze `results/source-public-llm-model-console-v1` from this build after
+committing the reviewed controls. Use `.local/m0-model-console-case-v3.json`:
+installed vocabulary app-v4 is the recovery baseline (19,922,944 bytes,
+SHA256 `ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`).
+Independently review the fresh candidate, then deploy-only and review its receipt
+before one bounded installed-title execution on idle .40 under both locks.
+No full-model console validation or inference has been established. Preserve
+failed model-app-v1 and intentionally stopped model-app-v2; do not replay old
+candidates or rebuild the completed v3 package without a justified source change.
 Latest: corrected native vocabulary candidate
 `results/source-public-llm-vocab-console-v3` completed execution with exit zero.
 All 32 tokenizer cases/236 tokens, HIP storage, synthetic rejection and natural

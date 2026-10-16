@@ -101,10 +101,12 @@ The model phase adds the unchanged upstream `ggml-opt.cpp` because the real
 context destructor references optimizer cleanup even without training. Its
 148-object inventory requires this exact source and authenticated headers;
 the vocabulary phase remains 147 objects. The first model build exposed this
-missing link dependency. Diagnostic relink and 134 tests now pass, while the
-fresh complete package remains pending; see
-`../evidence/offline-native-llm-model-link-correction.json`.
-
+missing link dependency. The corrected full-model package now passes all 199
+commands, 139 regression tests and independent real model freeze admission.
+Its 827,719,680-byte UFS image contains nine exact assets; the model-only 1 GiB
+transfer ceiling accounts for filesystem metadata and reserved free blocks.
+Exact image size and hashes remain required. See
+`../evidence/offline-native-llm-model-gate.json`.
 The native image audit must retain the actual client call chain through that
 wrapper in raw, converted and package-extracted images. Console deployment
 authenticates the larger model asset using bounded streaming transfers, and

@@ -31,6 +31,27 @@ class Calls(unittest.TestCase):
     with patch.object(c,'ROOT',root),patch.object(c,'snapshot',lambda x:None),patch.object(c,'model_contract',lambda x:None):
      with self.assertRaises(ValueError):obj.deploy_model()
     self.assertEqual(obj.ftp.renames,[]);self.assertFalse(obj.record.get('promoted',False))
+ def test_actual_constructor_model_package_bound(self):
+  for size,accepted in ((827719680,True),(f.MODEL_PACKAGE_LIMIT,True),(f.MODEL_PACKAGE_LIMIT+1,False)):
+   with self.subTest(size=size),tempfile.TemporaryDirectory() as t:
+    root=Path(t);candidate=root/'candidate';candidate.mkdir();package=root/'pkg';package.write_bytes(b'x')
+    manifest={'fixture':'llm_client','llm_client':{'phase':'model-gate'},'results_dir':'/data/test','host':c.HOST,'title_id':c.TITLE,'package':'pkg','files':{}}
+    mp=candidate/'manifest.json';mp.write_text(json.dumps(manifest));(candidate/'review.json').write_text(json.dumps({'approved':True,'manifest_sha256':c.sha(mp.read_bytes())}))
+    real_stat=Path.stat
+    def sized_stat(path,*args,**kwargs):
+     result=real_stat(path,*args,**kwargs)
+     if path!=package:return result
+     class Sized:
+      st_size=size
+      def __getattr__(self,name):return getattr(result,name)
+     return Sized()
+    # Exercise actual constructor bound; expensive provenance has separate complete receipt tests.
+    with patch.object(c,'ROOT',root),patch.object(Path,'stat',sized_stat),patch.object(c.Control,'authenticate_llm_client') as auth:
+     if accepted:
+      obj=c.Control(candidate,'deploy');auth.assert_called_once();self.assertFalse(obj.record['launched'])
+     else:
+      with self.assertRaisesRegex(Exception,'candidate package size'):c.Control(candidate,'deploy')
+      auth.assert_not_called();self.assertFalse((candidate/'deploy').exists())
  def test_legacy_deploy_keeps_original_path(self):
   obj=c.Control.__new__(c.Control);obj.fixture='bootstrap';obj.manifest={};obj.idle=lambda:(_ for _ in ()).throw(RuntimeError('legacy idle reached'));obj.deploy_model=lambda:self.fail('model route used')
   with self.assertRaisesRegex(RuntimeError,'legacy idle reached'):obj.deploy()

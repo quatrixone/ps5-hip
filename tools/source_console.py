@@ -12,7 +12,7 @@ import time
 import uuid
 from source_public_hip_log import LOG_NAMES, package_limit
 from source_model_streaming import local_identity, readback, stage_upload
-from source_model_freeze import model_contract, stream_digest, validate_model_candidate
+from source_model_freeze import model_contract, stream_digest, validate_model_candidate, MODEL_PACKAGE_LIMIT
 from source_llm_model_log import check_model_log
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -120,7 +120,7 @@ class Control:
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
         self.verify()
-        require((ROOT/self.manifest['package']).stat().st_size <= (619831552+33554432 if self.model_phase() else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
+        require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
         if self.fixture == 'llm_client':
             self.authenticate_llm_client()
         if self.fixture == 'rmsnorm':

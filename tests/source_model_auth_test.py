@@ -32,16 +32,29 @@ class Auth(unittest.TestCase):
   # Tiny complete file-backed receipt; only expensive prerequisite authentication and fixed model size substituted.
   with patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(legacy,'ROOT',self.root):return f.validate_model_receipt(self.build,self.r)
  def test_actual_model_freeze_cli(self):
+  self.run_model_freeze_cli(2)
+ def test_actual_model_freeze_cli_ufs_overhead(self):
+  self.run_model_freeze_cli(827719680)
+ def run_model_freeze_cli(self, package_bytes):
   import sys
   for name in ('source_console.py','source_public_hip_log.py','freeze_source_candidate.py','helper.py'):self.put(self.root/'tools'/name)
   for name in ('dependencies.json','elevation-inputs.json','controller-inputs.json','title.json'):self.put(self.root/name)
   for name in ('launch.elf','close.elf'):self.put(self.root/'build/controllers/PPSA99014'/name)
   self.put(self.root/'snapshot/teardown-snapshot.elf');(self.build/'receipt.json').write_text(json.dumps(self.r))
+  self.r['package_bytes']=package_bytes;(self.build/'receipt.json').write_text(json.dumps(self.r))
   output=self.root/'results/candidate';argv=['freeze','--build',str(self.build),'--output',str(output),'--snapshot-build',str(self.root/'snapshot'),'--baseline-image-sha256','f'*64,'--baseline-image-bytes','1','--client-phase','model-gate']
   validators={'tools/helper.py':f.stream_digest(self.root/'tools/helper.py')}
   def git(*args,**kwargs):return 'commit\n' if kwargs.get('text') else b''
-  with patch.object(f,'ROOT',self.root),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(f,'validator_identities',return_value=validators),patch.object(legacy,'ROOT',self.root),patch.object(legacy.subprocess,'check_output',side_effect=git),patch.object(sys,'argv',argv):legacy.main()
-  manifest=json.loads((output/'manifest.json').read_text());self.assertEqual(manifest['llm_client']['phase'],'model-gate');self.assertEqual(manifest['deadline_seconds'],150);self.assertEqual(manifest['control_phase_seconds'],1800);self.assertEqual(manifest['model_transfer']['bytes'],2);self.assertIn('tools/helper.py',manifest['files']);self.assertFalse((output/'review.json').exists())
+  real_stat=Path.stat
+  def sized_stat(path,*args,**kwargs):
+   result=real_stat(path,*args,**kwargs)
+   if path.name!='PPSA99014.ffpkg':return result
+   class Sized:
+    st_size=package_bytes
+    def __getattr__(self,name):return getattr(result,name)
+   return Sized()
+  with patch.object(Path,'stat',sized_stat),patch.object(f,'ROOT',self.root),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',return_value=(self.v,self.c,self.m)),patch.object(f,'audit_sources',return_value=[]),patch.object(f,'validator_identities',return_value=validators),patch.object(legacy,'ROOT',self.root),patch.object(legacy.subprocess,'check_output',side_effect=git),patch.object(sys,'argv',argv):legacy.main()
+  manifest=json.loads((output/'manifest.json').read_text());self.assertEqual(manifest['llm_client']['phase'],'model-gate');self.assertEqual(manifest['deadline_seconds'],150);self.assertEqual(manifest['control_phase_seconds'],1800);self.assertEqual(manifest['model_transfer']['bytes'],package_bytes);self.assertIn('tools/helper.py',manifest['files']);self.assertFalse((output/'review.json').exists())
  def test_default_vocab_cli_rejects_model_receipt(self):
   import sys
   (self.build/'receipt.json').write_text(json.dumps(self.r));output=self.root/'results/candidate'
@@ -49,6 +62,16 @@ class Auth(unittest.TestCase):
   with patch.object(legacy,'ROOT',self.root),patch.object(sys,'argv',argv),self.assertRaises(SystemExit):legacy.main()
   self.assertFalse(output.exists())
  def test_complete(self):self.assertEqual(self.validate()['phase'],'model-gate')
+ def test_model_package_overhead_and_ceiling(self):
+  manifest=dict(fixture='llm_client',llm_client=dict(phase='model-gate',model=dict(bytes=f.MODEL_BYTES,sha256=f.MODEL_SHA)),model_transfer=dict(bytes=827719680,sha256='a'*64,deadline_seconds=1800),baseline_transfer=dict(bytes=19922944,sha256='b'*64,deadline_seconds=1800),baseline_image_sha256='b'*64,baseline_log_fixture='llm_client')
+  f.model_contract(manifest)
+  manifest['model_transfer']['bytes']=f.MODEL_PACKAGE_LIMIT;f.model_contract(manifest)
+  for size in (0,True,f.MODEL_BYTES,f.MODEL_PACKAGE_LIMIT+1):
+   manifest['model_transfer']['bytes']=size
+   with self.subTest(size=size),self.assertRaisesRegex(ValueError,'model package bound'):f.model_contract(manifest)
+ def test_exact_package_size_still_required(self):
+  self.r['package_bytes']+=1
+  with self.assertRaisesRegex(ValueError,'package identity'):self.validate()
  def test_wrong_phase(self):
   self.r['phase']='vocab'
   with self.assertRaises(ValueError):self.validate()
