@@ -12,6 +12,104 @@ from freeze_source_candidate import validate_embedded_audit, validate_source_inp
 import json
 
 
+class ConfigurableResultsTest(unittest.TestCase):
+    def candidate(self, root, results='/data/ps5-hip/results', baseline=None):
+        candidate=root/'candidate';candidate.mkdir(exist_ok=True)
+        (root/'image').write_bytes(b'image')
+        manifest=dict(host='192.168.4.40',title_id='PPSA99014',results_dir=results,
+                      fixture='bootstrap',baseline_log_fixture='memory',files={},package='image')
+        if baseline is not None:manifest['baseline_results_dir']=baseline
+        (candidate/'manifest.json').write_text(json.dumps(manifest))
+        (candidate/'review.json').write_text(json.dumps(dict(approved=True,
+            manifest_sha256=sha((candidate/'manifest.json').read_bytes()))))
+        return candidate
+
+    def test_separate_candidate_and_baseline_paths_and_legacy_default(self):
+        for results,baseline in [('/data/ps5-hip/results',None),
+                ('/data/ps5-hip/results-q4-halfword-v1','/data/ps5-hip/results-original')]:
+            with tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);candidate=self.candidate(root,results,baseline)
+                with patch('source_console.ROOT',root),patch('source_console.socket.create_connection') as connect:
+                    control=Control(candidate,'deploy')
+                    self.assertEqual(control.log,results+'/ps5-hip-public-bootstrap.log')
+                    self.assertEqual(control.baseline_log,(baseline or '/data/ps5-hip/results')+'/ps5-hip-public-memory.log')
+                    connect.assert_not_called()
+
+    def test_invalid_paths_reject_before_contact_or_phase_output(self):
+        for bad in ('relative','/bad/../path','/bad//path','/bad/', '/bad\\path','/bad\npath'):
+            for field in ('candidate','baseline'):
+                with self.subTest(bad=bad,field=field),tempfile.TemporaryDirectory() as directory:
+                    root=Path(directory);candidate=self.candidate(root,bad if field=='candidate' else '/valid',bad if field=='baseline' else None)
+                    with patch('source_console.ROOT',root),patch('source_console.socket.create_connection') as connect:
+                        with self.assertRaises(ValueError):Control(candidate,'deploy')
+                        connect.assert_not_called()
+                    self.assertFalse((candidate/'deploy').exists())
+
+    def test_freezer_rejects_invalid_baseline_and_candidate_before_copy(self):
+        import freeze_source_candidate as freeze
+        for field in ('candidate','baseline'):
+            with self.subTest(field=field),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);build=root/'build';build.mkdir()
+                (build/'link-receipt.json').write_text(json.dumps(dict(results_dir='relative' if field=='candidate' else '/valid',object_count=76)))
+                argv=['freeze','--build',str(build),'--output',str(root/'results/candidate'),
+                      '--baseline-image-sha256','0'*64]
+                if field=='baseline':argv+=['--baseline-results-dir','/bad/../path']
+                with patch.object(freeze,'ROOT',root),patch.object(sys,'argv',argv),patch.object(freeze.shutil,'copytree') as copy:
+                    with self.assertRaises(SystemExit) as error:freeze.main()
+                    self.assertEqual(error.exception.code,2);copy.assert_not_called()
+                self.assertFalse((root/'results/candidate').exists())
+
+
+class ResultsDirectoryCreationTest(unittest.TestCase):
+    def make_control(self, present=False):
+        from unittest.mock import Mock
+        control=Control.__new__(Control);control.phase='deploy'
+        control.manifest={'results_dir':'/data/ps5-hip/new-results'};control.record={}
+        state={'present':present};calls=[]
+        def listing(path):
+            calls.append(('LIST',path))
+            if path=='/data/ps5-hip':return ['drwx------ 1 root root 0 Jan 1 00:00 new-results'] if state['present'] else []
+            self.assertEqual(path,'/data/ps5-hip/new-results');return []
+        def mkdir(path):
+            calls.append(('MKD',path));state['present']=True
+        control.listing=listing;control.ftp=Mock();control.ftp.mkd.side_effect=mkdir
+        return control,calls
+
+    def test_existing_directory_never_created(self):
+        control,calls=self.make_control(True);control.ensure_results_directory()
+        self.assertEqual(calls,[('LIST','/data/ps5-hip'),('LIST','/data/ps5-hip/new-results')])
+        control.ftp.mkd.assert_not_called();self.assertNotIn('results_directory_created',control.record)
+
+    def test_absent_leaf_one_mkdir_and_readback(self):
+        control,calls=self.make_control();control.ensure_results_directory()
+        self.assertEqual(calls,[('LIST','/data/ps5-hip'),('MKD','/data/ps5-hip/new-results'),('LIST','/data/ps5-hip'),('LIST','/data/ps5-hip/new-results')])
+        self.assertEqual(control.record['results_directory_created'],control.record['results_directory_verified'])
+        control.ftp.delete.assert_not_called();control.ftp.rmd.assert_not_called()
+
+    def test_errors_not_interpreted_as_absence_or_cleaned_up(self):
+        from unittest.mock import Mock
+        for step in ('parent','mkdir','readback','leaf'):
+            with self.subTest(step=step):
+                control,calls=self.make_control()
+                if step=='parent':control.listing=Mock(side_effect=RuntimeError('550 permission denied'))
+                elif step=='mkdir':control.ftp.mkd.side_effect=RuntimeError('MKD denied')
+                elif step=='readback':control.listing=Mock(side_effect=[[],RuntimeError('LIST failed')])
+                else:control.listing=Mock(side_effect=[[],['drwx------ 1 root root 0 Jan 1 00:00 new-results'],RuntimeError('leaf LIST failed')])
+                with self.assertRaises(RuntimeError):control.ensure_results_directory()
+                if step=='parent':control.ftp.mkd.assert_not_called()
+                self.assertNotIn('results_directory_verified',control.record)
+                control.ftp.delete.assert_not_called();control.ftp.rmd.assert_not_called()
+
+    def test_file_collision_and_execute_refuse_creation(self):
+        from unittest.mock import Mock
+        control,_=self.make_control();control.listing=Mock(return_value=['-rw------- 1 root root 1 Jan 1 00:00 new-results'])
+        with self.assertRaisesRegex(RuntimeError,'not a directory'):control.ensure_results_directory()
+        control.ftp.mkd.assert_not_called()
+        control,_=self.make_control();control.phase='execute';control.listing=Mock()
+        with self.assertRaisesRegex(RuntimeError,'deploy-only'):control.ensure_results_directory()
+        control.listing.assert_not_called();control.ftp.mkd.assert_not_called()
+
+
 class TransferAndRecoveryTest(unittest.TestCase):
     def test_freeze_rejects_stale_source_inputs(self):
         with tempfile.TemporaryDirectory() as directory:

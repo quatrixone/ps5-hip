@@ -87,3 +87,19 @@ The variant also changes cache flags and scheduling. A successful numerical
 run alone would not establish alignment as the cause. Prefer a matched raw-load
 canary with identical cache flags for causal diagnosis; any workaround run
 must retain the frozen numerical oracle and undergo fresh package review.
+
+Build an authenticated diagnostic fixture with `make llm-q4-halfword-fixture`.
+This builds the original fixture first and writes a separate diagnostic directory;
+all fixture output directories must be fresh. For already-authenticated original
+outputs, run `python3 tools/build_llm_q4_halfword_fixture.py --original-fixture
+results/llm-q4-fixture-v3 --output results/llm-q4-halfword-fixture-v1` on one line.
+`make public-hip-q4-halfword-host-test` additionally builds and qualifies the
+public runtime against that diagnostic. This is an offline packet/ownership
+check, not an arithmetic qualification.
+
+Before native packaging, regenerate the Q4 reference with
+`build_llm_q4_reference.py --fixture` pointing to the diagnostic directory.
+Do not pair a diagnostic module with the old original-module reference receipt:
+the package validator requires the selected module's complete input closure.
+Keep the same numerical profile and compare all 56 assets against the original
+reference. Use the resulting pair with the existing Q4 native package builder.

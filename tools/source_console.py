@@ -80,8 +80,14 @@ class Control:
         self.fixture = self.manifest.get('fixture', 'bootstrap')
         baseline_fixture = self.manifest.get('baseline_log_fixture', 'bootstrap')
         require(self.fixture in LOG_NAMES and baseline_fixture in LOG_NAMES, 'unknown log fixture')
-        self.log = '/data/ps5-hip/results/' + LOG_NAMES[self.fixture]
-        self.baseline_log = '/data/ps5-hip/results/' + LOG_NAMES[baseline_fixture]
+        from build_public_hip import validate_results_directory
+        results_dir = self.manifest['results_dir']
+        baseline_results_dir = self.manifest.get('baseline_results_dir', '/data/ps5-hip/results')
+        for directory in (results_dir, baseline_results_dir):
+            require(isinstance(directory, str), 'invalid results directory type')
+            validate_results_directory(directory)
+        self.log = results_dir + '/' + LOG_NAMES[self.fixture]
+        self.baseline_log = baseline_results_dir + '/' + LOG_NAMES[baseline_fixture]
         self.baseline_log_preserved = self.manifest.get('baseline_log_preserved', False)
         require(type(self.baseline_log_preserved) is bool, 'invalid baseline log preservation mode')
         require(not self.baseline_log_preserved or
@@ -90,8 +96,8 @@ class Control:
         review = json.loads((candidate / 'review.json').read_text())
         require(review.get('approved') is True and review.get('manifest_sha256') == sha((candidate / 'manifest.json').read_bytes()),
                 'independent review does not approve this manifest')
-        require(self.manifest['host'] == HOST and self.manifest['title_id'] == TITLE and
-                self.manifest['results_dir'] == '/data/ps5-hip/results', 'wrong candidate environment')
+        require(self.manifest['host'] == HOST and self.manifest['title_id'] == TITLE,
+                'wrong candidate environment')
         if phase == 'execute':
             require(review.get('deployment_receipt_sha256') == sha((candidate / 'deploy/receipt.json').read_bytes()),
                     'deployment receipt has not been independently reviewed')
@@ -390,18 +396,39 @@ class Control:
                 'Q4 transcript metrics differ from raw readbacks')
         self.record['q4_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
 
+    def ensure_results_directory(self):
+        require(self.phase == 'deploy', 'results directory creation is deploy-only')
+        from build_public_hip import validate_results_directory
+        directory = self.manifest['results_dir']
+        validate_results_directory(directory)
+        parent, leaf = directory.rsplit('/', 1)
+        parent = parent or '/'
+        matches = [row for row in self.listing(parent) if row.endswith(' ' + leaf)]
+        require(len(matches) <= 1, 'ambiguous results directory entry')
+        if matches:
+            require(matches[0].startswith('d'), 'results path is not a directory')
+        else:
+            self.ftp.mkd(directory)
+            self.record['results_directory_created'] = directory
+            matches = [row for row in self.listing(parent) if row.endswith(' ' + leaf)]
+            require(len(matches) == 1 and matches[0].startswith('d'),
+                    'created results directory not visible')
+        self.listing(directory)
+        self.record['results_directory_verified'] = directory
+
     def deploy(self):
         self.idle()
         snapshot(self.send('snapshot'))
         baseline_log = self.manifest.get('baseline_log_sha256')
-        if self.baseline_log != self.log:
-            self.fresh_log()
-        previous = self.baseline_log_read()
         old_sha = self.manifest['baseline_image_sha256']
         require(re.fullmatch('[0-9a-f]{64}', old_sha), 'invalid baseline image digest')
         old = self.fetch_image(REMOTE, 16777216)
         require(sha(old) == old_sha, 'historical baseline differs; replan')
         (self.out / 'old.ffpkg').write_bytes(old)
+        self.ensure_results_directory()
+        if self.baseline_log != self.log:
+            self.fresh_log()
+        previous = self.baseline_log_read()
         backup = REMOTE + '.source-rebuild-' + old_sha + '.preserved'
         temporary = '/data/homebrew/.PPSA99014-source-' + self.token + '.upload'
         entries = self.listing('/data/homebrew')

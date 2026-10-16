@@ -60,6 +60,8 @@ source-inspected blockers. Native inference remains unqualified.
 
 - 2026-10-15 | V1.3 prerequisite | offline | exact c3/c4 Q4 core admission; original/halfword objects pass packet and owned preparation, 61 checks pass; one unrelated old reduction receipt rejected | evidence/offline-q4-c4-admission.json | next: authenticated native diagnostic, no GPU qualification claimed
 
+- 2026-10-15 | V1.3 diagnostic | offline | authenticated halfword fixture, unchanged 56 numerical assets, original/diagnostic public HIP models and independently extracted native package pass | evidence/offline-native-q4-halfword-package.json | next: fresh-directory controls and frozen .40 candidate; no numerical GPU qualification
+
 ## Q8/Q4 offline dispatch and numerical references
 
 - 2026-10-15 | V1.2/V1.3 prerequisites | offline | public Q8/Q4 eager/deferred dispatch, 30 rejection checks, shared 87-compilation suite, RMSNorm regression, 32 core tests and native aggregate cross-build pass | evidence/offline-public-q4-dispatch.json | next: native numerical harness and frozen .40 candidate

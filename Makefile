@@ -21,6 +21,7 @@ help:
 	@echo 'make llm-conversion-env  Prepare isolated, hash-locked CPU conversion dependencies (Linux x86-64)'
 	@echo 'make llm-model-convert  Convert verified source model to F16 and pure Q4_0 (fresh output required)'
 	@echo 'make llm-rmsnorm-fixture  Build unchanged upstream RMSNorm device module from authenticated sources'
+	@echo 'make llm-q4-halfword-fixture  Build authenticated halfword-load diagnostic from original Q4 fixture'
 	@echo 'make llm-q4-fixture  Build selected upstream Q8_1 and Q4_0 kernels (fresh outputs required)'
 	@echo 'make llm-q4-reference  Build authenticated GPU-format Q8/Q4 numerical references offline'
 	@echo 'make llm-rmsnorm-reference  Capture genuine CPU RMSNorm tensors and frozen comparison budget (fresh output required)'
@@ -110,6 +111,12 @@ llm-q4-fixture: llm-rmsnorm-fixture
 	$(PYTHON) tests/llm_q4_fixture_test.py
 	$(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture $(LLM_RMSNORM_FIXTURE_DIR) --output $(LLM_Q4_FIXTURE_DIR)
 
+LLM_Q4_HALFWORD_FIXTURE_DIR ?= results/llm-q4-halfword-fixture
+.PHONY: llm-q4-halfword-fixture
+llm-q4-halfword-fixture: llm-q4-fixture
+	$(PYTHON) tests/llm_q4_halfword_fixture_test.py
+	$(PYTHON) tools/build_llm_q4_halfword_fixture.py --original-fixture $(LLM_Q4_FIXTURE_DIR) --output $(LLM_Q4_HALFWORD_FIXTURE_DIR)
+
 LLM_Q4_REFERENCE_DIR ?= results/llm-q4-reference
 .PHONY: llm-q4-reference
 llm-q4-reference: llm-q4-fixture
@@ -162,6 +169,11 @@ Q4_QUALIFICATION_DIR ?= results/public-hip-q4
 .PHONY: public-hip-q4-host-test
 public-hip-q4-host-test: public-hip-host-test llm-q4-fixture
 	$(PYTHON) tools/qualify_public_hip_q4.py --base $(QUALIFICATION_DIR) --fixture $(LLM_Q4_FIXTURE_DIR) --output $(Q4_QUALIFICATION_DIR)
+
+Q4_HALFWORD_QUALIFICATION_DIR ?= results/public-hip-q4-halfword
+.PHONY: public-hip-q4-halfword-host-test
+public-hip-q4-halfword-host-test: public-hip-host-test llm-q4-halfword-fixture
+	$(PYTHON) tools/qualify_public_hip_q4.py --base $(QUALIFICATION_DIR) --fixture $(LLM_Q4_HALFWORD_FIXTURE_DIR) --output $(Q4_HALFWORD_QUALIFICATION_DIR)
 
 EMBEDDED_FIXTURE_DIR ?= build/public-hip-embedded-fixture
 EMBEDDED_QUALIFICATION_DIR ?= results/public-hip-embedded

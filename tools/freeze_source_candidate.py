@@ -198,10 +198,16 @@ def main():
                         help='Offline teardown helper from make console-controls')
     parser.add_argument('--baseline-image-sha256', required=True)
     parser.add_argument('--baseline-log-sha256')
+    parser.add_argument('--baseline-results-dir', default='/data/ps5-hip/results')
     parser.add_argument('--baseline-log-preserved', action='store_true',
                         help='Verify an existing SHA-suffixed preserved baseline log; never rename it again')
     parser.add_argument('--baseline-log-fixture', choices=tuple(LOG_NAMES), default='bootstrap')
     args = parser.parse_args()
+    from build_public_hip import validate_results_directory
+    try:
+        validate_results_directory(args.baseline_results_dir)
+    except ValueError as error:
+        parser.error(str(error))
     if args.baseline_log_preserved and not args.baseline_log_sha256:
         parser.error('--baseline-log-preserved requires --baseline-log-sha256')
     import re
@@ -215,7 +221,13 @@ def main():
     fixture = receipt.get('fixture', 'bootstrap')
     if fixture not in LOG_NAMES:
         parser.error('unknown fixture')
-    if receipt['results_dir'] != '/data/ps5-hip/results' or receipt['object_count'] != 76:
+    if not isinstance(receipt.get('results_dir'), str):
+        parser.error('invalid results directory type')
+    try:
+        validate_results_directory(receipt['results_dir'])
+    except ValueError as error:
+        parser.error(str(error))
+    if receipt['object_count'] != 76:
         parser.error('not the complete .40 candidate')
     validate_source_inputs(receipt)
     audit = (validate_q4_audit(args.build, receipt) if fixture == 'q4' else
@@ -265,6 +277,7 @@ def main():
                     files[str(path.relative_to(ROOT))] = expected
     relative = str(output.relative_to(ROOT))
     manifest = {'host': '192.168.4.40', 'title_id': 'PPSA99014', 'results_dir': receipt['results_dir'],
+                'baseline_results_dir': args.baseline_results_dir,
                 'baseline_image_sha256': args.baseline_image_sha256,
                 'baseline_log_sha256': args.baseline_log_sha256,
                 'baseline_log_preserved': args.baseline_log_preserved,
@@ -275,7 +288,7 @@ def main():
                 'snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'post_snapshot': relative + '/snapshot/teardown-snapshot.elf',
                 'package_files': receipt['package_files'], 'files': files,
-                'hypothesis': ('Selected unchanged upstream Q8_1 and nonfused Q4_0 kernels compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
+                'hypothesis': ('Selected Q8_1 and nonfused Q4_0 kernels, including any diagnostic load-width/cache/scheduling changes declared in the bound fixture receipt, compute12cases over28stages/dispatches; compare592Q4values and80640Q8bytes,112fullrawfiles/9097984bytes, unchangedinputs/weights/guards/inactivebytes,4allocations/frees,2moduleunloads and1retiredqueue. Frozen and chained stages require independent authenticated raw verification; transcript alone is insufficient.' if fixture == 'q4' else
                                'Unchanged upstream RMSNorm computes six CPU-oracle cases with81920 finite values,192 outputguardbytes,507904 inactivebytes and835776 unchangedinputbytes. Require independently verified full raw readbacks, exact two allocation/frees and one retiredqueue; transcript alone is insufficient.' if fixture == 'rmsnorm' else
                                'Genuine compiler stubs pass 12/16/128-byte aggregate arguments to two changed-input GPU rounds, preserving320memberbytes64guardbytes, one allocation/free and one retired queue. Internal struct padding is unspecified; no nested-pointer lifetime claim. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'aggregate' else
                                'Genuine compiler registration and launch stubs execute two changed-input GPU rounds, preserving146values16guards, one allocation/free and one retired queue. Audited compiler unregister precedes CLR teardown; final device backing checks do not prove full static-registry retirement.' if fixture == 'embedded' else

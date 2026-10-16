@@ -1,0 +1,35 @@
+{
+  "status": "PASS_OFFLINE_NATIVE_DIAGNOSTIC",
+  "gpu_executed": false,
+  "package_sha256": "bb8be0ff0eda5dfff2cd7ae6388aba95b8eeafbfd30d2047e7932c7ac5d90471",
+  "fixture_classification": "diagnostic-q4-halfword-fixture",
+  "results_dir": "/data/ps5-hip/results-q4-halfword-v1",
+  "evidence": {
+    "results/llm-q4-halfword-fixture-v1/receipt.json": "337523b24b2b2674be87400dc268e047d483f60fffbbc98a6f89e5721470b40d",
+    "results/llm-q4-halfword-reference-v1/receipt.json": "d41e2c400c1213142720abebcb2e4d969fccd45bd4794c2db94501df9554f0a3",
+    "results/source-public-q4-halfword-v1/receipt.json": "ea8f64f3e438c838f76b5d388c604c43f6fe0d694204e5ef6fc174cefdf78d4c",
+    "results/public-q4-halfword-model-v1/receipt.json": "3f5e22f4560f1406c040e240887b08e4b0a95921ce51592428166e4b33170020",
+    "results/public-q4-original-halfword-regression-v1/receipt.json": "38f32740212e2fb117e80af6a8485bfd141ed6eeba1ae8d071c526ffb67729ec",
+    "build/public-hip-q4-halfword-native-v1/link-receipt.json": "ddbcf055c158dd53345508a16bc52bf8c9ad3a261fb8fd44d5b17ccb976e4cfc",
+    "build/public-hip-q4-halfword-native-v1/q4-native-audit.json": "2c0827b887e092ad89440f8c37b25ecf0c5a9c3f0d04bfc84b98d9009ffe20ab",
+    "results/q4-halfword-integration-review-v1/review.json": "aeadc099ae3590527ea54c1ef4f980049e4ab5a2dda1649b40dbdc32c3ed8f84",
+    "results/q4-halfword-reference-review-v1/review.json": "15de3831c07f064e7260512ed757429c8ec36c4cf1bfa3c4354c34ed429c16d6",
+    "results/q4-halfword-native-package-review-v1/review.json": "d76bcd9f716c9ea6e166635db836d336e6d9bd8c20b4dc23c48bb41156c7469d",
+    "results/q4-halfword-controls-v1/receipt.json": "d8cd0527f734fc89d02ba541b9d2c5562ef29be1873fc2849ab01181fdde761b",
+    "results/q4-halfword-directory-controls-v2/receipt.json": "237fcf5a5977be1e92da2fac4836b304c6185df7064ab07e42145b2395f83107",
+    "results/q4-halfword-final-directory-controls-review-v1/review.json": "945cfa31aa6cdf20d6bada18ed166b7803e9970e09655f9fff13047c8757d357"
+  },
+  "checks": [
+    "Original source fixture authenticated; exact four-load volatile transform, same Q4 ABI, c4 resource allocation.",
+    "Q8 module unchanged; all56 numerical reference assets and budgets bitwise identical.",
+    "Genuine public source suite, halfword public model and original public model regression pass.",
+    "76-object native build,18-function image audit,64 independently extracted package files/58Q4 assets pass.",
+    "46 focused fixture/reference/package/control tests pass.",
+    "48 console/freeze/directory tests pass; configurable candidate/baseline paths and deploy-only nonrecursive leaf creation preserve old evidence."
+  ],
+  "limits": [
+    "No new console run or passed Q4 numerical gate.",
+    "Volatile reads also change cache flags and scheduling; no isolated root-cause proof.",
+    "Candidate must be committed, frozen and independently reviewed before hardware."
+  ]
+}

@@ -14,6 +14,9 @@ from build_llm_q4_fixture import PROFILES, metadata_contract, descriptor_contrac
 
 def fixture_inputs(folder):
     folder=Path(folder).resolve();receipt=folder/'receipt.json';report=json.loads(receipt.read_text())
+    if report.get('classification')=='diagnostic-q4-halfword-fixture':
+        from build_llm_q4_halfword_fixture import fixture_inputs as halfword_inputs
+        return halfword_inputs(folder)
     if (report.get('classification')!='source-only-selected-upstream-q4-q8-fixture' or report.get('status')!='PASS' or
             report.get('native_executed') is not False or report.get('gpu_executed') is not False):
         raise ValueError('unqualified Q8/Q4 fixture')

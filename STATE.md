@@ -14,6 +14,25 @@ As requested on 2026-10-14, ProsperoAI integration is removed. G7 is a standalon
 inference client and SDK preview. All other compute, library, framework and training
 gates remain open as previously recorded; historical evidence is unchanged.
 
+## Halfword Q4 diagnostic built and independently reviewed offline
+
+The authenticated halfword-load variant now passes genuine public HIP host
+qualification and its 76-object native package/image audit. The original Q4
+public model remains passing. Independent review verified all 64 package files,
+58 Q4 assets and 2,951 identities. All 56 numerical assets/budgets remain identical
+to the original reference; no tolerance was changed. See
+`evidence/offline-native-q4-halfword-package.json`.
+
+Package SHA256: `bb8be0ff0eda5dfff2cd7ae6388aba95b8eeafbfd30d2047e7932c7ac5d90471`.
+Build: `build/public-hip-q4-halfword-native-v1`; fixture/reference:
+`results/llm-q4-halfword-fixture-v1`, `results/llm-q4-halfword-reference-v1`.
+Use separate results directory `/data/ps5-hip/results-q4-halfword-v1`.
+Fresh-directory controls pass 48 tests; candidate/baseline directories are
+validated separately and deployment creates only a missing leaf directory.
+Next commit/freeze/review a new candidate and validate once on idle .40. The installed image and failed original
+results below remain unchanged. This variant changes cache flags and scheduling
+as well as load width; success would not alone prove alignment as the cause.
+
 ## Q4 diagnostic resource admission tested offline
 
 The core parser and packet encoder now admit exactly c3/c4 for the existing
