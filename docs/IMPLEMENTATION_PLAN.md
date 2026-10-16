@@ -4,6 +4,12 @@ Updated: 2026-10-15, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
+The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
+within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
+and executed operator inventory alongside QKV, then one layer and full logits.
+Implementation remains paused until the owner resumes it.
+
+
 Per the owner's 2026-10-15 direction, follow [LLM_V1_PLAN.md](LLM_V1_PLAN.md)
 for the first release: one native standalone Llama-family inference client,
 Q4_0, batch one and a bounded 512-token context. Start client/model profiling,

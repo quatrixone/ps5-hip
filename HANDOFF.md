@@ -23,6 +23,17 @@ batch one and 512-token context. Resolve Q4 arithmetic, qualify required
 operators and one complete layer, then full-model inference and release checks.
 Training and broad SDK coverage are later milestones, not prerequisites.
 
+## Plan review and pause
+
+Implementation and console testing are paused at the owner's request. The
+revised [LLM-first plan](docs/LLM_V1_PLAN.md) makes native client linkage and an
+executed graph inventory immediate priorities alongside the current QKV gate.
+Use a narrow ggml/public-HIP integration and sequential single-token GPU prefill
+initially; then qualify a complete layer, model memory, full logits, generation
+and release behavior. No full ROCm or general BLAS port is a prerequisite.
+The previously started native package build is an outstanding offline process;
+its outcome must be checked on resumption, not assumed successful.
+
 ## Weighted QKV package and console controls ready offline
 
 The five-stage native harness compiles and passes independent source review.

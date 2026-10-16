@@ -1,209 +1,217 @@
-# First release: native HIP LLM inference
+# LLM-first implementation plan
 
-Owner decision: 2026-10-15. This is the active release priority. It supersedes
-historical next-step paragraphs that put general G5 profiling ahead of a real
-inference client. The full SDK goals G1-G12 remain open with their original
-acceptance criteria; completing this release does not complete the SDK.
+Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
+Implementation and console testing remain paused at the owner's request while
+this plan is reviewed. Updating the plan does not resume them.
 
-## Release contract
+## Outcome and scope
 
-The first release is an inference product milestone, not an SDK-completeness
-milestone. The minimum releasable result must satisfy all of these checks:
+Deliver a standalone native PS5 example that loads the locked TinyLlama 1.1B
+Chat Q4_0 GGUF and generates tokens using ps5-hip for all model tensor computation.
+This is a useful inference release, not completion of the wider ROCm SDK.
 
-- A clean GitHub checkout builds the native SDK and example client through Make,
-  fetching documented dependencies and preparing the verified model inputs.
-- TinyLlama 1.1B Q4_0 performs GPU prefill and incremental decode at batch one
-  within the qualified 512-token context, with no silent CPU tensor fallback.
-- Intermediate tensors, logits and deterministic generation pass the frozen
-  CPU-reference checks below; a successful kernel launch alone is insufficient.
-- Repeated requests, cancellation, allocation failure and unload/reload pass
-  the lifecycle contract below, with bounded ownership and clean teardown.
-- The release documents its exact supported configuration, unsupported features,
-  measured memory use and prefill/decode performance. A speedup is not required.
+The fixed initial configuration is one request, one GPU, 22 layers, hidden width
+2048, feed-forward width 5632, 32 query heads, four KV heads, head width 64,
+vocabulary 32000, and a maximum combined prompt/output context of 512 tokens.
+Weights are Q4_0 except the model's F32 normalization weights; KV storage is F16.
+Model, tokenizer, conversion and client source identities remain pinned in the
+existing input files. No maintained upstream fork is required.
 
-Do not add a full ROCm distribution, general BLAS coverage or a framework port
-to the critical path unless the selected inference client demonstrates a need.
+CPU work is limited to loading/parsing, tokenization, scheduling, position/mask
+input preparation, sampling and output. Embedding lookup, normalization,
+projections, attention, feed-forward computation and logits run on the GPU.
+Diagnostic CPU fallback must be explicit and cannot satisfy release acceptance.
 
-Deliver a standalone native PS5 client that loads a supported GGUF model and
-generates tokens through ps5-hip on the console GPU. Keep it in this repository
-as an SDK example; ProsperoAI integration remains outside scope.
+Initially process prompt tokens sequentially with the same single-token path
+used for decode. This is GPU prefill, with lower throughput than batched prefill;
+it avoids making general GEMM or optimized multi-token kernels prerequisites.
+Keep token-by-token numerical references consistent with this execution order.
+A later prefill optimization must preserve those results and causal semantics.
 
-- One dense Llama-family architecture; no mixture-of-experts or multimodal model.
-- Batch size one, one active request and one console GPU.
-- Initial context ceiling: 512 tokens including prompt and generated tokens.
-  Reject requests beyond the qualified limit explicitly.
-- A small dense floating-point fixture for numerical bring-up, followed by one
-  real model in the exact GGUF Q4_0 format. Inventory residual non-Q4 tensors;
-  support their actual dtypes rather than assuming every tensor is quantized.
-- Candidate checkpoint: `TinyLlama/TinyLlama-1.1B-Chat-v1.0`. Its model card
-  identifies a Llama 2 architecture/tokenizer and Apache-2.0 license. Freeze the
-  exact checkpoint, tokenizer, conversion inputs and generated GGUF hashes in
-  V1.1. Metadata/tokenizer and the expected source weight hash are now locked in
-  `../models/tinyllama-1.1b-chat-v1.0.json`. Full source weights/tokenizer are now
-  downloaded and hash-verified. F16 and pure Q4_0 GGUF conversion are verified
-  in `../evidence/offline-llm-model-conversion.json`. CPU reference inference
-  passes the fixed cases in `../evidence/offline-llm-cpu-reference.json`;
-  native execution remains unqualified. It is not yet a supported native model.
-- CPU model loading, tokenization, scheduling and sampling are expected. Model
-  tensor computation must use the PS5 HIP backend. Any temporary CPU tensor
-  fallback is diagnostic and must be listed; it cannot silently satisfy final
-  GPU inference acceptance.
-- No predetermined tokens/second or speedup claim. Publish measured prefill,
-  decode, initialization and memory results for the qualified configuration.
+The release must build from GitHub source through Make, generate reproducible
+model/reference inputs, run repeated requests correctly, and publish measured
+memory use and initialization/prefill/decode speed. There is no invented speed
+or completion-percentage target. A correctness preview need not beat the CPU.
 
-Model source: [TinyLlama model card](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0).
-If that candidate cannot fit the measured budget, record the reason and select
-a smaller real model with the same architecture; do not replace final model
-inference with a synthetic kernel demonstration.
+## Review conclusion
 
-## Implementation order and exit evidence
+The compiler/runtime direction is justified by native arithmetic evidence. The
+main planning risk is completing more isolated kernels without integrating a
+client that can execute a whole model. Therefore client linkage, an executed
+operator inventory and model-memory integration are immediate work, alongside
+the current weighted-normalization/QKV numerical gate. Do not finish an entire
+operator catalogue before attempting the client.
 
-### Scope rule for the first release
+Use the existing llama.cpp loader, tokenizer, graph construction and scheduling.
+Provide the smallest ggml backend adaptation that routes the required operations
+through genuine public HIP allocation, module loading, dispatch and synchronization.
+Reuse selected upstream kernels and existing adapter code where applicable.
+Do not replace the SDK with a private direct-submission inference runtime, write
+another model parser, or require the entire upstream HIP backend to compile all
+unused operator specializations. The client integration gate below must settle
+the exact source selection and backend boundary before further expansion.
 
-Useful GPU inference is the release deliverable; a complete ROCm SDK is not a
-prerequisite. Accept new runtime or library work into v1 only when it closes a
-demonstrated client blocker or satisfies the validation contract below. Record
-the affected client call, tensor operation or acceptance check before expanding
-coverage. Keep broader SDK work on its existing roadmap.
+Full hipBLAS/rocBLAS, TheRock distribution packaging, Python/PyTorch, graph
+optimization, VMM, managed memory, RCCL and on-console compilation are not v1
+requirements. If an actual required operation needs a library function, either
+provide its real bounded implementation or adapt that operation explicitly.
+Never remove dependency checks and substitute success stubs.
 
-The required stack is the offline compiler/device-library subset, native HIP
-allocation/copy/launch/synchronization and module loading, the model's tensor
-operators, and the standalone inference client. Implement only the math-library
-operations that the selected backend actually calls; complete hipBLAS/rocBLAS,
-TheRock, Python and PyTorch ports are not release prerequisites. Preserve explicit
-unsupported errors and existing correctness regressions.
+## Evidence at this checkpoint
 
-Prioritize a working path through the whole model before optional throughput
-optimization. CPU reference fixtures and kernel canaries are prerequisites, not
-a substitute for native model inference. The v1 exit is V1.1-V1.5 below, including
-repeatable generation and measured performance; no broader SDK percentage can
-stand in for those checks.
-
-| Milestone | Work | Required evidence |
+| Area | Proven | Still missing |
 | --- | --- | --- |
-| V1.1 Client and model profile | Lock upstream llama.cpp, model/tokenizer/converter and Q4_0 outputs; inventory active HIP APIs, library calls, emitted kernel features, tensor shapes and total memory | Reproducible CPU reference, exact inputs, operator/API coverage table, compiler/link blocker report and proposed console memory budget |
-| V1.2 Public runtime coverage | Connect already-proven geometry/LDS/private-memory routes to genuine public HIP where the client requires them; qualify model-scale allocations, streams and copies | Native .40 tests for the actual launch/resource shapes and sizes; errors reject unsupported cases; cleanup and uncertainty ownership preserved |
-| V1.3 Required tensor operations | Implement or adapt matrix/vector multiplication, layouts, conversions, reductions, RMSNorm, RoPE, softmax, activation/gating, attention, KV updates and Q4_0 operations selected by V1.1 | Native numerical comparisons against CPU references for representative model shapes, strides, tail sizes and dtypes; declared tolerances and negative controls |
-| V1.4 End-to-end inference | Integrate the native client, GGUF loader/tokenizer, weight residency, KV cache, prefill, decode and sampling | Dense fixture then real Q4_0 model; reference-checked logits and deterministic token fixtures; on-console GPU dispatch evidence |
-| V1.5 Release qualification | Repeated requests, KV reuse/reset, cancellation, failure handling, unload/reload and source-only packaging | Bounded memory, correct outputs, clean teardown, reproducible build and honest performance/capability report |
+| Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
+| Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
+| Native arithmetic | Unweighted RMSNorm and Q8/Q4, including Q4 consuming device-produced Q8, passed on .40 | Weighted RMSNorm plus full Q/K/V native outcome |
+| Weighted QKV | Source-built modules, full CPU references, native title compilation, package/controller tests and independent reviews | Finished package/image audit, frozen deployment and native numerical validation |
+| Client | Locked upstream sources and partial compile/link investigations | Runnable native ggml/llama client, complete backend routing and real graph trace |
+| Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
-These milestones overlap when independent work is possible. Start the client
-compile/operator inventory now; do not require general G5 completion first.
-Implement the smallest reusable HIP/library capability that unblocks the client,
-not a separate fake runtime that bypasses the SDK under test.
+See STATE.md and the referenced compact evidence for individual outcomes.
+A running package build is not a passed build. Historical compile-probe limits
+are not current capability declarations. No native LLM inference is claimed.
 
-## Client baseline and integration choices
+## Required computation, in model order
 
-Initial upstream source inspected from `ggml-org/llama.cpp` master:
-`b76b13379d3b7d67ab0bc424516bb6fd2522bd8e`. This is an inventory baseline, not a
-qualified native build or a requirement to maintain a fork. CPU reference tools
-and upstream quantization/RoPE tests now pass; see `LLM_V1_PROFILE.md`.
-Source hashes and the
-inspection scope are in `../evidence/llm-v1-planning-baseline.json`.
+The shapes below define the intended single-token path. Confirm exact strides,
+views, dtypes and operation parameters from an executed graph trace; source
+inspection alone cannot close the inventory.
 
-The upstream HIP CMake target requires HIP, hipBLAS and rocBLAS, compiles shared
-CUDA operator sources as HIP and rejects `GGML_STATIC`. Therefore the first
-integration spike must resolve both native linkage and actual math calls.
-Deleting dependency checks or exporting success stubs does not satisfy this.
-Prefer required upstream operations; where a full library port is impractical,
-use a documented operation subset and explicit client/backend adaptation.
-Do not call a subset a complete rocBLAS or hipBLAS port.
+| Operation | Required shape/behavior | Implementation target and acceptance |
+| --- | --- | --- |
+| Token embedding | Select one Q4_0 row from 32000 x 2048 | GPU gather/dequantization to F32; exact row identity and numerical comparison |
+| Learned RMSNorm | 2048 F32 activations and 2048 F32 weights | Existing weighted kernel; attention norm, FFN norm and final norm |
+| Q/K/V projections | 2048 input to Q2048, K256, V256 | Q8 activation then Q4 matrix-vector products; reuse actual GPU Q8 |
+| RoPE | Q[32,64], K[4,64], actual token position | Locked model's exact rotation convention and parameters; positions 0, 1, intermediate and 511 |
+| KV update | Per-layer K/V[512,4,64], F16 | F32-to-F16 conversion, correct writes/strides and session reset; no overwrite of other positions |
+| Attention scores | 32 query heads over up to 512 cached positions | Correct grouped-query mapping to four KV heads, F16/F32 arithmetic and 1/sqrt(64) scale |
+| Mask and softmax | Valid causal prefix for each query head | Stable max/sum/exp reduction, finite outputs and correct masks; future/unwritten cache must not contribute |
+| Attention values | Probability-weighted V, combined 2048 output | Correct cache strides and head mapping; GPU float matvec/reduction subset, not a general BLAS port |
+| Attention output and residual | Q4 projection 2048 -> 2048, add input | Existing quantized route extended to complete model shape plus F32 addition |
+| FFN | Norm2048; gate/up 2048 -> 5632; SiLU(gate)*up; down 5632 -> 2048 | Real Q4 projections, activation/multiply, residual addition; frozen intermediate comparisons |
+| Output | Final norm2048; Q4 projection 2048 -> 32000 | Full finite logits, compared to matched CPU reference; CPU sampling consumes those logits |
+| Layout and execution glue | Views, reshape/permute, copies and conversions actually emitted | Metadata-only views when valid; real GPU conversion/copy where needed; reject unsupported strides/ops |
 
-Initial backend profile: HIP enabled, graphs off, VMM disabled, RCCL off,
-MFMA-specific quantized multiplication off, ordinary attention initially.
-No managed-memory or host-registration opt-ins. The effective preprocessed
-configuration and emitted ISA must be inspected; flags alone do not establish
-PS5 compatibility. Preserve measured gfx1013 requirements; do not impersonate
-another GPU architecture to make compilation pass.
+Do not infer full projection support from a one-row matrix test. Do not compare
+quantized intermediate bytes to a frozen CPU intermediate if acceptable upstream
+rounding can change quantization. First validate the actual upstream GPU output,
+then derive the next-stage oracle from those captured bytes, while retaining
+whole-layer and full-logit comparisons to detect accumulated error.
 
-The public adapter supports measured RMSNorm and bounded Q8_1/Q4_0 routes
-with native numerical evidence. The original Q4 kernel failed; the authenticated
-halfword-load workaround passed 28 stages with unchanged references and budgets,
-including model-width Q8 and chained Q4. See
-`../evidence/console40-public-q4-halfword-success.json`. Cache flags and scheduling
-also changed, so this does not isolate the original hardware failure mechanism.
-Weighted RMSNorm/full QKV projections and remaining operators are next.
-Model-scale allocations, including the advertised 64 MiB per-allocation limit,
-remain a separate blocker. Validate each required route and limit; never merely
-raise advertised limits or treat these bounded tests as full-model support.
+## Milestones and exit criteria
 
-## V1 validation contract
+### M0 ? Establish the actual client boundary (V1.1 / V1.2)
 
-- Compare intermediate tensors and logits for fixed token inputs against the
-  matching CPU implementation and dtype/quantization. Freeze tolerances before
-  accepting runs; investigate argmax differences rather than checking only that
-  text looks plausible. Quantized output is compared with the same quantized
-  reference, not assumed identical to the unquantized model.
-- Freeze at least five prompt/token fixtures with at least 16 decode steps each,
-  plus a 64-step generation case and a context-boundary case. Include prefill and
-  incremental decode with KV reuse; resetting a session must remove prior state.
-- Run at least 20 sequential requests, including different prompt lengths and
-  two unload/reload cycles. Record owned model, KV, workspace and native backing
-  allocations; require bounded steady-state ownership and expected release on
-  unload. Do not infer total memory stability from only one counter family.
-- Exercise cancellation at safe prefill/decode boundaries, invalid/unsupported
-  model inputs, allocation failure and over-limit context rejection. No stale
-  output, silent tensor fallback, use-after-free or uncertain-GPU force-free.
-- Report initialization, prefill tokens/second, decode tokens/second, peak owned
-  memory and the complete fallback inventory. A correctness preview can ship
-  without a speed win; an unmeasured performance claim cannot.
-- Rebuild SDK and client from a clean source checkout with fetched public inputs
-  and documented model preparation. Add real Make targets when implemented,
-  not placeholder commands. Freeze packages and validate important milestones
-  on idle .40 under the existing console protocol.
-- Update evidence/state/handoff and push each validated milestone to private
-  GitHub `main`. Release publication and repository visibility are separate
-  owner decisions; no public release is authorized by this plan.
+Start immediately when implementation resumes, in parallel with M1.
 
-## Deferred beyond this release
+- Link a native minimal client using the existing GGUF loader, tokenizer and
+  graph builder with the chosen narrow ggml/public-HIP backend integration.
+- Capture the executed CPU graph for the exact target settings: op, dtype,
+  shape, stride, views, kernel specialization, public HIP call and library call.
+  Trace prompt processing and incremental decode, including cache growth.
+- Maintain one coverage table with states: observed, implemented, host-tested,
+  native-tested, integrated. Every missing item must point to its actual caller.
+- Prove native loading/tokenization and backend selection with bounded assets;
+  reject unsupported graph operations instead of silently falling back.
+- Resolve coherent production headers/source selection. Diagnostic old hipBLAS
+  headers and partial translation-unit compilation do not close client linkage.
 
-General command-retirement diagnostics, exact CLR command plateau profiling,
-graph speedup optimization and broad operator/API coverage are not v1 gates
-unless a demonstrated client issue makes them necessary. Existing graph and
-ownership tests remain regressions; memory correctness is never deferred.
+Exit: native client links, backend boundary is concrete, and every required
+operation/call has an implementation task. This is not yet an inference claim.
+If full upstream HIP linkage adds unused libraries or kernels, select only the
+needed sources/backend operations rather than expanding the SDK to satisfy them.
 
-Also defer native Python/PyTorch, arbitrary model families/quantizations,
-training/LoRA/QLoRA, unused ROCm libraries, on-console compilation and
-multi-console compute. These retain their SDK goals. After useful inference,
-prioritize measured performance and a separately scoped bounded LoRA release;
-that requires backward kernels, gradient validation, optimizer state and
-checkpoint/resume, even when base weights are frozen.
+### M1 ? Finish the current weighted QKV chain (V1.3)
 
-## Release progress and work selection
+Use the already prepared candidate workflow. Audit the actual native package,
+freeze its source and bytes, then run once on idle .40 under the console protocol.
+Require all 2048 weighted outputs, exact Q8 derived from that output, and full
+Q2048/K256/V256 projections; all 30 raw buffers, guards, unchanged inputs,
+shared intermediates and clean lifecycle must pass. Keep the original failed Q4
+case and qualified halfword workaround evidence. Do not relax tolerances.
 
-Use these deliverables to report first-release progress, separately from the
-full SDK roadmap:
+Exit: real GPU weighted normalization and full projections compose correctly.
+This closes one part of a layer, not attention or model inference.
 
-| Deliverable | Current evidence / remaining work |
-| --- | --- |
-| Reproducible model and CPU oracle | Source weights, Q4_0 conversion and seven repeated CPU inference cases pass; native memory budget and complete client inventory remain open |
-| Native public HIP runtime | Compiler-generated launches and aggregate arguments pass on .40; real operator resource shapes and model-scale allocations remain open |
-| Required operators | Upstream RMSNorm passed six native cases; the halfword Q4 workaround passed 28 stages including model-width Q8/chained Q4. Weighted RMSNorm, full projections, remaining operators and graph integration are open |
-| Complete inference | Native client link, GPU prefill/decode, reference logits and generated tokens remain open |
-| Release qualification | Repeated requests, lifecycle/failure tests, clean source-only client build and measured performance remain open |
+### M2 ? Complete one transformer layer in the client (V1.2 / V1.3 / V1.4)
 
-Do not estimate completion by counting HIP APIs or passed canaries. A useful
-first release requires every row to meet V1.1-V1.5 acceptance. Runtime additions
-must serve an identified model operation; optimize throughput after the complete
-correct inference path works. Training is a separately scoped follow-up release.
+Implement RoPE and F16 KV updates, then scores/softmax/value aggregation,
+attention output/residual, and the normalized gated FFN/residual. Integrate each
+into the same client/backend path; reuse those implementations in diagnostics.
+Keep intermediate activations on the GPU. CPU readbacks are validation tooling,
+not replacements for missing tensor operations.
 
-## Immediate next action
+Exit: one real layer matches CPU intermediate and final outputs for a token
+sequence, with cache reuse at positions 0/1 and nontrivial lengths up to 512.
+Include a small dense floating-point fixture to isolate indexing/numerics,
+then real Q4 weights. Test grouped-query mapping, causal masking, cache strides,
+reset and representative extreme inputs. Position zero alone cannot qualify RoPE
+or attention. Do not introduce optional fusions or throughput work at this gate.
 
-1. Preserve the original failed Q4 candidate and the passing halfword workaround
-   evidence, with unchanged tolerances. Use the qualified diagnostic module only
-   within its measured ABI/resource contract; exact failure causality remains open.
-2. Complete weighted RMSNorm and the full Q/K/V projections using one shared
-   device-produced Q8 activation. Integrate one reference-checked transformer
-   layer, including RoPE, attention, KV updates, residuals and feed-forward
-   operations, before expanding to the full model.
-3. In parallel where independent, finish the actual client call/operator inventory,
-   native client link and measured model/KV/workspace allocation budget. Use
-   [LLM_V1_PROFILE.md](LLM_V1_PROFILE.md) and
-   [LLM_Q4_PATH.md](LLM_Q4_PATH.md); add only demonstrated missing capabilities.
-4. Run complete TinyLlama GPU prefill and incremental decode against the fixed CPU
-   logits/token fixtures, then satisfy V1.5 lifecycle, source-only build and
-   performance reporting requirements.
+### M3 ? Model-scale memory and full forward pass (V1.2 / V1.4)
 
-These steps retain all V1.1-V1.5 acceptance criteria. No native LLM, training or
-first-release completion is claimed. Push each validated milestone to private
-GitHub main; keep general SDK expansion off this release's critical path.
+Begin memory integration alongside M2; do not wait until all operators are done.
+
+- Advertise the real 64 MiB buffer maximum to the backend and use upstream
+  tensor-boundary chunking. All current tensors fit individually; the largest
+  is 35.15625 MiB. Do not raise limits to accommodate grouped allocations.
+- Qualify cumulative residency: 590.414 MiB weight payload plus 11 MiB F16 KV,
+  and measured activations, workspace, staging, host memory and runtime backing.
+  The 84.516 MiB CPU workspace observation is not a GPU workspace measurement.
+- Upload weights once and retain them across requests; use bounded scratch
+  reuse and explicit KV ownership. Verify largest transfers and representative
+  readbacks, failure cleanup and unload. Record actual allocation traces.
+- Run the small dense fixture end to end, then all 22 real layers, final norm
+  and all 32000 logits through the native client.
+
+Exit: real-model GPU forward pass with matched layer boundaries and full logits,
+within a measured memory budget. If fit fails, diagnose placement/workspace and
+record evidence before changing the model or release scope; no silent downgrade.
+
+### M4 ? Generate tokens with prefill and incremental decode (V1.4)
+
+Connect CPU sampling to GPU logits, feed tokens back, advance position and reuse
+KV. Process the prompt through the same GPU single-token path. Compare fixed
+teacher-forced token sequences first, then deterministic greedy generation;
+this separates numerical drift from divergent sampled histories.
+
+Exit: at least five fixed prompts with 16 decode steps, a 64-step case and a
+512-token boundary case pass predeclared intermediate/logit/error checks and
+greedy-token checks. Investigate argmax differences; plausible text is not proof.
+Validate normal end-of-generation stopping separately from fixed-step fixtures.
+Reject context overflow before submitting work; reset must remove prior state.
+
+### M5 ? Qualify the first release (V1.5)
+
+Run at least 20 sequential requests and two unload/reload cycles. Test different
+prompt lengths, safe-boundary cancellation, allocation failure, malformed and
+unsupported models and explicit error propagation. No stale output, uncertain
+GPU force-free, hidden CPU tensor fallback or unexplained ownership growth.
+General asynchronous error propagation remains a known gap: the client must
+receive failure for required paths; successful synchronization cannot hide a
+failed dispatch. Pointer preflight alone does not solve this.
+
+Exit: clean source-only SDK/client/model preparation on a second environment;
+fixed-fixture inference and lifecycle evidence; measured initialization,
+sequential-prefill and decode rates, peak memory, and exact capability limits.
+Push each validated milestone to private main with state/handoff updates.
+Publishing a public release or changing visibility still requires owner direction.
+
+## Work selection and reporting
+
+The critical path is M0 + M1 -> M2 -> M3 -> M4 -> M5. Memory work overlaps M2.
+One complete layer and then real logits are the next product-level proof points.
+Report completed exit criteria and remaining blockers, not API counts or a
+single speculative percentage. Keep compiler, host-model, native-operator,
+client-integration and release evidence distinct.
+
+After resumption: finish the already-started package build, review its outcome,
+then perform M1 on .40 when idle. In parallel, prioritize M0's native link and
+executed graph inventory. Every additional SDK capability must name the model
+operation or release failure test it unblocks. Avoid new infrastructure unless
+existing tools cannot establish that specific acceptance criterion.
+
+Training, LoRA, other models/quantizations, batched prefill optimization, Flash
+Attention, general BLAS, framework ports and broad ROCm coverage are deferred.
+They retain their wider SDK goals; this inference release does not complete them.

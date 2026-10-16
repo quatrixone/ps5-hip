@@ -164,6 +164,9 @@ See `../evidence/offline-llm-v1-memory-inventory.json`; no native model-fit clai
 
 ## Source-inspected client blockers
 
+Execution order and release decisions are in [LLM_V1_PLAN.md](LLM_V1_PLAN.md).
+This inventory is not a substitute for the still-required executed graph/call trace.
+
 The bounded [real compiler probe](LLM_V1_COMPILE_PROBE.md) now supplements this
 inventory: twelve host objects compile and five device modules link after
 correcting OCML/OCLC library order. It also
@@ -180,8 +183,8 @@ compiled or registered because upstream globs broad operator/template sets.
 | Build/library integration | Upstream `ggml/src/ggml-hip/CMakeLists.txt` requires `hip`, `hipblas`, `rocblas`, links all three, and rejects `GGML_STATIC`. Establish native build/link integration and real operation providers; removing package checks is insufficient. |
 | Native embedded image execution | Bounded compiler-generated registration/stubs now pass genuine CLR host qualification and the single-module/two-launch .40 case. This does not qualify arbitrary operator modules. Pointer-only dynamic image loading remains unsupported. See `PUBLIC_EMBEDDED_IMAGES.md`. |
 | Whole-module admission | `ports/clr/ps5-device.cpp` checks every kernel against the Initial route; an unsupported unused kernel can reject a module. Measure the compiled closure rather than assuming runtime operator selection removes it. |
-| Argument ABI | Current capture/admission accepts only four/eight-byte values and non-null registered global buffers. Ordinary normalization passes `uint3` aggregates and optional null buffers; softmax uses a larger structure. Inspect emitted metadata, then implement the required copying/validation semantics. |
-| Geometry and LDS | Ordinary RMSNorm in `ggml/src/ggml-cuda/norm.cu` uses 256/1024-thread blocks and shared storage; RoPE uses Y-thread geometry. Current public CLR caps workgroups at 64 and admits no LDS. Integrate already-proven routes with public HIP and validate these actual operators. |
+| Argument ABI | Aggregate arguments and optional null buffers are implemented and qualified for measured routes; weighted RMSNorm public HIP qualification passes offline. Inspect each remaining operator's exact metadata, including softmax structures; existing admission is not arbitrary-ABI support. |
+| Geometry and LDS | The public adapter now supports the measured 1024-thread/128-byte dynamic-LDS RMSNorm route and selected Q8/Q4 resources. RoPE and remaining attention/reduction routes still need exact metadata, geometry and native qualification; no general resource envelope is claimed. |
 | Matmul and numerical types | `ggml-cuda.cu` retains actual GEMM fallbacks without MFMA. FP16/BF16 conversions, reductions and `rsqrtf`/`expf`/trigonometric math remain relevant. Select calls from the effective build/model, not every vendor alias: `cublasSetMathMode`, for example, is a success macro on HIP. |
 | Model memory | Validate actual weight/KV/workspace placement and live allocation requests against available native memory. A metadata estimate proves neither model fit nor cleanup. |
 
