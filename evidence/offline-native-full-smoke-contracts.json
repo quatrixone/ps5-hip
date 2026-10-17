@@ -11,7 +11,7 @@
   "raw_bytes": 949248,
   "tests": {
     "full_assets": 21,
-    "native_audit": 35,
+    "native_audit": 36,
     "full_freezer": 24,
     "full_controller": 11,
     "full_transcript_methods": 2,
@@ -30,7 +30,7 @@
     "sha256": "417ef1790d536b14ef3248e0d694ca052df520f8a00ba7278ba9075ac99f8bee"
   },
   "source_sha256": {
-    "tools/audit_public_hip_llm_client_native.py": "eed94ef336a83bd07234cf82b92355266d6f0d681bf7834f81e676a45ec2a34b",
+    "tools/audit_public_hip_llm_client_native.py": "fe0fd2aed7c1cfdc7a5e74c94af1f1917efa180eb0c159e56a38f7ce64fc31ee",
     "tools/build_llm_native_app.py": "2e557acf8848b6d51dafa3068677b2416246a0eae2839009954461c66c973ce8",
     "tools/build_public_hip.py": "41e745cf47ce696b56eaedbf4df467e8d8537b03e7a24526f18b92fc65da81a9",
     "tools/freeze_source_candidate.py": "95345539d42de62185208536b6282775165efe9d0ab7d064c1758ae78b108117",
@@ -42,7 +42,7 @@
     "tools/source_llm_full_log.py": "52c3f503ebdff297233966283806099d22be6c27afa1decb29fa9f8c2c2f7106",
     "tools/verify_llm_full_readbacks.py": "63de3c7f735a142a4bb6a27e1f079a32697229e25ee29ae47dc78cf16633d924",
     "Makefile": "bb0d21d45f8741b0d043289f63d3758f47a59bce4f47aae351694c0b2643e793",
-    "tests/llm_client_native_audit_test.py": "0144a62d0b1e1293abece82cb6b654d7cabf11accce82fe695f858c2842cade8",
+    "tests/llm_client_native_audit_test.py": "825f0dbb4d69d4f63b04005b3bba35d317d012990e860e3c86003574cd59de4f",
     "tests/llm_native_app_build_test.py": "3cf6eb0e1098796b31706a790c3f0cd6235e34da95b412f6381e2ad572500595",
     "tests/llm_prefix_make_test.py": "2f4324a172a43b1947d8f92b821e07e054e2c088d5797f83692855616fac3e47",
     "tests/llm_full_readbacks_test.py": "5a7cea9ec7b8f9769678c8ef73252ea05974223bd4c96a613cd3295c47f8cf63",
@@ -56,5 +56,6 @@
     "Final full native image audit and package build pending",
     "No console contact or full-model GPU numerical acceptance",
     "Static call presence alone does not prove execution/dataflow"
-  ]
+  ],
+  "initial_mode_verified": "Both flags must be zero in stored data or ELF zero-fill, in writable nonexecutable segments"
 }

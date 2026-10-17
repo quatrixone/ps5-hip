@@ -308,6 +308,13 @@ def full_mode_store(body,enabled,value):
  stores=[text for _,target,text in rip_references(body) if target==enabled and re.match(r'movb\s+\$',text)]
  require(len(stores)==1 and re.match(r'movb\s+\$'+hex(value)+r',',stores[0]),'full mode flag store differs')
 
+def zero_initialized_flag(reader,headers,address):
+ segments=[h for h in headers if h[0]==1 and h[3]<=address<h[3]+h[6]]
+ require(len(segments)==1 and segments[0][1]&2 and not segments[0][1]&1,'full flag not in writable nonexecutable memory')
+ h=segments[0]
+ # ELF guarantees zero-filled memory after p_filesz; stored bytes must be zero too.
+ if address-h[3]<h[5]:require(reader(address,1)[0]==b'\0','full mode flag initially nonzero')
+
 def full_roles(match):
  return {role:match(fragment) for role,fragment in {
   'run':'run_native_full','enable':'enable_full','disable':'disable_full','reset':'reset_full',
@@ -521,6 +528,10 @@ def audit(raw,converted,extracted,phase="vocab"):
  if full_support_table is not None:
   original=reader(full_support_table,404)[0]
   require(all(load_regions(p)[0](full_support_table,404)[0]==original for p in paths[1:]),'converted/extracted support table differs')
+  for p in paths:
+   flag_reader,headers,_=load_regions(p)
+   for name in ('_ZN2m0L12full_enabledE','_ZN2m0L11full_activeE'):
+    zero_initialized_flag(flag_reader,headers,one(name))
  layouts=[dict(file=str(p),segments=load_layout(p.read_bytes())) for p in paths]
  imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]
  require(imports[0]==imports[1],'converted/extracted import owners differ')

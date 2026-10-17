@@ -307,6 +307,13 @@ class Full(unittest.TestCase):
   with self.assertRaises(RuntimeError):a.full_global_bindings(body,0x1000,{0:('enabled',0)},lambda _:0x3000)
   with self.assertRaises(RuntimeError):a.full_mode_store(body,0x2000,0)
   with self.assertRaises(RuntimeError):a.full_mode_store(body+body,0x2000,1)
+ def test_full_initial_mode_flag_cannot_enable_data_only_bypass(self):
+  header=(1,6,0,0x1000,0,16,32,4096)
+  a.zero_initialized_flag(lambda *_:(b'\0',None),[header],0x1000)
+  a.zero_initialized_flag(lambda *_:self.fail('BSS must not read stored bytes'),[header],0x1010)
+  with self.assertRaises(RuntimeError):a.zero_initialized_flag(lambda *_:(b'\1',None),[header],0x1000)
+  with self.assertRaises(RuntimeError):a.zero_initialized_flag(lambda *_:(b'\0',None),[header],0x1020)
+  with self.assertRaises(RuntimeError):a.zero_initialized_flag(lambda *_:(b'\0',None),[(1,7,*header[2:])],0x1000)
  @staticmethod
  def smoke_body():
   return '10: movq %rsp, %rax\n13: movq %rcx, (%rax)\n16: movl $0x1, 0x8(%rax)\n1d: leaq 0x30(%rip), %rcx\n24: movq %rbx, %r9\n27: leaq 0xc0(%rsp), %rdi\n2f: leaq 0xf0(%rsp), %rdx\n37: leaq 0x218(%rsp), %r8\n40: callq 0x9000 <run>\n'
