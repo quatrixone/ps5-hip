@@ -552,3 +552,17 @@ llm-full-reference: llm-deps-fetch
 	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
 	$(PYTHON) tests/llm_full_model_reference_test.py
 	$(PYTHON) tools/build_llm_full_model_reference.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_REFERENCE_DIR)"
+
+LLM_FULL_NUMERIC_TEST_DIR ?= results/llm-full-numeric-host-tests
+.PHONY: llm-full-numeric-tests
+llm-full-numeric-tests: llm-deps-fetch
+	@if ! test -f "$(LLM_FULL_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-full-reference; fi
+	$(PYTHON) tests/llm_full_numeric_test.py
+	$(PYTHON) tools/build_llm_full_numeric_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_FULL_REFERENCE_DIR)" --output "$(LLM_FULL_NUMERIC_TEST_DIR)"
+
+LLM_FULL_HELPER_TEST_DIR ?= results/llm-native-full-helper-tests
+.PHONY: llm-full-helper-tests
+llm-full-helper-tests: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
+	$(PYTHON) tools/build_llm_full_backend_test.py --native-helper --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_HELPER_TEST_DIR)"

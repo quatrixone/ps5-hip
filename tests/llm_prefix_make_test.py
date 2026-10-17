@@ -97,7 +97,7 @@ class FullGraphMake(unittest.TestCase):
 class FullExecutionMake(unittest.TestCase):
  run_make=PrefixMake.run_make
  def test_host_targets_use_selected_inputs_without_native_build(self):
-  for target,script,variable,folder in [('llm-full-host-tests','build_llm_full_backend_test.py','LLM_FULL_HOST_TEST_DIR','backend'),('llm-full-reference','build_llm_full_model_reference.py','LLM_FULL_REFERENCE_DIR','reference')]:
+  for target,script,variable,folder in [('llm-full-host-tests','build_llm_full_backend_test.py','LLM_FULL_HOST_TEST_DIR','backend'),('llm-full-reference','build_llm_full_model_reference.py','LLM_FULL_REFERENCE_DIR','reference'),('llm-full-helper-tests','build_llm_full_backend_test.py','LLM_FULL_HELPER_TEST_DIR','helper')]:
    with tempfile.TemporaryDirectory() as directory:
     model=Path(directory)/'selected-full.gguf';model.touch()
     text=self.run_make(target,variable+'=results/selected-'+folder,'LLM_FULL_GRAPH_MODEL='+str(model))
@@ -105,6 +105,14 @@ class FullExecutionMake(unittest.TestCase):
    self.assertIn('tools/'+script,text)
    self.assertNotIn('build_llm_native_app.py',text)
    self.assertNotIn('source_console.py',text)
+ def test_numerical_target_preserves_selected_reference(self):
+  with tempfile.TemporaryDirectory() as directory:
+   receipt=Path(directory)/'receipt.json';receipt.write_text('{}')
+   text=self.run_make('llm-full-numeric-tests','LLM_FULL_REFERENCE_DIR='+directory,'LLM_FULL_NUMERIC_TEST_DIR=results/selected-numeric')
+  self.assertIn('--reference "'+directory+'" --output "results/selected-numeric"',text)
+  self.assertIn('tests/llm_full_numeric_test.py',text)
+  self.assertIn('tools/build_llm_full_numeric_test.py',text)
+  self.assertNotIn('build_llm_native_app.py',text)
  def test_dispatch_target_uses_selected_trace(self):
   text=self.run_make('llm-full-dispatch-tests','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_DISPATCH_TEST_DIR=results/selected-dispatch')
   self.assertIn('--graph "results/selected-full-graph/raw/run-0-pos-0.graph.json" --output "results/selected-dispatch"',text)

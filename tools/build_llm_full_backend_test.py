@@ -4,11 +4,12 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def sha(p):
  with Path(p).open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
-def build(cpu,model,output):
+def build(cpu,model,output,helper=False):
  cpu,model,output=(Path(p).resolve() for p in (cpu,model,output))
  if output.exists() or not output.is_relative_to(ROOT/'results'):raise ValueError('fresh workspace results directory required')
  client=ROOT/'.deps/sources/llama-client';lib=cpu/'cmake/bin'
  sources=('tools/build_llm_full_backend_test.py','tests/llm_full_backend_test.cpp','tests/llm_layer_hip_mock.h','ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/full_qualification.h','ports/ggml/full_dispatch.h','ports/ggml/full_graph.h','ports/ggml/layer_dispatch.h','ports/ggml/model_layer.h','ports/ggml/layer_qualification.h','ports/ggml/prefix_dispatch.h')
+ if helper:sources+=('ports/ggml/native_full.h','tests/llm_native_full_test.cpp')
  inputs={str(ROOT/n):sha(ROOT/n) for n in sources}
  for p in (model,Path('/usr/bin/clang++-18'),*lib.glob('lib*.so*')):
   if p.is_file():inputs[str(p.resolve())]=sha(p)
@@ -24,13 +25,14 @@ def build(cpu,model,output):
   commands.append(dict(label=label,argv=argv,exit_code=p.returncode));(output/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
   if p.returncode:raise RuntimeError(label+' failed; inspect retained stderr')
   if any(s in p.stderr for s in (b'ERROR: AddressSanitizer',b'LeakSanitizer:',b'runtime error:')):raise RuntimeError('sanitizer diagnostics')
- run('compile',['/usr/bin/clang++-18',*flags,ROOT/'tests/llm_full_backend_test.cpp',ROOT/'ports/ggml/ps5_backend.cpp','-L'+str(lib),'-Wl,-rpath,'+str(lib),'-Wl,--no-as-needed','-lllama','-lggml','-lggml-cpu','-lggml-base','-ldl','-o',output/'full-backend'])
- for mode in ('whole','split'):run(mode,[output/'full-backend',model,mode])
+ run('compile',['/usr/bin/clang++-18',*flags,ROOT/('tests/llm_native_full_test.cpp' if helper else 'tests/llm_full_backend_test.cpp'),ROOT/'ports/ggml/ps5_backend.cpp','-L'+str(lib),'-Wl,-rpath,'+str(lib),'-Wl,--no-as-needed','-lllama','-lggml','-lggml-cpu','-lggml-base','-ldl','-o',output/'full-backend'])
+ for mode in (('helper',) if helper else ('whole','split')):run(mode,[output/'full-backend',model,*([] if helper else [mode])])
  for n,d in inputs.items():
   if sha(n)!=d:raise RuntimeError('input changed during focused test: '+n)
- report=dict(status='PASS',classification='focused-actual-full-model-scheduler-mocked-HIP',inputs=inputs,commands=commands,modes=['whole','split'],requests_per_mode=3,sequence=[0,1,'reset',0],gpu_executed=False,numerical_verified=False,limits=['Transport mocks perform no tensor arithmetic; zero logits prove only output path','Existing CPU libraries are not sanitizer-instrumented','Focused test input identities; not complete deployment prerequisite provenance'])
- (output/'receipt.json').write_text(json.dumps(report,indent=2)+'\n');print('PASS full-model scheduler whole/split modes, committed KV, reset, no CPU tensor arithmetic')
+ report=dict(status='PASS',classification='focused-native-full-helper-mocked-HIP' if helper else 'focused-actual-full-model-scheduler-mocked-HIP',inputs=inputs,commands=commands,modes=['helper'] if helper else ['whole','split'],requests_per_mode=514 if helper else 3,sequence=[512,'reset',2] if helper else [0,1,'reset',0],gpu_executed=False,numerical_verified=False,limits=['Transport mocks perform no tensor arithmetic; zero logits prove only output path','Existing CPU libraries are not sanitizer-instrumented','Focused test input identities; not complete deployment prerequisite provenance'])
+ (output/'receipt.json').write_text(json.dumps(report,indent=2)+'\n');print('PASS native helper514 mock requests and exact readback inventory' if helper else 'PASS full-model scheduler whole/split modes, committed KV, reset, no CPU tensor arithmetic')
 if __name__=='__main__':
  p=argparse.ArgumentParser(description=__doc__)
  for n in ('cpu-build','model','output'):p.add_argument('--'+n,type=Path,required=True)
- a=p.parse_args();build(a.cpu_build,a.model,a.output)
+ p.add_argument('--native-helper',action='store_true')
+ a=p.parse_args();build(a.cpu_build,a.model,a.output,a.native_helper)

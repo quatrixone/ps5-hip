@@ -93,3 +93,15 @@ tolerances beginning at layer 4. This is an open issue, not native qualification
 A full native package needs its own phase, image audit, frozen controls and
 numerical verifier. Begin with two tokens plus reset; the existing 120-second
 watchdog includes loading and is not a measured budget for all 514 requests.
+
+`make llm-full-helper-tests` exercises the native helper for all 514 requests,
+including the 256-to-512 attention extent transition and reset. The test
+simulates zero-valued arithmetic outputs; it proves sequencing, capture and
+cleanup only. It checks 376,762 mock launches and the exact 168-file inventory.
+No native long-run timing is inferred.
+
+`make llm-full-numeric-tests` uses the production-kernel host interpreter and
+the authenticated complete CPU reference. It currently exits 1 with a
+NUMERICAL_FAIL receipt. See [the numerical diagnosis](LLM_FULL_NUMERICS.md).
+Set `LLM_FULL_NUMERIC_TEST_DIR` and `LLM_FULL_HELPER_TEST_DIR` to fresh result
+directories. Native numerical acceptance remains open.

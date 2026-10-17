@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PARTIAL",
+  "classification": "offline-full-decoder-long-lifecycle-and-failed-numerical-gate",
+  "helper": {
+    "status": "PASS",
+    "requests": 514,
+    "sequence": [
+      512,
+      2
+    ],
+    "layers": 22,
+    "logits": 32000,
+    "active_nodes": 410172,
+    "mock_launches": 376762,
+    "raw_files": 168,
+    "raw_bytes": 2214912,
+    "actual_kv_progression": true,
+    "reset": true,
+    "allocations_balanced": true,
+    "cpu_backend_arithmetic": 0,
+    "arithmetic_outputs": "synthetic zeros",
+    "receipt_sha256": "d74f16e5a8c37e36d38b1e8128fababbb301392ae1ab3adafe2478599fe6cb3e"
+  },
+  "numerical": {
+    "status": "NUMERICAL_FAIL",
+    "requests": 3,
+    "raw_files": 72,
+    "failed_files": 59,
+    "largest_relative_l2": 0.0696764,
+    "tolerances": {
+      "absolute": 2e-05,
+      "relative": 0.0002,
+      "relative_l2": 0.0002
+    },
+    "reset_outputs_bitwise_equal": true,
+    "same_input_quantizer_matches_upstream": true,
+    "first_divergence": "layer 4 FFN projection; one Q8 byte crosses -8.5 after small incoming normalization variation",
+    "receipt_sha256": "68cb86bf426b70d3ede5c9c71dde3a2d58a6c84be6f79173975f0d65d4647e2e"
+  },
+  "tests": {
+    "numerical_validation_cases": 7,
+    "make_methods": 13
+  },
+  "sources": {
+    "ports/ggml/native_full.h": "67df8482f39ce1b406ad3b91d25b5eacaea3e9b2fa086b2914b76e65613ba25c",
+    "tests/llm_native_full_test.cpp": "982e1e94868d5e532e8cdc44c6ebd9e1c14f39b69fac8e4e6ca7ec407a485e5c",
+    "tests/llm_full_numeric_test.cpp": "c567bd411e2c5cd38ab72a926e7024d1487460a768c382af5a0720549201e51e",
+    "tests/llm_full_numeric_test.py": "3f69246426b31cf0fd8bda0ac18cbac66a5ff4d8370d322b22cf11768e3dde04",
+    "tools/build_llm_full_backend_test.py": "be30c38df10b93b56b7c1109b87a7e3a5c173a11a099580641730b99d2017bed",
+    "tools/build_llm_full_numeric_test.py": "70e490450d016c3903b9392bd734e3970a25e13681849d92260cce8b7086fee2",
+    "Makefile": "54fec7cefb5678aeab50d42b9876f0d0f38f0f9cf4d593fb1b45546efa0d005b",
+    "tests/llm_prefix_make_test.py": "f815d2f6963f13b95ac387756561dc286bdc3a6c454cb200633e7ad5bd409756"
+  },
+  "local_evidence": {
+    "helper": "results/m3-native-full-helper-portable-v1/receipt.json",
+    "numerical": "results/m3-full-numeric-portable-v1/receipt.json",
+    "diagnosis": "results/m3-full-stage4-diagnostic-v1/"
+  },
+  "gpu_executed": false,
+  "full_model_accepted": false,
+  "limits": [
+    "Long helper test uses mocked HIP and synthetic zero outputs; no arithmetic qualification.",
+    "Final numerical mismatch remains unresolved; first-discontinuity diagnosis does not prove all later errors.",
+    "No full-decoder native package, image audit, deployment or .40 run yet.",
+    "The 120-second native watchdog is not a measured budget for the long profile."
+  ]
+}
