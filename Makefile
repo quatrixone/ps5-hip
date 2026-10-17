@@ -114,6 +114,7 @@ QUALIFICATION_DIR ?= results/public-hip-host
 
 LLM_EXECUTED_GRAPH_DIR ?= results/llm-executed-graph
 LLM_NATIVE_CLIENT_BUILD_DIR ?= build/llm-native-client
+LLM_NATIVE_CLIENT_PREPARED_GENERATED_INPUTS ?=
 LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
 LLM_NATIVE_APP_PREPARED_SOURCE_BUILD ?=
 LLM_NATIVE_APP_PHASE ?= vocab
@@ -188,7 +189,7 @@ llm-native-client-link: deps-build llm-deps-fetch
 	$(PYTHON) tests/native_ccache_test.py
 	$(PYTHON) tests/llm_native_client_build_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
-	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR)
+	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR) $(if $(strip $(LLM_NATIVE_CLIENT_PREPARED_GENERATED_INPUTS)),--prepared-generated-inputs "$(LLM_NATIVE_CLIENT_PREPARED_GENERATED_INPUTS)")
 
 .PHONY: llm-native-scheduler-test
 llm-native-scheduler-test: llm-cpu-reference

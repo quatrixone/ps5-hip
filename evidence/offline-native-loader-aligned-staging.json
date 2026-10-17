@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-loader-aligned-staging",
+  "hardware_executed": false,
+  "problem": "Full GPU model load takes synchronous tensor staging through ordinary std::vector, requesting 36864000 bytes for the largest locked Q4 tensor. Console failed before load_complete; no allocation backtrace proves this is the sole heap pressure source.",
+  "change": "Native-only derived loader uses exception-safe paired ggml_aligned_malloc/free already wrapped by native direct-memory ownership. Upstream checkout, tensor validation, reads and backend upload remain unchanged.",
+  "checks": [
+    "60 focused unittest methods pass across loader, builder and native audit (audit draft pending actual native loader object).",
+    "Actual generated staging block passes ASan/UBSan and six failure cleanup paths.",
+    "36864000-byte staging succeeds under a 16 MiB ordinary-data limit with shared-mapping-backed aligned mock; ordinary vector fails.",
+    "Prepared generated input reuse verifies exact current render and header inventory; fresh objects, dependencies, commands and receipt required.",
+    "One unchanged ggml.c actual-builder-environment ccache probe hits in 0.733 seconds, byte-identical object/dependencies. Earlier minimal-environment miss retained; 70-unit reuse is not yet measured."
+  ],
+  "sources": {
+    "tools/prepare_llm_native_loader.py": "48ee9230b1bf755c958b5a3d0f81deb668e77d65b9e5cfeb4940b921ce4d11a1",
+    "tests/llm_native_loader_test.py": "2fa0a732da98164854b206c43e7adb9ea06f53414b5394cf87b1f0aa72a6f639",
+    "tools/build_llm_native_client.py": "a8b72659dde7b6cb2990b62efb1da4a182340396c0f26156390e50aa29ae304f",
+    "tests/llm_native_client_build_test.py": "f8be6940b6873e439c4f602f3f3270565bca4805fc38d10a0051179a3dd9caff",
+    "Makefile": "3066f93e8c6fdf083c1ed82f183677d3fad3e7feaa44ee255c281cc969bb985b"
+  },
+  "local_cache_probe": {
+    "path": "results/m3-native-client-cache-probe-v1/result.json",
+    "sha256": "a539852e61de46cb9511d06e3cd1ed3d23389e4b1f46bf87955eb68d1156ced8"
+  },
+  "remaining": [
+    "Build and audit actual native image",
+    "Fresh frozen candidate; validate all 22 layers and logits on .40"
+  ]
+}

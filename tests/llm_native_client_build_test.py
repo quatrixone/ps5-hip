@@ -85,4 +85,50 @@ class NativeBuild(unittest.TestCase):
    with self.subTest(bad=bad),self.assertRaises(ValueError):b.verify_commands(bad,expected,bad,artifacts)
   with self.assertRaisesRegex(ValueError,'record'):b.verify_commands([row],expected,[],artifacts)
   with self.assertRaisesRegex(ValueError,'output'):b.verify_commands([row],expected,[row],{})
+
+
+class PreparedGenerated(unittest.TestCase):
+ def fixture(self, folder):
+  texts={'llama-version.h':'llama\n','ggml-version.h':'ggml\n',b.scheduler.GENERATED_NAME:'scheduler\n','unity-0.cpp':'unity\n'}
+  for name,text in texts.items():(folder/name).write_bytes(text.encode())
+  return texts
+ def test_verified_inputs_do_not_require_or_rewrite_old_receipt(self):
+  with tempfile.TemporaryDirectory() as d:
+   folder=Path(d);texts=self.fixture(folder);(folder/'receipt.json').write_text('stale receipt')
+   self.assertEqual(b.verify_generated(folder,texts),folder)
+   self.assertEqual((folder/'receipt.json').read_text(),'stale receipt')
+ def test_same_size_content_missing_and_header_shadow_rejected(self):
+  with tempfile.TemporaryDirectory() as d:
+   folder=Path(d);texts=self.fixture(folder)
+   for name,text in texts.items():
+    (folder/name).write_bytes(b'X'+text.encode()[1:])
+    with self.subTest(name=name),self.assertRaisesRegex(ValueError,'differs'):b.verify_generated(folder,texts)
+    (folder/name).write_bytes(text.encode())
+   (folder/'extra.h').write_text('shadow')
+   with self.assertRaisesRegex(ValueError,'inventory'):b.verify_generated(folder,texts)
+   (folder/'extra.h').unlink();(folder/'unity-0.cpp').unlink()
+   with self.assertRaisesRegex(ValueError,'differs'):b.verify_generated(folder,texts)
+ def test_nested_header_directory_and_symlinks_rejected(self):
+  with tempfile.TemporaryDirectory() as d:
+   folder=Path(d);texts=self.fixture(folder);(folder/'nested').mkdir()
+   with self.assertRaisesRegex(ValueError,'inventory'):b.verify_generated(folder,texts)
+   (folder/'nested').rmdir();target=folder/'target';target.write_text(texts['unity-0.cpp']);(folder/'unity-0.cpp').unlink();(folder/'unity-0.cpp').symlink_to(target)
+   with self.assertRaisesRegex(ValueError,'differs'):b.verify_generated(folder,texts)
+ def test_reused_flags_and_generated_paths_stay_old_fresh_loader_separate(self):
+  client=b.ROOT/'.deps/sources/llama-client';_,models=b.selection(client)
+  texts=b.generated_texts(client,models,'revision')
+  self.assertNotIn(b.loader.GENERATED_NAME,texts)
+  self.assertEqual(len(texts),14)
+  self.assertEqual(texts['unity-0.cpp'],'\n'.join('#include "'+str(p)+'"' for p in models[:16])+'\n')
+  old=Path('/old');fresh=Path('/fresh')
+  self.assertEqual(b.compile_flags(old,client)[7],'-I/old')
+  self.assertNotEqual(b.compile_flags(old,client),b.compile_flags(fresh,client))
+ def test_unexpected_version_bytes_and_directory_alias_rejected(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);folder=root/'inputs';folder.mkdir();texts=self.fixture(folder)
+   (folder/'ggml-version.h').write_bytes(b'ggml\r\n')
+   with self.assertRaisesRegex(ValueError,'differs'):b.verify_generated(folder,texts)
+   (folder/'ggml-version.h').write_bytes(texts['ggml-version.h'].encode());alias=root/'alias';alias.symlink_to(folder,target_is_directory=True)
+   with self.assertRaisesRegex(ValueError,'unsafe'):b.verify_generated(alias,texts)
+
 if __name__=='__main__':unittest.main()

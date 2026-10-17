@@ -19,10 +19,17 @@ storage. Next derive only the native loader staging through exception-safe
 paired `ggml_aligned_malloc/free`, preserving tensor validation and HIP uploads;
 prove it under a constrained ordinary heap before another fresh native candidate.
 
+The native-only derived loader now routes this staging through paired aligned
+ownership; constrained-heap, sanitizer and failure-path tests pass offline.
+The builder can reuse exact current-render generated input paths for ccache
+without accepting an old producer receipt. See
+`evidence/offline-native-loader-aligned-staging.json`. Native rebuild/audit
+and a new .40 candidate remain required.
+
 See `evidence/console40-full-model-load-allocation-failure.json`. Preserve
 consumed `results/source-public-llm-full-smoke-console-v1` and installed
 `build/llm-native-full-smoke-app-v1`; never replay this candidate. The new installed
-baseline is package `700c673e?`, not the previous selected-layer package. The
+baseline is package `700c673e179b111de7106297fb410667fc97505b76b9cbbeb59c8fe81c8aa894`, not the previous selected-layer package. The
 external model was hash-verified and reused. Portable all-22-layer numerical
 acceptance remains valid; native full-model acceptance remains open.
 
