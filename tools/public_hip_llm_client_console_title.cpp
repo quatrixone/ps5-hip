@@ -16,10 +16,13 @@
 #include "ps5_backend.h"
 #include "model_gate.h"
 #include "native_host_allocator.h"
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+#include "native_full.h"
+#endif
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
 #include "native_layer.h"
 #endif
-#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER || PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
 #include "native_prefix.h"
 #include <fcntl.h>
 #include <cerrno>
@@ -166,7 +169,7 @@ __attribute__((noinline)) static void model_memory_snapshot(const char* phase){
   std::printf("M0_APP MEMORY phase=%s pool_bytes=%llu largest_free_bytes=%llu total_free_bytes=unknown alignment=16384\n",
               phase,static_cast<unsigned long long>(pool),static_cast<unsigned long long>(largest));
 }
-enum class ClientPhase { vocab, model_gate, model_prefix, model_layer };
+enum class ClientPhase { vocab, model_gate, model_prefix, model_layer, model_full };
 static ClientPhase configured_model_phase(){
  std::ifstream file(std::string(title_root)+"client-phase.txt",std::ios::binary);
  if(!file.is_open())ps5hip_clr_gpu_fail("client-phase-open");
@@ -178,6 +181,7 @@ static ClientPhase configured_model_phase(){
  if(n==11&&std::memcmp(phase,"model-gate\n",11)==0)return ClientPhase::model_gate;
  if(n==13&&std::memcmp(phase,"model-prefix\n",13)==0)return ClientPhase::model_prefix;
  if(n==12&&std::memcmp(phase,"model-layer\n",12)==0)return ClientPhase::model_layer;
+ if(n==11&&std::memcmp(phase,"model-full\n",11)==0)return ClientPhase::model_full;
  ps5hip_clr_gpu_fail("client-phase-config");
 }
 static std::string configured_model_path(const std::string& config_path){
@@ -201,7 +205,7 @@ static std::string configured_model_path(const std::string& config_path){
  }
  return path;
 }
-#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER || PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
 static void prefix_write(const char* filename,const void* data,size_t bytes,void* state){
  const auto& directory=*static_cast<const std::string*>(state);
  const auto path=directory+"/"+filename;
@@ -244,7 +248,22 @@ int main() {
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
       const std::string model_path=configured_model_path(std::string(title_root)+"model-path.txt");
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
-      if(phase==ClientPhase::model_layer){
+      if(phase==ClientPhase::model_full){
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+        const std::array<const char*,6> modules={
+          "/system_ex/app/PPSA99014/model-layer/getrows.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/normalized.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/weighted.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/q8.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/q4.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/layer.hsaco"};
+        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::smoke);
+        m0::require(result.files==72&&result.bytes==949248&&result.full.requests==3&&result.full.completed_nodes==2394&&result.full.launches==2199);
+        m0::require(observed.launches==2199&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
+#else
+        ps5hip_clr_gpu_fail("model-full-not-authenticated");
+#endif
+      }else if(phase==ClientPhase::model_layer){
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
         const std::array<const char*,6> modules={
           "/system_ex/app/PPSA99014/model-layer/getrows.hsaco",
@@ -283,7 +302,7 @@ int main() {
       const auto host=ps5hip::llm::native_host_allocator_stats();
       m0::require(host.allocations>0&&host.allocations==host.releases&&
                   !host.live_allocations&&!host.live_requested_bytes&&!host.failures&&
-                  !host.poisoned&&host.peak_requested_bytes>=619094016);
+                  !host.poisoned&&(phase==ClientPhase::model_full?host.peak_requested_bytes>0:host.peak_requested_bytes>=619094016));
       std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false scope=ggml_aligned\n",
                   static_cast<unsigned long long>(host.allocations),
                   static_cast<unsigned long long>(host.releases),
@@ -294,7 +313,8 @@ int main() {
     }
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-    if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+    if(phase==ClientPhase::model_full)std::puts("M3_FULL APP_COMPLETE profile=smoke watchdog_joined=true numerical=pending finalization=pending inference=false");
+    else if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else std::puts("M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending");
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");

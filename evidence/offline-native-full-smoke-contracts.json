@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "classification": "offline-native-full-smoke-contracts",
+  "native_executed": false,
+  "gpu_executed": false,
+  "profile": "smoke",
+  "requests": 3,
+  "layers": 22,
+  "logits": 32000,
+  "raw_files": 72,
+  "raw_bytes": 949248,
+  "tests": {
+    "full_assets": 21,
+    "native_audit": 35,
+    "full_freezer": 24,
+    "full_controller": 11,
+    "full_transcript_methods": 2,
+    "full_readbacks": 6,
+    "native_title": 3,
+    "app_builder": 19,
+    "make_routes": 14,
+    "historical_freezer_and_authentication": 93
+  },
+  "aggregate": {
+    "path": "results/m3-full-assets-v2/receipt.json",
+    "sha256": "faacecb963cb8cb377ecaf974714bb9a9cb8084c2603ccb810e0adbc6b7f5f1b"
+  },
+  "vocabulary": {
+    "path": "results/llm-vocab-fixture-v3/receipt.json",
+    "sha256": "417ef1790d536b14ef3248e0d694ca052df520f8a00ba7278ba9075ac99f8bee"
+  },
+  "source_sha256": {
+    "tools/audit_public_hip_llm_client_native.py": "eed94ef336a83bd07234cf82b92355266d6f0d681bf7834f81e676a45ec2a34b",
+    "tools/build_llm_native_app.py": "2e557acf8848b6d51dafa3068677b2416246a0eae2839009954461c66c973ce8",
+    "tools/build_public_hip.py": "41e745cf47ce696b56eaedbf4df467e8d8537b03e7a24526f18b92fc65da81a9",
+    "tools/freeze_source_candidate.py": "95345539d42de62185208536b6282775165efe9d0ab7d064c1758ae78b108117",
+    "tools/public_hip_llm_client_console_title.cpp": "a0fb49524ec46637ceb8e35912a6b3153a7ed4451fbdd302d8cb1a96c9432a75",
+    "tools/source_console.py": "24613dc9a2a55a6224b03ab6f6cd7b79b13b4157ce6f8969c65bb3a19bb07073",
+    "tools/source_model_freeze.py": "5434e25e95a3667618ea2115c1b871d0ad89a1e6448ee159a1d19fb023a67646",
+    "tools/build_public_hip_full_assets.py": "aad236c44fa75e71e0e135744ed04145513c1b32c0b424631bf7bbfc452b80f6",
+    "tools/public_hip_full_assets.py": "b250aface5e04e5fae155161df6725cc56882336963bd201032fee95ccb2bf90",
+    "tools/source_llm_full_log.py": "52c3f503ebdff297233966283806099d22be6c27afa1decb29fa9f8c2c2f7106",
+    "tools/verify_llm_full_readbacks.py": "63de3c7f735a142a4bb6a27e1f079a32697229e25ee29ae47dc78cf16633d924",
+    "Makefile": "bb0d21d45f8741b0d043289f63d3758f47a59bce4f47aae351694c0b2643e793",
+    "tests/llm_client_native_audit_test.py": "0144a62d0b1e1293abece82cb6b654d7cabf11accce82fe695f858c2842cade8",
+    "tests/llm_native_app_build_test.py": "3cf6eb0e1098796b31706a790c3f0cd6235e34da95b412f6381e2ad572500595",
+    "tests/llm_prefix_make_test.py": "2f4324a172a43b1947d8f92b821e07e054e2c088d5797f83692855616fac3e47",
+    "tests/llm_full_readbacks_test.py": "5a7cea9ec7b8f9769678c8ef73252ea05974223bd4c96a613cd3295c47f8cf63",
+    "tests/native_full_title_test.py": "6867894aa156ff8d1d4218242a4ae737bb685b31d20799fcc97a317122e09cfd",
+    "tests/native_full_transcript_test.py": "73f60741115ce7b3203b7ee5a8291a5992aa926626040beba49326d199480fe2",
+    "tests/public_hip_full_assets_test.py": "9b9dde430e6205fd79562a52ead521ec648ca2b1f58a221061b3351ca3390aea",
+    "tests/source_full_console_test.py": "ccedc551f558520b98f54ded2bdee3f93018fab1e6e8156c85fa2122751cf0a0",
+    "tests/source_model_full_freeze_test.py": "d79cacafc9ae9a1dcc5346ed3e5fe4a087c27f2b7bc61cbecd4863465bed66d9"
+  },
+  "limits": [
+    "Final full native image audit and package build pending",
+    "No console contact or full-model GPU numerical acceptance",
+    "Static call presence alone does not prove execution/dataflow"
+  ]
+}

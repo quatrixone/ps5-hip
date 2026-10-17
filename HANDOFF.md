@@ -68,6 +68,22 @@ profile already passed mock lifecycle testing with synthetic outputs; that
 result does not establish numerical accuracy. Native package audit, frozen
 candidate acceptance and .40 numerical validation remain pending.
 
+## Native full smoke preparation
+
+The `model-full` phase now packages the six authenticated modules and selects
+three real decoder requests (0/1/reset0), with 72 raw outputs and unchanged
+numerical gates. Full image audit, copied-reference freezer and controller
+routes have focused positive/negative tests and independent review. The
+extended auditor also accepts the preserved selected-layer image. This is
+source/control preparation, not acceptance of a newly linked full image.
+See `evidence/offline-native-full-smoke-contracts.json`.
+
+Reuse full assets `results/m3-full-assets-v2`, vocabulary v3, native client v6
+and CPU reference v3. Only the stale small vocabulary fixture was refreshed.
+Next build `build/llm-native-full-smoke-app-v1`, audit its actual final images,
+freeze a new candidate, and test .40 once idle. Local commands/baseline identities
+are in `results/m3-native-full-command-plan-v1.md`; no full console run yet.
+
 ## Full-decoder control flow (offline only)
 
 Full mode now configures llama's own backend instances, explicitly offloads

@@ -42,6 +42,31 @@ performance or native full-decoder acceptance. Validate the native smoke app
 on .40 before the long profile. The historical diagnoses below explain the
 failed arithmetic and remain separate evidence.
 
+## Native smoke profile
+
+The `model-full` package phase reads the external model at
+`/data/hip/models/tinyllama-q4_0.gguf`. It runs tokens 0/1, clears actual decoder
+memory and resets the backend, then repeats token 0. Its callback captures all
+24 boundaries for each request: 72 files / 949,248 bytes, 2,394 active nodes and
+2,199 launches. The native watchdog remains 120 seconds including model load.
+The 514-request profile is a separate helper qualification; it is not selected
+by the native title until elapsed time has been measured.
+
+`llm-full-assets` authenticates the six existing modules and the complete CPU
+reference without embedding the model. `llm-native-app LLM_NATIVE_APP_PHASE=model-full`
+uses that aggregate through `LLM_NATIVE_APP_FULL_FIXTURE`; the normal model,
+CPU build and output-directory overrides still apply. Use a fresh output and
+results directory. An existing receipt is authenticated rather than silently
+replaced; stale inputs require a fresh small fixture, not an unrelated full
+dependency rebuild.
+
+The full transcript parser checks real position commits, exact raw inventory,
+balanced owners, restored free extent and finalization. The controller then
+compares captured bytes against the frozen CPU reference using the same
+element/L2 limits above and requires exact reset equality. Transport success
+alone cannot establish native numerical acceptance. Commit and freeze the
+candidate before a single bounded .40 run.
+
 ## Historical failure (2026-10-17)
 
 `results/m3-full-numeric-v4/receipt.json` records 3 committed requests, 2,394 active nodes, 2,199 interpreted launches, 2,403 checked backend compute calls, zero CPU backend arithmetic, and 16 balanced allocations/frees. All 72 outputs were finite and reset repeated exactly. **59 outputs failed the unchanged numerical limits**, with final-layer relative L2 reaching about 6.97%. Receipt SHA-256: `0b0795363739b0a3b96dac73227ef0b5db40ee5cabc256702380517665c3978a`. That historical run used its bound local `results/m3-full-numeric-v4/run.py`; the portable producer above adds full CPU reference authentication and a failing process exit, without changing the numerical thresholds. Historical receipts are not rewritten.

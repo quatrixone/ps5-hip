@@ -13,7 +13,7 @@ def stream_digest(path):
   for b in iter(lambda:f.read(CHUNK),b''):h.update(b)
  return h.hexdigest()
 def model_contract(manifest):
- require(manifest.get('fixture')=='llm_client' and manifest.get('llm_client',{}).get('phase') in ('model-gate','model-prefix','model-layer'),'wrong model phase')
+ require(manifest.get('fixture')=='llm_client' and manifest.get('llm_client',{}).get('phase') in ('model-gate','model-prefix','model-layer','model-full'),'wrong model phase')
  model=manifest['llm_client']['model']
  require(model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA,'wrong locked model')
  t=manifest['model_transfer'];b=manifest['baseline_transfer']
@@ -85,10 +85,10 @@ def _validate_model_receipt(build,receipt):
  import sys
  sys.path.insert(0,str(ROOT/'tools'))
  import freeze_source_candidate as legacy
- phase=receipt.get('phase');prefix=phase in ('model-prefix','model-layer');kind='layer' if phase=='model-layer' else 'prefix'
+ phase=receipt.get('phase');prefix=phase in ('model-prefix','model-layer','model-full');kind='full' if phase=='model-full' else 'layer' if phase=='model-layer' else 'prefix'
  classification='source-only-model-'+kind+'-native-client-app' if prefix else 'source-only-model-rejection-native-client-app'
  require(receipt.get('schema')==1 and receipt.get('status')=='PASS' and receipt.get('classification')==classification,'wrong model receipt')
- require(receipt.get('fixture')=='llm_client' and phase in ('model-gate','model-prefix','model-layer') and receipt.get('native_executed') is False and receipt.get('gpu_executed') is False,'wrong phase/execution')
+ require(receipt.get('fixture')=='llm_client' and phase in ('model-gate','model-prefix','model-layer','model-full') and receipt.get('native_executed') is False and receipt.get('gpu_executed') is False,'wrong phase/execution')
  external=receipt.get('external_model');validate_external_model(external)
  bound=receipt['llm_client'];require(bound.get('phase')==phase,'wrong bound phase')
  inputs=receipt.get('inputs');require(isinstance(inputs,dict) and inputs,'missing input closure')
@@ -116,7 +116,7 @@ def _validate_model_receipt(build,receipt):
   h=stream_digest(path);require(audit_inputs.get(str(path))==h and inputs.get(str(path))==h,'missing audit identity')
  for name,h in audit_inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'audit input changed')
  app=build/'package/app';package=build/'package/PPSA99014.ffpkg'
- prefix_data=(layer_binding(bound,inputs) if kind=='layer' else prefix_binding(bound,inputs)) if prefix else None
+ prefix_data=_binding(bound,inputs,kind) if prefix else None
  names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model-path.txt'}|(set(prefix_data['assets']) if prefix else set())
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact model package assets required')
  require(type(receipt['package_bytes']) is int and 0<receipt['package_bytes']<=package_limit('llm_client') and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
@@ -134,10 +134,11 @@ def validate_model_receipt(build,receipt):
 def validator_identities():
  import sys,types,importlib
  driver=importlib.import_module('build_llm_native_app')
- pending=[importlib.import_module('public_hip_layer_assets'),importlib.import_module('build_llm_layer_reference'),importlib.import_module('verify_llm_layer_readbacks'),importlib.import_module('public_hip_prefix_assets'),importlib.import_module('build_llm_prefix_reference'),driver,importlib.import_module('freeze_source_candidate'),importlib.import_module('fetch_llm_model')]
+ pending=[importlib.import_module('public_hip_full_assets'),importlib.import_module('build_llm_full_model_reference'),importlib.import_module('verify_llm_full_readbacks'),importlib.import_module('public_hip_layer_assets'),importlib.import_module('build_llm_layer_reference'),importlib.import_module('verify_llm_layer_readbacks'),importlib.import_module('public_hip_prefix_assets'),importlib.import_module('build_llm_prefix_reference'),driver,importlib.import_module('freeze_source_candidate'),importlib.import_module('fetch_llm_model')]
  paths={Path(__file__).resolve(),ROOT/'tests/llm_native_app_build_test.py'}
  paths.update(ROOT/n for n in ('tools/build_public_hip_prefix_assets.py','tests/public_hip_prefix_assets_test.py','tests/source_model_prefix_freeze_test.py','tests/llm_prefix_reference_test.py','tests/source_prefix_console_test.py','tests/source_prefix_authentication_test.py','tools/source_llm_prefix_log.py','tools/verify_llm_prefix_readbacks.py','tests/native_prefix_transcript_test.py','tests/llm_prefix_readbacks_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_layer_assets.py','tools/build_public_hip_layer_assets.py','tools/build_llm_layer_reference.py','tools/source_llm_layer_raw.py','tools/source_llm_layer_log.py','tools/verify_llm_layer_readbacks.py','tests/source_model_layer_freeze_test.py','tests/llm_layer_reference_test.py','tests/public_hip_layer_assets_test.py','tests/native_layer_transcript_test.py','tests/llm_layer_readbacks_test.py','tests/source_layer_console_test.py','tests/source_layer_authentication_test.py'))
+ paths.update(ROOT/n for n in ('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tools/build_llm_full_model_reference.py','tools/build_llm_full_numeric_test.py','tools/source_llm_full_log.py','tools/verify_llm_full_readbacks.py','tests/source_model_full_freeze_test.py','tests/llm_full_model_reference_test.py','tests/public_hip_full_assets_test.py','tests/native_full_transcript_test.py','tests/llm_full_readbacks_test.py','tests/source_full_console_test.py'))
  paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
  seen=set()
@@ -169,8 +170,8 @@ def _validate_model_candidate(candidate,manifest,freeze_evidence=None):
  require(bound==manifest['llm_client'] and receipt['external_model']==manifest.get('external_model'),'manifest provenance differs')
  require(manifest['model_transfer']['bytes']==receipt['package_bytes'] and manifest['model_transfer']['sha256']==receipt['package_sha256'],'transfer identity differs')
  require(manifest['package_files']==receipt['package_files'],'manifest package inventory differs')
- if bound['phase'] in ('model-prefix','model-layer'):
-  kind='layer' if bound['phase']=='model-layer' else 'prefix'
+ if bound['phase'] in ('model-prefix','model-layer','model-full'):
+  kind='full' if bound['phase']=='model-full' else 'layer' if bound['phase']=='model-layer' else 'prefix'
   if freeze_evidence is None:
    authenticate=_reference_authenticator(kind)
    copied=authenticate(candidate/(kind+'-reference'))
@@ -200,7 +201,13 @@ def prefix_binding(bound,inputs):
 def layer_binding(bound,inputs):
  return _binding(bound,inputs,'layer')
 
+def full_binding(bound,inputs):
+ return _binding(bound,inputs,'full')
+
 def _reference_authenticator(kind):
+ if kind=='full':
+  from build_llm_full_model_reference import authenticate_full_model_reference
+  return authenticate_full_model_reference
  if kind=='layer':
   from build_llm_layer_reference import authenticate_layer_reference
   return authenticate_layer_reference
@@ -208,17 +215,24 @@ def _reference_authenticator(kind):
  return authenticate_prefix_reference
 
 def _binding(bound,inputs,kind):
- if kind=='layer':
+ if kind=='full':
+  from public_hip_full_assets import full_inputs as aggregate_inputs
+ elif kind=='layer':
   from public_hip_layer_assets import layer_inputs as aggregate_inputs
  else:
   from public_hip_prefix_assets import prefix_inputs as aggregate_inputs
  link=bound.get(kind,{})
- require(set(link)=={'receipt','receipt_sha256','reference'},'prefix binding fields differ')
+ require(set(link)==({'receipt','receipt_sha256','reference','profile'} if kind=='full' else {'receipt','receipt_sha256','reference'}),'prefix binding fields differ')
+ if kind=='full':require(link['profile']=='smoke','full profile differs')
  receipt=Path(link['receipt'])
  require(receipt.is_absolute() and receipt.name=='receipt.json' and receipt.is_relative_to(ROOT),'prefix aggregate path differs')
  data=aggregate_inputs(receipt.parent)
  require({k:data[k] for k in link}==link,'prefix aggregate binding differs')
- require(set(data['assets'])=={'model-'+kind+'/'+n+'.hsaco' for n in (LAYER_MODULES if kind=='layer' else PREFIX_MODULES)},'prefix exact five modules required')
+ asset_kind='layer' if kind=='full' else kind
+ require(set(data['assets'])=={'model-'+asset_kind+'/'+n+'.hsaco' for n in (LAYER_MODULES if kind in ('layer','full') else PREFIX_MODULES)},'prefix exact modules required')
+ if kind=='full':
+  from source_llm_full_log import FILES as FULL_FILES
+  require(data.get('raw_files')==FULL_FILES,'full raw inventory differs')
  model=bound['model']
  require(data['model']=={'path':str(Path(model['asset']).resolve()),'bytes':model['bytes'],'sha256':model['sha256']},'prefix model identity differs')
  require(all(inputs.get(p)==h for p,h in data['inputs'].items()),'prefix closure omitted')
@@ -238,6 +252,10 @@ def frozen_layer_manifest(candidate,bound,inputs):
  data=layer_binding(bound,inputs)
  return _frozen_reference_manifest(candidate,data,_reference_authenticator('layer')(candidate/'layer-reference'),'layer')
 
+def frozen_full_manifest(candidate,bound,inputs):
+ data=full_binding(bound,inputs)
+ return _frozen_reference_manifest(candidate,data,_reference_authenticator('full')(candidate/'full-reference'),'full')
+
 def _frozen_reference_manifest(candidate,data,authenticated,kind):
  """Construct from local authentication evidence; recheck exact copied bytes."""
  from source_llm_layer_raw import FILES
@@ -252,7 +270,15 @@ def _frozen_reference_manifest(candidate,data,authenticated,kind):
  require(set(files)==expected,'frozen prefix reference inventory differs')
  require(sum(p.stat().st_size for p in files.values())<=PREFIX_REFERENCE_LIMIT,'prefix reference too large')
  for name,path in files.items():require(stream_digest(path)==closure[name],'frozen prefix reference file changed')
- return {'aggregate':str(Path(data['receipt']).relative_to(ROOT)),'aggregate_sha256':data['receipt_sha256'],
+ asset_kind='layer' if kind=='full' else kind
+ raw_files=FILES if kind=='layer' else PREFIX_RAW_FILES
+ if kind=='full':
+  from source_llm_full_log import FILES as FULL_FILES
+  require(data.get('profile')=='smoke','full profile differs')
+  raw_files=FULL_FILES
+ result={'aggregate':str(Path(data['receipt']).relative_to(ROOT)),'aggregate_sha256':data['receipt_sha256'],
          'reference':str(reference.relative_to(ROOT)),'reference_receipt_sha256':copied['receipt_sha256'],
-         'module_sha256':{n:stream_digest(data['assets']['model-'+kind+'/'+n+'.hsaco']) for n in (LAYER_MODULES if kind=='layer' else PREFIX_MODULES)},
-         'raw_files':dict(FILES if kind=='layer' else PREFIX_RAW_FILES)}
+         'module_sha256':{n:stream_digest(data['assets']['model-'+asset_kind+'/'+n+'.hsaco']) for n in (LAYER_MODULES if kind in ('layer','full') else PREFIX_MODULES)},
+         'raw_files':dict(raw_files)}
+ if kind=='full':result['profile']='smoke'
+ return result

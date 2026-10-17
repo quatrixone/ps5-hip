@@ -6,6 +6,15 @@ class Driver(unittest.TestCase):
  def test_phase_exact(self):
   with tempfile.TemporaryDirectory() as name:
    p=Path(name)/'phase';d.write_phase(p);self.assertEqual(p.read_bytes(),b'vocab\n')
+ def test_full_phase_requires_its_own_fixture(self):
+  with tempfile.TemporaryDirectory() as name:
+   p=Path(name)/'phase';d.write_phase(p,'model-full');self.assertEqual(p.read_bytes(),b'model-full\n')
+  d.validate_phase_arguments('model-full','model','source','cpu',full_fixture='full')
+  for phase in ('vocab','model-gate','model-prefix','model-layer'):
+   with self.assertRaisesRegex(ValueError,'full fixture'):
+    d.validate_phase_arguments(phase,'model','source','cpu',full_fixture='full')
+  with self.assertRaisesRegex(ValueError,'full fixture'):d.validate_phase_arguments('model-full','model','source','cpu')
+  with self.assertRaisesRegex(ValueError,'prerequisites'):d.validate_phase_arguments('model-full',None,'source','cpu',full_fixture='full')
  def test_outputs_never_treated_as_input(self):
   with tempfile.TemporaryDirectory() as name:
    folder=Path(name);a=folder/'input';o=folder/'output';dep=folder/'out.d'

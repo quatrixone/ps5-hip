@@ -105,6 +105,15 @@ class FullExecutionMake(unittest.TestCase):
    self.assertIn('tools/'+script,text)
    self.assertNotIn('build_llm_native_app.py',text)
    self.assertNotIn('source_console.py',text)
+ def test_full_native_phase_uses_its_own_aggregate(self):
+  with tempfile.TemporaryDirectory() as directory:
+   receipt=Path(directory)/'receipt.json';receipt.write_text('{}')
+   text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-full','LLM_NATIVE_APP_FULL_FIXTURE='+directory)
+  self.assertIn('--phase "model-full"',text)
+  self.assertIn('--full-fixture "'+directory+'"',text)
+  self.assertNotIn('--layer-fixture',text)
+  self.assertNotIn('--prefix-fixture',text)
+  self.assertLess(text.index('tests/public_hip_full_assets_test.py'),text.index('tools/build_llm_native_app.py'))
  def test_numerical_target_preserves_selected_reference(self):
   with tempfile.TemporaryDirectory() as directory:
    receipt=Path(directory)/'receipt.json';receipt.write_text('{}')

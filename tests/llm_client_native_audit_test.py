@@ -266,4 +266,72 @@ class LayerAudit(unittest.TestCase):
   bad=dict(bodies);bad[roles['launch']]=bad[roles['launch']].replace('counter','unconnected')
   with self.assertRaises(RuntimeError):a.layer_contract(bad,roles,dispatch)
 
+class Full(unittest.TestCase):
+ @staticmethod
+ def instructions(template,base,offsets=None,targets=None):
+  source=template.splitlines();offsets=offsets or [i*6 for i in range(len(source))];targets=targets or {}
+  lines=[]
+  for i,line in enumerate(source):
+   op,*tail=line.split(' ',1);arg=tail[0] if tail else ''
+   if op.startswith('j') and arg!='*%rax':arg='0x'+format(base+int(arg,16),'x')
+   elif op=='call':op='callq';arg='0x9000 <target>'
+   elif 'RIP' in arg:
+    target=targets.get(i,0x8000);disp=target-base-offsets[i+1]
+    arg=arg.replace('RIP',('-' if disp<0 else '')+hex(abs(disp))+'(%rip)')+' # '+hex(target)
+   lines.append(f'{base+offsets[i]:x}: {op} {arg}')
+  return '\n'.join(lines)+'\n'
+ def wrapper_fixture(self):
+  lines=a.FULL_WRAPPER_TEMPLATE.splitlines();index=lines.index('testb $0x1, RIP');offsets=[i*6 for i in range(len(lines))];offsets[index:index+2]=[0x2d,0x34]
+  return self.instructions(a.FULL_WRAPPER_TEMPLATE,0x1000,offsets,{index:0x8000}),list(enumerate(a.FULL_WRAPPER_CALLS))
+ def test_full_wrapper_requires_exact_control_flow_and_calls(self):
+  body,calls=self.wrapper_fixture();a.full_wrapper_contract(body,0x1000,calls,0x8000)
+  for before,after in [('jge ','jl '),('sete ','setne '),('$0x31e','$0x31f'),('movl $0x0, -0x4','movl $0x1, -0x4')]:
+   with self.subTest(before=before),self.assertRaises(RuntimeError):a.full_wrapper_contract(body.replace(before,after,1),0x1000,calls,0x8000)
+  for changed in (calls[:-1],calls+[(1000,'bypass')],list(enumerate(reversed(a.FULL_WRAPPER_CALLS)))):
+   with self.assertRaises(RuntimeError):a.full_wrapper_contract(body,0x1000,changed,0x8000)
+  with self.assertRaises(RuntimeError):a.full_wrapper_contract(body,0x1000,calls,0x8001)
+ def test_full_supported_opcode_table(self):
+  offsets=[0,5,0xa,0x11,0x17,0x1d,0x23,0x28,0x2d,0x32,0x35,0x3a,0x3e,0x44,0x49,0x50,0x54,0x57,0x59,0x5e,0x63,0x68,0x6c,0x6e,0x71]
+  body=self.instructions(a.FULL_SUPPORT_TEMPLATE,0x2000,offsets,{2:0x8000,14:0x9000})
+  table=struct.pack('<101i',*[0x2000+(0x59 if i in a.FULL_OPS else 0x63)-0x9000 for i in range(101)])
+  def reader(addr,size):self.assertEqual((addr,size),(0x9000,404));return table,None
+  self.assertEqual(a.full_support_contract(body,0x2000,reader,0x8000),0x9000)
+  for op in range(101):
+   changed=bytearray(table);struct.pack_into('<i',changed,4*op,0x2000+(0x63 if op in a.FULL_OPS else 0x59)-0x9000)
+   with self.subTest(op=op),self.assertRaises(RuntimeError):a.full_support_contract(body,0x2000,lambda *_:(bytes(changed),None),0x8000)
+  with self.assertRaises(RuntimeError):a.full_support_contract(body.replace('ja ','jge ',1),0x2000,reader,0x8000)
+ def test_full_global_and_mode_store_targets(self):
+  body='1000: movb $0x1, 0xff9(%rip) # 0x2000\n1007: retq\n'
+  a.full_global_bindings(body,0x1000,{0:('enabled',0)},lambda _:0x2000)
+  a.full_mode_store(body,0x2000,1)
+  with self.assertRaises(RuntimeError):a.full_global_bindings(body,0x1000,{0:('enabled',0)},lambda _:0x3000)
+  with self.assertRaises(RuntimeError):a.full_mode_store(body,0x2000,0)
+  with self.assertRaises(RuntimeError):a.full_mode_store(body+body,0x2000,1)
+ @staticmethod
+ def smoke_body():
+  return '10: movq %rsp, %rax\n13: movq %rcx, (%rax)\n16: movl $0x1, 0x8(%rax)\n1d: leaq 0x30(%rip), %rcx\n24: movq %rbx, %r9\n27: leaq 0xc0(%rsp), %rdi\n2f: leaq 0xf0(%rsp), %rdx\n37: leaq 0x218(%rsp), %r8\n40: callq 0x9000 <run>\n'
+ def test_smoke_argument_not_long_or_overwritten(self):
+  body=self.smoke_body();a.full_smoke_operand(body,'run')
+  for changed in (body.replace('$0x1','$0x0'),body.replace('0x8(%rax)','0x10(%rax)'),body.replace('40: callq','38: movl $0x0, 0x8(%rsp)\n40: callq'),body+body):
+   with self.assertRaises(RuntimeError):a.full_smoke_operand(changed,'run')
+ def contract_fixture(self):
+  names=('run enable disable reset context_reset model_reset readback writer graph backend_init release begin finish execute initialize shutdown controls select node launch read dispatch_reset').split();roles={n:n for n in names}
+  bodies={n:'' for n in names};bodies['main']=self.smoke_body();bodies[a.WRAPPER]=''
+  for caller,targets in a.full_edges(roles).items():
+   if caller!='main':bodies[caller]=''.join(f'{i*8+10:x}: callq 0x9000 <{t}>\n' for i,t in enumerate(targets))
+  for role,apis in [('initialize',('hipModuleLoad','hipModuleGetFunction','hipMalloc')),('shutdown',('hipFree','hipModuleUnload','hipDeviceSynchronize')),('launch',('hipModuleLaunchKernel','hipDeviceSynchronize')),('read',('hipMemcpy',))]:
+   bodies[role]+=''.join(f'{i*8+100:x}: callq 0x9000 <{t}>\n' for i,t in enumerate(apis))
+  return bodies,roles,[roles[n] for n in ('begin','finish','execute','initialize','shutdown','controls','node','launch','read','dispatch_reset')]
+ def test_full_real_scheduler_reset_cleanup_and_hip_edges(self):
+  bodies,roles,dispatch=self.contract_fixture();a.full_contract(bodies,roles,dispatch)
+  for caller,targets in a.full_edges(roles).items():
+   for target in targets:
+    bad=dict(bodies);bad[caller]=bad[caller].replace('<'+target+'>','<wrong>')
+    with self.subTest(caller=caller,target=target),self.assertRaises(RuntimeError):a.full_contract(bad,roles,dispatch)
+  bad=dict(bodies);bad['run']=bad['run'].replace('<llama_memory_clear>','<temporary>').replace('<reset>','<llama_memory_clear>').replace('<temporary>','<reset>')
+  with self.assertRaises(RuntimeError):a.full_contract(bad,roles,dispatch)
+  for caller in dispatch:
+   bad=dict(bodies);bad[caller]+='900: callq 0x9000 <ggml_backend_cpu_init>\n'
+   with self.assertRaises(RuntimeError):a.full_contract(bad,roles,dispatch)
+
 if __name__=='__main__':unittest.main()

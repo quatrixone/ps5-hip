@@ -176,10 +176,10 @@ class Control:
         return result
 
     def model_phase(self):
-        return getattr(self,'fixture',None) == 'llm_client' and self.manifest.get('llm_client', {}).get('phase') in ('model-gate','model-prefix','model-layer')
+        return getattr(self,'fixture',None) == 'llm_client' and self.manifest.get('llm_client', {}).get('phase') in ('model-gate','model-prefix','model-layer','model-full')
 
     def prefix_phase(self):
-        return self.model_phase() and self.manifest['llm_client']['phase'] in ('model-prefix','model-layer')
+        return self.model_phase() and self.manifest['llm_client']['phase'] in ('model-prefix','model-layer','model-full')
 
     def authenticate_llm_client(self):
         if self.model_phase():
@@ -332,11 +332,16 @@ class Control:
         (self.out / (name + '.log')).write_bytes(raw)
         return raw
 
+    def full_phase(self):
+        return self.model_phase() and self.manifest['llm_client']['phase']=='model-full'
+
     def layer_phase(self):
         return self.model_phase() and self.manifest['llm_client']['phase']=='model-layer'
 
     def compute_contract(self):
-        if self.layer_phase():
+        if self.full_phase():
+            import source_llm_full_log as contract
+        elif self.layer_phase():
             import source_llm_layer_log as contract
         else:
             import source_llm_prefix_log as contract
@@ -348,7 +353,12 @@ class Control:
         import verify_llm_prefix_readbacks
         import build_llm_prefix_reference
         import public_hip_prefix_assets
-        if self.layer_phase():
+        if self.full_phase():
+            import source_llm_full_log
+            import verify_llm_full_readbacks
+            import build_llm_full_model_reference
+            import public_hip_full_assets
+        elif self.layer_phase():
             import source_llm_layer_log
             import verify_llm_layer_readbacks
             import build_llm_layer_reference
@@ -653,7 +663,7 @@ class Control:
         if not self.prefix_phase():return
         FILES=self.compute_contract().FILES
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
-        require(not any((n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() else n.startswith('token-') and n.endswith('.f32le')) for n in names),'prefix raw files already exist')
+        require(not any((n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else n.startswith('token-') and n.endswith('.f32le')) for n in names),'prefix raw files already exist')
         self.record['prefix_raw_absent_before_launch']=sorted(FILES)
 
     def collect_prefix_dumps(self,partial=False):
@@ -665,7 +675,7 @@ class Control:
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
         records=self.record.setdefault('prefix_raw_files',{})
         folder=self.out/'raw';folder.mkdir(exist_ok=True)
-        if not partial:require({n for n in names if (n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() else n.startswith('token-') and n.endswith('.f32le'))}==set(FILES),'prefix raw inventory differs')
+        if not partial:require({n for n in names if (n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else n.startswith('token-') and n.endswith('.f32le'))}==set(FILES),'prefix raw inventory differs')
         for name,size in FILES.items():
             if name in records or (partial and name not in names):continue
             remaining=self.prefix_capture_deadline-time.monotonic()
@@ -686,12 +696,14 @@ class Control:
 
     def verify_prefix_dumps(self):
         if not self.prefix_phase():return
-        if self.layer_phase():
+        if self.full_phase():
+            from verify_llm_full_readbacks import verify
+        elif self.layer_phase():
             from verify_llm_layer_readbacks import verify
         else:
             from verify_llm_prefix_readbacks import verify
         output=self.out/'prefix-numerical.json'
-        binding=self.manifest['model_layer' if self.layer_phase() else 'model_prefix']
+        binding=self.manifest['model_full' if self.full_phase() else 'model_layer' if self.layer_phase() else 'model_prefix']
         result=verify(ROOT/binding['reference'],self.out/'raw',output)
         require(result.get('status')=='PASS' and result.get('raw_files')==len(self.compute_contract().FILES) and result.get('raw_bytes')==sum(self.compute_contract().FILES.values()),'prefix numerical verification failed')
         require(result.get('reference_receipt_sha256')==binding['reference_receipt_sha256'],'prefix numerical reference differs')
@@ -891,6 +903,9 @@ class Control:
         return 150 if self.model_phase() else 40
 
     def check_application(self, raw):
+        if self.full_phase():
+            from source_llm_full_log import check_full_log
+            return check_full_log(raw)
         if self.layer_phase():
             from source_llm_layer_log import check_layer_log
             return check_layer_log(raw)

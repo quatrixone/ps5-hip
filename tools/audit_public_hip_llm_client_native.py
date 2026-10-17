@@ -40,6 +40,14 @@ ALLOCATOR_SOURCES=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_hos
  'tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h',
  'tools/prepare_llm_native_scheduler.py']
 
+# Reviewed current LLVM18 O0 full-capable wrapper; RIP targets and calls are checked separately.
+FULL_WRAPPER_TEMPLATE='pushq %rbp\nmovq %rsp, %rbp\nsubq $0xc0, %rsp\nmovq %rdi, -0x10(%rbp)\nmovq %rsi, -0x18(%rbp)\nmovq -0x18(%rbp), %rax\nmovq %rax, RIP\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\ntestb $0x1, RIP\nje 334\nmovb RIP, %al\nxorb $-0x1, %al\nmovzbl %al, %edi\nandl $0x1, %edi\ncall\nmovq $0x0, -0x20(%rbp)\nmovl $0x0, -0x24(%rbp)\nmovl -0x24(%rbp), %eax\nmovl %eax, -0x6c(%rbp)\nmovq -0x18(%rbp), %rdi\ncall\nmovl %eax, %ecx\nmovl -0x6c(%rbp), %eax\ncmpl %ecx, %eax\njge 1a4\nmovq -0x18(%rbp), %rdi\nmovl -0x24(%rbp), %esi\ncall\nmovq %rax, -0x30(%rbp)\nmovq -0x30(%rbp), %rax\nmovl 0x94(%rax), %eax\nandl $0x10, %eax\ncmpl $0x0, %eax\njne a5\njmp 196\nmovq -0x10(%rbp), %rdi\nmovq -0x30(%rbp), %rsi\ncall\nmovq %rax, -0x38(%rbp)\ncmpq $0x0, -0x38(%rbp)\nje f6\nleaq RIP, %rdi\nleaq -0x38(%rbp), %rsi\ncall\ncmpq $0x0, %rax\nje f6\ncmpq $0x0, -0x20(%rbp)\nje 18e\nmovq -0x20(%rbp), %rax\ncmpq -0x38(%rbp), %rax\nje 18e\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovq RIP, %rax\nmovq (%rax), %rax\nmovq %rax, -0x88(%rbp)\nmovl -0x24(%rbp), %eax\nmovl %eax, -0x7c(%rbp)\nmovq -0x30(%rbp), %rax\naddq $0x100, %rax\nmovq %rax, -0x78(%rbp)\ncmpq $0x0, -0x38(%rbp)\nje 14b\nmovq -0x38(%rbp), %rdi\ncall\nmovq %rax, -0x90(%rbp)\njmp 15e\nleaq RIP, %rax\nmovq %rax, -0x90(%rbp)\njmp 15e\nmovq -0x78(%rbp), %rcx\nmovl -0x7c(%rbp), %edx\nmovq -0x88(%rbp), %rdi\nmovq -0x90(%rbp), %r8\nleaq RIP, %rsi\nmovb $0x0, %al\ncall\nmovl $0xffffffff, -0x4(%rbp)\njmp 4bb\nmovq -0x38(%rbp), %rax\nmovq %rax, -0x20(%rbp)\nmovl -0x24(%rbp), %eax\naddl $0x1, %eax\nmovl %eax, -0x24(%rbp)\njmp 5c\ncmpq $0x0, -0x20(%rbp)\njne 1ca\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl $0xffffffff, -0x4(%rbp)\njmp 4bb\nleaq RIP, %rdi\nleaq RIP, %rax\nleaq -0x20(%rbp), %rsi\ncall\nmovq (%rax), %rax\nmovq %rax, -0x40(%rbp)\nmovq -0x40(%rbp), %rdi\nmovq -0x18(%rbp), %rsi\ncall\nmovb %al, -0x91(%rbp)\njmp 1fd\nmovb -0x91(%rbp), %al\ntestb $0x1, %al\njne 257\njmp 210\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl $0xffffffff, -0x4(%rbp)\njmp 4bb\nmovq %rax, %rcx\nmovl %edx, %eax\nmovq %rcx, -0x48(%rbp)\nmovl %eax, -0x4c(%rbp)\nmovq -0x48(%rbp), %rdi\ncall\nleaq RIP, %rdi\nleaq RIP, %rax\ncall\njmp 255\nud2\nmovb $0x1, RIP\nmovl RIP, %eax\nincl %eax\nmovl %eax, RIP\nmovq -0x10(%rbp), %rdi\nmovq -0x18(%rbp), %rsi\nleaq RIP, %rax\ncall\nmovl %eax, -0x98(%rbp)\njmp 288\nmovl -0x98(%rbp), %eax\nmovl %eax, -0x50(%rbp)\nmovq -0x40(%rbp), %rdi\nmovl -0x50(%rbp), %eax\ntestl %eax, %eax\nsete %al\nmovzbl %al, %esi\ncall\nmovb %al, -0x99(%rbp)\njmp 2b0\nmovb -0x99(%rbp), %al\nandb $0x1, %al\nmovb %al, -0x51(%rbp)\nmovb $0x0, RIP\ntestb $0x1, -0x51(%rbp)\njne 2e7\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl $0xffffffff, -0x4(%rbp)\njmp 4bb\nmovq RIP, %rax\naddq $0x1, %rax\nmovq %rax, RIP\nmovq RIP, %rax\naddq $0x31e, %rax\nmovq %rax, RIP\nmovl $0x0, -0x4(%rbp)\njmp 4bb\nmovq %rax, %rcx\nmovl %edx, %eax\nmovq %rcx, -0x48(%rbp)\nmovl %eax, -0x4c(%rbp)\ncall\njmp 32f\njmp 4c7\ncmpq $0x0, RIP\nje 34b\nmovq -0x18(%rbp), %rdi\ncall\ncmpq $0x0, RIP\nje 362\nmovq -0x18(%rbp), %rdi\ncall\nmovl $0x0, -0x58(%rbp)\nmovl -0x58(%rbp), %eax\nmovl %eax, -0xa0(%rbp)\nmovq -0x18(%rbp), %rdi\ncall\nmovl %eax, %ecx\nmovl -0xa0(%rbp), %eax\ncmpl %ecx, %eax\njge 49b\nmovq -0x18(%rbp), %rdi\nmovl -0x58(%rbp), %esi\ncall\nmovq %rax, -0x60(%rbp)\nmovq -0x10(%rbp), %rdi\nmovq -0x60(%rbp), %rsi\ncall\nmovq %rax, -0x68(%rbp)\ncmpq $0x0, -0x68(%rbp)\nje 3fc\nmovq -0x68(%rbp), %rdi\ncall\nmovq %rax, -0xa8(%rbp)\ncall\nmovq %rax, %rcx\nmovq -0xa8(%rbp), %rax\ncmpq %rcx, %rax\njne 3fc\ncall\nmovq %rax, %rdi\nmovq -0x60(%rbp), %rsi\ncall\ntestb $0x1, %al\njne 488\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovl -0x58(%rbp), %eax\nmovl %eax, -0xb4(%rbp)\nmovq -0x60(%rbp), %rdi\ncall\nmovq %rax, -0xb0(%rbp)\ncmpq $0x0, -0x68(%rbp)\nje 446\nmovq -0x68(%rbp), %rdi\ncall\nmovq %rax, -0xc0(%rbp)\njmp 459\nleaq RIP, %rax\nmovq %rax, -0xc0(%rbp)\njmp 459\nmovq -0xb0(%rbp), %rdx\nmovl -0xb4(%rbp), %esi\nmovq -0xc0(%rbp), %rcx\nleaq RIP, %rdi\nmovb $0x0, %al\ncall\nmovl $0xffffffff, -0x4(%rbp)\njmp 4bb\njmp 48d\nmovl -0x58(%rbp), %eax\naddl $0x1, %eax\nmovl %eax, -0x58(%rbp)\njmp 369\nmovl RIP, %eax\naddl $0x1, %eax\nmovl %eax, RIP\nmovq -0x10(%rbp), %rdi\nmovq -0x18(%rbp), %rsi\ncall\nmovl %eax, -0x4(%rbp)\nmovl -0x4(%rbp), %eax\naddq $0xc0, %rsp\npopq %rbp\nretq\nmovq -0x48(%rbp), %rdi\ncall\nud2\nmovq %rax, %rdi\ncall\nud2\n'
+FULL_SUPPORT_TEMPLATE='movq %rdi, -0x10(%rsp)\nmovq %rsi, -0x18(%rsp)\ntestb $0x1, RIP\nje 23\ncmpq $0x0, -0x18(%rsp)\njne 2d\nmovb $0x0, -0x1(%rsp)\njmp 68\nmovq -0x18(%rsp), %rax\nmovl 0x50(%rax), %eax\nmovq %rax, -0x20(%rsp)\nsubq $0x64, %rax\nja 63\nmovq -0x20(%rsp), %rax\nleaq RIP, %rcx\nmovslq (%rcx,%rax,4), %rax\naddq %rcx, %rax\njmpq *%rax\nmovb $0x1, -0x1(%rsp)\njmp 68\nmovb $0x0, -0x1(%rsp)\nmovb -0x1(%rsp), %al\nandb $0x1, %al\nmovzbl %al, %eax\nretq\n'
+FULL_WRAPPER_CALLS=['_ZN2m07requireEb', 'ggml_graph_n_nodes', 'ggml_graph_node', 'ggml_backend_sched_get_tensor_backend', '_ZNKSt3__13mapIP12ggml_backendPN11ps5hip_full8DispatchENS_4lessIS2_EENS_9allocatorINS_4pairIKS2_S5_EEEEE5countB8ne180100ERSA_', 'ggml_backend_name', 'fprintf', '_ZNSt3__13mapIP12ggml_backendPN11ps5hip_full8DispatchENS_4lessIS2_EENS_9allocatorINS_4pairIKS2_S5_EEEEE2atERSA_', '_ZN11ps5hip_full8Dispatch5beginEP11ggml_cgraph', '__cxa_begin_catch', 'ps5hip_llm_fail', 'ggml_backend_sched_graph_compute_async', '_ZN11ps5hip_full8Dispatch6finishEb', '__cxa_end_catch', '_ZN2m0L21qualify_actual_prefixEP11ggml_cgraph', '_ZN2m0L20qualify_actual_layerEP11ggml_cgraph', 'ggml_graph_n_nodes', 'ggml_graph_node', 'ggml_backend_sched_get_tensor_backend', 'ggml_backend_get_device', '_ZN2m013device_handleEv', '_ZN2m013device_handleEv', '_ZN2m0L8supportsEP19ggml_backend_devicePK11ggml_tensor', 'ggml_op_desc', 'ggml_backend_name', 'printf', 'ggml_backend_sched_graph_compute_async', '_Unwind_Resume', '__clang_call_terminate']
+FULL_GLOBAL_TARGETS={23: ('_ZN2m0L10last_graphE', 0), 30: ('_ZN2m0L10gate_callsE', 0), 39: ('_ZN2m0L10gate_callsE', 0), 45: ('_ZN2m0L12full_enabledE', 0), 58: ('_ZN2m0L11full_activeE', 0), 194: ('_ZN2m0L13full_backendsE', 0), 246: ('_ZN2m0L8rejectedE', 0), 255: ('_ZN2m0L8rejectedE', 0), 431: ('_ZN2m0L8rejectedE', 0), 440: ('_ZN2m0L8rejectedE', 0), 458: ('_ZN2m0L13full_backendsE', 0), 528: ('_ZN2m0L8rejectedE', 0), 537: ('_ZN2m0L8rejectedE', 0), 599: ('_ZN2m0L11full_activeE', 0), 606: ('_ZN2m0L23scheduled_compute_callsE', 0), 614: ('_ZN2m0L23scheduled_compute_callsE', 0), 699: ('_ZN2m0L11full_activeE', 0), 716: ('_ZN2m0L8rejectedE', 0), 725: ('_ZN2m0L8rejectedE', 0), 743: ('_ZN2m0L10full_statsE', 0), 754: ('_ZN2m0L10full_statsE', 0), 761: ('_ZN2m0L10full_statsE', 8), 774: ('_ZN2m0L10full_statsE', 8), 820: ('_ZN2m0L12prefix_scopeE', 0), 843: ('_ZN2m0L11layer_scopeE', 0), 1020: ('_ZN2m0L8rejectedE', 0), 1029: ('_ZN2m0L8rejectedE', 0), 1179: ('_ZN2m0L23scheduled_compute_callsE', 0), 1188: ('_ZN2m0L23scheduled_compute_callsE', 0)}
+FULL_OPS=frozenset((0,1,2,7,25,29,35,36,37,38,40,42,46,48,100))
+FULL_SOURCES=["ports/ggml/native_full.h","ports/ggml/full_qualification.h","ports/ggml/full_dispatch.h","ports/ggml/full_graph.h","tests/llm_native_full_test.cpp","tests/native_full_title_test.py"]
+
 def threadpool_indirect_malloc(body,target):
  # Exact observed LLVM18 O0 prefix: RIP-relative wrapper address, pool size,
  # then indirect call. Resolve the LEA using its actual next instruction address.
@@ -139,7 +147,7 @@ def lifecycle_imports(imports):
  return {name:expected for name in ('atexit','_init_env','printf')}
 
 def phase_contract(phase,model_gate,chain,bodies):
- require(phase in ('vocab','model-gate','model-prefix','model-layer'),'unknown client phase')
+ require(phase in ('vocab','model-gate','model-prefix','model-layer','model-full'),'unknown client phase')
  if phase=='vocab':
   require(model_gate is None,'model gate retained in vocabulary phase')
   return
@@ -234,7 +242,12 @@ def layer_edges(r):
   r['readback']:[r['dump']],r['dump']:['ggml_backend_tensor_get'],r['fail']:['ps5hip_llm_fail']}
 
 def layer_contract(bodies,r,dispatch_names):
- for caller,targets in layer_edges(r).items():
+ edges=layer_edges(r)
+ node=[n for n in dispatch_names if n.startswith('_ZN12ps5hip_layer8Dispatch12execute_nodeE')]
+ if node:
+  require(len(node)==1,'ambiguous layer node dispatcher')
+  edges[r['execute']]=[r['preflight'],node[0]];edges[node[0]]=[r['launch']]
+ for caller,targets in edges.items():
   for callee in targets:require(symbol_calls(bodies[caller],callee),'layer call missing: '+caller+' -> '+callee)
  ordered_calls(bodies[r['run']],[r['configure'],'llama_model_load_from_file','llama_init_from_model','llama_process',r['disable'],'ggml_backend_free'])
  ordered_calls(bodies[LAYER_HOOK],[r['select'],r['weights'],r['cache'],r['materialize'],'ggml_backend_graph_compute','ggml_backend_buffer_free','ggml_free'])
@@ -254,16 +267,115 @@ def layer_contract(bodies,r,dispatch_names):
   for bypass in ('ggml_backend_cpu_init','ggml_backend_sched_graph_compute_async','__real_ggml_backend_sched_graph_compute_async'):
    require(not symbol_calls(bodies[caller],bypass),'layer CPU/scheduler fallback call')
 
+def full_normalized(body,base):
+ # Only supports' reviewed jump-table branch has an indirect jump.
+ marker='jmpq *%rax'
+ transformed=re.sub(r'jmpq\s+\*%rax', 'full_indirect_jump',body)
+ return normalized_wrapper(transformed,base).replace('full_indirect_jump',marker)
+
+def rip_references(body):
+ rows=list(re.finditer(r'^\s*([0-9a-f]+):\s+(.*)$',body,re.M));found=[]
+ for i,row in enumerate(rows[:-1]):
+  m=re.search(r'(-?0x[0-9a-f]+)?\(%rip\).*?#\s*0x([0-9a-f]+)',row[2])
+  if m:
+   address=int(rows[i+1][1],16)+int(m[1] or '0',16)
+   require(address==int(m[2],16),'RIP reference comment/address differs')
+   found.append((int(row[1],16),address,row[2]))
+ return found
+
+def full_support_contract(body,base,reader,enabled):
+ require(full_normalized(body,base)==FULL_SUPPORT_TEMPLATE,'full support predicate instructions differ')
+ refs=rip_references(body)
+ require(len(refs)==2 and refs[0][1]==enabled and refs[0][0]==base+0xa,'full support mode flag differs')
+ table=refs[1][1];raw=reader(table,101*4)[0]
+ require(len(raw)==404,'full support table truncated')
+ offsets=struct.unpack('<101i',raw)
+ for op,offset in enumerate(offsets):
+  require(table+offset==base+(0x59 if op in FULL_OPS else 0x63),'full support opcode table differs: '+str(op))
+ return table
+
+def full_wrapper_contract(body,base,calls,enabled):
+ require(full_normalized(body,base)==FULL_WRAPPER_TEMPLATE,'full wrapper instruction/control-flow contract differs')
+ require([n for _,n in sorted(calls)]==FULL_WRAPPER_CALLS,'full wrapper calls/order differ')
+ require(any(at==base+0x2d and target==enabled for at,target,_ in rip_references(body)),'full wrapper mode flag differs')
+
+def full_global_bindings(body,base,bindings,one):
+ references={at:target for at,target,_ in rip_references(body)}
+ for offset,(name,addend) in bindings.items():
+  require(references.get(base+offset)==one(name)+addend,'full wrapper global binding differs: '+name)
+
+def full_mode_store(body,enabled,value):
+ stores=[text for _,target,text in rip_references(body) if target==enabled and re.match(r'movb\s+\$',text)]
+ require(len(stores)==1 and re.match(r'movb\s+\$'+hex(value)+r',',stores[0]),'full mode flag store differs')
+
+def full_roles(match):
+ return {role:match(fragment) for role,fragment in {
+  'run':'run_native_full','enable':'enable_full','disable':'disable_full','reset':'reset_full',
+  'context_reset':'unique_ptrI13llama_contextPFvPS1_EE5reset','model_reset':'unique_ptrI11llama_modelPFvPS1_EE5reset',
+  'readback':'NativeFullSink8callback','writer':'prefix_write','graph':'_ZN2m0L5graphE',
+  'backend_init':'_ZN2m0L4initE','release':'_ZN2m0L7releaseE',
+  'begin':'_ZN11ps5hip_full8Dispatch5beginE','finish':'_ZN11ps5hip_full8Dispatch6finishE',
+  'execute':'_ZN11ps5hip_full8Dispatch13execute_graphE','initialize':'_ZN11ps5hip_full8Dispatch10initializeE',
+  'shutdown':'_ZN11ps5hip_full8Dispatch8shutdownE','controls':'_ZN11ps5hip_full8Dispatch17validate_controlsE',
+  'select':'_ZN11ps5hip_full6selectE','node':'_ZN12ps5hip_layer8Dispatch12execute_nodeE',
+  'launch':'_ZN12ps5hip_layer8Dispatch6launchE','read':'_ZN12ps5hip_layer8Dispatch4readE',
+  'dispatch_reset':'_ZN11ps5hip_full8Dispatch5resetE'}.items()}
+
+def full_edges(r):
+ return {'main':[r['run']],
+  r['run']:[r['enable'],'llama_model_load_from_file','llama_init_from_model','llama_synchronize','llama_memory_clear',r['reset'],'llama_process',r['context_reset'],r['model_reset'],r['disable'],'llama_backend_free'],
+  r['backend_init']:[r['initialize']],r['release']:[r['shutdown']],
+  r['reset']:[r['dispatch_reset']],r['graph']:[r['execute']],
+  r['begin']:[r['select']],r['execute']:[r['controls'],r['node']],
+  r['node']:[r['launch']],r['controls']:[r['read']],r['readback']:['ggml_backend_tensor_get'],
+  WRAPPER:[r['begin'],'ggml_backend_sched_graph_compute_async',r['finish']]}
+
+def full_smoke_operand(body,run):
+ positions=symbol_calls(body,run);require(len(positions)==1,'full helper call missing/duplicated')
+ before=body[:positions[0]]
+ instructions=[]
+ for line in before.splitlines():
+  m=re.match(r'^\s*[0-9a-f]+:\s+(.*)$',line)
+  if m:instructions.append(re.sub(r'\s+',' ',m[1].split('#')[0].strip()))
+ window=instructions[-14:]
+ first=next((i for i,s in enumerate(window) if s=='movq %rsp, %rax'),None)
+ require(first is not None and window[first:first+3]==['movq %rsp, %rax','movq %rcx, (%rax)','movl $0x1, 0x8(%rax)'],'full title does not pass smoke ABI operand')
+ # No later stack/rax rewrite may replace the reviewed seventh source argument.
+ require(not any(re.search(r', (?:0x8\(%r(?:ax|sp)\)|%rax|%rsp)$',s) for s in window[first+3:]),'full smoke operand overwritten')
+
+def full_contract(bodies,r,dispatch_names):
+ for caller,targets in full_edges(r).items():
+  for callee in targets:require(symbol_calls(bodies[caller],callee),'full call missing: '+caller+' -> '+callee)
+ ordered_calls(bodies[r['run']],[r['enable'],'llama_model_load_from_file','llama_init_from_model','llama_synchronize','llama_memory_clear',r['reset'],'llama_process',r['context_reset'],r['model_reset'],r['disable'],'llama_backend_free'])
+ full_smoke_operand(bodies['main'],r['run'])
+ # Audit all connected dispatcher helpers, including counter-recording lambdas.
+ def reachable(start,target):
+  pending=[start];seen=set()
+  while pending:
+   caller=pending.pop()
+   if caller in seen:continue
+   seen.add(caller)
+   if symbol_calls(bodies[caller],target):return True
+   pending.extend(n for n in dispatch_names if n not in seen and symbol_calls(bodies[caller],n))
+  return False
+ for role,apis in [('initialize',('hipModuleLoad','hipModuleGetFunction','hipMalloc')),('shutdown',('hipFree','hipModuleUnload','hipDeviceSynchronize')),('launch',('hipModuleLaunchKernel','hipDeviceSynchronize')),('read',('hipMemcpy',))]:
+  for api in apis:require(reachable(r[role],api),'full public HIP path missing: '+role+' -> '+api)
+ for caller in [r['graph'],*dispatch_names]:
+  for bypass in ('ggml_backend_cpu_init','ggml_backend_sched_graph_compute_async','__real_ggml_backend_sched_graph_compute_async'):
+   require(not symbol_calls(bodies[caller],bypass),'full CPU/scheduler fallback call')
+
 def audit(raw,converted,extracted,phase="vocab"):
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
  tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
- source_paths=[ROOT/n for n in SOURCES+(ALLOCATOR_SOURCES if phase in ('model-gate','model-prefix','model-layer') else [])]
+ source_paths=[ROOT/n for n in SOURCES+(ALLOCATOR_SOURCES if phase in ('model-gate','model-prefix','model-layer','model-full') else [])]
  identities={str(p):sha(p) for p in [*paths,tool.resolve(),*source_paths]}
  data=paths[0].read_bytes();values=symbol_values(data)
  if PREFIX_HOOK in values:
   for p in (ROOT/n for n in PREFIX_SOURCES):identities[str(p)]=sha(p)
  if LAYER_HOOK in values:
   for p in (ROOT/n for n in LAYER_SOURCES):identities[str(p)]=sha(p)
+ if phase=='model-full':
+  for p in (ROOT/n for n in FULL_SOURCES):identities[str(p)]=sha(p)
  def one(n):
   require(n in values and len(values[n])==1,'missing/ambiguous symbol '+n);return values[n][0]
  def match(fragment):
@@ -281,7 +393,8 @@ def audit(raw,converted,extracted,phase="vocab"):
  model_gate=model_names[0] if model_names else None
  chain=[]
  allocator_roles=None
- if phase in ('model-gate','model-prefix','model-layer'):
+ if phase in ('model-gate','model-prefix','model-layer','model-full'):
+  if phase=='model-full':model_gate=match('run_native_full')
   require(model_gate is not None,'model phase code not compiled')
   chain=['main',model_gate,'llama_process',match('_ZN13llama_context6decode'),match('_ZN13llama_context14process_ubatch'),match('_ZN13llama_context13graph_compute'),WRAPPER]
   names+=list(dict.fromkeys(n for n in chain if n not in names))
@@ -324,6 +437,16 @@ def audit(raw,converted,extracted,phase="vocab"):
   layer_dispatch_names=[n for n in values if ('ps5hip_layer8Dispatch' in n or 'ps5hip_prefix8Dispatch' in n) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
   layer_names=[*layer.values(),*layer_dispatch_names,*[n for targets in layer_edges(layer).values() for n in targets]]
   names+=list(dict.fromkeys(n for n in layer_names if n not in names))
+ full=None;full_dispatch_names=[]
+ if phase=='model-full':
+  full=full_roles(match)
+  full_dispatch_names=[n for n in values if any(p in n for p in ('ps5hip_full8Dispatch','ps5hip_layer8Dispatch','ps5hip_prefix8Dispatch')) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
+  full_names=[*full.values(),'llama_free',*full_dispatch_names,*[n for targets in full_edges(full).values() for n in targets]]
+  names+=list(dict.fromkeys(n for n in full_names if n not in names))
+ # Current full-capable wrapper is shared by all phases; older reviewed images remain supported.
+ full_capable='_ZN2m0L12full_enabledE' in values
+ if full_capable:
+  names+=list(dict.fromkeys(n for n in FULL_WRAPPER_CALLS if n not in names and n in values))
  text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
  sizes={};symtab=section(data,b'.symtab')
  for at in range(0,len(symtab),24):
@@ -338,10 +461,11 @@ def audit(raw,converted,extracted,phase="vocab"):
  if layer is not None:
   phase_contract(phase,layer['run'],layer_chain,{n:body(n) for n in layer_chain})
   layer_contract({n:prefix_scope_aliases(body(n),layer,values,'ActualLayerQualification') for n in names},layer,layer_dispatch_names)
+ if full is not None:full_contract({n:body(n) for n in names},full,full_dispatch_names)
  if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
- if phase in ('model-gate','model-prefix','model-layer'):
+ if phase in ('model-gate','model-prefix','model-layer','model-full'):
   for query in ('sceKernelGetDirectMemorySize','sceKernelAvailableDirectMemorySize'):
    require(len(bound_calls(body(memory_snapshot),import_slots(data,query),reader))==1,
            'memory measurement query missing/duplicated: '+query)
@@ -359,9 +483,29 @@ def audit(raw,converted,extracted,phase="vocab"):
  if PREFIX_HOOK in values:calls.extend((pos,PREFIX_HOOK) for pos in symbol_calls(wrapper,PREFIX_HOOK))
  if LAYER_HOOK in values:calls.extend((pos,LAYER_HOOK) for pos in symbol_calls(wrapper,LAYER_HOOK))
  calls.extend((pos,'printf') for pos in bound_calls(wrapper,slots['printf'],reader))
- wrapper_contract(wrapper,one(WRAPPER),body(SUPPORTS),calls)
- if phase=='model-prefix':require(normalized_wrapper(wrapper,one(WRAPPER))in (PREFIX_WRAPPER_TEMPLATE,LAYER_WRAPPER_TEMPLATE),'prefix wrapper not retained')
- if phase=='model-layer':require(normalized_wrapper(wrapper,one(WRAPPER))==LAYER_WRAPPER_TEMPLATE,'layer wrapper not retained')
+ full_support_table=None
+ if full_capable:
+  calls=[]
+  for name in set(FULL_WRAPPER_CALLS):
+   if name in ('fprintf','printf'):found=bound_calls(wrapper,import_slots(data,name),reader)
+   else:found=symbol_calls(wrapper,name)
+   calls.extend((pos,name) for pos in found)
+  full_wrapper_contract(wrapper,one(WRAPPER),calls,one('_ZN2m0L12full_enabledE'))
+  full_global_bindings(wrapper,one(WRAPPER),FULL_GLOBAL_TARGETS,one)
+  full_support_table=full_support_contract(body(SUPPORTS),one(SUPPORTS),reader,one('_ZN2m0L12full_enabledE'))
+  if phase!='model-full':require(not any('enable_full' in n for n in values),'full mode enable retained in legacy phase')
+ else:
+  require(phase!='model-full','full wrapper missing')
+  wrapper_contract(wrapper,one(WRAPPER),body(SUPPORTS),calls)
+  if phase=='model-prefix':require(normalized_wrapper(wrapper,one(WRAPPER))in (PREFIX_WRAPPER_TEMPLATE,LAYER_WRAPPER_TEMPLATE),'prefix wrapper not retained')
+  if phase=='model-layer':require(normalized_wrapper(wrapper,one(WRAPPER))==LAYER_WRAPPER_TEMPLATE,'layer wrapper not retained')
+ if full is not None:
+  full_mode_store(body(full['enable']),one('_ZN2m0L12full_enabledE'),1)
+  full_mode_store(body(full['disable']),one('_ZN2m0L12full_enabledE'),0)
+  for caller,target in [('main',full['writer']),(full['run'],full['readback']),(full['backend_init'],full['graph']),(full['run'],'llama_free'),(full['run'],'llama_model_free')]:
+   require(one(target) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',body(caller))},'full callback address missing: '+target)
+  for name in ('open','write','fsync','close'):
+   require(len(prefix_writer_import_calls(body(full['writer']),import_slots(data,name),reader))==1,'full raw writer import missing/duplicated: '+name)
  if layer is not None:
   for caller,target in [('main',layer['writer']),(layer['run'],layer['readback']),(layer['backend_init'],layer['graph'])]:
    require(one(target) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',body(caller))},'layer callback address missing: '+target)
@@ -374,25 +518,30 @@ def audit(raw,converted,extracted,phase="vocab"):
   for name in ('open','write','fsync','close'):
    require(len(prefix_writer_import_calls(body(prefix['writer']),import_slots(data,name),reader))==1,'prefix raw writer import missing/duplicated: '+name)
  audit_text([load_regions(p)[0] for p in paths],{one(n) for n in names},sizes)
+ if full_support_table is not None:
+  original=reader(full_support_table,404)[0]
+  require(all(load_regions(p)[0](full_support_table,404)[0]==original for p in paths[1:]),'converted/extracted support table differs')
  layouts=[dict(file=str(p),segments=load_layout(p.read_bytes())) for p in paths]
  imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]
  require(imports[0]==imports[1],'converted/extracted import owners differ')
  require(all(sha(p)==h for p,h in identities.items()),'audit inputs changed')
  return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase=phase,
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
-  actual_layer_call_chain_audited=(phase=='model-layer'),layer_callback_dataflow_proven=False,
+   actual_full_call_chain_audited=(phase=='model-full'),full_profile=('smoke' if phase=='model-full' else None),full_callback_dataflow_proven=False,
+   actual_layer_call_chain_audited=(phase=='model-layer'),layer_callback_dataflow_proven=False,
   actual_prefix_call_chain_audited=(phase=='model-prefix'),prefix_callback_dataflow_proven=False,
-  native_allocator_routing_audited=(phase in ('model-gate','model-prefix','model-layer')),
-  wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase in ('model-gate','model-prefix','model-layer')),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
+   native_allocator_routing_audited=(phase in ('model-gate','model-prefix','model-layer','model-full')),
+   wrapper_retained=True,wrapper_no_bypass=True,actual_client_call_chain_audited=(phase in ('model-gate','model-prefix','model-layer','model-full')),actual_client_gate_executed=False,native_executed=False,gpu_executed=False,
   limits=['Prefix selected direct-call edges and callback addresses are checked; ownership, original-leaf staging, preflight/topology, indirect callback routing and exclusive-write flags are additionally source/test evidence, not exhaustive machine-code proofs.',
   'Selected GGML context, CPU-buffer, scheduler context-buffer and threadpool aligned pairs are checked in model mode; ordinary libc allocations are not intercepted and native ownership is unproven.',
-  'Actual client call chain checked only for model-gate mode; static presence is not execution evidence.',
-  'Reviewed LLVM18 O0 wrapper template rejects nonempty graphs with current zero-op predicate; any codegen change requires review.',
+  'Actual model call chains are checked for model phases; static presence is not execution evidence.',
+   'Legacy reviewed wrappers reject nonempty graphs. Full-capable wrapper additionally checks exact active-node ownership, begin/real scheduler/finish control flow, mode/global targets and all 101 support-table entries; codegen changes require review.',
+   'Full smoke argument, direct cleanup/reset edges and selected callback addresses are checked; complete indirect callback/unique_ptr dataflow and runtime tensor ownership additionally require source/host/native evidence.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for n in ['raw','converted','extracted','output']:parser.add_argument('--'+n,type=Path,required=True)
- parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer'),default='vocab')
+ parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full'),default='vocab')
  args=parser.parse_args()
  if args.output.exists():parser.error('fresh output required')
  report=audit(args.raw,args.converted,args.extracted,args.phase);args.output.parent.mkdir(parents=True,exist_ok=True)
