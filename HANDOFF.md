@@ -8,6 +8,39 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## M4 CPU generation oracle passes; new HIP numerical case fails
+
+The shared bounded generation driver and source-only Make targets now execute
+actual tokenizer/prefill/greedy feedback, with four selected tokens and explicit
+KV reset/repeat. The CPU oracle for `Once upon a time` passes 16 real decoder
+commits and produces `, there was a`; full logits repeat bitwise. All 24 focused
+tests pass, including sanitized driver checks, EOS, overflow-before-submit,
+independent argmax/feedback, malformed evidence and reset drift.
+
+The HIP host interpreter completes the same 16 commits, 12,768 active nodes and
+11,728 launches with 16 balanced allocations/frees and no CPU backend tensor
+operations. Token IDs match and all 384 boundary outputs reset exactly, but
+**all 16 full-logit comparisons fail** unchanged numerical budgets: maximum
+absolute error 0.19304943, maximum relative L2 0.00918597. Do not call this GPU
+generation acceptance or deploy it. See
+`evidence/offline-greedy-generation-reference-and-regression.json` and
+`docs/LLM_GENERATION.md`.
+
+Preserve CPU oracle `results/m4-generation-reference-v1`, failed numerical case
+`results/m4-generation-numeric-v1`, independent review and local diagnostic
+folders. CPU callback splitting and fusion-environment changes do not explain
+the failure. A diagnostic-only upstream CPU SiLU substitution restores bitwise
+logits at positions 0/1 in both runs, but 12 outputs still fail; substituting
+softmax as well does not finish the fix. These injected CPU operations establish
+no GPU capability and must never enter the accepted runtime.
+
+Next localize the first remaining divergent intermediate at position 2/layer 14,
+including operation contraction/rounding. Implement real GPU arithmetic and pass
+the unchanged offline regression before native generation packaging, timings,
+ISA audit, a new frozen candidate and .40 test. The accepted installed native
+smoke baseline below remains unchanged; no console contact or native rebuild
+was needed for this offline milestone. Longer context and all M4/M5 gates stay open.
+
 ## Native full decoder and logits validated on .40
 
 The native PPSA99014 app passed at frozen source `3ef7c74` on 2026-10-17.

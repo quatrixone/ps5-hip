@@ -59,6 +59,7 @@ static void decode(llama_context* ctx,int token,int requested_position){
  auto memory=llama_get_memory(ctx);assert(memory&&llama_memory_seq_pos_min(memory,0)==0&&llama_memory_seq_pos_max(memory,0)==position);
  const float* logits=llama_get_logits_ith(ctx,0);assert(logits);for(unsigned i=0;i<32000;++i)assert(std::isfinite(logits[i]));for(bool value:seen)assert(value);
 }
+#ifndef PS5HIP_FULL_NUMERIC_NO_MAIN
 int main(int argc,char**argv){
  assert(argc==3);const bool split=true;output_dir=argv[2];
  llama_backend_init();ggml_backend_register(m0::registration());m0::enable_full({"getrows","norm","weighted","q8","q4","layer"});
@@ -77,3 +78,5 @@ int main(int argc,char**argv){
  assert(allocations.empty()&&allocation_count==free_count&&loads==unloads);
  std::printf("PASS full-model backend mode=%s requests=3 committed_positions=0,1,reset0 nodes=%llu launches=%u instances=%u/%u scheduler_forwarded=%u device_graphs=%u CPU_arithmetic=0 postcompute=%u allocations=%u/%u; numerical HIP interpretation,72 raw boundaries, GPU unproven\n",argv[2],static_cast<unsigned long long>(retired.completed_nodes),launches,retired.instances_created,retired.instances_freed,real_scheduler_calls,device_graph_calls,postcompute,allocation_count,free_count);
 }
+
+#endif

@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "CPU_REFERENCE_PASS_HIP_NUMERICAL_FAIL",
+  "classification": "offline-short-greedy-generation-oracle-and-failing-regression",
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "results/m4-generation-reference-v1/receipt.json": "ece6842bf3ebb1bcb5002e7aa2d9377e0af0b0d1bfe5d3fb4a43445fddeda8b8",
+    "results/m4-generation-numeric-v1/receipt.json": "584d3849629f31cecd5056d7961b042cc9bb4e63ba3ec8415bbfa0f3b921f4c2",
+    "results/m4-generation-review-v1.json": "c673773a3c8beae84a442cf90ab9b532d9e3c69ed13c7a099b8c28a9b8db8969",
+    "results/m4-cpu-callback-diagnostic-v1/receipt.json": "9cc418a7a487be5a9f79d6361156545138f24fcfce2dd269a4b1572b835bbd47",
+    "results/m4-generation-boundaries-diagnostic-v1/receipt.json": "e63d54ddc060a182776a35e69cc236048b8b9b4f92b0f83ab7def1828f02dc1a",
+    "results/m4-cpu-env-diagnostic-v1/analysis.json": "5b00eff24571db57c50ebf1e8abca365f917d861f252154b7ef2440b9fb043e2",
+    "results/m4-silu-substitution-diagnostic-v1/analysis.json": "481b5107e8e5585f0c116ed2f00bea4d83e323c4b8cd6314a6f1f2119435d95a",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/analysis.json": "7e55f6dd7abe884b51eb9b48dd9cd3a15be6080c1ab58aa344b9e77849c47dcb",
+    "results/m4-silu-substitution-diagnostic-v1/commands.json": "4dcbedf8e86b4f5043d2ece858b82703d572316fe0739716079724cb80d2b154",
+    "results/m4-silu-substitution-diagnostic-v1/generation.cpp": "49199d3cb8b111c98337480837692af99679dd4f1207dbccbfc24672b179890e",
+    "results/m4-silu-substitution-diagnostic-v1/full-numeric.cpp": "7f3f21037a8d119689ad6d4912806abe2409d48396aff89a6081d1fa2e86fbf3",
+    "results/m4-silu-substitution-diagnostic-v1/execute.stdout": "3a1dfc418857b8be72a106e6166c6a525c8086d10c28889fcd73d354307428b9",
+    "results/m4-silu-substitution-diagnostic-v1/execute.stderr": "79136efe4d856a3094be9b8f3c7a3eb962086c843027e32d0fb3e77a76d0b1c1",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/commands.json": "9b5ff185beb468ee036bc9010d73becd7280c50bc280f1579fd90b1d01e02f9f",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/generation.cpp": "71383a6883036d441c33a5a6fe5e2cd897c1be6e6bb22f61a4c7edcaa7da3629",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/full-numeric.cpp": "1b7491cc2845b89a600e044037378ceb3331bc48d81536396575264f90139949",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/execute.stdout": "3a1dfc418857b8be72a106e6166c6a525c8086d10c28889fcd73d354307428b9",
+    "results/m4-silu-softmax-substitution-diagnostic-v1/execute.stderr": "67ec7ae31b332f61d4a11d6bf372f5784cdd5fb6bedae331e8bcf57448ca9b5c"
+  },
+  "profile": {
+    "prompt": "Once upon a time",
+    "add_special": true,
+    "parse_special": false,
+    "prompt_tokens": [
+      1,
+      9038,
+      2501,
+      263,
+      931
+    ],
+    "max_new_tokens": 4,
+    "generated": [
+      29892,
+      727,
+      471,
+      263
+    ],
+    "text": ", there was a",
+    "stop": "step_limit",
+    "runs": 2,
+    "committed_requests": 16
+  },
+  "CPU_reference": {
+    "status": "PASS",
+    "raw_logit_files": 16,
+    "raw_bytes": 2048000,
+    "reset_bitwise": true
+  },
+  "HIP_interpretation": {
+    "status": "NUMERICAL_FAIL",
+    "raw_boundary_files": 384,
+    "nodes": 12768,
+    "launches": 11728,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1,
+    "CPU_backend_tensor_operations": 0,
+    "matching_generated_tokens": true,
+    "reset_bitwise": true,
+    "failed_logit_files": 16,
+    "maximum_logit_absolute_error": 0.19304943084716797,
+    "maximum_logit_relative_l2": 0.009185972159529569,
+    "budgets": {
+      "absolute": 2e-05,
+      "relative": 0.0002,
+      "relative_l2": 0.0002
+    }
+  },
+  "diagnoses": [
+    "CPU callback splitting and externally setting GGML_CPU_DISABLE_FUSION leave all16 CPU logits unchanged; neither explains failure.",
+    "CPU layer captures: position0 first tiny boundary drift at layer11 and first budget failure14; positions1-5 first failure14; position6 layer7; position7 layer8.",
+    "Diagnostic CPU SiLU substitution alone makes positions0/1 in both runs bitwise CPU-equal (4/16); remaining12 fail. This is causal localization, not an implementation or acceptance.",
+    "Diagnostic CPU SiLU plus softmax substitution still passes only4/16; further attention/projection arithmetic needs localization."
+  ],
+  "limits": [
+    "CPU reference and host HIP interpreter only; no new native package or console use.",
+    "CPU activation substitutions are ignored diagnostics only; never admitted as GPU arithmetic.",
+    "Only logits have independent CPU numerical reference in the production generation check; other layer captures check size/finiteness/exact reset.",
+    "Existing native 3-request full-decoder smoke remains a bounded accepted result; it does not qualify this new generated history.",
+    "No tolerance changes or failed receipt rewrites."
+  ],
+  "next": [
+    "Localize first divergent intermediate at position2/layer14 after diagnostic substitutions; inspect CPU/GPU contraction and rounding before altering arithmetic.",
+    "Implement required genuine GPU arithmetic, rerun unchanged generation regression, then fresh fixture ISA/admission.",
+    "Integrate audited native generation profile and phase timings; freeze fresh candidate and test .40 only after offline gate passes."
+  ],
+  "focused_tests": {
+    "methods": 24,
+    "status": "PASS",
+    "driver_sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "existing_full_numeric_regression_methods": 7
+  }
+}

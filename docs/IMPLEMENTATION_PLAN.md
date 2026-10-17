@@ -12,6 +12,8 @@ native full-model smoke now passes all 22 layers, normalization and logits with
 actual decoder commits/reset. Next qualify short greedy generation and timing;
 long full-model context and token generation are not yet established.
 
+- 2026-10-17 | M4 CPU greedy oracle / host regression | offline | CPU actual-feedback/reset oracle passes; matching HIP token IDs but16/16 logits fail fixed gates; SiLU partially localized | evidence/offline-greedy-generation-reference-and-regression.json | next: first divergent arithmetic before native generation
+
 - 2026-10-17 | M3 native full decoder | .40 | pass: 22 layers, 32000 logits, 3 real commits/reset, 72 bitwise CPU-equal outputs, 2199 GPU launches and clean lifecycle | evidence/console40-full-decoder-smoke-success.json | next: short greedy generation and phase timings
 
 - 2026-10-17 | M3 corrected native package | offline | v7 client,149 app objects,201 commands and397-function linked audit pass | evidence/offline-native-full-decoder-aligned-staging-package.json | next: fresh .40 full smoke

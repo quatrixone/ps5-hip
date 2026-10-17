@@ -309,6 +309,13 @@ record evidence before changing the model or release scope; no silent downgrade.
 
 ### M4 ? Generate tokens with prefill and incremental decode (V1.4)
 
+The short CPU greedy oracle now passes and is reproducible with
+`make llm-generation-reference`. The corresponding actual-feedback HIP
+interpreter reproduces tokens/reset but fails all 16 logit gates. See
+`evidence/offline-greedy-generation-reference-and-regression.json` and
+`LLM_GENERATION.md`. Resolve input-sensitive arithmetic before native generation;
+matching text is insufficient. Diagnostic CPU substitutions are never acceptance.
+
 Immediate next proof: one fixed tokenized prompt, sequential prefill, then a
 few actual CPU-argmax selections from GPU logits fed into the next decoder
 request. Compare tokens and full logits against CPU on that generated history;
