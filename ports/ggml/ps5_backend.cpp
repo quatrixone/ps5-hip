@@ -10,6 +10,10 @@
 #include <atomic>
 #include "prefix_qualification.h"
 #include "prefix_dispatch.h"
+#include "layer_qualification.h"
+#include "model_layer.h"
+#include "layer_dispatch.h"
+#include <limits>
 #include <algorithm>
 #include <array>
 namespace m0 {
@@ -34,6 +38,31 @@ struct PrefixBackend {
  ps5hip_prefix::Dispatch dispatch{prefix_owned,prefix_fail};
  PrefixStatistics statistics{};
 };
+// Layer mode has a distinct owner; the existing prefix context keeps its exact type.
+static ActualLayerQualification* layer_scope=nullptr;
+static bool layer_active=false;
+static bool layer_owned(const ggml_tensor* t){
+ if(!t||!t->data)return false;
+ const ggml_tensor* owner=t;
+ for(unsigned depth=0;owner->view_src;++depth){if(depth>=64)return false;owner=owner->view_src;}
+ auto* buffer=owner->buffer;
+ if(!buffer||buffer->buft!=&buffer_type||(t->buffer&&t->buffer!=buffer))return false;
+ const auto begin=reinterpret_cast<uintptr_t>(buffer->context),p=reinterpret_cast<uintptr_t>(t->data);
+ return p>=begin&&p-begin<=buffer->size&&ggml_nbytes(t)<=buffer->size-(p-begin);
+}
+[[noreturn]] static void layer_fail(const char* site,hipError_t result){
+ std::fprintf(stderr,"M3 layer HIP failure site=%s result=%d\n",site,int(result));ps5hip_llm_fail("layer-hip");
+}
+struct LayerBackend {
+ ggml_backend_t owner=nullptr;
+ ps5hip_layer::Dispatch dispatch{layer_owned,layer_fail};
+ LayerStatistics statistics{};
+ ggml_context* persistent=nullptr;
+ std::array<ggml_backend_buffer_t,12> storage{};
+ ps5hip_layer::Weights weights{};
+ ps5hip_layer::Cache cache{};
+};
+static LayerBackend* layer_backend=nullptr;
 static HipCallStatistics hip_calls{};
 static std::atomic_flag hip_calls_lock=ATOMIC_FLAG_INIT;
 struct HipCallsGuard {
@@ -103,10 +132,15 @@ static ggml_backend_buffer_type_t buft(ggml_backend_dev_t){return &buffer_type;}
 static bool supports_buft(ggml_backend_dev_t,ggml_backend_buffer_type_t t){return t==&buffer_type;}
 static void sync(ggml_backend_t){begin_call(HipCall::synchronize);hip_ok(finish_call(HipCall::synchronize,hipDeviceSynchronize()));}
 static void release(ggml_backend_t b){
- require(!b->context&&(!prefix_scope||prefix_scope->backend!=b));delete b;
+ require(!b->context&&(!prefix_scope||prefix_scope->backend!=b)&&(!layer_backend||layer_backend->owner!=b));delete b;
 }
 static ggml_status graph(ggml_backend_t b,ggml_cgraph* g){
  ++graph_calls;
+ if(layer_backend&&layer_backend->owner==b){
+  require(layer_active);
+  try{return layer_backend->dispatch.execute_graph(g)?GGML_STATUS_SUCCESS:GGML_STATUS_FAILED;}
+  catch(...){ps5hip_llm_fail("layer-graph-invariant");}
+ }
  if(!b->context)return ggml_graph_n_nodes(g)==0?GGML_STATUS_SUCCESS:GGML_STATUS_FAILED;
  auto& state=*static_cast<PrefixBackend*>(b->context);
  try{return state.dispatch.execute_graph(g)?GGML_STATUS_SUCCESS:GGML_STATUS_FAILED;}
@@ -139,7 +173,7 @@ ggml_status release_compute(ggml_backend_sched_t scheduler,ggml_backend_t ps5,gg
 
 namespace m0 {
 void configure_prefix(ggml_backend_t b,const std::array<const char*,5>& modules){
- require(b&&b->device==&device&&!b->context&&!prefix_active);
+ require(b&&b->device==&device&&!b->context&&!prefix_active&&(!layer_backend||layer_backend->owner!=b));
  auto* state=new(std::nothrow)PrefixBackend;require(state);b->context=state;
  try{state->dispatch.initialize(modules);}catch(...){ps5hip_llm_fail("prefix-module-invariant");}
 }
@@ -158,7 +192,7 @@ PrefixStatistics prefix_statistics(ggml_backend_t b){
  result.completed_launches=state.dispatch.completed_launches;return result;
 }
 ActualPrefixQualification::ActualPrefixQualification(ggml_backend_t b,Readback sink,void* user):backend(b),readback(sink),user(user){
- require(b&&b->device==&device&&b->context&&sink&&!prefix_scope&&!prefix_active);prefix_scope=this;
+ require(b&&b->device==&device&&b->context&&sink&&!prefix_scope&&!prefix_active&&!layer_scope&&!layer_active);prefix_scope=this;
 }
 ActualPrefixQualification::~ActualPrefixQualification(){require(prefix_scope==this&&!prefix_active);prefix_scope=nullptr;}
 static void qualify_actual_prefix(ggml_cgraph* original){
@@ -192,6 +226,84 @@ static void qualify_actual_prefix(ggml_cgraph* original){
  }catch(...){ps5hip_llm_fail("prefix-qualification-invariant");}
  prefix_active=false;
 }
+void configure_layer(ggml_backend_t b,const std::array<const char*,6>& modules){
+ require(b&&b->device==&device&&!b->context&&!layer_backend&&!layer_scope&&!prefix_scope&&!prefix_active);
+ layer_backend=new(std::nothrow)LayerBackend;require(layer_backend);layer_backend->owner=b;
+ try{layer_backend->dispatch.initialize(modules);}catch(...){ps5hip_llm_fail("layer-module-invariant");}
+}
+static LayerBackend& layer_state(ggml_backend_t b){require(layer_backend&&layer_backend->owner==b);return *layer_backend;}
+void reset_layer_cache(ggml_backend_t b){
+ require(!layer_active&&!layer_scope);auto& state=layer_state(b);
+ sync(b);
+ if(state.persistent){for(auto* t:{state.cache.k,state.cache.v})ggml_backend_tensor_memset(t,0,0,ggml_nbytes(t));sync(b);}
+ state.dispatch.reset();state.statistics.request_cursor=0;state.statistics.last_token=state.statistics.last_position=-1;
+ require(state.statistics.cache_resets<UINT64_MAX);++state.statistics.cache_resets;
+}
+ps5hip_prefix::CallStatistics disable_layer(ggml_backend_t b){
+ require(!layer_active&&!layer_scope);auto& state=layer_state(b);
+ try{state.dispatch.shutdown();}catch(...){ps5hip_llm_fail("layer-release-invariant");}
+ for(auto buffer:state.storage)if(buffer)ggml_backend_buffer_free(buffer);
+ if(state.persistent)ggml_free(state.persistent);
+ auto calls=state.dispatch.base.calls;delete layer_backend;layer_backend=nullptr;return calls;
+}
+LayerStatistics layer_statistics(ggml_backend_t b){auto& state=layer_state(b);auto result=state.statistics;result.completed_launches=state.dispatch.base.completed_launches;return result;}
+ps5hip_prefix::CallStatistics layer_call_statistics(ggml_backend_t b){return layer_state(b).dispatch.base.calls;}
+ActualLayerQualification::ActualLayerQualification(ggml_backend_t b,const LayerRequest* sequence,size_t size,Readback sink,void* pointer):backend(b),requests(sequence),count(size),readback(sink),user(pointer){
+ require(sequence&&size&&size<=512&&sink&&!layer_scope&&!layer_active&&!prefix_scope&&!prefix_active);
+ auto& state=layer_state(b);require(state.statistics.request_cursor==0);
+ for(size_t i=0;i<size;++i)require(sequence[i].token>=0&&sequence[i].token<32000&&sequence[i].position==int32_t(i));
+ layer_scope=this;
+}
+ActualLayerQualification::~ActualLayerQualification(){require(layer_scope==this&&!layer_active);layer_scope=nullptr;}
+static void qualify_actual_layer(ggml_cgraph* original){
+ require(layer_scope&&!layer_active&&!prefix_scope&&!prefix_active);layer_active=true;
+ auto& scope=*layer_scope;auto& state=layer_state(scope.backend);
+ try{
+  const auto selection=ps5hip_layer::select(original);
+  if(!state.persistent){
+   state.persistent=ggml_init({1024*1024,nullptr,true});require(state.persistent);
+   state.weights=ps5hip_layer::make_weights(state.persistent,selection);state.cache=ps5hip_layer::make_cache(state.persistent);
+   // Submission coherency flushes whole owners. Keep immutable weights and each
+   // KV cache in separate allocations so a cache write never flushes all weights.
+   for(size_t i=0;i<state.storage.size();++i){
+    auto* tensor=i<10?state.weights.uploads[i].clone:i==10?state.cache.k:state.cache.v;
+    const size_t size=ggml_backend_buft_get_alloc_size(&buffer_type,tensor);
+    state.storage[i]=ggml_backend_alloc_buffer(scope.backend,size);require(state.storage[i]);
+    require(ggml_backend_tensor_alloc(state.storage[i],tensor,ggml_backend_buffer_get_base(state.storage[i]))==GGML_STATUS_SUCCESS);
+   }
+   std::array<unsigned char,64*1024> chunk{};
+   for(const auto& pair:state.weights.uploads){
+    require(pair.original&&pair.original->buffer&&pair.original->data&&ggml_nbytes(pair.original)==ggml_nbytes(pair.clone));
+    const auto bytes=ggml_nbytes(pair.original);require(bytes<=allocation_limit&&bytes<=UINT64_MAX-state.statistics.uploaded_weight_bytes);
+    for(size_t off=0;off<bytes;){const auto n=std::min(chunk.size(),bytes-off);ggml_backend_tensor_get(pair.original,chunk.data(),off,n);ggml_backend_tensor_set(pair.clone,chunk.data(),off,n);off+=n;}
+    state.statistics.uploaded_weight_bytes+=bytes;
+   }
+   for(auto* t:{state.cache.k,state.cache.v})ggml_backend_tensor_memset(t,0,0,ggml_nbytes(t));
+  }
+  for(size_t i=0;i<scope.count;++i){
+   const auto request=scope.requests[i];require(request.position==int32_t(state.statistics.request_cursor));
+   auto* ctx=ggml_init({1024*1024,nullptr,true});require(ctx);
+   const int64_t extent=request.position<256?256:512;
+   const auto selected=ps5hip_layer::materialize(ctx,selection,state.weights,state.cache,extent);
+   auto storage=ggml_backend_alloc_ctx_tensors(ctx,scope.backend);require(storage);
+   const int64_t slot=request.position;
+   std::array<int64_t,256> vslots{};for(size_t j=0;j<vslots.size();++j)vslots[j]=int64_t(j*512)+slot;
+   const void* controls[]={&request.token,&request.position,&slot,vslots.data()};
+   const size_t sizes[]={4,4,8,sizeof(vslots)};size_t bytes=0;
+   for(size_t j=0;j<4;++j){auto* t=selected.uploads[j].clone;require(ggml_nbytes(t)==sizes[j]);ggml_backend_tensor_set(t,controls[j],0,sizes[j]);bytes+=sizes[j];}
+   std::array<float,512> mask{};for(int64_t j=0;j<extent;++j)mask[j]=j<=request.position?0.f:-std::numeric_limits<float>::infinity();
+   auto* mask_tensor=selected.uploads[4].clone;require(mask_tensor->type==GGML_TYPE_F32&&ggml_nbytes(mask_tensor)==size_t(extent)*sizeof(float));
+   ggml_backend_tensor_set(mask_tensor,mask.data(),0,ggml_nbytes(mask_tensor));bytes+=ggml_nbytes(mask_tensor);
+   require(ggml_backend_graph_compute(scope.backend,selected.graph)==GGML_STATUS_SUCCESS);
+   scope.readback(selected,request,scope.user);
+   ggml_backend_buffer_free(storage);ggml_free(ctx);
+   require(state.statistics.invocations<UINT64_MAX&&bytes<=UINT64_MAX-state.statistics.uploaded_request_bytes);
+   ++state.statistics.invocations;state.statistics.uploaded_request_bytes+=bytes;++state.statistics.request_cursor;
+   state.statistics.last_token=request.token;state.statistics.last_position=request.position;
+  }
+ }catch(...){ps5hip_llm_fail("layer-qualification-invariant");}
+ layer_active=false;
+}
 ggml_backend_dev_t device_handle(){return &device;}
 GateStatistics statistics(){return {gate_calls,scheduled_compute_calls,rejected,graph_calls,last_graph};}
 void reset_statistics(){gate_calls=scheduled_compute_calls=rejected=graph_calls=0;last_graph=nullptr;}
@@ -201,6 +313,7 @@ extern "C" ggml_status __wrap_ggml_backend_sched_graph_compute_async(ggml_backen
  m0::last_graph=graph;
  ++m0::gate_calls;
  if(m0::prefix_scope)m0::qualify_actual_prefix(graph);
+ if(m0::layer_scope)m0::qualify_actual_layer(graph);
  for(int i=0;i<ggml_graph_n_nodes(graph);++i){
   auto* tensor=ggml_graph_node(graph,i);
   auto selected=ggml_backend_sched_get_tensor_backend(scheduler,tensor);

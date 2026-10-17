@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "classification": "offline-actual-model-layer-integration",
+  "native_executed": false,
+  "gpu_executed": false,
+  "graph_nodes": 37,
+  "computed_outputs": 21,
+  "requests": 514,
+  "sequence_lengths": [
+    512,
+    2
+  ],
+  "mocked_launches": 16962,
+  "resident_buffers": 12,
+  "data_allocations_and_frees": 528,
+  "raw_files": 151,
+  "raw_bytes": 2878464,
+  "evidence": {
+    "host": {
+      "path": "results/m2-layer-focused-host-v8/receipt.json",
+      "sha256": "9a7ac29e8e2ad132985911ed94500bd9779a7a5065b964c22775fd870255a735"
+    },
+    "cpu_reference": {
+      "path": "results/m2-layer-reference-v2/receipt.json",
+      "sha256": "393bbba128258be5d88dfb61ca058041d001ac3dc4f7ef1d84813bac5f8ff33f"
+    },
+    "device_fixture": {
+      "path": "results/llm-layer-fixture-v4/receipt.json",
+      "sha256": "c67f0a30afa2d57807b1daab23d4e6b6e1e3eb87a845387617602c0ac1ef142f"
+    },
+    "numerical_diagnostic": {
+      "path": "results/m2-layer-numerical-512-v2/strict-comparison.json",
+      "sha256": "6b5d02ec8d483f080ed1f05958da2b4a8a5b93fec5b3a26a500283fbd44157f0"
+    },
+    "numerical_diagnostic_provenance": {
+      "path": "results/m2-layer-numerical-512-v2/evidence.json",
+      "sha256": "53813cf1aec2f11665b44d69a8942c50a11eba83d81d50256960e68825ed57a4"
+    },
+    "native_object_review": {
+      "path": "results/m3-layer-native-phase-v1/relocation-call-review.json",
+      "sha256": "4e10c7273e7b8bd38858349cc6b149e347be97cadaaad8818b5ac47619c158a5"
+    }
+  },
+  "limits": [
+    "Numerical mock is diagnostic: its exploratory execution did not freeze a complete source closure before running.",
+    "Host integration validates ownership and dispatch, not device arithmetic.",
+    "Native package, installed-app execution and final numerical/lifecycle acceptance remain outstanding.",
+    "Full llama graph still rejects; selected layer control sequence does not establish full decoder progression."
+  ],
+  "native_wiring_test_methods": 72
+}

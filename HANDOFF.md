@@ -8,6 +8,20 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Active one-layer candidate
+
+The complete selected first layer is implemented offline: 37 real-model nodes,
+including RoPE, persistent F16 KV, attention, both residuals and FFN. Host tests
+pass 512 positions plus reset/two repeats, with 12 separate resident allocations
+and 528 balanced data allocations/frees. Two CPU-reference runs are bitwise
+identical. A numerical mock passes all 151 sampled outputs/caches under the
+fixed verifier; it is diagnostic evidence, not a frozen native qualification.
+See `evidence/offline-model-layer-integration.json` and `docs/LLM_MODEL_LAYER.md`.
+Native packaging and .40 validation remain outstanding; M2 is still open.
+Reuse `results/m2-layer-reference-v2`, `results/llm-layer-fixture-v4`, and
+`results/m2-layer-assets-v1` after authentication. The accepted native baseline
+remains prefix app v4. Do not replay its consumed candidate.
+
 The root `Makefile` now fetches locked public inputs and builds the SDK,
 zlib, UFS2Tool, Lapy helper, controllers, host suite, native core, and a
 76-object public HIP bootstrap package. The
@@ -81,11 +95,11 @@ paths. The applied cache change passes 127 focused tests, including real SDK
 cache integration; see `evidence/offline-relative-compiler-cache.json` and
 `docs/SOURCE_ONLY_REBUILD.md` for controls and limits.
 
-The next native build must regenerate the CPU prefix reference and aggregate
-assets because their authenticated builder source changed. Reuse the unchanged
-CPU libraries, native client, GPU fixtures, SDK and model. The accepted v4
-package was built before this build-only change; a complete package using the
-new relative paths has not yet been built or timed.
+A new prefix-only candidate would need regenerated prefix reference/aggregate
+receipts after the builder changes. The active layer candidate has its own fresh
+reference and aggregate; it reuses the CPU libraries, native client, SDK and model.
+The accepted v4 package predates the relative-path cache change; a complete
+package using the new paths has not yet been built or timed.
 
 Disk cleanup removed 3167 superseded native/experiment object files (1.06 GiB).
 Receipts, sources, models, logs and recovery packages were retained; old

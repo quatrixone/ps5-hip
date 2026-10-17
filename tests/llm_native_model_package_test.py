@@ -56,13 +56,16 @@ class ModelPackage(unittest.TestCase):
    for i in range(30):(hip/(str(i)+'.cpp')).write_text('')
    def compile_bound(out,path,obj,flags,label,source_root=None):
     calls.append((path,flags));return {'object':str(obj.relative_to(out))}
-   for phase in ('vocab','model-gate'):
+   for phase in ('vocab','model-gate','model-prefix','model-layer'):
     calls=[];out=folder/phase;out.mkdir()
     with patch.object(d.b,'compiler_flags',return_value=[]),patch.object(d.b,'compile_bound_unit',side_effect=compile_bound):
      units=d.b.compile_units(out,source,'llm_client',client_phase=phase)
     self.assertEqual(len(units),76)
     enabled=[p.name for p,flags in calls if '-DPS5HIP_LLM_AUTHENTICATED_MODEL_GATE=1' in flags]
-    self.assertEqual(enabled,['public_hip_llm_client_console_title.cpp'] if phase=='model-gate' else [])
+    self.assertEqual(enabled,['public_hip_llm_client_console_title.cpp'] if phase!='vocab' else [])
+    for target in ('PREFIX','LAYER'):
+     marked=[p.name for p,flags in calls if '-DPS5HIP_LLM_AUTHENTICATED_MODEL_'+target+'=1' in flags]
+     self.assertEqual(marked,['public_hip_llm_client_console_title.cpp'] if phase=='model-'+target.lower() else [])
    with self.assertRaisesRegex(ValueError,'invalid client compile phase'):d.b.compile_units(folder,source,'bootstrap',client_phase='model-gate')
  def test_package_marker_and_streamed_copy(self):
   with tempfile.TemporaryDirectory() as name:
@@ -89,4 +92,19 @@ class ModelPackage(unittest.TestCase):
    p=Path(name)/'header';p.write_bytes(b'before');headers=d.merged_unit_headers([{'headers':{str(p):d.b.sha(p)}}]);p.write_bytes(b'after');bind=actual_binder()
    with self.assertRaisesRegex(ValueError,'identity differs'):
     for path,h in headers.items():bind(path,h)
+class LayerPackage(unittest.TestCase):
+ def test_exact_six_modules_and_phase_prerequisites(self):
+  d.validate_phase_arguments('model-layer','model','source','cpu',layer_fixture='assets')
+  for phase,prefix,layer in [('model-layer',None,None),('model-layer','prefix','layer'),('vocab',None,'layer'),('model-prefix','prefix','layer')]:
+   with self.assertRaises(ValueError):d.validate_phase_arguments(phase,'model','source','cpu',prefix,layer)
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp);phase=root/'phase';phase.write_bytes(b'model-layer\n');model=root/'path';model.write_bytes(d.encode_model_path(d.DEFAULT_MODEL_PATH));data=root/'asset';data.write_bytes(b'hsaco')
+   assets={'client-phase.txt':phase,'vocab.gguf':data,'model-path.txt':model,**{'model-layer/'+name+'.hsaco':data for name in ('getrows','normalized','weighted','q8','q4','layer')}}
+   d.b.validate_client_assets(assets)
+   for name in assets:
+    bad=dict(assets);del bad[name]
+    with self.subTest(missing=name),self.assertRaises(ValueError):d.b.validate_client_assets(bad)
+   for name in ('model.gguf','model-prefix/q4.hsaco','model-layer/extra.hsaco'):
+    with self.subTest(extra=name),self.assertRaises(ValueError):d.b.validate_client_assets({**assets,name:data})
+
 if __name__=='__main__':unittest.main()

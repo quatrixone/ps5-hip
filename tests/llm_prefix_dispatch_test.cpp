@@ -6,7 +6,7 @@
 #include <vector>
 using namespace ps5hip_prefix;
 static std::map<const ggml_tensor*,std::vector<char>> buffers;
-static std::vector<char> scratch(2304);
+static std::vector<char> scratch(6336);
 static std::vector<unsigned> launches;
 static unsigned loads=0,unloads=0,frees=0,syncs=0;
 static std::string failure;
@@ -19,7 +19,7 @@ static hipError_t status(const char * site) {
 extern "C" hipError_t hipModuleLoad(hipModule_t * m,const char*) { auto e=status("load"); if(e==hipSuccess)*m=reinterpret_cast<hipModule_t>(++loads);return e; }
 extern "C" hipError_t hipModuleGetFunction(hipFunction_t * f,hipModule_t,const char * name) { auto e=status("function");if(e==hipSuccess){for(unsigned i=0;i<5;++i)if(std::strcmp(name,Dispatch::symbols[i])==0)*f=reinterpret_cast<hipFunction_t>(i+1);}return e; }
 extern "C" hipError_t hipModuleUnload(hipModule_t) { auto e=status("unload"); if(e==hipSuccess)++unloads;return e; }
-extern "C" hipError_t hipMalloc(void ** p,size_t n) { assert(n==2304);auto e=status("malloc");if(e==hipSuccess)*p=scratch.data();return e; }
+extern "C" hipError_t hipMalloc(void ** p,size_t n) { assert(active && n==active->scratch_bytes && (n==2304 || n==6336));auto e=status("malloc");if(e==hipSuccess)*p=scratch.data();return e; }
 extern "C" hipError_t hipFree(void * p) { assert(p==scratch.data());auto e=status("free");if(e==hipSuccess)++frees;return e; }
 extern "C" hipError_t hipMemcpy(void * dst,const void * src,size_t n,hipMemcpyKind kind) {assert(kind==hipMemcpyDeviceToHost && n==4);auto e=status("copy");if(e==hipSuccess)std::memcpy(dst,src,n);return e;}
 extern "C" hipError_t hipDeviceSynchronize() {++syncs;return status("sync");}
@@ -29,8 +29,23 @@ extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t f,unsigned gx,unsigned
     unsigned index=reinterpret_cast<uintptr_t>(f)-1;assert(index<5 && gz==1 && bz==1 && !stream && !extra);launches.push_back(index);
     if(index==0) {assert(gx==1 && gy==4 && bx==256 && by==1 && lds==0);assert(arg<int64_t>(args,3)==2048 && arg<int64_t>(args,4)==1);assert(arg<size_t>(args,9)==1152 && arg<size_t>(args,10)==36864000 && arg<size_t>(args,14)==1);auto fd=arg<Dispatch::Uint3>(args,5);assert(fd.x==1 && fd.y==0 && fd.z==1);}
     if(index==1 || index==2) {assert(gx==1 && gy==1 && bx==1024 && by==1 && lds==128);assert(arg<int>(args,2)==2048 && arg<float>(args,8)==1e-5f);assert((arg<void*>(args,9)!=nullptr)==(index==2));assert(arg<void*>(args,17)==nullptr && arg<float>(args,25)==1.f);}
-    if(index==3) {assert(gx==8 && gy==1 && bx==256 && by==1 && lds==0);assert(arg<void*>(args,1)==scratch.data() && arg<int64_t>(args,6)==2048);}
-    if(index==4) {assert((gx==2048 || gx==256) && gy==1 && bx==32 && by==4 && lds==0);assert(arg<void*>(args,1)==scratch.data() && !arg<void*>(args,2));assert(arg<uint32_t>(args,5)==2048 && arg<uint32_t>(args,9)==gx && arg<uint32_t>(args,11)==gx*64 && arg<uint32_t>(args,18)==0);auto fusion=arg<Dispatch::Fusion>(args,3);for(auto b:fusion.bytes)assert(b==0);}
+    if(index==3) {
+        const auto width=arg<int64_t>(args,2);assert(width==2048 || width==5632);
+        assert(gx==unsigned(width/256) && gy==1 && bx==256 && by==1 && lds==0);
+        assert(arg<void*>(args,1)==scratch.data());for(int i=3;i<=6;++i)assert(arg<int64_t>(args,i)==width);
+        assert(arg<uint32_t>(args,7)==1);auto one=arg<Dispatch::Uint3>(args,8);assert(one.x==1 && one.y==0 && one.z==1);
+        assert(size_t(width/32)*36<=active->scratch_bytes);
+    }
+    if(index==4) {
+        const auto width=arg<uint32_t>(args,5),blocks=width/32;
+        assert((width==2048 && (gx==2048 || gx==256 || gx==5632)) || (width==5632 && gx==2048));
+        assert(gy==1 && bx==32 && by==4 && lds==0 && arg<void*>(args,1)==scratch.data() && !arg<void*>(args,2));
+        for(int i:{7,8,12,16})assert(arg<uint32_t>(args,i)==blocks);
+        for(int i:{9,13,17})assert(arg<uint32_t>(args,i)==gx);
+        for(int i:{11,15})assert(arg<uint32_t>(args,i)==gx*blocks);
+        for(int i:{6,10,14}){auto one=arg<Dispatch::Uint3>(args,i);assert(one.x==1 && one.y==0 && one.z==1);}
+        assert(arg<uint32_t>(args,18)==0);auto fusion=arg<Dispatch::Fusion>(args,3);for(auto b:fusion.bytes)assert(b==0);
+    }
     return hipSuccess;
 }
 struct Terminal{};
@@ -63,6 +78,20 @@ int main() {
     d.shutdown();assert(frees==1 && unloads==5);
     assert(counter(Call::module_unload).successes==5 && counter(Call::scratch_free).requested_bytes==2304 && counter(Call::release_sync).successes==1);
     d.initialize(paths);assert(d.execute(emb));d.shutdown();assert(frees==2 && unloads==10);
+    // Layer mode opts into only the FFN up/gate and down shapes; legacy admission stays unchanged.
+    auto bind=[&](ggml_tensor * t){buffers[t].resize(ggml_nbytes(t));t->data=buffers[t].data();};
+    auto matvec=[&](int width,int rows){auto * w=tensor(GGML_TYPE_Q4_0,width,rows);auto * x=tensor(GGML_TYPE_F32,width,1);auto * y=ggml_mul_mat(ctx,w,x);for(auto * t:{w,x,y})bind(t);return y;};
+    auto * up=matvec(2048,5632),* down=matvec(5632,2048),* output=matvec(2048,2048);
+    assert(!d.admit(up) && !d.admit(down) && d.admit(output));
+    Dispatch layer(owned,fail,5632);active=&layer;layer.initialize(paths);
+    assert(layer.scratch_bytes==6336 && layer.calls[static_cast<unsigned>(Call::scratch_allocate)].requested_bytes==6336);
+    for(auto * t:{output,up,down,k}){const auto n=launches.size();assert(layer.execute(t));assert(launches.size()==n+2 && launches[n]==3 && launches[n+1]==4);}
+    for(auto dims:{std::pair<int,int>{5632,256},{5632,5632},{1024,2048},{2048,512},{4096,2048}}){auto * bad=matvec(dims.first,dims.second);const auto n=launches.size();assert(!layer.execute(bad) && launches.size()==n);}
+    const auto n=launches.size();down->src[0]->nb[1]++;assert(!layer.execute(down) && launches.size()==n);down->src[0]->nb[1]--;
+    down->op_params[0]=GGML_PREC_F32;assert(!layer.execute(down) && launches.size()==n);down->op_params[0]=GGML_PREC_DEFAULT;
+    auto * invalid=matvec(5632,256);auto * whole=ggml_new_graph_custom(ctx,8,false);ggml_build_forward_expand(whole,up);ggml_build_forward_expand(whole,invalid);assert(!layer.execute_graph(whole) && launches.size()==n);
+    layer.shutdown();assert(layer.calls[static_cast<unsigned>(Call::scratch_free)].requested_bytes==6336);
+    for(unsigned width:{0u,1024u,4096u,8192u}){bool rejected=false;try{Dispatch bad(owned,fail,width);}catch(const std::runtime_error&){rejected=true;}assert(rejected);}
     for(const char * site:{"load","function","malloc","launch","sync","unload","free","copy"}) {
         Dispatch broken(owned,fail);active=&broken;bool thrown=false;failure.clear();
         try {

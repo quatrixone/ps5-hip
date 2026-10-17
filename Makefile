@@ -118,14 +118,15 @@ LLM_NATIVE_APP_BUILD_DIR ?= build/llm-native-app
 LLM_NATIVE_APP_PREPARED_SOURCE_BUILD ?=
 LLM_NATIVE_APP_PHASE ?= vocab
 LLM_NATIVE_APP_PREFIX_FIXTURE ?= $(LLM_PREFIX_FIXTURE_DIR)
+LLM_NATIVE_APP_LAYER_FIXTURE ?= $(LLM_LAYER_ASSETS_DIR)
 LLM_NATIVE_APP_MODEL ?= $(LLM_GGUF_DIR)/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_MODEL_SOURCE ?= $(LLM_MODEL_DIR)
 LLM_NATIVE_APP_MODEL_REMOTE_PATH ?= /data/hip/models/tinyllama-q4_0.gguf
 LLM_NATIVE_APP_CPU_BUILD ?= $(LLM_CPU_BUILD_DIR)
-ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate model-prefix),$(LLM_NATIVE_APP_PHASE))
-$(error LLM_NATIVE_APP_PHASE must be vocab, model-gate or model-prefix)
+ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate model-prefix model-layer),$(LLM_NATIVE_APP_PHASE))
+$(error LLM_NATIVE_APP_PHASE must be vocab, model-gate, model-prefix or model-layer)
 endif
-LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate model-prefix,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)" --model-remote-path "$(LLM_NATIVE_APP_MODEL_REMOTE_PATH)")
+LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate model-prefix model-layer,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)" --model-remote-path "$(LLM_NATIVE_APP_MODEL_REMOTE_PATH)")
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
 LLM_PROFILE_DIR ?= results/llm-model-profile
 LLM_MODEL_DIR ?= models/tinyllama-source
@@ -200,7 +201,7 @@ llm-native-app: deps-build llm-deps-fetch
 	@if ! test -f "$(LLM_VOCAB_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-vocab-fixture; fi
 	$(PYTHON) tests/watchdog_test.py
 	$(PYTHON) tests/llm_native_host_allocator_test.py
-	$(if $(filter model-gate model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/llm_native_scheduler_test.py --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)",@true)
+	$(if $(filter model-gate model-prefix model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/llm_native_scheduler_test.py --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)",@true)
 	$(PYTHON) tests/llm_native_app_build_test.py
 	$(PYTHON) tests/llm_native_model_package_test.py
 	$(PYTHON) tests/source_model_auth_test.py
@@ -222,7 +223,13 @@ llm-native-app: deps-build llm-deps-fetch
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_prefix_console_test.py,@true)
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_prefix_authentication_test.py,@true)
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_PREFIX_FIXTURE)/receipt.json"; then $(MAKE) llm-prefix-assets LLM_PREFIX_FIXTURE_DIR="$(LLM_NATIVE_APP_PREFIX_FIXTURE)" LLM_PREFIX_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; fi,@true)
-	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_model_layer_freeze_test.py,@true)
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_layer_console_test.py,@true)
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_layer_authentication_test.py,@true)
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/native_layer_transcript_test.py,@true)
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/llm_layer_readbacks_test.py,@true)
+	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_LAYER_FIXTURE)/receipt.json"; then $(MAKE) llm-layer-assets LLM_LAYER_ASSETS_DIR="$(LLM_NATIVE_APP_LAYER_FIXTURE)" LLM_LAYER_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; fi,@true)
+	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),--layer-fixture "$(LLM_NATIVE_APP_LAYER_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
 
 .PHONY: llm-executed-graph
 llm-executed-graph: llm-cpu-reference
@@ -473,3 +480,40 @@ llm-prefix-assets: llm-deps-fetch deps-fetch
 	$(PYTHON) tests/public_hip_prefix_assets_test.py
 	@if ! test -f "$(LLM_PREFIX_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_public_hip_prefix_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --reference "$(LLM_PREFIX_REFERENCE_DIR)" --output "$(LLM_PREFIX_FIXTURE_DIR)"; fi
 	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_prefix_assets import prefix_inputs; prefix_inputs(Path(sys.argv[1]).resolve())' "$(LLM_PREFIX_FIXTURE_DIR)"
+
+# Bounded one-layer qualification. Reuse receipts only after producer authentication.
+LLM_LAYER_MODEL ?= $(LLM_NATIVE_APP_MODEL)
+LLM_LAYER_FIXTURE_DIR ?= results/llm-layer-fixture
+LLM_LAYER_REFERENCE_DIR ?= results/llm-layer-reference
+LLM_LAYER_ASSETS_DIR ?= results/llm-layer-assets
+LLM_LAYER_HOST_TEST_DIR ?= results/llm-layer-host-tests
+.PHONY: llm-layer-fixture llm-layer-reference llm-layer-assets llm-layer-host-tests
+llm-layer-fixture: llm-deps-fetch deps-fetch
+	@if ! test -f "$(LLM_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-fixture; fi
+	$(PYTHON) tests/llm_layer_fixture_test.py
+	@if ! test -f "$(LLM_LAYER_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_layer_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_LAYER_FIXTURE_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from build_llm_layer_fixture import fixture_inputs; fixture_inputs(Path(sys.argv[1]).resolve())' "$(LLM_LAYER_FIXTURE_DIR)"
+
+llm-layer-reference: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	@if ! test -f "$(LLM_LAYER_MODEL)"; then if test "$(LLM_LAYER_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_LAYER_MODEL: $(LLM_LAYER_MODEL)" >&2; exit 1; fi; fi
+	$(PYTHON) tests/llm_layer_reference_test.py
+	@if ! test -f "$(LLM_LAYER_REFERENCE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_layer_reference.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_LAYER_MODEL)" --output "$(LLM_LAYER_REFERENCE_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from build_llm_layer_reference import authenticate_layer_reference; authenticate_layer_reference(Path(sys.argv[1]).resolve())' "$(LLM_LAYER_REFERENCE_DIR)"
+
+llm-layer-assets: llm-deps-fetch deps-fetch
+	@if ! test -f "$(LLM_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-fixture; fi
+	@if ! test -f "$(LLM_GETROWS_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-getrows-fixture; fi
+	@if ! test -f "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_weighted_rmsnorm_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)"; fi
+	@if ! test -f "$(LLM_Q4_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_Q4_FIXTURE_DIR)"; fi
+	@if ! test -f "$(LLM_Q4_HALFWORD_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_q4_halfword_fixture.py --original-fixture "$(LLM_Q4_FIXTURE_DIR)" --output "$(LLM_Q4_HALFWORD_FIXTURE_DIR)"; fi
+	@if ! test -f "$(LLM_LAYER_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-layer-reference; fi
+	@if ! test -f "$(LLM_LAYER_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-layer-fixture; fi
+	$(PYTHON) tests/public_hip_layer_assets_test.py
+	@if ! test -f "$(LLM_LAYER_ASSETS_DIR)/receipt.json"; then $(PYTHON) tools/build_public_hip_layer_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --layer "$(LLM_LAYER_FIXTURE_DIR)" --reference "$(LLM_LAYER_REFERENCE_DIR)" --output "$(LLM_LAYER_ASSETS_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_layer_assets import layer_inputs; layer_inputs(Path(sys.argv[1]).resolve())' "$(LLM_LAYER_ASSETS_DIR)"
+
+llm-layer-host-tests: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	$(PYTHON) tests/native_layer_transcript_test.py
+	$(PYTHON) tools/build_llm_layer_host_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_LAYER_MODEL)" --output "$(LLM_LAYER_HOST_TEST_DIR)"

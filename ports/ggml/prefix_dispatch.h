@@ -24,12 +24,17 @@ struct Dispatch {
     std::array<hipModule_t,5> modules{};
     std::array<hipFunction_t,5> functions{};
     void * q8 = nullptr;
+    const unsigned max_width;
+    const size_t scratch_bytes;
     Span owned;
     Fail fail;
     bool ready=false, terminal=false;
     unsigned completed_launches=0;
     CallStatistics calls{};
-    Dispatch(Span span, Fail failure):owned(span),fail(failure) { check(owned && fail,"dispatch callbacks"); }
+    Dispatch(Span span, Fail failure, unsigned maximum_width=2048):max_width(maximum_width),scratch_bytes(size_t(maximum_width/32)*36),owned(span),fail(failure) {
+        check(owned && fail,"dispatch callbacks");
+        check(max_width==2048 || max_width==5632,"unsupported dispatch width");
+    }
     Dispatch(const Dispatch&)=delete;
     Dispatch& operator=(const Dispatch&)=delete;
     void ok(hipError_t e, const char * site) {
@@ -54,12 +59,12 @@ struct Dispatch {
             call(Call::module_load,0,"module_load",[&]{return hipModuleLoad(&modules[i],paths[i]);}); ok(modules[i]?hipSuccess:hipErrorInvalidValue,"null_module");
             call(Call::module_function,0,"module_function",[&]{return hipModuleGetFunction(&functions[i],modules[i],symbols[i]);}); ok(functions[i]?hipSuccess:hipErrorInvalidValue,"null_function");
         }
-        call(Call::scratch_allocate,2304,"scratch_allocate",[&]{return hipMalloc(&q8,2304);}); ok(q8?hipSuccess:hipErrorInvalidValue,"null_scratch"); ready=true;
+        call(Call::scratch_allocate,scratch_bytes,"scratch_allocate",[&]{return hipMalloc(&q8,scratch_bytes);}); ok(q8?hipSuccess:hipErrorInvalidValue,"null_scratch"); ready=true;
     }
     void shutdown() {
         check(ready && !terminal,"dispatch cannot release uncertain work");
         call(Call::release_sync,0,"shutdown_sync",[]{return hipDeviceSynchronize();});
-        call(Call::scratch_free,2304,"scratch_free",[&]{return hipFree(q8);}); q8=nullptr;
+        call(Call::scratch_free,scratch_bytes,"scratch_free",[&]{return hipFree(q8);}); q8=nullptr;
         for(size_t i=modules.size();i-- >0;) { call(Call::module_unload,0,"module_unload",[&]{return hipModuleUnload(modules[i]);}); modules[i]=nullptr; functions[i]=nullptr; }
         ready=false;
     }
@@ -80,8 +85,10 @@ struct Dispatch {
         }
         if(t->op==GGML_OP_GET_ROWS) return valid(t,GGML_TYPE_F32,2048,1) && valid(t->src[0],GGML_TYPE_Q4_0,2048,32000) && valid(t->src[1],GGML_TYPE_I32,1,1);
         if(t->op==GGML_OP_MUL_MAT) {
-            const int rows=t->ne[0]==2048?2048:256;
-            return valid(t,GGML_TYPE_F32,rows,1) && valid(t->src[0],GGML_TYPE_Q4_0,2048,rows) && valid(t->src[1],GGML_TYPE_F32,2048,1) && t->op_params[0]==GGML_PREC_DEFAULT;
+            const auto width=t->src[0]->ne[0], rows=t->ne[0];
+            const bool prefix=width==2048 && (rows==2048 || rows==256);
+            const bool ffn=max_width==5632 && ((width==2048 && rows==5632) || (width==5632 && rows==2048));
+            return (prefix || ffn) && valid(t,GGML_TYPE_F32,rows,1) && valid(t->src[0],GGML_TYPE_Q4_0,width,rows) && valid(t->src[1],GGML_TYPE_F32,width,1) && t->op_params[0]==GGML_PREC_DEFAULT;
         }
         if(t->op!=GGML_OP_RMS_NORM && t->op!=GGML_OP_MUL) return false;
         const bool weighted=t->op==GGML_OP_MUL;
@@ -154,14 +161,13 @@ struct Dispatch {
             launch(weighted?2:1,1,1,1024,1,128,args); return true;
         }
         if(t->op==GGML_OP_MUL_MAT) {
-            const int rows=t->ne[0]==2048?2048:256;
-            if(!valid(t,GGML_TYPE_F32,rows,1) || !valid(t->src[0],GGML_TYPE_Q4_0,2048,rows) || !valid(t->src[1],GGML_TYPE_F32,2048,1) || t->op_params[0]!=GGML_PREC_DEFAULT) return false;
-            for(int i=2;i<GGML_MAX_SRC;++i) if(t->src[i]) return false;
-            void * input=t->src[1]->data; int64_t size=2048; uint32_t ne1=1;
+            // admit() has already restricted this to the four exact model matrix shapes.
+            uint32_t width=uint32_t(t->src[0]->ne[0]),rows=uint32_t(t->ne[0]);
+            void * input=t->src[1]->data; int64_t size=width; uint32_t ne1=1;
             void * quantize[]={&input,&q8,&size,&size,&size,&size,&size,&ne1,&one};
-            launch(3,8,1,256,1,0,quantize);
+            launch(3,width/256,1,256,1,0,quantize);
             void * weight=t->src[0]->data,* ids=nullptr,* out=t->data; Fusion fusion{};
-            uint32_t width=2048,blocks=64,matrix_blocks=rows*64,ids_stride=0,output_rows=rows;
+            uint32_t blocks=width/32,matrix_blocks=rows*blocks,ids_stride=0,output_rows=rows;
             void * project[]={&weight,&q8,&ids,&fusion,&out,&width,&one,&blocks,&blocks,&output_rows,&one,&matrix_blocks,&blocks,&output_rows,&one,&matrix_blocks,&blocks,&output_rows,&ids_stride};
             launch(4,rows,1,32,4,0,project); return true;
         }

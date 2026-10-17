@@ -221,4 +221,49 @@ class PrefixWrapper(unittest.TestCase):
   bad=dict(bodies);bad['context']+='20: callq 0x40 <ggml_backend_sched_graph_compute_async>\n'
   with self.assertRaises(RuntimeError):a.phase_contract('model-prefix','prefix',chain,bad)
 
+class LayerAudit(unittest.TestCase):
+ def fixture(self):
+  _,base,support,calls=fixture();lines=[]
+  for i,line in enumerate(a.LAYER_WRAPPER_TEMPLATE.splitlines()):
+   op,*tail=line.split(' ',1);arg=tail[0] if tail else ''
+   if op.startswith('j'):arg='0x'+format(base+int(arg,16),'x')
+   elif op=='call':op='callq';arg='0x5000 <target>'
+   else:arg=arg.replace('RIP','0x450(%rip)')
+   lines.append(f'{base+i*6:x}: {op} {arg}')
+  return '\n'.join(lines),base,support,list(enumerate([a.PREFIX_HOOK,a.LAYER_HOOK,*[n for _,n in calls]]))
+ def test_exact_two_hooks_and_rejection(self):
+  body,base,support,calls=self.fixture();a.wrapper_contract(body,base,support,calls)
+  for old,new in [('je 0x1058','jmp 0x1170'),('jge 0x1170','jge 0x1190'),('jne 0x115d','je 0x115d'),('jmp 0x1190','jmp 0x1170')]:
+   self.assertIn(old,body)
+   with self.subTest(branch=old),self.assertRaises(RuntimeError):a.wrapper_contract(body.replace(old,new),base,support,calls)
+  for bad in (calls[1:],calls[:1]+calls[2:],calls+[(999,a.LAYER_HOOK)],[(i,a.PREFIX_HOOK if n==a.LAYER_HOOK else n) for i,n in calls],[(0,a.LAYER_HOOK),(1,a.PREFIX_HOOK),*calls[2:]]):
+   with self.assertRaises(RuntimeError):a.wrapper_contract(body,base,support,bad)
+  with self.assertRaises(RuntimeError):a.wrapper_contract(body,base,support.replace('xorl %eax, %eax','movl $0x1, %eax'),calls)
+ def test_layer_aliases_exact_addresses(self):
+  roles={'scope_constructor':'ActualLayerQualificationC1args','scope_destructor':'ActualLayerQualificationD1Ev'}
+  values={n:{v} for n,v in [('ActualLayerQualificationC1args',0x100),('ActualLayerQualificationC2args',0x100),('ActualLayerQualificationD1Ev',0x200),('ActualLayerQualificationD2Ev',0x200)]}
+  text='10: callq 0x100 <ActualLayerQualificationC2args>\n20: callq 0x200 <ActualLayerQualificationD2Ev>'
+  normalized=a.prefix_scope_aliases(text,roles,values,'ActualLayerQualification');self.assertIn('C1args',normalized)
+  for badtext,badvalues in [(text.replace('0x100','0x101'),values),(text,{**values,'ActualLayerQualificationC2args':{0x300}})]:
+   with self.assertRaises(RuntimeError):a.prefix_scope_aliases(badtext,roles,badvalues,'ActualLayerQualification')
+ def contract_fixture(self):
+  roles=a.layer_roles(lambda x:x);edges=a.layer_edges(roles)
+  for role,apis in [('initialize',['hipModuleLoad','hipModuleGetFunction','hipMalloc']),('shutdown',['hipFree','hipModuleUnload','hipDeviceSynchronize']),('launch',['hipModuleLaunchKernel','hipDeviceSynchronize']),('read',['hipMemcpy'])]:
+   edges[roles[role]]=apis
+  bodies={n:'\n'.join(f'{16+i*8:x}: callq 0x5000 <{target}>' for i,target in enumerate(targets)) for n,targets in edges.items()}
+  return bodies,roles,[roles[n] for n in ('initialize','shutdown','launch','read','execute','preflight')]
+ def test_layer_direct_edges_and_connected_public_apis(self):
+  bodies,roles,dispatch=self.contract_fixture();a.layer_contract(bodies,roles,dispatch)
+  for caller,text in bodies.items():
+   for line in text.splitlines():
+    bad=dict(bodies);bad[caller]=text.replace(line,'')
+    with self.subTest(caller=caller,line=line),self.assertRaises(RuntimeError):a.layer_contract(bad,roles,dispatch)
+  for caller in [a.LAYER_HOOK,roles['graph'],*dispatch]:
+   bad=dict(bodies);bad[caller]+='\n900: callq 0x5000 <ggml_backend_cpu_init>'
+   with self.assertRaises(RuntimeError):a.layer_contract(bad,roles,dispatch)
+ def test_counter_lambda_path_must_be_connected(self):
+  bodies,roles,dispatch=self.contract_fixture();api='hipModuleLaunchKernel';bodies[roles['launch']]=bodies[roles['launch']].replace(api,'counter');bodies['counter']='10: callq 0x5000 <'+api+'>';dispatch.append('counter');a.layer_contract(bodies,roles,dispatch)
+  bad=dict(bodies);bad[roles['launch']]=bad[roles['launch']].replace('counter','unconnected')
+  with self.assertRaises(RuntimeError):a.layer_contract(bad,roles,dispatch)
+
 if __name__=='__main__':unittest.main()

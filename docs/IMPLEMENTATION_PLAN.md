@@ -12,6 +12,8 @@ priority is one whole transformer layer under M2: RoPE/KV, attention, output
 projection/residual and FFN/residual, with milestone pushes. Position-zero
 prefix validation does not close M2 or establish inference.
 
+- 2026-10-16 | M2 whole layer | offline | 37 nodes, 512+reset2 host sequence, twelve resident owners, CPU reference and diagnostic numerical comparison pass | evidence/offline-model-layer-integration.json | next: native app and .40 validation
+
 - 2026-10-16 | M2 actual-model prefix | 50df1fd | .40 | pass: tokens 0/1/2/31999 at position zero, embedding/norm/weighted/full QKV, 24 raw tensors and 36 launches, external model reused, normal cleanup | evidence/console40-model-prefix-success.json | next: complete-layer RoPE/KV/attention/residual/FFN; M2 remains open
 
 - 2026-10-16 | M2 native prefix | .40 | failed: model/context loaded; public HIP rejected first GET_ROWS launch; healthy safety close | evidence/console40-model-prefix-launch-rejection.json | next: adapter admission fix

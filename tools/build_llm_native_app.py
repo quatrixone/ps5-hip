@@ -28,7 +28,7 @@ def command_file_inputs(output,label,argv,title,cwd=None):
 
 
 def write_phase(path,phase='vocab'):
- if phase not in ('vocab','model-gate','model-prefix'):raise ValueError('invalid app phase')
+ if phase not in ('vocab','model-gate','model-prefix','model-layer'):raise ValueError('invalid app phase')
  Path(path).write_bytes((phase+'\n').encode())
 
 
@@ -94,11 +94,12 @@ def vocab_inputs(folder):
  return {'asset':str(asset),'receipt':str(receipt),'receipt_sha256':digest,'inputs':{**inputs,**{str(folder/n):h for n,h in artifacts.items()},str(receipt):digest}}
 
 
-def validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture=None):
+def validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture=None,layer_fixture=None):
+ if (phase=='model-layer') != (layer_fixture is not None):raise ValueError('layer fixture does not match phase')
  if (phase=='model-prefix') != (prefix_fixture is not None):raise ValueError('prefix fixture does not match phase')
- if phase not in ('vocab','model-gate','model-prefix'):raise ValueError('invalid app phase')
+ if phase not in ('vocab','model-gate','model-prefix','model-layer'):raise ValueError('invalid app phase')
  supplied=(model is not None,model_source is not None,cpu_build is not None)
- if (phase=='vocab' and any(supplied)) or (phase in ('model-gate','model-prefix') and not all(supplied)):raise ValueError('model prerequisites do not match phase')
+ if (phase=='vocab' and any(supplied)) or (phase in ('model-gate','model-prefix','model-layer') and not all(supplied)):raise ValueError('model prerequisites do not match phase')
 
 
 def model_inputs(model,source_dir,cpu_build):
@@ -194,8 +195,8 @@ def select_prepared_source(output, fresh, previous):
  return old
 
 
-def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None):
- validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture)
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None,layer_fixture=None):
+ validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture,layer_fixture)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
  b.validate_results_directory(results_dir)
@@ -237,11 +238,12 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   name=getattr(module,'__file__',None)
   if name and Path(name).is_file():bind(Path(name).resolve())
  required_sources=['tools/public_hip_llm_client_console_title.cpp','ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h','tools/audit_public_hip_llm_client_native.py']
- if phase in ('model-gate','model-prefix'):
+ if phase in ('model-gate','model-prefix','model-layer'):
   required_sources+=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
    'tests/llm_native_host_allocator_test.py','tests/llm_native_scheduler_test.py',
    'src/native_memory.cpp','include/ps5hip/native_memory.h']
  if phase=='model-prefix':required_sources += ['ports/ggml/native_prefix.h','ports/ggml/prefix_qualification.h','ports/ggml/model_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_prefix_assets.py']
+ if phase=='model-layer':required_sources += ['ports/ggml/native_layer.h','ports/ggml/layer_qualification.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_layer_assets.py']
  for name in required_sources:bind(ROOT/name)
  specs=sources()
  for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
@@ -281,7 +283,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    if name.startswith('/') and Path(name).is_file():bind(name)
  client=client_builder.app_objects(native_client);merge(client['inputs'])
  vocab=vocab_inputs(vocab_fixture);merge(vocab['inputs'])
- model_info=model_inputs(model,model_source,cpu_build) if phase in ('model-gate','model-prefix') else None
+ model_info=model_inputs(model,model_source,cpu_build) if phase in ('model-gate','model-prefix','model-layer') else None
  external_model={'path':model_remote_path,'bytes':model_info['bytes'],'sha256':model_info['sha256']} if model_info else None
  if external_model:validate_external_model(external_model)
  if model_info:merge(model_info['inputs'])
@@ -290,6 +292,11 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   from public_hip_prefix_assets import prefix_inputs
   prefix_info=prefix_inputs(prefix_fixture);merge(prefix_info['inputs'])
   if prefix_info['model']['sha256']!=model_info['sha256'] or prefix_info['model']['bytes']!=model_info['bytes']:raise ValueError('prefix/model identity differs')
+ layer_info=None
+ if phase=='model-layer':
+  from public_hip_layer_assets import layer_inputs
+  layer_info=layer_inputs(layer_fixture);merge(layer_info['inputs'])
+  if layer_info['model']['sha256']!=model_info['sha256'] or layer_info['model']['bytes']!=model_info['bytes']:raise ValueError('layer/model identity differs')
  output.mkdir(parents=True)
  original_run=b.run
  def recorded_run(out,label,argv,cwd=None):
@@ -372,13 +379,13 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
   flags=b.compiler_flags(public)+['-I'+str(upstream_client/n) for n in ('include','ggml/include','ggml/src')]+['-I'+str(ROOT/'ports/ggml')]
   backend=b.compile_bound_unit(output,ROOT/'ports/ggml/ps5_backend.cpp',output/'ps5_backend.o',flags,'compile-ps5-backend');merge(backend['headers']);bind(output/backend['object'],backend['object_sha256']);units.append(backend)
-  if phase in ('model-gate','model-prefix'):
+  if phase in ('model-gate','model-prefix','model-layer'):
    # llama_context destruction references the upstream optimizer cleanup even without training.
    opt=b.compile_bound_unit(output,upstream_client/'ggml/src/ggml-opt.cpp',output/'ggml-opt.o',flags,'compile-ggml-opt');merge(opt['headers']);bind(output/opt['object'],opt['object_sha256']);units.append(opt)
    allocator=b.compile_bound_unit(output,ROOT/'ports/ggml/native_host_allocator.cpp',output/'native_host_allocator.o',flags,'compile-native-host-allocator');merge(allocator['headers']);bind(output/allocator['object'],allocator['object_sha256']);units.append(allocator)
   units.extend({'object':p,'object_sha256':inputs[p],'source':'authenticated-native-client'} for p in client['objects'])
-  if len(units)!=(149 if phase in ('model-gate','model-prefix') else 147):raise ValueError('unexpected app object count')
-  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client',native_host_allocator=(phase in ('model-gate','model-prefix')))
+  if len(units)!=(149 if phase in ('model-gate','model-prefix','model-layer') else 147):raise ValueError('unexpected app object count')
+  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client',native_host_allocator=(phase in ('model-gate','model-prefix','model-layer')))
   bind(output/'title.elf');tool=b.native_tool(output);bind(tool);libc=b.clean_room_libc(output,tool);bind(libc)
   image,roundtrip=b.convert_title(output,tool,'llm_client')
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)
@@ -388,17 +395,19 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    model_path_file=output/'model-path.txt';model_path_file.write_bytes(encode_model_path(external_model['path']));bind(model_path_file)
    assets['model-path.txt']=model_path_file
   if prefix_info:assets.update(prefix_info['assets'])
+  if layer_info:assets.update(layer_info['assets'])
   package,files=b.package_title(output,image,libc,results_dir,client_assets=assets)
   if not 0<package.stat().st_size<=package_limit('llm_client'):raise ValueError('native client package exceeds small package limit')
   bind(package)
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
   audit=output/'llm-client-native-audit.json'
-  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix') else [])])
+  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer') else [])])
   ar=json.loads(audit.read_text())
   if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!=phase or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
-  if phase in ('model-gate','model-prefix') and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
+  if phase in ('model-gate','model-prefix','model-layer') and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
   if phase=='model-prefix' and ar.get('actual_prefix_call_chain_audited') is not True:raise ValueError('actual prefix call chain not audited')
+  if phase=='model-layer' and ar.get('actual_layer_call_chain_audited') is not True:raise ValueError('actual layer call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   merge(ar['inputs']);bind(audit)
@@ -407,15 +416,17 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   # Re-run consumers to reject source or dependency changes during compilation.
   if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab or (model_info and model_inputs(model,model_source,cpu_build)!=model_info):raise ValueError('app prerequisite changed')
   if prefix_info and prefix_inputs(prefix_fixture)!=prefix_info:raise ValueError('prefix prerequisite changed')
+  if layer_info and layer_inputs(layer_fixture)!=layer_info:raise ValueError('layer prerequisite changed')
   for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
   if reused_source:select_prepared_source(output,output/'source-public',public.parent)
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
-  receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
+  receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-layer-native-client-app' if phase=='model-layer' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
   b.cache.verify(ROOT,cache_record)
   receipt['compiler_cache']=cache_record
   if reused_source:receipt['prepared_source_build']=str(public.parent)
   if prefix_info:receipt['llm_client']['prefix']={k:prefix_info[k] for k in ('receipt','receipt_sha256','reference')}
+  if layer_info:receipt['llm_client']['layer']={k:layer_info[k] for k in ('receipt','receipt_sha256','reference')}
   if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
   return receipt
@@ -424,9 +435,10 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for name in ('output','native-client','vocab-fixture'):parser.add_argument('--'+name,type=Path,required=True)
- parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix'),default='vocab')
+ parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer'),default='vocab')
  for name in ('model','model-source','cpu-build'):parser.add_argument('--'+name,type=Path)
  parser.add_argument('--prefix-fixture',type=Path)
+ parser.add_argument('--layer-fixture',type=Path)
  parser.add_argument('--prepared-source-build',type=Path,help='Reuse compiler paths only after fresh preparation proves identical source bytes')
  parser.add_argument('--model-remote-path',default=DEFAULT_MODEL_PATH)
- a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build)
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build,a.layer_fixture)

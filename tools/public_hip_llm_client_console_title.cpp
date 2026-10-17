@@ -16,7 +16,10 @@
 #include "ps5_backend.h"
 #include "model_gate.h"
 #include "native_host_allocator.h"
-#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
+#include "native_layer.h"
+#endif
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
 #include "native_prefix.h"
 #include <fcntl.h>
 #include <cerrno>
@@ -163,7 +166,7 @@ __attribute__((noinline)) static void model_memory_snapshot(const char* phase){
   std::printf("M0_APP MEMORY phase=%s pool_bytes=%llu largest_free_bytes=%llu total_free_bytes=unknown alignment=16384\n",
               phase,static_cast<unsigned long long>(pool),static_cast<unsigned long long>(largest));
 }
-enum class ClientPhase { vocab, model_gate, model_prefix };
+enum class ClientPhase { vocab, model_gate, model_prefix, model_layer };
 static ClientPhase configured_model_phase(){
  std::ifstream file(std::string(title_root)+"client-phase.txt",std::ios::binary);
  if(!file.is_open())ps5hip_clr_gpu_fail("client-phase-open");
@@ -174,6 +177,7 @@ static ClientPhase configured_model_phase(){
  if(n==6&&std::memcmp(phase,"vocab\n",6)==0)return ClientPhase::vocab;
  if(n==11&&std::memcmp(phase,"model-gate\n",11)==0)return ClientPhase::model_gate;
  if(n==13&&std::memcmp(phase,"model-prefix\n",13)==0)return ClientPhase::model_prefix;
+ if(n==12&&std::memcmp(phase,"model-layer\n",12)==0)return ClientPhase::model_layer;
  ps5hip_clr_gpu_fail("client-phase-config");
 }
 static std::string configured_model_path(const std::string& config_path){
@@ -197,7 +201,7 @@ static std::string configured_model_path(const std::string& config_path){
  }
  return path;
 }
-#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
 static void prefix_write(const char* filename,const void* data,size_t bytes,void* state){
  const auto& directory=*static_cast<const std::string*>(state);
  const auto path=directory+"/"+filename;
@@ -240,7 +244,22 @@ int main() {
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
       const std::string model_path=configured_model_path(std::string(title_root)+"model-path.txt");
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
-      if(phase==ClientPhase::model_prefix){
+      if(phase==ClientPhase::model_layer){
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER
+        const std::array<const char*,6> modules={
+          "/system_ex/app/PPSA99014/model-layer/getrows.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/normalized.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/weighted.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/q8.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/q4.hsaco",
+          "/system_ex/app/PPSA99014/model-layer/layer.hsaco"};
+        const auto result=m0::run_native_layer(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot);
+        m0::require(result.files==151&&result.bytes==2878464&&result.layer.completed_launches==16962);
+        m0::require(observed.launches==16962&&!observed.uncertain&&observed.allocations==528&&observed.frees==528);
+#else
+        ps5hip_clr_gpu_fail("model-layer-not-authenticated");
+#endif
+      }else if(phase==ClientPhase::model_prefix){
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX
         const std::array<const char*,5> modules={
           "/system_ex/app/PPSA99014/model-prefix/getrows.hsaco",
@@ -275,7 +294,8 @@ int main() {
     }
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-    if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+    if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+    else if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else std::puts("M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending");
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
     return 0;

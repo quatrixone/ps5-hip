@@ -58,4 +58,24 @@ class PrefixMake(unittest.TestCase):
   text=self.run_make('llm-native-app','LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior source')
   line=next(line for line in text.splitlines() if 'tools/build_llm_native_app.py' in line)
   self.assertIn('--prepared-source-build "build/prior source"',line)
+class LayerMake(unittest.TestCase):
+ run_make=PrefixMake.run_make
+ def test_layer_selected_aggregate_and_no_unrelated_phase(self):
+  text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-layer','LLM_NATIVE_APP_LAYER_FIXTURE=results/selected-layer')
+  self.assertIn('llm-layer-assets LLM_LAYER_ASSETS_DIR="results/selected-layer"',text)
+  self.assertIn('--layer-fixture "results/selected-layer"',text)
+  self.assertNotIn('--prefix-fixture',text)
+  for test in ('source_model_layer_freeze_test.py','source_layer_console_test.py','source_layer_authentication_test.py','native_layer_transcript_test.py','llm_layer_readbacks_test.py'):
+   self.assertLess(text.index('tests/'+test),text.index('tools/build_llm_native_app.py'))
+  for phase in ('vocab','model-gate','model-prefix'):
+   text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE='+phase)
+   self.assertNotIn('--layer-fixture',text)
+ def test_layer_receipts_guard_creation_but_not_authentication(self):
+  for target,variable,producer,validator in [('llm-layer-fixture','LLM_LAYER_FIXTURE_DIR','build_llm_layer_fixture.py','fixture_inputs'),('llm-layer-reference','LLM_LAYER_REFERENCE_DIR','build_llm_layer_reference.py','authenticate_layer_reference'),('llm-layer-assets','LLM_LAYER_ASSETS_DIR','build_public_hip_layer_assets.py','layer_inputs')]:
+   text=self.run_make(target,variable+'=results/reused-layer')
+   line=next(x for x in text.splitlines() if producer in x)
+   self.assertTrue(line.startswith('if ! test -f "results/reused-layer/receipt.json"; then '))
+   self.assertIn('import '+validator+'; '+validator,text)
+  text=self.run_make('llm-layer-host-tests');self.assertIn('tools/build_llm_layer_host_test.py',text);self.assertNotIn('source_console.py',text)
+
 if __name__=='__main__':unittest.main()

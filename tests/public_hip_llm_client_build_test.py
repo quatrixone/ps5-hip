@@ -42,7 +42,7 @@ class ClientBuild(unittest.TestCase):
             root=Path(tmp);cpp=root/'parser.cpp';exe=root/'parser';cpp.write_text(harness)
             subprocess.run(['c++','-std=c++17',str(cpp),'-o',str(exe)],check=True,capture_output=True)
             cases=[('vocab',b'vocab\n',0,'phase=0'),('model',b'model-gate\n',0,'phase=1'),
-                   ('prefix',b'model-prefix\n',0,'phase=2'),
+                   ('prefix',b'model-prefix\n',0,'phase=2'),('layer',b'model-layer\n',0,'phase=3'),('layer-extra',b'model-layer\nx',1,'reason=client-phase-config'),
                    ('missing',None,1,'reason=client-phase-open'),
                    ('empty',b'',1,'reason=client-phase-config'),
                    ('trailing',b'vocab\nx',1,'reason=client-phase-config'),
