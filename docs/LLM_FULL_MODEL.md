@@ -51,3 +51,17 @@ Reset must synchronize, clear actual llama memory and reset validation state.
 Compare layer boundaries and complete logits before adding sampling. GPU
 full-model execution, model-scale memory, generation, the dense floating-point
 layer fixture, near-zero RMS and native extreme-input tests remain open.
+
+## CPU numerical reference
+
+`tools/build_llm_full_model_reference.py` records all 22 layer residuals, final
+weighted normalization and 32,000 logits at positions 0, 1, 255, 256 and 511,
+then reset positions 0 and 1. It executes the real CPU decoder for all 514
+requests and checks committed KV positions. Its completed-node callback reads
+each selected output before the scheduler can reuse its memory. CPU fusion is
+disabled, and the existing CPU libraries and model are reused. The 168 files
+have an exact inventory; all 24 reset boundaries must match bitwise.
+Run the tool with `--cpu-build`, `--model` and a fresh `--output` under results.
+`authenticate_full_model_reference` verifies the saved inputs and outputs.
+This supplies the full-model comparison oracle; it does not establish GPU
+execution or numerical agreement.

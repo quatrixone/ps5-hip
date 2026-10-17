@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-full-model-cpu-boundary-reference",
+  "requests": 514,
+  "sequence": [
+    512,
+    2
+  ],
+  "layers": 22,
+  "boundaries_per_checkpoint": 24,
+  "checkpoints": 7,
+  "raw_files": 168,
+  "raw_bytes": 2214912,
+  "actual_decoder_success": true,
+  "committed_kv_positions": true,
+  "reset_boundaries_bitwise_equal": true,
+  "model": {
+    "path": "/tmp/ps5-hip-tinyllama-gguf-v3/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "receipt_sha256": "68627bf74ec33a8a52ef543f249e40b3da0434aca10f07a08bc6e19cb547abe4",
+  "source_sha256": {
+    "tools/build_llm_full_model_reference.py": "c6df0144e862267510e8a462b1c7d728b739be27a152d8ea2205579ae7cf3e87",
+    "tests/llm_full_model_reference.cpp": "cfccb37c6effb7862b9a9eae19b9e9f4825a8e98a181a019dd3ce3f651bb1fe7",
+    "tests/llm_full_model_reference_test.py": "f6dd41036b43a7ca86aacd06dd30a9dd7554bc0119cccb9d7772056a0a642913"
+  },
+  "tests": {
+    "validator_cases": 6
+  },
+  "local_evidence": "results/m3-full-reference-v1",
+  "gpu_executed": false,
+  "limits": [
+    "CPU diagnostic, not GPU admission",
+    "Single run with reset equality, not independent repeated-run determinism"
+  ]
+}

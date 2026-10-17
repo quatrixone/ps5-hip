@@ -25,6 +25,16 @@ representative extreme inputs. Next advance M3: all 22 layers, final
 normalization/logits, model-scale residency and real decoder/cache progression.
 The qualification's declared sequence is not a committed full llama decode.
 
+## Full-model numerical reference
+
+All 514 original CPU decoder requests now have a boundary reference: all 22
+layer residuals, final weighted normalization and all 32,000 logits at seven
+checkpoints. The 168 raw files total 2,214,912 bytes; reset positions 0 and 1
+match all 24 boundaries bitwise. See
+`evidence/offline-full-model-cpu-reference.json`. Reuse authenticated
+`results/m3-full-reference-v1`; no native package was rebuilt for this gate.
+Full GPU integration remains local work in progress and has not passed yet.
+
 ## Full-model integration prerequisite
 
 The original CPU decoder now has an authenticated 514-request/reset trace.
