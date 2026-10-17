@@ -11,6 +11,8 @@ floating-point whole-layer fixture and representative extreme inputs. Next
 advance M3's 22-layer forward pass, final normalization/logits, model residency
 and real decoder/cache progression; token generation is not yet established.
 
+- 2026-10-17 | M3 native package | offline | 149 objects, 15 assets, final source receipt and 393-function image audit pass | evidence/offline-native-full-decoder-package.json | next: .40 smoke
+
 - 2026-10-17 | M3 native smoke controls | offline | package/freezer/controller contracts pass review and tests | evidence/offline-native-full-smoke-contracts.json | next: final native image and .40
 
 - 2026-10-17 | M3 canonical arithmetic | offline | all 72 full-decoder boundaries/logits bitwise CPU-equal under unchanged gates; 13-kernel device fixture admitted without private memory/spills | evidence/offline-full-decoder-canonical-arithmetic.json | next: native smoke package and .40 all-layer/logit validation

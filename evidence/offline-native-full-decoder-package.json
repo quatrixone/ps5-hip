@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "classification": "offline-native-full-decoder-package",
+  "source_commit": "f519b8143178f7ed5854e6f9622ed55e6c7b1a76",
+  "native_executed": false,
+  "gpu_executed": false,
+  "phase": "model-full",
+  "profile": "smoke",
+  "object_count": 149,
+  "input_count": 8212,
+  "package": {
+    "path": "build/llm-native-full-smoke-app-v1/package/PPSA99014.ffpkg",
+    "bytes": 22478848,
+    "sha256": "700c673e179b111de7106297fb410667fc97505b76b9cbbeb59c8fe81c8aa894",
+    "files": 15,
+    "embedded_model": false
+  },
+  "receipt": {
+    "path": "build/llm-native-full-smoke-app-v1/receipt.json",
+    "sha256": "0578d509d2976ba20ca1ea99f672ef8d4e71e72dc5dc2c6eb363afc106f86a01"
+  },
+  "audit": {
+    "path": "build/llm-native-full-smoke-app-v1/llm-client-native-audit.json",
+    "sha256": "fcf4f2be492c76072d2427dcf5a98a5426f76711a90d00b97f326fd7f46ce8fc",
+    "functions": 393,
+    "actual_full_call_chain_audited": true,
+    "wrapper_no_bypass": true,
+    "initial_mode_zero": true,
+    "callback_dataflow_proven": false
+  },
+  "commands": {
+    "count": 201,
+    "all_exit_zero": true
+  },
+  "reuse": [
+    "Original external model",
+    "CPU libraries/reference",
+    "70 native client objects",
+    "Existing six module fixtures",
+    "Isolated ccache with four compile workers"
+  ],
+  "limits": [
+    "Offline package acceptance only; .40 native execution remains pending",
+    "Static callback dataflow is not proved by symbol presence; host and native numerical evidence remain required",
+    "Smoke3requests only; long context and generation remain separate"
+  ],
+  "independent_review": {
+    "path": "results/m3-native-full-build-review-v1/final-review.json",
+    "sha256": "f4e2485c4da97a6e14a511c89c7e855ded081bc9679cbddb8ec3dd4f9dde9777"
+  }
+}

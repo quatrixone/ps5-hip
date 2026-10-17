@@ -67,9 +67,12 @@ See `evidence/offline-native-full-smoke-contracts.json`.
 
 Reuse full assets `results/m3-full-assets-v2`, vocabulary v3, native client v6
 and CPU reference v3. Only the stale small vocabulary fixture was refreshed.
-Next build `build/llm-native-full-smoke-app-v1`, audit its actual final images,
-freeze a new candidate, and test .40 once idle. Local commands/baseline identities
-are in `results/m3-native-full-command-plan-v1.md`; no full console run yet.
+The native package now passes its final receipt and 393-function image audit:
+149 objects, 8,212 authenticated inputs, 15 files and 22,478,848 package bytes.
+See `evidence/offline-native-full-decoder-package.json`. Preserve
+`build/llm-native-full-smoke-app-v1`. Next freeze a fresh candidate and test .40
+once idle; no full console run yet. Local commands and baseline identities
+are in `results/m3-native-full-command-plan-v1.md`.
 
 ## Full-decoder control flow (offline only)
 
