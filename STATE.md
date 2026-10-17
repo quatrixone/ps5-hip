@@ -50,8 +50,9 @@ See `evidence/console40-model-prefix-launch-rejection.json`.
 Candidate `results/source-public-llm-prefix-console-v2` is consumed for both
 phases. Preserve its installed package, deployment backups, raw logs and
 `build/llm-native-prefix-app-v1` prepared sources used by v3. Do not replay it.
-Next fix the public HIP admission boundary, test that actual boundary, and
-prepare a fresh native candidate. M0/M1 remain passed; M2 remains open.
+The narrow GET_ROWS public-HIP admission fix now passes four resource tests
+and independent review. Prepare a fresh native candidate with regenerated
+prefix reference/assets v2; see `evidence/offline-public-getrows-admission.json`. M0/M1 remain passed; M2 remains open.
 
 Build overhead fixes pass 123 focused tests: automatic verified prepared-source
 reuse and per-inventory dependency path resolution. The earlier freeze fix

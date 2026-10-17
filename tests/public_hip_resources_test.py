@@ -46,16 +46,19 @@ class ResourcesTest(unittest.TestCase):
                         if line.startswith(('+',' ')) and not line.startswith('+++'))
         early=after[after.index('  const bool ps5Linear'):]
         early=early[:early.index('#endif')]
-        late=after[after.index('  if (uint64_t(blockDimX)'):]
+        late=after[after.index('  const bool ps5GetRows ='):]
         late=late[:late.index('#endif')]
         program=r"""
 #include <cassert>
 #include <cstdint>
+#include <string>
+struct Function { std::string symbol; const std::string& name()const{return symbol;} };
 struct Info { uint64_t size_,availableLDSSize_,localMemSize_; };
 constexpr int hipErrorInvalidValue=1;
 int validate(uint32_t blockDimX,uint32_t blockDimY,uint32_t blockDimZ,
              uint32_t globalWorkSizeX,uint32_t globalWorkSizeY,uint32_t globalWorkSizeZ,
-             uint32_t sharedMemBytes,const Info* ps5Info) {
+             uint32_t sharedMemBytes,const Info* ps5Info,const char* symbol="other") {
+ Function selected{symbol};const Function* function=&selected;
  // Genuine upstream checks zero dimensions before the patched code.
  if (!blockDimX||!blockDimY||!blockDimZ||!globalWorkSizeX||!globalWorkSizeY||!globalWorkSizeZ) return 1;
 """+early+late+r"""
@@ -80,6 +83,7 @@ int main(){
  assert(validate(32,4,1,159,4,1,0,&q4));
  assert(validate(32,4,1,160,5,1,0,&q4));
  assert(validate(256,1,1,256,2,1,0,&q8));
+ assert(validate(256,1,1,256,4,1,0,&q8));
  for (unsigned shared:{1u,384u,65537u}) assert(validate(32,4,1,160,4,1,shared,&q4));
  assert(validate(32,4,1,160,4,1,0,&bad));
  assert(validate(1024,1,1,1024,1,1,0,&rms));
@@ -172,5 +176,79 @@ int main(){State state;state.locked=true;Device d;d.state_=&state;amd::Kernel k;
             subprocess.run([compiler,'-std=c++20','-Wall','-Wextra','-Werror',str(cpp),'-o',str(binary)],check=True,capture_output=True)
             subprocess.run([str(binary)],check=True,capture_output=True)
 
+
+    def test_actual_public_hip_validation_function_getrows_before_capture(self):
+        name='hipamd/src/hip_module.cpp'
+        with tempfile.TemporaryDirectory() as directory:
+            folder=Path(directory);source=folder/name;source.parent.mkdir(parents=True)
+            source.write_bytes((resources.ROOT/'.deps/sources/clr'/name).read_bytes())
+            for stage in ('launch','resources'):
+                prefix=resources.ROOT/'ports/clr'/('ps5-public-'+stage)
+                spec=json.loads(prefix.with_suffix('.json').read_text())
+                diff=prefix.with_suffix('.patch').read_text()
+                self.assertEqual(hashlib.sha256(diff.encode()).hexdigest(),spec['patch_sha256'])
+                self.assertEqual(resources.digest(source),spec['files'][name]['before'])
+                start=diff.index('--- a/'+name+'\n');end=diff.find('\n--- a/',start+1)
+                selected=diff[start:] if end<0 else diff[start:end+1]
+                subprocess.run(['patch','--batch','--fuzz=0','-p1'],input=selected,cwd=folder,text=True,check=True,capture_output=True)
+                self.assertEqual(resources.digest(source),spec['files'][name]['after'])
+            text=source.read_text();start=text.index('hipError_t ihipLaunchKernel_validate(')
+            function=text[start:text.index('\nhipError_t ihipLaunchKernelCommand(',start)]
+            # Keep the complete real validator, including function lookup and argument capture.
+            symbol='_ZL10k_get_rowsILi32ELi2EXadL_ZL15dequantize_q4_0PKvliR15HIP_vector_typeIfLj2EEEEfEvS1_PKiPT2_llS2_IjLj3EEmmmmmmmmm'
+            program=r'''
+#include <cassert>
+#include <cstdint>
+#include <cstddef>
+#include <string>
+#include <vector>
+using hipFunction_t=void*;using hipError_t=int;using address=char*;
+constexpr int hipSuccess=0,hipErrorInvalidValue=1,hipErrorInvalidImage=2,hipErrorInvalidConfiguration=3,hipErrorNotSupported=4,hipErrorInvalidDevice=5,hipErrorLaunchFailure=6,hipErrorCooperativeLaunchTooLarge=7,T_POINTER=1;
+#define WITH_PS5_DEVICE 1
+#define LogPrintfError(...) ((void)0)
+#define HIP_LAUNCH_PARAM_BUFFER_POINTER ((void*)1)
+#define HIP_LAUNCH_PARAM_BUFFER_SIZE ((void*)2)
+#define HIP_LAUNCH_PARAM_END ((void*)3)
+static int captured=0,validated=0,lookups=0;
+namespace amd {
+struct KernelParameterDescriptor{size_t size_=8,offset_=0;int type_=T_POINTER;};
+struct KernelSignature{size_t count=15;KernelParameterDescriptor descriptor;size_t numParameters()const{return count;}const KernelParameterDescriptor& at(size_t)const{return descriptor;}};
+struct Info{uint64_t size_=256,availableLDSSize_=0,localMemSize_=0;};
+struct DeviceKernel{Info value;const Info* workGroupInfo()const{return &value;}};
+struct Params{void set(size_t,size_t,const void*,bool){++captured;}};
+struct Device;
+struct Kernel{KernelSignature sig;DeviceKernel dk;Params args;const KernelSignature& signature()const{return sig;}DeviceKernel* getDeviceKernel(const Device&){return &dk;}Params& parameters(){return args;}};
+struct Device{struct{uint64_t localMemSizePerCU_=65536,maxWorkGroupSize_=1024;bool cooperativeGroups_=false,cooperativeMultiDeviceGroups_=false;}value;const auto& info()const{return value;}bool validateKernel(const Kernel&,void*,bool)const{++validated;return true;}};
+struct NDRangeKernelCommand{enum{CooperativeGroups=1,CooperativeMultiDeviceGroups=2};};
+}
+namespace hip {struct DeviceFunc{amd::Kernel value;std::string symbol;static DeviceFunc* asFunction(hipFunction_t p){++lookups;return static_cast<DeviceFunc*>(p);}amd::Kernel* kernel(){return &value;}const std::string& name()const{return symbol;}};}
+struct HostDevice{amd::Device value;std::vector<amd::Device*> devices(){return {&value};}};
+HostDevice host;HostDevice* g_devices[]={&host};
+namespace hip_impl {template<class... T> int ihipOccupancyMaxActiveBlocksPerMultiprocessor(T...){return 0;}}
+'''+function+r'''
+int main(){
+ hip::DeviceFunc f;f.symbol=GETROWS_NAME;
+ uint64_t value=0;void* args[15];for(auto& a:args)a=&value;
+ auto call=[&](unsigned gx,unsigned gy,unsigned gz,unsigned bx,unsigned by,unsigned bz,unsigned lds){captured=validated=lookups=0;return ihipLaunchKernel_validate(&f,gx,gy,gz,bx,by,bz,lds,args,nullptr,0);};
+ assert(call(256,4,1,256,1,1,0)==hipSuccess&&captured==15&&validated==1&&lookups==1);
+ for(unsigned y:{1u,2u,3u,5u,8u}){assert(call(256,y,1,256,1,1,0)!=hipSuccess);assert(captured==0&&validated==0);}
+ for(unsigned x:{0u,128u,512u}){assert(call(x,4,1,256,1,1,0)!=hipSuccess);assert(captured==0&&validated==0);}
+ assert(call(256,4,2,256,1,1,0)!=hipSuccess&&captured==0);
+ assert(call(256,4,1,256,1,1,1)!=hipSuccess&&captured==0);
+ f.symbol="quantize_q8";f.value.sig.count=4;
+ assert(call(256,4,1,256,1,1,0)==hipErrorInvalidValue&&captured==0&&validated==0&&lookups==1);
+ assert(call(5632,1,1,256,1,1,0)==hipSuccess&&captured==4);
+ f.symbol="initial";f.value.dk.value={64,0,0};assert(call(128,1,1,64,1,1,0)==hipSuccess);
+ assert(call(64,4,1,64,1,1,0)!=hipSuccess&&captured==0);
+ f.symbol="q4";f.value.dk.value={128,384,384};assert(call(160,8,1,32,4,1,0)==hipSuccess);
+ f.symbol="rms";f.value.dk.value={1024,65536,0};assert(call(1024,1,1,1024,1,1,128)==hipSuccess);
+ assert(call(1024,4,1,1024,1,1,128)!=hipSuccess&&captured==0);
+}
+'''
+            program=program.replace('GETROWS_NAME',json.dumps(symbol))
+            cpp=folder/'actual.cpp';binary=folder/'actual';cpp.write_text(program)
+            compiler=shutil.which('clang++-18') or shutil.which('c++')
+            subprocess.run([compiler,'-std=c++17','-Wall','-Wextra','-Werror',str(cpp),'-o',str(binary)],check=True,capture_output=True)
+            subprocess.run([str(binary)],check=True,capture_output=True)
 
 if __name__=='__main__':unittest.main()

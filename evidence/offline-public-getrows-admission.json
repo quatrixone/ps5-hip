@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "scope": "Offline public HIP launch admission",
+  "patch_sha256": "5e9148d62912f82bdfaad6ac5709b4de688ce65a7966d03e2cbe7873f265e31f",
+  "specification_sha256": "5869f1d3f5ca06e94af9f0236bb2f933946e2482c05fabfce315a950964d913b",
+  "tests": 4,
+  "test_source_sha256": "f727c50f01b1592f7b82548b567aeb02e5a7be6757546e21d634e69ba010cf58",
+  "test_log_sha256": "606e81636e18b4f5c3cdb1dcdd16ddea0c5dee47aea2c212b8b0c2d887e2ff92",
+  "accepted": "Exact admitted GET_ROWS symbol with global(256,4,1), block(256,1,1), LDS0",
+  "rejection": "Other symbols with this multirow geometry, or GET_ROWS with any other shape, reject before argument capture.",
+  "regressions": "Existing 64-thread, Q8, Q4 and RMSNorm accepted geometries retained; pointer ownership tests retained.",
+  "native_validation": "Pending fresh build and .40 run; previous candidate consumed."
+}

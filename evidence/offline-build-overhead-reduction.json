@@ -26,7 +26,8 @@
       "exit_code": 0,
       "elapsed_seconds": 0.14574241638183594,
       "methods": 11,
-      "log_sha256": "90adcfb875f3a8506f15bf4e508d2adeb865134efe8b9cdc8051e91d1610509b"
+      "log_sha256": "90adcfb875f3a8506f15bf4e508d2adeb865134efe8b9cdc8051e91d1610509b",
+      "initial_skipped": 1
     },
     {
       "test": "build_jobs",
@@ -77,5 +78,16 @@
     "Whole native build after automatic reuse/resolver changes not yet measured.",
     "Freeze timings are one comparison, not a controlled benchmark.",
     "Native prefix execution rejected first public HIP launch; no GPU tensor validation."
-  ]
+  ],
+  "real_sdk_cache_integration": {
+    "status": "PASS",
+    "methods": 11,
+    "log_sha256": "f75d232aa6e9de7c8a77e416dacea4b4c98340e80c2b69dbaaa2e80ded8f5ea6",
+    "checks": [
+      "C and C++ cache hit",
+      "header and source changes invalidate",
+      "cached and uncached objects equal",
+      "dependency files retained"
+    ]
+  }
 }
