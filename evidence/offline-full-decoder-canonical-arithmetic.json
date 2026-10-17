@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "classification": "offline-full-decoder-canonical-arithmetic",
+  "native_executed": false,
+  "gpu_executed": false,
+  "requests": 3,
+  "layers": 22,
+  "logits": 32000,
+  "raw_files": 72,
+  "bitwise_cpu_equal": true,
+  "active_nodes": 2394,
+  "interpreted_launches": 2199,
+  "cpu_backend_tensor_arithmetic": false,
+  "same_input_quantizations": 465,
+  "same_input_projections": 465,
+  "tolerances": {
+    "absolute": 2e-05,
+    "relative": 0.0002,
+    "relative_l2": 0.0002
+  },
+  "receipts": {
+    "numerical": {
+      "path": "results/m3-full-numeric-canonical-v1/receipt.json",
+      "sha256": "360a7172fd5f35e3a368609b649c70aec852548e1c685f51ef9e7af166ec31b5"
+    },
+    "device_fixture": {
+      "path": "results/llm-layer-fixture-v6/receipt.json",
+      "sha256": "87859f9c719bbf72cab4d680d513bfcae27b4a0c1cfd52bbbc76aea28c70e2be"
+    },
+    "selected_layer_regression": {
+      "path": "results/m3-canonical-selected-regression-v1/receipt.json",
+      "sha256": "8e1639d00a6a87b1c313a7eea256ab92999cd324c85fbb1723f746d5d33cec2c"
+    },
+    "full_dispatch_regression": {
+      "path": "results/m3-canonical-full-dispatch-v1/receipt.json",
+      "sha256": "3cc8dd622137d4e1f3a689b04098723f812afe31ca5d5ebdf3925b9fb8dc75f0"
+    },
+    "prefix_regression": {
+      "path": "results/m3-canonical-prefix-regression-v1/receipt.json",
+      "sha256": "58c2ea3b119daf8d91b024c29f440162158ca00f5df3be07bb8c9d378d849313"
+    }
+  },
+  "limits": [
+    "Host interpretation is not native GPU numerical acceptance",
+    "Hardware FP64/nonlinear rounding and performance need .40 validation",
+    "Three forced-token requests do not qualify generation or long-context inference"
+  ]
+}

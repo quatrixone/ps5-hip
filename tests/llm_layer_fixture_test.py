@@ -9,7 +9,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import build_llm_layer_fixture as m
 class LayerFixtureTest(unittest.TestCase):
  def test_inventory(self):
-  self.assertEqual(len(m.SYMBOLS),12);self.assertEqual(len(set(m.SYMBOLS)),12)
+  self.assertEqual(len(m.SYMBOLS),13);self.assertEqual(len(set(m.SYMBOLS)),13)
  def test_reject_outside_output(self):
   with self.assertRaisesRegex(ValueError,'outside'):m.build('/unused','/tmp/untrusted-layer-output')
  def test_reject_wrong_receipt(self):
@@ -25,7 +25,7 @@ class LayerFixtureTest(unittest.TestCase):
    p=Path(d)
    for n in ('undefined.stdout','notes.stdout','isa.stdout','admission.stdout'): (p/n).write_text('')
    (p/'layer.hsaco').write_bytes(b'fake')
-   (p/'isa.stdout').write_text('global_load_ubyte '+ 'global_load_ubyte '*15)
+   (p/'isa.stdout').write_text('<layer_q4_cpu>:\n global_load_ubyte '+ 'global_load_ubyte '*15)
    with patch.object(m,'audit_object',return_value={}):
     with self.assertRaisesRegex(ValueError,'admission'):m.contracts(d)
  def test_artifact_identity_and_missing_rejection(self):

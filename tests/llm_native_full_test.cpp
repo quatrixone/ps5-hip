@@ -33,9 +33,11 @@ static void write_raw(const char* name,const void* data,size_t size,void*){
  assert(std::strncmp(name,"run-",4)==0&&(size==8192||size==128000)&&names.insert(name).second);
  const auto* p=static_cast<const float*>(data);for(size_t i=0;i<size/4;++i)assert(p[i]==0.f);++files;bytes+=size;
 }
-int main(int argc,char**argv){assert(argc==2);const auto result=m0::run_native_full(argv[1],{"getrows","norm","weighted","q8","q4","layer"},write_raw,nullptr,synced,snapshot);
- assert(result.full.requests==514&&result.full.launches==376762&&files==168&&bytes==2214912&&snapshots==std::vector<std::string>({"before_load","after_load","after_context","after_cleanup"}));
- std::set<std::string> expected;for(unsigned run=0;run<2;++run)for(unsigned pos:(run?std::vector<unsigned>{0,1}:std::vector<unsigned>{0,1,255,256,511}))for(unsigned i=0;i<24;++i){std::string stage=i<22?"layer-"+std::to_string(i):i==22?"norm":"logits";expected.insert("run-"+std::to_string(run)+"-pos-"+std::to_string(pos)+"-"+stage+".f32le");}assert(names==expected);
+int main(int argc,char**argv){assert(argc==2||(argc==3&&std::strcmp(argv[2],"smoke")==0));const bool smoke=argc==3;
+ const auto result=smoke?m0::run_native_full(argv[1],{"getrows","norm","weighted","q8","q4","layer"},write_raw,nullptr,synced,snapshot,m0::NativeFullProfile::smoke):
+                        m0::run_native_full(argv[1],{"getrows","norm","weighted","q8","q4","layer"},write_raw,nullptr,synced,snapshot);
+ assert(result.full.requests==(smoke?3u:514u)&&result.full.launches==(smoke?2199u:376762u)&&files==(smoke?72u:168u)&&bytes==(smoke?949248u:2214912u)&&snapshots==std::vector<std::string>({"before_load","after_load","after_context","after_cleanup"}));
+ std::set<std::string> expected;for(unsigned run=0;run<2;++run)for(unsigned pos:(smoke?(run?std::vector<unsigned>{0}:std::vector<unsigned>{0,1}):(run?std::vector<unsigned>{0,1}:std::vector<unsigned>{0,1,255,256,511})))for(unsigned i=0;i<24;++i){std::string stage=i<22?"layer-"+std::to_string(i):i==22?"norm":"logits";expected.insert("run-"+std::to_string(run)+"-pos-"+std::to_string(pos)+"-"+stage+".f32le");}assert(names==expected);
  assert(allocations.empty()&&allocation_count==free_count&&loads==unloads&&cpu_arithmetic_nodes==0);
- std::puts("PASS native full helper mocked:514 real decoder commits/reset, all22layers/head, 376762 launches,168 files; GPU/numerics unproven");
+ std::printf("PASS native full helper mocked: profile=%s requests=%llu launches=%llu files=%u; GPU/numerics unproven\n",smoke?"smoke":"sequence",static_cast<unsigned long long>(result.full.requests),static_cast<unsigned long long>(result.full.launches),files);
 }

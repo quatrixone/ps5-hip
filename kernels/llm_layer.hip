@@ -29,9 +29,33 @@ KERNEL void layer_rope(const float* x,float* out,u32 heads,u32 position) {
 KERNEL void layer_set_rows(const float* x,const i64* indices,_Float16* out,u32 width,u32 rows) {
  u32 i=index();if(i<width*rows)out[static_cast<unsigned long long>(indices[i/width])*width+i%width]=(_Float16)x[i];
 }
+// Fixed reduction order bounds rounding drift before subsequent quantization.
+static DEVICE float half_dot(const _Float16* x,const _Float16* y,u32 n) {
+ float acc[4][8]{};
+ for(u32 offset=0;offset<n;offset+=32) {
+#pragma unroll
+  for(u32 part=0;part<4;part++) {
+#pragma unroll
+   for(u32 lane=0;lane<8;lane++)acc[part][lane]=__builtin_fmaf(float(x[offset+part*8+lane]),float(y[offset+part*8+lane]),acc[part][lane]);
+  }
+ }
+ float sum[8];
+#pragma unroll
+ for(u32 lane=0;lane<8;lane++)sum[lane]=(acc[0][lane]+acc[2][lane])+(acc[1][lane]+acc[3][lane]);
+ return ((sum[0]+sum[4])+(sum[1]+sum[5]))+((sum[2]+sum[6])+(sum[3]+sum[7]));
+}
+// One lane computes the scale once; all input reads finish before in-place writes.
+KERNEL void layer_rms_cpu(const float* x,float* out) {
+ if(index()!=0)return;
+ double sum=0;
+ for(u32 i=0;i<2048;i++){float square=x[i]*x[i];sum+=double(square);}
+ const float mean=float(sum/2048.0);
+ const float scale=1.0f/__builtin_sqrtf(mean+1.e-5f);
+ for(u32 i=0;i<2048;i++)out[i]=x[i]*scale;
+}
 KERNEL void layer_scores(const _Float16* k,const _Float16* q,float* out,u32 n) {
- u32 i=index();if(i>=32u*n)return;u32 h=i/n,t=i%n;float sum=0;
- for(u32 d=0;d<64;d++)sum+=float(k[t*256u+(h/8u)*64u+d])*q[h*64u+d];out[i]=sum;
+ u32 i=index();if(i>=32u*n)return;u32 h=i/n,t=i%n;
+ out[i]=half_dot(k+t*256u+(h/8u)*64u,q+h*64u,64);
 }
 KERNEL void layer_softmax(const float* x,const float* mask,float* out,u32 n) {
  u32 h=index();if(h>=32)return;float m=-__builtin_inff();
@@ -40,8 +64,8 @@ KERNEL void layer_softmax(const float* x,const float* mask,float* out,u32 n) {
  for(u32 t=0;t<n;t++)out[h*n+t]/=sum;
 }
 KERNEL void layer_values(const _Float16* v,const _Float16* p,float* out,u32 n) {
- u32 i=index();if(i>=2048)return;u32 h=i/64u,d=i%64u;float sum=0;
- for(u32 t=0;t<n;t++)sum+=float(v[((h/8u)*64u+d)*512u+t])*p[h*n+t];out[i]=sum;
+ u32 i=index();if(i>=2048)return;u32 h=i/64u,d=i%64u;
+ out[i]=half_dot(v+((h/8u)*64u+d)*512u,p+h*n,n);
 }
 
 // Layer-only CPU AVX-compatible Q8_0 operands in36-byte scratch blocks.
@@ -59,15 +83,20 @@ KERNEL void layer_quantize_q8_cpu(const float* x,unsigned char* out,u32 width) {
  for(u32 j=0;j<32;j++)out[b*36+4+j]=(unsigned char)(signed char)__builtin_rintf(x[b*32+j]*inverse);
 }
 KERNEL void layer_q4_cpu(const unsigned char* weights,const unsigned char* q8,float* out,u32 width,u32 rows) {
- u32 row=index();if(row>=rows)return;u32 blocks=width/32;float sum=0;
+ u32 row=index();if(row>=rows)return;u32 blocks=width/32;float acc[8]{};
  for(u32 b=0;b<blocks;b++) {
   const unsigned char* w=weights+(row*blocks+b)*18;const unsigned char* q=q8+b*36;
-  float d4=float(*reinterpret_cast<const _Float16*>(w)),d8=float(*reinterpret_cast<const _Float16*>(q));int dot=0;
-  for(u32 j=0;j<16;j++){unsigned v=*((const volatile global_byte*)(w+2+j));dot+=(int(v&15)-8)*int((signed char)q[4+j])+(int(v>>4)-8)*int((signed char)q[20+j]);}
-  sum+=(d4*d8)*float(dot);
+  float scale=float(*reinterpret_cast<const _Float16*>(w))*float(*reinterpret_cast<const _Float16*>(q));
+  unsigned char packed[16];
+#pragma unroll
+  for(u32 j=0;j<16;j++)packed[j]=*((const volatile global_byte*)(w+2+j));
+#pragma unroll
+  for(u32 lane=0;lane<8;lane++) {
+   int dot=0;
+#pragma unroll
+   for(u32 k=0;k<4;k++){u32 j=lane*4+k;int nibble=int((packed[j%16]>>(j<16?0:4))&15)-8;dot+=nibble*int((signed char)q[4+j]);}
+   acc[lane]=__builtin_fmaf(scale,float(dot),acc[lane]);
+  }
  }
- out[row]=sum;
+ out[row]=((acc[4]+acc[0])+(acc[6]+acc[2]))+((acc[5]+acc[1])+(acc[7]+acc[3]));
 }
-
-
-

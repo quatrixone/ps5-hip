@@ -49,7 +49,7 @@ def status(rows):
     return ("PASS", 0) if all(row["pass"] for row in rows) else ("NUMERICAL_FAIL", 1)
 
 
-def build(cpu, model, reference, output):
+def build(cpu, model, reference, output, same_input_oracle=False):
     cpu, model, reference, output = (Path(p).resolve() for p in (cpu, model, reference, output))
     if output.exists() or not output.is_relative_to(ROOT / "results"):
         raise ValueError("fresh results output required")
@@ -60,7 +60,7 @@ def build(cpu, model, reference, output):
     if reference_data["model"] != {"path": str(model), "bytes": model.stat().st_size, "sha256": inputs[str(model)]}:
         raise ValueError("reference model identity")
     compiler = Path("/usr/bin/clang++-18")
-    for path in (Path(__file__), ROOT / "tests/llm_full_numeric_test.py", Path(provenance.__file__), compiler, Path("/usr/bin/ldd")):
+    for path in (Path(__file__), ROOT / "tests/llm_full_numeric_test.py", ROOT / "tests/llm_rms_numeric_mock_test.cpp", Path(provenance.__file__), compiler, Path("/usr/bin/ldd")):
         provenance.merge(inputs, path, provenance.sha(path))
     output.mkdir(parents=True); raw = output / "raw"; raw.mkdir()
     commands = []
@@ -85,6 +85,8 @@ def build(cpu, model, reference, output):
     flags = [compiler, "-std=c++17", "-O1", "-gline-tables-only", "-Wall", "-Wextra", "-Werror",
              "-Wno-misleading-indentation", "-fsanitize=address,undefined", "-D__HIP_PLATFORM_AMD__",
              *("-I"+str(p) for p in includes), "-isystem", client / "ggml/src"]
+    if same_input_oracle:
+        flags.append("-DPS5HIP_SAME_INPUT_ORACLE")
     units = [ROOT / "tests/llm_full_numeric_test.cpp", ROOT / "ports/ggml/ps5_backend.cpp"]
     objects = []
     for i, unit in enumerate(units):
@@ -111,7 +113,7 @@ def build(cpu, model, reference, output):
     (output / "comparison.json").write_text(json.dumps(rows, indent=2) + "\n")
     provenance.recheck(inputs)
     receipt = {"status": classification, "classification": "full-model-host-HIP-numerical-comparison",
-               "gpu_executed": False, "raw_files": 72, "requests": 3, "inputs": inputs, "commands": commands,
+               "gpu_executed": False, "same_input_oracle": same_input_oracle, "raw_files": 72, "requests": 3, "inputs": inputs, "commands": commands,
                "reference_receipt": reference_data["receipt"], "reference_sha256": reference_data["receipt_sha256"],
                "model": reference_data["model"], "tolerances": {"absolute": ABS_TOL, "relative": REL_TOL, "relative_l2": L2_TOL},
                "artifacts": {str(p.relative_to(output)): provenance.sha(p) for p in output.rglob("*") if p.is_file()}}
@@ -124,5 +126,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("cpu-build", "model", "reference", "output"):
         parser.add_argument("--"+name, type=Path, required=True)
+    parser.add_argument("--same-input-oracle", action="store_true", help="Also check identical-input Q8 bytes and Q4 FP64 error bounds; does not relax the CPU gate")
     args = parser.parse_args()
-    raise SystemExit(build(args.cpu_build, args.model, args.reference, args.output))
+    raise SystemExit(build(args.cpu_build, args.model, args.reference, args.output, args.same_input_oracle))

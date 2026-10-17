@@ -11,21 +11,21 @@ namespace ps5hip_layer {
 struct Dispatch {
     ps5hip_prefix::Dispatch base;
     hipModule_t module=nullptr;
-    std::array<hipFunction_t,12> functions{};
+    std::array<hipFunction_t,13> functions{};
     void* half=nullptr;
     void* full_scratch=nullptr; // Owned and span-validated by the full-model dispatcher.
     unsigned expected_position=0;
     static constexpr size_t half_bytes=32*512*2;
     static constexpr const char* symbols[]={"layer_add","layer_mul","layer_silu","layer_rope",
-        "layer_set_rows","layer_scores","layer_softmax","layer_values","layer_copy","layer_to_f16","layer_quantize_q8_cpu","layer_q4_cpu"};
+        "layer_set_rows","layer_scores","layer_softmax","layer_values","layer_copy","layer_to_f16","layer_quantize_q8_cpu","layer_q4_cpu","layer_rms_cpu"};
     using Call=ps5hip_prefix::Call;
     Dispatch(ps5hip_prefix::Dispatch::Span owned,ps5hip_prefix::Dispatch::Fail fail):base(owned,fail,5632){}
-    void initialize(const std::array<const char*,6>& paths) {
+    void initialize(const std::array<const char*,6>& paths,bool full_precision=false) {
         ps5hip_prefix::check(paths[5]&&paths[5][0]&&!module&&!half,"layer initialization");
         base.initialize({paths[0],paths[1],paths[2],paths[3],paths[4]});
         base.call(Call::module_load,0,"layer_module",[&]{return hipModuleLoad(&module,paths[5]);});
         base.ok(module?hipSuccess:hipErrorInvalidValue,"null_layer_module");
-        for(size_t i=0;i<functions.size();++i) {
+        for(size_t i=0;i<(full_precision?functions.size():functions.size()-1);++i) {
             base.call(Call::module_function,0,"layer_function",[&]{return hipModuleGetFunction(&functions[i],module,symbols[i]);});
             base.ok(functions[i]?hipSuccess:hipErrorInvalidValue,"null_layer_function");
         }
@@ -39,7 +39,7 @@ struct Dispatch {
     }
     void reset(){ps5hip_prefix::check(base.ready&&!base.terminal,"layer reset state");expected_position=0;}
     void launch(unsigned f,unsigned count,void** args) {
-        ps5hip_prefix::check(count&&f<functions.size(),"layer launch bounds");
+        ps5hip_prefix::check(count&&f<functions.size()&&functions[f],"layer launch bounds");
         base.call(Call::launch,0,"layer_launch",[&]{return hipModuleLaunchKernel(functions[f],(count+63)/64,1,1,64,1,1,0,nullptr,args,nullptr);});
         base.call(Call::completion_sync,0,"layer_sync",[]{return hipDeviceSynchronize();});++base.completed_launches;
     }
@@ -127,6 +127,8 @@ struct Dispatch {
                 if(!vector(t)||!vector(t->src[0])||!exact_or_disjoint(t,t->src[0]))return false;
                 for(int i=1;i<GGML_MAX_SRC;++i)if(t->src[i])return false;
                 float epsilon;std::memcpy(&epsilon,t->op_params,4);if(epsilon!=1e-5f)return false;
+                if(functions[12]){void* input=t->src[0]->data;void* out=t->data;
+                    void* args[]={&input,&out};launch(12,1,args);break;}
                 // The qualified 1024-thread kernel reduces all input squares
                 // across a block barrier before each thread writes its own columns.
                 void* input=t->src[0]->data;void* out=t->data;void* absent=nullptr;

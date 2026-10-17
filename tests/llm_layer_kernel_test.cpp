@@ -15,6 +15,26 @@ extern "C" float __ocml_cos_f32(float x){return std::cos(x);}
 extern "C" float __ocml_pow_f32(float x,float y){return std::pow(x,y);}
 #include "../kernels/llm_layer.hip"
 
+static void canonical_reductions() {
+ for(unsigned n:{64u,256u,512u}) {
+  std::vector<_Float16> x(n,0),y(n,0);x[0]=y[0]=65504;x[32]=-65504;y[32]=65504;x[1]=y[1]=1;
+  assert(half_dot(x.data(),y.data(),n)==1.f);
+ }
+ for(unsigned width:{2048u,5632u}) {
+  std::vector<unsigned char> w(width/32*18,0x88),q(width/32*36,0);
+  for(unsigned b=0;b<width/32;b++){_Float16 scale=1;std::memcpy(w.data()+18*b,&scale,2);std::memcpy(q.data()+36*b,&scale,2);}
+  _Float16 big=65504;for(unsigned b:{0u,2u}){std::memcpy(w.data()+18*b,&big,2);std::memcpy(q.data()+36*b,&big,2);}
+  w[2]=0x89;q[4]=1;w[18+2+4]=0x89;q[36+4+4]=1;w[36+2]=0x87;q[72+4]=1;
+  float out[2]={-1,17};for(lane=0;lane<64;lane++)layer_q4_cpu(w.data(),q.data(),out,width,1);assert(out[0]==1.f&&out[1]==17);
+ }
+ for(float magnitude:{0.f,1.e-20f,1.f,1.e10f}) {
+  std::vector<float> x(2049),out(2049,17);for(unsigned i=0;i<2048;i++)x[i]=magnitude*float(int(i%31)-15);x[2048]=17;
+  double squared=0;for(unsigned i=0;i<2048;i++){volatile float v=x[i]*x[i];squared+=v;}float scale=1.f/std::sqrt(float(squared/2048)+1.e-5f);
+  for(lane=0;lane<64;lane++)layer_rms_cpu(x.data(),out.data());
+  for(unsigned i=0;i<2048;i++)assert(out[i]==x[i]*scale);assert(out[2048]==17);
+  for(lane=0;lane<64;lane++)layer_rms_cpu(x.data(),x.data());assert(std::memcmp(x.data(),out.data(),x.size()*sizeof(float))==0);
+ }
+}
 static void conversion_extremes() {
  const float tiny=std::ldexp(1.f,-24),halfway=std::ldexp(1.f,-25);
  const float input[]={0.f,-0.f,tiny,-tiny,halfway,-halfway,3*halfway,-3*halfway,65504.f,-65504.f};
@@ -117,6 +137,7 @@ static void quantizer_extremes() {
  }
 }
 int main(){
+ canonical_reductions();
  conversion_extremes();silu_extremes();softmax_extremes();dense_attention_extremes();rope_extremes();quantizer_extremes();
 
  float rounded_input[]={1.00048828125f,1.00146484375f,-1.00048828125f,0.000000059604644775390625f};_Float16 rounded[4];float copied[4];for(lane=0;lane<64;lane++){layer_to_f16(rounded_input,rounded,4);layer_copy(rounded_input,copied,4);}assert(float(rounded[0])==1.f&&float(rounded[1])==1.001953125f&&float(rounded[2])==-1.f&&float(rounded[3])==rounded_input[3]);for(unsigned i=0;i<4;i++)assert(copied[i]==rounded_input[i]);
@@ -151,7 +172,7 @@ int main(){
   for(lane=0;lane<2048;lane++)layer_values(v.data(),ph.data(),out.data(),n);
   for(unsigned i=0;i<2048;i++)assert(out[i]==src[(i/64/8)*64+i%64]);
  }
- std::cout<<"PASS exact kernel-source host execution: conversion/SILU/softmax/dense-attention/RoPE/quantizer extremes, tails5632, K/V layouts, N256/512 GQA\n";
+ std::cout<<"PASS exact kernel-source host execution: canonical Q4/F16/RMS cancellation and inplace, conversion/SILU/softmax/dense-attention/RoPE/quantizer extremes, tails5632, K/V layouts, N256/512 GQA\n";
  return 0;
 }
 

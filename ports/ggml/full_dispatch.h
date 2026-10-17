@@ -29,7 +29,7 @@ struct Dispatch {
  Dispatch(Span owned,Fail fail):layer(owned,fail){}
  static constexpr size_t scratch_bytes=65536;
  void initialize(const std::array<const char*,6>& paths){
-  layer.initialize(paths);
+  layer.initialize(paths,true);
   layer.base.call(ps5hip_prefix::Call::scratch_allocate,scratch_bytes,"full_scratch_allocate",[&]{return hipMalloc(&layer.full_scratch,scratch_bytes);});
   layer.base.ok(layer.full_scratch?hipSuccess:hipErrorInvalidValue,"null_full_scratch");
  }

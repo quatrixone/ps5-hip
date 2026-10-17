@@ -6,7 +6,14 @@
 #undef hipModuleLaunchKernel
 #include "llm_layer_numeric_mock.h"
 #include <fstream>
-extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t f,unsigned gx,unsigned gy,unsigned gz,unsigned bx,unsigned by,unsigned bz,unsigned,hipStream_t stream,void** args,void** extra){assert(uintptr_t(f)>=1&&uintptr_t(f)<=17&&gx&&gy&&gz==1&&bx&&by&&bz==1&&!stream&&!extra);++launches;layer_numeric::execute(unsigned(uintptr_t(f)),gx*bx,args);return hipSuccess;}
+#ifdef PS5HIP_SAME_INPUT_ORACLE
+#include "llm_full_projection_oracle.h"
+#endif
+extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t f,unsigned gx,unsigned gy,unsigned gz,unsigned bx,unsigned by,unsigned bz,unsigned,hipStream_t stream,void** args,void** extra){assert(uintptr_t(f)>=1&&uintptr_t(f)<=18&&gx&&gy&&gz==1&&bx&&by&&bz==1&&!stream&&!extra);++launches;layer_numeric::execute(unsigned(uintptr_t(f)),gx*bx,args);
+#ifdef PS5HIP_SAME_INPUT_ORACLE
+same_input(unsigned(uintptr_t(f)),args);
+#endif
+return hipSuccess;}
 #undef __real_ggml_backend_sched_graph_compute_async
 #undef ggml_backend_sched_graph_compute_async
 #include "full_qualification.h"
@@ -63,6 +70,10 @@ int main(int argc,char**argv){
  llama_synchronize(context);llama_memory_clear(llama_get_memory(context),true);m0::reset_full();assert(llama_memory_seq_pos_max(llama_get_memory(context),0)==-1);sequence=1;decode(context,0,0);
  assert(captured==72);const auto gate=m0::statistics();const auto live=m0::full_statistics();assert(gate.calls==3&&gate.forwarded==3&&gate.rejected==0&&real_scheduler_calls==3);assert(live.requests==3&&live.completed_nodes==3*798&&live.launches==launches&&launches>0);assert(device_graph_calls>0&&cpu_arithmetic_nodes==0);if(split)assert(postcompute>0);
  llama_free(context);llama_model_free(model);const auto retired=m0::full_statistics();assert(retired.instances_created>0&&retired.instances_created==retired.instances_freed&&retired.launches==launches);m0::disable_full();llama_backend_free();
+#ifdef PS5HIP_SAME_INPUT_ORACLE
+ assert(q8_calls==465&&q4_calls==465&&q4_rows==1278720);
+ std::printf("SAME_INPUT q8_calls=%u q4_calls=%u rows=%zu max_gamma_fraction=%.9g\n",q8_calls,q4_calls,q4_rows,max_bound_fraction);
+#endif
  assert(allocations.empty()&&allocation_count==free_count&&loads==unloads);
  std::printf("PASS full-model backend mode=%s requests=3 committed_positions=0,1,reset0 nodes=%llu launches=%u instances=%u/%u scheduler_forwarded=%u device_graphs=%u CPU_arithmetic=0 postcompute=%u allocations=%u/%u; numerical HIP interpretation,72 raw boundaries, GPU unproven\n",argv[2],static_cast<unsigned long long>(retired.completed_nodes),launches,retired.instances_created,retired.instances_freed,real_scheduler_calls,device_graph_calls,postcompute,allocation_count,free_count);
 }

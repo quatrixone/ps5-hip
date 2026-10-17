@@ -49,9 +49,18 @@ inline float q4_row(const unsigned char* w,const unsigned char* q,unsigned block
  if(!std::isfinite(result)||std::abs(double(result)-reference)>bound)throw std::runtime_error("Q4 violates predeclared gamma envelope");
  return result;
 }
+// Qualified norm ISA uses per-thread FMA then two F32 XOR reductions.
+// Host reciprocal sqrt remains a rounded surrogate, not hardware v_rsq emulation.
+// Fixed qualified RMS launch: 1024 threads,32-lane waves,2048 columns.
+inline float rms_sum_1024(const float* x,unsigned n){
+ if(n!=2048)throw std::runtime_error("RMS mock shape");
+ float waves[32];
+ for(unsigned wave=0;wave<32;++wave){float values[32];for(unsigned lane=0;lane<32;++lane){unsigned i=wave*32+lane;values[lane]=std::fma(x[i+1024],x[i+1024],std::fma(x[i],x[i],0.f));}waves[wave]=butterfly(values);}
+ return butterfly(waves);
+}
 inline void execute(unsigned id,unsigned work_items,void** a){
  if(id==1){const auto* w=arg<const unsigned char*>(a,0);int token=*arg<const int*>(a,1);float* out=arg<float*>(a,2);w+=1152*token;for(unsigned b=0;b<64;b++)for(unsigned j=0;j<32;j++)out[b*32+j]=half(w+18*b)*(int((w[18*b+2+j%16]>>(j<16?0:4))&15)-8);return;}
- if(id==2||id==3){const float* x=arg<const float*>(a,0);float* out=arg<float*>(a,1);unsigned n=arg<int>(a,2);double sum=0;for(unsigned i=0;i<n;i++)sum+=double(x[i])*x[i];float scale=float(1/std::sqrt(sum/n+arg<float>(a,8)));const float* w=arg<const float*>(a,9);for(unsigned i=0;i<n;i++){float v=x[i]*scale;out[i]=id==3?v*w[i]:v;}return;}
+ if(id==2||id==3){const float* x=arg<const float*>(a,0);float* out=arg<float*>(a,1);unsigned n=arg<int>(a,2);float sum=rms_sum_1024(x,n);float denominator=sum/float(n)+arg<float>(a,8);float scale=float(1.0/std::sqrt(double(denominator)));const float* w=arg<const float*>(a,9);for(unsigned i=0;i<n;i++){float v=x[i]*scale;out[i]=id==3?v*w[i]:v;}return;}
  if(id==4){quantize(arg<const float*>(a,0),arg<unsigned char*>(a,1),unsigned(arg<int64_t>(a,2)));return;}
  if(id==5){auto w=arg<const unsigned char*>(a,0);auto q=arg<const unsigned char*>(a,1);auto out=arg<float*>(a,4);unsigned width=arg<unsigned>(a,5),rows=arg<unsigned>(a,9);for(unsigned r=0;r<rows;r++)out[r]=q4_row(w+r*(width/32)*18,q,width/32);return;}
  for(lane=0;lane<work_items;lane++)switch(id){
@@ -67,6 +76,7 @@ inline void execute(unsigned id,unsigned work_items,void** a){
  case 15:layer_to_f16(arg<const float*>(a,0),arg<_Float16*>(a,1),arg<unsigned>(a,2));break;
  case 16:layer_quantize_q8_cpu(arg<const float*>(a,0),arg<unsigned char*>(a,1),arg<unsigned>(a,2));break;
  case 17:layer_q4_cpu(arg<const unsigned char*>(a,0),arg<const unsigned char*>(a,1),arg<float*>(a,2),arg<unsigned>(a,3),arg<unsigned>(a,4));break;
+ case 18:layer_rms_cpu(arg<const float*>(a,0),arg<float*>(a,1));break;
  default:throw std::runtime_error("unknown numerical HIP symbol");
  }
 }

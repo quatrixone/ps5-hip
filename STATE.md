@@ -25,31 +25,35 @@ representative extreme inputs. Next advance M3: all 22 layers, final
 normalization/logits, model-scale residency and real decoder/cache progression.
 The qualification's declared sequence is not a committed full llama decode.
 
-## Full-decoder long sequence and numerical resume point
+## Full-decoder numerical milestone (offline)
 
-The native full helper now passes all 514 real decoder requests with mock HIP
-and synthetic zero outputs: 512 positions, clear/reset, then positions 0 and 1.
-All 22 blocks and the logits head dispatch, context extent changes at 256,
-376,762 launches complete and the exact 168-file/2,214,912-byte readback inventory
-is checked. This is lifecycle evidence only. Reproduce with
-`make llm-full-helper-tests`; authoritative local result is
-`results/m3-native-full-helper-portable-v1`.
+Production canonical arithmetic now passes the complete three-request portable
+numerical gate: positions 0 and 1, then position 0 after actual KV clear/reset.
+All 72 captured outputs (22 layers, final normalization and 32,000 logits per
+request) match the authenticated CPU reference bit for bit. The real decoder
+commits all positions; 2,394 active nodes and 2,199 interpreted launches complete
+with zero CPU backend tensor arithmetic and balanced ownership. Same-input
+checks pass all 465 quantizations and 465 projections without injecting CPU
+activations. Acceptance tolerances remain unchanged.
 
-`make llm-full-numeric-tests` is a deliberately failing numerical gate today:
-its portable producer returns 1 and records NUMERICAL_FAIL. The authenticated
-three-request run produces 72 finite files with exact reset, but 59 exceed the
-unchanged limits. See `docs/LLM_FULL_NUMERICS.md`,
-`evidence/offline-full-decoder-long-and-numerics.json` and
-`results/m3-full-numeric-portable-v1`. Same-input Q8 quantization and independent
-FP64 projection checks isolate the first discontinuity to one layer-4 quantized
-value (-8 versus -9) after tiny normalization variation. This does not explain
-or accept every later error. Continue arithmetic diagnosis; do not report
-native full-model numerical acceptance or generation.
+The fix gives full mode a serial FP64 sum of F32 squares for RMS, eight fixed
+FMA accumulators for Q4 projection, and 32 fixed FMA accumulators for F16 dot
+products. The selected-layer normalization route remains unchanged. The fresh
+13-kernel GPU fixture passes Initial admission, keeps exactly 16 byte loads per
+Q4 block and uses no LDS, private memory or spills. Host interpretation does
+not prove native GPU arithmetic, performance or full-model inference.
 
-The helper is source/host tested, but its package phase, static image audit,
-freezer/controller routes and native numerical acceptance are still missing.
-Plan a short two-token-plus-reset hardware profile before a measured long run;
-the existing native watchdog is capped at 120 seconds including load time.
+See `evidence/offline-full-decoder-canonical-arithmetic.json` and
+`docs/LLM_FULL_NUMERICS.md`. Reuse `results/m3-full-reference-v1`,
+`results/m3-full-numeric-canonical-v1` and `results/llm-layer-fixture-v6`.
+Historical NUMERICAL_FAIL receipts remain unchanged.
+
+The native helper has smoke (3 requests/72 files) and long (514 requests/168
+files) profiles. The first native test must use smoke, qualify every layer and
+logit, and measure elapsed time before attempting the long sequence. The long
+profile already passed mock lifecycle testing with synthetic outputs; that
+result does not establish numerical accuracy. Native package audit, frozen
+candidate acceptance and .40 numerical validation remain pending.
 
 ## Full-decoder control flow (offline only)
 
@@ -65,14 +69,9 @@ See `evidence/offline-full-decoder-integration.json` and
 `results/m3-full-backend-v11`, `results/m3-full-dispatch-v7`,
 `results/m3-layer-regression-v4`.
 
-Numerical integration is NOT accepted: the first full-model arithmetic test
-agrees through layer 3 and diverges beyond fixed gates beginning at layer 4.
-Investigate the recorded Q8 rounding boundary and same-input projection oracle
-before building/deploying a full-decoder package. The native full helper now has a separate 514-request host test, described
-above; its native packaging integration is still pending. Native planning is in `results/m3-full-native-plan-v1.md`; start
-with two tokens plus reset, and measure the budget before a 514-request run.
-No native full-model test has been performed; .40's installed accepted layer
-package remains historical evidence.
+Portable numerical integration now passes as described above. No native
+full-model test has been performed; .40's installed accepted selected-layer
+package remains historical evidence. Preserve it for recovery.
 
 ## Full-model numerical reference
 

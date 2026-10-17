@@ -13,7 +13,7 @@ from qualify_public_hip_rmsnorm import checked_inputs, checked_tools
 from probe_hip_routes import audit_object
 
 CLASSIFICATION='source-only-bounded-layer-fixture'
-SYMBOLS=('layer_copy','layer_to_f16','layer_add','layer_mul','layer_silu','layer_rope','layer_set_rows','layer_scores','layer_softmax','layer_values','layer_quantize_q8_cpu','layer_q4_cpu')
+SYMBOLS=('layer_copy','layer_to_f16','layer_add','layer_mul','layer_silu','layer_rope','layer_set_rows','layer_scores','layer_softmax','layer_values','layer_quantize_q8_cpu','layer_q4_cpu','layer_rms_cpu')
 SOURCES=('kernels/llm_layer.hip','tools/build_llm_layer_fixture.py','tests/llm_layer_fixture_test.py','tests/llm_layer_admission.cpp','tests/llm_layer_kernel_test.cpp','src/code_object.cpp','include/ps5hip/code_object.h','tools/build_llm_weighted_rmsnorm_fixture.py','tools/build_llm_q4_fixture.py','tools/build_llm_rmsnorm_fixture.py','tools/qualify_public_hip_rmsnorm.py','tools/probe_hip_routes.py','tools/build_canaries.py','tests/fat_binary_fixture_test.py')
 TOOLS=('clang++-18','llvm-config-18','ld.lld-18','llvm-readobj-18','llvm-objdump-18','llvm-nm-18')
 LABELS=('compile','notes','isa','undefined','admission-build','admission')
@@ -23,13 +23,15 @@ def contracts(folder):
     folder=Path(folder)
     if (folder/'undefined.stdout').read_text().strip():raise ValueError('undefined device symbols')
     isa=(folder/'isa.stdout').read_text()
-    q4_isa=isa.split('<layer_q4_cpu>:',1)[-1]
+    q4_parts=isa.split('<layer_q4_cpu>:',1)
+    if len(q4_parts)!=2:raise ValueError('layer Q4 symbol missing')
+    q4_isa=re.split(r'\n[0-9a-f]+ <[^>]+>:',q4_parts[1],maxsplit=1)[0]
     if len(re.findall(r'\bglobal_load_ubyte\b',q4_isa))!=16 or re.search(r'\b(?:flat_|scratch_|s_swappc|s_setpc)',isa):raise ValueError('layer ISA load/call contract changed')
     audit=audit_object((folder/'layer.hsaco').read_bytes(),(folder/'notes.stdout').read_text(),(folder/'isa.stdout').read_text(),SYMBOLS)
     rows=(folder/'admission.stdout').read_text().splitlines()
     if len(rows)!=len(SYMBOLS) or {r.split()[0] for r in rows}!=set(SYMBOLS) or any(not r.endswith('rejection=') for r in rows):raise ValueError('Initial admission failed')
     expected_sizes={n:28 for n in SYMBOLS}
-    expected_sizes.update(layer_copy=20,layer_to_f16=20,layer_silu=20,layer_rope=24,layer_set_rows=32,layer_quantize_q8_cpu=20,layer_q4_cpu=32)
+    expected_sizes.update(layer_copy=20,layer_to_f16=20,layer_silu=20,layer_rope=24,layer_set_rows=32,layer_quantize_q8_cpu=20,layer_q4_cpu=32,layer_rms_cpu=16)
     for name,d in audit['descriptors'].items():
         if d['kernarg_bytes']!=expected_sizes[name] or d['rsrc2']!=0x8c or d['properties']!=0x409 or any(d[n] for n in ('group_bytes','private_bytes','rsrc3','preload')):raise ValueError('unexpected Initial descriptor')
     return audit
