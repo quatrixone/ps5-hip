@@ -47,6 +47,61 @@ FULL_WRAPPER_CALLS=['_ZN2m07requireEb', 'ggml_graph_n_nodes', 'ggml_graph_node',
 FULL_GLOBAL_TARGETS={23: ('_ZN2m0L10last_graphE', 0), 30: ('_ZN2m0L10gate_callsE', 0), 39: ('_ZN2m0L10gate_callsE', 0), 45: ('_ZN2m0L12full_enabledE', 0), 58: ('_ZN2m0L11full_activeE', 0), 194: ('_ZN2m0L13full_backendsE', 0), 246: ('_ZN2m0L8rejectedE', 0), 255: ('_ZN2m0L8rejectedE', 0), 431: ('_ZN2m0L8rejectedE', 0), 440: ('_ZN2m0L8rejectedE', 0), 458: ('_ZN2m0L13full_backendsE', 0), 528: ('_ZN2m0L8rejectedE', 0), 537: ('_ZN2m0L8rejectedE', 0), 599: ('_ZN2m0L11full_activeE', 0), 606: ('_ZN2m0L23scheduled_compute_callsE', 0), 614: ('_ZN2m0L23scheduled_compute_callsE', 0), 699: ('_ZN2m0L11full_activeE', 0), 716: ('_ZN2m0L8rejectedE', 0), 725: ('_ZN2m0L8rejectedE', 0), 743: ('_ZN2m0L10full_statsE', 0), 754: ('_ZN2m0L10full_statsE', 0), 761: ('_ZN2m0L10full_statsE', 8), 774: ('_ZN2m0L10full_statsE', 8), 820: ('_ZN2m0L12prefix_scopeE', 0), 843: ('_ZN2m0L11layer_scopeE', 0), 1020: ('_ZN2m0L8rejectedE', 0), 1029: ('_ZN2m0L8rejectedE', 0), 1179: ('_ZN2m0L23scheduled_compute_callsE', 0), 1188: ('_ZN2m0L23scheduled_compute_callsE', 0)}
 FULL_OPS=frozenset((0,1,2,7,25,29,35,36,37,38,40,42,46,48,100))
 FULL_SOURCES=["ports/ggml/native_full.h","ports/ggml/full_qualification.h","ports/ggml/full_dispatch.h","ports/ggml/full_graph.h","tests/llm_native_full_test.cpp","tests/native_full_title_test.py"]
+LOADER_SOURCES=['tools/prepare_llm_native_loader.py','tests/llm_native_loader_test.py']
+
+# LLVM18 O0 native local RAII owner: preserve size/pointer ABI and null-throw control flow.
+LOADER_TEMPLATES={'constructor': 'pushq %rbp\nmovq %rsp, %rbp\nsubq $0x20, %rsp\nmovq %rdi, -0x8(%rbp)\nmovq %rsi, -0x10(%rbp)\nmovq -0x8(%rbp), %rax\nmovq %rax, -0x18(%rbp)\nmovq -0x10(%rbp), %rcx\nmovq %rcx, (%rax)\nmovq -0x10(%rbp), %rdi\ncall\nmovq %rax, %rcx\nmovq -0x18(%rbp), %rax\nmovq %rcx, 0x8(%rax)\ncmpq $0x0, 0x8(%rax)\njne 72\nmovl $0x8, %edi\ncall\nmovq %rax, %rdi\nmovq %rdi, -0x20(%rbp)\nleaq RIP, %rax\ncall\nmovq -0x20(%rbp), %rdi\nleaq RIP, %rsi\nleaq RIP, %rdx\ncall\nud2\naddq $0x20, %rsp\npopq %rbp\nretq\n', 'destructor': 'pushq %rbp\nmovq %rsp, %rbp\nsubq $0x10, %rsp\nmovq %rdi, -0x8(%rbp)\nmovq -0x8(%rbp), %rax\nmovq (%rax), %rsi\nmovq 0x8(%rax), %rdi\nleaq RIP, %rax\ncall\njmp 25\naddq $0x10, %rsp\npopq %rbp\nretq\nmovq %rax, %rdi\ncall\nud2\n', 'data': 'movq %rdi, -0x8(%rsp)\nmovq -0x8(%rsp), %rax\nmovq 0x8(%rax), %rax\nretq\n'}
+
+def loader_roles(values):
+ # The native staging owner is local to load_all_data, hence its _ZZ names.
+ def unique(fragment):
+  found=[n for n in values if fragment in n]
+  require(len(found)==1,'missing/ambiguous native loader symbol '+fragment)
+  return found[0]
+ load=[n for n in values if n.startswith('_ZN18llama_model_loader13load_all_data')]
+ require(len(load)==1,'missing/ambiguous loader entry')
+ return dict(load=load[0],constructor=unique('18native_read_bufferC2'),
+             destructor=unique('18native_read_bufferD2'),data=unique('18native_read_buffer4data'))
+
+def loader_contract(bodies,roles):
+ """Bound the new synchronous non-host tensor staging pair, not libc globally."""
+ load=bodies[roles['load']]
+ require(len(symbol_calls(load,roles['constructor']))==1,'loader staging constructor missing/duplicated')
+ require(len(symbol_calls(load,roles['destructor']))==2,'loader normal/unwind release missing/duplicated')
+ require(len(symbol_calls(load,roles['data']))==3,'loader staging data uses differ')
+ upload=symbol_calls(load,'ggml_backend_tensor_set')
+ require(upload,'loader tensor upload missing')
+ start=symbol_calls(load,roles['constructor'])[0];uses=symbol_calls(load,roles['data']);end=symbol_calls(load,roles['destructor'])[0]
+ require(start<uses[0]<uses[1] and any(uses[1]<p<uses[2] for p in upload) and uses[2]<end,
+         'loader staging/upload/release call order differs')
+ for role,target in [('constructor','__wrap_ggml_aligned_malloc'),('destructor','__wrap_ggml_aligned_free')]:
+  require(len(symbol_calls(bodies[roles[role]],target))==1,'loader wrapped allocator edge missing: '+role)
+ for role in roles:
+  for target in ('ggml_aligned_malloc','ggml_aligned_free','malloc','calloc','realloc','free'):
+   require(not symbol_calls(bodies[roles[role]],target),'loader original allocator bypass: '+role)
+ require(not re.search(r'<[^>]*vector[^>]*no_init[^>]*>',load),'original loader staging vector retained')
+
+def loader_machine_contract(bodies,roles,bases):
+ loader_contract(bodies,roles)
+ for role,expected in LOADER_TEMPLATES.items():
+  actual=normalized_wrapper(bodies[roles[role]],bases[role])
+  # Linker GOT relaxation may retain mov or produce lea; the call binding
+  # independently requires the wrapped allocator, including indirect calls.
+  actual=actual.replace('movq RIP,','leaq RIP,')
+  require(actual==expected,'native loader owner operands/control flow differ: '+role)
+ ctor=bodies[roles['constructor']]
+ ordered_calls(ctor,['__wrap_ggml_aligned_malloc','__cxa_allocate_exception','__cxa_throw'])
+ require(len(symbol_calls(bodies[roles['destructor']],'__clang_call_terminate'))==1,
+         'native loader destructor exception edge differs')
+ lines=[line for line in bodies[roles['load']].splitlines() if re.match(r'^\s*[0-9a-f]+:',line)]
+ for role in ('constructor','destructor','data'):
+  for i,line in enumerate(lines):
+   if '<'+roles[role]+'>' not in line:continue
+   require(i>0 and re.search(r'leaq\s+-0x2b0\(%rbp\),\s*%rdi\s*$',lines[i-1]),
+           'native loader staging owner argument differs: '+role)
+   if role=='constructor':
+    require(i>1 and re.search(r'movq\s+-0x1a0\(%rbp\),\s*%rsi\s*$',lines[i-2]),
+            'native loader staging size argument differs')
 
 def threadpool_indirect_malloc(body,target):
  # Exact observed LLVM18 O0 prefix: RIP-relative wrapper address, pool size,
@@ -382,7 +437,7 @@ def audit(raw,converted,extracted,phase="vocab"):
  if LAYER_HOOK in values:
   for p in (ROOT/n for n in LAYER_SOURCES):identities[str(p)]=sha(p)
  if phase=='model-full':
-  for p in (ROOT/n for n in FULL_SOURCES):identities[str(p)]=sha(p)
+  for p in (ROOT/n for n in FULL_SOURCES+LOADER_SOURCES):identities[str(p)]=sha(p)
  def one(n):
   require(n in values and len(values[n])==1,'missing/ambiguous symbol '+n);return values[n][0]
  def match(fragment):
@@ -444,8 +499,10 @@ def audit(raw,converted,extracted,phase="vocab"):
   layer_dispatch_names=[n for n in values if ('ps5hip_layer8Dispatch' in n or 'ps5hip_prefix8Dispatch' in n) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
   layer_names=[*layer.values(),*layer_dispatch_names,*[n for targets in layer_edges(layer).values() for n in targets]]
   names+=list(dict.fromkeys(n for n in layer_names if n not in names))
- full=None;full_dispatch_names=[]
+ full=None;full_dispatch_names=[];loader=None
  if phase=='model-full':
+  loader=loader_roles(values)
+  names+=list(dict.fromkeys(n for n in loader.values() if n not in names))
   full=full_roles(match)
   full_dispatch_names=[n for n in values if any(p in n for p in ('ps5hip_full8Dispatch','ps5hip_layer8Dispatch','ps5hip_prefix8Dispatch')) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
   full_names=[*full.values(),'llama_free',*full_dispatch_names,*[n for targets in full_edges(full).values() for n in targets]]
@@ -469,6 +526,7 @@ def audit(raw,converted,extracted,phase="vocab"):
   phase_contract(phase,layer['run'],layer_chain,{n:body(n) for n in layer_chain})
   layer_contract({n:prefix_scope_aliases(body(n),layer,values,'ActualLayerQualification') for n in names},layer,layer_dispatch_names)
  if full is not None:full_contract({n:body(n) for n in names},full,full_dispatch_names)
+ if loader is not None:loader_machine_contract({n:body(n) for n in loader.values()},loader,{k:one(n) for k,n in loader.items()})
  if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
  reader=load_regions(paths[0])[0];slots={n:import_slots(data,n) for n in ['atexit','_init_env','printf']}
@@ -538,7 +596,7 @@ def audit(raw,converted,extracted,phase="vocab"):
  require(all(sha(p)==h for p,h in identities.items()),'audit inputs changed')
  return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase=phase,
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
-   actual_full_call_chain_audited=(phase=='model-full'),full_profile=('smoke' if phase=='model-full' else None),full_callback_dataflow_proven=False,
+   actual_full_call_chain_audited=(phase=='model-full'),native_loader_staging_audited=(loader is not None),full_profile=('smoke' if phase=='model-full' else None),full_callback_dataflow_proven=False,
    actual_layer_call_chain_audited=(phase=='model-layer'),layer_callback_dataflow_proven=False,
   actual_prefix_call_chain_audited=(phase=='model-prefix'),prefix_callback_dataflow_proven=False,
    native_allocator_routing_audited=(phase in ('model-gate','model-prefix','model-layer','model-full')),

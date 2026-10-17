@@ -188,6 +188,7 @@ llm-native-client-link: deps-build llm-deps-fetch
 	$(PYTHON) tests/build_jobs_test.py
 	$(PYTHON) tests/native_ccache_test.py
 	$(PYTHON) tests/llm_native_client_build_test.py
+	$(PYTHON) tests/llm_native_loader_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tools/build_llm_native_client.py --output $(LLM_NATIVE_CLIENT_BUILD_DIR) $(if $(strip $(LLM_NATIVE_CLIENT_PREPARED_GENERATED_INPUTS)),--prepared-generated-inputs "$(LLM_NATIVE_CLIENT_PREPARED_GENERATED_INPUTS)")
 

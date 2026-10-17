@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-loader-object-contract",
+  "native_executed": false,
+  "gpu_executed": false,
+  "object": {
+    "path": "build/llm-native-client-v7/35.o",
+    "sha256": "c20125799ba30b19ca737d255c21d557e5da52aa094324ec53a294bfa64ffecb"
+  },
+  "checks": [
+    "61 focused methods pass across loader, native builder and image auditor.",
+    "Actual LLVM18 PS5 loader object has one owner constructor, three data uses, two normal/unwind destructors.",
+    "Final full-image audit now requires exact native size/pointer ABI, null throw branch, wrapped allocator calls and no original staging vector/libc bypass.",
+    "Completed 71-object generated directory and dependency inventories independently checked without unexpected headers/PCH/symlinks.",
+    "Make native-client target now runs loader-helper tests."
+  ],
+  "local_evidence": {
+    "results/m3-native-loader-audit-v1/receipt.json": "58a36c3266ca248d4ee1c25f3d4c757f78e0d75a61e088eeb79f56708f19e972",
+    "results/m3-generated-shadow-attestation.json": "e7876bd0d78d98c8638eb7ba20c04e127762d543499f65727ecbf2cb60a43aa9"
+  },
+  "sources": {
+    "tools/audit_public_hip_llm_client_native.py": "0ab5f3d31e7011a823ba776c76b9dad35d049c4899c64061c3529fedf0c196ec",
+    "tests/llm_client_native_audit_test.py": "393502630c13ec3bf8293d26f1a9471eb247c01db077f796104685a65e98dd5f",
+    "Makefile": "9f2651c003aa018cf49ef908b73b63a95f6a558f363f560b1e255548e90f7eea"
+  },
+  "limits": [
+    "Actual linked image audit remains mandatory.",
+    "Generic optional generated-folder producer currently filters header extensions; exact filename-allowlist hardening is deferred. This specific completed input/dependency inventory is independently clean.",
+    "No native model-load or all-layer numerical acceptance from object inspection."
+  ]
+}

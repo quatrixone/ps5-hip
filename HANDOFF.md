@@ -24,10 +24,18 @@ storage. Next derive only the native loader staging through exception-safe
 paired `ggml_aligned_malloc/free`, preserving tensor validation and HIP uploads;
 prove it under a constrained ordinary heap before another fresh native candidate.
 
+Aligned native staging is implemented and passes constrained-heap, sanitizer
+and failure cleanup tests. Client v7 compiled all 71 objects; its actual loader
+object passes the new strict machine ABI/branch contract. Final client receipt,
+app v2 linked audit and .40 execution remain pending. Use
+`results/m3-native-full-command-plan-v2.md`; keep the v1 case immutable.
+See `evidence/offline-native-loader-aligned-staging.json` and
+`evidence/offline-native-loader-object-contract.json`.
+
 See `evidence/console40-full-model-load-allocation-failure.json`. Preserve
 consumed `results/source-public-llm-full-smoke-console-v1` and installed
 `build/llm-native-full-smoke-app-v1`; never replay this candidate. The new installed
-baseline is package `700c673e?`, not the previous selected-layer package. The
+baseline is package `700c673e179b111de7106297fb410667fc97505b76b9cbbeb59c8fe81c8aa894`, not the previous selected-layer package. The
 external model was hash-verified and reused. Portable all-22-layer numerical
 acceptance remains valid; native full-model acceptance remains open.
 
@@ -124,9 +132,9 @@ See `evidence/offline-full-decoder-integration.json` and
 `results/m3-full-backend-v11`, `results/m3-full-dispatch-v7`,
 `results/m3-layer-regression-v4`.
 
-Portable numerical integration now passes as described above. No native
-full-model test has been performed; .40's installed accepted selected-layer
-package remains historical evidence. Preserve it for recovery.
+Portable numerical integration passes as described above. The first native
+full-model candidate failed during model loading; see the current failure and
+recovery identities above. Preserve the earlier selected-layer package for recovery.
 
 ## Full-model numerical reference
 

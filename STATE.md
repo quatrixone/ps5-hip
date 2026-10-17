@@ -118,9 +118,9 @@ See `evidence/offline-full-decoder-integration.json` and
 `results/m3-full-backend-v11`, `results/m3-full-dispatch-v7`,
 `results/m3-layer-regression-v4`.
 
-Portable numerical integration now passes as described above. No native
-full-model test has been performed; .40's installed accepted selected-layer
-package remains historical evidence. Preserve it for recovery.
+Portable numerical integration passes as described above. The first native
+full-model candidate failed during model loading; see the current failure and
+recovery identities above. Preserve the earlier selected-layer package for recovery.
 
 ## Full-model numerical reference
 

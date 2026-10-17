@@ -341,4 +341,56 @@ class Full(unittest.TestCase):
    bad=dict(bodies);bad[caller]+='900: callq 0x9000 <ggml_backend_cpu_init>\n'
    with self.assertRaises(RuntimeError):a.full_contract(bad,roles,dispatch)
 
+class NativeLoader(unittest.TestCase):
+ def fixture(self):
+  roles=dict(load='loader',constructor='construct',destructor='destroy',data='data')
+  calls=['construct','data','read_raw','data','ggml_backend_tensor_set','data','ggml_validate_row_data','destroy','destroy']
+  body=lambda targets:'\n'.join(f'{10+i*8:x}: callq 0x9000 <{t}>' for i,t in enumerate(targets))
+  return roles,{'loader':body(calls),'construct':body(['__wrap_ggml_aligned_malloc']),'destroy':body(['__wrap_ggml_aligned_free']),'data':'10: retq'}
+ def test_native_pair_and_normal_exception_release_edges(self):
+  roles,bodies=self.fixture();a.loader_contract(bodies,roles)
+  for role,target in [('load','construct'),('load','destroy'),('load','data'),('load','ggml_backend_tensor_set'),('constructor','__wrap_ggml_aligned_malloc'),('destructor','__wrap_ggml_aligned_free')]:
+   bad=dict(bodies);name=roles[role];bad[name]=bad[name].replace('<'+target+'>','<wrong>',1)
+   with self.subTest(role=role,target=target),self.assertRaises(RuntimeError):a.loader_contract(bad,roles)
+ def test_original_pair_or_staging_vector_cannot_bypass(self):
+  roles,bodies=self.fixture()
+  for role in roles:
+   for target in ['ggml_aligned_malloc','ggml_aligned_free','malloc','calloc','realloc','free']:
+    bad=dict(bodies);bad[roles[role]]+='\n100: callq 0x9000 <'+target+'>'
+    with self.subTest(role=role,target=target),self.assertRaises(RuntimeError):a.loader_contract(bad,roles)
+  bad=dict(bodies);bad['loader']+='\n100: callq 0x9000 <stdvector_no_init_ctor>'
+  with self.assertRaises(RuntimeError):a.loader_contract(bad,roles)
+ def test_owner_symbols_are_local_and_unambiguous(self):
+  values={n:1 for n in ['_ZN18llama_model_loader13load_all_dataargs','_ZZload18native_read_bufferC2Em','_ZZload18native_read_bufferD2Ev','_ZZload18native_read_buffer4dataEv']}
+  a.loader_roles(values)
+  for name in list(values):
+   with self.subTest(name=name),self.assertRaises(RuntimeError):a.loader_roles({n:v for n,v in values.items() if n!=name})
+  with self.assertRaises(RuntimeError):a.loader_roles({**values,'_ZZother18native_read_bufferD2Ev':2})
+ def machine_fixture(self):
+  roles,bodies=self.fixture();bases={k:0x1000 for k in roles}
+  for role,template in a.LOADER_TEMPLATES.items():
+   text=Full.instructions(template,0x1000)
+   targets={'constructor':['__wrap_ggml_aligned_malloc','__cxa_allocate_exception','bad_alloc_ctor','__cxa_throw'],
+            'destructor':['__wrap_ggml_aligned_free','__clang_call_terminate'],'data':[]}[role]
+   for target in targets:text=text.replace('<target>','<'+target+'>',1)
+   bodies[roles[role]]=text
+  rows=[]
+  for line in bodies['loader'].splitlines():
+   if '<construct>' in line:rows.append('1: movq -0x1a0(%rbp), %rsi')
+   if any('<'+roles[k]+'>' in line for k in ('constructor','destructor','data')):rows.append('2: leaq -0x2b0(%rbp), %rdi')
+   rows.append(line)
+  bodies['loader']='\n'.join(rows)
+  return roles,bodies,bases
+ def test_native_size_pointer_null_branch_and_owner_abi(self):
+  roles,bodies,bases=self.machine_fixture();a.loader_machine_contract(bodies,roles,bases)
+  for role,before,after in [('constructor','jne ','je '),('constructor','0x8(%rax)','0x10(%rax)'),
+    ('constructor','-0x10(%rbp), %rdi','-0x8(%rbp), %rdi'),('destructor','(%rax), %rsi','0x8(%rax), %rsi'),
+    ('destructor','jmp ','jne '),('data','0x8(%rax)','(%rax)'),('load','-0x1a0(%rbp)','-0x1a8(%rbp)'),
+    ('load','-0x2b0(%rbp)','-0x2c0(%rbp)')]:
+   bad=dict(bodies);name=roles[role];self.assertIn(before,bad[name]);bad[name]=bad[name].replace(before,after,1)
+   with self.subTest(role=role,before=before),self.assertRaises(RuntimeError):a.loader_machine_contract(bad,roles,bases)
+  for target in ['__cxa_allocate_exception','__cxa_throw']:
+   bad=dict(bodies);bad['construct']=bad['construct'].replace('<'+target+'>','<wrong>')
+   with self.assertRaises(RuntimeError):a.loader_machine_contract(bad,roles,bases)
+
 if __name__=='__main__':unittest.main()
