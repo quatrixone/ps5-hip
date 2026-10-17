@@ -10,6 +10,8 @@ and executed operator inventory alongside QKV, then one layer and full logits.
 M0 and M1 are validated on .40. The immediate priority is the actual-model
 M2 prefix, followed by one whole transformer layer, with milestone pushes.
 
+- 2026-10-16 | M2 native prefix | .40 | failed: model/context loaded; public HIP rejected first GET_ROWS launch; healthy safety close | evidence/console40-model-prefix-launch-rejection.json | next: adapter admission fix
+
 - 2026-10-16 | M2 actual-model prefix | offline | four real graphs, 36 mocked HIP dispatches, sanitized admission and repeatable CPU reference | evidence/offline-model-prefix-integration.json | next: native package and .40 numerical/lifecycle validation
 
 - 2026-10-16 | M0 HIP calls | c988245 | .40 | pass:11 exact rows, guarded fill, clean lifecycle/postchecks | evidence/console40-native-hip-call-success.json | next: integrated M2 prefix

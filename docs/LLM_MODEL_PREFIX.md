@@ -57,13 +57,12 @@ The expected final observed data-buffer counts are five allocations/frees and on
 
 ## Reusing prepared compiler paths
 
-For an unchanged runtime source tree, optionally pass
-`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior-app` to `make llm-native-app`,
-while selecting a fresh `LLM_NATIVE_APP_BUILD_DIR`. The builder independently
-prepares a fresh tree, compares file inventories and content with the prior
-prepared tree, and uses the prior absolute compiler paths only on an exact
-match. This permits existing ccache entries to match without weakening header,
-toolchain, model, package or final-image checks. A changed runtime tree rejects
-this selection; omit the option to prepare and compile new sources normally.
-The selected prior build becomes a receipt dependency and must be retained.
-The option does not restore a missing final receipt or guarantee a cache hit.
+Native app builds automatically try the last completed build's prepared compiler paths.
+The hint only selects a candidate: the builder prepares a fresh tree, validates
+the previous receipt and compares both complete trees before reuse. Missing,
+invalid or mismatching automatic candidates fall back to fresh sources.
+`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior-app` explicitly selects a prior
+build and rejects a mismatch. Always select a fresh output directory.
+The selected prior receipt and source tree become dependencies and must be
+retained. Reuse does not restore missing receipts or guarantee cache hits.
+The advisory hint is published only after a successful final build receipt.

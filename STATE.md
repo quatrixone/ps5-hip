@@ -38,27 +38,26 @@ raw tensors and lifecycle on .40. The full model still rejects unsupported work.
 See `docs/LLM_MODEL_PREFIX.md` for the reproducible Make targets and
 `evidence/offline-model-prefix-integration.json` for the bounded host evidence.
 
-The first prefix package compiled and packaged, but its audit rejected valid
-C++ constructor aliases and GOT-loaded writer calls. The corrected audit passes
-102 functions on the unchanged images; see
-`evidence/offline-model-prefix-image-audit.json`. No console run occurred.
-The failed build has no final receipt. Preserve `build/llm-native-prefix-app-v1`;
-the next build can reuse its compiler paths after fresh source comparison via
-`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD`. The second build recorded 79 cache hits and two misses but took 1699 seconds.
-Its final check failed because command instrumentation expanded the reference
-dependency graph; restoring the original runner before authentication fixes
-that tooling error (41 focused tests pass). Preserve both failed builds.
-The v3 native build now passes (149 objects, 201 commands), package
-SHA-256 `736e2cf57cee3b507f94add584f34688ea5bf58a5dbbc5a8a952c4343ea67f4b`.
-The first freeze also passed but exposed six repeated aggregate validations.
-The reviewed validator fix reduces those to two without changing the package;
-46 tests pass. Create a fresh v2 freeze/review before deployment. The v1 frozen
-candidate is superseded and has never contacted .40. No integrated-prefix
-console result exists yet.
-The consumed call candidate is `results/source-public-llm-call-console-v1`;
-do not replay its deployment or execution. Preserve its current package and
-the prior v10/v8 recovery artifacts. Source: `c988245`; package SHA-256:
-`363c817513c92ba565d1dc5e361a5e34646ada65f70a4a09b6afb8de09499995`.
+The v3 native prefix package built and its v2 deployment passed on .40.
+The model was reused from `/data/hip/models`; all 14 package assets were verified.
+Execution loaded the model and created its context, but the first embedding
+launch returned `hipErrorInvalidValue` before GPU submission. The public HIP
+adapter still rejects its required four-row launch. The app quarantined;
+the bounded controller closed PPSA99014, confirmed idle/healthy services and
+released both owned locks. No actual-model tensor output is validated.
+See `evidence/console40-model-prefix-launch-rejection.json`.
+
+Candidate `results/source-public-llm-prefix-console-v2` is consumed for both
+phases. Preserve its installed package, deployment backups, raw logs and
+`build/llm-native-prefix-app-v1` prepared sources used by v3. Do not replay it.
+Next fix the public HIP admission boundary, test that actual boundary, and
+prepare a fresh native candidate. M0/M1 remain passed; M2 remains open.
+
+Build overhead fixes pass 123 focused tests: automatic verified prepared-source
+reuse and per-inventory dependency path resolution. The earlier freeze fix
+reduced one measured run from 1299 to 943 seconds. Whole-build savings from
+the newly applied changes remain unmeasured; see
+`evidence/offline-build-overhead-reduction.json`.
 
 Disk cleanup removed 3167 superseded native/experiment object files (1.06 GiB).
 Receipts, sources, models, logs and recovery packages were retained; old

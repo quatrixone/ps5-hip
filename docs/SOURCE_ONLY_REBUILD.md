@@ -17,7 +17,14 @@ directories can reuse compiled objects without reusing an old build receipt.
 Host CPU-reference compiler caching is not included; its parallelism is configurable.
 Run `PS5_HIP_CACHE_INTEGRATION=1 python3 tests/native_ccache_test.py` for the real
 SDK C/C++ cache hit/invalidation test, and `python3 tests/build_jobs_test.py` for worker
-limit and ordering checks. Full cold/warm package timings are not yet measured.
+limit and ordering checks. A completed warm prefix build recorded 79 cache hits,
+two misses and 1637.75 seconds total; this is not a controlled cold/warm comparison.
+Cache hits still require fresh dependency discovery, input authentication,
+linking and packaging. Native builds now automatically try equivalent prepared
+compiler paths from the last successful build, with safe fresh-source fallback.
+Per-inventory parent resolution reduces repeated filesystem calls while retaining
+independent before/after dependency mappings and content verification.
+Whole-package savings from these two changes remain to be measured.
 
 Compiler parallelism is configured through Make's `JOBS` variable, for example
 `make llm-native-app JOBS=8` or `JOBS=1` for serial compilation in the stages below. Make exports the

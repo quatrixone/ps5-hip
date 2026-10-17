@@ -117,4 +117,65 @@ class PreparedSource(unittest.TestCase):
   del data['inputs'][str(self.old/'unexpected')];data['inputs'][str(self.new/'source-base/source/unit.cpp')]='a'*64;p.write_text(json.dumps(data))
   with self.assertRaisesRegex(ValueError,'ambiguous'):self.select()
 
+class AutomaticPreparedSource(unittest.TestCase):
+ setUp=PreparedSource.setUp
+ def complete(self):
+  receipt=self.old/'receipt.json'
+  receipt.write_text(json.dumps({'phase':'model-prefix','classification':'source-only-model-prefix-native-client-app','fixture':'llm_client','status':'PASS','object_count':149}))
+  self.assertTrue(d.publish_prepared_hint(receipt,self.old/'source-public'))
+  return receipt
+ def choose(self,explicit=None):return d.choose_prepared_source(self.new,self.new/'source-public',explicit)
+ def test_base_receipt_and_parent_symlinks_rejected(self):
+  for folder in (self.old,self.new):
+   for target in (folder/'source-base',folder/'source-base/receipt.json'):
+    with self.subTest(path=str(target)):
+     escaped=self.root/'escaped';target.rename(escaped);target.symlink_to(escaped,target_is_directory=escaped.is_dir())
+     try:
+      with self.assertRaisesRegex(ValueError,'base receipt'):d.select_prepared_source(self.new,self.new/'source-public',self.old)
+     finally:target.unlink();escaped.rename(target)
+ def test_deep_malformed_hint_falls_back(self):
+  self.complete();d.prepared_hint_path().write_text('['*1100+'0'+']'*1100)
+  self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+ def test_missing_hint_and_valid_complete_hint(self):
+  self.assertEqual(self.choose(),(self.new/'source-public',{'mode':'fresh','reason':'no_hint'}))
+  receipt=self.complete();source,selection=self.choose()
+  self.assertEqual(source,self.old/'source-public');self.assertEqual(selection['mode'],'automatic')
+  self.assertEqual(selection['receipt_sha256'],d.b.sha(receipt))
+ def test_explicit_precedence_and_fail_closed(self):
+  self.complete();d.prepared_hint_path().write_text('invalid')
+  self.assertEqual(self.choose(self.old),(self.old/'source-public',{'mode':'explicit'}))
+  (self.old/'source-public/unit.cpp').write_text('changed')
+  with self.assertRaisesRegex(ValueError,'content'):self.choose(self.old)
+ def test_stale_receipt_and_source_fallback(self):
+  receipt=self.complete();receipt.write_text('{}')
+  self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+  self.complete();(self.old/'source-public/unit.cpp').write_text('changed')
+  self.assertEqual(self.choose()[1]['reason'],'source_mismatch')
+ def test_wrong_receipt_contract_rejected(self):
+  receipt=self.complete();data=json.loads(receipt.read_text());data['fixture']='other';receipt.write_text(json.dumps(data))
+  d.publish_prepared_hint(receipt,self.old/'source-public')
+  self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+ def test_outside_symlink_and_oversized_hint_rejected(self):
+  self.complete();hint=d.prepared_hint_path();data=json.loads(hint.read_text());data['receipt']=str(self.root/'elsewhere/receipt.json');hint.write_text(json.dumps(data))
+  self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+  hint.write_text('x'*4097);self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+  hint.unlink();hint.symlink_to(self.old/'receipt.json');self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+ def test_hint_path_matches_receipt_selected_source(self):
+  receipt=self.complete();data=json.loads(receipt.read_text());data['prepared_source_build']=str(self.new);receipt.write_text(json.dumps(data))
+  d.publish_prepared_hint(receipt,self.old/'source-public')
+  self.assertEqual(self.choose()[1]['reason'],'invalid_or_stale_hint')
+ def test_atomic_write_failure_preserves_existing_hint(self):
+  self.complete();hint=d.prepared_hint_path();before=hint.read_bytes()
+  with patch.object(d.os,'replace',side_effect=OSError('test interruption')):
+   self.assertFalse(d.publish_prepared_hint(self.old/'receipt.json',self.old/'source-public'))
+  self.assertEqual(hint.read_bytes(),before);self.assertFalse(list(hint.parent.glob('.native-app-hint-*')))
+ def test_missing_receipt_never_publishes(self):
+  self.assertFalse(d.publish_prepared_hint(self.old/'receipt.json',self.old/'source-public'))
+  self.assertFalse(d.prepared_hint_path().exists())
+ def test_receipt_bound_before_compile_and_hint_after_completion(self):
+  import inspect
+  source=inspect.getsource(d.build)
+  self.assertLess(source.index("bind(source_selection['receipt'],source_selection['receipt_sha256'])"),source.index('units=b.compile_units'))
+  self.assertLess(source.index("(output/'receipt.json').write_text"),source.index('publish_prepared_hint'))
+
 if __name__=='__main__':unittest.main()

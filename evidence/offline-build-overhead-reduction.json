@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "scope": "Build tooling only; no GPU numerical acceptance",
+  "changes": [
+    "Automatic verified prepared-source reuse after completed build",
+    "Per-inventory dependency parent canonicalization with route replay and before/after content binding",
+    "Previously applied private freeze validation deduplication"
+  ],
+  "tests": [
+    {
+      "test": "public_hip_compile_inputs",
+      "exit_code": 0,
+      "elapsed_seconds": 0.31731081008911133,
+      "methods": 10,
+      "log_sha256": "9d5cbf50af2b5d43b53292e22efa8ffa4ca03168aabba92fa0d3e90b2ff6a317"
+    },
+    {
+      "test": "llm_native_app_build",
+      "exit_code": 0,
+      "elapsed_seconds": 0.7501239776611328,
+      "methods": 26,
+      "log_sha256": "4166d8cfc1c5e7dcf0e579e8f2054634b32a2a2037123de77f0cb1d4a67dee99"
+    },
+    {
+      "test": "native_ccache",
+      "exit_code": 0,
+      "elapsed_seconds": 0.14574241638183594,
+      "methods": 11,
+      "log_sha256": "90adcfb875f3a8506f15bf4e508d2adeb865134efe8b9cdc8051e91d1610509b"
+    },
+    {
+      "test": "build_jobs",
+      "exit_code": 0,
+      "elapsed_seconds": 0.8237800598144531,
+      "methods": 5,
+      "log_sha256": "90bb0436b21ffdd78350d06836c4a9a1caecb6ea551218fef84283d0da5edf0f"
+    },
+    {
+      "test": "source_model_auth",
+      "exit_code": 0,
+      "elapsed_seconds": 1.4046239852905273,
+      "methods": 27,
+      "log_sha256": "c8a57d184f6a76efdd8c9c1fbb85bc6ac9528d98b37553d09f3158080217f3af"
+    },
+    {
+      "test": "source_model_prefix_freeze",
+      "exit_code": 0,
+      "elapsed_seconds": 1.2533953189849854,
+      "methods": 19,
+      "log_sha256": "7dbca91f499260e4cf5672da8922d789c9c0a41d4535563a0ea8c61bb555ccdf"
+    },
+    {
+      "test": "source_prefix_authentication",
+      "exit_code": 0,
+      "elapsed_seconds": 0.18905925750732422,
+      "methods": 14,
+      "log_sha256": "bb665783b4d706bc95547dba667ae618232875fa482eed6031ba69d1dfeb7944"
+    },
+    {
+      "test": "source_prefix_console",
+      "exit_code": 0,
+      "elapsed_seconds": 0.19302582740783691,
+      "methods": 11,
+      "log_sha256": "53ec6bfd32b426a23950e2fbbff5aba6e95df6d3ed7324d3edb40dd8151e63f8"
+    }
+  ],
+  "test_methods": 123,
+  "native_warm_build_seconds": 1637.75,
+  "cache_hits": 79,
+  "cache_misses": 2,
+  "freeze_before_seconds": 1299.2918,
+  "freeze_after_seconds": 942.8883185,
+  "freeze_reduction_percent": 27.430607,
+  "dependency_inventory_lstat_before": 16834,
+  "dependency_inventory_lstat_after": 4080,
+  "limits": [
+    "Whole native build after automatic reuse/resolver changes not yet measured.",
+    "Freeze timings are one comparison, not a controlled benchmark.",
+    "Native prefix execution rejected first public HIP launch; no GPU tensor validation."
+  ]
+}

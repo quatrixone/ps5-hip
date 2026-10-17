@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import shlex
+import stat
 import subprocess
 import sys
 import tempfile
@@ -195,20 +196,65 @@ def compiler_flags(source):
             "-ffunction-sections", "-fdata-sections", *["-D" + d for d in defines]]
 
 
+def canonicalize_dependencies(names):
+    observed={};parents={};mapping={}
+    def identity(path):
+        s=os.lstat(path)
+        target=os.readlink(path) if stat.S_ISLNK(s.st_mode) else None
+        # Sibling file creation is not a directory identity/route change.
+        times=(None,None) if stat.S_ISDIR(s.st_mode) else (s.st_mtime_ns,s.st_ctime_ns)
+        return (s.st_dev,s.st_ino,s.st_mode,*times,target)
+    def observe(path):
+        path=Path(path)
+        if path in observed:return observed[path]
+        value=identity(path);observed[path]=value
+        if path.parent!=path:observe(path.parent)
+        if value[-1] is not None:
+            target=Path(value[-1])
+            observe(target if target.is_absolute() else path.parent/target)
+        return value
+    for name in names:
+        lexical=Path(name)
+        if not lexical.is_absolute():lexical=Path.cwd()/lexical
+        parent=lexical.parent
+        if parent not in parents:
+            observe(parent)
+            resolved=parent.resolve(strict=True)
+            if not stat.S_ISDIR(observe(resolved)[2]):raise ValueError('dependency parent not directory')
+            parents[parent]=resolved
+        leaf=observe(lexical)
+        if stat.S_ISLNK(leaf[2]):
+            resolved=lexical.resolve(strict=True);observe(resolved)
+        else:resolved=parents[parent]/lexical.name
+        if not stat.S_ISREG(observe(resolved)[2]):raise ValueError('dependency not regular file')
+        mapping[str(lexical)]=str(resolved)
+    # Replay the directory mappings independently; no reuse across inventory calls.
+    for parent,resolved in parents.items():
+        if parent.resolve(strict=True)!=resolved:raise ValueError('dependency directory mapping changed')
+    for path,value in observed.items():
+        if identity(path)!=value:raise ValueError('dependency route changed: '+str(path))
+    return mapping
+
+
+
 def compile_bound_unit(output, path, obj, flags, label):
     """Bind the compiler's header closure before compiling, then verify it."""
     def dependencies(depfile):
         text = depfile.read_text().replace("\\\n", " ")
-        return {str(Path(p).resolve()) for p in shlex.split(text.split(":", 1)[1])}
+        try:
+            return canonicalize_dependencies(shlex.split(text.split(":", 1)[1]))
+        except (OSError, ValueError) as error:
+            raise RuntimeError("compiler dependency resolution failed") from error
 
     before = obj.with_suffix(".headers.d")
     actual = obj.with_suffix(".compiled.d")
     run(output, label + "-headers", [*flags, "-c", "-M", path, "-MF", before])
-    headers = {p: sha(p) for p in dependencies(before)}
+    before_paths = dependencies(before)
+    headers = {p: sha(p) for p in set(before_paths.values())}
     if str(path.resolve()) not in headers:
         raise RuntimeError("compiler dependency inventory omits source")
     run(output, label, [*flags, "-MD", "-MF", actual, "-c", path, "-o", obj])
-    if dependencies(actual) != set(headers):
+    if dependencies(actual) != before_paths:
         raise RuntimeError("actual compiler dependencies changed")
     if any(sha(p) != digest for p, digest in headers.items()):
         raise RuntimeError("compiler input changed during compilation")
