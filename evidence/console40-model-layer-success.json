@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "native-actual-model-selected-layer-hardware-validation",
+  "source_commit": "f251366a7a76a7818f479aceff35aa370f470f73",
+  "manifest_sha256": "44810e7d067aafaefb993932768dbed4a524b572203eb3c734a9412d560c53b5",
+  "package_sha256": "ecae2e105843d9227ac83d9784befb256c8c3ed398008b9418f3b464f2572de0",
+  "package_bytes": 22413312,
+  "model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "complete": true,
+    "action": "reuse"
+  },
+  "observed": {
+    "status": "PASS",
+    "classification": "native-layer-transcript-only",
+    "requests": 514,
+    "nodes": 37,
+    "gpu_submits": 16962,
+    "raw_files": 151,
+    "raw_bytes": 2878464,
+    "memory": [
+      {
+        "phase": "before_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12261605376,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_context",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12214861824,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_cleanup",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      }
+    ],
+    "uploaded_weight_bytes": 61652992,
+    "uploaded_request_bytes": 1849376,
+    "numerical_verified": false,
+    "gpu_origin_established": false,
+    "inference": false,
+    "phase": "model-layer",
+    "final_counts": [
+      528,
+      528,
+      1,
+      1
+    ],
+    "host_storage": {
+      "allocations": 728,
+      "releases": 728,
+      "peak_requested_bytes": 665642512
+    },
+    "finalization_transcript_complete": true
+  },
+  "sequence": {
+    "lengths": [
+      512,
+      2
+    ],
+    "token_cycle": [
+      0,
+      1,
+      2,
+      31999
+    ],
+    "checkpoints": {
+      "0": [
+        0,
+        1,
+        255,
+        256,
+        511
+      ],
+      "1": [
+        0,
+        1
+      ]
+    },
+    "resident_owners": 12,
+    "reset_outputs_bitwise_equal": true,
+    "cpu_computed_activations": 0
+  },
+  "numerical": {
+    "status": "PASS",
+    "raw_files": 151,
+    "raw_bytes": 2878464,
+    "budgets": {
+      "f32_absolute": 2e-05,
+      "f32_relative": 0.0002,
+      "f32_rms_relative": 0.0002,
+      "f16_absolute": 2e-05,
+      "f16_relative": 0.002,
+      "score_accumulation": "gamma64 times sum absolute F16 products; CPU RMS gate retained"
+    },
+    "final_residual_metrics": {
+      "run-0-pos-0-out-20.f32le": {
+        "maximum_absolute_error": 1.1641532182693481e-10,
+        "relative_rms_error": 1.746106962682992e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-0-pos-1-out-20.f32le": {
+        "maximum_absolute_error": 2.421438694000244e-08,
+        "relative_rms_error": 2.9801663235423577e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-0-pos-255-out-20.f32le": {
+        "maximum_absolute_error": 5.960464477539063e-08,
+        "relative_rms_error": 1.4135010372568387e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-0-pos-256-out-20.f32le": {
+        "maximum_absolute_error": 2.9802322387695312e-08,
+        "relative_rms_error": 2.445503459142886e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-0-pos-511-out-20.f32le": {
+        "maximum_absolute_error": 2.2351741790771484e-08,
+        "relative_rms_error": 1.1787884813851094e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-1-pos-0-out-20.f32le": {
+        "maximum_absolute_error": 1.1641532182693481e-10,
+        "relative_rms_error": 1.746106962682992e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      },
+      "run-1-pos-1-out-20.f32le": {
+        "maximum_absolute_error": 2.421438694000244e-08,
+        "relative_rms_error": 2.9801663235423577e-07,
+        "elements": 2048,
+        "element_oracle": "CPU"
+      }
+    }
+  },
+  "acceptance": {
+    "deployment_accepted": true,
+    "execution_accepted": true,
+    "native_origin_established_by_controller": true,
+    "numerical_verified_by_separate_verifier": true,
+    "natural_stop": true,
+    "healthy_after": true,
+    "both_owned_locks_released": true,
+    "final_authentication": {
+      "status": "PASS",
+      "elapsed_seconds": 646.9225984239893
+    }
+  },
+  "artifact_sha256": {
+    "manifest": "44810e7d067aafaefb993932768dbed4a524b572203eb3c734a9412d560c53b5",
+    "build-receipt": "06c1b902b9fd216dd2fdd726f86da95e7b498dae353aa3dfa23e26b261f28104",
+    "native-audit": "6971343e9dbcce1071fdf04d0d1c3e8e02e5eb260812ef79c75d17e810ecf2db",
+    "reference-receipt": "393bbba128258be5d88dfb61ca058041d001ac3dc4f7ef1d84813bac5f8ff33f",
+    "deploy-receipt": "1a24d8ff54ff80fbb44767bee1bf7380c1d407269ef9d1eba8b14ac8830833f1",
+    "execute-receipt": "39a0d919822e940ce2d8e01e7be6d8211294756b9fa669911c04b365c9708cb7",
+    "application.log": "d4d92d5a62c47eb0670745fd0e12c1902a5d36bfba0c62db5e13720efedbaa76",
+    "klog.log": "4a0783c37f99a73688253c6cb4db2d00f383bd1cf3eace53d7f15862f376b5ea",
+    "numerical": "b16c3c02e306c38f456c80d39c4909e24d2f2725a92d98cb0a98cfbc898a4198",
+    "deploy-secondary-lock": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "deployment-review": "040c944e43421ee87140d187c4cd6eb10428c5d7002d828157376315874c95c3",
+    "execution-evidence-review": "932cbf316ac79a290e0b90e50d27e36e48e0f9f46276dcb7e4240a35bf0bd9b3",
+    "execution-review": "bab220b8f22ba2d80f644aeafe3fab05ca61a299793f029a242b560465e6f950",
+    "deploy-command-result": "dd7ae711ab775156b5eb1b6db408737f9531c73902c80c4277865f6b3ff9178e",
+    "execute-command-result": "7ecf17faa44421fd74867780d07c22531000ecde0c80e09ecd6fb993d25deca5"
+  },
+  "local_evidence": {
+    "candidate": "results/source-public-llm-layer-console-v1",
+    "build": "build/llm-native-layer-app-v1",
+    "reviews": "results/m2-layer-native-build-v1"
+  },
+  "limits": [
+    "Selected first layer of the actual Q4 model; full original llama graph still rejects unsupported work.",
+    "Sequence is explicitly driven; full llama decoder/cache progression, all 22 layers, logits and generation remain unqualified.",
+    "Readbacks sample 21 stages at seven checkpoints plus four full caches; not every output at every position.",
+    "Broader M2 dense floating-point whole-layer fixture and representative extreme-input coverage remain open.",
+    "No throughput benchmark or complete model-scale GPU memory measurement.",
+    "Native safetensors/PyTorch readers and training are not implemented."
+  ]
+}

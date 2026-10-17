@@ -1,7 +1,9 @@
 # Actual-model first-layer qualification
 
-This is the M2 candidate, not a claim of native validation or complete inference.
-The accepted native baseline remains the position-zero embedding/RMS/QKV prefix.
+The selected Q4 first layer passed native validation on .40 on 2026-10-17,
+source `f251366`. Candidate `results/source-public-llm-layer-console-v1` used
+`build/llm-native-layer-app-v1`. See `evidence/console40-model-layer-success.json`.
+This bounded milestone does not close broader M2 coverage or establish inference.
 
 ## Executed graph
 
@@ -52,12 +54,17 @@ Every other sampled F32 stage retains the fixed CPU elementwise and RMS gates.
 Native acceptance requires an authenticated package and references, idle .40,
 a single bounded PPSA99014 run, strict transcript and raw inventory, numerical
 comparison, balanced allocation/queue cleanup, restored memory and healthy
-services. No native acceptance is recorded until this complete cycle passes.
+services. This cycle passed: 514 requests, 16,962 launches, all 151 raw files,
+all 21 sampled stages through the final residual, exact reset and 528 balanced
+allocations/frees. The largest free extent returned to 12,882,804,736 bytes.
+Preserve the consumed candidate and earlier prefix recovery evidence.
 The model remains external at `/data/hip/models/tinyllama-q4_0.gguf`.
 
 ## Remaining release work
 
-One layer does not provide token generation. Repeat across all 22 layers,
+M2 still requires a dense floating-point whole-layer fixture and representative
+extreme inputs. One selected layer does not provide token generation. Advance
+M3 across all 22 layers,
 integrate decoder cache progression, final normalization/logits, sampling and
 end-to-end prompt/decode validation before declaring the GGUF inference release.
 Direct safetensors and PyTorch checkpoint readers remain separately required

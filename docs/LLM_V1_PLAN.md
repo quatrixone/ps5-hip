@@ -1,10 +1,10 @@
 # LLM-first implementation plan
 
-Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-M0 bounded client-boundary qualification, M1 and the bounded actual-model
-embedding/normalization/QKV prefix are complete. Finishing one transformer
-layer under M2 is the immediate priority. Use idle .40 for meaningful validation and push each completed,
-validated milestone to main. This review does not itself initiate a console run.
+Reviewed: 2026-10-17. This is the authoritative first-release execution plan.
+M0, M1, the bounded prefix and the selected real Q4 first-layer sequence pass
+native validation. Finish M2's dense floating-point whole-layer/extreme-input
+coverage and advance M3's 22-layer forward pass and logits. Use idle .40 for
+meaningful validation and push each validated milestone to main.
 
 ## Outcome and scope
 
@@ -119,10 +119,10 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 | --- | --- | --- |
 | Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
-| Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
+| Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Dense floating-point whole-layer and extreme-input coverage |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; now integrated in the bounded actual-model prefix | General input/sequence coverage beyond the four qualified position-zero tokens |
-| Client | Native loading/context/rejection/reuse and bounded HIP calls passed; actual-model embedding/normalization/full QKV now pass for four position-zero tokens, 24 raw tensors and 36 GPU launches with normal cleanup | RoPE, causal KV/attention, output/residual, FFN and complete-layer comparison |
-| Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
+| Client | Native selected 37-node Q4 layer passes 512+reset2 requests, 151 raw outputs/caches and balanced cleanup | Full-model scheduling/cache progression and remaining M2 fixtures |
+| Full inference | CPU reference only | All 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
 A running package build is not a passed build. Historical compile-probe limits
@@ -138,13 +138,12 @@ are not current capability declarations. No native LLM inference is claimed.
    now pass on .40, including actual graph rejection and graph reuse.
    A vocabulary-only asset and a rejected synthetic ADD are useful preliminary
    tests, but cannot alone close M0's model graph routing requirement.
-3. The integrated GPU embedding/normalization/QKV prefix now passes on .40.
-   Add RoPE, KV writes, attention, output/residual and FFN until
-   one complete layer passes sequence-level comparison. Do not build a separate
-   diagnostic implementation of each operation.
-4. In parallel with layer integration, validate full weight/KV residency,
-   64 MiB buffer chunking and cleanup. Finish all 22 layers and full logits
-   before adding generation behavior or optimizing throughput.
+3. The selected GPU first layer now passes its 512-position/reset sequence.
+   Complete the dense floating-point whole-layer fixture and extreme-input
+   cases; retain the same backend implementations and numerical gates.
+4. Advance model-scale weight/KV residency and cleanup, then all 22 layers,
+   final normalization and logits with real decoder/cache progression.
+   Do not treat the declared one-layer sequence as full-model decode.
 5. Connect sampling and incremental decode, then qualify repeated requests,
    errors, source-only rebuilds and measured performance under M4/M5.
 
@@ -252,17 +251,16 @@ This closes one part of a layer, not attention or model inference.
 
 ### M2 ? Complete one transformer layer in the client (V1.2 / V1.3 / V1.4)
 
-The bounded prefix passed on .40 at source `50df1fd`: real tokens 0, 1, 2
-and 31999 at position zero; embedding, RMSNorm, learned weights and full Q/K/V;
-24 numerical readbacks across 36 GPU launches, external model reuse and normal
-cleanup. See `evidence/console40-model-prefix-success.json`. This is not a
-complete layer or an inference result; M2 remains open.
+The selected Q4 first layer passed on .40 at source `f251366`: all 37 nodes,
+512 positions plus reset/two repeats, 514 requests, 16,962 launches and 151
+numerically validated readbacks. All 21 sampled stages include the final
+residual; reset is exact and 528 allocations/frees balance with restored
+memory. See `evidence/console40-model-layer-success.json`. The original full
+graph remains rejected; this does not establish inference or decoder commits.
 
-Implement RoPE and F16 KV updates, then scores/softmax/value aggregation,
-attention output/residual, and the normalized gated FFN/residual. Integrate each
-into the same client/backend path; reuse those implementations in diagnostics.
-Keep intermediate activations on the GPU. CPU readbacks are validation tooling,
-not replacements for missing tensor operations.
+The selected real-model milestone is complete. M2 remains open for the small
+dense floating-point whole-layer fixture and representative extreme inputs.
+Keep activations on the GPU and reuse the integrated implementations.
 
 Exit: one real layer matches CPU intermediate and final outputs for a token
 sequence, with cache reuse at positions 0/1 and nontrivial lengths up to 512.
@@ -330,13 +328,13 @@ Publishing a public release or changing visibility still requires owner directio
 ## Work selection and reporting
 
 The critical path is M0 + M1 -> M2 -> M3 -> M4 -> M5. Memory work overlaps M2.
-One complete layer and then real logits are the next product-level proof points.
+The next product-level proof point is a full 22-layer forward pass and real logits.
 Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-M0's bounded native client boundary, M1 and the actual-model prefix are
-complete. Qualify one complete transformer layer under M2 next.
+M0, M1 and the selected native Q4-layer milestone are complete. Finish the
+remaining M2 numerical fixtures while advancing M3's full-model forward path.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.

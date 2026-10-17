@@ -1,21 +1,29 @@
 # Current state
 
-Updated: 2026-10-16, America/New_York. See `HANDOFF.md` for the exact
+Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
-## Active one-layer candidate
+## Native selected-layer milestone
 
-The complete selected first layer is implemented offline: 37 real-model nodes,
-including RoPE, persistent F16 KV, attention, both residuals and FFN. Host tests
-pass 512 positions plus reset/two repeats, with 12 separate resident allocations
-and 528 balanced data allocations/frees. Two CPU-reference runs are bitwise
-identical. A numerical mock passes all 151 sampled outputs/caches under the
-fixed verifier; it is diagnostic evidence, not a frozen native qualification.
-See `evidence/offline-model-layer-integration.json` and `docs/LLM_MODEL_LAYER.md`.
-Native packaging and .40 validation remain outstanding; M2 is still open.
-Reuse `results/m2-layer-reference-v2`, `results/llm-layer-fixture-v4`, and
-`results/m2-layer-assets-v1` after authentication. The accepted native baseline
-remains prefix app v4. Do not replay its consumed candidate.
+On 2026-10-17, the selected TinyLlama Q4 first layer passed on .40 as the native
+PPSA99014 app at source `f251366`. All 37 nodes ran for 512 positions plus reset
+and two repeats: 514 requests, 16,962 GPU launches and 151 validated raw files.
+All 21 sampled stages, including the final residual, passed; reset outputs
+matched exactly. Twelve resident owners and 528 allocations/frees balanced,
+and the largest free extent returned to 12,882,804,736 bytes.
+See `evidence/console40-model-layer-success.json` and `docs/LLM_MODEL_LAYER.md`.
+
+Preserve `build/llm-native-layer-app-v1` and consumed candidate
+`results/source-public-llm-layer-console-v1`, including receipts and readbacks.
+The previous prefix app v4 and its consumed candidate remain recovery history;
+do not replay either candidate. Reuse authenticated external model bytes and
+source-built fixtures rather than uploading or rebuilding unchanged inputs.
+
+This completes the native selected Q4-layer milestone, not the broader M2 gate
+or inference. M2 still needs the dense floating-point whole-layer fixture and
+representative extreme inputs. Next advance M3: all 22 layers, final
+normalization/logits, model-scale residency and real decoder/cache progression.
+The qualification's declared sequence is not a committed full llama decode.
 
 ## Current scope
 
@@ -53,12 +61,10 @@ The model was reused from `/data/hip/models`, and the native app completed
 normal cleanup. See `evidence/console40-model-prefix-success.json` for final
 acceptance and exact identities; `docs/LLM_MODEL_PREFIX.md` documents the scope.
 
-This closes the bounded actual-model prefix milestone, not M2's whole-layer
-gate or inference. The full graph still rejects unsupported work. Next integrate
-RoPE, F16 KV writes, attention, attention output/residual and the normalized
-FFN/residual into this same backend path. Validate nonzero positions, causal
-cache history and repeated requests; position-zero prefix outputs do not prove
-those behaviors. Native original-format readers also remain unimplemented.
+This prefix result remains valid historical evidence. The selected complete
+Q4 layer now passes the separate native milestone above; the full original
+graph still rejects unsupported work. M2's broader numerical fixtures, M3's
+model-scale forward path and native original-format readers remain open.
 
 Preserve app v4, its frozen candidate, deployment/recovery receipts and raw
 readbacks. Both candidate phases are consumed; do not replay them. Prepare a

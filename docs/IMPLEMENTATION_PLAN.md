@@ -1,16 +1,17 @@
 # Native HIP and ROCm capabilities on PlayStation 5
 
-Updated: 2026-10-16, America/New_York.
+Updated: 2026-10-17, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
-The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
-within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
-and executed operator inventory alongside QKV, then one layer and full logits.
-M0, M1 and the bounded actual-model prefix are validated on .40. The next
-priority is one whole transformer layer under M2: RoPE/KV, attention, output
-projection/residual and FFN/residual, with milestone pushes. Position-zero
-prefix validation does not close M2 or establish inference.
+The release plan in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5 within
+the original acceptance gates. M0, M1, the actual-model prefix and the selected
+Q4 first-layer sequence are native-validated. M2 remains open for a dense
+floating-point whole-layer fixture and representative extreme inputs. Next
+advance M3's 22-layer forward pass, final normalization/logits, model residency
+and real decoder/cache progression; token generation is not yet established.
+
+- 2026-10-17 | M2 selected Q4 layer | f251366 | .40 | pass: 37 nodes, 514 requests, 16,962 launches, 151 numerical readbacks, exact reset, 528 balanced allocations/frees and restored largest free extent | evidence/console40-model-layer-success.json | next: remaining M2 numerical fixtures and M3 full-model forward; no inference claim
 
 - 2026-10-16 | M2 whole layer | offline | 37 nodes, 512+reset2 host sequence, twelve resident owners, CPU reference and diagnostic numerical comparison pass | evidence/offline-model-layer-integration.json | next: native app and .40 validation
 
@@ -45,7 +46,7 @@ inference gates remain open.
 
 M1 now passed independently on .40: weighted normalization, shared Q8 and full
 Q/K/V, with all raw buffers and clean lifecycle. M0's native application
-boundary also passed; integrate M2's remaining layer operations next.
+boundary also passed; the later selected-layer milestone is recorded above.
 
 - 2026-10-16 | M0 model load | .40 | failed: 619094016-byte CPU allocation ENOMEM; healthy safety close | evidence/console40-native-model-allocation-failure.json | next: native allocation fix
 
