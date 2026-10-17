@@ -11,6 +11,8 @@ floating-point whole-layer fixture and representative extreme inputs. Next
 advance M3's 22-layer forward pass, final normalization/logits, model residency
 and real decoder/cache progression; token generation is not yet established.
 
+- 2026-10-17 | M3 corrected native package | offline | v7 client,149 app objects,201 commands and397-function linked audit pass | evidence/offline-native-full-decoder-aligned-staging-package.json | next: fresh .40 full smoke
+
 - 2026-10-17 | M3 native loader staging | offline | generated staging owner and constrained-heap/failure-path checks pass; verified generated-input cache reuse added | evidence/offline-native-loader-aligned-staging.json | next: native image and fresh .40 candidate
 
 - 2026-10-17 | M3 full native | .40 | failed before model load completed: ordinary heap staging bad_alloc; safe close healthy | evidence/console40-full-model-load-allocation-failure.json | next: aligned staging

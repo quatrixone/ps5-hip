@@ -3,6 +3,24 @@
 Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Corrected native full package ready for a fresh .40 test
+
+The aligned-staging fix is built and passes final offline authentication:
+`build/llm-native-client-v7` has 71 objects (70 byte-identical to v6), and
+`build/llm-native-full-smoke-app-v2` has 149 objects, 201 successful commands,
+15 package files and a reproduced 397-function image audit. The actual linked
+loader uses paired native allocation/free with checked size/pointer ABI and
+normal/unwind cleanup. Package is 22,478,848 bytes, SHA-256
+`0c203527c52ab9e1645ae0428df1dc596ee081e64ed250c57322bf015d957571`.
+See `evidence/offline-native-full-decoder-aligned-staging-package.json`.
+
+Next freeze fresh `results/source-public-llm-full-smoke-console-v2` using
+`results/m3-native-full-command-plan-v2.md` and `results/m3-native-full-case-v2.json`.
+The installed baseline remains the failed v1 full package/log below. No v2
+console execution yet; all-22-layer/logit native acceptance is still open.
+Reuse unchanged CPU reference, GPU fixtures and external model. Preserve v1
+prepared source files because v2 authenticates and uses their compiler paths.
+
 ## Native full model-load failure and next fix
 
 The first full smoke candidate was deployed and tested once on .40. Startup
@@ -95,7 +113,7 @@ extended auditor also accepts the preserved selected-layer image. This is
 source/control preparation, not acceptance of a newly linked full image.
 See `evidence/offline-native-full-smoke-contracts.json`.
 
-Reuse full assets `results/m3-full-assets-v2`, vocabulary v3, native client v6
+Reuse full assets `results/m3-full-assets-v2`, vocabulary v3, native client v7
 and CPU reference v3. Only the stale small vocabulary fixture was refreshed.
 The native package now passes its final receipt and 393-function image audit:
 149 objects, 8,212 authenticated inputs, 15 files and 22,478,848 package bytes.
