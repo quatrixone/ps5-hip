@@ -8,54 +8,59 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
-## Corrected native full package ready for a fresh .40 test
+## Native full decoder and logits validated on .40
 
-The aligned-staging fix is built and passes final offline authentication:
-`build/llm-native-client-v7` has 71 objects (70 byte-identical to v6), and
-`build/llm-native-full-smoke-app-v2` has 149 objects, 201 successful commands,
-15 package files and a reproduced 397-function image audit. The actual linked
-loader uses paired native allocation/free with checked size/pointer ABI and
-normal/unwind cleanup. Package is 22,478,848 bytes, SHA-256
-`0c203527c52ab9e1645ae0428df1dc596ee081e64ed250c57322bf015d957571`.
-See `evidence/offline-native-full-decoder-aligned-staging-package.json`.
+The native PPSA99014 app passed at frozen source `3ef7c74` on 2026-10-17.
+Three real decoder commits (token 0/position 0, token 1/position 1, then token 0
+at position 0 after actual KV/backend reset) execute all 22 TinyLlama Q4 layers,
+final weighted normalization and 32,000 logits. All 72 raw outputs (949,248
+bytes) are bitwise identical to the authenticated CPU reference; reset is exact.
+The audited HIP path executes 2,394 active nodes and 2,199 GPU launches.
 
-Next freeze fresh `results/source-public-llm-full-smoke-console-v2` using
-`results/m3-native-full-command-plan-v2.md` and `results/m3-native-full-case-v2.json`.
-The installed baseline remains the failed v1 full package/log below. No v2
-console execution yet; all-22-layer/logit native acceptance is still open.
-Reuse unchanged CPU reference, GPU fixtures and external model. Preserve v1
-prepared source files because v2 authenticates and uses their compiler paths.
+The aligned native staging fix resolves the earlier model-load failure:
+411 host allocations/releases and 16 GPU allocations/frees balance; one queue
+retires normally, with no allocation failure or poisoned storage. Largest free
+extent is 12,882,804,736 bytes before load and after cleanup, 12,253,069,312
+after load and 12,206,473,216 after context creation. These are largest extents,
+not total-free-memory measurements. The external model at
+`/data/hip/models/tinyllama-q4_0.gguf` was verified and reused, not embedded.
+The app stops normally, services remain healthy and both owned locks release.
+See `evidence/console40-full-decoder-smoke-success.json`.
 
-## Native full model-load failure and next fix
+Preserve consumed `results/source-public-llm-full-smoke-console-v2` and
+`build/llm-native-full-smoke-app-v2`; never replay the candidate. The installed
+baseline is package SHA-256
+`0c203527c52ab9e1645ae0428df1dc596ee081e64ed250c57322bf015d957571`,
+log `eaf552b7651620275bc56b18000a21c637a8423472d5232d1b3fb13a2c2c39a8`,
+in `/user/homebrew/ps5-hip/m3-full-smoke-v2`. Final execution receipt is
+`17c3d3572f66d5b0ea2f13984d944f2c36b09491be583b0c209ca97bb0e6f57a`;
+independent terminal review is `results/m3-native-full-build-review-v2/execution-review.json`.
 
-The first full smoke candidate was deployed and tested once on .40. Startup
-passed, but model loading exhausted the ordinary SDK heap and reported
-`std::bad_alloc` before `load_complete`. No layer/logit readbacks were produced.
-The app quarantined, then the controller's exact-title safety close restored
-idle and healthy services; both owned locks were released. This does not
-establish GPU arithmetic failure or normal model cleanup.
+Reuse client v7, app v2's v1 prepared source paths, full assets v2, vocabulary v3,
+GPU layer fixture v6 and CPU full reference v1. Keep their receipts and inputs.
+No native rebuild is needed just to record this milestone. Source-only
+reproduction builds new receipts; local historical evidence is not in GitHub.
 
-Two independent source reviews identify the newly taken synchronous GPU-upload
-path: its ordinary staging vector requests 36,864,000 bytes for the largest
-locked tensor. Previous CPU model loading read directly into NativeMemory-backed
-storage. Next derive only the native loader staging through exception-safe
-paired `ggml_aligned_malloc/free`, preserving tensor validation and HIP uploads;
-prove it under a constrained ordinary heap before another fresh native candidate.
+Next: short deterministic greedy generation using GPU logits and actual KV
+progression, with monotonic phase/per-request timings and CPU reference checks.
+The observed approximately 17-second whole-app lifecycle is not tokens/second
+or per-request latency; do not extrapolate it to the 514-request profile or
+run that profile under unchanged deadlines. Generated text, long full-model
+context, remaining dense/extreme-input fixtures and release acceptance remain
+open. Numerical-only GPU-origin and audit dataflow limitations are unchanged;
+native acceptance combines image, deployment, audited routing and execution.
 
-Aligned native staging is implemented and passes constrained-heap, sanitizer
-and failure cleanup tests. Client v7 compiled all 71 objects; its actual loader
-object passes the new strict machine ABI/branch contract. Final client receipt,
-app v2 linked audit and .40 execution remain pending. Use
-`results/m3-native-full-command-plan-v2.md`; keep the v1 case immutable.
-See `evidence/offline-native-loader-aligned-staging.json` and
-`evidence/offline-native-loader-object-contract.json`.
+## Historical first full model-load failure (resolved)
 
-See `evidence/console40-full-model-load-allocation-failure.json`. Preserve
-consumed `results/source-public-llm-full-smoke-console-v1` and installed
-`build/llm-native-full-smoke-app-v1`; never replay this candidate. The new installed
-baseline is package `700c673e179b111de7106297fb410667fc97505b76b9cbbeb59c8fe81c8aa894`, not the previous selected-layer package. The
-external model was hash-verified and reused. Portable all-22-layer numerical
-acceptance remains valid; native full-model acceptance remains open.
+The consumed v1 candidate failed before load_complete with ordinary-heap
+`std::bad_alloc`. Source review identified a 36,864,000-byte upload staging
+vector; the native aligned replacement passed v2. There is no captured
+allocation backtrace. Native-only RAII staging now passes constrained-heap,
+sanitizer, failure-path,
+actual machine ABI/cleanup audits and the successful v2 console execution.
+Keep `evidence/console40-full-model-load-allocation-failure.json`, consumed v1,
+its package and logs as history; package `700c673e179b111de7106297fb410667fc97505b76b9cbbeb59c8fe81c8aa894`
+is the superseded baseline. Do not rewrite failed receipts or replay v1.
 
 ## Native selected-layer milestone
 
@@ -75,9 +80,8 @@ source-built fixtures rather than uploading or rebuilding unchanged inputs.
 
 This completes the native selected Q4-layer milestone, not the broader M2 gate
 or inference. M2 still needs the dense floating-point whole-layer fixture and
-representative extreme inputs. Next advance M3: all 22 layers, final
-normalization/logits, model-scale residency and real decoder/cache progression.
-The qualification's declared sequence is not a committed full llama decode.
+representative extreme inputs. The full-decoder milestone above now establishes
+three actual decoder commits; this older selected-layer sequence alone did not.
 
 The root `Makefile` now fetches locked public inputs and builds the SDK,
 zlib, UFS2Tool, Lapy helper, controllers, host suite, native core, and a
@@ -111,11 +115,11 @@ See `evidence/offline-full-decoder-canonical-arithmetic.json` and
 Historical NUMERICAL_FAIL receipts remain unchanged.
 
 The native helper has smoke (3 requests/72 files) and long (514 requests/168
-files) profiles. The first native test must use smoke, qualify every layer and
-logit, and measure elapsed time before attempting the long sequence. The long
+files) profiles. Smoke now passes natively as recorded above. Measure phase and
+request timings before attempting the long sequence. The long
 profile already passed mock lifecycle testing with synthetic outputs; that
-result does not establish numerical accuracy. Native package audit, frozen
-candidate acceptance and .40 numerical validation remain pending.
+result does not establish long-profile numerical accuracy. Native smoke image,
+frozen candidate and .40 numerical/lifecycle acceptance now pass.
 
 ## Native full smoke preparation
 
@@ -133,8 +137,8 @@ The native package now passes its final receipt and 393-function image audit:
 149 objects, 8,212 authenticated inputs, 15 files and 22,478,848 package bytes.
 See `evidence/offline-native-full-decoder-package.json`. Preserve
 `build/llm-native-full-smoke-app-v1`. The consumed full candidate failed during model loading as described above.
-Native all-layer/logit numerical acceptance remains pending. Local commands and baseline identities
-are in `results/m3-native-full-command-plan-v1.md`.
+The v2 milestone above supersedes that failure and establishes native smoke
+all-layer/logit acceptance. The v1 command plan remains historical only.
 
 ## Full-decoder control flow (offline only)
 
@@ -151,8 +155,8 @@ See `evidence/offline-full-decoder-integration.json` and
 `results/m3-layer-regression-v4`.
 
 Portable numerical integration passes as described above. The first native
-full-model candidate failed during model loading; see the current failure and
-recovery identities above. Preserve the earlier selected-layer package for recovery.
+full-model candidate failed during model loading; corrected v2 now passes. See
+the current accepted baseline and preserved failure identities above. Preserve the earlier selected-layer package for recovery.
 
 ## Full-model numerical reference
 
@@ -162,7 +166,8 @@ checkpoints. The 168 raw files total 2,214,912 bytes; reset positions 0 and 1
 match all 24 boundaries bitwise. See
 `evidence/offline-full-model-cpu-reference.json`. Reuse authenticated
 `results/m3-full-reference-v1`; no native package was rebuilt for this gate.
-Full GPU integration remains local work in progress and has not passed yet.
+Native full GPU smoke integration now passes as recorded above; the long
+CPU reference does not by itself qualify long native execution.
 
 ## Full-model integration prerequisite
 

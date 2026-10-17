@@ -7,9 +7,12 @@ Updated: 2026-10-17, America/New_York.
 The release plan in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5 within
 the original acceptance gates. M0, M1, the actual-model prefix and the selected
 Q4 first-layer sequence are native-validated. M2 remains open for a dense
-floating-point whole-layer fixture and representative extreme inputs. Next
-advance M3's 22-layer forward pass, final normalization/logits, model residency
-and real decoder/cache progression; token generation is not yet established.
+floating-point whole-layer fixture and representative extreme inputs. M3's
+native full-model smoke now passes all 22 layers, normalization and logits with
+actual decoder commits/reset. Next qualify short greedy generation and timing;
+long full-model context and token generation are not yet established.
+
+- 2026-10-17 | M3 native full decoder | .40 | pass: 22 layers, 32000 logits, 3 real commits/reset, 72 bitwise CPU-equal outputs, 2199 GPU launches and clean lifecycle | evidence/console40-full-decoder-smoke-success.json | next: short greedy generation and phase timings
 
 - 2026-10-17 | M3 corrected native package | offline | v7 client,149 app objects,201 commands and397-function linked audit pass | evidence/offline-native-full-decoder-aligned-staging-package.json | next: fresh .40 full smoke
 

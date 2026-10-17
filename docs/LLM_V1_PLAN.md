@@ -2,9 +2,11 @@
 
 Reviewed: 2026-10-17. This is the authoritative first-release execution plan.
 M0, M1, the bounded prefix and the selected real Q4 first-layer sequence pass
-native validation. Finish M2's dense floating-point whole-layer/extreme-input
-coverage and advance M3's 22-layer forward pass and logits. Use idle .40 for
-meaningful validation and push each validated milestone to main.
+native validation. M3's full 22-layer native smoke, final normalization/logits
+and three actual decoder commits/reset now pass. Next implement short greedy
+generation with phase/request timing; retain M2 dense/extreme and long-context
+qualification. Use idle .40 for meaningful validation and push each validated
+milestone to main.
 
 ## Outcome and scope
 
@@ -108,8 +110,9 @@ on changes. The accepted architecture/profile remains explicit: supporting a
 serialization format does not support every model distributed in that format.
 
 Status: design reviewed against the pinned upstream API; native readers and
-adapter are not implemented or qualified. M0's bounded per-HIP-call qualification is complete; M2 remains
-the immediate blocker; M1 arithmetic is already qualified. The unshipped desktop
+adapter are not implemented or qualified. M0's bounded per-HIP-call qualification
+is complete; M2 remains open for dense/extreme qualification; full native smoke
+now passes. M1 arithmetic is already qualified. The unshipped desktop
 conversion prototype was removed from active tools/Make targets after this
 clarification and retained locally under `results/deferred-host-checkpoint-prototype`.
 
@@ -117,16 +120,17 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 
 | Area | Proven | Still missing |
 | --- | --- | --- |
-| Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
-| Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
+| Inputs and CPU oracle | Locked model/tokenizer/conversion; native smoke matches all 72 CPU outputs bitwise | Full generated-history and long-context native comparisons |
+| Public HIP foundation | Native full-client smoke routes 2199 GPU launches with model residency and balanced cleanup | Broader resources, failure and long-context qualification |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Dense floating-point whole-layer and extreme-input coverage |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; now integrated in the bounded actual-model prefix | General input/sequence coverage beyond the four qualified position-zero tokens |
-| Client | Native selected 37-node Q4 layer passes 512+reset2 requests, 151 raw outputs/caches and balanced cleanup | Full-model scheduling/cache progression and remaining M2 fixtures |
-| Full inference | CPU reference only | All 22 layers, GPU logits and generated tokens |
+| Client | Full native decoder commits positions 0/1/reset0; all 22 layers and logits pass with clean ownership | Long full-model cache progression and remaining M2 fixtures |
+| Full inference | All 22 GPU layers, final normalization and 32000 logits per request match CPU bitwise | Sampling feedback, generated tokens, long context and release qualification |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
 A running package build is not a passed build. Historical compile-probe limits
-are not current capability declarations. No native LLM inference is claimed.
+are not current capability declarations. Native forced-token forward execution
+is established; generated-text and release acceptance are not yet claimed.
 
 ## Next implementation checkpoints
 
@@ -141,9 +145,9 @@ are not current capability declarations. No native LLM inference is claimed.
 3. The selected GPU first layer now passes its 512-position/reset sequence.
    Complete the dense floating-point whole-layer fixture and extreme-input
    cases; retain the same backend implementations and numerical gates.
-4. Advance model-scale weight/KV residency and cleanup, then all 22 layers,
-   final normalization and logits with real decoder/cache progression.
-   Do not treat the declared one-layer sequence as full-model decode.
+4. Full native smoke now passes model-scale residency, all 22 layers, final
+   normalization/logits and real positions 0/1/reset0. Preserve its immutable
+   receipts; long full-model context remains unqualified.
 5. Connect sampling and incremental decode, then qualify repeated requests,
    errors, source-only rebuilds and measured performance under M4/M5.
 
@@ -278,6 +282,13 @@ and reproduce the trace when promoting its ignored prototype into the build.
 
 ### M3 ? Model-scale memory and full forward pass (V1.2 / V1.4)
 
+Native real-model smoke passes on .40: three real decoder commits/reset, all
+22 layer boundaries, final weighted normalization and 32,000 logits per request;
+72 outputs are bitwise CPU-equal. Model storage and host/GPU cleanup are measured
+and balanced. See `evidence/console40-full-decoder-smoke-success.json`. This
+establishes the bounded real-model forward milestone; dense fixture, long
+full-model context and failure coverage below remain open.
+
 Begin memory integration alongside M2; do not wait until all operators are done.
 
 - Advertise the real 64 MiB buffer maximum to the backend and use upstream
@@ -297,6 +308,13 @@ within a measured memory budget. If fit fails, diagnose placement/workspace and
 record evidence before changing the model or release scope; no silent downgrade.
 
 ### M4 ? Generate tokens with prefill and incremental decode (V1.4)
+
+Immediate next proof: one fixed tokenized prompt, sequential prefill, then a
+few actual CPU-argmax selections from GPU logits fed into the next decoder
+request. Compare tokens and full logits against CPU on that generated history;
+reset/repeat and qualify EOS. Add monotonic load/context/decode/readback/cleanup
+timings. This short proof precedes, and does not replace, the full M4 gates below.
+The 17-second whole-app smoke observation cannot budget the 514-request profile.
 
 Connect CPU sampling to GPU logits, feed tokens back, advance position and reuse
 KV. Process the prompt through the same GPU single-token path. Compare fixed

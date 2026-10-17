@@ -1,0 +1,102 @@
+{
+  "status": "PASS",
+  "classification": "console40-native-full-decoder-smoke-success",
+  "source_commit": "3ef7c74a42c17a55fcd950e2413f0fe297f6bada",
+  "manifest_sha256": "31b590d9220d618aca54e49ab29e076aad41a65e779a42b388a06afbe9a64701",
+  "package_sha256": "0c203527c52ab9e1645ae0428df1dc596ee081e64ed250c57322bf015d957571",
+  "execution_receipt_sha256": "17c3d3572f66d5b0ea2f13984d944f2c36b09491be583b0c209ca97bb0e6f57a",
+  "deployment_receipt_sha256": "b1de55173a699d5c231cac8b5c20cfb7bdb3060af0f16db8db884187a290535e",
+  "native_audit_sha256": "5f22583671c9dac931276b82da6a3124c816ca7e616c5273da01d5cb59ed9cd3",
+  "numerical_receipt_sha256": "a28014d1fe65e1b756ab60b7c8a34b4cfeff69c2f49f7de906e77297f2ec9320",
+  "application_log_sha256": "eaf552b7651620275bc56b18000a21c637a8423472d5232d1b3fb13a2c2c39a8",
+  "command_receipt_sha256": "bd0edeeadf2074ce33995d4b6921efb9cf513c68a8f6d51ca78b636fe9f77572",
+  "secondary_lock_receipt_sha256": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+  "numerical_precheck_sha256": "4f4386bd4fee329af449553a066643bb6e7f0b84cdcd27cdbb1d98bfc4450e7f",
+  "requests": 3,
+  "positions": [
+    0,
+    1,
+    0
+  ],
+  "reset_between_requests": [
+    2,
+    3
+  ],
+  "layers_per_request": 22,
+  "logits_per_request": 32000,
+  "nodes": 2394,
+  "gpu_launches": 2199,
+  "raw_files": 72,
+  "raw_bytes": 949248,
+  "bitwise_cpu_reference_equal": true,
+  "reset_bitwise_equal": true,
+  "cpu_tensor_fallback_rejected_by_audited_guard": true,
+  "native_origin_established_by_combined_evidence": true,
+  "normal_stop": true,
+  "mounts_unchanged": true,
+  "healthy_after": true,
+  "both_owned_locks_released": true,
+  "host_storage": {
+    "allocations": 411,
+    "releases": 411,
+    "peak_requested_bytes": 37028496
+  },
+  "native_final_counts": [
+    16,
+    16,
+    1,
+    1
+  ],
+  "largest_free_before_after": 12882804736,
+  "final_authentication": {
+    "status": "PASS",
+    "elapsed_seconds": 640.1321337750123
+  },
+  "limits": [
+    "Three forced-token decoder requests only; generated text and token sampling not qualified",
+    "Long KV sequence, throughput, model generality and first release completion remain open",
+    "Numerical comparison alone is not GPU-origin proof; this review combines authenticated native image/deployment, audited exclusive HIP scheduler routing and terminal native lifecycle",
+    "No repeated full producer/source closure authentication; terminal controller already performed it"
+  ],
+  "schema": 1,
+  "date": "2026-10-17",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "native_executed": true,
+  "provenance": {
+    "results/m3-native-full-build-review-v2/execution-review.json": "f0906d52902f3e56c576e57ec78f061046b4a8d68528d3bf1472fb7ef1780511",
+    "results/source-public-llm-full-smoke-console-v2/manifest.json": "31b590d9220d618aca54e49ab29e076aad41a65e779a42b388a06afbe9a64701",
+    "results/source-public-llm-full-smoke-console-v2/deploy/receipt.json": "b1de55173a699d5c231cac8b5c20cfb7bdb3060af0f16db8db884187a290535e",
+    "results/source-public-llm-full-smoke-console-v2/execute/receipt.json": "17c3d3572f66d5b0ea2f13984d944f2c36b09491be583b0c209ca97bb0e6f57a",
+    "results/source-public-llm-full-smoke-console-v2/execute/prefix-numerical.json": "a28014d1fe65e1b756ab60b7c8a34b4cfeff69c2f49f7de906e77297f2ec9320",
+    "build/llm-native-full-smoke-app-v2/receipt.json": "ce1cc1a6a6bd18309fed2eb0234b1491a34ed5cef2da94d98f32e5f301382f82",
+    "build/llm-native-full-smoke-app-v2/llm-client-native-audit.json": "5f22583671c9dac931276b82da6a3124c816ca7e616c5273da01d5cb59ed9cd3",
+    "results/m3-full-reference-v1/receipt.json": "68627bf74ec33a8a52ef543f249e40b3da0434aca10f07a08bc6e19cb547abe4"
+  },
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "action": "verified-and-reused"
+  },
+  "largest_free_extent_bytes": {
+    "before_load": 12882804736,
+    "after_load": 12253069312,
+    "after_context": 12206473216,
+    "after_cleanup": 12882804736,
+    "pool_capacity": 12884901888,
+    "total_free_bytes": null
+  },
+  "evidence_scope": {
+    "combined_native_origin_established": true,
+    "numerical_only_gpu_origin_established": false,
+    "full_callback_dataflow_proven": false,
+    "note": "Original narrower numerical and audit flags remain unchanged; acceptance combines audited routing, frozen native image, deployment, execution and raw comparison."
+  },
+  "remaining": [
+    "M4 actual greedy sampling/prefill/incremental generation and phase timings",
+    "Long full-decoder KV/context, repeated requests and failure qualification",
+    "M2 dense whole-layer and extreme-input coverage",
+    "M5 source-only release qualification and original-format native readers"
+  ]
+}
