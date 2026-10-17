@@ -8,6 +8,29 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Native full model-load failure and next fix
+
+The first full smoke candidate was deployed and tested once on .40. Startup
+passed, but model loading exhausted the ordinary SDK heap and reported
+`std::bad_alloc` before `load_complete`. No layer/logit readbacks were produced.
+The app quarantined, then the controller's exact-title safety close restored
+idle and healthy services; both owned locks were released. This does not
+establish GPU arithmetic failure or normal model cleanup.
+
+Two independent source reviews identify the newly taken synchronous GPU-upload
+path: its ordinary staging vector requests 36,864,000 bytes for the largest
+locked tensor. Previous CPU model loading read directly into NativeMemory-backed
+storage. Next derive only the native loader staging through exception-safe
+paired `ggml_aligned_malloc/free`, preserving tensor validation and HIP uploads;
+prove it under a constrained ordinary heap before another fresh native candidate.
+
+See `evidence/console40-full-model-load-allocation-failure.json`. Preserve
+consumed `results/source-public-llm-full-smoke-console-v1` and installed
+`build/llm-native-full-smoke-app-v1`; never replay this candidate. The new installed
+baseline is package `700c673e?`, not the previous selected-layer package. The
+external model was hash-verified and reused. Portable all-22-layer numerical
+acceptance remains valid; native full-model acceptance remains open.
+
 ## Native selected-layer milestone
 
 On 2026-10-17, the selected TinyLlama Q4 first layer passed on .40 as the native
@@ -83,8 +106,8 @@ and CPU reference v3. Only the stale small vocabulary fixture was refreshed.
 The native package now passes its final receipt and 393-function image audit:
 149 objects, 8,212 authenticated inputs, 15 files and 22,478,848 package bytes.
 See `evidence/offline-native-full-decoder-package.json`. Preserve
-`build/llm-native-full-smoke-app-v1`. Next freeze a fresh candidate and test .40
-once idle; no full console run yet. Local commands and baseline identities
+`build/llm-native-full-smoke-app-v1`. The consumed full candidate failed during model loading as described above.
+Native all-layer/logit numerical acceptance remains pending. Local commands and baseline identities
 are in `results/m3-native-full-command-plan-v1.md`.
 
 ## Full-decoder control flow (offline only)

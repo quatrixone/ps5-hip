@@ -1,0 +1,49 @@
+{
+  "status": "FAILED",
+  "classification": "native-full-model-load-allocation-failure",
+  "host": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "source_commit": "f519b8143178f7ed5854e6f9622ed55e6c7b1a76",
+  "candidate": "results/source-public-llm-full-smoke-console-v1",
+  "manifest_sha256": "644ff27d2f91fb6d02c1896fc13d8b1cdf78b8275fa2888a6cb5164554df4638",
+  "execution_receipt": {
+    "path": "results/source-public-llm-full-smoke-console-v1/execute/receipt.json",
+    "sha256": "c53ba3102eda5f806dc6865d9ad5eb0b1d0be120fefce9ddb889588a9537fbd8"
+  },
+  "application_log": {
+    "path": "results/source-public-llm-full-smoke-console-v1/execute/application.log",
+    "sha256": "3589e6b1d351269cba3b063b551b94796c638d4e94dad4c26756a2773e4122e2"
+  },
+  "independent_review": {
+    "path": "results/m3-native-full-build-review-v1/execution-review.json",
+    "sha256": "4e2af5ff338757976de906def5bd0b6acb5adc5b8240426f3d56cee2a6766749"
+  },
+  "observed": [
+    "Native runtime startup passed",
+    "Model loading began with 12884901888-byte direct-memory pool and 12882804736-byte largest free extent",
+    "SDK internal-memory exhaustion and std::bad_alloc reported before load_complete",
+    "Backend and watchdog quarantined; observation deadline reached",
+    "Exact-title safety close restored idle; services healthy; both owned locks released"
+  ],
+  "raw_files": 0,
+  "model_gpu_numerical_acceptance": false,
+  "normal_model_cleanup_proven": false,
+  "safety": {
+    "safety_close_sent": true,
+    "idle_after_safety_close": true,
+    "healthy_after": true,
+    "lock_released": true
+  },
+  "diagnosis": {
+    "classification": "source-backed allocation-path diagnosis, throwing address not captured",
+    "path": "llama_model_loader synchronous non-host read_buf std::vector",
+    "largest_locked_tensor_bytes": 36864000,
+    "cause": "Ordinary SDK heap staging bypasses NativeHostAllocator; prior host tensors were loaded directly into direct-memory-backed storage",
+    "next": "Native-only exception-safe aligned staging owner; preserve validation and actual HIP uploads"
+  },
+  "limits": [
+    "No layer/logit GPU execution established; this is not a GPU arithmetic failure",
+    "Consumed candidate must not be replayed",
+    "Healthy safety close does not prove normal in-app cleanup"
+  ]
+}
