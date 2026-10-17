@@ -517,3 +517,19 @@ llm-layer-host-tests: llm-deps-fetch
 	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
 	$(PYTHON) tests/native_layer_transcript_test.py
 	$(PYTHON) tools/build_llm_layer_host_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_LAYER_MODEL)" --output "$(LLM_LAYER_HOST_TEST_DIR)"
+
+# Original successful CPU decoder graphs, including inactive branch flags.
+LLM_FULL_GRAPH_MODEL ?= $(LLM_NATIVE_APP_MODEL)
+LLM_FULL_GRAPH_TRACE_DIR ?= results/llm-full-graph-trace
+LLM_FULL_GRAPH_ADMISSION_DIR ?= results/llm-full-graph-admission
+.PHONY: llm-full-graph-trace llm-full-graph-admission
+llm-full-graph-trace: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
+	$(PYTHON) tests/llm_full_graph_trace_test.py
+	@if ! test -f "$(LLM_FULL_GRAPH_TRACE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_full_graph_trace.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_GRAPH_TRACE_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from build_llm_full_graph_trace import authenticate_full_graph_trace; authenticate_full_graph_trace(Path(sys.argv[1]).resolve())' "$(LLM_FULL_GRAPH_TRACE_DIR)"
+	$(PYTHON) tests/llm_full_graph_trace_data_test.py --raw "$(LLM_FULL_GRAPH_TRACE_DIR)/raw"
+
+llm-full-graph-admission: llm-full-graph-trace
+	$(PYTHON) tools/build_llm_full_graph_admission.py --trace "$(LLM_FULL_GRAPH_TRACE_DIR)" --output "$(LLM_FULL_GRAPH_ADMISSION_DIR)"

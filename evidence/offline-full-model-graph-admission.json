@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-original-decoder-trace-and-full-graph-metadata-admission",
+  "trace": {
+    "requests": 514,
+    "checkpoints": 7,
+    "nodes_per_graph": 801,
+    "active_nodes_per_graph": 798,
+    "inactive_node_ids": [
+      1,
+      2,
+      3
+    ],
+    "tensors_per_graph": 1056,
+    "reset_logits_bitwise_equal": true,
+    "real_cpu_scheduler_success": true,
+    "actual_kv_position_progression": true,
+    "receipt_sha256": "7f5541ab4db2a657b35e57b44ce07ee4c08b6119b197195ed9d50c9894071d2a"
+  },
+  "metadata_admission": {
+    "graphs": 7,
+    "mutation_classes": 10,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "receipt_sha256": "f3a4cd83c37e47acfb7b4d32ae6ff75cc91cafd9e95eb26093ea3fae5ecbc682"
+  },
+  "validation": {
+    "trace_data_tamper_cases": 7,
+    "make_tests": 10,
+    "trace_progression_unit_tests": 2
+  },
+  "source_sha256": {
+    "ports/ggml/full_graph.h": "26f4b96dd93adb1caad9bdd061210debb7084d6b90dd3904b47c7fb4ee920b73",
+    "tests/llm_full_graph_admission.cpp": "307d1e8eb6d122c1f8c9dbf5b2d84c0adb93458e8b9416755c96cb51b2bd978d",
+    "tests/llm_full_graph_trace.cpp": "7815970b1743fd0175e41cc519bfef51de232fea9f99447b198a48312c9e9cad",
+    "tests/llm_full_graph_trace_test.py": "d8280623f9078fcbeea446e5b6cd7b9d011211730f601d94729cb41d37841720",
+    "tests/llm_full_graph_trace_data_test.py": "10db423898e7ecf912c35bba12b785e8a756e724cba8302674be680cd57e133f",
+    "tools/build_llm_full_graph_trace.py": "af44477fbbc3295dc69852f1ae6ac84e4309f61cea6f5f608d61a3dcca171306",
+    "tools/build_llm_full_graph_admission.py": "75f8a63c2ddcc1b2117ce092147dfb6f25cbd4defbf1a17c31a8843d212f6f0f"
+  },
+  "local_evidence": {
+    "trace": "results/m3-full-graph-trace-v4",
+    "admission": "results/m3-full-graph-admission-v3"
+  },
+  "limits": [
+    "CPU execution and host metadata admission only; no full-model GPU dispatch.",
+    "Selector does not validate GPU spans, live control bytes or scheduler split ownership.",
+    "Logical tensor byte totals are not actual peak allocator residency.",
+    "A single full CPU sequence with reset equality does not establish independent repeated-run determinism.",
+    "Dense floating-point whole-layer and remaining extreme-input coverage stay open."
+  ]
+}

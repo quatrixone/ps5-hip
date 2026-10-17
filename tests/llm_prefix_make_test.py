@@ -78,4 +78,20 @@ class LayerMake(unittest.TestCase):
    self.assertIn('import '+validator+'; '+validator,text)
   text=self.run_make('llm-layer-host-tests');self.assertIn('tools/build_llm_layer_host_test.py',text);self.assertNotIn('source_console.py',text)
 
+class FullGraphMake(unittest.TestCase):
+ run_make=PrefixMake.run_make
+ def test_selected_inputs_and_authenticated_reuse(self):
+  with tempfile.TemporaryDirectory() as folder:
+   model=Path(folder)/'selected.gguf';model.touch()
+   text=self.run_make('llm-full-graph-trace','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_GRAPH_MODEL='+str(model))
+   self.assertIn('--model "'+str(model)+'"',text)
+  self.assertIn('if ! test -f "results/selected-full-graph/receipt.json"; then python3 tools/build_llm_full_graph_trace.py',text)
+  self.assertIn('import authenticate_full_graph_trace; authenticate_full_graph_trace',text)
+  self.assertIn('tests/llm_full_graph_trace_test.py',text)
+  self.assertIn('tests/llm_full_graph_trace_data_test.py --raw "results/selected-full-graph/raw"',text)
+  self.assertNotIn('source_console.py',text)
+ def test_admission_consumes_selected_trace(self):
+  text=self.run_make('llm-full-graph-admission','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_GRAPH_ADMISSION_DIR=results/selected-admission')
+  self.assertIn('tools/build_llm_full_graph_admission.py --trace "results/selected-full-graph" --output "results/selected-admission"',text)
+
 if __name__=='__main__':unittest.main()

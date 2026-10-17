@@ -38,6 +38,18 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Full-model integration prerequisite
+
+The original CPU decoder now has an authenticated 514-request/reset trace.
+All seven complete graphs pass strict 22-block metadata/topology admission
+and ten mutation classes under sanitizers. The 801-node graph contains three
+inactive mixed-input nodes; their reused bytes must not drive GPU operations.
+See `docs/LLM_FULL_MODEL.md` and `evidence/offline-full-model-graph-admission.json`.
+Reuse `results/m3-full-graph-trace-v4` after authentication;
+`results/m3-full-graph-admission-v3` records the host gate. Full GPU scheduler
+instance configuration, device ownership, ordered split execution, actual KV
+progression and complete logits remain to implement and validate.
+
 ## Layer arithmetic follow-up
 
 Host extreme-input tests found and fixed an invalid integer conversion for
