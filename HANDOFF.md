@@ -38,6 +38,17 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Layer arithmetic follow-up
+
+Host extreme-input tests found and fixed an invalid integer conversion for
+finite activations whose Q8 scale underflows to half zero. Such blocks now
+become canonical zeros before reciprocal calculation; ordinary-input bytes
+remain unchanged. Sanitizers and fresh layer fixture v5 ISA/admission pass.
+See `evidence/offline-layer-extreme-inputs.json`. This is not a new native
+qualification: the installed app remains the accepted `f251366` build.
+Use `results/llm-layer-fixture-v5` in a refreshed aggregate/candidate. Dense
+whole-layer, near-zero RMS and native extreme-input validation remain open.
+
 ## Authentication overhead follow-up
 
 The CPU-input helper now hashes the model once per call in its mandatory final

@@ -1,0 +1,124 @@
+{
+  "classification": "offline-layer-extreme-input-tests-and-quantizer-zero-scale-fix",
+  "status": "PASS",
+  "native_executed": false,
+  "gpu_executed": false,
+  "defect": {
+    "input": "32 finite F32 denorm_min values",
+    "original_result": "UBSan float-cast-overflow: inf outside signed char range",
+    "original_exit_code": 1,
+    "fixed_exit_code": 0,
+    "fix": "Canonical zero Q8 block before reciprocal when stored F16 scale is zero; nonzero stored-scale arithmetic retained"
+  },
+  "tests": [
+    "F16 zeros/signs/ties/minsubnormal/maxfinite",
+    "SiLU +/-1000, +/-80, nearzero and signedzero",
+    "Softmax +/-1e6 offsets with five nonuniform visible slots and maximal masked values, N256/512",
+    "Dense F16 score/value matrices, GQA32->4, maximal finite half magnitudes and cancellation, FP64 gamma bounds",
+    "RoPE Q32/K4 heads, five positions, both components and squared norm at 1e10/1e-30",
+    "Q8 zero/denorm_min/minnormal/below-at-above half-underflow threshold/minhalfscale/maxhalfscale, mixed signs and zero; exact canonical36byte zeros",
+    "Ten ordinary-input2048/5632 cases byte-identical to previous committed quantizer"
+  ],
+  "commands": [
+    [
+      "g++",
+      "-std=c++17",
+      "-O1",
+      "-ffp-contract=off",
+      "-fsanitize=address,undefined,float-cast-overflow",
+      "tests/llm_layer_kernel_test.cpp",
+      "-o",
+      "/tmp/ps5hip-layer-extremes"
+    ],
+    [
+      "/tmp/ps5hip-layer-extremes"
+    ],
+    [
+      "python3",
+      "tools/build_llm_layer_fixture.py",
+      "--rmsnorm-fixture",
+      "results/llm-rmsnorm-fixture-v2",
+      "--output",
+      "results/llm-layer-fixture-v5"
+    ]
+  ],
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "halt_on_error=1:detect_leaks=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "files": {
+    "kernels/llm_layer.hip": {
+      "bytes": 4475,
+      "sha256": "b9456d4fbba60bebe3f7f630b0dbbeda754214dfaac308ea4184ed4fd677463a"
+    },
+    "tests/llm_layer_kernel_test.cpp": {
+      "bytes": 9910,
+      "sha256": "113c5a0c8a219c145292593693f83cfec12eed35dd9119995119d2bec76f7125"
+    },
+    "results/llm-layer-fixture-v5/receipt.json": {
+      "bytes": 221279,
+      "sha256": "b528d08426eb67f234ed6d41af495470cbd047108efac9a1a2f13473d910e1f1"
+    },
+    "results/llm-layer-fixture-v5/layer.hsaco": {
+      "bytes": 21184,
+      "sha256": "4c695055e1c3829265d5e24300d0114ed3cc6c7f07fb7ad6c72e0bc3fdc8cec2"
+    },
+    "results/llm-layer-fixture-v5/admission.stdout": {
+      "bytes": 780,
+      "sha256": "e55df8a91c98d4cd9b2ad4baa920eebd23b0a0c0b1c533d924ee11e86090c6f0"
+    },
+    "results/llm-layer-fixture-v5/isa.stdout": {
+      "bytes": 152206,
+      "sha256": "4c0470a51b9a7c6bc19eb558adec1a1db766d6670346fb1ae4ef0e6a41a35c34"
+    },
+    "results/m2-layer-extremes-v1/tests.stdout": {
+      "bytes": 143,
+      "sha256": "a40b0719543ef4c8da3c325a70f026c567e0a1376f9ed944364feacb9888bae9"
+    },
+    "results/m2-layer-extremes-v1/tests.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/m2-layer-extremes-v1/tiny_quantizer.cpp": {
+      "bytes": 243,
+      "sha256": "421dd220186cfc9e69a1b289148d98abec6da10b5da1d0d8159c5f2ed5aaa827"
+    },
+    "results/m2-layer-extremes-v1/tiny.stderr": {
+      "bytes": 795,
+      "sha256": "071ae437ddc2a2af3492b2488ffd22934130f83a8bc0ee5478f47a8f42c549b4"
+    },
+    "results/m2-layer-extremes-v1/tiny-fixed.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/m2-layer-extremes-v1/tiny-fixed.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "results/m2-layer-extremes-v1/ordinary-regression.json": {
+      "bytes": 652,
+      "sha256": "8d9a3cea21787b65c6a4b3df488ca1da2d1a1477bf809d34ec685287290e6bd0"
+    },
+    "results/m2-layer-extremes-v1/ordinary_regression.cpp": {
+      "bytes": 1866,
+      "sha256": "8037779e735083ccd0ec4566906c5f52b052635486113100ce354ca48a2747c1"
+    },
+    "results/m2-layer-extremes-v1/ordinary_regression.py": {
+      "bytes": 2033,
+      "sha256": "4e7d04ff8eac7feb775e66b2874649554488571d0a52ea4677086472d6283a88"
+    },
+    "results/m2-layer-extremes-v1/test-ordinary.stdout": {
+      "bytes": 79,
+      "sha256": "611a4a45942b63c61e432ed661a952985ea235a0efd869cbc28f0ba1616baf6d"
+    }
+  },
+  "limits": [
+    "Host shim substitutes libm for GPU OCML; GPU extreme accuracy unqualified.",
+    "No complete dense floating-point transformer fixture or near-zero RMS fixture in this test.",
+    "NaN/infinity and half-scale overflow remain outside tested valid activation domain.",
+    "Future native candidate requires new fixture/aggregate/package identities; previous native milestone remains historical evidence."
+  ],
+  "local_receipt_sha256": "e739ce98142b268aee978283c97ac457bb2e12e8353026138de326993faba685",
+  "date": "2026-10-17",
+  "local_evidence": "results/m2-layer-extremes-v1"
+}

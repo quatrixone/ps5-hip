@@ -25,6 +25,17 @@ representative extreme inputs. Next advance M3: all 22 layers, final
 normalization/logits, model-scale residency and real decoder/cache progression.
 The qualification's declared sequence is not a committed full llama decode.
 
+## Layer arithmetic follow-up
+
+Host extreme-input tests found and fixed an invalid integer conversion for
+finite activations whose Q8 scale underflows to half zero. Such blocks now
+become canonical zeros before reciprocal calculation; ordinary-input bytes
+remain unchanged. Sanitizers and fresh layer fixture v5 ISA/admission pass.
+See `evidence/offline-layer-extreme-inputs.json`. This is not a new native
+qualification: the installed app remains the accepted `f251366` build.
+Use `results/llm-layer-fixture-v5` in a refreshed aggregate/candidate. Dense
+whole-layer, near-zero RMS and native extreme-input validation remain open.
+
 ## Current scope
 
 The first release is standalone TinyLlama 1.1B Q4_0 GPU inference, batch one,

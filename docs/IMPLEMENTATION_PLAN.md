@@ -11,6 +11,8 @@ floating-point whole-layer fixture and representative extreme inputs. Next
 advance M3's 22-layer forward pass, final normalization/logits, model residency
 and real decoder/cache progression; token generation is not yet established.
 
+- 2026-10-17 | M2 arithmetic edges | host | pass: tiny-input Q8 UB fixed, sanitizers and fixture v5 ISA/admission pass | evidence/offline-layer-extreme-inputs.json | next: native stress and dense layer
+
 - 2026-10-17 | Build authentication | host | pass: one redundant 619,831,552-byte model read removed per helper call; 20 tests pass | evidence/offline-cpu-model-hash-dedup.json | no native rebuild or timing claim
 
 - 2026-10-17 | M2 selected Q4 layer | f251366 | .40 | pass: 37 nodes, 514 requests, 16,962 launches, 151 numerical readbacks, exact reset, 528 balanced allocations/frees and restored largest free extent | evidence/console40-model-layer-success.json | next: remaining M2 numerical fixtures and M3 full-model forward; no inference claim

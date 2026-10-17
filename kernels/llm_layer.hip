@@ -49,8 +49,12 @@ KERNEL void layer_values(const _Float16* v,const _Float16* p,float* out,u32 n) {
 KERNEL void layer_quantize_q8_cpu(const float* x,unsigned char* out,u32 width) {
  u32 b=index();if(b>=width/32u)return;float maximum=0;
  for(u32 j=0;j<32;j++){float v=__builtin_fabsf(x[b*32+j]);maximum=v>maximum?v:maximum;}
- float d=maximum/127.0f,inverse=maximum?127.0f/maximum:0.0f;
- *reinterpret_cast<_Float16*>(out+b*36)=(_Float16)d;
+ float d=maximum/127.0f;
+ const _Float16 stored_scale=(_Float16)d;
+ // A zero stored scale contributes zero; avoid overflowing the reciprocal first.
+ if(stored_scale==(_Float16)0){for(u32 j=0;j<36;j++)out[b*36+j]=0;return;}
+ float inverse=maximum?127.0f/maximum:0.0f;
+ *reinterpret_cast<_Float16*>(out+b*36)=stored_scale;
  *reinterpret_cast<_Float16*>(out+b*36+2)=(_Float16)0;
  for(u32 j=0;j<32;j++)out[b*36+4+j]=(unsigned char)(signed char)__builtin_rintf(x[b*32+j]*inverse);
 }
