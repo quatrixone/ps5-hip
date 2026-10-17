@@ -145,7 +145,8 @@ def cpu_inputs(cpu, model):
         raise ValueError('CPU source identity mismatch')
     if subprocess.check_output(['git', '-C', str(client), 'rev-parse', 'HEAD'], text=True).strip() != lock['client']['revision'] or subprocess.check_output(['git', '-C', str(client), 'status', '--porcelain'], text=True).strip():
         raise ValueError('client must be clean and locked')
-    if model.stat().st_size != expected['bytes'] or sha(model) != expected['sha256']:
+    # Authenticate content once in the mandatory final recheck below.
+    if model.stat().st_size != expected['bytes']:
         raise ValueError('model differs from qualified conversion')
     identities = {str(cpu / 'receipt.json'): sha(cpu / 'receipt.json'), str(model): expected['sha256']}
     for key, digest in receipt['identity']['inputs'].items():

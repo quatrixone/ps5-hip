@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "host-cpu-input-authentication-deduplication",
+  "change": "Remove the redundant early model content hash; retain size/identity conflict checks and mandatory final recheck.",
+  "per_call_model_reads_before": 2,
+  "per_call_model_reads_after": 1,
+  "locked_model_bytes_saved_per_call": 619831552,
+  "validation": {
+    "command": "python3 tests/llm_executed_graph_test.py",
+    "tests": 20,
+    "result": "PASS",
+    "coverage": [
+      "one fresh model hash each invocation",
+      "same-size corrupt model rejected",
+      "model mutation during identity assembly rejected",
+      "source/tool/library tampering rejected",
+      "missing and unsafe artifact paths rejected",
+      "conflicting model identity rejected"
+    ]
+  },
+  "files": {
+    "tools/build_llm_executed_graph.py": "8ecb4f753206c9ff1c9d4167e2a09acc356b78311e3d2aebaad0c6f9b984449f",
+    "tests/llm_executed_graph_test.py": "3b806096d144d0c7fd4cd7540d5bbdeb84e6090df12af09e3e5f54e57186a2d8"
+  },
+  "limits": [
+    "No end-to-end speed benchmark; native package was not rebuilt.",
+    "Historical source-bound reference receipts remain evidence for their original commit; regenerate affected references before a new candidate uses changed authentication source.",
+    "No timestamp/content cache or skipped final authentication."
+  ]
+}

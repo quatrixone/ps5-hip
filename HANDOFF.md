@@ -38,6 +38,16 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Authentication overhead follow-up
+
+The CPU-input helper now hashes the model once per call in its mandatory final
+recheck, saving one 619,831,552-byte read while retaining tamper rejection.
+All 20 focused regression tests pass; end-to-end timing is not measured.
+See `evidence/offline-cpu-model-hash-dedup.json`. No native rebuild was run.
+Historical layer references bind the pre-change helper at `f251366`; preserve
+them as evidence and regenerate affected source-bound references for a new
+candidate. Never rewrite historical receipts to match current source.
+
 ## First-release priority
 
 M0's bounded HIP-call qualification passed on .40 as native title PPSA99014.

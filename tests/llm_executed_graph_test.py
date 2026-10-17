@@ -86,4 +86,74 @@ class TraceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'unresolved'):graph.runtime_inputs('libllama.so => not found',lib,identities)
         (lib/'libllama.so').write_text('changed')
         with self.assertRaisesRegex(ValueError,'unauthenticated'):graph.runtime_inputs(text,lib,identities)
+
+class CpuInputsTests(unittest.TestCase):
+    def setUp(self):
+        from unittest.mock import patch
+        self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name); self.cpu = self.root / 'cpu'; self.cpu.mkdir()
+        self.model = self.root / 'model.gguf'; self.model.write_bytes(b'good-model')
+        (self.root / 'evidence').mkdir()
+        (self.root / 'llm-inputs.json').write_text(json.dumps({'client': {'revision': 'locked'}}))
+        self.expected = graph.sha(self.model)
+        (self.root / 'evidence/offline-llm-model-conversion.json').write_text(json.dumps(
+            {'outputs': {'tinyllama-q4_0.gguf': {'bytes': 10, 'sha256': self.expected}}}))
+        source = self.root / 'source'; source.write_bytes(b'source')
+        tool = self.root / 'compiler'; tool.write_bytes(b'tool')
+        artifacts = {}
+        for name in ('libllama.so', 'libggml.so', 'libggml-base.so', 'libggml-cpu.so'):
+            path = self.cpu / name; path.write_bytes(name.encode()); artifacts[name] = graph.sha(path)
+        self.receipt = {'classification': 'host-cpu-reference-tools-built', 'source_revision': 'locked',
+            'identity': {'inputs': {'source': graph.sha(source)},
+                         'tools': {'compiler': {'path': str(tool), 'sha256': graph.sha(tool)}}},
+            'artifacts': artifacts}
+        self.save()
+        self.addCleanup(patch.stopall)
+        patch.object(graph, 'ROOT', self.root).start()
+        patch.object(graph.subprocess, 'check_output', side_effect=lambda argv, **kw:
+            'locked\n' if argv[-1] == 'HEAD' else '').start()
+    def save(self):
+        (self.cpu / 'receipt.json').write_text(json.dumps(self.receipt))
+    def test_one_fresh_model_hash_per_invocation(self):
+        from unittest.mock import patch
+        original = graph.sha
+        with patch.object(graph, 'sha', wraps=original) as hashed:
+            identities = graph.cpu_inputs(self.cpu, self.model)
+            self.assertEqual(identities[str(self.model)], self.expected)
+            self.assertEqual(sum(Path(c.args[0]) == self.model for c in hashed.call_args_list), 1)
+            graph.cpu_inputs(self.cpu, self.model)
+            self.assertEqual(sum(Path(c.args[0]) == self.model for c in hashed.call_args_list), 2)
+    def test_same_size_corruption_rejected(self):
+        self.model.write_bytes(b'evil-model')
+        with self.assertRaisesRegex(ValueError, 'input changed'):
+            graph.cpu_inputs(self.cpu, self.model)
+    def test_same_size_change_during_closure_rejected(self):
+        from unittest.mock import patch
+        original = graph.merge
+        def mutate(inputs, key, digest):
+            original(inputs, key, digest)
+            if Path(key).name == 'source': self.model.write_bytes(b'evil-model')
+        with patch.object(graph, 'merge', side_effect=mutate), self.assertRaisesRegex(ValueError, 'input changed'):
+            graph.cpu_inputs(self.cpu, self.model)
+    def test_changed_source_tool_or_library_rejected(self):
+        for path in (self.root / 'source', self.root / 'compiler', self.cpu / 'libllama.so'):
+            content = path.read_bytes()
+            with self.subTest(path=path):
+                path.write_bytes(b'changed')
+                with self.assertRaisesRegex(ValueError, 'input changed'):
+                    graph.cpu_inputs(self.cpu, self.model)
+                path.write_bytes(content)
+    def test_missing_library_and_unsafe_artifact_rejected(self):
+        original = self.receipt['artifacts'].copy()
+        del self.receipt['artifacts']['libllama.so']; self.save()
+        with self.assertRaisesRegex(ValueError, 'libraries missing'):
+            graph.cpu_inputs(self.cpu, self.model)
+        self.receipt['artifacts'] = {**original, '../escape': '0' * 64}; self.save()
+        with self.assertRaisesRegex(ValueError, 'unsafe CPU artifact'):
+            graph.cpu_inputs(self.cpu, self.model)
+    def test_conflicting_model_identity_rejected(self):
+        self.receipt['identity']['inputs'][str(self.model)] = '0' * 64; self.save()
+        with self.assertRaisesRegex(ValueError, 'conflicting'):
+            graph.cpu_inputs(self.cpu, self.model)
+
 if __name__=='__main__':unittest.main()
