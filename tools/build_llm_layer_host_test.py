@@ -40,6 +40,7 @@ def build(cpu, model, output):
     units = {'backend':'ports/ggml/ps5_backend.cpp', 'layer':'tests/llm_layer_backend_test.cpp',
              'prefix':'tests/llm_prefix_backend_test.cpp', 'dispatch':'tests/llm_prefix_dispatch_test.cpp', 'helper':'tests/llm_native_layer_test.cpp'}
     sources = {str(ROOT/n):sha(ROOT/n) for n in (*units.values(), 'ports/ggml/model_layer.h',
+               'ports/ggml/full_dispatch.h','ports/ggml/full_graph.h','ports/ggml/full_qualification.h',
                'ports/ggml/layer_dispatch.h','ports/ggml/layer_qualification.h','ports/ggml/prefix_dispatch.h',
                'ports/ggml/native_layer.h','tests/llm_layer_hip_mock.h','tools/build_llm_layer_host_test.py')}
     for name, source in units.items():

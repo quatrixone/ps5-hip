@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-full-decoder-control-flow-and-lifecycle-only",
+  "scheduler": {
+    "modes": [
+      "whole",
+      "single-node callback"
+    ],
+    "requests_per_mode": 3,
+    "positions": [
+      0,
+      1,
+      "reset",
+      0
+    ],
+    "active_nodes_per_mode": 2394,
+    "mock_launches_per_mode": 2199,
+    "backend_instances_created_freed_per_mode": [
+      1,
+      1
+    ],
+    "allocations_frees_per_mode": [
+      16,
+      16
+    ],
+    "cpu_tensor_arithmetic": 0,
+    "actual_backend_interfaces_observed": true,
+    "real_scheduler_forwarded": true,
+    "committed_kv_positions": true
+  },
+  "guards": [
+    "Exact admitted 801-node topology and 798 active nodes",
+    "Ordered whole/partial graphs and immutable tensor metadata",
+    "GPU spans, view bounds and persistent weight/cache identities",
+    "Live control validation after scheduler copies, before first launch",
+    "Control lifetime protection through each last consumer",
+    "Dedicated 64 KiB scratch for in-place softmax",
+    "Partial failure quarantines state and cannot advance/reset position"
+  ],
+  "regression": {
+    "selected_layer_requests": 514,
+    "selected_layer_launches": 16962,
+    "prefix_unchanged": true,
+    "make_tests": 12,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ]
+  },
+  "receipts": {
+    "scheduler": {
+      "local_path": "results/m3-full-backend-v11/receipt.json",
+      "sha256": "63066bca096d8b0fd2509e2ed71c51fcd8672d722eb96d429c4acba5a87291dc"
+    },
+    "dispatch": {
+      "local_path": "results/m3-full-dispatch-v7/receipt.json",
+      "sha256": "135ab8fb19ee10f8438bd0d2767a59d1b8bc41bf18b99b89bd4645ad37f7f6a8"
+    },
+    "metadata": {
+      "local_path": "results/m3-full-graph-admission-v4/receipt.json",
+      "sha256": "160e6e0595658448828a2ba96c3eeb1e25b72446d752c4a7e7e231c942c46be2"
+    },
+    "regression": {
+      "local_path": "results/m3-layer-regression-v4/receipt.json",
+      "sha256": "fb6467a99f9cd02fe7840717fbadd7f53c75736b2f8f8c240454e16dd3505d5e"
+    },
+    "direct_nodes": {
+      "local_path": "results/m3-node-final-v1/receipt.json",
+      "sha256": "d08e0e8bbeb9b9727f84e420ab184b7c14e49bad92905c06802751f7abe8e5c1"
+    }
+  },
+  "source_sha256": {
+    "ports/ggml/full_graph.h": "485f51de1be7c3c84828cc5cb3554dcad894102a0d88443f0e39258feda871e4",
+    "ports/ggml/full_dispatch.h": "90e7f1991d587e2d87d02d1ff565857973ecbf5461b35ed90c90cf9c154e0751",
+    "ports/ggml/full_qualification.h": "abf54aa600370fed094aac03096ad16a28e63268338e24982d0f71c567cc2eb7",
+    "ports/ggml/layer_dispatch.h": "937065f4d0bb7a784c00b5db7a62bdafd54d9653892c36c68292a2c3062b9e77",
+    "ports/ggml/ps5_backend.cpp": "714d7e6fbaf37a4165e3f4a2b45f5d806062ec2f37bd1bcb05142f839916fd96",
+    "tests/llm_full_backend_test.cpp": "96402031f3fe223bcad1386338f5d6a5715064fa95786b9e43084c4a3dfcdfd2",
+    "tests/llm_full_dispatch_test.cpp": "c8855b0c7d6751b7ba06efe03facac6dc309939e0377ecb7e3c82afed63734b0",
+    "tests/llm_layer_node_test.cpp": "b379e0815edad37f2aeb5e98c18907f40dac9174289d3563bcaf7b1d28988f50",
+    "tools/build_llm_full_backend_test.py": "eab7d0ee5b48a47fbd944fcad7413930b7696593ffba45b4610e6c7e61c7b540",
+    "tools/build_llm_full_dispatch_test.py": "67d71297a2adac5d9f9c6480b045919a340af9e566e0df82f3aa4c569e28f323",
+    "tools/build_llm_layer_host_test.py": "2608cad1710fd7489e9e1a62efe2a5762fc1dfdc7dbae2895a449bca13f36a2c",
+    "Makefile": "20151683ca81756fd4fc1ffed8185b0e749111bc59b1bbe4222313018420f89b",
+    "tests/llm_prefix_make_test.py": "7a8c25242e9412fdd22d93429f96abc1b41f85ebfa79332c455e1350a4ce3690"
+  },
+  "gpu_executed": false,
+  "numerical_verified": false,
+  "limits": [
+    "Mock HIP transport performs no tensor arithmetic.",
+    "Full-model numerical comparison currently fails from layer 4 onward; investigate before native testing.",
+    "CPU libraries reused and not sanitizer instrumented.",
+    "Focused host input identities do not establish native package provenance.",
+    "Existing native image audit must be updated for full-mode scheduler forwarding before deployment."
+  ],
+  "lifecycle_review": {
+    "local_path": "results/m3-full-lifecycle-review-v1.json",
+    "sha256": "a580a293eb5920ca2ca48a2415f2bc466ff1de341f628e18a30fcedf191de5b9"
+  }
+}

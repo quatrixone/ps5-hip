@@ -38,6 +38,29 @@ local-only commits are no longer build prerequisites. The protocol launch
 controller now returns a status without printing a result, so the historical
 one-use E control remains inert pending revised lifecycle checks and review.
 
+## Full-decoder control flow (offline only)
+
+Full mode now configures llama's own backend instances, explicitly offloads
+embedding weights and forwards the original scheduler graph. Both whole-graph
+and single-node callback modes pass three successful mock-HIP decodes at
+positions 0, 1 and reset 0: 2,394 active nodes, 2,199 launches, real KV commits,
+no CPU tensor arithmetic and balanced 16/16 allocations and 1/1 instances.
+Exact graph/spans, ordered fragments and live controls are checked. A dedicated
+64 KiB workspace handles in-place softmax, and copied controls may be reused
+only after their last consumer. Existing layer/prefix regressions still pass.
+See `evidence/offline-full-decoder-integration.json` and
+`results/m3-full-backend-v11`, `results/m3-full-dispatch-v7`,
+`results/m3-layer-regression-v4`.
+
+Numerical integration is NOT accepted: the first full-model arithmetic test
+agrees through layer 3 and diverges beyond fixed gates beginning at layer 4.
+Investigate the recorded Q8 rounding boundary and same-input projection oracle
+before building/deploying a full-decoder package. The native full helper remains
+a local draft. Native planning is in `results/m3-full-native-plan-v1.md`; start
+with two tokens plus reset, and measure the budget before a 514-request run.
+No native full-model test has been performed; .40's installed accepted layer
+package remains historical evidence.
+
 ## Full-model numerical reference
 
 All 514 original CPU decoder requests now have a boundary reference: all 22
@@ -57,8 +80,8 @@ inactive mixed-input nodes; their reused bytes must not drive GPU operations.
 See `docs/LLM_FULL_MODEL.md` and `evidence/offline-full-model-graph-admission.json`.
 Reuse `results/m3-full-graph-trace-v4` after authentication;
 `results/m3-full-graph-admission-v3` records the host gate. Full GPU scheduler
-instance configuration, device ownership, ordered split execution, actual KV
-progression and complete logits remain to implement and validate.
+instance configuration, ordered split execution and KV progression now pass
+the offline mock gate above. Full numerical and native validation remain open.
 
 ## Layer arithmetic follow-up
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "model_layer.h"
 #include <string>
+#include <cstdio>
 
 namespace ps5hip_full {
 using ps5hip_layer::check;
@@ -20,6 +21,8 @@ inline std::string layer_name(const char* value,unsigned layer) {
     return s;
 }
 inline void match(ggml_tensor* t,Spec spec,const std::string& name) {
+    if(t&&(std::strcmp(t->name,name.c_str())||t->type!=spec.type||t->op!=spec.op))
+        std::fprintf(stderr,"full tensor mismatch: got %s/%s/%s expected %s/%s/%s\n",t->name,ggml_type_name(t->type),ggml_op_name(t->op),name.c_str(),ggml_type_name(spec.type),ggml_op_name(spec.op));
     spec.name=name.c_str();ps5hip_layer::detail::match(t,spec);
 }
 inline void sources(ggml_tensor* t,std::initializer_list<ggml_tensor*> expected,ggml_tensor* owner=nullptr) {
@@ -32,7 +35,10 @@ inline void leaf(ggml_tensor* t,Spec spec,const std::string& name) {
 }
 // Metadata/topology only. Controls, actual GPU spans and scheduler split ownership
 // must be validated separately before this selection may authorize computation.
-inline Selection select(ggml_cgraph* graph) {
+inline Selection select(ggml_cgraph* graph,bool scheduler_copies=false) {
+    auto control=[&](ggml_tensor* t,Spec spec,const std::string& name){
+        leaf(t,spec,scheduler_copies?"PS5HIP-FULL#"+name+"#0":name);
+    };
     check(graph&&ggml_graph_n_nodes(graph)==801,"full graph node count");
     std::set<ggml_tensor*> unique;
     for(int i=0;i<801;++i) {
@@ -45,14 +51,14 @@ inline Selection select(ggml_cgraph* graph) {
     const auto& ns=ps5hip_layer::detail::node_specs;
     const auto& ls=ps5hip_layer::detail::leaf_specs;
     match(node(0),ns[0],"embd");
-    leaf(node(0)->src[0],ls[0],"token_embd.weight");leaf(node(0)->src[1],ls[10],"inp_tokens");
+    leaf(node(0)->src[0],ls[0],"token_embd.weight");control(node(0)->src[1],ls[10],"inp_tokens");
     sources(node(0),{node(0)->src[0],node(0)->src[1]});
-    match(node(1),ns[0],"node_1");leaf(node(1)->src[1],ls[10],"inp_mixed_tokens");
+    match(node(1),ns[0],"node_1");control(node(1)->src[1],ls[10],"inp_mixed_tokens");
     sources(node(1),{node(0)->src[0],node(1)->src[1]});
     auto dense=ls[1];dense.op=GGML_OP_DUP;match(node(2),dense,"node_2");
-    leaf(node(2)->src[0],ls[1],"inp_mixed_embd");sources(node(2),{node(2)->src[0]});
+    control(node(2)->src[0],ls[1],"inp_mixed_embd");sources(node(2),{node(2)->src[0]});
     dense.op=GGML_OP_SET_ROWS;match(node(3),dense," (view)");
-    leaf(node(3)->src[1],ls[12],"inp_mixed_slots");sources(node(3),{node(1),node(3)->src[1],node(2)},node(2));
+    control(node(3)->src[1],ls[12],"inp_mixed_slots");sources(node(3),{node(1),node(3)->src[1],node(2)},node(2));
     unsigned cursor=4;ggml_tensor* input=node(0);
     for(unsigned l=0;l<22;++l) {
         auto& s=result.layers[l];s.nodes[0]=input;
@@ -66,7 +72,7 @@ inline Selection select(ggml_cgraph* graph) {
                 auto* t=node(cursor++);gathered[j]=t;auto spec=ns[0];
                 match(t,spec,j?"node_789":"node_788");
                 if(!result.output_ids)result.output_ids=t->src[1];
-                leaf(result.output_ids,ls[10],"out_ids");
+                control(result.output_ids,ls[10],"out_ids");
                 sources(t,{j?input:s.nodes[28],result.output_ids});
             }
             auto* t=node(cursor++);s.nodes[i]=t;const auto spec=ps5hip_layer::detail::spec(i,s.extent);
@@ -86,7 +92,7 @@ inline Selection select(ggml_cgraph* graph) {
         }
         for(unsigned k=1;k<17;++k) {
             auto* t=ps5hip_layer::detail::leaf(s,k);auto spec=ps5hip_layer::detail::spec(k,s.extent,true);
-            leaf(t,spec,layer_name(spec.name,l));
+            if(k>=10&&k<15)control(t,spec,layer_name(spec.name,l));else leaf(t,spec,layer_name(spec.name,l));
             if(l&&k>=10&&k<15)check(t==result.layers[0].requests[k-10],"full graph shared control identity");
         }
         for(unsigned i=1;i<37;++i) {

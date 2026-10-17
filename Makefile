@@ -533,3 +533,22 @@ llm-full-graph-trace: llm-deps-fetch
 
 llm-full-graph-admission: llm-full-graph-trace
 	$(PYTHON) tools/build_llm_full_graph_admission.py --trace "$(LLM_FULL_GRAPH_TRACE_DIR)" --output "$(LLM_FULL_GRAPH_ADMISSION_DIR)"
+
+LLM_FULL_HOST_TEST_DIR ?= results/llm-full-backend-host-tests
+.PHONY: llm-full-host-tests
+llm-full-host-tests: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
+	$(PYTHON) tools/build_llm_full_backend_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_HOST_TEST_DIR)"
+
+LLM_FULL_DISPATCH_TEST_DIR ?= results/llm-full-dispatch-host-tests
+LLM_FULL_REFERENCE_DIR ?= results/llm-full-model-reference
+.PHONY: llm-full-dispatch-tests llm-full-reference
+llm-full-dispatch-tests: llm-full-graph-trace
+	$(PYTHON) tools/build_llm_full_dispatch_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --graph "$(LLM_FULL_GRAPH_TRACE_DIR)/raw/run-0-pos-0.graph.json" --output "$(LLM_FULL_DISPATCH_TEST_DIR)"
+
+llm-full-reference: llm-deps-fetch
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
+	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
+	$(PYTHON) tests/llm_full_model_reference_test.py
+	$(PYTHON) tools/build_llm_full_model_reference.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_REFERENCE_DIR)"

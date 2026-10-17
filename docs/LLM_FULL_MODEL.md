@@ -1,7 +1,7 @@
 # Full-model execution prerequisite
 
-The selected quantized first layer is native-qualified. Full-model GPU execution
-is not implemented yet. The next path must execute the original llama scheduler
+The selected quantized first layer is native-qualified. Full-model dispatch now passes the real scheduler with mocked HIP. Native
+full-model execution and numerical agreement remain unqualified. The next path must execute the original llama scheduler
 graph successfully, so llama retains its actual KV position state; returning
 success after a diagnostic cloned layer is not sufficient.
 
@@ -65,3 +65,31 @@ Run the tool with `--cpu-build`, `--model` and a fresh `--output` under results.
 `authenticate_full_model_reference` verifies the saved inputs and outputs.
 This supplies the full-model comparison oracle; it does not establish GPU
 execution or numerical agreement.
+
+## Offline decoder integration
+
+`make llm-full-host-tests` runs both whole-graph and per-node callback modes
+against the real llama scheduler with mocked HIP. Each performs positions 0
+and 1, synchronizes and clears actual llama memory, then repeats position 0.
+Actual backend interfaces are observed to reject CPU tensor arithmetic. The
+backend enables this fixed model profile before context creation and configures
+each backend instance llama creates; normal storage-only behavior stays disabled
+for tensor computation unless full mode is explicitly enabled.
+
+`make llm-full-dispatch-tests` tests ordered fragments, live controls, view and
+owner bounds, immutable weights/cache and failure quarantine against the saved
+CPU graph. `make llm-full-reference` builds the numerical oracle described above.
+Select fresh output directories using `LLM_FULL_HOST_TEST_DIR`,
+`LLM_FULL_DISPATCH_TEST_DIR` and `LLM_FULL_REFERENCE_DIR`.
+
+Full mode uses direct MUL inputs and accepts only proved exact in-place aliases.
+The softmax kernel writes a dedicated 64 KiB workspace before copying back when
+the scheduler aliases its input/output. Control copies are checked after upload
+and before the first launch; their storage becomes reusable only after their
+last consumer. Partial execution never commits a request or allows reset.
+
+The control-flow gate passes, but the first full numerical test fails fixed
+tolerances beginning at layer 4. This is an open issue, not native qualification.
+A full native package needs its own phase, image audit, frozen controls and
+numerical verifier. Begin with two tokens plus reset; the existing 120-second
+watchdog includes loading and is not a measured budget for all 514 requests.

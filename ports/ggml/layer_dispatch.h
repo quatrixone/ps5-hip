@@ -13,6 +13,7 @@ struct Dispatch {
     hipModule_t module=nullptr;
     std::array<hipFunction_t,12> functions{};
     void* half=nullptr;
+    void* full_scratch=nullptr; // Owned and span-validated by the full-model dispatcher.
     unsigned expected_position=0;
     static constexpr size_t half_bytes=32*512*2;
     static constexpr const char* symbols[]={"layer_add","layer_mul","layer_silu","layer_rope",
@@ -87,15 +88,55 @@ struct Dispatch {
             return true;
         } catch(const std::runtime_error&) {return false;}
     }
-    bool execute_graph(ggml_cgraph* g) {
+    static bool exact_or_disjoint(const ggml_tensor* a,const ggml_tensor* b) {
+        return a->data==b->data||ps5hip_prefix::Dispatch::disjoint(a,b);
+    }
+    bool vector(const ggml_tensor* t) const {
+        return t&&t->type==GGML_TYPE_F32&&t->ne[0]==2048&&t->ne[1]==1&&t->ne[2]==1&&t->ne[3]==1&&
+               ggml_is_contiguous(t)&&base.owned(t);
+    }
+    // Caller must admit the complete graph and live aliases/controls before any
+    // node executes. This primitive does not advance the request position.
+    bool execute_node(ggml_tensor* t,bool direct_inputs) {
         ps5hip_prefix::check(base.ready&&!base.terminal&&half&&module,"layer not ready");
-        if(!g||!preflight(g))return false;
-        for(int i=0;i<ggml_graph_n_nodes(g);++i) {
-            auto* t=ggml_graph_node(g,i);
+        if(!t)return false;
             switch(t->op) {
             case GGML_OP_RESHAPE:case GGML_OP_VIEW:case GGML_OP_PERMUTE:break;
-            case GGML_OP_GET_ROWS:case GGML_OP_RMS_NORM:case GGML_OP_MUL:
-                ps5hip_prefix::check(base.execute(t),"layer prefix dispatch");break;
+            case GGML_OP_GET_ROWS: {
+                if(t->src[0]&&t->src[0]->type==GGML_TYPE_F32) {
+                    auto* ids=t->src[1];
+                    if(!direct_inputs||!vector(t)||!vector(t->src[0])||!ids||ids->type!=GGML_TYPE_I32||
+                       ggml_nelements(ids)!=1||!ggml_is_contiguous(ids)||!base.owned(ids)||
+                       !exact_or_disjoint(t,t->src[0]))return false;
+                    int32_t index=-1;read(ids,&index,sizeof(index));if(index!=0)return false;
+                    void* x=t->src[0]->data;void* out=t->data;unsigned n=2048;
+                    void* args[]={&x,&out,&n};launch(8,n,args);break;
+                }
+                return base.execute(t);
+            }
+            case GGML_OP_MUL: {
+                if(!direct_inputs)return base.execute(t);
+                if(!vector(t)||!vector(t->src[0])||!vector(t->src[1])||
+                   !exact_or_disjoint(t,t->src[0])||
+                   !exact_or_disjoint(t,t->src[1]))return false;
+                void* x=t->src[0]->data;void* y=t->src[1]->data;void* out=t->data;unsigned n=2048;
+                void* args[]={&x,&y,&out,&n};launch(1,n,args);break;
+            }
+            case GGML_OP_RMS_NORM: {
+                if(!direct_inputs)return base.execute(t);
+                if(!vector(t)||!vector(t->src[0])||!exact_or_disjoint(t,t->src[0]))return false;
+                for(int i=1;i<GGML_MAX_SRC;++i)if(t->src[i])return false;
+                float epsilon;std::memcpy(&epsilon,t->op_params,4);if(epsilon!=1e-5f)return false;
+                // The qualified 1024-thread kernel reduces all input squares
+                // across a block barrier before each thread writes its own columns.
+                void* input=t->src[0]->data;void* out=t->data;void* absent=nullptr;
+                int ncols=2048,channels=1,samples=1;int64_t stride=2048,zero_stride=0;float scale=1.f;
+                ps5hip_prefix::Dispatch::Uint3 columns{1,11,2048},one{1,0,1},zero{};
+                void* args[]={&input,&out,&ncols,&channels,&samples,&stride,&stride,&stride,&epsilon,
+                    &absent,&stride,&stride,&stride,&columns,&one,&one,&one,
+                    &absent,&zero_stride,&zero_stride,&zero_stride,&zero,&zero,&zero,&zero,&scale};
+                base.launch(1,1,1,1024,1,128,args);break;
+            }
             case GGML_OP_MUL_MAT: {
                 if(t->src[0]->type==GGML_TYPE_Q4_0) {
                     void* x=t->src[1]->data;void* weight=t->src[0]->data;void* out=t->data;
@@ -121,7 +162,14 @@ struct Dispatch {
             }
             case GGML_OP_SOFT_MAX: {
                 void* x=t->src[0]->data;void* mask=t->src[1]->data;void* out=t->data;unsigned n=unsigned(t->ne[0]);
-                void* args[]={&x,&mask,&out,&n};launch(6,32,args);break;
+                const bool aliased=direct_inputs&&x==out;
+                if(aliased&&!full_scratch)return false;
+                if(aliased)out=full_scratch;
+                void* args[]={&x,&mask,&out,&n};launch(6,32,args);
+                // Softmax rereads the entire row for each output; exact input alias is unsafe.
+                if(aliased){void* destination=t->data;unsigned count=n*32;
+                    void* copy[]={&out,&destination,&count};launch(8,count,copy);}
+                break;
             }
             case GGML_OP_CONT: {
                 void* x=t->src[0]->data;void* out=t->data;unsigned n=2048;
@@ -136,9 +184,15 @@ struct Dispatch {
                 void* silu[]={&x,&out,&n};launch(2,n,silu);
                 void* mul[]={&out,&y,&out,&n};launch(1,n,mul);break;
             }
-            default:ps5hip_prefix::check(false,"unsupported selected layer operation");
+            default:return false;
             }
-        }
+        return true;
+    }
+    bool execute_graph(ggml_cgraph* g) {
+        ps5hip_prefix::check(base.ready&&!base.terminal&&half&&module,"layer not ready");
+        if(!g||!preflight(g))return false;
+        for(int i=0;i<ggml_graph_n_nodes(g);++i)
+            ps5hip_prefix::check(execute_node(ggml_graph_node(g,i),false),"layer node dispatch");
         ++expected_position;return true;
     }
 };

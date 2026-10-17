@@ -94,4 +94,20 @@ class FullGraphMake(unittest.TestCase):
   text=self.run_make('llm-full-graph-admission','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_GRAPH_ADMISSION_DIR=results/selected-admission')
   self.assertIn('tools/build_llm_full_graph_admission.py --trace "results/selected-full-graph" --output "results/selected-admission"',text)
 
+class FullExecutionMake(unittest.TestCase):
+ run_make=PrefixMake.run_make
+ def test_host_targets_use_selected_inputs_without_native_build(self):
+  for target,script,variable,folder in [('llm-full-host-tests','build_llm_full_backend_test.py','LLM_FULL_HOST_TEST_DIR','backend'),('llm-full-reference','build_llm_full_model_reference.py','LLM_FULL_REFERENCE_DIR','reference')]:
+   with tempfile.TemporaryDirectory() as directory:
+    model=Path(directory)/'selected-full.gguf';model.touch()
+    text=self.run_make(target,variable+'=results/selected-'+folder,'LLM_FULL_GRAPH_MODEL='+str(model))
+    self.assertIn('--model "'+str(model)+'" --output "results/selected-'+folder+'"',text)
+   self.assertIn('tools/'+script,text)
+   self.assertNotIn('build_llm_native_app.py',text)
+   self.assertNotIn('source_console.py',text)
+ def test_dispatch_target_uses_selected_trace(self):
+  text=self.run_make('llm-full-dispatch-tests','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_DISPATCH_TEST_DIR=results/selected-dispatch')
+  self.assertIn('--graph "results/selected-full-graph/raw/run-0-pos-0.graph.json" --output "results/selected-dispatch"',text)
+  self.assertIn('tools/build_llm_full_dispatch_test.py',text)
+
 if __name__=='__main__':unittest.main()
