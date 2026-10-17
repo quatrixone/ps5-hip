@@ -111,8 +111,8 @@ def build_inputs():
     return {name: sha(ROOT / name) for name in sorted(names)}
 
 
-def run(output, label, argv):
-    process = subprocess.run([str(arg) for arg in argv], cwd=ROOT, capture_output=True,
+def run(output, label, argv, cwd=None):
+    process = subprocess.run([str(arg) for arg in argv], cwd=ROOT if cwd is None else cwd, capture_output=True,
                              text=True, timeout=300,
                              env=dict(os.environ, DOTNET_ROLL_FORWARD="Major",
                                       DOTNET_CLI_TELEMETRY_OPTOUT="1"))
@@ -237,23 +237,33 @@ def canonicalize_dependencies(names):
 
 
 
-def compile_bound_unit(output, path, obj, flags, label):
+def compile_bound_unit(output, path, obj, flags, label, source_root=None):
     """Bind the compiler's header closure before compiling, then verify it."""
+    cwd = ROOT if source_root is None else Path(source_root).absolute()
+    source_arg = path
+    if source_root is not None:
+        # Relative generated paths keep per-unit cache keys stable across fresh trees.
+        source_arg = path.relative_to(cwd) if path.is_relative_to(cwd) else path
+        flags = ["-I" + str(Path(str(a)[2:]).relative_to(cwd))
+                 if str(a).startswith("-I") and Path(str(a)[2:]).is_relative_to(cwd)
+                 else a for a in flags]
+    run_options = {} if source_root is None else {"cwd": cwd}
     def dependencies(depfile):
         text = depfile.read_text().replace("\\\n", " ")
         try:
-            return canonicalize_dependencies(shlex.split(text.split(":", 1)[1]))
+            return canonicalize_dependencies([str(Path(n) if Path(n).is_absolute() else cwd / n)
+                                             for n in shlex.split(text.split(":", 1)[1])])
         except (OSError, ValueError) as error:
             raise RuntimeError("compiler dependency resolution failed") from error
 
     before = obj.with_suffix(".headers.d")
     actual = obj.with_suffix(".compiled.d")
-    run(output, label + "-headers", [*flags, "-c", "-M", path, "-MF", before])
+    run(output, label + "-headers", [*flags, "-c", "-M", source_arg, "-MF", before], **run_options)
     before_paths = dependencies(before)
     headers = {p: sha(p) for p in set(before_paths.values())}
     if str(path.resolve()) not in headers:
         raise RuntimeError("compiler dependency inventory omits source")
-    run(output, label, [*flags, "-MD", "-MF", actual, "-c", path, "-o", obj])
+    run(output, label, [*flags, "-MD", "-MF", actual, "-c", source_arg, "-o", obj], **run_options)
     if dependencies(actual) != before_paths:
         raise RuntimeError("actual compiler dependencies changed")
     if any(sha(p) != digest for p, digest in headers.items()):
@@ -297,7 +307,7 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab"):
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]
-        return compile_bound_unit(output, path, obj, [*flags, *extra], f"compile-{index:02d}")
+        return compile_bound_unit(output, path, obj, [*flags, *extra], f"compile-{index:02d}", source_root=source)
 
     # Fail quickly on the selected client before spending time on the upstream closure.
     title_index = units.index(ROOT / ("tools/public_hip_" + fixture + "_console_title.cpp"))

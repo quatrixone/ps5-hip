@@ -138,5 +138,30 @@ class Canonicalization(unittest.TestCase):
    with patch.object(Path,'resolve',resolve),self.assertRaises(ValueError):b.canonicalize_dependencies([leaf])
 
 
+
+class RelativeInputs(unittest.TestCase):
+    def test_current_directory_and_absolute_binding(self):
+        for outside in (False,True):
+            with self.subTest(outside=outside),tempfile.TemporaryDirectory() as tmp:
+                out=Path(tmp);tree=out/'source';tree.mkdir();(tree/'inc').mkdir()
+                source=(out if outside else tree)/'unit.cpp';source.write_text('source')
+                header=tree/'inc/value.h';header.write_text('header');obj=out/'unit.o';seen=[]
+                def run(output,label,args,cwd=None):
+                    self.assertEqual(cwd,tree);seen.append(cwd)
+                    self.assertIn('-Iinc',args);self.assertIn('-I'+str(out/'external'),args)
+                    self.assertEqual(args[args.index('-c')+1] if '-MD' in args else args[args.index('-M')+1],source if outside else Path('unit.cpp'))
+                    Path(args[args.index('-MF')+1]).write_text('unit.o: '+(str(source) if outside else 'unit.cpp')+' inc/value.h\n')
+                    if '-MD' in args:obj.write_bytes(b'object')
+                with patch.object(b,'run',side_effect=run):
+                    r=b.compile_bound_unit(out,source,obj,['compiler','-I'+str(tree/'inc'),'-I'+str(out/'external')],'unit',source_root=tree)
+                self.assertEqual(len(seen),2)
+                self.assertEqual(set(r['headers']),{str(source.resolve()),str(header.resolve())})
+    def test_run_forwards_cwd_without_chdir(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp,patch.object(b.subprocess,'run',return_value=subprocess.CompletedProcess([],0,'','')) as call:
+            before=Path.cwd();b.run(Path(tmp),'run',['compiler'],cwd=Path(tmp))
+            self.assertEqual(call.call_args.kwargs['cwd'],Path(tmp));self.assertEqual(Path.cwd(),before)
+            b.run(Path(tmp),'default',['compiler']);self.assertEqual(call.call_args.kwargs['cwd'],b.ROOT)
+
 if __name__ == '__main__':
     unittest.main()

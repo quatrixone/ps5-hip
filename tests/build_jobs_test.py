@@ -48,7 +48,7 @@ class JobPolicy(unittest.TestCase):
     output=Path(directory);source=output/'source';(source/'hipamd/src').mkdir(parents=True)
     for i in range(30):(source/'hipamd/src'/f'unit{i:02d}.cpp').touch()
     title_done=False;active=peak=started=0;lock=threading.Lock();barrier=threading.Barrier(jobs)
-    def compile_unit(out,path,obj,flags,label):
+    def compile_unit(out,path,obj,flags,label,source_root=None):
      nonlocal title_done,active,peak,started
      if path.name=='public_hip_bootstrap_console_title.cpp':
       self.assertFalse(title_done);self.assertEqual(active,0);title_done=True

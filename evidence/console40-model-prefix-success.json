@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "native-actual-model-prefix-hardware-validation",
+  "source_commit": "50df1fdd9272b499b91faeba1f2443be941f3347",
+  "manifest_sha256": "4319e22605a60865775c8b46f1fa301c41f3b9b39e95988e0d1bc9c28f39c12a",
+  "package_sha256": "6b105451d8826ec39a2a5b5cabb1c7654050adc76d1ea0892d0fca75c71f576f",
+  "model": {
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+    "console_path": "/data/hip/models/tinyllama-q4_0.gguf"
+  },
+  "observed": {
+    "tokens": [
+      0,
+      1,
+      2,
+      31999
+    ],
+    "prefix_nodes": 6,
+    "gpu_submits": 36,
+    "raw_files": 24,
+    "raw_bytes": 139264,
+    "cpu_forwarded": 0,
+    "post_compute": 0,
+    "original_full_graph_rejected": true,
+    "host_storage": {
+      "allocations": 217,
+      "releases": 217,
+      "peak_requested_bytes": 664593936,
+      "live_requested_bytes": 0,
+      "failures": 0,
+      "poisoned": false
+    },
+    "memory": [
+      {
+        "phase": "before_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_load",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12261605376,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_context",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12214861824,
+        "total_free_bytes": null,
+        "alignment": 16384
+      },
+      {
+        "phase": "after_cleanup",
+        "pool_bytes": 12884901888,
+        "largest_free_bytes": 12882804736,
+        "total_free_bytes": null,
+        "alignment": 16384
+      }
+    ],
+    "final_counts": [
+      5,
+      5,
+      1,
+      1
+    ],
+    "maximum_budget_fraction": {
+      "normalized": 0.0005479108257750769,
+      "weighted": 0.0007569927218268872,
+      "q": 0.10330346449148738,
+      "k": 0.0835422410893933,
+      "v": 0.037184381183683744
+    }
+  },
+  "artifact_sha256": {
+    "application.log": "485f9c20b6336dec71ac07066fb658a8cfb644648a2eb3390bfa1554ca0014b6",
+    "prefix-numerical.json": "866df705ea5103e94fa407b5b7cb4471c85058973258d670921d6123ba4e3f7a",
+    "reference-receipt": "a39d2fb44258bea196b173275d1ae5e5515a9e2b88f5ce8b79a6cc1310bd111e",
+    "deploy-receipt": "458c0cb719ac91356161f7579819e8ef8b319302683925e86ca5ddabb888f555",
+    "execute-receipt": "ea1b93356fea7f4e9087815ff8e48dd8afcb787f3cdaca197b8814a2825b7a7a",
+    "deploy-secondary-lock": "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "execute-secondary-lock": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "execute-command": "8d9263aa29db49711d1ec3e216dd6459bbb68156d29738402888f78706aef2f7",
+    "saved-artifact-review": "e43f553ebee2e6462652964345d982b0a46d824a8e11dcafd2f2182bd90870c8"
+  },
+  "raw_sha256": {
+    "token-0-embedding.f32le": "4dd9533b221b67a0b4ea23478e5cec2ac7f91f70b594894077924be8171ee5e5",
+    "token-0-normalized.f32le": "8b25f30a0bf4b072f69667ff4b6882208b62eee7fe017cbc706293db12ca7f2d",
+    "token-0-weighted.f32le": "80edbf28ecd7340ecbd5e0e336877044a8fd3d52c2b2da81001bc5766f70be03",
+    "token-0-q.f32le": "3d072821a854f126e9bf2d320171e156f02c25697f06b304563a58a4a7f91231",
+    "token-0-k.f32le": "94a269e3a51f4d1369f30c7c534d99ad160d444d3aa3ebfa87bc50cd9ebd68b4",
+    "token-0-v.f32le": "5c87c49d239459ad38352683021e178436eca9d0fb5044d6ec98bc551097e789",
+    "token-1-embedding.f32le": "2ff11a01bef9f84c1790ecf24c773569b993660458365a1c267bdb7d626243c5",
+    "token-1-normalized.f32le": "a75689d6fba09271e989f1939c8a6749fb7dfe11419bb4cc2296b773043ebc72",
+    "token-1-weighted.f32le": "55cca73e942ac2e1c70463247b07ce8c33f6772ea66936b2d88791dbd01019b4",
+    "token-1-q.f32le": "b3aa2becdf6347e76e2c59b52a23659f65dc59420448eb1444a761b992a9ce22",
+    "token-1-k.f32le": "c16278047841bee53141035c417cd4128ab82816efca580de93d394b268eab2a",
+    "token-1-v.f32le": "ab6979b824d82f1bce8bb54bc239a2aaad2ed8eed481ba2d9e9ee80e2fda8c98",
+    "token-2-embedding.f32le": "203fc982b0c4e8f31c4072de6136c9119dddbc3f9fa835ac1b903d13fcc35fac",
+    "token-2-normalized.f32le": "b25378b23a9117f716101728a251dbfcc449d9ef6b6e992e801c22f5a076dc98",
+    "token-2-weighted.f32le": "70c42e133e241dee9e5d82ae679aef24882cbc830cec2352c62858ec45cfbd0f",
+    "token-2-q.f32le": "e84a16fe53e20e0f26a842f1ea77e5ea000145842e9cbdbfbd73b0b8597189fb",
+    "token-2-k.f32le": "2c506044f958ff19456391329ef97c7c16a4269faf8a63f2e97d17ac43df290f",
+    "token-2-v.f32le": "b773f9a9329846ccf57e72487d05da509694cb3b7295c1aebb91b8ae63a0be7d",
+    "token-31999-embedding.f32le": "08eff6fcc795bdc71a1e0dafae5787f4c49dc9d4de2199c3dc68f06b816618c8",
+    "token-31999-normalized.f32le": "307c1f7481a456a8a3a6b09a7ff734cff91b8634909cf8094b20e508f6d8882a",
+    "token-31999-weighted.f32le": "5b7f088ae4269903350ffb5d8e08695879c7ad09b85da11d890f588f3b024ca8",
+    "token-31999-q.f32le": "62ad43fe45d5dff31ba9e60498d5421afacf94f4f3bb77449aa8dcf2c64e9089",
+    "token-31999-k.f32le": "e641d1f576a0f2d7a70a42857b10752ed079d845ae56069b3ad04a2a96ccec19",
+    "token-31999-v.f32le": "53b6296844396f56517c466c60bd691550a6e789dca54755ec21b4da925bc00f"
+  },
+  "controller_acceptance_verified": true,
+  "whole_transformer_layer": false,
+  "inference": false,
+  "limits": [
+    "QKV oracle is chained from validated device weighted activation; no separate Q8 byte proof.",
+    "Largest free extent is measured; total free memory is not.",
+    "Validated six-node embedding/normalization/QKV prefix only; RoPE, attention, feed-forward and end-to-end inference remain unvalidated."
+  ],
+  "controller": {
+    "deploy_accepted": true,
+    "execute_accepted": true,
+    "natural_ordered_stop": true,
+    "services_healthy_after": true,
+    "primary_owned_lock_released": true,
+    "secondary_owned_lock_released": true,
+    "final_authentication": {
+      "status": "PASS",
+      "elapsed_seconds": 601.5200623900164
+    }
+  }
+}

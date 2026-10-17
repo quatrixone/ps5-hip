@@ -1,0 +1,107 @@
+{
+  "status": "PASS",
+  "patch_sha256": "ab3cb32ce52534e9db5b0ba5d993c6fe335cd5b217703faa74e9fcdfa1f77090",
+  "reviewed_inputs": {
+    "tools/build_public_hip.py": "0cb789ee0923ac66d754e178cc7376135ca808de29e6d50de08fb54daa8d9de3",
+    "tools/build_llm_native_app.py": "9d74a9b3e7aaf21682735653aff45e7218be35c12f77c10ee593d92743a9f525",
+    "tests/public_hip_compile_inputs_test.py": "1f7a6f9e9c9063ce8e215c97c4a65f7f2719dcc75b52a5b328dcf46dea5dfb77",
+    "tests/llm_native_app_build_test.py": "be0a4460ec4a8b75bfdfb1aaae094965ea5a198435d026a1b61ed46aa9ad7880",
+    "tests/build_jobs_test.py": "b1734f336a13b97046a3bd611a89cd9bd44499bef2f73fb0c61d5a0ff7284a9f",
+    "tests/llm_native_model_package_test.py": "d774be4648922cfa2c6079338490d742a30615e0c43a2bbc045817768775a13d"
+  },
+  "guard_fix": "Both direct unittest entry points are now last; production candidate hashes unchanged from reviewed version.",
+  "validation": {
+    "combined_tests": 45,
+    "direct_test_counts": [
+      12,
+      18
+    ],
+    "real_sdk_unit": "hipamd/src/hip_error.cpp",
+    "real_sdk_object_sha256": "5ed98f549732b39d8cc4bc89a7dfd2f28515e6752b22ec6d621f201cdbb42a99",
+    "real_sdk_seconds": {
+      "first_miss": 63.07,
+      "equivalent_tree_hit": 44.614,
+      "disabled": 41.868
+    },
+    "controlled_cases": [
+      "equivalent tree cache hit",
+      "source mutation miss",
+      "included header mutation miss",
+      "new optional header miss",
+      "cached versus disabled object equality",
+      "current-root dependency identity"
+    ]
+  },
+  "review": "Per-subprocess cwd forwarded and recorded; generated paths normalized without process chdir; current-root absolute dependency identities and pre/post hashing retained. Existing host helper and executable callers use absolute operands. Explicit prepared-source reuse remains fail-closed; automatic hint path removed.",
+  "limits": [
+    "Current production no-debug flags only; debug configuration is not qualified.",
+    "One real SDK translation unit and isolated mutation probes; not all runtime units or complete title.",
+    "Timing does not establish speedup: disabled run was faster than cached in this sample.",
+    "Relative generated __FILE__ diagnostics intentionally differ from old absolute-path binaries.",
+    "No console or inference validation; regenerate bound references/app/freeze after promotion as required."
+  ],
+  "evidence_hashes": {
+    "integration-receipt.json": "6659241fdc61b3b12829f9479d8118c7e3da07e15509d8edf5a77467a76c14f0",
+    "direct-entrypoints.json": "adad50828a994acea1d9e86c7e93d70ea435e1816dd10c4542caa9425dce6196",
+    "real-results.json": "663e13bc150ba29a8794d3779253b46072a762581fcae1fafe556807f7073a9a",
+    "bound-mutation-results.json": "27f1256afb63de8d3148bb8e4aad2009967593fee12f502939e88573c59113cf"
+  },
+  "classification": "offline-cross-directory-native-compiler-cache-validation",
+  "applied_tests": [
+    {
+      "test": "public_hip_compile_inputs",
+      "exit_code": 0,
+      "seconds": 0.4761180999921635,
+      "log_sha256": "6084b874a4258c3fb3f96b54c3338739f7c443689cfd7f35262327e858ed5d80"
+    },
+    {
+      "test": "llm_native_app_build",
+      "exit_code": 0,
+      "seconds": 1.0831334959948435,
+      "log_sha256": "d8bf18110fba95b34d009b5a521d3c535939baee7150d971bf2ee0f2b1b27ec6"
+    },
+    {
+      "test": "build_jobs",
+      "exit_code": 0,
+      "seconds": 1.0981519859924447,
+      "log_sha256": "53d250a40eeac6ece2fc6450ac06802476b2dd5632c2543cc652a2e9fdedec59"
+    },
+    {
+      "test": "llm_native_model_package",
+      "exit_code": 0,
+      "seconds": 0.5733337360143196,
+      "log_sha256": "a0a7e5c62aa9d5547272dc42e15c48c24a43b3b8336ac206d7c0c2f615ffe24a"
+    },
+    {
+      "test": "native_ccache",
+      "exit_code": 0,
+      "seconds": 3.2095947109919507,
+      "log_sha256": "a5dd702f714c6cbe0bd9038818cbe0c64b5b671bd355825feede9e315b3fcf0c"
+    },
+    {
+      "test": "source_model_auth",
+      "exit_code": 0,
+      "seconds": 1.6586898569948971,
+      "log_sha256": "e686abf5fd2aca673cbb3eac5a7102c4aa8f0701292b2ba34afa86aa9ed341b2"
+    },
+    {
+      "test": "source_model_prefix_freeze",
+      "exit_code": 0,
+      "seconds": 1.4336235689988825,
+      "log_sha256": "4f15904e248545cff7aaec0cab94ac329109127a9167dfcce7160f0d594f7279"
+    },
+    {
+      "test": "source_prefix_authentication",
+      "exit_code": 0,
+      "seconds": 0.2556546420091763,
+      "log_sha256": "49aabcedbbf073af18439d34e4df5be532d542943a4c74420ad535fbf1c10d70"
+    },
+    {
+      "test": "source_prefix_console",
+      "exit_code": 0,
+      "seconds": 0.23978143199929036,
+      "log_sha256": "53ec6bfd32b426a23950e2fbbff5aba6e95df6d3ed7324d3edb40dd8151e63f8"
+    }
+  ],
+  "applied_test_methods": 127
+}

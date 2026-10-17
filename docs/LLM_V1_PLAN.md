@@ -1,8 +1,9 @@
 # LLM-first implementation plan
 
 Reviewed: 2026-10-15. This is the authoritative first-release execution plan.
-M0 bounded client-boundary qualification and M1 are complete. Integrating
-the actual-model prefix, then one transformer layer, is the immediate priority. Use idle .40 for meaningful validation and push each completed,
+M0 bounded client-boundary qualification, M1 and the bounded actual-model
+embedding/normalization/QKV prefix are complete. Finishing one transformer
+layer under M2 is the immediate priority. Use idle .40 for meaningful validation and push each completed,
 validated milestone to main. This review does not itself initiate a console run.
 
 ## Outcome and scope
@@ -119,8 +120,8 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 | Inputs and CPU oracle | Locked model/tokenizer/conversion; seven repeated inference cases and full logits | Native client results against these references |
 | Public HIP foundation | Bounded native launches, memory/stream/event/graph/lifecycle paths; aggregate arguments and operator-specific resources | Exact full-client call coverage, model-scale residency and remaining operator resources |
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Remaining layer operators and client integration |
-| Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; independently reviewed | General input coverage and integration into the client |
-| Client | Native full-model load, 512-token context, two actual graph rejections/reuse and 213 balanced owned allocations passed strict v10 validation on .40; vocabulary/tokenizer and HIP storage previously passed | Bounded per-HIP-call qualification passed; integrate actual GPU model operations in M2 |
+| Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; now integrated in the bounded actual-model prefix | General input/sequence coverage beyond the four qualified position-zero tokens |
+| Client | Native loading/context/rejection/reuse and bounded HIP calls passed; actual-model embedding/normalization/full QKV now pass for four position-zero tokens, 24 raw tensors and 36 GPU launches with normal cleanup | RoPE, causal KV/attention, output/residual, FFN and complete-layer comparison |
 | Full inference | CPU reference only | One GPU transformer layer, all 22 layers, GPU logits and generated tokens |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
@@ -137,8 +138,8 @@ are not current capability declarations. No native LLM inference is claimed.
    now pass on .40, including actual graph rejection and graph reuse.
    A vocabulary-only asset and a rejected synthetic ADD are useful preliminary
    tests, but cannot alone close M0's model graph routing requirement.
-3. Integrate GPU embedding and the proven normalization/QKV chain into that
-   backend. Then add RoPE, KV writes, attention, output/residual and FFN until
+3. The integrated GPU embedding/normalization/QKV prefix now passes on .40.
+   Add RoPE, KV writes, attention, output/residual and FFN until
    one complete layer passes sequence-level comparison. Do not build a separate
    diagnostic implementation of each operation.
 4. In parallel with layer integration, validate full weight/KV residency,
@@ -251,6 +252,12 @@ This closes one part of a layer, not attention or model inference.
 
 ### M2 ? Complete one transformer layer in the client (V1.2 / V1.3 / V1.4)
 
+The bounded prefix passed on .40 at source `50df1fd`: real tokens 0, 1, 2
+and 31999 at position zero; embedding, RMSNorm, learned weights and full Q/K/V;
+24 numerical readbacks across 36 GPU launches, external model reuse and normal
+cleanup. See `evidence/console40-model-prefix-success.json`. This is not a
+complete layer or an inference result; M2 remains open.
+
 Implement RoPE and F16 KV updates, then scores/softmax/value aggregation,
 attention output/residual, and the normalized gated FFN/residual. Integrate each
 into the same client/backend path; reuse those implementations in diagnostics.
@@ -328,8 +335,8 @@ Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
-M0's bounded native client boundary and M1 are complete. Integrate the
-actual-model prefix, then qualify one complete transformer layer under M2.
+M0's bounded native client boundary, M1 and the actual-model prefix are
+complete. Qualify one complete transformer layer under M2 next.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.

@@ -1,6 +1,6 @@
 """Build a fresh authenticated vocabulary-only native application offline."""
 from pathlib import Path
-import argparse, hashlib, json, os, shutil, subprocess, sys, threading, shlex, re, tempfile
+import argparse, hashlib, json, os, shutil, subprocess, sys, threading, shlex, re
 ROOT=next(p for p in Path(__file__).resolve().parents if (p/'dependencies.json').is_file())
 sys.path[:0]=[str(Path(__file__).resolve().parent),str(ROOT/'tools'),str(ROOT/'tests')]
 import build_public_hip as b
@@ -11,15 +11,17 @@ from external_model import DEFAULT_MODEL_PATH, validate_external_model, encode_m
 from source_public_hip_log import package_limit
 
 
-def file_inputs(argv):
+def file_inputs(argv,cwd=None):
  """Existing explicit file operands, excluding compiler/converter output operands."""
  skipped={i+1 for i,a in enumerate(argv) if a in ('-o','--out','-MF')}
- return [Path(a) for i,a in enumerate(argv[1:],1) if i not in skipped and Path(a).is_file()]
+ base=ROOT if cwd is None else Path(cwd)
+ return [p for i,a in enumerate(argv[1:],1) if i not in skipped
+         for p in [Path(a) if Path(a).is_absolute() else base/a] if p.is_file()]
 
 
-def command_file_inputs(output,label,argv,title):
+def command_file_inputs(output,label,argv,title,cwd=None):
  persistent=[];scratch=[]
- for p in file_inputs(argv):
+ for p in file_inputs(argv,cwd):
   ephemeral=(label in ('fsck','package-extract') and p.name==title+'.ffpkg' and p.parent.parent==Path(output)/'package' and p.parent.name.startswith('pack-'))
   (scratch if ephemeral else persistent).append(p)
  return persistent,scratch
@@ -192,73 +194,6 @@ def select_prepared_source(output, fresh, previous):
  return old
 
 
-def prepared_hint_path():
- return ROOT/'build/.native-app-last-complete.json'
-
-
-def prepared_hint_location(value):
- if not isinstance(value,str):raise ValueError('invalid prepared hint path')
- path=Path(value)
- if not path.is_absolute() or not any(path.is_relative_to(ROOT/n) for n in ('build','results')):
-  raise ValueError('prepared hint path outside build/results')
- if any(p.is_symlink() for p in (path,*path.parents)) or path.resolve()!=path:
-  raise ValueError('ambiguous prepared hint path')
- return path
-
-
-def bounded_prepared_json(path,limit):
- with path.open('rb') as stream:raw=stream.read(limit+1)
- if len(raw)>limit:raise ValueError('prepared hint input too large')
- data=json.loads(raw)
- if not isinstance(data,dict):raise ValueError('invalid prepared hint object')
- return data,hashlib.sha256(raw).hexdigest()
-
-
-def choose_prepared_source(output,fresh,explicit):
- if explicit is not None:
-  return select_prepared_source(output,fresh,explicit),{'mode':'explicit'}
- hint=prepared_hint_path()
- if not hint.exists() and not hint.is_symlink():return fresh,{'mode':'fresh','reason':'no_hint'}
- try:
-  prepared_hint_location(str(hint));data,hint_hash=bounded_prepared_json(hint,4096)
-  if set(data)!={'schema','receipt','receipt_sha256','prepared_source_build'} or data['schema']!=1:
-   raise ValueError('invalid prepared hint schema')
-  receipt=prepared_hint_location(data['receipt']);previous=prepared_hint_location(data['prepared_source_build'])
-  if receipt.name!='receipt.json':raise ValueError('invalid prepared receipt name')
-  prior,digest=bounded_prepared_json(receipt,64*1024*1024)
-  phases={'vocab':('source-only-vocabulary-native-client-app',147),'model-gate':('source-only-model-rejection-native-client-app',149),'model-prefix':('source-only-model-prefix-native-client-app',149)}
-  phase=prior.get('phase');contract=phases.get(phase)
-  if digest!=data['receipt_sha256'] or contract is None or prior.get('status')!='PASS' or prior.get('fixture')!='llm_client' or (prior.get('classification'),prior.get('object_count'))!=contract:
-   raise ValueError('invalid completed native app receipt')
-  if prepared_hint_location(prior.get('prepared_source_build',str(receipt.parent)))!=previous:
-   raise ValueError('prepared receipt source path differs')
- except (OSError,ValueError,KeyError,TypeError,RecursionError):
-  return fresh,{'mode':'fresh','reason':'invalid_or_stale_hint'}
- try:public=select_prepared_source(output,fresh,previous)
- except (OSError,ValueError,KeyError,TypeError,RecursionError):
-  return fresh,{'mode':'fresh','reason':'source_mismatch'}
- return public,{'mode':'automatic','receipt':str(receipt),'receipt_sha256':digest,'hint_sha256':hint_hash}
-
-
-def publish_prepared_hint(receipt,public):
- """An advisory pointer only: publish after the completed receipt, atomically."""
- temporary=None
- try:
-  hint=prepared_hint_location(str(prepared_hint_path()));receipt=prepared_hint_location(str(receipt))
-  previous=prepared_hint_location(str(public.parent));hint.parent.mkdir(parents=True,exist_ok=True)
-  data={'schema':1,'receipt':str(receipt),'receipt_sha256':b.sha(receipt),'prepared_source_build':str(previous)}
-  with tempfile.NamedTemporaryFile(mode='w',dir=hint.parent,prefix='.native-app-hint-',delete=False) as stream:
-   temporary=Path(stream.name);json.dump(data,stream);stream.write('\n')
-  os.replace(temporary,hint);return True
- except (OSError,ValueError) as error:
-  print('warning: completed app retained; prepared-source hint not updated: '+str(error),file=sys.stderr)
-  return False
- finally:
-  if temporary is not None:
-   try:temporary.unlink(missing_ok=True)
-   except OSError as error:print('warning: prepared-source hint temporary cleanup failed: '+str(error),file=sys.stderr)
-
-
 def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None):
  validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture)
  output=Path(output).resolve()
@@ -357,7 +292,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if prefix_info['model']['sha256']!=model_info['sha256'] or prefix_info['model']['bytes']!=model_info['bytes']:raise ValueError('prefix/model identity differs')
  output.mkdir(parents=True)
  original_run=b.run
- def recorded_run(out,label,argv):
+ def recorded_run(out,label,argv,cwd=None):
   argv=list(map(str,argv));executable=Path(argv[0]) if '/' in argv[0] else Path(shutil.which(argv[0]));bind(executable)
   if executable.is_relative_to(output):
    with executable.open('rb') as stream:magic=stream.read(4)
@@ -390,13 +325,13 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    runtime(linker)
    argv.insert(1,'-Wl,--trace')
   if label=='link' and '--trace' not in argv:argv.insert(1,'--trace')
-  row={'label':label,'argv':argv}
+  row={'label':label,'argv':argv,'cwd':str(ROOT if cwd is None else cwd)}
   # Bind generated binaries, raw ELF inputs, linker scripts and package executables before use.
-  persistent,scratch=command_file_inputs(output,label,argv,title)
+  persistent,scratch=command_file_inputs(output,label,argv,title,cwd=cwd)
   for p in persistent:bind(p)
   row['temporary_package_inputs']={str(p):b.sha(p) for p in scratch}
   try:
-   original_run(out,label,argv);row['exit_code']=0
+   original_run(out,label,argv,**({} if cwd is None else {'cwd':cwd}));row['exit_code']=0
    for p,h in row['temporary_package_inputs'].items():
     if b.sha(p)!=h:raise ValueError('temporary package input changed during command')
    if label=='link' or host_link:
@@ -428,9 +363,8 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  b.run=recorded_run
  try:
   public=b.source_tree(output,'llm_client');tree(public)
-  public,source_selection=choose_prepared_source(output,public,prepared_source_build)
+  public=select_prepared_source(output,public,prepared_source_build)
   reused_source=public!=output/'source-public'
-  if source_selection['mode']=='automatic':bind(source_selection['receipt'],source_selection['receipt_sha256'])
   if reused_source:
    tree(public);bind(public.parent/'source-base/receipt.json');bind(output/'source-base/receipt.json')
   units=b.compile_units(output,public,'llm_client',client_phase=phase)
@@ -480,12 +414,10 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
   b.cache.verify(ROOT,cache_record)
   receipt['compiler_cache']=cache_record
-  receipt['prepared_source_selection']=source_selection
   if reused_source:receipt['prepared_source_build']=str(public.parent)
   if prefix_info:receipt['llm_client']['prefix']={k:prefix_info[k] for k in ('receipt','receipt_sha256','reference')}
   if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-  publish_prepared_hint(output/'receipt.json',public)
   return receipt
  finally:b.run=original_run
 

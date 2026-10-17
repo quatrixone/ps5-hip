@@ -7,8 +7,12 @@ Updated: 2026-10-16, America/New_York.
 The 2026-10-15 plan review in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5
 within the original V1.1-V1.5 acceptance gates. Prioritize a linked native client
 and executed operator inventory alongside QKV, then one layer and full logits.
-M0 and M1 are validated on .40. The immediate priority is the actual-model
-M2 prefix, followed by one whole transformer layer, with milestone pushes.
+M0, M1 and the bounded actual-model prefix are validated on .40. The next
+priority is one whole transformer layer under M2: RoPE/KV, attention, output
+projection/residual and FFN/residual, with milestone pushes. Position-zero
+prefix validation does not close M2 or establish inference.
+
+- 2026-10-16 | M2 actual-model prefix | 50df1fd | .40 | pass: tokens 0/1/2/31999 at position zero, embedding/norm/weighted/full QKV, 24 raw tensors and 36 launches, external model reused, normal cleanup | evidence/console40-model-prefix-success.json | next: complete-layer RoPE/KV/attention/residual/FFN; M2 remains open
 
 - 2026-10-16 | M2 native prefix | .40 | failed: model/context loaded; public HIP rejected first GET_ROWS launch; healthy safety close | evidence/console40-model-prefix-launch-rejection.json | next: adapter admission fix
 

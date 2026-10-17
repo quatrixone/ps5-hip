@@ -20,11 +20,22 @@ SDK C/C++ cache hit/invalidation test, and `python3 tests/build_jobs_test.py` fo
 limit and ordering checks. A completed warm prefix build recorded 79 cache hits,
 two misses and 1637.75 seconds total; this is not a controlled cold/warm comparison.
 Cache hits still require fresh dependency discovery, input authentication,
-linking and packaging. Native builds now automatically try equivalent prepared
-compiler paths from the last successful build, with safe fresh-source fallback.
-Per-inventory parent resolution reduces repeated filesystem calls while retaining
-independent before/after dependency mappings and content verification.
-Whole-package savings from these two changes remain to be measured.
+linking and packaging. The runtime compilation stage uses paths relative to
+its freshly prepared source tree, so unchanged units can reuse cache entries
+across fresh output directories even when another runtime unit changes. It does
+not require an identical previous tree or a completed-build hint. Each compiler
+command records its working directory; dependency paths are resolved against
+that directory and bound to absolute source/header identities before and after
+compilation. Direct mode remains disabled.
+
+A real unchanged runtime unit compiled from two different prepared trees
+produced a cache hit and the same object bytes as uncached compilation. Separate
+SDK tests confirmed source/header changes and newly present optional headers
+invalidate the cache. These checks cover the current production flags without
+debug information; they do not establish a whole-package speedup. The first
+build using relative paths may miss entries created with older absolute paths.
+Per-inventory parent resolution also reduces repeated filesystem calls while
+retaining independent before/after mappings and content verification.
 
 Compiler parallelism is configured through Make's `JOBS` variable, for example
 `make llm-native-app JOBS=8` or `JOBS=1` for serial compilation in the stages below. Make exports the

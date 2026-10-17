@@ -31,36 +31,61 @@ fresh host failure cases, this closes the bounded M0 client-boundary gate.
 Cleanup-failure paths remain host-tested only. M1 remains complete. Neither
 result demonstrates model GPU tensor computation or inference.
 
-The actual-model embedding/norm/QKV prefix is now integrated in source for M2.
-Four real model graphs pass the host HIP-mock route (36 dispatches), and 361
-Python regression methods pass. Genuine GET_ROWS/Q8/Q4 object admission also
-passes sanitized runtime tests. These are offline results, not GPU numerical
-proof. Build and audit the native model-prefix package, then validate its 24
-raw tensors and lifecycle on .40. The full model still rejects unsupported work.
-See `docs/LLM_MODEL_PREFIX.md` for the reproducible Make targets and
-`evidence/offline-model-prefix-integration.json` for the bounded host evidence.
+The actual-model embedding/normalization/QKV prefix now passes native GPU
+validation on .40 as PPSA99014, using app v4 at source `50df1fd` and frozen
+candidate `results/source-public-llm-prefix-console-v3`. Tokens 0, 1, 2 and
+31999 each ran at position zero through the real model graph/backend: embedding
+lookup, RMSNorm, learned normalization weights and full Q/K/V projections.
+All 24 raw output tensors passed numerical validation across 36 GPU launches.
+The model was reused from `/data/hip/models`, and the native app completed
+normal cleanup. See `evidence/console40-model-prefix-success.json` for final
+acceptance and exact identities; `docs/LLM_MODEL_PREFIX.md` documents the scope.
 
-The v3 native prefix package built and its v2 deployment passed on .40.
-The model was reused from `/data/hip/models`; all 14 package assets were verified.
-Execution loaded the model and created its context, but the first embedding
-launch returned `hipErrorInvalidValue` before GPU submission. The public HIP
-adapter still rejects its required four-row launch. The app quarantined;
-the bounded controller closed PPSA99014, confirmed idle/healthy services and
-released both owned locks. No actual-model tensor output is validated.
-See `evidence/console40-model-prefix-launch-rejection.json`.
+This closes the bounded actual-model prefix milestone, not M2's whole-layer
+gate or inference. The full graph still rejects unsupported work. Next integrate
+RoPE, F16 KV writes, attention, attention output/residual and the normalized
+FFN/residual into this same backend path. Validate nonzero positions, causal
+cache history and repeated requests; position-zero prefix outputs do not prove
+those behaviors. Native original-format readers also remain unimplemented.
 
-Candidate `results/source-public-llm-prefix-console-v2` is consumed for both
-phases. Preserve its installed package, deployment backups, raw logs and
-`build/llm-native-prefix-app-v1` prepared sources used by v3. Do not replay it.
-The narrow GET_ROWS public-HIP admission fix now passes four resource tests
-and independent review. Prepare a fresh native candidate with regenerated
-prefix reference/assets v2; see `evidence/offline-public-getrows-admission.json`. M0/M1 remain passed; M2 remains open.
+Preserve app v4, its frozen candidate, deployment/recovery receipts and raw
+readbacks. Both candidate phases are consumed; do not replay them. Prepare a
+fresh candidate for the next native milestone. The model does not need another
+upload while its authenticated bytes remain unchanged.
 
-Build overhead fixes pass 123 focused tests: automatic verified prepared-source
-reuse and per-inventory dependency path resolution. The earlier freeze fix
-reduced one measured run from 1299 to 943 seconds. Whole-build savings from
-the newly applied changes remain unmeasured; see
-`evidence/offline-build-overhead-reduction.json`.
+Earlier prefix evidence remains valid history: four real graphs and 36 mocked
+HIP dispatches passed offline; 361 Python regression methods and sanitized
+GET_ROWS/Q8/Q4 admission tests passed. See
+`evidence/offline-model-prefix-integration.json`. App v3 / frozen candidate v2
+then loaded the model/context but rejected the first embedding launch with
+`hipErrorInvalidValue` before GPU submission, quarantined and completed a
+healthy controlled close. That run validated no model tensor output; see
+`evidence/console40-model-prefix-launch-rejection.json`. The narrow four-row
+GET_ROWS admission fix and four resource tests are recorded in
+`evidence/offline-public-getrows-admission.json`. Preserve the earlier recovery
+artifacts and v1 prepared sources used by v3; never replay consumed candidate v2.
+
+Build-performance work now uses relative generated source/include paths from
+each fresh prepared tree, allowing unchanged runtime units to hit ccache even
+when another unit changes. A real unchanged runtime TU hit across v1/v4 trees
+and matched uncached object bytes; isolated source/header/optional-header changes
+invalidated correctly. Default builds no longer depend on automatic prior-tree
+hints; the explicit prepared-source option remains available. Dependency scans,
+absolute input identities and before/after checks remain enforced. Historical
+123-test path-resolution/automatic-tree work remains recorded in
+`evidence/offline-build-overhead-reduction.json`; automatic selection is now
+superseded by per-unit reuse. One warm build took 1637.75 seconds with 79 hits
+and two misses. Freeze dedup reduced a measured run from 1299.29 to 942.888
+seconds (27.43%); neither result establishes whole-build savings from relative
+paths. The applied cache change passes 127 focused tests, including real SDK
+cache integration; see `evidence/offline-relative-compiler-cache.json` and
+`docs/SOURCE_ONLY_REBUILD.md` for controls and limits.
+
+The next native build must regenerate the CPU prefix reference and aggregate
+assets because their authenticated builder source changed. Reuse the unchanged
+CPU libraries, native client, GPU fixtures, SDK and model. The accepted v4
+package was built before this build-only change; a complete package using the
+new relative paths has not yet been built or timed.
 
 Disk cleanup removed 3167 superseded native/experiment object files (1.06 GiB).
 Receipts, sources, models, logs and recovery packages were retained; old

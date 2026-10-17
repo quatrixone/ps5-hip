@@ -55,14 +55,27 @@ Package creation alone is not validation. The source-only freezer, final-image a
 
 The expected final observed data-buffer counts are five allocations/frees and one created/retired default queue. The transcript also measures largest-free direct-memory extents; these are not total-free-memory measurements. A discrepancy after first-time AGC initialization requires investigation rather than assuming either a successful cleanup or a proven model-buffer leak.
 
-## Reusing prepared compiler paths
+## Compiler cache reuse across fresh builds
 
-Native app builds automatically try the last completed build's prepared compiler paths.
-The hint only selects a candidate: the builder prepares a fresh tree, validates
-the previous receipt and compares both complete trees before reuse. Missing,
-invalid or mismatching automatic candidates fall back to fresh sources.
-`LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior-app` explicitly selects a prior
-build and rejects a mismatch. Always select a fresh output directory.
-The selected prior receipt and source tree become dependencies and must be
-retained. Reuse does not restore missing receipts or guarantee cache hits.
-The advisory hint is published only after a successful final build receipt.
+Native app builds prepare a fresh source tree by default. Runtime units compile
+with generated source/include paths relative to that tree, allowing ccache to
+reuse unchanged units across output directories. Changing one runtime source
+file does not require an identical prior tree to reuse other units. Header
+changes still invalidate affected units, and every compile retains fresh
+dependency discovery and before/after source/header verification. Always select
+a fresh output directory. No completed-build hint or previous tree is required
+for default cache reuse.
+
+The optional `LLM_NATIVE_APP_PREPARED_SOURCE_BUILD=build/prior-app` remains
+available for explicitly selecting prior compiler paths. The builder prepares
+a fresh tree and compares the complete inventories, content and preparation
+identities before accepting that selection; a mismatch fails. The selected
+prior source tree and preparation identities become receipt dependencies and
+must be retained. This option does not restore missing receipts or guarantee
+cache hits.
+
+Cross-directory reuse has been checked with a real unchanged runtime unit and
+SDK source/header invalidation tests. Whole-package savings remain unmeasured;
+cache hits still perform prerequisite authentication, dependency scans, hashing,
+linking and packaging. See [source-only build controls](SOURCE_ONLY_REBUILD.md)
+for cache and worker settings and the measured warm-build limit.

@@ -54,7 +54,7 @@ class ModelPackage(unittest.TestCase):
   with tempfile.TemporaryDirectory() as name:
    folder=Path(name);source=folder/'source';hip=source/'hipamd/src';hip.mkdir(parents=True)
    for i in range(30):(hip/(str(i)+'.cpp')).write_text('')
-   def compile_bound(out,path,obj,flags,label):
+   def compile_bound(out,path,obj,flags,label,source_root=None):
     calls.append((path,flags));return {'object':str(obj.relative_to(out))}
    for phase in ('vocab','model-gate'):
     calls=[];out=folder/phase;out.mkdir()
