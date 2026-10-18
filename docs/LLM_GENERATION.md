@@ -185,3 +185,22 @@ process teardown; those require the fresh image audit and actual controller run.
 `make llm-native-generation-tests` runs these offline tests and the numerical
 helper. Current helper output is `results/m4-native-generation-numeric-v6`, with all
 384 tensors still bitwise CPU-equal. No native package rebuild was needed here.
+
+## Native generation package selection
+
+Build through Make with `LLM_NATIVE_APP_PHASE=model-full LLM_FULL_PROFILE=generation`.
+The full-assets target selects `LLM_GENERATION_REFERENCE_DIR` and defaults to a
+separate `results/llm-generation-assets` receipt; smoke retains its existing
+default directory. Reused assets must have the requested profile. The app builder
+authenticates that receipt, checks the pinned metadata sizes and derives the title
+macro; there is no runtime profile file that can turn a smoke package into
+generation. Weights stay external at `/data/hip/models/tinyllama-q4_0.gguf`.
+
+The audit CLI takes `--full-profile generation` and checks the matching seventh
+helper argument, generation tokenizer/reset/sampler/process/decoder/logit/EOS
+call edges and both prompt/feedback process callsites. It retains the common HIP,
+wrapper, loader and cleanup contracts. This is selected static call-chain proof;
+indirect feedback/callback dataflow is additionally source/host/native evidence.
+The native object preflight compiles and exposes the expected symbols/profile2
+operand. Actual linked-image and console validation still follow this contract
+milestone. Current native client v7 remains authenticated and can be reused.

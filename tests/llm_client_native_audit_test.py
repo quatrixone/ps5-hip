@@ -318,9 +318,9 @@ class Full(unittest.TestCase):
  def smoke_body():
   return '10: movq %rsp, %rax\n13: movq %rcx, (%rax)\n16: movl $0x1, 0x8(%rax)\n1d: leaq 0x30(%rip), %rcx\n24: movq %rbx, %r9\n27: leaq 0xc0(%rsp), %rdi\n2f: leaq 0xf0(%rsp), %rdx\n37: leaq 0x218(%rsp), %r8\n40: callq 0x9000 <run>\n'
  def test_smoke_argument_not_long_or_overwritten(self):
-  body=self.smoke_body();a.full_smoke_operand(body,'run')
+  body=self.smoke_body();a.full_profile_operand(body,'run')
   for changed in (body.replace('$0x1','$0x0'),body.replace('0x8(%rax)','0x10(%rax)'),body.replace('40: callq','38: movl $0x0, 0x8(%rsp)\n40: callq'),body+body):
-   with self.assertRaises(RuntimeError):a.full_smoke_operand(changed,'run')
+   with self.assertRaises(RuntimeError):a.full_profile_operand(changed,'run')
  def contract_fixture(self):
   names=('run enable disable reset context_reset model_reset readback writer graph backend_init release begin finish execute initialize shutdown controls select node launch read dispatch_reset').split();roles={n:n for n in names}
   bodies={n:'' for n in names};bodies['main']=self.smoke_body();bodies[a.WRAPPER]=''
@@ -340,6 +340,40 @@ class Full(unittest.TestCase):
   for caller in dispatch:
    bad=dict(bodies);bad[caller]+='900: callq 0x9000 <ggml_backend_cpu_init>\n'
    with self.assertRaises(RuntimeError):a.full_contract(bad,roles,dispatch)
+
+class Generation(unittest.TestCase):
+ def fixture(self):
+  r={n:n for n in ('helper','sampler','process','decode','eog','greedy')};full={'run':'run','reset':'reset'}
+  bodies={n:'' for n in (*r.values(),*full.values())}
+  for caller,targets in a.generation_edges(full,r).items():
+   bodies[caller]=''.join(f'{10+i*8:x}: callq 0x9000 <{t}>\n' for i,t in enumerate(targets))
+  bodies['sampler']+='80: callq 0x9000 <process>\n'
+  return bodies,full,r,list(r.values())
+ def test_generation_abi_is_distinct_and_not_overwritten(self):
+  body=Full.smoke_body().replace('$0x1','$0x2');a.full_profile_operand(body,'run','generation')
+  for profile,changed in [('smoke',body),('generation',Full.smoke_body()),('generation',body.replace('40: callq','38: movl $0x1, 0x8(%rsp)\n40: callq')),('long',body)]:
+   with self.subTest(profile=profile),self.assertRaises(RuntimeError):a.full_profile_operand(changed,'run',profile)
+ def test_all_actual_generation_edges_required(self):
+  bodies,full,r,scope=self.fixture();a.generation_contract(bodies,full,r,scope)
+  for caller,targets in a.generation_edges(full,r).items():
+   for callee in targets:
+    changed=dict(bodies);changed[caller]=changed[caller].replace('<'+callee+'>','<wrong>')
+    with self.subTest(caller=caller,callee=callee),self.assertRaises(RuntimeError):a.generation_contract(changed,full,r,scope)
+ def test_sampling_order_feedback_and_no_fallback(self):
+  bodies,full,r,scope=self.fixture()
+  for caller,changed in [('process',bodies['process'].replace('<decode>','<temp>').replace('<greedy>','<decode>').replace('<temp>','<greedy>')),('sampler',bodies['sampler'].replace('80: callq 0x9000 <process>','')),('decode',bodies['decode'].replace('<llama_get_logits_ith>','<wrong>'))]:
+   modified=dict(bodies);modified[caller]=changed
+   with self.assertRaises(RuntimeError):a.generation_contract(modified,full,r,scope)
+  for caller in scope:
+   modified=dict(bodies);modified[caller]+='900: callq 0x9000 <ggml_backend_cpu_init>\n'
+   with self.subTest(caller=caller),self.assertRaises(RuntimeError):a.generation_contract(modified,full,r,scope)
+ def test_generation_symbols_must_be_unique_functions(self):
+  names=['_ZN2m019run_full_generationEargs','_ZN17ps5hip_generation8generateIargs','_ZZN17ps5hip_generation8generateIargsENKUliE_clEi','_ZZN2m019run_full_generationEargsENKUliiE_clEii','_ZZN2m019run_full_generationEargsENKUliE_clEi','_ZN17ps5hip_generation6greedyEargs']
+  values={n:[i+1] for i,n in enumerate(names)};addresses=set(range(1,7));a.generation_roles(values,addresses)
+  for name in names:
+   with self.subTest(name=name),self.assertRaises(RuntimeError):a.generation_roles({n:v for n,v in values.items() if n!=name},addresses)
+  with self.assertRaises(RuntimeError):a.generation_roles({**values,names[3]+'junk_clEii':[7]},addresses|{7})
+  with self.assertRaises(RuntimeError):a.generation_roles(values,addresses-{4})
 
 class NativeLoader(unittest.TestCase):
  def fixture(self):

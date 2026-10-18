@@ -15,6 +15,15 @@ class Driver(unittest.TestCase):
     d.validate_phase_arguments(phase,'model','source','cpu',full_fixture='full')
   with self.assertRaisesRegex(ValueError,'full fixture'):d.validate_phase_arguments('model-full','model','source','cpu')
   with self.assertRaisesRegex(ValueError,'prerequisites'):d.validate_phase_arguments('model-full',None,'source','cpu',full_fixture='full')
+ def test_full_profile_and_fixed_native_metadata(self):
+  model={'sha256':'a'*64,'bytes':619831552};info={'model':dict(model),'profile':'smoke'}
+  self.assertEqual(d.validate_full_profile(info,model),'smoke')
+  info.update(profile='generation',raw_files={**{str(i):8192 for i in range(384)},'generation.json':590,'steps.jsonl':1108})
+  self.assertEqual(d.validate_full_profile(info,model),'generation')
+  for key,value in [('profile','long'),('raw_files',{}),('model',{'sha256':'b'*64,'bytes':619831552})]:
+   with self.subTest(key=key),self.assertRaises(ValueError):d.validate_full_profile({**info,key:value},model)
+  for name in ('generation.json','steps.jsonl'):
+   with self.subTest(name=name),self.assertRaisesRegex(ValueError,'metadata'):d.validate_full_profile({**info,'raw_files':{**info['raw_files'],name:1}},model)
  def test_outputs_never_treated_as_input(self):
   with tempfile.TemporaryDirectory() as name:
    folder=Path(name);a=folder/'input';o=folder/'output';dep=folder/'out.d'

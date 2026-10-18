@@ -3,6 +3,37 @@
 Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## M4 native generation profile and audit contract prepared
+
+The builder now derives the title's compile-time generation selection from its
+authenticated six-module asset receipt. Smoke stays the default. Generation checks
+16 requests, 386 files/5,064,354 bytes, 12,768 nodes and 11,728 launches, and emits a
+profile-specific application completion marker. Make selects the generation CPU
+oracle with `LLM_FULL_PROFILE=generation` and rejects a reused aggregate with the
+wrong profile.
+
+The native generation title object compiles with consumed headers bound. Its
+actual ABI operand is 2, and the helper/sampler/process/decode/EOS/greedy symbols
+match the new audit selectors. The auditor adds their selected direct call edges,
+prompt/feedback process callsites and matching profile operand while retaining
+common scheduler/HIP, allocator, loader, callback-address and cleanup checks.
+Complete indirect feedback dataflow is not claimed by this static audit.
+See `evidence/offline-native-generation-profile.json`; 129 focused test methods
+pass. This is object/contract qualification, not a linked-image audit.
+
+Native client `build/llm-native-client-v7` passes current authentication and its
+70 objects can be reused; no replacement client build is needed. Reuse prepared
+public source/compiler paths from `build/llm-native-full-smoke-app-v1`. Preserve
+`results/m4-native-title-preflight-v1`, including the initial section-count
+inspection failure: the general object reader was replaced with llvm-nm for this
+preflight, without weakening linked-image bounds.
+
+Next build the generation package once with those authenticated inputs, inspect
+its actual raw/converted/extracted images and finish the full audit. Then commit,
+freeze/review and test the fresh candidate on idle .40. No native package build or
+console contact occurred in this contract milestone. The installed smoke baseline
+and consumed candidate remain untouched.
+
 ## M4 generation freeze, readback and application contracts integrated offline
 
 The generation profile now selects its CPU oracle during reference freezing and

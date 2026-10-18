@@ -11,6 +11,12 @@ from external_model import DEFAULT_MODEL_PATH, validate_external_model, encode_m
 from source_public_hip_log import package_limit
 
 
+def validate_full_profile(info,model):
+ if info['model']['sha256']!=model['sha256'] or info['model']['bytes']!=model['bytes'] or info['profile'] not in ('smoke','generation'):raise ValueError('full/model profile identity differs')
+ if info['profile']=='generation' and (len(info['raw_files'])!=386 or info['raw_files'].get('generation.json')!=590 or info['raw_files'].get('steps.jsonl')!=1108):raise ValueError('generation title metadata contract differs')
+ return info['profile']
+
+
 def file_inputs(argv,cwd=None):
  """Existing explicit file operands, excluding compiler/converter output operands."""
  skipped={i+1 for i,a in enumerate(argv) if a in ('-o','--out','-MF')}
@@ -303,7 +309,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  if phase=='model-full':
   from public_hip_full_assets import full_inputs
   full_info=full_inputs(full_fixture);merge(full_info['inputs'])
-  if full_info['model']['sha256']!=model_info['sha256'] or full_info['model']['bytes']!=model_info['bytes'] or full_info['profile']!='smoke':raise ValueError('full/model profile identity differs')
+  validate_full_profile(full_info,model_info)
  output.mkdir(parents=True)
  original_run=b.run
  def recorded_run(out,label,argv,cwd=None):
@@ -381,7 +387,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   reused_source=public!=output/'source-public'
   if reused_source:
    tree(public);bind(public.parent/'source-base/receipt.json');bind(output/'source-base/receipt.json')
-  units=b.compile_units(output,public,'llm_client',client_phase=phase)
+  units=b.compile_units(output,public,'llm_client',client_phase=phase,full_profile=full_info['profile'] if full_info else 'smoke')
   merge(merged_unit_headers(units))
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
   flags=b.compiler_flags(public)+['-I'+str(upstream_client/n) for n in ('include','ggml/include','ggml/src')]+['-I'+str(ROOT/'ports/ggml')]
@@ -410,13 +416,14 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
   audit=output/'llm-client-native-audit.json'
-  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full') else [])])
+  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full') else []),*(['--full-profile',full_info['profile']] if full_info else [])])
   ar=json.loads(audit.read_text())
   if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!=phase or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
   if phase in ('model-gate','model-prefix','model-layer','model-full') and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
   if phase=='model-prefix' and ar.get('actual_prefix_call_chain_audited') is not True:raise ValueError('actual prefix call chain not audited')
   if phase=='model-layer' and ar.get('actual_layer_call_chain_audited') is not True:raise ValueError('actual layer call chain not audited')
-  if phase=='model-full' and ar.get('actual_full_call_chain_audited') is not True:raise ValueError('actual full call chain not audited')
+  if phase=='model-full' and (ar.get('actual_full_call_chain_audited') is not True or ar.get('full_profile')!=full_info['profile']):raise ValueError('actual full profile/call chain not audited')
+  if full_info and full_info['profile']=='generation' and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   merge(ar['inputs']);bind(audit)

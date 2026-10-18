@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-native-generation-selection-and-audit-contract",
+  "source_base_commit": "455b699",
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "results/m4-native-title-preflight-v1/title.o": "78bc9513d0d20c3ba95bdc1af4d893aa5292b3c7550fec512998817c9cfec73c",
+    "results/m4-native-title-preflight-v1/unit.json": "ce64e1a3022a15aa712aa8985ae752133073370b3e8c8157fd30a1f05531250e",
+    "results/m4-native-title-preflight-v1/generation-roles.json": "557d6e489adeace7e9a87e94569403b81e6febed9f9b570ab5f704a540ebfb18",
+    "results/m4-native-title-preflight-v1/main-isa.stdout": "2e031bf6d5e703631ffd197e5d85aba5d4cdd9f82171e09d328e0995fa7ea09b",
+    "results/m4-native-title-preflight-v1/generation-isa.stdout": "3ec05e84c0325d9e879ea97d49ac995f8e2b6c06177b3d2811358192d1a842c3",
+    "build/llm-native-client-v7/receipt.json": "2f1cbbb536717290258fbdff9e2ed7efbc66c3e30dedcf2378bc5978c870135d"
+  },
+  "native_object_preflight": {
+    "compiled": true,
+    "native_SDK_flags": true,
+    "source_and_consumed_headers_bound": true,
+    "profile_ABI_operand": 2,
+    "generation_roles_selected": [
+      "helper",
+      "sampler",
+      "process",
+      "decode",
+      "eog",
+      "greedy"
+    ],
+    "linked_image_audited": false,
+    "limits": [
+      "Initial generic symbol-reader inspection rejected the object section count; preserved diagnostic and used llvm-nm for object inspection without changing final image audit bounds."
+    ]
+  },
+  "selection": {
+    "authenticated_asset_profile_drives_title_macro": true,
+    "generation_macro_scoped_to_full_title": true,
+    "smoke_default_retained": true,
+    "fixed_generation_metadata_bytes": [
+      590,
+      1108
+    ],
+    "generation_expected_files": 386,
+    "generation_expected_requests": 16,
+    "generation_expected_nodes": 12768,
+    "generation_expected_launches": 11728,
+    "profile_specific_application_completion_marker": true
+  },
+  "audit_contract": {
+    "requires_matching_profile_ABI": true,
+    "checks_tokenizer_reset_sampler_process_decoder_logits_EOS_edges": true,
+    "checks_prompt_and_feedback_process_callsites": true,
+    "retains_common_HIP_scheduler_ownership_loader_and_cleanup_checks": true,
+    "generation_feedback_dataflow_proven": false,
+    "full_native_image_passed": false
+  },
+  "reuse": {
+    "native_client": "build/llm-native-client-v7",
+    "current_authentication": "PASS",
+    "objects": 70,
+    "client_rebuilt": false,
+    "prepared_public_source": "build/llm-native-full-smoke-app-v1"
+  },
+  "validation": {
+    "unit_groups": {
+      "native_image_audit_contract": 44,
+      "native_title": 5,
+      "native_app_builder": 20,
+      "native_model_package": 11,
+      "parallel_jobs": 5,
+      "Make_routes": 16,
+      "full_reference_freeze": 28
+    },
+    "Make_generation_profile": "LLM_NATIVE_APP_PHASE=model-full LLM_FULL_PROFILE=generation",
+    "new_native_translation_units_preflight": 1,
+    "native_package_built": false,
+    "console_contact": false
+  },
+  "limits": [
+    "This qualifies source contracts and one native object, not a linked application or native execution.",
+    "Complete indirect sampler/callback dataflow additionally requires source, host and native evidence.",
+    "Current GPU arithmetic proof remains offline interpretation; original smoke baseline is preserved."
+  ],
+  "next": [
+    "Build one generation package using authenticated native client v7 and prepared public source/compiler cache.",
+    "Audit actual raw/converted/extracted generation images, then commit/freeze/review the candidate before idle .40 validation."
+  ]
+}

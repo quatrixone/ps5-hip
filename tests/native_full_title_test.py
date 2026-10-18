@@ -63,6 +63,58 @@ class FullTitle(unittest.TestCase):
                     self.assertIn('-DPS5HIP_LLM_AUTHENTICATED_MODEL_GATE=1',flags)
                     self.assertNotIn('-DPS5HIP_LLM_AUTHENTICATED_MODEL_LAYER=1',flags)
 
+    def test_generation_flag_is_scoped_and_other_phases_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            folder=pathlib.Path(folder);source=folder/'source';hip=source/'hipamd/src';hip.mkdir(parents=True)
+            for i in range(30):(hip/(str(i)+'.cpp')).touch()
+            for profile in ('smoke','generation'):
+                calls=[];out=folder/profile;out.mkdir()
+                def compile_unit(output,path,obj,flags,label,source_root=None):
+                    calls.append((path.name,flags));return {'object':str(obj.relative_to(output))}
+                with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit):
+                    builder.compile_units(out,source,'llm_client',client_phase='model-full',full_profile=profile)
+                self.assertEqual([name for name,flags in calls if '-DPS5HIP_LLM_FULL_GENERATION=1' in flags],['public_hip_llm_client_console_title.cpp'] if profile=='generation' else [])
+            for phase,profile in [('vocab','generation'),('model-gate','generation'),('model-layer','generation'),('model-full','long')]:
+                with patch.object(builder,'compile_bound_unit') as compile_unit,self.assertRaisesRegex(ValueError,'full compile profile'):
+                    builder.compile_units(folder,source,'llm_client',client_phase=phase,full_profile=profile)
+                compile_unit.assert_not_called()
+
+    def test_production_profile_dispatch_and_counts(self):
+        text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
+        start=text.index('#if PS5HIP_LLM_FULL_GENERATION\n        const auto result=')
+        end=text.index('\n#endif',start)+len('\n#endif');branch=text[start:end]
+        fixture=r"""
+#include <array>
+#include <stdexcept>
+#include <string>
+namespace m0 {
+enum class NativeFullProfile {sequence,smoke,generation};
+struct Full {unsigned requests,completed_nodes,launches;};
+struct Result {unsigned files,bytes;Full full;};
+static int seen;
+void require(bool ok){if(!ok)throw std::runtime_error("contract");}
+Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int,int,NativeFullProfile p){
+ seen=int(p);Result r=p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
+#ifdef BAD_RESULT
+ ++r.full.launches;
+#endif
+ return r;
+}}
+namespace ps5hip_canary {constexpr int sync_log=0;}
+int main(){const std::string model_path="unused";std::array<const char*,6> modules{};int prefix_write=0,directory=0,model_memory_snapshot=0;
+ struct {unsigned launches;bool uncertain;unsigned allocations,frees;} observed{PS5HIP_LLM_FULL_GENERATION?11728u:2199u,false,16,16};
+ try{
+"""
+        with tempfile.TemporaryDirectory() as folder:
+            folder=pathlib.Path(folder);cpp=folder/'title.cpp';binary=folder/'title'
+            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_GENERATION?2:1)?0:1;}catch(...){return 99;}}\n')
+            for profile in (0,1):
+                for bad in (False,True):
+                    command=['c++','-std=c++17','-DPS5HIP_LLM_FULL_GENERATION='+str(profile),str(cpp),'-o',str(binary)]
+                    if bad:command.append('-DBAD_RESULT=1')
+                    subprocess.run(command,check=True)
+                    self.assertEqual(subprocess.run([str(binary)]).returncode,99 if bad else 0)
+
 
 if __name__ == '__main__':
     unittest.main()

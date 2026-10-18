@@ -107,13 +107,22 @@ class FullExecutionMake(unittest.TestCase):
    self.assertNotIn('source_console.py',text)
  def test_full_native_phase_uses_its_own_aggregate(self):
   with tempfile.TemporaryDirectory() as directory:
-   receipt=Path(directory)/'receipt.json';receipt.write_text('{}')
+   receipt=Path(directory)/'receipt.json';receipt.write_text('{"profile":"smoke"}')
    text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-full','LLM_NATIVE_APP_FULL_FIXTURE='+directory)
   self.assertIn('--phase "model-full"',text)
   self.assertIn('--full-fixture "'+directory+'"',text)
   self.assertNotIn('--layer-fixture',text)
   self.assertNotIn('--prefix-fixture',text)
   self.assertLess(text.index('tests/public_hip_full_assets_test.py'),text.index('tools/build_llm_native_app.py'))
+ def test_generation_assets_select_the_generation_oracle(self):
+  text=self.run_make('llm-full-assets','LLM_FULL_PROFILE=generation','LLM_GENERATION_REFERENCE_DIR=results/selected-generation-reference')
+  self.assertIn('llm-generation-reference',text);self.assertIn('--reference "results/selected-generation-reference" --profile "generation"',text);self.assertIn('results/llm-generation-assets',text);self.assertNotIn('then echo llm-full-reference',text)
+  smoke=self.run_make('llm-full-assets');self.assertIn('--profile "smoke"',smoke);self.assertIn('results/llm-full-assets',smoke)
+ def test_generation_app_checks_existing_profile_and_runs_its_tests(self):
+  with tempfile.TemporaryDirectory() as directory:
+   (Path(directory)/'receipt.json').write_text('{"profile":"generation"}')
+   text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-full','LLM_FULL_PROFILE=generation','LLM_NATIVE_APP_FULL_FIXTURE='+directory)
+  self.assertIn('requested full profile differs',text);self.assertIn('tests/native_generation_application_test.py',text);self.assertIn('tests/llm_generation_readbacks_test.py',text);self.assertIn('tests/source_generation_console_test.py',text)
  def test_numerical_target_preserves_selected_reference(self):
   with tempfile.TemporaryDirectory() as directory:
    receipt=Path(directory)/'receipt.json';receipt.write_text('{}')

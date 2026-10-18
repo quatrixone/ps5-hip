@@ -46,7 +46,7 @@ FULL_SUPPORT_TEMPLATE='movq %rdi, -0x10(%rsp)\nmovq %rsi, -0x18(%rsp)\ntestb $0x
 FULL_WRAPPER_CALLS=['_ZN2m07requireEb', 'ggml_graph_n_nodes', 'ggml_graph_node', 'ggml_backend_sched_get_tensor_backend', '_ZNKSt3__13mapIP12ggml_backendPN11ps5hip_full8DispatchENS_4lessIS2_EENS_9allocatorINS_4pairIKS2_S5_EEEEE5countB8ne180100ERSA_', 'ggml_backend_name', 'fprintf', '_ZNSt3__13mapIP12ggml_backendPN11ps5hip_full8DispatchENS_4lessIS2_EENS_9allocatorINS_4pairIKS2_S5_EEEEE2atERSA_', '_ZN11ps5hip_full8Dispatch5beginEP11ggml_cgraph', '__cxa_begin_catch', 'ps5hip_llm_fail', 'ggml_backend_sched_graph_compute_async', '_ZN11ps5hip_full8Dispatch6finishEb', '__cxa_end_catch', '_ZN2m0L21qualify_actual_prefixEP11ggml_cgraph', '_ZN2m0L20qualify_actual_layerEP11ggml_cgraph', 'ggml_graph_n_nodes', 'ggml_graph_node', 'ggml_backend_sched_get_tensor_backend', 'ggml_backend_get_device', '_ZN2m013device_handleEv', '_ZN2m013device_handleEv', '_ZN2m0L8supportsEP19ggml_backend_devicePK11ggml_tensor', 'ggml_op_desc', 'ggml_backend_name', 'printf', 'ggml_backend_sched_graph_compute_async', '_Unwind_Resume', '__clang_call_terminate']
 FULL_GLOBAL_TARGETS={23: ('_ZN2m0L10last_graphE', 0), 30: ('_ZN2m0L10gate_callsE', 0), 39: ('_ZN2m0L10gate_callsE', 0), 45: ('_ZN2m0L12full_enabledE', 0), 58: ('_ZN2m0L11full_activeE', 0), 194: ('_ZN2m0L13full_backendsE', 0), 246: ('_ZN2m0L8rejectedE', 0), 255: ('_ZN2m0L8rejectedE', 0), 431: ('_ZN2m0L8rejectedE', 0), 440: ('_ZN2m0L8rejectedE', 0), 458: ('_ZN2m0L13full_backendsE', 0), 528: ('_ZN2m0L8rejectedE', 0), 537: ('_ZN2m0L8rejectedE', 0), 599: ('_ZN2m0L11full_activeE', 0), 606: ('_ZN2m0L23scheduled_compute_callsE', 0), 614: ('_ZN2m0L23scheduled_compute_callsE', 0), 699: ('_ZN2m0L11full_activeE', 0), 716: ('_ZN2m0L8rejectedE', 0), 725: ('_ZN2m0L8rejectedE', 0), 743: ('_ZN2m0L10full_statsE', 0), 754: ('_ZN2m0L10full_statsE', 0), 761: ('_ZN2m0L10full_statsE', 8), 774: ('_ZN2m0L10full_statsE', 8), 820: ('_ZN2m0L12prefix_scopeE', 0), 843: ('_ZN2m0L11layer_scopeE', 0), 1020: ('_ZN2m0L8rejectedE', 0), 1029: ('_ZN2m0L8rejectedE', 0), 1179: ('_ZN2m0L23scheduled_compute_callsE', 0), 1188: ('_ZN2m0L23scheduled_compute_callsE', 0)}
 FULL_OPS=frozenset((0,1,2,7,25,29,35,36,37,38,40,42,46,48,100))
-FULL_SOURCES=["ports/ggml/native_full.h","ports/ggml/full_qualification.h","ports/ggml/full_dispatch.h","ports/ggml/full_graph.h","tests/llm_native_full_test.cpp","tests/native_full_title_test.py"]
+FULL_SOURCES=["ports/ggml/native_full.h","ports/ggml/generation.h","ports/ggml/full_qualification.h","ports/ggml/full_dispatch.h","ports/ggml/full_graph.h","tests/llm_native_full_test.cpp","tests/native_full_title_test.py"]
 LOADER_SOURCES=['tools/prepare_llm_native_loader.py','tests/llm_native_loader_test.py']
 
 # LLVM18 O0 native local RAII owner: preserve size/pointer ABI and null-throw control flow.
@@ -392,7 +392,9 @@ def full_edges(r):
   r['node']:[r['launch']],r['controls']:[r['read']],r['readback']:['ggml_backend_tensor_get'],
   WRAPPER:[r['begin'],'ggml_backend_sched_graph_compute_async',r['finish']]}
 
-def full_smoke_operand(body,run):
+def full_profile_operand(body,run,profile="smoke"):
+ require(profile in ("smoke","generation"),"unsupported full audit profile")
+ operand="0x1" if profile=="smoke" else "0x2"
  positions=symbol_calls(body,run);require(len(positions)==1,'full helper call missing/duplicated')
  before=body[:positions[0]]
  instructions=[]
@@ -401,15 +403,15 @@ def full_smoke_operand(body,run):
   if m:instructions.append(re.sub(r'\s+',' ',m[1].split('#')[0].strip()))
  window=instructions[-14:]
  first=next((i for i,s in enumerate(window) if s=='movq %rsp, %rax'),None)
- require(first is not None and window[first:first+3]==['movq %rsp, %rax','movq %rcx, (%rax)','movl $0x1, 0x8(%rax)'],'full title does not pass smoke ABI operand')
+ require(first is not None and window[first:first+3]==['movq %rsp, %rax','movq %rcx, (%rax)','movl $'+operand+', 0x8(%rax)'],'full title does not pass '+profile+' ABI operand')
  # No later stack/rax rewrite may replace the reviewed seventh source argument.
- require(not any(re.search(r', (?:0x8\(%r(?:ax|sp)\)|%rax|%rsp)$',s) for s in window[first+3:]),'full smoke operand overwritten')
+ require(not any(re.search(r', (?:0x8\(%r(?:ax|sp)\)|%rax|%rsp)$',s) for s in window[first+3:]),'full profile operand overwritten')
 
-def full_contract(bodies,r,dispatch_names):
+def full_contract(bodies,r,dispatch_names,profile="smoke"):
  for caller,targets in full_edges(r).items():
   for callee in targets:require(symbol_calls(bodies[caller],callee),'full call missing: '+caller+' -> '+callee)
  ordered_calls(bodies[r['run']],[r['enable'],'llama_model_load_from_file','llama_init_from_model','llama_synchronize','llama_memory_clear',r['reset'],'llama_process',r['context_reset'],r['model_reset'],r['disable'],'llama_backend_free'])
- full_smoke_operand(bodies['main'],r['run'])
+ full_profile_operand(bodies['main'],r['run'],profile)
  # Audit all connected dispatcher helpers, including counter-recording lambdas.
  def reachable(start,target):
   pending=[start];seen=set()
@@ -426,7 +428,45 @@ def full_contract(bodies,r,dispatch_names):
   for bypass in ('ggml_backend_cpu_init','ggml_backend_sched_graph_compute_async','__real_ggml_backend_sched_graph_compute_async'):
    require(not symbol_calls(bodies[caller],bypass),'full CPU/scheduler fallback call')
 
-def audit(raw,converted,extracted,phase="vocab"):
+def generation_roles(values,function_addresses):
+ def select(predicate,role):
+  found=[n for n,v in values.items() if len(v)==1 and v[0] in function_addresses and predicate(n)]
+  require(len(found)==1,'missing/ambiguous generation '+role)
+  return found[0]
+ return {role:select(predicate,role) for role,predicate in {
+  'helper':lambda n:n.startswith('_ZN2m019run_full_generationE'),
+  'sampler':lambda n:n.startswith('_ZN17ps5hip_generation8generateI'),
+  'process':lambda n:n.startswith('_ZZN17ps5hip_generation8generateI') and n.endswith('_clEi'),
+  'decode':lambda n:n.startswith('_ZZN2m019run_full_generationE') and n.endswith('_clEii'),
+  'eog':lambda n:n.startswith('_ZZN2m019run_full_generationE') and n.endswith('_clEi'),
+  'greedy':lambda n:n.startswith('_ZN17ps5hip_generation6greedyE')}.items()}
+
+
+def generation_edges(full,r):
+ return {full['run']:[r['helper']],
+  r['helper']:['llama_model_get_vocab','llama_tokenize','llama_synchronize','llama_memory_clear',full['reset'],r['sampler'],'llama_token_to_piece'],
+  r['sampler']:[r['process'],r['eog']],r['process']:[r['decode'],r['greedy']],
+  r['decode']:['llama_batch_ext_init','llama_batch_ext_add_token','llama_batch_ext_set_pos','llama_batch_ext_set_output_logits','llama_process','llama_batch_ext_free','llama_get_logits_ith'],
+  r['eog']:['llama_vocab_is_eog']}
+
+
+def generation_contract(bodies,full,r,scope):
+ edges=generation_edges(full,r)
+ for caller,targets in edges.items():
+  for callee in targets:require(symbol_calls(bodies[caller],callee),'generation call missing: '+caller+' -> '+callee)
+ ordered_calls(bodies[r['helper']],['llama_model_get_vocab','llama_tokenize','llama_synchronize','llama_memory_clear',full['reset'],r['sampler'],'llama_token_to_piece'])
+ ordered_calls(bodies[r['process']],[r['decode'],r['greedy']])
+ ordered_calls(bodies[r['decode']],edges[r['decode']])
+ require(len(symbol_calls(bodies[r['sampler']],r['process']))==2,'generation prompt/feedback process callsites differ')
+ require(len(symbol_calls(bodies[r['sampler']],r['eog']))==1,'generation EOS callsite differs')
+ for caller in scope:
+  for bypass in ('ggml_backend_cpu_init','ggml_backend_sched_graph_compute_async','__real_ggml_backend_sched_graph_compute_async'):
+   require(not symbol_calls(bodies[caller],bypass),'generation CPU/scheduler fallback call')
+ return edges
+
+
+def audit(raw,converted,extracted,phase="vocab",full_profile="smoke"):
+ require(full_profile in ('smoke','generation') and (full_profile=='smoke' or phase=='model-full'),'invalid full audit profile')
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
  tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
  source_paths=[ROOT/n for n in SOURCES+(ALLOCATOR_SOURCES if phase in ('model-gate','model-prefix','model-layer','model-full') else [])]
@@ -499,12 +539,16 @@ def audit(raw,converted,extracted,phase="vocab"):
   layer_dispatch_names=[n for n in values if ('ps5hip_layer8Dispatch' in n or 'ps5hip_prefix8Dispatch' in n) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
   layer_names=[*layer.values(),*layer_dispatch_names,*[n for targets in layer_edges(layer).values() for n in targets]]
   names+=list(dict.fromkeys(n for n in layer_names if n not in names))
- full=None;full_dispatch_names=[];loader=None
+ full=None;full_dispatch_names=[];loader=None;generation=None;generation_names=[];generation_calls=None
  if phase=='model-full':
   loader=loader_roles(values)
   names+=list(dict.fromkeys(n for n in loader.values() if n not in names))
   full=full_roles(match)
   full_dispatch_names=[n for n in values if any(p in n for p in ('ps5hip_full8Dispatch','ps5hip_layer8Dispatch','ps5hip_prefix8Dispatch')) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
+  if full_profile=='generation':
+   generation=generation_roles(values,function_addresses)
+   generation_names=[n for n in values if ('run_full_generation' in n or 'ps5hip_generation' in n) and len(values[n])==1 and one(n) in function_addresses]
+   names+=list(dict.fromkeys(n for n in [*generation_names,*[n for targets in generation_edges(full,generation).values() for n in targets]] if n not in names))
   full_names=[*full.values(),'llama_free',*full_dispatch_names,*[n for targets in full_edges(full).values() for n in targets]]
   names+=list(dict.fromkeys(n for n in full_names if n not in names))
  # Current full-capable wrapper is shared by all phases; older reviewed images remain supported.
@@ -525,7 +569,8 @@ def audit(raw,converted,extracted,phase="vocab"):
  if layer is not None:
   phase_contract(phase,layer['run'],layer_chain,{n:body(n) for n in layer_chain})
   layer_contract({n:prefix_scope_aliases(body(n),layer,values,'ActualLayerQualification') for n in names},layer,layer_dispatch_names)
- if full is not None:full_contract({n:body(n) for n in names},full,full_dispatch_names)
+ if full is not None:full_contract({n:body(n) for n in names},full,full_dispatch_names,full_profile)
+ if generation is not None:generation_calls=generation_contract({n:body(n) for n in names},full,generation,generation_names)
  if loader is not None:loader_machine_contract({n:body(n) for n in loader.values()},loader,{k:one(n) for k,n in loader.items()})
  if allocator_roles is not None:allocator_contract({n:body(n) for n in names},allocator_roles)
  positions=ordered_calls(body('_start'),['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
@@ -596,7 +641,7 @@ def audit(raw,converted,extracted,phase="vocab"):
  require(all(sha(p)==h for p,h in identities.items()),'audit inputs changed')
  return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase=phase,
   inputs=identities,audited_functions=names,audited_function_count=len(names),layouts=layouts,imports=imports[0],
-   actual_full_call_chain_audited=(phase=='model-full'),native_loader_staging_audited=(loader is not None),full_profile=('smoke' if phase=='model-full' else None),full_callback_dataflow_proven=False,
+   actual_full_call_chain_audited=(phase=='model-full'),native_loader_staging_audited=(loader is not None),full_profile=(full_profile if phase=='model-full' else None),actual_generation_call_chain_audited=(generation is not None),generation_direct_edges=generation_calls,generation_feedback_dataflow_proven=False,full_callback_dataflow_proven=False,
    actual_layer_call_chain_audited=(phase=='model-layer'),layer_callback_dataflow_proven=False,
   actual_prefix_call_chain_audited=(phase=='model-prefix'),prefix_callback_dataflow_proven=False,
    native_allocator_routing_audited=(phase in ('model-gate','model-prefix','model-layer','model-full')),
@@ -605,13 +650,14 @@ def audit(raw,converted,extracted,phase="vocab"):
   'Selected GGML context, CPU-buffer, scheduler context-buffer and threadpool aligned pairs are checked in model mode; ordinary libc allocations are not intercepted and native ownership is unproven.',
   'Actual model call chains are checked for model phases; static presence is not execution evidence.',
    'Legacy reviewed wrappers reject nonempty graphs. Full-capable wrapper additionally checks exact active-node ownership, begin/real scheduler/finish control flow, mode/global targets and all 101 support-table entries; codegen changes require review.',
-   'Full smoke argument, direct cleanup/reset edges and selected callback addresses are checked; complete indirect callback/unique_ptr dataflow and runtime tensor ownership additionally require source/host/native evidence.',
+   'Full profile argument and, for generation, selected tokenizer/reset/sampler/decode/logit/EOS call edges are checked. Direct cleanup/reset edges and selected callback addresses are checked; complete indirect callback/unique_ptr dataflow and runtime tensor ownership additionally require source/host/native evidence.',
   'Static preservation/import/lifecycle audit only; no native loading, tokenization, computation or teardown execution proof.'])
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for n in ['raw','converted','extracted','output']:parser.add_argument('--'+n,type=Path,required=True)
  parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full'),default='vocab')
+ parser.add_argument('--full-profile',choices=('smoke','generation'),default='smoke')
  args=parser.parse_args()
  if args.output.exists():parser.error('fresh output required')
- report=audit(args.raw,args.converted,args.extracted,args.phase);args.output.parent.mkdir(parents=True,exist_ok=True)
+ report=audit(args.raw,args.converted,args.extracted,args.phase,args.full_profile);args.output.parent.mkdir(parents=True,exist_ok=True)
  with args.output.open('x') as f:json.dump(report,f,indent=2);f.write('\n')

@@ -16,6 +16,12 @@
 #include "ps5_backend.h"
 #include "model_gate.h"
 #include "native_host_allocator.h"
+#ifndef PS5HIP_LLM_FULL_GENERATION
+#define PS5HIP_LLM_FULL_GENERATION 0
+#endif
+#if PS5HIP_LLM_FULL_GENERATION && !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+#error generation requires the authenticated full-model title
+#endif
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
 #include "native_full.h"
 #endif
@@ -257,9 +263,15 @@ int main() {
           "/system_ex/app/PPSA99014/model-layer/q8.hsaco",
           "/system_ex/app/PPSA99014/model-layer/q4.hsaco",
           "/system_ex/app/PPSA99014/model-layer/layer.hsaco"};
+#if PS5HIP_LLM_FULL_GENERATION
+        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::generation);
+        m0::require(result.files==386&&result.bytes==5064354&&result.full.requests==16&&result.full.completed_nodes==12768&&result.full.launches==11728);
+        m0::require(observed.launches==11728&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
+#else
         const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::smoke);
         m0::require(result.files==72&&result.bytes==949248&&result.full.requests==3&&result.full.completed_nodes==2394&&result.full.launches==2199);
         m0::require(observed.launches==2199&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
+#endif
 #else
         ps5hip_clr_gpu_fail("model-full-not-authenticated");
 #endif
@@ -313,7 +325,11 @@ int main() {
     }
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
+#if PS5HIP_LLM_FULL_GENERATION
+    if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=generation watchdog_joined=true numerical=pending finalization=pending inference=false");
+#else
     if(phase==ClientPhase::model_full)std::puts("M3_FULL APP_COMPLETE profile=smoke watchdog_joined=true numerical=pending finalization=pending inference=false");
+#endif
     else if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else std::puts("M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending");
