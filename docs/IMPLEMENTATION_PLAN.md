@@ -22,6 +22,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Dense assets and readback verifier | offline | supported six-module aggregate and complete verifier fixture pass; no hardware-origin claim | evidence/offline-dense-assets-and-readbacks.json
 
+- 2026-10-18 | Native dense helper | host | supported sanitized 526 requests / 11,084 records and five failure modes pass; no PS5 execution | evidence/offline-native-dense-helper.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

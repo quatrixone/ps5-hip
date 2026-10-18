@@ -11,6 +11,7 @@
 #include "prefix_qualification.h"
 #include "prefix_dispatch.h"
 #include "layer_qualification.h"
+#include "dense_layer_qualification.h"
 #include "model_layer.h"
 #include "layer_dispatch.h"
 #include "full_dispatch.h"
@@ -58,6 +59,7 @@ static bool layer_owned(const ggml_tensor* t){
  std::fprintf(stderr,"M3 layer HIP failure site=%s result=%d\n",site,int(result));ps5hip_llm_fail("layer-hip");
 }
 struct LayerBackend {
+ bool dense_fixture=false;
  ggml_backend_t owner=nullptr;
  ps5hip_layer::Dispatch dispatch{layer_owned,layer_fail};
  LayerStatistics statistics{};
@@ -279,7 +281,20 @@ void configure_layer(ggml_backend_t b,const std::array<const char*,6>& modules){
  layer_backend=new(std::nothrow)LayerBackend;require(layer_backend);layer_backend->owner=b;
  try{layer_backend->dispatch.initialize(modules);}catch(...){ps5hip_llm_fail("layer-module-invariant");}
 }
+void configure_dense_layer(ggml_backend_t b,const std::array<const char*,6>& modules){
+ require(!full_enabled&&b&&b->device==&device&&!b->context&&!layer_backend&&!layer_scope&&!prefix_scope&&!prefix_active);
+ layer_backend=new(std::nothrow)LayerBackend;require(layer_backend);layer_backend->owner=b;layer_backend->dense_fixture=true;
+ try{layer_backend->dispatch.initialize_dense_fixture(modules);}catch(...){ps5hip_llm_fail("dense-layer-module-invariant");}
+}
 static LayerBackend& layer_state(ggml_backend_t b){require(layer_backend&&layer_backend->owner==b);return *layer_backend;}
+void execute_dense_layer(ggml_backend_t b,ggml_cgraph* graph){
+ auto& state=layer_state(b);require(state.dense_fixture&&!layer_active&&!layer_scope&&!prefix_scope&&!prefix_active&&graph);
+ layer_active=true;
+ // Fatal errors retain active state and resources; uncertain GPU work is quarantined.
+ try{require(ggml_backend_graph_compute(b,graph)==GGML_STATUS_SUCCESS);}catch(...){ps5hip_llm_fail("dense-layer-graph-invariant");}
+ layer_active=false;++state.statistics.invocations;++state.statistics.request_cursor;
+ state.statistics.last_token=0;state.statistics.last_position=int32_t(state.statistics.request_cursor-1);
+}
 void reset_layer_cache(ggml_backend_t b){
  require(!layer_active&&!layer_scope);auto& state=layer_state(b);
  sync(b);
@@ -298,7 +313,7 @@ LayerStatistics layer_statistics(ggml_backend_t b){auto& state=layer_state(b);au
 ps5hip_prefix::CallStatistics layer_call_statistics(ggml_backend_t b){return layer_state(b).dispatch.base.calls;}
 ActualLayerQualification::ActualLayerQualification(ggml_backend_t b,const LayerRequest* sequence,size_t size,Readback sink,void* pointer):backend(b),requests(sequence),count(size),readback(sink),user(pointer){
  require(sequence&&size&&size<=512&&sink&&!layer_scope&&!layer_active&&!prefix_scope&&!prefix_active);
- auto& state=layer_state(b);require(state.statistics.request_cursor==0);
+ auto& state=layer_state(b);require(!state.dense_fixture&&state.statistics.request_cursor==0);
  for(size_t i=0;i<size;++i)require(sequence[i].token>=0&&sequence[i].token<32000&&sequence[i].position==int32_t(i));
  layer_scope=this;
 }

@@ -3,6 +3,19 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Native dense execution helper: host qualification passes
+
+The supported `llm-native-dense-layer-tests` run passed with ASan/UBSan:
+526 requests, 11,084 packed records and 154,392,576 bytes match the CPU reference.
+The helper uses the actual backend allocation/dispatch path with host-interpreted
+HIP calls; this is not PS5 execution. All five injected failures pass quarantine
+checks. Successful cleanup frees all 16 allocations and releases host staging
+before its memory snapshot. Existing CPU libraries and reference were reused.
+See `evidence/offline-native-dense-helper.json` for the command and limitations.
+
+Next: finish native title, package and image-audit integration, then frozen
+controller admission and a bounded .40 run. No console was contacted.
+
 ## Dense assets and numerical readback verifier
 
 The supported `llm-dense-layer-assets` target now authenticates the six existing

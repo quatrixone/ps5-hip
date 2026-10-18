@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "scope": "synthetic-native-dense-helper-host-transport",
+  "native_executed": false,
+  "gpu_executed": false,
+  "receipt": "results/llm-native-dense-helper-main-v1/receipt.json",
+  "receipt_sha256": "8a1043c9d5f41eb3c6a7ae1dea584072b851a1e06a96a73da72851d8b111da77",
+  "requests": 526,
+  "records": 11084,
+  "bytes": 154392576,
+  "commands": [
+    {
+      "label": "compile",
+      "exit_code": 0,
+      "seconds": 9.79569789202651,
+      "leak_detection": true
+    },
+    {
+      "label": "linkage",
+      "exit_code": 0,
+      "seconds": 0.06766367901582271,
+      "leak_detection": true
+    },
+    {
+      "label": "missing-symbol",
+      "exit_code": 0,
+      "seconds": 0.06878759799292311,
+      "leak_detection": false
+    },
+    {
+      "label": "launch",
+      "exit_code": 0,
+      "seconds": 1.3224749619839713,
+      "leak_detection": false
+    },
+    {
+      "label": "sync",
+      "exit_code": 0,
+      "seconds": 1.8735827429918572,
+      "leak_detection": false
+    },
+    {
+      "label": "writer",
+      "exit_code": 0,
+      "seconds": 1.0231316050048918,
+      "leak_detection": false
+    },
+    {
+      "label": "readback",
+      "exit_code": 0,
+      "seconds": 0.8210266400128603,
+      "leak_detection": false
+    },
+    {
+      "label": "numeric",
+      "exit_code": 0,
+      "seconds": 51.67421625304269,
+      "leak_detection": true
+    }
+  ],
+  "limits": [
+    "Existing libraries are uninstrumented and no full CPU producer closure is reauthenticated",
+    "Failure-path leak checks disabled because fatal quarantine intentionally retains metadata/state",
+    "HIP kernel interpretation, not native execution; no model loading"
+  ],
+  "command": "make llm-native-dense-layer-tests LLM_CPU_BUILD_DIR=build/llm-original-format-cpu-v1 LLM_DENSE_REFERENCE_DIR=results/llm-dense-reference-main-v1 LLM_NATIVE_DENSE_TEST_DIR=results/llm-native-dense-helper-main-v1"
+}

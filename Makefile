@@ -752,3 +752,12 @@ llm-dense-layer-assets:
 	$(PYTHON) tests/public_hip_dense_layer_assets_test.py
 	@if ! test -f "$(LLM_DENSE_ASSETS_DIR)/receipt.json"; then $(PYTHON) tools/public_hip_dense_layer_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --layer "$(LLM_DENSE_LAYER_FIXTURE_DIR)" --reference "$(LLM_DENSE_REFERENCE_DIR)" --output "$(LLM_DENSE_ASSETS_DIR)"; fi
 	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_dense_layer_assets import dense_inputs; dense_inputs(Path(sys.argv[1]).resolve())' "$(LLM_DENSE_ASSETS_DIR)"
+
+LLM_NATIVE_DENSE_TEST_DIR ?= results/llm-native-dense-helper
+.PHONY: llm-native-dense-layer-tests
+llm-native-dense-layer-tests:
+	@test -f "$(LLM_CPU_BUILD_DIR)/receipt.json" || { echo "Existing LLM_CPU_BUILD_DIR receipt required" >&2; exit 1; }
+	@test -f "$(LLM_DENSE_REFERENCE_DIR)/reference.json" || { echo "Existing LLM_DENSE_REFERENCE_DIR reference required" >&2; exit 1; }
+	$(PYTHON) tests/llm_native_dense_layer_make_test.py
+	$(PYTHON) tests/llm_native_dense_layer_runner_test.py
+	$(PYTHON) tools/build_llm_native_dense_layer_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --reference "$(LLM_DENSE_REFERENCE_DIR)" --output "$(LLM_NATIVE_DENSE_TEST_DIR)"
