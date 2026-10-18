@@ -4,11 +4,14 @@ Updated: 2026-10-18, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
-Current corpus package deployment passed; execution rejected FTP dot directory
-entries before launch. The shared listing parser and controller verification
-changes pass373 source tests. Reuse the existing package in a fresh candidate;
-no corpus GPU result yet. See `evidence/offline-corpus-controller-recovery.json`.
+Current v2 corpus deployment failed before launch during existing-model FTP
+readback; subsequent health check reported no route to host. Both locks released.
+Preserve the consumed candidate; no automatic retry. Native corpus validation
+remains open. Finish the reviewed artifact-admission fix offline and establish
+console condition before a fresh hardware attempt. See
+`evidence/console40-corpus-model-read-transport-failure.json`.
 
+- 2026-10-18 | Frozen-artifact admission | offline | 19 admission and373 controller tests pass; real issuer qualification pending | evidence/offline-frozen-artifact-admission.json | next: fresh offline freeze
 
 The release plan in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5 within
 the original acceptance gates. M0, M1, the actual-model prefix and the selected

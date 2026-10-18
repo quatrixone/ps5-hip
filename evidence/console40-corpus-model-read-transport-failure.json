@@ -1,0 +1,32 @@
+{
+    "schema":  1,
+    "classification":  "transport-failure-before-native-corpus-launch",
+    "source_commit":  "a276126198f6ae19af9180f5f37be07915962257",
+    "candidate":  "results/source-public-llm-generation-corpus-console-v2",
+    "manifest_sha256":  "05c005bf701dabd3fdd5e1247fd2850befe09bb312842677dfed670c6c23b28e",
+    "package_sha256":  "8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2",
+    "deployment_receipt_sha256":  "d1381032473f39de9d271b751e9fca8424e3ebd8b53ba3b52ce25bf3ff5e8420",
+    "secondary_lock_receipt_sha256":  "6273a13b7b9a121826647578368237219e3eccdd2627074b86d16e8bee0c6163",
+    "deployment_accepted":  false,
+    "native_corpus_executed":  false,
+    "gpu_corpus_validated":  false,
+    "model_reuploaded":  false,
+    "package_promoted":  false,
+    "both_locks_released":  true,
+    "external_model_read":  {
+                                "path":  "/data/hip/models/tinyllama-q4_0.gguf",
+                                "expected_bytes":  619831552,
+                                "expected_sha256":  "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+                                "complete":  false,
+                                "received_bytes":  117875652,
+                                "error":  "TimeoutError(\u0027timed out\u0027)",
+                                "received_sha256":  "047e9e6313a91ea752f184e0ff7082ed6b582e9c3c968a695db75dca93e98645",
+                                "elapsed_seconds":  91.44466364203254
+                            },
+    "failure":  "TimeoutError(\u0027timed out\u0027)",
+    "health_error":  "OSError(113, \u0027No route to host\u0027)",
+    "healthy_after_established":  false,
+    "cause":  "Unknown: timeout followed by no route to host does not establish power loss, network loss, or console panic.",
+    "next":  "Preserve consumed v2 and do not replay. Establish console condition before any new hardware attempt; complete reviewed artifact admission offline first.",
+    "independent_review_sha256":  "ba01f5686a20d322e37fe4ff79fa233c287082755ad6bb2e530fec6ac2676cfd"
+}

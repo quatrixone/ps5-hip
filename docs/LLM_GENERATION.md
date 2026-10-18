@@ -276,3 +276,24 @@ indirect feedback/callback dataflow is additionally source/host/native evidence.
 The native object preflight compiles and exposes the expected symbols/profile2
 operand. Actual linked-image and console validation still follow this contract
 milestone. Current native client v7 remains authenticated and can be reused.
+
+## Frozen artifacts during deployment
+
+For a new full-model smoke, generation or corpus candidate, add
+`--frozen-artifact-admission` to `tools/freeze_source_candidate.py` with the
+usual build, output, snapshot and baseline arguments. This authenticates the
+complete producer closure before issuing `artifact-admission.json`; mutations
+after authentication are rejected. Existing candidates retain their old checks.
+
+The new controller path checks the exact frozen package, controllers, CPU
+reference and current validator code, including the prompt policy, before and
+after use. It does not reopen original producer paths during deployment or
+numerical comparison. Independent review of the manifest remains required.
+The copied provenance receipts are historical evidence, not executable paths.
+
+Keep the candidate's repository-relative directory when relocating a workspace.
+If the external model is absent on the console, supply `--model-file` to
+`tools/source_console.py`; existing remote model verification stays mandatory.
+The local two-lock wrapper must forward this option when uploading a missing
+model. Source-only tests are `python3 tests/frozen_full_admission_test.py`.
+This offline integration is not a real issuer qualification or measured speedup.

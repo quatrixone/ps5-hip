@@ -91,7 +91,8 @@ class PhaseFTP:
         return guarded
 
 class Control:
-    def __init__(self, candidate, phase):
+    def __init__(self, candidate, phase, model_file=None):
+        self.model_file=model_file
         self.candidate, self.phase = candidate, phase
         manifest_bytes = (candidate / 'manifest.json').read_bytes()
         self.manifest_sha = sha(manifest_bytes)
@@ -153,6 +154,11 @@ class Control:
         self.capture_errors = []
 
     def verify(self, execution_only=False):
+        if 'artifact_admission' in self.manifest:
+            require(sha((self.candidate/'manifest.json').read_bytes())==self.manifest_sha,'manifest changed')
+            from frozen_full_admission import validate
+            validate(self.candidate,self.manifest,ROOT)
+            return
         require(sha((self.candidate / 'manifest.json').read_bytes()) == self.manifest_sha, 'manifest changed')
         def check(item):
             name, digest = item
@@ -213,6 +219,10 @@ class Control:
         return self.model_phase() and self.manifest['llm_client']['phase'] in ('model-prefix','model-layer','model-full')
 
     def authenticate_llm_client(self):
+        if 'artifact_admission' in self.manifest:
+            from frozen_full_admission import validate
+            validate(self.candidate,self.manifest,ROOT)
+            return
         if self.model_phase():
             validate_model_candidate(self.candidate,self.manifest)
             return
@@ -576,7 +586,11 @@ class Control:
             temporary = str(Path(model['path']).parent) + '/.model-' + sha(self.token.encode())[:32] + '.upload'
             evidence['temporary'] = temporary
             require(not self.external_model_entry(temporary), 'model staging path already exists')
-            source = Path(self.manifest['llm_client']['model']['asset'])
+            if 'artifact_admission' in self.manifest:
+                require(self.model_file is not None,'new artifact admission requires explicit local model file when remote model is absent')
+                source = Path(self.model_file)
+            else:
+                source = Path(self.manifest['llm_client']['model']['asset'])
             self.model_upload(source, temporary, model['bytes'], model['sha256'],
                               self.record.setdefault('external_model_transfers', []), 1800)
             self.idle()
@@ -823,7 +837,12 @@ class Control:
             from verify_llm_prefix_readbacks import verify
         output=self.out/'prefix-numerical.json'
         binding=self.manifest['model_full' if self.full_phase() else 'model_layer' if self.layer_phase() else 'model_prefix']
-        result=verify(ROOT/binding['reference'],self.out/'raw',output,**({'profile':binding['profile']} if self.generation_phase() else {}))
+        if 'artifact_admission' in self.manifest:
+            from frozen_full_admission import FrozenReference
+            from frozen_full_readbacks import verify_frozen
+            result=verify_frozen(FrozenReference(self.candidate,self.manifest,ROOT),self.out/'raw',output)
+        else:
+            result=verify(ROOT/binding['reference'],self.out/'raw',output,**({'profile':binding['profile']} if self.generation_phase() else {}))
         require(result.get('status')=='PASS' and result.get('raw_files')==len(self.prefix_files()) and result.get('raw_bytes')==sum(self.prefix_files().values()),'prefix numerical verification failed')
         require(result.get('reference_receipt_sha256')==binding['reference_receipt_sha256'],'prefix numerical reference differs')
         require(result.get('raw_sha256')=={name:entry['sha256'] for name,entry in self.record['prefix_raw_files'].items()},'prefix compared bytes differ from captured bytes')
@@ -1203,5 +1222,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase', choices=('deploy', 'execute'))
     parser.add_argument('--candidate', type=Path, required=True)
+    parser.add_argument('--model-file', type=Path)
     args = parser.parse_args()
-    raise SystemExit(Control(args.candidate.resolve(), args.phase).run())
+    raise SystemExit(Control(args.candidate.resolve(), args.phase, model_file=args.model_file).run())

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "classification": "offline-frozen-artifact-admission-integration",
+  "status": "PASS",
+  "native_executed": false,
+  "gpu_executed": false,
+  "real_issuer_qualified": false,
+  "end_to_end_speedup_measured": false,
+  "tests": [
+    {
+      "command": "python3 tests/frozen_full_admission_test.py",
+      "tests": 19,
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p 'source_*test.py'",
+      "tests": 373,
+      "status": "PASS"
+    }
+  ],
+  "inputs": {
+    "tools/admission.py": "a00ce258fc6e7d529ab49aa8ef535e1c26515047450661b22bd1e57190667002",
+    "tools/frozen_full_admission.py": "2db58115f565bccfcb63473d3f7017580bf41d5b98412a6d36b0165f7f270954",
+    "tools/frozen_full_readbacks.py": "08dac521b89cf7150dd1a5375f31ae1eba58c196c2ddbc13b87d6449a0011ba8",
+    "tools/freeze_source_candidate.py": "1f46056c90c67d7e28bf8307ce809a468505a41ce4f8380b2688cade023e8372",
+    "tools/source_console.py": "fbf1b273a45b0678fc039bd920e90c7f88a06f8a0e100d686a541d6017d033d1",
+    "tests/frozen_full_admission_test.py": "8a08ae2d3e2636740783240d9b1d11095a475c7876463d27e13eaf3c1e50477e"
+  },
+  "logs": {
+    ".local/frozen-artifact-admission/integrated-main-tests.log": "bbb928e92b43ee818f5ae9b25b29bfbf0271892b6a1de19b5e503cff6fa28087",
+    ".local/frozen-artifact-admission/source-regression.log": "6c0a8ce94b74b00ee3e6feda842b242ad1c7f6e18655a8cec2a52ceae4b8f743"
+  },
+  "independent_review_sha256": "dbd66a205479cd162372606bc4e126aa16a945ffa1a53251ff943ebd0e66f64a",
+  "changed_package_producer_inputs": [],
+  "scope": "Producer closure remains mandatory at freeze; deployment/readback validate frozen consumed bytes and bound runtime code. Existing legacy behavior unchanged.",
+  "limits": [
+    "Synthetic issuer fixture; real producer freeze still required.",
+    "No measured deployment speedup or console result.",
+    "Existing independent manifest review remains trust anchor; no cross-machine authenticity from self-issued attestation."
+  ]
+}

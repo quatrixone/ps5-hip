@@ -8,7 +8,32 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
-## Corpus pre-launch rejection fixed; native validation still pending
+## Current: corpus deployment interrupted before launch
+
+Candidate `results/source-public-llm-generation-corpus-console-v2` froze and
+passed deploy-only review, then deployment failed while reading the existing
+external model: 117,875,652 of 619,831,552 bytes arrived before an FTP timeout.
+The subsequent health check reported `No route to host`. Both owned locks were
+released. No model upload, package promotion or corpus app launch occurred.
+This is a transport failure; the evidence does not establish a console panic.
+See `evidence/console40-corpus-model-read-transport-failure.json`.
+
+Preserve consumed v1 and v2 candidates; neither may be replayed or approved for
+execution. Confirm console condition before preparing a new hardware attempt.
+The unchanged corpus package remains available in `build/llm-native-corpus-app-v1`;
+no rebuild is required for host-only controller changes. Its last installed
+identity is recorded in the evidence, but current console health is unknown.
+
+Frozen-artifact admission is now integrated as an explicit freezer option.
+All 19 admission tests and 373 source-controller regressions pass; independent
+review defects (post-authentication identity rebinding and omitted prompt policy)
+are corrected and covered by tests. See
+`evidence/offline-frozen-artifact-admission.json`. Next qualify one fresh real
+issuer freeze before using the new route; no deployment speedup is claimed yet.
+Longer-generation helper and original-format reader patches remain isolated.
+The native four-token generation proof remains the latest GPU generation result.
+
+## Historical: corpus pre-launch rejection fixed
 
 The corpus package deployed successfully and passed independent review. Execution
 then stopped before launch because the PS5 FTP server lists `.` and `..` for the
@@ -23,20 +48,6 @@ pass. Scoped execution checks avoid unrelated producer sweeps under console lock
 fresh complete provenance still gates final acceptance after cleanup and lock
 release. Pending receipts cannot authorize execution. End-to-end speedup remains
 unmeasured. Evidence: `evidence/offline-corpus-controller-recovery.json`.
-
-Next freeze a fresh v2 candidate from `build/llm-native-corpus-app-v1`, then review,
-deploy and execute once on idle .40 under both locks. Reuse the unchanged 22,478,848
-byte package `8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2`,
-which is also the currently installed baseline. Use no baseline-log digest for
-the empty `/user/homebrew/ps5-hip/m4-corpus-v1` directory. The external model stays
-at `/data/hip/models/tinyllama-q4_0.gguf`. No native corpus inference is claimed.
-
-Do not rebuild the native app for this host-controller fix. Asset-verifier and
-prompt-capacity patches remain isolated in `.local` because applying them would
-invalidate producer inputs; integrate them after this native qualification.
-The local two-lock wrapper uses deferred finalization after releasing its
-secondary lock; its ignored file is not shipped through main. Earlier sections
-below are historical milestones, not the current resume action.
 
 ## Native corpus integration resume point
 

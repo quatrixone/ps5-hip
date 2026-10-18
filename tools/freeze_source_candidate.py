@@ -437,6 +437,7 @@ def main():
     parser.add_argument('--client-phase', choices=('vocab','model-gate','model-prefix','model-layer','model-full'), default='vocab')
     parser.add_argument('--baseline-image-bytes', type=int)
     parser.add_argument('--baseline-model-receipt', type=Path)
+    parser.add_argument('--frozen-artifact-admission', action='store_true')
     parser.add_argument('--transfer-seconds', type=int, default=1800)
     args = parser.parse_args()
     from build_public_hip import validate_results_directory
@@ -473,7 +474,10 @@ def main():
     validators={}
     if model_phase:
         from source_model_freeze import _validate_model_receipt, validator_identities, model_contract, _validate_model_candidate
-        validators=validator_identities()
+        if args.frozen_artifact_admission:
+            from frozen_full_admission import runtime_identities
+            validators=runtime_identities(ROOT)
+        else:validators=validator_identities()
         llm_client,prefix_data=_validate_model_receipt(args.build,receipt)
         if args.baseline_image_bytes is None or not 0<args.transfer_seconds<=1800:parser.error('model phase requires baseline size and bounded transfer seconds')
     else:llm_client = validate_llm_client(args.build,receipt) if fixture=='llm_client' else None
@@ -547,7 +551,7 @@ def main():
             path=Path(name).resolve()
             if path.is_relative_to(ROOT):files[str(path.relative_to(ROOT))]=h
     if model_phase:
-        if validator_identities()!=validators:parser.error('model validators changed during freeze')
+        if (runtime_identities(ROOT) if args.frozen_artifact_admission else validator_identities())!=validators:parser.error('model validators changed during freeze')
         for name,h in validators.items():
             if name in files and files[name]!=h:parser.error('validator identity conflict')
             files[name]=h
@@ -607,7 +611,11 @@ def main():
                 manifest['hypothesis']='Full TinyLlama five-prompt greedy corpus: sixteen generated tokens per prompt over two reset rounds each, 272 committed decodes through all 22 layers and full logits, one resident model/backend. Require 6528 CPU-compared float outputs and eleven exact metadata files, actual feedback, no early EOS, bounded timing and clean native ownership; long context remains separate.'
             if model_prefix['profile']=='generation':
                 manifest['hypothesis']='Full TinyLlama greedy generation: actual tokenizer and live-logit feedback, 16 committed decodes over two reset rounds, all 22 layers and full logits through HIP. Require 384 CPU-compared float outputs, exact token metadata, bounded timings and balanced native cleanup; wider prompts and long context remain separate.'
-        _validate_model_candidate(output,manifest,prefix_evidence)
+        if not args.frozen_artifact_admission:
+            _validate_model_candidate(output,manifest,prefix_evidence)
+    if args.frozen_artifact_admission:
+        from frozen_full_admission import emit
+        manifest=emit(output,manifest,ROOT)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')
 
