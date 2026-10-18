@@ -19,6 +19,7 @@ export RESULTS_DIR
 all: host-test native-core public-hip-package
 
 help:
+	@echo 'make llm-dense-layer-assets  Authenticate synthetic dense modules and complete CPU reference; no model assets'
 	@echo 'make llm-dense-layer-fixture  Compile and audit explicit17-export dense module; no GPU qualification'
 	@echo 'make llm-dense-layer-tests  Deterministic F16 whole-layer host comparison; reuses LLM_CPU_BUILD_DIR'
 	@echo 'make llm-dense-projection-test  Host F16 projection primitive; reuse LLM_CPU_BUILD_DIR (no GPU qualification)'
@@ -737,3 +738,17 @@ llm-dense-layer-fixture:
 	$(PYTHON) tests/llm_layer_fixture_test.py
 	@if ! test -f "$(LLM_DENSE_LAYER_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_layer_fixture.py --profile dense-f16 --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_DENSE_LAYER_FIXTURE_DIR)"; fi
 	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from build_llm_layer_fixture import fixture_inputs; fixture_inputs(Path(sys.argv[1]).resolve(),"dense-f16")' "$(LLM_DENSE_LAYER_FIXTURE_DIR)"
+
+LLM_DENSE_REFERENCE_DIR ?= results/llm-dense-reference
+LLM_DENSE_ASSETS_DIR ?= results/llm-dense-assets
+.PHONY: llm-dense-layer-assets
+llm-dense-layer-assets:
+	@if ! test -f "$(LLM_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-fixture; fi
+	@if ! test -f "$(LLM_GETROWS_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-getrows-fixture; fi
+	@if ! test -f "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_weighted_rmsnorm_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)"; fi
+	@if ! test -f "$(LLM_Q4_HALFWORD_FIXTURE_DIR)/receipt.json"; then if ! test -f "$(LLM_Q4_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_Q4_FIXTURE_DIR)" || exit $$?; fi; $(PYTHON) tools/build_llm_q4_halfword_fixture.py --original-fixture "$(LLM_Q4_FIXTURE_DIR)" --output "$(LLM_Q4_HALFWORD_FIXTURE_DIR)"; fi
+	@if ! test -f "$(LLM_DENSE_LAYER_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-dense-layer-fixture; fi
+	@if ! test -f "$(LLM_DENSE_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-dense-layer-tests LLM_DENSE_LAYER_OUTPUT_DIR="$(LLM_DENSE_REFERENCE_DIR)" LLM_DENSE_LAYER_EXPORT_REFERENCE=1; fi
+	$(PYTHON) tests/public_hip_dense_layer_assets_test.py
+	@if ! test -f "$(LLM_DENSE_ASSETS_DIR)/receipt.json"; then $(PYTHON) tools/public_hip_dense_layer_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --layer "$(LLM_DENSE_LAYER_FIXTURE_DIR)" --reference "$(LLM_DENSE_REFERENCE_DIR)" --output "$(LLM_DENSE_ASSETS_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_dense_layer_assets import dense_inputs; dense_inputs(Path(sys.argv[1]).resolve())' "$(LLM_DENSE_ASSETS_DIR)"

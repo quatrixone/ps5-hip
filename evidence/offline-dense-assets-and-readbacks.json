@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "classification": "offline-dense-assets-and-readback-verifier",
+  "source_base": "5d535bb",
+  "gpu_executed": false,
+  "native_executed": false,
+  "aggregate_receipt_sha256": "e37c8f7ed83448208c3f7bd091e9283948d5bbb3d186e326dfc66fb066c87ec4",
+  "aggregate_inputs": 1372,
+  "assets": {
+    "dense-layer/getrows.hsaco": {
+      "bytes": 5696,
+      "sha256": "10d87ae40b1c06e37a02962cc79efe123e1814953cfed5b0b1b12c258476465c"
+    },
+    "dense-layer/layer.hsaco": {
+      "bytes": 33696,
+      "sha256": "10ac1afb49701b1c27e02be8270a5bb88c2475997c2c275106a0f31c265b854f"
+    },
+    "dense-layer/normalized.hsaco": {
+      "bytes": 60544,
+      "sha256": "504ed4ae3e8c65f5bee7dc2f09ef1ed227235c93deab84b655e69ada654405b5"
+    },
+    "dense-layer/q4.hsaco": {
+      "bytes": 5880,
+      "sha256": "a759b32b4d546635b090828b54dec63ec9d756512cf301c8a815028ef99b5e15"
+    },
+    "dense-layer/q8.hsaco": {
+      "bytes": 5224,
+      "sha256": "8f85a6c063c5e03ea6319c316fe4eef134a954aae7a2dd73a075f8e5c97bdd29"
+    },
+    "dense-layer/weighted.hsaco": {
+      "bytes": 6744,
+      "sha256": "8dc54f13100af14147eeae1f472f3a6790bd41adaf1add8978f300859db89c97"
+    }
+  },
+  "comparison_receipt_sha256": "c1c978ca913d25f7d07a28137e4a7e2462f2aa643cd12515525a3bc5c4be840d",
+  "comparison_fixture": "Exact CPU reference copy, not device readbacks",
+  "requests": 526,
+  "records": 11084,
+  "raw_bytes": 154392576,
+  "maximum_absolute_error": 0,
+  "tests": {
+    "asset_and_make_tests": 9,
+    "verifier_test_groups": 6
+  },
+  "checks": [
+    "strict relative RMS without energy floor",
+    "exact embedding bits and required zeros",
+    "all21 reset outputs",
+    "device-derived Q/K gamma64 bound",
+    "device-derived K/V checkpoint bytes",
+    "reference/source/command/manifest identities and mutation rejection"
+  ],
+  "limits": [
+    "No native-origin or GPU-origin proof",
+    "Prebuilt CPU libraries hash-bound; full producer provenance not reauthenticated",
+    "Native title, image audit and controller integration pending"
+  ],
+  "preserved_failure": ".local/dense-assets-first-attempt.txt: wrong default Q4 path started unnecessary producer, deliberately terminated; partial logs retained; corrected Make reuses selected halfword prerequisite"
+}

@@ -20,6 +20,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Dense native compiler and CPU reference | offline | explicit17-export module admission; all11,084CPU reference records exported; no native execution | evidence/offline-dense-native-and-reference.json
 
+- 2026-10-18 | Dense assets and readback verifier | offline | supported six-module aggregate and complete verifier fixture pass; no hardware-origin claim | evidence/offline-dense-assets-and-readbacks.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

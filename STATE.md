@@ -3,6 +3,24 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Dense assets and numerical readback verifier
+
+The supported `llm-dense-layer-assets` target now authenticates the six existing
+GPU modules with the full packed CPU reference, without model assets. The target
+reuses the selected halfword module and its recorded prerequisite. Nine asset/
+Make tests pass, including classification, changed identities and receipt races.
+
+`tools/verify_llm_dense_readbacks.py` authenticates the reference and exact control
+inventory, then applies strict float/zero/embedding/reset checks and device-derived
+Q/K attention and K/V-cache checks across all 526 requests / 11,084 records.
+Six mutation/authentication test groups pass. A supported main comparison of an
+exact CPU-reference copy passes with zero error; this is verifier qualification,
+not PS5 evidence. See `evidence/offline-dense-assets-and-readbacks.json`.
+
+Resume with native execution helper integration, then title/package/image-audit
+and frozen controller integration. Existing frozen console candidates remain
+unchanged; .40 availability has not been re-established.
+
 ## Dense native compiler and complete CPU reference
 
 The supported `llm-dense-layer-fixture` target now compiles and audits an explicit
