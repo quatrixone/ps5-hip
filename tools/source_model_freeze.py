@@ -145,6 +145,7 @@ def validator_identities():
  paths.update(ROOT/n for n in ('tests/llm_generation_readbacks_test.py','tests/llm_generation_reference_test.py','tests/llm_generation_numeric_test.py','tools/source_llm_generation_log.py','tests/native_generation_transcript_test.py','tests/native_generation_application_test.py','tests/source_generation_console_test.py','tests/source_corpus_console_test.py'))
  paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
+ paths.update(ROOT/n for n in ('tests/source_console_finalization_test.py','tests/source_console_deployment_boundaries_test.py'))
  seen=set()
  while pending:
   module=pending.pop()

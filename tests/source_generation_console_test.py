@@ -5,21 +5,23 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import source_console as c
 from llm_generation_readbacks_test import write_generation_raw
 
+def list_rows(names):return ['-rw-r--r-- 1 root wheel 1 Oct 18 02:31 '+name for name in names]
+
 class GenerationControl(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name);self.candidate=self.root/'candidate';self.reference=self.candidate/'full-reference';self.files=write_generation_raw(self.reference/'raw')
   self.obj=c.Control.__new__(c.Control);self.obj.fixture='llm_client';self.obj.candidate=self.candidate;self.obj.out=self.root/'execute';self.obj.out.mkdir();self.obj.record={}
   self.obj.manifest={'llm_client':{'phase':'model-full','full':{'profile':'generation'}},'model_full':{'profile':'generation','reference':'candidate/full-reference','reference_receipt_sha256':'a'*64,'raw_files':self.files},'results_dir':'/user/hip','files':{str(p.relative_to(self.root)):c.sha(p.read_bytes()) for p in (self.reference/'raw').iterdir()}}
-  self.obj.listing=lambda _:list(self.files);self.obj.fetch=lambda path,size,deadline:(self.reference/'raw'/path.rsplit('/',1)[-1]).read_bytes();self.patch=patch.object(c,'ROOT',self.root);self.patch.start();self.addCleanup(self.patch.stop)
+  self.obj.listing=lambda _:list_rows(self.files);self.obj.fetch=lambda path,size,deadline:(self.reference/'raw'/path.rsplit('/',1)[-1]).read_bytes();self.patch=patch.object(c,'ROOT',self.root);self.patch.start();self.addCleanup(self.patch.stop)
  def test_collect_all_boundaries_and_metadata(self):
   self.obj.collect_prefix_dumps();self.assertEqual(set(self.obj.record['prefix_raw_files']),set(self.files));self.assertEqual(len(self.obj.record['prefix_raw_files']),386)
  def test_stale_metadata_alone_blocks_launch(self):
   for name in ('generation.json','steps.jsonl'):
-   self.obj.listing=lambda _,name=name:[name]
+   self.obj.listing=lambda _,name=name:list_rows([name])
    with self.subTest(name=name),self.assertRaisesRegex(RuntimeError,'already exist'):self.obj.fresh_prefix_dumps()
  def test_missing_metadata_and_extra_float_rejected(self):
   for names in ([n for n in self.files if n!='generation.json'],[*self.files,'run-2-pos-0-logits.f32le']):
-   self.obj.listing=lambda _:names
+   self.obj.listing=lambda _:list_rows(names)
    with self.assertRaisesRegex(RuntimeError,'inventory'):self.obj.collect_prefix_dumps()
  def test_frozen_policy_identity(self):
   policy,sizes=self.obj.generation_policy();self.assertEqual(sizes,{n:self.files[n] for n in ('generation.json','steps.jsonl')});self.assertEqual(len(policy['runs']),2)

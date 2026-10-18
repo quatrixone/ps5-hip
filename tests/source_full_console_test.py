@@ -5,11 +5,13 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 import source_console as c
 from source_llm_full_log import FILES
+def list_rows(names):return ['-rw-r--r-- 1 root wheel 1 Oct 18 02:31 '+name for name in names]
+
 class FullControl(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
   self.obj=c.Control.__new__(c.Control);self.obj.fixture='llm_client';self.obj.manifest={'llm_client':{'phase':'model-full'},'results_dir':'/user/hip','model_full':{'reference':'reference','reference_receipt_sha256':'a'*64}}
-  self.obj.record={};self.obj.out=Path(self.tmp.name);self.obj.listing=lambda _:list(FILES);self.obj.fetch=lambda p,b,d:bytes(b)
+  self.obj.record={};self.obj.out=Path(self.tmp.name);self.obj.listing=lambda _:list_rows(FILES);self.obj.fetch=lambda p,b,d:bytes(b)
   fake=types.ModuleType('source_llm_full_log');fake.FILES=FILES;fake.check_full_log=lambda raw:{'prefix':raw}
   self.mods=patch.dict(sys.modules,{'source_llm_full_log':fake});self.mods.start();self.addCleanup(self.mods.stop)
  def test_phase_routes(self):
@@ -22,13 +24,13 @@ class FullControl(unittest.TestCase):
  def test_collect_exact_bytes(self):
   self.obj.collect_prefix_dumps();self.assertEqual(len(self.obj.record['prefix_raw_files']),72);self.assertEqual(sum(x['bytes'] for x in self.obj.record['prefix_raw_files'].values()),949248)
  def test_extra_inventory(self):
-  self.obj.listing=lambda _:list(FILES)+['run-2-pos-0-out-00.f32le']
+  self.obj.listing=lambda _:list_rows(list(FILES)+['run-2-pos-0-out-00.f32le'])
   with self.assertRaisesRegex(RuntimeError,'inventory'):self.obj.collect_prefix_dumps()
  def test_short_rejected(self):
   self.obj.fetch=lambda p,b,d:bytes(b-1)
   with self.assertRaisesRegex(RuntimeError,'byte count'):self.obj.collect_prefix_dumps()
  def test_partial_preserves_available(self):
-  self.obj.listing=lambda _:list(FILES)[:2];self.obj.collect_prefix_dumps(partial=True);self.assertEqual(len(self.obj.record['prefix_raw_files']),2)
+  self.obj.listing=lambda _:list_rows(list(FILES)[:2]);self.obj.collect_prefix_dumps(partial=True);self.assertEqual(len(self.obj.record['prefix_raw_files']),2)
  def test_capture_deadline(self):
   self.obj.prefix_capture_deadline=0
   with self.assertRaisesRegex(RuntimeError,'deadline'):self.obj.collect_prefix_dumps()

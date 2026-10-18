@@ -152,16 +152,41 @@ class Control:
         self.klog = bytearray()
         self.capture_errors = []
 
-    def verify(self):
+    def verify(self, execution_only=False):
         require(sha((self.candidate / 'manifest.json').read_bytes()) == self.manifest_sha, 'manifest changed')
         def check(item):
             name, digest = item
             path = ROOT / name
             require(path.resolve().is_relative_to(ROOT) and stream_digest(path) == digest, 'frozen input changed: ' + name)
         # Bound open files and overlap WSL filesystem latency; every call still reads fresh bytes.
+        items = self.manifest['files'].items()
+        if execution_only:
+            self.verify_execution_inventory()
+            prefix = self.candidate.relative_to(ROOT).as_posix() + '/'
+            items = [(name, digest) for name, digest in items
+                     if name.startswith(prefix) or Path(name).parts[0] not in ('build', 'results', '.deps')]
         with ThreadPoolExecutor(max_workers=4) as workers:
-            for _ in workers.map(check, self.manifest['files'].items()):
+            for _ in workers.map(check, items):
                 pass
+
+    def verify_execution_inventory(self):
+        require(self.prefix_phase(), 'execution scope requires model prefix')
+        kind='full' if self.full_phase() else 'layer' if self.layer_phase() else 'prefix'
+        reference=self.manifest['model_'+kind]['reference']
+        required=[self.manifest[key] for key in ('package','launch','close','snapshot','post_snapshot')]
+        required += [str((self.candidate/name).relative_to(ROOT)) for name in ('build-receipt.json','llm-client-native-audit.json')]
+        for name in (self.manifest['app'],reference):
+            directory=ROOT/name
+            require(not Path(name).is_absolute() and directory.resolve().is_relative_to(self.candidate.resolve()) and not directory.is_symlink() and directory.is_dir(), 'execution directory outside candidate')
+            for path in directory.rglob('*'):
+                require(not path.is_symlink(), 'execution inventory symlink')
+                if path.is_file():required.append(str(path.relative_to(ROOT)))
+        required += [str(Path(self.manifest['app'])/name) for name in self.manifest['package_files']]
+        required.append(str(Path(reference)/'receipt.json'))
+        for name in required:
+            path=ROOT/name
+            require(not Path(name).is_absolute() and path.resolve().is_relative_to(self.candidate.resolve()) and not path.is_symlink(), 'execution input outside candidate')
+            require(name in self.manifest['files'], 'execution input missing from manifest: '+name)
 
     def phase_remaining(self, requested=1800):
         if not self.model_phase(): return requested
@@ -420,14 +445,29 @@ class Control:
         return payload
 
     def final_prefix_authentication(self):
-        require(self.record.get('accepted') is True,'prefix phase has not passed')
+        require(self.record.get('prefix_authentication_pending') is True, 'prefix phase has not passed')
+        require(self.record.get('lock_released') is True, 'primary lock not released')
+        require(not self.defer_prefix_authentication or self.record.get('secondary_lock_released') is True,
+                'secondary lock not released')
+        require(self.record.get('healthy_after') is True and not any(key in self.record for key in ('error','ftp_close_error','health_error','lock_error')), 'console cleanup failed')
+        self.record['prefix_authentication_pending']=False
         self.record['accepted']=False
         self.phase_remaining();started=time.monotonic()
         self.verify()
         self.authenticate_llm_client()
-        self.phase_remaining();self.owned_lock()
+        self.phase_remaining()
         self.record['prefix_final_authentication']={'status':'PASS','elapsed_seconds':time.monotonic()-started}
+        self.record['prefix_authentication_pending']=False
         self.record['accepted']=True
+
+    def finish_prefix_authentication(self):
+        try:
+            self.final_prefix_authentication()
+        except Exception as error:
+            self.record['accepted']=False
+            self.record['error']=repr(error)
+        (self.out/'receipt.json').write_text(json.dumps(self.record,indent=2)+'\n')
+        return 0 if self.record['accepted'] else 1
 
     def verify_close_payload(self):
         require(sha((self.candidate/'manifest.json').read_bytes())==self.manifest_sha,'cleanup manifest changed')
@@ -704,10 +744,25 @@ class Control:
         require(self.record.get('application',{}).get('reported_metrics')==metrics,'weighted QKV transcript metrics differ')
         self.record['weighted_qkv_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
 
+    def prefix_listing_names(self, directory):
+        names=set()
+        for row in self.listing(directory):
+            fields=row.split(None,8)
+            require(len(fields)==9 and re.fullmatch('[d-][rwxstST-]{9}',fields[0]) and
+                    fields[1].isdigit() and fields[4].isdigit(), 'prefix malformed or unsupported LIST entry')
+            name=fields[8]
+            if name in ('.','..'):
+                require(fields[0][0]=='d','prefix dot entry is not a directory')
+                continue
+            require('/' not in name and '\\' not in name and not any(ord(ch)<32 or ord(ch)==127 for ch in name), 'prefix unsafe LIST name')
+            require(name not in names,'prefix duplicate LIST name')
+            names.add(name)
+        return names
+
     def fresh_prefix_dumps(self):
         if not self.prefix_phase():return
         FILES=self.prefix_files()
-        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        names=self.prefix_listing_names(self.manifest['results_dir'])
         if self.corpus_phase():
             from build_llm_generation_reference import corpus_cases
             require(not names.intersection(case for case,_ in corpus_cases()),'corpus case directories already exist')
@@ -722,7 +777,7 @@ class Control:
             limit=600 if self.corpus_phase() else 120
             self.prefix_capture_deadline=time.monotonic()+limit
             self.record['prefix_raw_capture_limit_seconds']=limit
-        names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        names=self.prefix_listing_names(self.manifest['results_dir'])
         if self.corpus_phase():
             from build_llm_generation_reference import corpus_cases
             require(names <= {'corpus.json',LOG_NAMES['llm_client'],*(case for case,_ in corpus_cases())},'corpus root inventory differs')
@@ -731,8 +786,7 @@ class Control:
                     require(partial,'corpus case directory missing')
                     continue
                 names.remove(case)
-                children={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir']+'/'+case)}
-                require(all(n not in ('.','..') and '/' not in n and '\\' not in n for n in children),'corpus child name')
+                children=self.prefix_listing_names(self.manifest['results_dir']+'/'+case)
                 names.update(case+'/'+n for n in children)
         records=self.record.setdefault('prefix_raw_files',{})
         folder=self.out/'raw';folder.mkdir(exist_ok=True)
@@ -887,7 +941,7 @@ class Control:
         package=ROOT/self.manifest['package']
         transfer=self.manifest['model_transfer']
         size=transfer['bytes']; digest=transfer['sha256']; seconds=transfer['deadline_seconds']
-        self.idle(); self.verify()
+        self.idle(); self.verify(execution_only=True) if self.prefix_phase() else self.verify()
         self.absent(temporary)
         self.model_upload(package,temporary,size,digest,self.record.setdefault('ftp_transfers',[]),seconds)
         self.idle()
@@ -906,7 +960,7 @@ class Control:
                 break
             require(time.monotonic() < deadline, 'old image release timed out')
             time.sleep(3)
-        self.idle(); self.verify()
+        self.idle(); self.verify(execution_only=True) if self.prefix_phase() else self.verify()
         self.phase_remaining()
         self.ftp.rename(temporary, REMOTE)
         self.phase_remaining()
@@ -1099,7 +1153,8 @@ class Control:
             require(not self.capture_errors and not native_fault(self.klog[launch_offset:]), 'klog failed or native fault during postchecks')
         self.record['natural_stop'] = True
 
-    def run(self):
+    def run(self, defer_prefix_authentication=False):
+        self.defer_prefix_authentication=defer_prefix_authentication
         try:
             if self.model_phase(): self.phase_remaining()
             with LOCK.open('x') as stream:
@@ -1112,7 +1167,9 @@ class Control:
             if self.model_phase():self.phase_remaining();self.ftp=PhaseFTP(self.ftp,self.phase_remaining)
             require(self.ftp.sendcmd('SELF') == '226 SELF transfer mode disabled', 'raw SELF transfer mode unavailable')
             getattr(self, self.phase)()
-            if self.prefix_phase():self.final_prefix_authentication()
+            if self.prefix_phase():
+                self.record['prefix_authentication_pending']=self.record['accepted']
+                self.record['accepted']=False
         except Exception as error:
             self.record['accepted'] = False
             self.record['error'] = repr(error)
@@ -1135,6 +1192,9 @@ class Control:
                     self.record['lock_error'] = repr(error)
                     self.record['accepted'] = False
             (self.out / 'receipt.json').write_text(json.dumps(self.record, indent=2) + '\n')
+        if self.record.get('prefix_authentication_pending') and not any(key in self.record for key in ('error','ftp_close_error','health_error','lock_error')):
+            if defer_prefix_authentication:return 2
+            self.finish_prefix_authentication()
         print(json.dumps(self.record))
         return 0 if self.record['accepted'] else 1
 

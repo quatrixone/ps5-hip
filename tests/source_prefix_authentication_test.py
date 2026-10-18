@@ -15,7 +15,7 @@ class Authentication(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name)
   self.candidate=self.root/'results/candidate';self.candidate.mkdir(parents=True);self.out=self.candidate/'execute';self.out.mkdir()
-  self.obj=c.Control.__new__(c.Control);self.obj.candidate=self.candidate;self.obj.out=self.out;self.obj.fixture='llm_client';self.obj.token='owned';self.obj.record={}
+  self.obj=c.Control.__new__(c.Control);self.obj.candidate=self.candidate;self.obj.out=self.out;self.obj.fixture='llm_client';self.obj.token='owned';self.obj.defer_prefix_authentication=False;self.obj.record={'accepted':False,'prefix_authentication_pending':True,'lock_released':True,'healthy_after':True}
   self.obj.manifest={'llm_client':{'phase':'model-prefix'},'files':{}}
   for name in ('snapshot','post_snapshot','launch','close'):
    p=self.candidate/(name+'.elf');p.write_bytes(name.encode());relative=str(p.relative_to(self.root));self.obj.manifest[name]=relative;self.obj.manifest['files'][relative]=c.sha(p.read_bytes())
@@ -60,7 +60,7 @@ class Authentication(unittest.TestCase):
   self.assertEqual(self.obj.record['prefix_final_authentication']['status'],'PASS')
  def test_final_source_or_receipt_change_never_passes(self):
   for target in ('verify','authenticate_llm_client'):
-   self.obj.record={'accepted':True};setattr(self.obj,target,Mock(side_effect=ValueError('changed')))
+   self.obj.record={'accepted':False,'prefix_authentication_pending':True,'lock_released':True,'healthy_after':True};setattr(self.obj,target,Mock(side_effect=ValueError('changed')))
    with self.assertRaisesRegex(ValueError,'changed'):self.obj.final_prefix_authentication()
    self.assertFalse(self.obj.record['accepted']);self.assertNotIn('prefix_final_authentication',self.obj.record)
    setattr(self.obj,target,Mock())
@@ -69,7 +69,7 @@ class Authentication(unittest.TestCase):
   with self.assertRaisesRegex(RuntimeError,'deadline'):self.obj.final_prefix_authentication()
   self.assertFalse(self.obj.record['accepted'])
  def test_unaccepted_phase_cannot_be_promoted(self):
-  self.obj.record['accepted']=False
+  self.obj.record['accepted']=False;self.obj.record['prefix_authentication_pending']=False
   with self.assertRaisesRegex(RuntimeError,'has not passed'):self.obj.final_prefix_authentication()
   self.assertFalse(self.obj.record['accepted']);self.obj.verify.assert_not_called()
  def test_legacy_send_still_full_verifies(self):

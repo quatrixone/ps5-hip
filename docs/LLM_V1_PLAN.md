@@ -9,7 +9,9 @@ short-generation checkpoint, not full M4/M5. Host verification improvements are
 committed; the five-prompt / 16-token corpus now passes production-helper HIP
 numerical interpretation with all 6,528 float files bytewise CPU equal and clean
 ownership. Native corpus packaging, controller bounds and the linked-image audit now pass.
-Next freeze the completed package and validate on .40. Retain M2 dense/extreme cases and
+Deployment passed; execution stopped before launch on FTP dot directory entries.
+The host controller fix passes373 tests; freeze a fresh candidate and reuse the
+unchanged package for .40 validation. Retain M2 dense/extreme cases and
 the original source-format loading requirement. Use idle .40 for meaningful
 validation and push each validated milestone to main.
 

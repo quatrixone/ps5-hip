@@ -4,6 +4,12 @@ Updated: 2026-10-18, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
+Current corpus package deployment passed; execution rejected FTP dot directory
+entries before launch. The shared listing parser and controller verification
+changes pass373 source tests. Reuse the existing package in a fresh candidate;
+no corpus GPU result yet. See `evidence/offline-corpus-controller-recovery.json`.
+
+
 The release plan in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5 within
 the original acceptance gates. M0, M1, the actual-model prefix and the selected
 Q4 first-layer sequence are native-validated. M2 remains open for a dense

@@ -225,6 +225,8 @@ llm-native-app: deps-build llm-deps-fetch
 	$(PYTHON) tests/public_hip_compile_inputs_test.py
 	$(PYTHON) tests/public_hip_llm_client_build_test.py
 	$(PYTHON) tests/source_llm_client_controls_test.py
+	$(PYTHON) tests/source_console_finalization_test.py
+	$(PYTHON) tests/source_console_deployment_boundaries_test.py
 	$(PYTHON) tests/native_call_transcript_test.py
 	$(PYTHON) tests/llm_client_native_audit_test.py
 	$(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_model_prefix_freeze_test.py,@true)

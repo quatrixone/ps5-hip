@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "corpus-ftp-list-and-controller-verification-fix",
+  "tests": {
+    "command": "python3 -m unittest discover -s tests -p source_*test.py",
+    "passed": 373,
+    "elapsed_seconds": 9.052,
+    "terminal_session": 12694,
+    "exit_code": 0
+  },
+  "changes": [
+    "Ignore only actual FTP dot directory entries; preserve full filenames and exact corpus inventories.",
+    "Check execution inputs before console mutations; retain fresh complete provenance before and after the cycle.",
+    "Release owned console locks before final provenance; keep pending receipts unaccepted."
+  ],
+  "inputs": {
+    "tools/source_console.py": "ca2bde4daf215788a1c8274f6cda11bf2d1ca82c4c75545ccbf97f884a5a4b46",
+    "tools/source_model_freeze.py": "3d358714dc096ae4fa6c02ff4ffa40c94961b14362a59a2468cdcc5f97ebd3e4",
+    "Makefile": "ae79b4119c349a1a8a444ffaae85065ad468cab51b35bc62ac6768fbffa34a97",
+    "tests/source_corpus_console_test.py": "05cfb1b6c353db83bd1e7f9bb9b65249a17f7bc00715950aa012a51efa4d1c30",
+    "tests/source_full_console_test.py": "d59979a4f1131f833c63af58b7182fe61c314f6737ab26730e4c8f2d1acf130f",
+    "tests/source_generation_console_test.py": "af30c142bc2fe2c899523153b6a357485272ecf17eff67c246aac0e7bc5a00e4",
+    "tests/source_layer_console_test.py": "68cfcbbd209e51f33f09164c605d413f1d2b1513542792e604dc1e87e73e3c12",
+    "tests/source_prefix_console_test.py": "4c15d4af55de425bbddfe97bbc867056423eff6f26b555e7e921e1a0d5c65457",
+    "tests/source_prefix_authentication_test.py": "ff32ef2708230426828d156f83ae7ac378ac77fbf5c19f8c1b04dbbdac54d993",
+    "tests/source_console_finalization_test.py": "7dae7f7f2950d426ce11ac8991fc00f0cb7e5eb63e24faff54c35ebced8e92e5",
+    "tests/source_console_deployment_boundaries_test.py": "8400c793700234d21d6adb113b20b85f56756e6dfd4e86104768146fc02a0c7a"
+  },
+  "native_package_rebuild_required": false,
+  "console_retest_performed": false,
+  "end_to_end_speedup_measured": false,
+  "local_wrapper": "The ignored two-lock wrapper was updated locally; it is not part of the shipped repository patch."
+}

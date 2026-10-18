@@ -8,28 +8,35 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
-## Native corpus package complete; freeze and .40 next
+## Corpus pre-launch rejection fixed; native validation still pending
 
-The corpus native package is complete: 201 commands passed, 149 linked objects,
-15 package files and a 415-function audit across the three executable images.
-The final producer receipt and independent package review pass. Package size is
-22,478,848 bytes; the model remains external at
-`/data/hip/models/tinyllama-q4_0.gguf`. Evidence:
-`evidence/offline-native-corpus-linked-package.json`.
+The corpus package deployed successfully and passed independent review. Execution
+then stopped before launch because the PS5 FTP server lists `.` and `..` for the
+empty results directory. A read-only diagnostic confirmed there were no result
+files. Both phases ended healthy and released both locks. Preserve consumed
+candidate `results/source-public-llm-generation-corpus-console-v1`; do not replay it.
+Evidence: `evidence/console40-corpus-prelaunch-rejection.json`.
 
-Next freeze `build/llm-native-corpus-app-v1`, independently review the candidate,
-and validate five prompts / sixteen generated tokens / two reset runs on idle
-.40 under both locks. No native corpus execution is claimed yet. Reuse the
-completed client v8 and corpus assets v1; do not rebuild or rerun the host corpus.
+The controller now ignores only genuine dot directory entries, preserves complete
+filenames, and retains exact corpus inventories. All 373 source-controller tests
+pass. Scoped execution checks avoid unrelated producer sweeps under console locks;
+fresh complete provenance still gates final acceptance after cleanup and lock
+release. Pending receipts cannot authorize execution. End-to-end speedup remains
+unmeasured. Evidence: `evidence/offline-corpus-controller-recovery.json`.
 
-Build receipt SHA-256: `82dbcbf71ebfff5505c1c9496773128fcbd4fe94bdd72ff95ddf5dffdc868421`.
-Package SHA-256: `8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2`.
-Session 22424 exited 0; no package build remains active. The experiment is in
-`.local/corpus-console-case.md`; use fresh candidate
-`results/source-public-llm-generation-corpus-console-v1`. The installed short
-baseline below remains the recovery source. A duplicate-read optimization passed
-27 isolated tests but is not applied; defer source changes until after the frozen
-candidate has been validated. Earlier sections below record prior milestones.
+Next freeze a fresh v2 candidate from `build/llm-native-corpus-app-v1`, then review,
+deploy and execute once on idle .40 under both locks. Reuse the unchanged 22,478,848
+byte package `8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2`,
+which is also the currently installed baseline. Use no baseline-log digest for
+the empty `/user/homebrew/ps5-hip/m4-corpus-v1` directory. The external model stays
+at `/data/hip/models/tinyllama-q4_0.gguf`. No native corpus inference is claimed.
+
+Do not rebuild the native app for this host-controller fix. Asset-verifier and
+prompt-capacity patches remain isolated in `.local` because applying them would
+invalidate producer inputs; integrate them after this native qualification.
+The local two-lock wrapper uses deferred finalization after releasing its
+secondary lock; its ignored file is not shipped through main. Earlier sections
+below are historical milestones, not the current resume action.
 
 ## Native corpus integration resume point
 

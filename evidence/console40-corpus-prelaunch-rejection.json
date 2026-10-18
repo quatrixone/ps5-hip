@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "classification": "native-corpus-prelaunch-controller-rejection",
+  "deployment_accepted": true,
+  "native_corpus_executed": false,
+  "gpu_corpus_validated": false,
+  "manifest_sha256": "757bff811b39cde8ba6c1c864a347e40b51701767a883049fdbbfef843ee5d9c",
+  "package_sha256": "8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2",
+  "deployment_receipt_sha256": "04dcf4cbd0470f1f1bd6f5d023669bdd02e58f4b2331e376af7a87765989c840",
+  "execution_receipt_sha256": "219890adb923f6068058b38f86c3a054e4542556916d9010d526df95909e02d0",
+  "failure": "RuntimeError('corpus unexpected files already exist')",
+  "raw_listing": [
+    "drwxrwxrwx 2 0 0 65536 Oct 18 02:31 .",
+    "drwxrwxrwx 2 0 0 65536 Oct 18 02:31 .."
+  ],
+  "diagnostic_sha256": "f39cf3de4e6840861f6ebbc9eba36fa30853ec0aedd21eced22295c04739a0bf",
+  "healthy_after": true,
+  "both_locks_released": true,
+  "model_reuploaded": false,
+  "next": "Fresh source candidate with corrected FTP LIST parser; reuse unchanged native package and empty corpus results directory. Never replay the consumed candidate."
+}
