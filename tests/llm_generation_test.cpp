@@ -38,6 +38,14 @@ int main() {
     auto boundary=generate(one,1,511,[&](int32_t token,int32_t position){assert(token==0&&position==int32_t(submitted)&&position<512);++submitted;std::fill(logits.begin(),logits.end(),0.f);return Logits{logits.data(),logits.size()};},never);
     assert(submitted==511&&boundary.processed_count==511&&boundary.generated_count==511);
     std::array<int32_t,512> full_prompt{};calls.clear();rejects([&]{generate(full_prompt.data(),512,1,decode,never);});assert(calls.empty());
+    // Long prompts share the same combined budget; overflow submits nothing.
+    std::array<int32_t, 512> long_prompt{};
+    auto long_decode=[&](int32_t token,int32_t position){assert(token==0&&position==int32_t(submitted));++submitted;std::fill(logits.begin(),logits.end(),0.f);return Logits{logits.data(),logits.size()};};
+    for(size_t prompt_size:{size_t(33),size_t(508)}) {
+        submitted=0;auto result=generate(long_prompt.data(),prompt_size,4,long_decode,never);
+        assert(result.generated_count==4&&result.processed_count==prompt_size+3&&submitted==prompt_size+3);
+    }
+    submitted=0;rejects([&]{generate(long_prompt.data(),509,4,long_decode,never);});assert(submitted==0);
     // Exceptions propagate; caller must reset/quarantine its own decoder state.
     size_t failed=0;rejects([&]{generate(prompt,2,1,[&](int32_t,int32_t)->Logits{++failed;throw std::runtime_error("decode failed");},never);});assert(failed==1);
     return 0;

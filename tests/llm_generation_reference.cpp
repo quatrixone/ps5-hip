@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstring>
 #include "../ports/ggml/generation.h"
+#include "../ports/ggml/extended_generation.h"
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
@@ -22,7 +23,7 @@
 static void check(bool ok,const char* why){if(!ok)throw std::runtime_error(why);}
 static std::string hex(const std::string& s){const char* d="0123456789abcdef";std::string out;for(unsigned char c:s){out+=d[c>>4];out+=d[c&15];}return out;}
 template<class T>static void ids(std::ostream& out,const T* p,size_t n){out<<'[';for(size_t i=0;i<n;++i){if(i)out<<',';out<<p[i];}out<<']';}
-struct Trace{std::string folder;int run=-1,position=-1;unsigned captured=0;bool failed=false;std::array<bool,24> seen{};};
+struct Trace{std::string folder;int run=-1,position=-1;unsigned captured=0;bool failed=false;std::array<bool,24> seen{};const ps5hip_generation::ExtendedCase* extended=nullptr;};
 static bool checkpoint(const Trace& t){return t.run>=0&&t.position>=0;}
 static std::string stem(const Trace& t){return t.folder+"/run-"+std::to_string(t.run)+"-pos-"+std::to_string(t.position);}
 static bool capture(ggml_tensor* tensor,bool ask,void* pointer){
@@ -31,6 +32,7 @@ static bool capture(ggml_tensor* tensor,bool ask,void* pointer){
  if(!std::strcmp(tensor->name,"result_norm"))index=22;
  if(!std::strcmp(tensor->name,"result_output"))index=23;
  if(index<0)return true;
+ if(state.extended&&index!=23&&!ps5hip_generation::extended_checkpoint(*state.extended,unsigned(state.position)))return true;
  try{
   check(!state.seen[index],"duplicate boundary callback");check(tensor->type==GGML_TYPE_F32&&ggml_is_contiguous(tensor)&&ggml_nelements(tensor)==(index==23?32000:2048),"boundary layout");
   std::vector<float> values(size_t(ggml_nelements(tensor)));ggml_backend_tensor_get(tensor,values.data(),0,values.size()*4);for(float v:values)check(std::isfinite(v),"nonfinite boundary");
@@ -40,11 +42,12 @@ static bool capture(ggml_tensor* tensor,bool ask,void* pointer){
 }
 int main(int argc,char** argv){
  const bool corpus=argc==4&&!std::strcmp(argv[3],"corpus");
+ const bool extended=argc==4&&!std::strcmp(argv[3],"extended");
  bool original=false;
 #ifdef PS5HIP_ORIGINAL_MODEL
  original=argc==4&&!std::strcmp(argv[3],"--original-source");
 #endif
- if(argc!=3&&!corpus&&!original)return 2;setenv("GGML_CPU_DISABLE_FUSION","1",1);llama_backend_init();int status=0;
+ if(argc!=3&&!corpus&&!extended&&!original)return 2;setenv("GGML_CPU_DISABLE_FUSION","1",1);llama_backend_init();int status=0;
  try{
   auto mp=llama_model_default_params();mp.n_gpu_layers=0;mp.check_tensors=true;mp.use_extra_bufts=false;
   #ifdef PS5HIP_ORIGINAL_MODEL
@@ -79,13 +82,15 @@ int main(int argc,char** argv){
 #include "../ports/ggml/generation_cases.def"
 #undef PS5HIP_GENERATION_CASE
   };
-  const unsigned case_count=corpus?unsigned(sizeof(cases)/sizeof(cases[0])):1;
-  const size_t budget=corpus?16:4;
+  const unsigned case_count=extended?3:corpus?unsigned(sizeof(cases)/sizeof(cases[0])):1;
+  const size_t budget=extended?64:corpus?16:4;
   for(unsigned case_index=0;case_index<case_count;++case_index){
-  const auto& selected=cases[case_index];const std::string prompt=selected.prompt;
-  llama_token tokens[32];const int n=llama_tokenize(vocab,prompt.data(),int(prompt.size()),tokens,32,true,false);check(n>0&&n<=32,"prompt tokenization");
-  const std::string folder=std::string(argv[2])+(corpus?std::string("/")+selected.id:"");
-  if(corpus)check(std::filesystem::create_directory(folder),"fresh corpus case directory");
+  const auto* policy=extended?&ps5hip_generation::extended_cases[case_index]:nullptr;
+  const Case selected=policy?Case{policy->id,policy->prompt}:cases[case_index];const std::string prompt=selected.prompt;state.extended=policy;
+  llama_token tokens[ps5hip_generation::context_size];const int n=llama_tokenize(vocab,prompt.data(),int(prompt.size()),tokens,int(ps5hip_generation::context_size),true,false);check(n>0&&size_t(n)<=ps5hip_generation::context_size-budget,"prompt tokenization/context budget");
+  check(!policy||size_t(n)==policy->prompt_count,"extended prompt tokenization");
+  const std::string folder=std::string(argv[2])+((corpus||extended)?std::string("/")+selected.id:"");
+  if(corpus||extended)check(std::filesystem::create_directory(folder),"fresh corpus case directory");
   state.folder=folder;
   std::ofstream steps(folder+"/steps.jsonl"),manifest(folder+"/generation.json");
   manifest<<"{\"schema\":1,\"prompt\":\"";
@@ -99,7 +104,7 @@ int main(int argc,char** argv){
     state.position=position;state.seen={};
     auto* batch=llama_batch_ext_init(ctx.get());check(batch,"batch");const int index=llama_batch_ext_add_token(batch,0,token);const llama_pos pos=position;
     check(index>=0&&llama_batch_ext_set_pos(batch,index,&pos)&&llama_batch_ext_set_output_logits(batch,index,true),"controls");
-    const int rc=llama_process(ctx.get(),LLAMA_PROCESS_TYPE_DECODE,batch);llama_batch_ext_free(batch);check(rc==0&&!state.failed,"CPU decode");for(bool seen:state.seen)check(seen,"missing boundary callback");check(llama_memory_seq_pos_max(llama_get_memory(ctx.get()),0)==position,"committed position");
+    const int rc=llama_process(ctx.get(),LLAMA_PROCESS_TYPE_DECODE,batch);llama_batch_ext_free(batch);check(rc==0&&!state.failed,"CPU decode");for(unsigned stage=0;stage<24;++stage)check(state.seen[stage]==(!policy||stage==23||ps5hip_generation::extended_checkpoint(*policy,unsigned(position))),"missing/unexpected boundary callback");check(llama_memory_seq_pos_max(llama_get_memory(ctx.get()),0)==position,"committed position");
     const float* logits=llama_get_logits_ith(ctx.get(),-1);check(logits,"logits");
     std::ifstream captured(stem(state)+"-logits.f32le",std::ios::binary);std::vector<float> sampled(32000);captured.read(reinterpret_cast<char*>(sampled.data()),128000);check(captured.good()&&!std::memcmp(sampled.data(),logits,128000),"sampler logits differ from callback");
     steps<<"{\"run\":"<<run<<",\"position\":"<<position<<",\"token\":"<<token<<",\"status\":0,\"committed_position\":"<<position<<"}\n";
@@ -107,6 +112,7 @@ int main(int argc,char** argv){
    };
    const auto result=ps5hip_generation::generate(tokens,size_t(n),budget,decode,[&](int32_t t){return llama_vocab_is_eog(vocab,t);});
    check(!corpus||(result.generated_count==16&&result.stop==ps5hip_generation::StopReason::step_limit),"corpus requires sixteen tokens without EOS");
+   check(!policy||(result.generated_count==policy->generated&&result.processed_count==policy->prompt_count+policy->generated-1&&((result.stop==ps5hip_generation::StopReason::eos)==!std::strcmp(policy->stop,"eos"))),"extended stop/count policy");
    if(run)manifest<<',';manifest<<"{\"run\":"<<run<<",\"processed\":";ids(manifest,result.processed.data(),result.processed_count);manifest<<",\"generated\":";ids(manifest,result.generated.data(),result.generated_count);
    manifest<<",\"stop\":\""<<(result.stop==ps5hip_generation::StopReason::eos?"eos":"step_limit")<<"\",\"pieces_hex\":[";
    std::string text;for(size_t i=0;i<result.generated_count;++i){char piece[4096];int bytes=llama_token_to_piece(vocab,result.generated[i],piece,sizeof(piece),0,true);check(bytes>=0&&bytes<=int(sizeof(piece)),"piece");std::string value(piece,size_t(bytes));if(i)manifest<<',';manifest<<'"'<<hex(value)<<'"';text+=value;}manifest<<"],\"text_hex\":\""<<hex(text)<<"\"}";
@@ -114,7 +120,9 @@ int main(int argc,char** argv){
   manifest<<"]}\n";steps.close();manifest.close();check(steps.good()&&manifest.good(),"metadata write");
   }
   if(corpus){std::ofstream index(std::string(argv[2])+"/corpus.json");index<<"{\"schema\":1,\"profile\":\"corpus\",\"max_new_tokens\":16,\"cases\":[";for(unsigned i=0;i<case_count;++i){if(i)index<<',';index<<'\"'<<cases[i].id<<'\"';}index<<"]}\n";index.close();check(index.good(),"corpus index write");}
-  if(corpus)std::puts("GENERATION_REFERENCE_PASS profile=corpus cases=5 runs=2 max_new_tokens=16 original_cpu_decode=true GPU_execution=false");
+  if(extended){std::ofstream index(std::string(argv[2])+"/extended.json");index<<"{\"schema\":1,\"profile\":\"extended\",\"max_new_tokens\":64,\"cases\":[\"short64\",\"eos\",\"boundary\"],\"capture\":\"logits-all-checkpoints-v1\"}\n";index.close();check(index.good(),"extended index write");}
+  if(extended)std::puts("GENERATION_REFERENCE_PASS profile=extended cases=3 runs=2 max_new_tokens=64 original_cpu_decode=true GPU_execution=false");
+  else if(corpus)std::puts("GENERATION_REFERENCE_PASS profile=corpus cases=5 runs=2 max_new_tokens=16 original_cpu_decode=true GPU_execution=false");
   else std::puts("GENERATION_REFERENCE_PASS runs=2 max_new_tokens=4 original_cpu_decode=true GPU_execution=false");
  }catch(const std::exception& e){std::fprintf(stderr,"%s\n",e.what());status=1;}llama_backend_free();return status;
 }

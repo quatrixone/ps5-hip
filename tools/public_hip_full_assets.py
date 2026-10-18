@@ -4,7 +4,7 @@ from pathlib import Path
 from public_hip_layer_assets import KINDS, FILES, validate_module, check_inputs
 from public_hip_weighted_qkv_assets import sha, merge
 ROOT=Path(__file__).resolve().parents[1]
-SOURCES=('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tests/public_hip_full_assets_test.py','tools/public_hip_layer_assets.py')
+SOURCES=('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tests/public_hip_full_assets_test.py','tools/public_hip_layer_assets.py','ports/ggml/extended_generation.h','ports/ggml/extended_generation_cases.def')
 CLASSIFICATION='authenticated-full-model-smoke-assets'
 RAW_FILES={f'run-{run}-pos-{pos}-{stage}.f32le':128000 if stage=='logits' else 8192
            for run,pos in ((0,0),(0,1),(1,0))
@@ -15,7 +15,7 @@ def validate_reference(folder):
  return authenticate_full_model_reference(folder)
 
 def assemble(parents,reference,profile='smoke'):
- if profile not in ('smoke','generation','corpus'):raise ValueError('altered or unsupported full profile')
+ if profile not in ('smoke','generation','corpus','extended'):raise ValueError('altered or unsupported full profile')
  if set(parents)!=set(KINDS):raise ValueError('exact five module parents required')
  inputs={str(ROOT/n):sha(ROOT/n) for n in SOURCES};assets={};resolved={}
  for kind in KINDS:
@@ -35,6 +35,16 @@ def assemble(parents,reference,profile='smoke'):
  if profile=='smoke':
   data,closure=validate_reference(reference)
   if data.get('status')!='PASS' or data.get('classification')!='successful-full-model-cpu-boundary-reference' or data.get('requests')!=514 or data.get('raw_files')!=168:raise ValueError('full reference contract')
+ elif profile=='extended':
+  from build_llm_generation_reference import authenticate_generation_reference,validate_extended,extended_cases
+  data,closure=authenticate_generation_reference(reference)
+  if data.get('classification')!='successful-greedy-generation-cpu-reference' or data.get('profile')!='extended':raise ValueError('extended reference profile')
+  summary=validate_extended(reference/'raw')
+  if (data.get('requests'),data.get('raw_files'))!=(1176,2096):raise ValueError('extended reference contract')
+  entries=list((reference/'raw').rglob('*'));raw_files={p.relative_to(reference/'raw').as_posix():p.stat().st_size for p in entries if p.is_file()}
+  metadata={'extended.json',*(c['id']+'/'+name for c in extended_cases() for name in ('generation.json','steps.jsonl'))}
+  if len(raw_files)!=2103 or len(metadata)!=7 or not metadata<=raw_files.keys() or sum(raw_files.values())>160*1024*1024:raise ValueError('extended raw contract')
+  if any(p.is_symlink() or not (p.is_file() or p.is_dir()) for p in entries):raise ValueError('extended raw kind')
  else:
   from build_llm_generation_reference import authenticate_generation_reference,loads,STAGES,corpus_cases
   data,closure=authenticate_generation_reference(reference)

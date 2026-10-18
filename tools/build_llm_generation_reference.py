@@ -6,8 +6,10 @@ ROOT=Path(__file__).resolve().parents[1]
 LINE='GENERATION_REFERENCE_PASS runs=2 max_new_tokens=4 original_cpu_decode=true GPU_execution=false\n'
 STAGES=[*(f'layer-{i}' for i in range(22)),'norm','logits']
 CASES=ROOT/'ports/ggml/generation_cases.def'
+EXTENDED_CASES=ROOT/'ports/ggml/extended_generation_cases.def'
+EXTENDED_LINE='GENERATION_REFERENCE_PASS profile=extended cases=3 runs=2 max_new_tokens=64 original_cpu_decode=true GPU_execution=false\n'
 CORPUS_LINE='GENERATION_REFERENCE_PASS profile=corpus cases=5 runs=2 max_new_tokens=16 original_cpu_decode=true GPU_execution=false\n'
-SOURCES=[CASES,Path(__file__).resolve(),ROOT/'tests/llm_generation_reference.cpp',ROOT/'tests/llm_generation_reference_test.py',ROOT/'ports/ggml/generation.h',ROOT/'tests/llm_generation_test.cpp',ROOT/'tests/llm_generation_test.py',Path(provenance.__file__).resolve(),ROOT/'llm-inputs.json',ROOT/'evidence/offline-llm-model-conversion.json']
+SOURCES=[EXTENDED_CASES,ROOT/'ports/ggml/extended_generation.h',CASES,Path(__file__).resolve(),ROOT/'tests/llm_generation_reference.cpp',ROOT/'tests/llm_generation_reference_test.py',ROOT/'ports/ggml/generation.h',ROOT/'tests/llm_generation_test.cpp',ROOT/'tests/llm_generation_test.py',Path(provenance.__file__).resolve(),ROOT/'llm-inputs.json',ROOT/'evidence/offline-llm-model-conversion.json']
 
 def loads(text):
  def pairs(rows):
@@ -29,13 +31,55 @@ def corpus_cases():
  if len(rows)!=5 or len({r[0] for r in rows})!=5:raise ValueError('fixed corpus cases')
  return rows
 
+def extended_cases():
+ rows=[]
+ for line in EXTENDED_CASES.read_text(encoding='utf-8').splitlines():
+  if not line or line.startswith('//'):continue
+  match=re.fullmatch(r'PS5HIP_EXTENDED_CASE\(("[a-z0-9]+"), ("(?:[^"\\]|\\.)*"), (\d+), (\d+), (\d+), ("[a-z_]+"), ([0-9, ]+)\)',line)
+  if not match:raise ValueError('extended case definition')
+  key,prompt,count,budget,generated,stop,positions=match.groups()
+  rows.append(dict(id=loads(key),prompt=loads(prompt),prompt_count=int(count),budget=int(budget),generated=int(generated),stop=loads(stop),checkpoints=tuple(map(int,positions.split(',')))))
+ expected=[('short64',5,64,'step_limit',(0,1,3,4,5,6,67)),('eos',9,1,'eos',(0,1,7,8)),('boundary',448,64,'step_limit',(0,1,255,256,446,447,448,449,510))]
+ if len(rows)!=3 or [(r['id'],r['prompt_count'],r['generated'],r['stop'],r['checkpoints']) for r in rows]!=expected or any(r['budget']!=64 or not r['prompt'] for r in rows):raise ValueError('extended fixed policy')
+ return rows
+
+def extended_index():
+ return dict(schema=1,profile='extended',max_new_tokens=64,cases=[r['id'] for r in extended_cases()],capture='logits-all-checkpoints-v1')
+
+def validate_extended(folder):
+ cases=extended_cases()
+ if folder.is_symlink() or not folder.is_dir():raise ValueError('extended directory')
+ if {p.name for p in folder.iterdir()}!={'extended.json',*[r['id'] for r in cases]}:raise ValueError('extended inventory')
+ index=folder/'extended.json'
+ if index.is_symlink() or not index.is_file() or index.stat().st_size>65536:raise ValueError('extended index')
+ index_data=loads(index.read_text())
+ if not isinstance(index_data,dict) or index_data!=extended_index() or type(index_data.get('schema'))is not int or type(index_data.get('max_new_tokens'))is not int:raise ValueError('extended index')
+ summaries={}
+ for case in cases:
+  sub=folder/case['id']
+  if sub.is_symlink() or not sub.is_dir():raise ValueError('extended case directory')
+  for name in ('generation.json','steps.jsonl'):
+   path=sub/name
+   if path.is_symlink() or not path.is_file() or path.stat().st_size>1024*1024:raise ValueError('extended metadata bound')
+  meta=loads((sub/'generation.json').read_text())
+  if not isinstance(meta,dict) or not isinstance(meta.get('prompt_tokens'),list) or not isinstance(meta.get('runs'),list):raise ValueError('extended metadata containers')
+  if len(meta['prompt_tokens'])!=case['prompt_count'] or meta.get('eog_tokens')!=[2] or len(meta['runs'])!=2 or not all(isinstance(row,dict) for row in meta['runs']):raise ValueError('extended token policy')
+  if any(not isinstance(r.get('generated'),list) or len(r['generated'])!=case['generated'] or r.get('stop')!=case['stop'] for r in meta['runs']):raise ValueError('extended stop/count policy')
+  summaries[case['id']]=validate_case(sub,case['prompt'],64,case['checkpoints'])
+ summary=dict(profile='extended',cases=summaries,**{key:sum(v[key] for v in summaries.values()) for key in ('requests','raw_files','raw_bytes')})
+ if (summary['requests'],summary['raw_files'],summary['raw_bytes'])!=(1176,2096,158064640):raise ValueError('extended capture totals')
+ if sum(p.stat().st_size for p in folder.rglob('*') if p.is_file())>160*1024*1024:raise ValueError('extended raw bound')
+ return summary
+
 def profile_policy(profile):
- if profile not in ('short','corpus'):raise ValueError('generation profile')
+ if profile not in ('short','corpus','extended'):raise ValueError('generation profile')
+ if profile=='extended':return 64,EXTENDED_LINE,256*1024*1024
  return (4,LINE,32*1024*1024) if profile=='short' else (16,CORPUS_LINE,128*1024*1024)
 
 def validate(folder,profile='short'):
  profile_policy(profile);folder=Path(folder)
  if profile=='short':return validate_case(folder,'Once upon a time',4)
+ if profile=='extended':return validate_extended(folder)
  if folder.is_symlink() or not folder.is_dir():raise ValueError('corpus directory')
  cases=corpus_cases();expected=dict(schema=1,profile='corpus',max_new_tokens=16,cases=[k for k,_ in cases])
  if {p.name for p in folder.iterdir()}!={'corpus.json',*[k for k,_ in cases]} or (folder/'corpus.json').is_symlink():raise ValueError('corpus inventory')
@@ -44,7 +88,7 @@ def validate(folder,profile='short'):
  summaries={key:validate_case(folder/key,prompt,16) for key,prompt in cases}
  return dict(profile='corpus',cases=summaries,**{key:sum(v[key] for v in summaries.values()) for key in ('requests','raw_files','raw_bytes')})
 
-def validate_case(folder,prompt_text,budget):
+def validate_case(folder,prompt_text,budget,checkpoints=None):
  folder=Path(folder)
  if folder.is_symlink() or not folder.is_dir():raise ValueError('raw directory')
  if any(not p.is_file() or p.is_symlink() for p in folder.iterdir()) or not all((folder/n).is_file() for n in ['generation.json','steps.jsonl']):raise ValueError('generation inventory')
@@ -53,7 +97,7 @@ def validate_case(folder,prompt_text,budget):
  if not isinstance(meta,dict) or set(meta)!=set(fixed)|{'prompt_tokens','eog_tokens','runs'} or any(type(meta.get(k))is not type(v) or meta.get(k)!=v for k,v in fixed.items()):raise ValueError('generation metadata')
  prompt=meta['prompt_tokens'];eog=meta['eog_tokens']
  valid=lambda v:type(v)is int and 0<=v<32000
- if not isinstance(prompt,list) or not 1<=len(prompt)<=32 or not all(map(valid,prompt)):raise ValueError('prompt tokens')
+ if type(budget)is not int or not 1<=budget<=512 or not isinstance(prompt,list) or not 1<=len(prompt)<=512-budget or not all(map(valid,prompt)):raise ValueError('prompt tokens/context budget')
  if not isinstance(eog,list) or not eog or not all(map(valid,eog)) or eog!=sorted(set(eog)):raise ValueError('EOS vocabulary')
  if not isinstance(meta['runs'],list) or len(meta['runs'])!=2:raise ValueError('reset runs')
  inventory={'generation.json','steps.jsonl'};expected_steps=[];raws={};runs=[]
@@ -70,8 +114,9 @@ def validate_case(folder,prompt_text,budget):
    pieces=[bytes.fromhex(s) for s in row['pieces_hex']];text=bytes.fromhex(row['text_hex'])
   except (ValueError,TypeError):raise ValueError('decoded hex')
   if any(len(p)>4096 for p in pieces) or b''.join(pieces)!=text:raise ValueError('decoded text')
+  if checkpoints is not None and (not isinstance(checkpoints,tuple) or tuple(sorted(set(checkpoints)))!=checkpoints or any(type(p)is not int or not 0<=p<len(processed) for p in checkpoints)):raise ValueError('intermediate checkpoints')
   for pos,token in enumerate(processed):
-   for stage in STAGES:
+   for stage in (STAGES if checkpoints is None or pos in checkpoints else ('logits',)):
     name=f'run-{run}-pos-{pos}-{stage}.f32le';inventory.add(name)
     path=folder/name
     if not path.is_file():raise ValueError('generation inventory')
@@ -92,7 +137,7 @@ def validate_case(folder,prompt_text,budget):
    expected_steps.append(dict(run=run,position=pos,token=token,status=0,committed_position=pos))
   runs.append({k:v for k,v in row.items() if k!='run'})
  if any(not isinstance(s,dict) or any(type(v)is not int for v in s.values()) for s in steps) or steps!=expected_steps:raise ValueError('committed progression')
- if runs[0]!=runs[1] or any(raws[(0,p,stage)]!=raws[(1,p,stage)] for p in range(len(runs[0]['processed'])) for stage in STAGES):raise ValueError('reset equality')
+ if runs[0]!=runs[1] or any(raws[(0,p,stage)]!=raws[(1,p,stage)] for p in range(len(runs[0]['processed'])) for stage in (STAGES if checkpoints is None or p in checkpoints else ('logits',))):raise ValueError('reset equality')
  if {p.name for p in folder.iterdir()}!=inventory or any(not p.is_file() or p.is_symlink() for p in folder.iterdir()):raise ValueError('generation inventory')
  return dict(requests=len(steps),raw_files=len(raws),raw_bytes=sum(map(len,raws.values())),prompt_tokens=prompt,generated=runs[0]['generated'],stop=runs[0]['stop'],text_hex=runs[0]['text_hex'])
 
@@ -115,7 +160,7 @@ def command_plan(folder,cpu,model,profile='short',original_source=None):
  return {k:list(map(str,v)) for k,v in {
   'headers':['/usr/bin/clang++-18',*flags,'-M','-MF',folder/'headers.d',harness],
   'compile':['/usr/bin/clang++-18',*flags,'-MD','-MF',folder/'compile.d',harness,'-L'+str(lib),'-Wl,-rpath,'+str(lib),'-lllama','-lggml-cpu','-lggml-base','-o',folder/'trace'],
-  'ldd':['/usr/bin/ldd',folder/'trace'],'capture':[folder/'trace',original_source if original_source is not None else model,folder/'raw',*(['--original-source'] if original_source is not None else ['corpus'] if profile=='corpus' else [])]}.items()}
+  'ldd':['/usr/bin/ldd',folder/'trace'],'capture':[folder/'trace',original_source if original_source is not None else model,folder/'raw',*(['--original-source'] if original_source is not None else [profile] if profile!='short' else [])]}.items()}
 
 def artifact_inventory(folder,receipt):
  if any(p.is_symlink() for p in folder.rglob('*')):raise ValueError('generation artifact symlink')
@@ -205,12 +250,12 @@ def build(cpu,model,output,profile='short',original_source=None,reference=None):
  data=dict(producer_output=str(output),status='PASS',classification='successful-greedy-generation-cpu-reference',cpu_build=str(cpu),model=dict(path=str(model),bytes=model.stat().st_size,sha256=inputs[str(model)]),inputs=inputs,artifacts=artifacts,commands=commands,requests=summary['requests'],raw_files=summary['raw_files'],max_new_tokens=budget,gpu_executed=False,limits=['CPU reference only; no GPU execution','Reset/repeat in one process, not independent-process determinism','Text pieces are source-bound vocabulary API output; Python independently validates greedy IDs and feedback'])
  if original_source is not None:
   data.update(classification='original-format-host-short-generation-compared',original_source=str(original_source),reference=str(reference),complete201=True,native_executed=False)
- if profile=='corpus':data['profile']=profile
+ if profile!='short':data['profile']=profile
  commands_valid(data,output,cpu,model);(output/'receipt.json').write_text(json.dumps(data,indent=2)+'\n');print('PASS original-format host short generation compared' if original_source is not None else 'PASS CPU greedy generation reference')
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for name in ('cpu-build','model','output'):parser.add_argument('--'+name,type=Path,required=True)
- parser.add_argument('--profile',choices=('short','corpus'),default='short')
+ parser.add_argument('--profile',choices=('short','corpus','extended'),default='short')
  parser.add_argument('--original-source',type=Path)
  parser.add_argument('--reference',type=Path)
  args=parser.parse_args();build(args.cpu_build,args.model,args.output,args.profile,args.original_source,args.reference)

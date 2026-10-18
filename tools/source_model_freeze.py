@@ -88,9 +88,9 @@ def validate_historical_baseline(path):
   image=original/name;h=audit['inputs'].get(str(image));require(h is not None and receipt['inputs'].get(str(image))==h and stream_digest(image)==h,'baseline image provenance differs')
  return receipt
 
-def prerequisites(bound):
+def prerequisites(bound,authenticated_original_inputs=None):
  import build_llm_native_app as driver
- model=driver.model_inputs(Path(bound['model']['asset']),Path(bound['model']['source_dir']),Path(bound['model']['cpu_build']))
+ model=driver.model_inputs(Path(bound['model']['asset']),Path(bound['model']['source_dir']),Path(bound['model']['cpu_build']),authenticated_original_inputs=authenticated_original_inputs)
  return driver.vocab_inputs(Path(bound['vocabulary']['receipt']).parent),driver.client_builder.app_objects(Path(bound['native_client']['receipt']).parent),model
 
 def audit_sources():
@@ -114,7 +114,7 @@ def _validate_model_receipt(build,receipt):
  for name,h in cache.bound_inputs(receipt['compiler_cache']).items():require(inputs.get(name)==h,'unbound compiler cache identity')
  for name,h in inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'input changed')
  for name,target in receipt.get('symlinks',{}).items():require(str(Path(name).resolve())==target,'symlink changed')
- vocab,client,model=prerequisites(bound)
+ vocab,client,model=prerequisites(bound,dict(inputs))
  for key,actual,fields in [('vocabulary',vocab,('receipt','receipt_sha256','asset')),('native_client',client,('receipt','receipt_sha256')),('model',model,('asset','bytes','sha256','receipt','receipt_sha256','source_dir','cpu_build'))]:
   require({k:actual[k] for k in fields}==bound[key],'prerequisite differs')
   require(all(inputs.get(p)==h for p,h in actual['inputs'].items()),'prerequisite closure omitted')

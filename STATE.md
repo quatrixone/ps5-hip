@@ -3,6 +3,27 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Extended host generation and build-overhead improvements
+
+The isolated extended host numerical run passes 1,176 commits and all 2,096
+float outputs bitwise CPU-equal across the fixed 64-step, normal-EOS and
+combined-512 cases, with reset/ownership checks. The implementation is integrated after rebasing
+onto `167b22d` with numerical code unchanged; 229 combined tests pass. This is
+scratch host evidence: a supported authenticated main extended oracle and
+native extended execution remain unproven. Full M4/M5 acceptance stays open.
+
+Two independently reviewed overhead changes are integrated: shared initial/
+final header verification for the native compile batch (41 focused tests), and
+reuse of freshly authenticated original prerequisites within admission (45
+tests). The latter retains all nine locked prerequisite files, fresh standalone
+validation and complete final sweeps; the six-file runtime contract is unchanged.
+The extended profile and both overhead changes are integrated. The original
+candidate freeze completed on 167b22d and its isolated runtime validates; use
+that frozen runtime rather than the changed main checkout. The latest console
+service checks failed, so no new hardware result or console availability is
+claimed. The four-token native proof remains the latest console generation
+result; the original-format package's offline PASS is not native execution.
+
 ## Original-format inference: supported host generation passes, native pending
 
 Main `6a7b941` contains bounded safetensors/index readers, strict TinyLlama
@@ -35,7 +56,7 @@ files with no embedded model weights. The app selects the six original files
 under `/data/hip/models/tinyllama-source`. Project cache counters recorded 79 hits
 and 2 misses across compilation; this is not a whole-build speedup measurement.
 See `evidence/offline-native-original-linked-package.json`.
-Next: freeze and isolate this candidate, then validate original loading and the
+Next: use the isolated frozen candidate to validate original loading and the
 short generation/reset profile on available .40. Its latest service check still
 fails; no original-format console execution or release readiness is claimed.
 
@@ -85,7 +106,7 @@ its isolated frozen runtime validates in 4.6 seconds on Linux /tmp after adding
 the receipt-bound dependencies.json root marker. See
 `evidence/offline-real-frozen-runtime-qualification.json`. Current main has changed;
 use the isolated frozen runtime for this candidate. No deployment speedup is claimed.
-Longer-generation helper and original-format producer integration remain isolated.
+The extended-generation helper and original-format producer are integrated; native extended validation remains open.
 The additive original-format components are already on main.
 The native four-token generation proof remains the latest GPU generation result.
 

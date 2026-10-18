@@ -54,7 +54,7 @@ class FullTitle(unittest.TestCase):
                 calls=[];out=folder/phase;out.mkdir()
                 def compile_unit(output,path,obj,flags,label,source_root=None):
                     calls.append((path.name,flags));return {'object':str(obj.relative_to(output))}
-                with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit):
+                with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit),patch.object(builder,'_plan_bound_unit',side_effect=lambda *a,**kw: ({},lambda _: compile_unit(*a,**kw))):
                     self.assertEqual(len(builder.compile_units(out,source,'llm_client',client_phase=phase)),76)
                 marked=[name for name,flags in calls if '-DPS5HIP_LLM_AUTHENTICATED_MODEL_FULL=1' in flags]
                 self.assertEqual(marked,['public_hip_llm_client_console_title.cpp'] if phase=='model-full' else [])
@@ -71,7 +71,7 @@ class FullTitle(unittest.TestCase):
                 calls=[];out=folder/profile;out.mkdir()
                 def compile_unit(output,path,obj,flags,label,source_root=None):
                     calls.append((path.name,flags));return {'object':str(obj.relative_to(output))}
-                with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit):
+                with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit),patch.object(builder,'_plan_bound_unit',side_effect=lambda *a,**kw: ({},lambda _: compile_unit(*a,**kw))):
                     builder.compile_units(out,source,'llm_client',client_phase='model-full',full_profile=profile)
                 self.assertEqual([name for name,flags in calls if '-DPS5HIP_LLM_FULL_GENERATION=1' in flags],['public_hip_llm_client_console_title.cpp'] if profile=='generation' else [])
                 self.assertEqual([name for name,flags in calls if '-DPS5HIP_LLM_FULL_CORPUS=1' in flags],['public_hip_llm_client_console_title.cpp'] if profile=='corpus' else [])
@@ -82,7 +82,7 @@ class FullTitle(unittest.TestCase):
 
     def test_production_profile_dispatch_and_counts(self):
         text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
-        start=text.index('#if PS5HIP_LLM_FULL_CORPUS\n        prepare_corpus_directories')
+        start=text.index('#if PS5HIP_LLM_FULL_EXTENDED\n        prepare_extended_directories')
         # Match the outer conditional, including the nested original-source arm.
         depth=0;lines=[]
         for line in text[start:].splitlines():
@@ -99,14 +99,14 @@ class FullTitle(unittest.TestCase):
 #include <stdexcept>
 #include <string>
 namespace m0 {
-enum class NativeFullProfile {sequence,smoke,generation,corpus};
+enum class NativeFullProfile {sequence,smoke,generation,corpus,extended};
 enum class NativeFullModelSource {gguf,original_safetensors};
 struct Full {unsigned requests,completed_nodes,launches;};
 struct Result {unsigned files,bytes;Full full;};
 static int seen,source_seen;
 void require(bool ok){if(!ok)throw std::runtime_error("contract");}
 Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int,int,NativeFullProfile p,NativeFullModelSource source=NativeFullModelSource::gguf){
- seen=int(p);source_seen=int(source);Result r=p==NativeFullProfile::corpus?Result{6539,86091236,{272,217056,199376}}:p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
+ seen=int(p);source_seen=int(source);Result r=p==NativeFullProfile::extended?Result{2103,158064647,{1176,938448,862008}}:p==NativeFullProfile::corpus?Result{6539,86091236,{272,217056,199376}}:p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
 #ifdef BAD_RESULT
  ++r.full.launches;
 #endif
@@ -114,16 +114,18 @@ Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int
 }}
 namespace ps5hip_canary {constexpr int sync_log=0;}
 static void prepare_corpus_directories(int){}
+static void prepare_extended_directories(int){}
+static constexpr unsigned extended_written_files=2103,extended_written_bytes=158064647;
 int main(){const std::string model_path="unused";std::array<const char*,6> modules{};int prefix_write=0,directory=0,model_memory_snapshot=0;
- struct {unsigned launches;bool uncertain;unsigned allocations,frees;} observed{PS5HIP_LLM_FULL_CORPUS?199376u:PS5HIP_LLM_FULL_GENERATION?11728u:2199u,false,16,16};
+ struct {unsigned launches;bool uncertain;unsigned allocations,frees;} observed{PS5HIP_LLM_FULL_EXTENDED?862008u:PS5HIP_LLM_FULL_CORPUS?199376u:PS5HIP_LLM_FULL_GENERATION?11728u:2199u,false,16,16};
  try{
 """
         with tempfile.TemporaryDirectory() as folder:
             folder=pathlib.Path(folder);cpp=folder/'title.cpp';binary=folder/'title'
-            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_CORPUS?3:PS5HIP_LLM_FULL_GENERATION?2:1)&&m0::source_seen==PS5HIP_LLM_ORIGINAL_MODEL?0:1;}catch(...){return 99;}}\n')
-            for profile,original in ((0,False),(1,False),(2,False),(1,True)):
+            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_EXTENDED?4:PS5HIP_LLM_FULL_CORPUS?3:PS5HIP_LLM_FULL_GENERATION?2:1)&&m0::source_seen==PS5HIP_LLM_ORIGINAL_MODEL?0:1;}catch(...){return 99;}}\n')
+            for profile,original in ((0,False),(1,False),(2,False),(3,False),(1,True)):
                 for bad in (False,True):
-                    command=['c++','-std=c++17','-DPS5HIP_LLM_ORIGINAL_MODEL='+str(int(original)),'-DPS5HIP_LLM_FULL_GENERATION='+str(int(profile==1)),'-DPS5HIP_LLM_FULL_CORPUS='+str(int(profile==2)),str(cpp),'-o',str(binary)]
+                    command=['c++','-std=c++17','-DPS5HIP_LLM_FULL_EXTENDED='+str(int(profile==3)),'-DPS5HIP_LLM_ORIGINAL_MODEL='+str(int(original)),'-DPS5HIP_LLM_FULL_GENERATION='+str(int(profile==1)),'-DPS5HIP_LLM_FULL_CORPUS='+str(int(profile==2)),str(cpp),'-o',str(binary)]
                     if bad:command.append('-DBAD_RESULT=1')
                     subprocess.run(command,check=True)
                     self.assertEqual(subprocess.run([str(binary)]).returncode,99 if bad else 0)
@@ -195,7 +197,7 @@ return 0;}catch(...){return 99;}}
             subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror',str(cpp),'-o',str(binary)],check=True)
             self.assertEqual(subprocess.run([str(binary)]).returncode,0)
         self.assertIn('M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false',text)
-        self.assertIn('#if PS5HIP_LLM_FULL_CORPUS && PS5HIP_LLM_FULL_GENERATION',text)
+        self.assertIn('#if (PS5HIP_LLM_FULL_CORPUS + PS5HIP_LLM_FULL_GENERATION + PS5HIP_LLM_FULL_EXTENDED) > 1',text)
 
 
 if __name__ == '__main__':

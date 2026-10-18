@@ -6,7 +6,8 @@ class OriginalLoad(unittest.TestCase):
  def test_loader_selection_and_lifetime(self):
   source=(ROOT/'ports/ggml/native_full.h').read_text()
   block=source[source.index(' // Keep source descriptors'):source.index(' if(generation){clock.report("load"')]
-  gate=source[source.index(' require(model_source=='):source.index(' const bool smoke=')]
+  gate_start=source.index(' require(model_source==')
+  gate=source[gate_start:source.index('\n#endif',gate_start)+len('\n#endif')+1]
   code=r'''
 #include <memory>
 #include <string>

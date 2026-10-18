@@ -58,7 +58,7 @@ class JobPolicy(unittest.TestCase):
       if number<=jobs:barrier.wait(timeout=5)
       with lock:active-=1
      return {'object':str(obj.relative_to(out))}
-    with patch.dict(os.environ,{'PS5_HIP_BUILD_JOBS':str(jobs)}),patch.object(b,'compiler_flags',return_value=['compiler']),patch.object(b,'compile_bound_unit',side_effect=compile_unit):
+    with patch.dict(os.environ,{'PS5_HIP_BUILD_JOBS':str(jobs)}),patch.object(b,'compiler_flags',return_value=['compiler']),patch.object(b,'compile_bound_unit',side_effect=compile_unit),patch.object(b,'_plan_bound_unit',side_effect=lambda *a,**kw: ({},lambda _: compile_unit(*a,**kw))):
      records=b.compile_units(output,source)
     self.assertEqual(peak,jobs);self.assertEqual(len(records),76)
     self.assertEqual([int(Path(r['object']).name.split('-')[0]) for r in records],list(range(76)))

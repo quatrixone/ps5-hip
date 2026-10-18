@@ -8,6 +8,10 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Original native package | offline |149objects/201commands/435functions and final receipt pass; no embedded weights | evidence/offline-native-original-linked-package.json | next: freeze and .40
 
+- 2026-10-18 | Extended host arithmetic | offline | 1,176 commits and 2,096 bitwise outputs; combined integration 229 tests; native extended remains open | evidence/offline-extended-generation-host-arithmetic.json
+
+- 2026-10-18 | Original frozen runtime | offline | issuer and isolated 543-file runtime pass; not deployed | evidence/offline-original-frozen-runtime.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

@@ -297,3 +297,48 @@ If the external model is absent on the console, supply `--model-file` to
 The local two-lock wrapper must forward this option when uploading a missing
 model. Source-only tests are `python3 tests/frozen_full_admission_test.py`.
 This offline integration is not a real issuer qualification or measured speedup.
+
+
+## Extended CPU qualification reference (not native admission)
+
+The explicit `extended` CPU profile prepares three fixed cases, each repeated
+with a cleared context: 64 outputs from `Once upon a time`, natural EOS from
+`Explain why the sky is blue.`, and the source-bound 448-token prompt with 64
+outputs. The last case has a combined 512-token budget but commits positions
+0 through 510; its final selected output is not decoded.
+
+Build from source with the existing prerequisite targets:
+
+```sh
+make llm-generation-reference LLM_GENERATION_REFERENCE_PROFILE=extended LLM_GENERATION_REFERENCE_DIR=results/llm-generation-extended-reference
+```
+
+Use a fresh output directory. Existing `LLM_CPU_BUILD_DIR` and
+`LLM_FULL_GRAPH_MODEL` overrides can reuse authenticated prerequisites without
+rebuilding the CPU libraries. No model weights are embedded in the policy.
+
+The fixed policy is `ports/ggml/extended_generation_cases.def`. Every commit
+captures all 32,000 logits. All 22 layer outputs and final normalization are
+captured at these positions in each reset run:
+
+| Case | Intermediate checkpoints |
+|---|---|
+| short64 | 0, 1, 3, 4, 5, 6, 67 |
+| eos | 0, 1, 7, 8 |
+| boundary | 0, 1, 255, 256, 446, 447, 448, 449, 510 |
+
+These cover startup/cache reuse, the prefill-to-feedback transition, attention
+padding growth, and the final committed state. The exact inventory is 1,176
+commits, 2,096 float files / 158,064,640 bytes, and seven metadata files. The raw
+tree is bounded at 160 MiB and the complete CPU artifact directory at 256 MiB.
+All logits must be finite and the independent greedy selections, generated
+history, stop reason and reset arrays must agree exactly. Existing downstream
+numerical tolerances are unchanged; this profile does not admit a native run.
+
+Short and corpus behavior remains unchanged. Extended asset assembly and host
+numerical integration are implemented. The scratch host HIP arithmetic run passes
+all 1,176 commits and 2,096 outputs bitwise against its scratch CPU baseline;
+a supported authenticated main extended oracle remains unqualified. Native package building rejects extended until measured
+watchdog budgets are qualified; console admission still rejects this profile.
+Producing the CPU reference alone does not establish long-context HIP execution,
+native EOS behavior or completion of M4.

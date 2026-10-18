@@ -34,6 +34,31 @@ class Auth(unittest.TestCase):
   bound=dict(phase='model-gate',vocabulary={k:self.v[k] for k in ('receipt','receipt_sha256','asset')},native_client={k:self.c[k] for k in ('receipt','receipt_sha256')},model={k:v for k,v in self.m.items() if k!='inputs'},audit={'path':str(ap),'sha256':f.stream_digest(ap)})
   self.r=dict(schema=1,status='PASS',classification='source-only-model-rejection-native-client-app',fixture='llm_client',phase='model-gate',native_executed=False,gpu_executed=False,object_count=149,units=units,inputs=self.inputs,llm_client=bound,package_bytes=2,package_sha256=f.stream_digest(package),package_files={n:f.stream_digest(self.app/n) for n in names},results_dir='/data/test',external_model=dict(path=em.DEFAULT_MODEL_PATH,bytes=1,sha256=self.sha))
   self.r['compiler_cache']={'enabled':False,'requested':'0'}
+ def test_original_reuse_snapshot_follows_initial_and_final_fresh_sweeps(self):
+  original=self.put(self.root/'model.safetensors',b'original');digest=self.inputs[str(original)]
+  real=f.stream_digest;calls=[]
+  def observed(path):
+   if str(path)==str(original):calls.append(str(path))
+   return real(path)
+  def prerequisites(bound,snapshot):
+   self.assertEqual(len(calls),1);self.assertEqual(snapshot[str(original)],digest)
+   self.assertIsNot(snapshot,self.inputs)
+   original.write_bytes(b'mutation') # same size; no stat-only acceptance
+   return self.v,self.c,self.m
+  with patch.object(em,'MODEL_BYTES',1),patch.object(em,'MODEL_SHA',self.sha),patch.object(f,'MODEL_BYTES',1),patch.object(f,'MODEL_SHA',self.sha),patch.object(f,'prerequisites',side_effect=prerequisites),patch.object(f,'audit_sources',return_value=[]),patch.object(legacy,'ROOT',self.root),patch.object(f,'stream_digest',side_effect=observed):
+   with self.assertRaisesRegex(ValueError,'input changed during admission'):f.validate_model_receipt(self.build,self.r)
+  self.assertEqual(len(calls),2)
+ def test_initial_original_mutation_rejects_before_reuse(self):
+  original=self.put(self.root/'model.safetensors',b'original');original.write_bytes(b'mutation')
+  with patch.object(em,'MODEL_BYTES',1),patch.object(em,'MODEL_SHA',self.sha),patch.object(f,'prerequisites') as prerequisites,self.assertRaisesRegex(ValueError,'input changed'):f.validate_model_receipt(self.build,self.r)
+  prerequisites.assert_not_called()
+ def test_prerequisites_forward_snapshot_without_skipping_other_validators(self):
+  import build_llm_native_app as driver
+  snapshot=dict(self.inputs)
+  with patch.object(driver,'model_inputs',return_value=self.m) as model,patch.object(driver,'vocab_inputs',return_value=self.v) as vocab,patch.object(driver.client_builder,'app_objects',return_value=self.c) as client:
+   self.assertEqual(f.prerequisites(self.r['llm_client'],snapshot),(self.v,self.c,self.m))
+   self.assertIs(model.call_args.kwargs['authenticated_original_inputs'],snapshot)
+   vocab.assert_called_once();client.assert_called_once()
  def test_cache_record_required(self):
   self.r.pop('compiler_cache')
   with self.assertRaisesRegex(ValueError,'compiler cache record'):self.validate()

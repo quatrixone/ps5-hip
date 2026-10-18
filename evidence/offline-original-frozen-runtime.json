@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "source_commit": "167b22d01c64146bc5e005a36b1ef9a0d9b2dea2",
+  "candidate": "results/source-public-llm-original-console-v1",
+  "manifest_sha256": "771ca0b5808210c49b848c7796fd0c733a7a1d343cef963ab43fc681c43e21bd",
+  "package_sha256": "5196f855773b2182ad1a0df14bb017f2a29746145edd3506d9d8e3e7ec34de36",
+  "runtime": {
+    "runtime_root": "/tmp/ps5-hip-original-runtime-v1",
+    "manifest_sha256": "771ca0b5808210c49b848c7796fd0c733a7a1d343cef963ab43fc681c43e21bd",
+    "files": 543,
+    "copied_bytes": 66024418,
+    "elapsed_seconds": 17.634055951959454,
+    "exit_code": 0,
+    "stdout": "{\"status\": \"PASS\", \"validation\": true, \"control_constructor\": false, \"console_contact\": false, \"max_rss_kib\": 90368}\n",
+    "stderr": "",
+    "console_contact": false
+  },
+  "freeze_exit_code": 0,
+  "native_executed": false,
+  "console_contact": false,
+  "limits": [
+    "Isolated runtime is in local temporary storage; preserve or recreate it from the exact frozen closure.",
+    "Copied and original candidates are one single-use deployment identity; never deploy both.",
+    "Recorded installed baseline must match the console before deployment; current availability is unknown."
+  ]
+}

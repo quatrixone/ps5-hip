@@ -28,13 +28,19 @@
 #ifndef PS5HIP_LLM_FULL_GENERATION
 #define PS5HIP_LLM_FULL_GENERATION 0
 #endif
+#ifndef PS5HIP_LLM_FULL_EXTENDED
+#define PS5HIP_LLM_FULL_EXTENDED 0
+#endif
+#if PS5HIP_LLM_FULL_EXTENDED
+#error extended native watchdog requires measured corpus timing and explicit qualification
+#endif
 #ifndef PS5HIP_LLM_FULL_CORPUS
 #define PS5HIP_LLM_FULL_CORPUS 0
 #endif
-#if PS5HIP_LLM_FULL_CORPUS && PS5HIP_LLM_FULL_GENERATION
+#if (PS5HIP_LLM_FULL_CORPUS + PS5HIP_LLM_FULL_GENERATION + PS5HIP_LLM_FULL_EXTENDED) > 1
 #error only one full generation profile may be selected
 #endif
-#if (PS5HIP_LLM_FULL_GENERATION || PS5HIP_LLM_FULL_CORPUS) && !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+#if (PS5HIP_LLM_FULL_GENERATION || PS5HIP_LLM_FULL_CORPUS || PS5HIP_LLM_FULL_EXTENDED) && !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
 #error generation requires the authenticated full-model title
 #endif
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
@@ -255,9 +261,21 @@ static bool corpus_output_name(const char* filename){
  return false;
 }
 #endif
+#if PS5HIP_LLM_FULL_EXTENDED
+#include "extended_title_output.h"
+static size_t extended_written_bytes=0;
+static unsigned extended_written_files=0;
+static void prepare_extended_directories(const std::string& directory){
+ for(const auto& item:ps5hip_generation::extended_cases)if(::mkdir((directory+"/"+item.id).c_str(),0700)!=0)ps5hip_clr_gpu_fail("extended-directory-not-fresh");
+}
+#endif
 static void prefix_write(const char* filename,const void* data,size_t bytes,void* state){
 #if PS5HIP_LLM_FULL_CORPUS
  if(!corpus_output_name(filename))ps5hip_clr_gpu_fail("corpus-output-name");
+#endif
+#if PS5HIP_LLM_FULL_EXTENDED
+ if(!ps5hip_generation::extended_output_size(filename,bytes)||extended_written_files>=2103||bytes>160u*1024*1024-extended_written_bytes)ps5hip_clr_gpu_fail("extended-output-contract");
+ ++extended_written_files;extended_written_bytes+=bytes;
 #endif
  const auto& directory=*static_cast<const std::string*>(state);
  const auto path=directory+"/"+filename;
@@ -314,7 +332,12 @@ int main() {
           "/system_ex/app/PPSA99014/model-layer/q8.hsaco",
           "/system_ex/app/PPSA99014/model-layer/q4.hsaco",
           "/system_ex/app/PPSA99014/model-layer/layer.hsaco"};
-#if PS5HIP_LLM_FULL_CORPUS
+#if PS5HIP_LLM_FULL_EXTENDED
+        prepare_extended_directories(directory);
+        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::extended);
+        m0::require(result.files==2103&&result.files==extended_written_files&&result.bytes==extended_written_bytes&&result.bytes>158064640&&result.bytes<=160u*1024*1024&&result.full.requests==1176&&result.full.completed_nodes==938448&&result.full.launches==862008);
+        m0::require(observed.launches==862008&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
+#elif PS5HIP_LLM_FULL_CORPUS
         prepare_corpus_directories(directory);
         const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::corpus);
         m0::require(result.files==6539&&result.bytes==86091236&&result.full.requests==272&&result.full.completed_nodes==217056&&result.full.launches==199376);
@@ -385,7 +408,9 @@ int main() {
     }
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-#if PS5HIP_LLM_FULL_CORPUS
+#if PS5HIP_LLM_FULL_EXTENDED
+    if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=extended watchdog_joined=true numerical=pending finalization=pending inference=false");
+#elif PS5HIP_LLM_FULL_CORPUS
     if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false");
 #elif PS5HIP_LLM_FULL_GENERATION
     if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=generation watchdog_joined=true numerical=pending finalization=pending inference=false");

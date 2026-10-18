@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "scratch-extended-host-HIP-arithmetic-against-scratch-CPU-baseline",
+  "source_base": "ad49c98",
+  "main_producer_authenticated": false,
+  "gpu_executed": false,
+  "native_executed": false,
+  "cases": {
+    "short64": {
+      "prompt_tokens": 5,
+      "generated_tokens": 64,
+      "stop": "step_limit",
+      "commits_two_resets": 136
+    },
+    "eos": {
+      "prompt_tokens": 9,
+      "generated_tokens": 1,
+      "stop": "eos",
+      "commits_two_resets": 18
+    },
+    "boundary": {
+      "prompt_tokens": 448,
+      "generated_tokens": 64,
+      "stop": "step_limit",
+      "commits_two_resets": 1022
+    }
+  },
+  "requests": 1176,
+  "raw_float_files": 2096,
+  "raw_float_bytes": 158064640,
+  "all_float_files_bitwise_equal": true,
+  "backend": {
+    "requests": 1176,
+    "nodes": 938448,
+    "launches": 862008,
+    "CPU_arithmetic": 0,
+    "scheduler_forwarded": 1176,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1
+  },
+  "numeric_tolerances": [
+    2e-05,
+    0.0002,
+    0.0002
+  ],
+  "execution_seconds": 3252.319289989944,
+  "cpu_capture_seconds": 118.94504801399307,
+  "cpu_affinity": [
+    0,
+    1
+  ],
+  "fresh_initial_and_final_model_sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa",
+  "evidence_sha256": {
+    ".local/extended-rebase/hip-numeric-v1/result.json": "5dc0fce938eea7989758ee82c0de8c7cf5a2a41332f033ea35c81e0aa98c8821",
+    ".local/extended-rebase/hip-numeric-v1/comparison.json": "fb1757c7b5e20969cff205377093d7f87095a6a3f46151d720f9a8e3c18ebb44",
+    ".local/extended-rebase/hip-numeric-v1/commands.json": "0550a027433cf75ef2c378c3323dc2ecc6bb5e9d3e795e14e419d4bbd6c6de2b",
+    ".local/extended-rebase/hip-numeric-v1/timing.json": "b09962270eafb12eb563defc612c4b178908c48962366beae714717069a4ca9b",
+    ".local/extended-rebase/hip-numeric-v1/inputs.json": "c4f3071db998830dd74c64d1cce1942dd0f023d3a1965714981c0cff6fd2c65b",
+    ".local/extended-rebase/hip-numeric-v1/validator-identities.json": "8609956370a28a0ea9d0d6714bf942b85ef56856d358430ceb63bcb29c71be9c",
+    ".local/extended-rebase/hip-numeric-v1/terminal-review.json": "79e35cbd9e4896c3e6ca085d576294634d68b63d97a24a5c1be68d574c466fc7",
+    ".local/extended-rebase/capture-v1/result.json": "00586eec1ebe6190ab638292c49de9ddc76c909d0400811140eb5a56a5b20624",
+    ".local/extended-rebase/capture-v1/summary.json": "fba208416fe6e78a5e3fa7bbf322f0a283b41ebfddaf2d8433395599cbc59a15",
+    ".local/extended-rebase/capture-v1/inputs.json": "4c163a5754681d7d7e4431fcc8aabdfca9a2d0cd64fc254c00d6cc383ed35bbe",
+    ".local/extended-rebase/capture-v1/raw-artifacts.json": "d5d3afa6cb5842c4bd89e4a778a4cd123b65979f4323ce375f7e3de7abfb0340",
+    ".local/extended-rebase/capture-v1/model-identity.json": "aa90fc65670378c71f2a36a07ed20b59de9a936dc0f7763ac8d2155c0dff600e",
+    ".local/extended-rebase/raw-archive-review.json": "a514eb32bb78df325d0e0fd6ca187c36afd324e08eff1c2166dba6603dafcd6c"
+  },
+  "limits": [
+    "Actual production helper/backend arithmetic interpreted on host; no PS5 GPU execution",
+    "Scratch CPU baseline and source proposal, not an authenticated supported main producer oracle",
+    "Historical CPU shared-library identities checked; full original build closure not reauthenticated",
+    "New harness/backend units use fatal ASan/UBSan; existing shared libraries uninstrumented",
+    "Thread counts changed from4 to2 only; unchanged checkpoints,EOS/reset policy and numerical tolerances",
+    "Raw outputs retained under /tmp and archived locally with every archive member byte-hash verified; archive is not committed to Git."
+  ],
+  "raw_archive": {
+    "status": "PASS",
+    "archive": ".local/extended-rebase/raw-captures-v1.tar.gz",
+    "sha256": "5467e6b840bd42c7b49c4a7e3f277f21a2160333f9cb0652d8d874eb04f522be",
+    "archive_bytes": 284172392,
+    "raw_bytes": 316338001,
+    "files": 4207,
+    "all_members_match_preserved_raw": true,
+    "temporary_sources_retained": true
+  }
+}

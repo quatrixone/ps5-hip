@@ -12,13 +12,15 @@ from source_public_hip_log import package_limit
 
 
 def validate_full_profile(info,model):
- if info['model']['sha256']!=model['sha256'] or info['model']['bytes']!=model['bytes'] or info['profile'] not in ('smoke','generation','corpus'):raise ValueError('full/model profile identity differs')
+ if info['model']['sha256']!=model['sha256'] or info['model']['bytes']!=model['bytes'] or info['profile'] not in ('smoke','generation','corpus','extended'):raise ValueError('full/model profile identity differs')
  if info['profile']=='generation' and (len(info['raw_files'])!=386 or info['raw_files'].get('generation.json')!=590 or info['raw_files'].get('steps.jsonl')!=1108):raise ValueError('generation title metadata contract differs')
  if info['profile']=='corpus':
   # The authenticated inventory must fit the fixed native title's output contract.
   from build_llm_generation_reference import corpus_cases
   files=info['raw_files'];metadata={'corpus.json',*(case+'/'+name for case,_ in corpus_cases() for name in ('generation.json','steps.jsonl'))}
   if len(files)!=6539 or not metadata<=files.keys() or sum(files.values())!=86091236 or sum(files[n] for n in metadata)!=26084:raise ValueError('corpus title metadata contract differs')
+ if info['profile']=='extended':
+  raise ValueError('extended native watchdog not qualified from measured corpus timing')
  return info['profile']
 
 
@@ -114,7 +116,7 @@ def validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture=N
  if (phase=='vocab' and any(supplied)) or (phase in ('model-gate','model-prefix','model-layer','model-full') and not all(supplied)):raise ValueError('model prerequisites do not match phase')
 
 
-def model_inputs(model,source_dir,cpu_build):
+def model_inputs(model,source_dir,cpu_build,*,authenticated_original_inputs=None):
  from fetch_llm_model import verify
  model=Path(model).absolute();source_dir=Path(source_dir).absolute();cpu_build=Path(cpu_build).resolve()
  # Check before resolving so aliases cannot conceal a symlink asset.
@@ -149,9 +151,18 @@ def model_inputs(model,source_dir,cpu_build):
  for p,h in graph.cpu_inputs(cpu_build,model).items():
   if p in inputs and inputs[p]!=h:raise ValueError('model prerequisite identity conflict')
   inputs[p]=h
+ # Only the enclosing admission may supply its freshly byte-verified snapshot;
+ # it must still finish its own complete fresh sweep after this semantic check.
+ def original_file(path,size,digest):
+  if authenticated_original_inputs is None:
+   verify(path,size,digest)
+  else:
+   if path.is_symlink() or not path.is_file() or path.stat().st_size!=size:raise ValueError('incorrect original file type or size: '+str(path))
+   if authenticated_original_inputs.get(str(path))!=digest:raise ValueError('original file absent or different in authenticated inputs: '+str(path))
+  inputs[str(path)]=digest
  for name,spec in model_lock['metadata'].items():
-  p=source_dir/name;verify(p,spec['bytes'],spec['sha256']);inputs[str(p)]=spec['sha256']
- p=source_dir/'model.safetensors';weights=model_lock['weights'];verify(p,weights['file_bytes'],weights['expected_file_sha256']);inputs[str(p)]=weights['expected_file_sha256']
+  original_file(source_dir/name,spec['bytes'],spec['sha256'])
+ weights=model_lock['weights'];original_file(source_dir/'model.safetensors',weights['file_bytes'],weights['expected_file_sha256'])
  if b.sha(receipt)!=receipt_hash:raise ValueError('conversion receipt changed')
  return {'asset':str(model),'source_dir':str(source_dir),'cpu_build':str(cpu_build),'bytes':expected['bytes'],'sha256':expected['sha256'],'receipt':str(receipt),'receipt_sha256':receipt_hash,'inputs':inputs}
 
@@ -267,7 +278,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
    'src/native_memory.cpp','include/ps5hip/native_memory.h']
  if phase=='model-prefix':required_sources += ['ports/ggml/native_prefix.h','ports/ggml/prefix_qualification.h','ports/ggml/model_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_prefix_assets.py']
  if phase=='model-layer':required_sources += ['ports/ggml/native_layer.h','ports/ggml/layer_qualification.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_layer_assets.py']
- if phase=='model-full':required_sources += ['ports/ggml/native_full.h','ports/ggml/full_qualification.h','ports/ggml/full_dispatch.h','ports/ggml/full_graph.h','ports/ggml/layer_dispatch.h','ports/ggml/model_layer.h','ports/ggml/native_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','ports/ggml/model_prefix.h','tools/public_hip_full_assets.py']
+ if phase=='model-full':required_sources += ['ports/ggml/extended_generation.h','ports/ggml/extended_generation_cases.def','ports/ggml/extended_title_output.h','ports/ggml/native_full.h','ports/ggml/full_qualification.h','ports/ggml/full_dispatch.h','ports/ggml/full_graph.h','ports/ggml/layer_dispatch.h','ports/ggml/model_layer.h','ports/ggml/native_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','ports/ggml/model_prefix.h','tools/public_hip_full_assets.py']
  for name in required_sources:bind(ROOT/name)
  specs=sources()
  for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
@@ -450,7 +461,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if phase=='model-prefix' and ar.get('actual_prefix_call_chain_audited') is not True:raise ValueError('actual prefix call chain not audited')
   if phase=='model-layer' and ar.get('actual_layer_call_chain_audited') is not True:raise ValueError('actual layer call chain not audited')
   if phase=='model-full' and (ar.get('actual_full_call_chain_audited') is not True or ar.get('full_profile')!=full_info['profile']):raise ValueError('actual full profile/call chain not audited')
-  if full_info and full_info['profile'] in ('generation','corpus') and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
+  if full_info and full_info['profile'] in ('generation','corpus','extended') and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   if external_original_model and (ar.get('model_format')!=model_format or ar.get('original_model_call_chain_audited') is not True):raise ValueError('original model call chain not audited')

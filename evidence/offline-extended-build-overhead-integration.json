@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "base": "167b22d",
+  "scratch": "/tmp/ps5hip-extended-overhead-167b22d",
+  "test_runners": 17,
+  "test_methods": 229,
+  "seconds": 24.427326595876366,
+  "patch_order": [
+    {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/extended-rebase-167b22d/changes.patch",
+      "sha256": "4aadcaec78b20da9096de78930c3fb8398968ec94dada3a359dd110789f0e1e6"
+    },
+    {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/native-header-batch/changes.patch",
+      "sha256": "129d0b64e12b38f7711ecd04c501a81bacf7a39f6c43a2edee0dfa929d56da32"
+    },
+    {
+      "path": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/original-admission-reuse/changes.patch",
+      "sha256": "cd74f8b35c5f6274b7fb2bb4aec64f64378d381a80319a2baacc8b1df085a563"
+    }
+  ],
+  "numerical_source_bindings_unchanged": 31,
+  "numeric_rerun": false,
+  "tracked_main_edits": false,
+  "scope": "Combined regression of extended profiles, header planning/batching, locked original-source admission reuse; no full native build/model or console run",
+  "integrated_code_files": 33,
+  "integrated_matches_tested_scratch_before_whitespace_cleanup": true,
+  "timed_native_build": false,
+  "main_post_whitespace_tests": {
+    "llm_generation_reference_test.py": 32,
+    "llm_extended_numeric_test.py": 34
+  },
+  "timing_limit": "No measured full native build or deployment speedup; test duration is regression runtime only."
+}

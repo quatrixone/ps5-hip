@@ -9,9 +9,15 @@ short-generation checkpoint, not full M4/M5. Host verification improvements are
 committed; the five-prompt / 16-token corpus now passes production-helper HIP
 numerical interpretation with all 6,528 float files bytewise CPU equal and clean
 ownership. Native corpus packaging, controller bounds and the linked-image audit now pass.
-Deployment passed; execution stopped before launch on FTP dot directory entries.
-The host controller fix passes373 tests; freeze a fresh candidate and reuse the
-unchanged package for .40 validation. Retain M2 dense/extreme cases and
+The historical FTP dot-entry rejection is fixed. The subsequent corpus v2
+attempt failed before launch during existing-model FTP readback, followed by
+`No route to host`; no corpus inference was observed. The four-token native
+proof remains the latest console generation result. Original-safetensors host
+inference and the linked native package now pass their separate offline gates;
+original-format console execution remains pending. Extended scratch host numerical qualification passes: 1,176 commits and all
+2,096 float outputs bitwise CPU-equal. The implementation is integrated after rebasing to `167b22d`
+with unchanged numerical code and 229 combined tests passing. Native extended
+execution and a supported authenticated main extended oracle remain unproven. Retain M2 dense/extreme cases and
 the original source-format loading requirement. Use idle .40 for meaningful
 validation and push each validated milestone to main.
 
@@ -52,10 +58,11 @@ or completion-percentage target. A correctness preview need not beat the CPU.
 
 The compiler/runtime direction is justified by native arithmetic evidence. The
 main planning risk is completing more isolated kernels without integrating a
-client that can execute a whole model. Therefore client linkage, an executed
-operator inventory and model-memory integration are immediate work, alongside
-the current weighted-normalization/QKV numerical gate. Do not finish an entire
-operator catalogue before attempting the client.
+client that can execute a whole model. Client linkage, the executed operator
+inventory, model-memory integration and bounded native generation now pass.
+The immediate inference work is wider-prompt and long-context qualification,
+alongside original-format native loading. Do not expand the operator catalogue
+without a concrete model or release requirement.
 
 Use the existing llama.cpp loader, tokenizer, graph construction and scheduling.
 Provide the smallest ggml backend adaptation that routes the required operations
@@ -116,12 +123,18 @@ all input identities and conversion settings, written atomically and invalidated
 on changes. The accepted architecture/profile remains explicit: supporting a
 serialization format does not support every model distributed in that format.
 
-Status: design reviewed against the pinned upstream API; native readers and
-adapter are not implemented or qualified. M0's bounded per-HIP-call qualification
-is complete; M2 remains open for dense/extreme qualification; full native smoke
-now passes. M1 arithmetic is already qualified. The unshipped desktop
-conversion prototype was removed from active tools/Make targets after this
-clarification and retained locally under `results/deferred-host-checkpoint-prototype`.
+Status: bounded safetensors/index readers, exact TinyLlama tensor mapping,
+original tokenizer metadata, row conversion and the tensor callback are
+implemented. The supported host Make path loads all 201 original tensors and
+matches all 384 short-generation boundaries bitwise over 16 commits/two resets.
+The runtime reads original files; GGUF is only the independent numerical oracle.
+See `evidence/offline-supported-original-model-generation.json`.
+The native package and 435-function image audit pass offline; no original-format
+native execution is qualified. See `evidence/offline-native-original-linked-package.json`.
+PyTorch `.bin/.pt/.pth`, sharded-model integration and native format qualification
+remain open. M0 and M1 are complete; M2 dense/extreme cases and full M4/M5
+acceptance remain open. The removed desktop-conversion prototype is not an
+implementation of this requirement.
 
 ## Evidence at this checkpoint
 
@@ -136,8 +149,8 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 
 See STATE.md and the referenced compact evidence for individual outcomes.
 A running package build is not a passed build. Historical compile-probe limits
-are not current capability declarations. Native forced-token forward execution
-is established; generated-text and release acceptance are not yet claimed.
+are not current capability declarations. Native forward execution and bounded four-token generation
+are established; full M4/M5 and release acceptance are not yet claimed.
 
 ## Next implementation checkpoints
 
@@ -155,8 +168,9 @@ is established; generated-text and release acceptance are not yet claimed.
 4. Full native smoke now passes model-scale residency, all 22 layers, final
    normalization/logits and real positions 0/1/reset0. Preserve its immutable
    receipts; long full-model context remains unqualified.
-5. Connect sampling and incremental decode, then qualify repeated requests,
-   errors, source-only rebuilds and measured performance under M4/M5.
+5. Preserve the qualified short sampling/incremental-decode path; qualify wider
+   prompts, long context, EOS, repeated requests, errors, source-only rebuilds
+   and measured performance under M4/M5.
 
 The corrected source-only native vocabulary package is 19,922,944 bytes. Its reviewed
 32 MiB transfer ceiling is specific to this fixture; legacy fixture limits
@@ -164,7 +178,8 @@ remain unchanged. Source/input provenance and real freeze admission pass in
 `evidence/offline-native-llm-application.json`. Neither packaging nor tokenizer
 success establishes inference. Installed vocabulary-title validation passed;
 see `evidence/console40-native-vocab-success.json`. Actual-model loading/context/rejection/reuse also passed scheduler-v10; model
-tensor computation and inference remain open.
+tensor computation and short native generation have since passed the separate
+M3/M4 evidence below; full release qualification remains open.
 
 ## Required computation, in model order
 
@@ -322,22 +337,27 @@ interpreter now passes all 16 full-logit gates bitwise after full-mode nonlinear
 and RoPE arithmetic fixes. The device fixture passes ISA/Initial admission. See
 `evidence/offline-greedy-generation-reference-and-regression.json` and
 `LLM_GENERATION.md` and `evidence/offline-greedy-canonical-arithmetic.json`.
-Next bind and test the native generation profile; matching text is insufficient.
-Diagnostic CPU substitutions are never acceptance.
+The bound native short-generation profile has since passed on .40; matching
+text alone is insufficient. Diagnostic CPU substitutions are never acceptance.
 
 The exact production helper now passes the same short numerical gate, including
 actual tokenizer/feedback, metadata, KV reset and checked phase/request timing.
 See `evidence/offline-native-generation-helper.json`. Combined prompt/output
-context is enforced before submission, including the final selected token. Next
-finish explicit native title/assets/audit/freezer/controller profile binding;
-the title remains on smoke until those contracts are ready.
+context is enforced before submission, including the final selected token.
+Native title/assets/audit/freezer/controller binding and the four-token proof
+now pass: two reset rounds, 16 commits and 384 bitwise-equal float boundaries.
 
-Immediate next proof: one fixed tokenized prompt, sequential prefill, then a
-few actual CPU-argmax selections from GPU logits fed into the next decoder
-request. Compare tokens and full logits against CPU on that generated history;
-reset/repeat and qualify EOS. Add monotonic load/context/decode/readback/cleanup
-timings. This short proof precedes, and does not replace, the full M4 gates below.
-The 17-second whole-app smoke observation cannot budget the 514-request profile.
+The five-prompt corpus passes host production-helper numerical qualification,
+but its native v2 attempt stopped before launch on a transport failure; see
+`evidence/console40-corpus-model-read-transport-failure.json`. The extended
+64-step, combined-512 and normal-EOS scratch host numerical proof now passes
+1,176 commits and all 2,096 float outputs bitwise CPU-equal. Its implementation is integrated after rebasing
+to `167b22d` with unchanged numerical code and 229 combined tests passing;
+this does not establish a supported authenticated main extended oracle or
+native extended execution. Preserve full logits,
+generated-history comparisons, reset and monotonic phase timings. The short
+proof does not replace the full M4 gates below, and the 17-second whole-app
+smoke observation cannot budget the longer profiles.
 
 Connect CPU sampling to GPU logits, feed tokens back, advance position and reuse
 KV. Process the prompt through the same GPU single-token path. Compare fixed
@@ -369,13 +389,16 @@ Publishing a public release or changing visibility still requires owner directio
 ## Work selection and reporting
 
 The critical path is M0 + M1 -> M2 -> M3 -> M4 -> M5. Memory work overlaps M2.
-The next product-level proof point is a full 22-layer forward pass and real logits.
+Full 22-layer forward execution and short native greedy generation now pass;
+the next product-level proofs are the remaining M4 cases and original-format
+native loading/generation.
 Report completed exit criteria and remaining blockers, not API counts or a
 single speculative percentage. Keep compiler, host-model, native-operator,
 client-integration and release evidence distinct.
 
 M0, M1 and the selected native Q4-layer milestone are complete. Finish the
-remaining M2 numerical fixtures while advancing M3's full-model forward path.
+remaining M2 numerical fixtures while qualifying wider full-model generation
+and original-format native execution.
 Every additional SDK capability must name the model
 operation or release failure test it unblocks. Avoid new infrastructure unless
 existing tools cannot establish that specific acceptance criterion.

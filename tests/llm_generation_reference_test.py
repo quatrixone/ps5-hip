@@ -91,6 +91,20 @@ class Reference(unittest.TestCase):
   ref.final_artifact_check(self.root,receipt,before,digest)
   raw=self.root/'run-0-pos-0-logits.f32le';raw.write_bytes(b'X'+raw.read_bytes()[1:])
   with self.assertRaisesRegex(ValueError,'changed during'):ref.final_artifact_check(self.root,receipt,before,digest)
+class PromptCapacity(unittest.TestCase):
+ def test_combined_budget_before_raw_reads(self):
+  from unittest.mock import patch
+  with tempfile.TemporaryDirectory() as tmp:
+   folder=Path(tmp);(folder/'steps.jsonl').write_text('')
+   for count,message in ((33,'reset runs'),(508,'reset runs'),(509,'context budget'),(512,'context budget')):
+    metadata=dict(schema=1,prompt='Once upon a time',add_special=True,parse_special=False,max_new_tokens=4,vocab_size=32000,prompt_tokens=[1]*count,eog_tokens=[2],runs=[])
+    (folder/'generation.json').write_text(json.dumps(metadata))
+    # Deliberately invalid runs isolate prompt admission without manufacturing model outputs.
+    with self.subTest(count=count),patch.object(Path,'read_bytes',side_effect=AssertionError('raw read before policy check')),self.assertRaisesRegex(ValueError,message):ref.validate_case(folder,'Once upon a time',4)
+ def test_profile_policy_unchanged(self):
+  self.assertEqual(ref.profile_policy('short')[0],4);self.assertEqual(ref.profile_policy('corpus')[0],16)
+  with self.assertRaisesRegex(ValueError,'profile'):ref.profile_policy('long')
+
 class Corpus(unittest.TestCase):
  def test_fixed_cases_commands_and_profile_bounds(self):
   cases=ref.corpus_cases();self.assertEqual(len(cases),5);self.assertTrue(any(not text.isascii() for _,text in cases))
@@ -136,5 +150,110 @@ class Corpus(unittest.TestCase):
    (folder/'commands.json').write_text(json.dumps(rows));data=dict(commands=rows,producer_output=str(producer),profile='corpus')
    ref.commands_valid(data,folder,cpu,model);del data['profile']
    with self.assertRaisesRegex(ValueError,'exact command'):ref.commands_valid(data,folder,cpu,model)
+
+class ExtendedPolicy(unittest.TestCase):
+ def test_exact_capture_inventory_and_bounds(self):
+  cases=ref.extended_cases();totals=[0,0,0]
+  for case in cases:
+   commits=case['prompt_count']+case['generated']-1
+   files=2*(commits+23*len(case['checkpoints']));size=2*(commits*128000+len(case['checkpoints'])*23*8192)
+   totals=[a+b for a,b in zip(totals,(commits*2,files,size))]
+   self.assertLess(max(case['checkpoints']),commits)
+  self.assertEqual(totals,[1176,2096,158064640]);self.assertEqual(cases[-1]['checkpoints'][-1],510)
+  self.assertEqual(ref.profile_policy('extended'),(64,ref.EXTENDED_LINE,256*1024*1024))
+  command=ref.command_plan(Path('/out'),Path('/cpu'),Path('/model'),'extended')
+  self.assertEqual(command['capture'],['/out/trace','/model','/out/raw','extended'])
+ def test_cpp_and_python_policy_agree(self):
+  import shutil,subprocess
+  compiler=shutil.which('clang++-18') or shutil.which('clang++');self.assertIsNotNone(compiler)
+  with tempfile.TemporaryDirectory() as tmp:
+   source=Path(tmp)/'policy.cpp';binary=Path(tmp)/'policy'
+   source.write_text('#include "extended_generation.h"\n#include <cstdio>\nint main(){for(const auto& c:ps5hip_generation::extended_cases){std::printf("%s|%zu|%zu|%zu|%s|",c.id,c.prompt_count,c.budget,c.generated,c.stop);for(auto p:c.checkpoints){if(!ps5hip_generation::extended_checkpoint(c,p))return 1;std::printf("%u,",p);}std::printf("|%s\\n",c.prompt);}return 0;}\n')
+   subprocess.run([compiler,'-std=c++17','-Wall','-Wextra','-Werror','-I'+str(ref.ROOT/'ports/ggml'),str(source),'-o',str(binary)],check=True,timeout=30)
+   rows=subprocess.check_output([str(binary)],text=True,timeout=10).splitlines()
+  expected=[f"{c['id']}|{c['prompt_count']}|{c['budget']}|{c['generated']}|{c['stop']}|"+''.join(str(p)+',' for p in c['checkpoints'])+'|'+c['prompt'] for c in ref.extended_cases()]
+  self.assertEqual(rows,expected)
+ def test_native_extended_still_requires_parents_and_watchdog(self):
+  import public_hip_full_assets,build_llm_native_app
+  with self.assertRaisesRegex(ValueError,'exact five module parents required'):public_hip_full_assets.assemble({},Path('/unused'),'extended')
+  model=dict(sha256='unchanged',bytes=1)
+  with self.assertRaisesRegex(ValueError,'watchdog not qualified'):build_llm_native_app.validate_full_profile(dict(profile='extended',model=model),model)
+ def test_fixed_checkpoint_definition_rejects_changes(self):
+  from unittest.mock import patch
+  original=ref.EXTENDED_CASES.read_text()
+  with tempfile.TemporaryDirectory() as tmp:
+   policy=Path(tmp)/'cases.def';policy.write_text(original.replace('449, 510','449, 511'))
+   with patch.object(ref,'EXTENDED_CASES',policy),self.assertRaisesRegex(ValueError,'fixed policy'):ref.extended_cases()
+ def test_case_symlink_rejected_before_metadata_read(self):
+  from unittest.mock import patch
+  with tempfile.TemporaryDirectory() as tmp:
+   folder=Path(tmp)/'raw';folder.mkdir();outside=Path(tmp)/'outside';outside.mkdir()
+   (folder/'extended.json').write_text(json.dumps(ref.extended_index()))
+   for case in ref.extended_cases():
+    target=folder/case['id']
+    if case['id']=='short64':target.symlink_to(outside,target_is_directory=True)
+    else:target.mkdir()
+   read=Path.read_text
+   def checked(path,*args,**kwargs):
+    if path.name=='generation.json':self.fail('metadata read through case symlink')
+    return read(path,*args,**kwargs)
+   with patch.object(Path,'read_text',checked),self.assertRaisesRegex(ValueError,'case directory'):ref.validate(folder,'extended')
+   (folder/'short64').unlink();(folder/'short64').write_text('not a directory')
+   with patch.object(Path,'read_text',checked),self.assertRaisesRegex(ValueError,'case directory'):ref.validate(folder,'extended')
+ def test_invalid_metadata_containers_raise_value_error(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   folder=Path(tmp);(folder/'extended.json').write_text(json.dumps(ref.extended_index()))
+   for case in ref.extended_cases():
+    sub=folder/case['id'];sub.mkdir();(sub/'steps.jsonl').write_text('')
+   base=dict(prompt_tokens=[1]*5,eog_tokens=[2],runs=[dict(generated=[3]*64,stop='step_limit') for _ in range(2)])
+   values=[[],None,{**base,'prompt_tokens':None},{**base,'runs':None},{**base,'runs':[None,None]},{**base,'runs':[dict(generated=None,stop='step_limit'),base['runs'][1]]}]
+   for metadata in values:
+    (folder/'short64'/'generation.json').write_text(json.dumps(metadata))
+    with self.subTest(metadata=metadata),self.assertRaises(ValueError):ref.validate(folder,'extended')
+ def test_extended_metadata_dispatch_and_stop_rejection(self):
+  from unittest.mock import patch
+  cases=ref.extended_cases()
+  with tempfile.TemporaryDirectory() as tmp:
+   folder=Path(tmp);(folder/'extended.json').write_text(json.dumps(ref.extended_index()))
+   for c in cases:
+    sub=folder/c['id'];sub.mkdir();(sub/'steps.jsonl').write_text('')
+    (sub/'generation.json').write_text(json.dumps(dict(prompt_tokens=[1]*c['prompt_count'],eog_tokens=[2],runs=[dict(generated=[2 if c['stop']=='eos' else 3]*c['generated'],stop=c['stop']) for _ in range(2)])))
+   def summary(sub,prompt,budget,checkpoints):
+    c=next(c for c in cases if c['id']==sub.name);self.assertEqual((prompt,budget,checkpoints),(c['prompt'],64,c['checkpoints']))
+    requests=2*(c['prompt_count']+c['generated']-1)
+    return dict(requests=requests,raw_files=requests+46*len(checkpoints),raw_bytes=requests*128000+46*len(checkpoints)*8192)
+   with patch.object(ref,'validate_case',side_effect=summary):self.assertEqual(ref.validate(folder,'extended')['raw_files'],2096)
+   for key,count in (('short64',63),('short64',65),('eos',2),('boundary',63)):
+    path=folder/key/'generation.json';original=path.read_text();metadata=json.loads(original);metadata['runs'][0]['generated']=[3]*count;path.write_text(json.dumps(metadata))
+    with self.subTest(case=key,count=count),patch.object(ref,'validate_case',side_effect=summary),self.assertRaisesRegex(ValueError,'stop/count'):ref.validate(folder,'extended')
+    path.write_text(original)
+   (folder/'extended.json').write_text(json.dumps({**ref.extended_index(),'schema':True}))
+   with self.assertRaisesRegex(ValueError,'index'):ref.validate(folder,'extended')
+   (folder/'extended.json').write_text(json.dumps(ref.extended_index()))
+   sub=folder/'eos';metadata=json.loads((sub/'generation.json').read_text());metadata['runs'][0]['stop']='step_limit';(sub/'generation.json').write_text(json.dumps(metadata))
+   with patch.object(ref,'validate_case',side_effect=summary),self.assertRaisesRegex(ValueError,'stop/count'):ref.validate(folder,'extended')
+
+class CheckpointReference(unittest.TestCase):
+ setUp=Reference.setUp
+ save=Reference.save
+ def selected(self):
+  for run in range(2):
+   for pos in (1,2,3):
+    for stage in ref.STAGES[:-1]:(self.root/f'run-{run}-pos-{pos}-{stage}.f32le').unlink()
+ def test_sparse_intermediates_keep_every_logit_and_reset(self):
+  self.selected();result=ref.validate_case(self.root,'Once upon a time',4,(0,4));self.assertEqual(result['raw_files'],102)
+  path=self.root/'run-1-pos-0-layer-0.f32le';path.write_bytes(struct.pack('<f',0.1)+path.read_bytes()[4:])
+  with self.assertRaisesRegex(ValueError,'reset'):ref.validate_case(self.root,'Once upon a time',4,(0,4))
+ def test_missing_logit_rejected_even_without_intermediates(self):
+  self.selected();(self.root/'run-0-pos-2-logits.f32le').unlink()
+  with self.assertRaisesRegex(ValueError,'inventory'):ref.validate_case(self.root,'Once upon a time',4,(0,4))
+ def test_unexpected_intermediate_rejected(self):
+  self.selected();(self.root/'run-0-pos-2-layer-0.f32le').write_bytes(bytes(8192))
+  with self.assertRaisesRegex(ValueError,'inventory'):ref.validate_case(self.root,'Once upon a time',4,(0,4))
+ def test_missing_checkpoint_rejected(self):
+  self.selected();(self.root/'run-0-pos-4-layer-0.f32le').unlink()
+  with self.assertRaisesRegex(ValueError,'inventory'):ref.validate_case(self.root,'Once upon a time',4,(0,4))
+ def test_checkpoint_outside_history_rejected(self):
+  with self.assertRaisesRegex(ValueError,'checkpoints'):ref.validate_case(self.root,'Once upon a time',4,(0,511))
 
 if __name__=='__main__':unittest.main()

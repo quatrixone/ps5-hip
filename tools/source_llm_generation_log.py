@@ -8,8 +8,8 @@ from source_llm_full_log import application_frame, memory_snapshot, check_memory
 APP_COMPLETE = 'M4_GEN APP_COMPLETE profile=generation watchdog_joined=true numerical=pending finalization=pending inference=false'
 
 
-def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False):
-    if not isinstance(raw, bytes) or not raw or len(raw) > (2 * 1024 * 1024 if corpus else 65536) or b'\0' in raw or b'\r' in raw:
+def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False, extended=False):
+    if not isinstance(raw, bytes) or not raw or len(raw) > (2 * 1024 * 1024 if corpus or extended else 65536) or b'\0' in raw or b'\r' in raw:
         raise ValueError('generation transcript encoding/bound')
     text = raw.decode('ascii')
     if not text.endswith('\n'):
@@ -47,7 +47,7 @@ def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False):
         interval(begin, end, elapsed)
         timings.append(dict(scope=scope, run=run, elapsed_ns=elapsed, **({'case': case_id} if tag else {})))
 
-    exact('M4_GEN PROFILE name=greedy-corpus cases=5 runs=2 max_new_tokens=16 context=512' if corpus else 'M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512')
+    exact('M4_GEN PROFILE name=greedy-extended cases=3 runs=2 max_new_tokens=64 context=512' if extended else 'M4_GEN PROFILE name=greedy-corpus cases=5 runs=2 max_new_tokens=16 context=512' if corpus else 'M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512')
     exact('M3_FULL PHASE load_begin')
     snapshot('before_load')
     phase('load')
@@ -56,20 +56,23 @@ def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False):
     phase('context')
     exact('M3_FULL PHASE context_complete')
     snapshot('after_context')
-    requests = 0
+    requests = 0; raw_files = 0; raw_bytes = 0
+    from build_llm_generation_reference import extended_cases
+    checkpoints = {case["id"]: case["checkpoints"] for case in extended_cases()} if extended else {}
     for case_id, metadata in policies:
-        tag = ' case=' + case_id if corpus else ''
-        prefix = case_id + '/' if corpus else ''
+        tag = ' case=' + case_id if corpus or extended else ''
+        prefix = case_id + '/' if corpus or extended else ''
         for run, policy in enumerate(metadata['runs']):
             phase('reset', run)
             reset_end = previous
             decode_sum = 0
             first_decode = None
             for position, token in enumerate(policy['processed']):
-                for stage in [*(f'layer-{i}' for i in range(22)), 'norm', 'logits']:
+                for stage in ([*(f'layer-{i}' for i in range(22)), 'norm', 'logits'] if not extended or position in checkpoints[case_id] else ['logits']):
                     name = prefix + f'run-{run}-pos-{position}-{stage}.f32le'
                     size = 128000 if stage == 'logits' else 8192
                     exact(f'M3_FULL RAW file={name} bytes={size} synced=true')
+                    raw_files += 1; raw_bytes += size
                 row = match(r'M4_GEN DECODE' + tag + r' run=' + str(run) + r' position=' + str(position) + r' token=' + str(token) + r' committed_position=' + str(position) + r' layers=22 logits=32000 begin_ns=(\d+) end_ns=(\d+) elapsed_ns=(\d+) readback_ns=(\d+) inclusive_readback=true')
                 begin, end, elapsed, readback = map(int, row.groups())
                 interval(begin, end, elapsed)
@@ -78,7 +81,7 @@ def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False):
                 if first_decode is None:
                     first_decode = begin
                 decode_sum += elapsed
-                timings.append(dict(scope='decode', run=run, position=position, elapsed_ns=elapsed, readback_ns=readback, **({'case': case_id} if corpus else {})))
+                timings.append(dict(scope='decode', run=run, position=position, elapsed_ns=elapsed, readback_ns=readback, **({'case': case_id} if corpus or extended else {})))
                 requests += 1
             row = match(r'M4_GEN RUN_TIME' + tag + r' run=' + str(run) + r' begin_ns=(\d+) end_ns=(\d+) elapsed_ns=(\d+) decode_ns=(\d+) scheduling_sampling_log_ns=(\d+)')
             begin, end, elapsed, decoded, overhead = map(int, row.groups())
@@ -89,17 +92,19 @@ def _check_fragment(raw, policies, metadata_sizes, native=False, corpus=False):
         generation_bytes, steps_bytes = (metadata_sizes[prefix + k] for k in ('generation.json', 'steps.jsonl'))
         exact(f'M4_GEN METADATA{tag} files=2 generation_bytes={generation_bytes} steps_bytes={steps_bytes} synced=true')
     tag = ''
+    if extended:exact('M4_GEN EXTENDED cases=3 runs=2 max_new_tokens=64 synced=true')
     if corpus:
         exact(f'M4_GEN CORPUS cases=5 runs=2 max_new_tokens=16 index_bytes={metadata_sizes["corpus.json"]} synced=true')
     exact('M3_FULL PHASE cleanup_begin')
     snapshot('after_cleanup')
     phase('cleanup')
-    row = match(r'M4_GEN TRANSPORT_COMPLETE requests=' + str(requests) + r' layers=22 logits=32000 nodes=' + str(requests * 798) + r' launches=' + str(requests * 733) + r' raw_files=' + str(requests * 24) + r' raw_bytes=' + str(requests * 316416) + r' metadata_files=' + str(11 if corpus else 2) + r' metadata_bytes=' + str(sum(metadata_sizes.values())) + r' instances=([1-9]\d{0,9})/([1-9]\d{0,9}) numerical=pending finalization=pending')
-    if row[1] != row[2] or (corpus and row[1] != '1') or next(lines, None) is not None:
+    row = match(r'M4_GEN TRANSPORT_COMPLETE requests=' + str(requests) + r' layers=22 logits=32000 nodes=' + str(requests * 798) + r' launches=' + str(requests * 733) + r' raw_files=' + str(raw_files) + r' raw_bytes=' + str(raw_bytes) + r' metadata_files=' + str(7 if extended else 11 if corpus else 2) + r' metadata_bytes=' + str(sum(metadata_sizes.values())) + r' instances=([1-9]\d{0,9})/([1-9]\d{0,9}) numerical=pending finalization=pending')
+    if row[1] != row[2] or ((corpus or extended) and row[1] != '1') or next(lines, None) is not None:
         raise ValueError('generation completion/ownership')
+    if extended and (requests,raw_files,raw_bytes)!=(1176,2096,158064640):raise ValueError('extended transcript totals')
     if native:
         check_memory_lifecycle(memory)
-    return dict(status='PASS', classification='generation-corpus-helper-transcript-only' if corpus else 'generation-helper-transcript-only', requests=requests, raw_files=requests * 24, metadata_files=11 if corpus else 2, metadata_bytes=sum(metadata_sizes.values()), raw_bytes=requests*316416, nodes=requests*798, gpu_submits=requests*733, instances=int(row[1]), memory=memory, timings=timings, numerical_verified=False, gpu_origin_established=False, finalization_verified=False)
+    return dict(status='PASS', classification='generation-extended-helper-transcript-only' if extended else 'generation-corpus-helper-transcript-only' if corpus else 'generation-helper-transcript-only', requests=requests, raw_files=raw_files, metadata_files=7 if extended else 11 if corpus else 2, metadata_bytes=sum(metadata_sizes.values()), raw_bytes=raw_bytes, nodes=requests*798, gpu_submits=requests*733, instances=int(row[1]), memory=memory, timings=timings, numerical_verified=False, gpu_origin_established=False, finalization_verified=False)
 
 
 def check_fragment(raw, metadata, metadata_sizes, native=False):
@@ -138,6 +143,27 @@ def check_corpus_fragment(raw, policies_by_id, metadata_sizes_flat, native=False
             raise ValueError('corpus reset repeat')
     return _check_fragment(raw, [(key, policies_by_id[key]) for key, _ in cases], metadata_sizes_flat, native, corpus=True)
 
+
+
+def check_extended_fragment(raw, policies_by_id, metadata_sizes, native=False):
+    from build_llm_generation_reference import extended_cases
+    cases = extended_cases()
+    if not isinstance(policies_by_id, dict) or set(policies_by_id) != {case['id'] for case in cases}:raise ValueError('extended policy cases')
+    expected_sizes = {'extended.json'} | {case['id'] + '/' + name for case in cases for name in ('generation.json', 'steps.jsonl')}
+    if set(metadata_sizes) != expected_sizes or any(type(n) is not int or not 0 < n <= 1024*1024 for n in metadata_sizes.values()):raise ValueError('extended metadata sizes')
+    valid = lambda token: type(token) is int and 0 <= token < 32000
+    for case in cases:
+        policy = policies_by_id[case['id']]
+        if not isinstance(policy, dict) or policy.get('prompt') != case['prompt'] or type(policy.get('max_new_tokens')) is not int or policy['max_new_tokens'] != case['budget']:raise ValueError('extended reference policy')
+        tokens, runs = policy.get('prompt_tokens'), policy.get('runs')
+        if not isinstance(tokens,list) or len(tokens)!=case['prompt_count'] or not all(map(valid,tokens)) or policy.get('eog_tokens') != [2] or not isinstance(runs,list) or len(runs)!=2:raise ValueError('extended token policy')
+        for run,row in enumerate(runs):
+            if not isinstance(row,dict) or type(row.get('run')) is not int or row['run']!=run:raise ValueError('extended reference run')
+            generated=row.get('generated')
+            if not isinstance(generated,list) or len(generated)!=case['generated'] or not all(map(valid,generated)) or row.get('stop')!=case['stop'] or row.get('processed')!=tokens+generated[:-1] or any(token==2 for token in generated[:-1]) or ((generated[-1]==2)!=(case['stop']=='eos')):raise ValueError('extended feedback/EOS')
+            if not isinstance(row.get('text_hex'),str) or re.fullmatch(r'(?:[0-9a-f]{2})*',row['text_hex']) is None:raise ValueError('extended text')
+        if any(runs[0][key]!=runs[1][key] for key in ('processed','generated','stop','text_hex')):raise ValueError('extended reset repeat')
+    return _check_fragment(raw,[(case['id'],policies_by_id[case['id']]) for case in cases],metadata_sizes,native,extended=True)
 
 def check_full_log(raw, metadata, metadata_sizes):
     if sum(len(row['processed']) for row in metadata['runs']) != 16:

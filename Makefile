@@ -239,6 +239,7 @@ llm-native-app: deps-build llm-deps-fetch
 	$(PYTHON) tests/native_model_path_test.py
 	$(PYTHON) tests/llm_native_validation_cost_test.py
 	$(PYTHON) tests/public_hip_compile_inputs_test.py
+	$(PYTHON) tests/native_header_batch_test.py
 	$(PYTHON) tests/public_hip_llm_client_build_test.py
 	$(PYTHON) tests/source_llm_client_controls_test.py
 	$(PYTHON) tests/source_console_finalization_test.py
@@ -257,6 +258,7 @@ llm-native-app: deps-build llm-deps-fetch
 	$(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_LAYER_FIXTURE)/receipt.json"; then $(MAKE) llm-layer-assets LLM_LAYER_ASSETS_DIR="$(LLM_NATIVE_APP_LAYER_FIXTURE)" LLM_LAYER_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; fi,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/public_hip_full_assets_test.py,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/native_full_title_test.py,@true)
+	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/extended_native_admission_test.py,@true)
 	$(if $(filter original_safetensors,$(LLM_NATIVE_APP_MODEL_FORMAT)),$(PYTHON) tests/native_full_original_loader_test.py,@true)
 	$(if $(filter original_safetensors,$(LLM_NATIVE_APP_MODEL_FORMAT)),$(PYTHON) tests/native_original_title_test.py,@true)
 	$(if $(filter original_safetensors,$(LLM_NATIVE_APP_MODEL_FORMAT)),$(PYTHON) tests/llm_original_native_audit_test.py,@true)
@@ -643,6 +645,7 @@ llm-generation-numeric-tests: llm-deps-fetch
 	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi
 	$(PYTHON) tests/llm_cpu_math_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
 	$(PYTHON) tests/llm_generation_numeric_test.py
+	$(PYTHON) tests/llm_extended_numeric_test.py
 	$(PYTHON) tools/build_llm_generation_numeric_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_GENERATION_NUMERIC_TEST_DIR)"
 
 .PHONY: llm-native-generation-tests llm-native-generation-corpus-tests
@@ -651,6 +654,7 @@ llm-native-generation-corpus-tests: LLM_NATIVE_GENERATION_TEST_DIR = $(LLM_NATIV
 llm-native-generation-corpus-tests: LLM_NATIVE_GENERATION_REFERENCE_TARGET = llm-generation-corpus-reference
 llm-native-generation-corpus-tests: llm-native-generation-tests
 llm-native-generation-tests: llm-deps-fetch
+	$(PYTHON) tests/llm_extended_numeric_test.py
 	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) $(LLM_NATIVE_GENERATION_REFERENCE_TARGET); fi
 	$(PYTHON) tests/native_generation_transcript_test.py
 	$(PYTHON) tests/native_generation_application_test.py
@@ -668,6 +672,7 @@ llm-full-numeric-tests: llm-deps-fetch
 LLM_FULL_HELPER_TEST_DIR ?= results/llm-native-full-helper-tests
 .PHONY: llm-full-helper-tests
 llm-full-helper-tests: llm-deps-fetch
+	$(PYTHON) tests/llm_native_extended_test.py
 	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
 	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
 	$(PYTHON) tools/build_llm_full_backend_test.py --native-helper --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_HELPER_TEST_DIR)"

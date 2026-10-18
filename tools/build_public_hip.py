@@ -75,7 +75,7 @@ def build_inputs():
              "tools/public_hip_rmsnorm_console_title.cpp", "tools/qualify_public_hip_rmsnorm.py",
              "tools/build_llm_rmsnorm_fixture.py", "tools/build_llm_rmsnorm_reference.py",
              "tests/public_hip_rmsnorm_build_test.py", "tests/rmsnorm_dump_test.py",
-             "tools/build_public_hip.py", "tools/build_jobs.py", "tests/build_jobs_test.py", "tools/prepare_clr_gpu_source.py",
+             "tools/build_public_hip.py", "tools/build_jobs.py", "tests/build_jobs_test.py", "tests/native_header_batch_test.py", "tools/prepare_clr_gpu_source.py",
              "tools/public_hip_embedded_console_title.cpp", "tools/embedded_module_linker.py",
              "tools/audit_public_hip_embedded_native.py", "tools/build_public_hip_embedded_fixture.py",
              "tools/probe_host_registration.py", "tools/native_multi_query.py",
@@ -237,8 +237,8 @@ def canonicalize_dependencies(names):
 
 
 
-def compile_bound_unit(output, path, obj, flags, label, source_root=None):
-    """Bind the compiler's header closure before compiling, then verify it."""
+def _plan_bound_unit(output, path, obj, flags, label, source_root=None):
+    """Discover one exact compiler dependency inventory; no object compiled yet."""
     cwd = ROOT if source_root is None else Path(source_root).absolute()
     source_arg = path
     if source_root is not None:
@@ -260,25 +260,61 @@ def compile_bound_unit(output, path, obj, flags, label, source_root=None):
     actual = obj.with_suffix(".compiled.d")
     run(output, label + "-headers", [*flags, "-c", "-M", source_arg, "-MF", before], **run_options)
     before_paths = dependencies(before)
-    headers = {p: sha(p) for p in set(before_paths.values())}
-    if str(path.resolve()) not in headers:
+    if str(path.resolve()) not in before_paths.values():
         raise RuntimeError("compiler dependency inventory omits source")
-    run(output, label, [*flags, "-MD", "-MF", actual, "-c", source_arg, "-o", obj], **run_options)
-    if dependencies(actual) != before_paths:
-        raise RuntimeError("actual compiler dependencies changed")
+    def compile(headers):
+        selected = {p: headers[p] for p in set(before_paths.values())}
+        run(output, label, [*flags, "-MD", "-MF", actual, "-c", source_arg, "-o", obj], **run_options)
+        if dependencies(actual) != before_paths:
+            raise RuntimeError("actual compiler dependencies changed")
+        return {"source": str(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path),
+                "source_sha256": selected[str(path.resolve())],
+                "object": str(obj.relative_to(output)), "object_sha256": sha(obj),
+                "headers": selected}
+    return before_paths, compile
+
+
+def _check_compiler_headers(headers):
     if any(sha(p) != digest for p, digest in headers.items()):
         raise RuntimeError("compiler input changed during compilation")
-    return {"source": str(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path),
-            "source_sha256": headers[str(path.resolve())],
-            "object": str(obj.relative_to(output)), "object_sha256": sha(obj),
-            "headers": headers}
+
+
+def compile_bound_unit(output, path, obj, flags, label, source_root=None):
+    """Standalone unit keeps fresh before/after header authentication."""
+    paths, compile = _plan_bound_unit(output, path, obj, flags, label, source_root)
+    headers = {p: sha(p) for p in set(paths.values())}
+    record = compile(headers)
+    _check_compiler_headers(headers)
+    return record
+
+
+def _compile_bound_plans(plans, jobs):
+    # An invocation-local union, authenticated only after every -M has completed.
+    # All workers finish before the fresh final union check or error propagation.
+    aliases = {}
+    for paths, _ in plans:
+        for name, target in paths.items():
+            if name in aliases and aliases[name] != target:
+                raise RuntimeError("compiler dependency resolution changed during planning")
+            aliases[name] = target
+    if canonicalize_dependencies(list(aliases)) != aliases:
+        raise RuntimeError("compiler dependency resolution changed before compilation")
+    headers = {p: sha(p) for p in sorted(set(aliases.values()))}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
+        records = list(pool.map(lambda plan: plan[1](headers), plans))
+    if canonicalize_dependencies(list(aliases)) != aliases:
+        raise RuntimeError("compiler dependency resolution changed during compilation")
+    _check_compiler_headers(headers)
+    return records
 
 
 def compile_units(output, source, fixture="bootstrap", client_phase="vocab", full_profile="smoke", model_format="gguf"):
+    if full_profile == "extended":
+        raise ValueError("extended native watchdog not qualified from measured corpus timing")
     jobs = build_jobs()
     if client_phase not in ("vocab", "model-gate", "model-prefix", "model-layer", "model-full") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
-    if full_profile not in ("smoke", "generation", "corpus") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
+    if full_profile not in ("smoke", "generation", "corpus", "extended") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
         raise ValueError("invalid full compile profile")
     if model_format not in ('gguf','original_safetensors') or (model_format!='gguf' and (fixture!='llm_client' or client_phase!='model-full' or full_profile!='generation')):
         raise ValueError('original format requires full short generation')
@@ -296,7 +332,7 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
     units += hip
     flags = compiler_flags(source)
 
-    def compile_one(pair):
+    def compile_one(pair, plan_only=False):
         index, path = pair
         obj = object_dir / (f"{index:02d}-" + path.stem + ".o")
         extra = (["-include", "hip/hip_runtime.h", "-include", "hip/hip_deprecated.h",
@@ -316,19 +352,23 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
                     extra.append("-DPS5HIP_LLM_FULL_GENERATION=1")
                 elif full_profile == "corpus":
                     extra.append("-DPS5HIP_LLM_FULL_CORPUS=1")
+                elif full_profile == "extended":
+                    extra.append("-DPS5HIP_LLM_FULL_EXTENDED=1")
             if model_format=='original_safetensors':
                 extra += ['-DPS5HIP_LLM_ORIGINAL_MODEL=1','-DPS5HIP_NATIVE_ORIGINAL_MODEL=1','-I'+str(DEPS/'sources/llama-client/vendor')]
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]
-        return compile_bound_unit(output, path, obj, [*flags, *extra], f"compile-{index:02d}", source_root=source)
+        operation = _plan_bound_unit if plan_only else compile_bound_unit
+        return operation(output, path, obj, [*flags, *extra], f"compile-{index:02d}", source_root=source)
 
     # Fail quickly on the selected client before spending time on the upstream closure.
     title_index = units.index(ROOT / ("tools/public_hip_" + fixture + "_console_title.cpp"))
     title_record = compile_one((title_index, units[title_index]))
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
-        records = list(pool.map(compile_one, ((index, path) for index, path in enumerate(units)
-                                              if index != title_index)))
+        plans = list(pool.map(lambda pair: compile_one(pair, plan_only=True),
+                              ((index, path) for index, path in enumerate(units) if index != title_index)))
+    records = _compile_bound_plans(plans, jobs)
     records.insert(title_index, title_record)
     if len(records) != 76 or len({record["object"] for record in records}) != 76:
         raise RuntimeError("not a clean 76-object closure")

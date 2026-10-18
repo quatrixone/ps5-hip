@@ -39,7 +39,7 @@ class OriginalTitle(unittest.TestCase):
    calls=[]
    def compile_unit(output,path,obj,flags,label,source_root=None):
     calls.append((path.name,flags));return {'object':str(obj.relative_to(output))}
-   with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit):
+   with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit),patch.object(builder,'_plan_bound_unit',side_effect=lambda *a,**kw: ({},lambda _: compile_unit(*a,**kw))):
     builder.compile_units(folder,source,'llm_client',client_phase='model-full',full_profile='generation',model_format='original_safetensors')
    marked=[n for n,f in calls if '-DPS5HIP_NATIVE_ORIGINAL_MODEL=1' in f]
    self.assertEqual(marked,['public_hip_llm_client_console_title.cpp'])
