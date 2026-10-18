@@ -11,6 +11,9 @@ extern "C" __attribute__((device)) float __ocml_cos_f32(float);
 extern "C" __attribute__((device)) float __ocml_pow_f32(float, float);
 #define DEVICE __attribute__((device,always_inline))
 #define KERNEL extern "C" __attribute__((global))
+#define PS5HIP_CPU_MATH_DEVICE __attribute__((device,always_inline))
+#include "llm_cpu_math.h"
+#undef PS5HIP_CPU_MATH_DEVICE
 static DEVICE u32 index() { return __builtin_amdgcn_workgroup_id_x()*64u+__builtin_amdgcn_workitem_id_x(); }
 KERNEL void layer_copy(const float* x,float* out,u32 n) {u32 i=index();if(i<n)out[i]=x[i];}
 KERNEL void layer_to_f16(const float* x,_Float16* out,u32 n) {u32 i=index();if(i<n)out[i]=(_Float16)x[i];}
@@ -99,4 +102,22 @@ KERNEL void layer_q4_cpu(const unsigned char* weights,const unsigned char* q8,fl
   }
  }
  out[row]=((acc[4]+acc[0])+(acc[6]+acc[2]))+((acc[5]+acc[1])+(acc[7]+acc[3]));
+}
+
+// Full-decoder arithmetic follows the pinned CPU oracle's explicit rounding.
+// The selected-layer symbols above retain their qualified legacy behavior.
+KERNEL void layer_silu_cpu(const float* x,float* out,u32 n) {
+ u32 i=index();if(i<n)out[i]=ps5hip_cpu_math::silu_f32(x[i]);
+}
+KERNEL void layer_softmax_cpu(const float* x,const float* mask,float* out,u32 n) {
+ u32 h=index();if(h>=32)return;
+ for(u32 t=0;t<n;t++)out[h*n+t]=x[h*n+t]*0.125f+mask[t];
+ ps5hip_cpu_math::softmax_f32(out+h*n,out+h*n,n);
+}
+KERNEL void layer_rope_cpu(const float* x,float* out,u32 heads,u32 position) {
+ u32 i=index();if(i>=heads*32u)return;u32 j=i*2u;
+ float theta=float(position);const float scale=__ocml_pow_f32(10000.0f,-1.0f/32.0f);
+ for(u32 step=0;step<i%32u;step++)theta*=scale;
+ const float c=__ocml_cos_f32(theta),s=__ocml_sin_f32(theta),a=x[j],b=x[j+1];
+ out[j]=__builtin_fmaf(a,c,-b*s);out[j+1]=__builtin_fmaf(a,s,b*c);
 }

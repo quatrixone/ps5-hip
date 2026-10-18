@@ -136,6 +136,27 @@ static void quantizer_extremes() {
   assert(q.back()==0xa5);
  }
 }
+static void canonical_nonlinears() {
+ std::vector<float> x(5632),out(5633,-999);for(unsigned i=0;i<x.size();++i)x[i]=float(int(i%199)-99)*.37f;
+ for(lane=0;lane<5696;++lane)layer_silu_cpu(x.data(),out.data(),5632);
+ for(unsigned i=0;i<x.size();++i)assert(out[i]==ps5hip_cpu_math::silu_f32(x[i]));assert(out.back()==-999);
+ for(lane=0;lane<5696;++lane)layer_silu_cpu(x.data(),x.data(),5632);
+ assert(std::memcmp(x.data(),out.data(),5632*4)==0);
+ for(unsigned n:{256u,512u}) {
+  std::vector<float> scores(32*n),mask(n,-INFINITY),prob(32*n+1,-999),reference(n);
+  for(unsigned i=0;i<scores.size();++i)scores[i]=float(int(i%71)-35)*.13f;
+  for(unsigned i=0;i<7;++i)mask[i]=0;
+  for(lane=0;lane<64;++lane)layer_softmax_cpu(scores.data(),mask.data(),prob.data(),n);
+  for(unsigned h=0;h<32;++h){for(unsigned i=0;i<n;++i)reference[i]=scores[h*n+i]*.125f+mask[i];ps5hip_cpu_math::softmax_f32(reference.data(),reference.data(),n);assert(std::memcmp(reference.data(),prob.data()+h*n,n*4)==0);}
+  assert(prob.back()==-999);
+ }
+ for(unsigned position:{0u,1u,2u,255u,256u,511u}) {
+  std::vector<float> source(2048),rotated(2049,-999);for(unsigned i=0;i<2048;++i)source[i]=float(int(i%257)-128)*.017f;
+  for(lane=0;lane<1024;++lane)layer_rope_cpu(source.data(),rotated.data(),32,position);
+  for(unsigned j=0;j<2048;j+=2){float theta=float(position);for(unsigned step=0;step<(j/2)%32;++step)theta*=std::pow(10000.f,-1.f/32.f);const float c=std::cos(theta),sn=std::sin(theta);assert(rotated[j]==std::fma(source[j],c,-source[j+1]*sn));assert(rotated[j+1]==std::fma(source[j],sn,source[j+1]*c));}
+  assert(rotated.back()==-999);for(lane=0;lane<1024;++lane)layer_rope_cpu(source.data(),source.data(),32,position);assert(std::memcmp(source.data(),rotated.data(),2048*4)==0);
+ }
+}
 int main(){
  canonical_reductions();
  conversion_extremes();silu_extremes();softmax_extremes();dense_attention_extremes();rope_extremes();quantizer_extremes();
@@ -172,6 +193,7 @@ int main(){
   for(lane=0;lane<2048;lane++)layer_values(v.data(),ph.data(),out.data(),n);
   for(unsigned i=0;i<2048;i++)assert(out[i]==src[(i/64/8)*64+i%64]);
  }
+ canonical_nonlinears();
  std::cout<<"PASS exact kernel-source host execution: canonical Q4/F16/RMS cancellation and inplace, conversion/SILU/softmax/dense-attention/RoPE/quantizer extremes, tails5632, K/V layouts, N256/512 GQA\n";
  return 0;
 }

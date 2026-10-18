@@ -311,10 +311,12 @@ record evidence before changing the model or release scope; no silent downgrade.
 
 The short CPU greedy oracle now passes and is reproducible with
 `make llm-generation-reference`. The corresponding actual-feedback HIP
-interpreter reproduces tokens/reset but fails all 16 logit gates. See
+interpreter now passes all 16 full-logit gates bitwise after full-mode nonlinear
+and RoPE arithmetic fixes. The device fixture passes ISA/Initial admission. See
 `evidence/offline-greedy-generation-reference-and-regression.json` and
-`LLM_GENERATION.md`. Resolve input-sensitive arithmetic before native generation;
-matching text is insufficient. Diagnostic CPU substitutions are never acceptance.
+`LLM_GENERATION.md` and `evidence/offline-greedy-canonical-arithmetic.json`.
+Next bind and test the native generation profile; matching text is insufficient.
+Diagnostic CPU substitutions are never acceptance.
 
 Immediate next proof: one fixed tokenized prompt, sequential prefill, then a
 few actual CPU-argmax selections from GPU logits fed into the next decoder

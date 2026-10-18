@@ -9,7 +9,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import build_llm_layer_fixture as m
 class LayerFixtureTest(unittest.TestCase):
  def test_inventory(self):
-  self.assertEqual(len(m.SYMBOLS),13);self.assertEqual(len(set(m.SYMBOLS)),13)
+  self.assertEqual(len(m.SYMBOLS),16);self.assertEqual(len(set(m.SYMBOLS)),16)
  def test_reject_outside_output(self):
   with self.assertRaisesRegex(ValueError,'outside'):m.build('/unused','/tmp/untrusted-layer-output')
  def test_reject_wrong_receipt(self):

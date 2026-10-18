@@ -12,6 +12,8 @@ native full-model smoke now passes all 22 layers, normalization and logits with
 actual decoder commits/reset. Next qualify short greedy generation and timing;
 long full-model context and token generation are not yet established.
 
+- 2026-10-17 | M4 canonical greedy arithmetic | offline | 16/16 full logits bitwise CPU-equal with genuine GPU-source math, 72-file smoke regression preserved; 16-symbol ISA/Initial pass | evidence/offline-greedy-canonical-arithmetic.json | next: native generation profile and .40
+
 - 2026-10-17 | M4 CPU greedy oracle / host regression | offline | CPU actual-feedback/reset oracle passes; matching HIP token IDs but16/16 logits fail fixed gates; SiLU partially localized | evidence/offline-greedy-generation-reference-and-regression.json | next: first divergent arithmetic before native generation
 
 - 2026-10-17 | M3 native full decoder | .40 | pass: 22 layers, 32000 logits, 3 real commits/reset, 72 bitwise CPU-equal outputs, 2199 GPU launches and clean lifecycle | evidence/console40-full-decoder-smoke-success.json | next: short greedy generation and phase timings

@@ -7,7 +7,7 @@ static unsigned launches=0,queries=0;
 static void* expected_input=nullptr;
 extern "C" hipError_t hipModuleLoad(hipModule_t* m,const char*){*m=(hipModule_t)1;return hipSuccess;}
 extern "C" hipError_t hipModuleGetFunction(hipFunction_t* f,hipModule_t,const char* name){
- ++queries;for(unsigned i=0;i<13;++i)if(!std::strcmp(name,ps5hip_layer::Dispatch::symbols[i])){*f=(hipFunction_t)(uintptr_t(i+10));return hipSuccess;}
+ ++queries;for(unsigned i=0;i<16;++i)if(!std::strcmp(name,ps5hip_layer::Dispatch::symbols[i])){*f=(hipFunction_t)(uintptr_t(i+10));return hipSuccess;}
  *f=(hipFunction_t)1;return hipSuccess;
 }
 extern "C" hipError_t hipModuleUnload(hipModule_t){return hipSuccess;}
@@ -38,7 +38,7 @@ int main(){
  for(int i=0;i<2048;++i){((float*)grandparent->data)[i]=99;((float*)normalized->data)[i]=3;((float*)weights->data)[i]=7;}
  normalized->op=GGML_OP_RMS_NORM;normalized->src[0]=grandparent;
  output->op=GGML_OP_MUL;output->src[0]=normalized;output->src[1]=weights;
- ps5hip_layer::Dispatch dispatch(owned,failure);dispatch.initialize({"a","b","c","d","e","f"});assert(queries==17&&!dispatch.functions[12]);expected_input=normalized->data;
+ ps5hip_layer::Dispatch dispatch(owned,failure);dispatch.initialize({"a","b","c","d","e","f"});assert(queries==17&&!dispatch.functions[12]&&!dispatch.functions[13]&&!dispatch.functions[14]&&!dispatch.functions[15]);expected_input=normalized->data;
  assert(dispatch.execute_node(output,true)&&launches==1&&dispatch.expected_position==0);
  for(int i=0;i<2048;++i)assert(((float*)output->data)[i]==21);
  output->op=GGML_OP_GET_ROWS;output->src[1]=ids;*(int32_t*)ids->data=0;
@@ -68,7 +68,7 @@ int main(){
  assert(dispatch.execute_node(probabilities,true)&&launches==6);
  for(unsigned i=0;i<8192;++i)assert(((float*)scores->data)[i]==float(i)+1);
  std::free(dispatch.full_scratch);dispatch.full_scratch=nullptr;
- dispatch.shutdown();dispatch.initialize({"a","b","c","d","e","f"},true);assert(queries==35&&dispatch.functions[12]);
+ dispatch.shutdown();dispatch.initialize({"a","b","c","d","e","f"},true);assert(queries==38&&dispatch.functions[12]&&dispatch.functions[13]&&dispatch.functions[14]&&dispatch.functions[15]);
  normalized->data=grandparent->data;assert(dispatch.execute_node(normalized,true)&&launches==7);
  normalized->data=(char*)grandparent->data+4;assert(!dispatch.execute_node(normalized,true)&&launches==7);normalized->data=norm_saved;
  dispatch.shutdown();ggml_free(ctx);std::puts("PASS direct MUL input, F32 gather and six rejection cases; no GPU proof");

@@ -10,6 +10,7 @@ int main(int argc,char**argv) {
  auto o=ps5hip::inspect_code_object(b.data(),b.size());
  const std::map<std::string,std::vector<unsigned>> expected={
   {"layer_rms_cpu",{8,8}},{"layer_quantize_q8_cpu",{8,8,4}},{"layer_q4_cpu",{8,8,8,4,4}},{"layer_copy",{8,8,4}},{"layer_to_f16",{8,8,4}},{"layer_silu",{8,8,4}},
+  {"layer_silu_cpu",{8,8,4}},{"layer_softmax_cpu",{8,8,8,4}},{"layer_rope_cpu",{8,8,4,4}},
   {"layer_add",{8,8,8,4}},{"layer_mul",{8,8,8,4}},
   {"layer_rope",{8,8,4,4}},{"layer_set_rows",{8,8,8,4,4}},
   {"layer_scores",{8,8,8,4}},{"layer_softmax",{8,8,8,4}},{"layer_values",{8,8,8,4}}};

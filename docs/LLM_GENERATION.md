@@ -54,7 +54,7 @@ native smoke and its consumed candidate; never replay it. This short profile
 does not replace five-prompt/16-step, 64-step, 512-token, EOS and repeated-request
 release gates in `LLM_V1_PLAN.md`, nor original-format loading requirements.
 
-## Current offline outcome
+## Historical first offline outcome
 
 The CPU oracle passes: five prompt tokens and three feedback decodes per run,
 two runs, 16 full-logit files and four selected tokens `, there was a`.
@@ -69,3 +69,26 @@ softmax still leaves 12 failures. Both are local diagnostic substitutions, not
 production GPU work. Next inspect the first remaining position-2/layer-14
 intermediate and required F32 contraction/rounding. Native generation remains
 unqualified; the earlier forced-token native smoke is preserved independently.
+
+## Current result: canonical GPU-source arithmetic
+
+`evidence/offline-greedy-canonical-arithmetic.json` records the passing follow-up:
+all 16 full-logit files are bitwise CPU-equal under unchanged limits, with actual
+feedback/reset and balanced cleanup. All 384 captured boundary files reset exactly;
+the independent CPU numerical reference here covers logits. The original
+three-request/72-output smoke regression also remains bitwise CPU-identical.
+
+Full mode now selects separate SiLU/softmax/RoPE symbols, retaining legacy
+selected-layer behavior. The nonlinear routines translate pinned AVX2 polynomial
+and reduction arithmetic into ordinary GPU scalar operations; RoPE uses explicit
+FMAs. No CPU callbacks or captured activation data implement these kernels.
+`kernels/llm_cpu_math.h` retains upstream MIT attribution. Standalone comparisons
+against actual CPU library functions pass 33 SiLU and 134 softmax cases in each of
+two compiler modes, including tails, masks, finite extremes and exact aliasing.
+The fresh 16-symbol fixture passes Initial admission without private memory,
+LDS, spills or undefined calls. Native arithmetic and performance remain open.
+
+Use `results/llm-layer-fixture-v8`, CPU oracle v1 and canonical numeric v1 for
+current local evidence. Old failures/diagnostics are preserved; their CPU
+substitutions are never native proof. Next finish native profile/audit/reference
+contracts and timings, then freeze and test a fresh package on .40.

@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-greedy-canonical-nonlinear-and-rope-arithmetic",
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "results/m4-generation-canonical-v1/receipt.json": "739749440f0061ee2a908922799e7b744bae6c42271bb6ea118a2ca37cb9b8ce",
+    "results/m4-generation-canonical-v1/comparison.json": "3fd0f0659fa5665fda546269a9a98d93633a08f4e4d91f97fa851029b2806f5f",
+    "results/m4-full-smoke-regression-v1/receipt.json": "e68a1372aa634a200172aafb23cd629242225b20eee6320b818a09cb5b92e6fe",
+    "results/m4-full-smoke-regression-v1/comparison.json": "0d97ee7d4f1564bcf3f2526fbfd23d5929473631e130428dd47f39ede4fa0407",
+    "results/m4-cpu-math-v2/receipt.json": "27a427d5074b6e37c426507cc68a107ae810d4ecf722b1dff0c77cdb45e93eff",
+    "results/llm-layer-fixture-v8/receipt.json": "bda2b6df461770c5d899f7f0dd54cd91f32fdc691c3b7e3a413feef9c49605a5",
+    "results/m4-arithmetic-focused-v1/receipt.json": "7b78bdc99be0c1f79c4615685bd9c8a212c342160a8d9ecd0dba6c36e892c71e",
+    "results/m4-rope-fma-diagnostic-v1/analysis.json": "61594820597402616c8e901f89852fe462053e34259b27a6dcb76b0fe10d7d53"
+  },
+  "changes": [
+    "Full mode selects appended layer_silu_cpu, layer_softmax_cpu and layer_rope_cpu GPU kernels; legacy selected-layer symbols and12function queries are preserved.",
+    "Scalar-lane translation of pinned AVX2/FMA polynomial exponential, SiLU and8-lane F32 softmax reduction with F64 group accumulation and F32 inverse multiplication.",
+    "RoPE explicitly fuses both output expressions as in the pinned CPU build; no automatic fast-math contraction.",
+    "No CPU activation substitution in production numerical test, no captured activation table and no tolerance changes.",
+    "Math unit tests use source-built CMakeCache profile, avoiding a local-only compile_commands.json prerequisite."
+  ],
+  "generation": {
+    "requests": 16,
+    "layers": 22,
+    "logits_per_request": 32000,
+    "logit_files": 16,
+    "bitwise_CPU_equal": true,
+    "maximum_absolute_error": 0,
+    "maximum_relative_l2": 0,
+    "raw_boundary_files": 384,
+    "raw_boundary_bytes": 5062656,
+    "all_raw_reset_equal": true,
+    "nodes": 12768,
+    "launches": 11728,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1,
+    "CPU_backend_tensor_operations": 0,
+    "generated": [
+      29892,
+      727,
+      471,
+      263
+    ],
+    "text": ", there was a"
+  },
+  "smoke_regression": {
+    "requests": 3,
+    "raw_files": 72,
+    "bitwise_CPU_equal": true
+  },
+  "validation": {
+    "unit_methods": 37,
+    "kernel_and_node_programs": "PASS with ASan/UBSan",
+    "math_cases_per_mode": {
+      "silu": 33,
+      "softmax": 134
+    },
+    "math_modes": [
+      "sanitized",
+      "optimized"
+    ],
+    "initial_admission_kernels": 16,
+    "zero_LDS_private_spills": true,
+    "undefined_device_symbols": 0,
+    "q4_byte_loads": 16,
+    "new_kernel_resources": {
+      "layer_silu_cpu": {
+        "vgprs": 12,
+        "sgprs": 9,
+        "kernarg_bytes": 20
+      },
+      "layer_softmax_cpu": {
+        "vgprs": 23,
+        "sgprs": 12,
+        "kernarg_bytes": 28
+      },
+      "layer_rope_cpu": {
+        "vgprs": 18,
+        "sgprs": 9,
+        "kernarg_bytes": 24
+      }
+    },
+    "ISA_observations": [
+      "SiLU contains corrected F32 division and explicit FMA forms",
+      "Softmax contains F64 accumulation and corrected F64 division",
+      "RoPE contains explicit F32 FMAs"
+    ]
+  },
+  "device_fixture": {
+    "path": "results/llm-layer-fixture-v8",
+    "sha256": "5c1bf4a63f25f8f4a1042701464e0e9c418d424b752041aef8dc9f322e1f807d"
+  },
+  "limits": [
+    "Host interpretation is not GPU or native generation evidence; device denormal/transcendental behavior and timing still need .40.",
+    "CPU numerical reference compares all logits; other384raw boundary captures prove finite output and reset, not an independent CPU comparison for every intermediate.",
+    "Earlier failing and CPU-substitution diagnostic receipts remain historical, unchanged.",
+    "M2 dense/extreme-input, long full-model context, native generated text, M4/M5 and native source-format readers remain open."
+  ],
+  "next": [
+    "Integrate explicit native generation profile with full short-sequence captures, EOS/reset/feedback controls and monotonic phase/request timing.",
+    "Bind profile-specific CPU oracle/readback inventory through assets, image audit, freezer and controller; preserve smoke contracts.",
+    "Fresh cache-backed client and native package only after offline profile tests settle; freeze/review then test .40."
+  ]
+}

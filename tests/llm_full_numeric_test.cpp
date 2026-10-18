@@ -9,7 +9,7 @@
 #ifdef PS5HIP_SAME_INPUT_ORACLE
 #include "llm_full_projection_oracle.h"
 #endif
-extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t f,unsigned gx,unsigned gy,unsigned gz,unsigned bx,unsigned by,unsigned bz,unsigned,hipStream_t stream,void** args,void** extra){assert(uintptr_t(f)>=1&&uintptr_t(f)<=18&&gx&&gy&&gz==1&&bx&&by&&bz==1&&!stream&&!extra);++launches;layer_numeric::execute(unsigned(uintptr_t(f)),gx*bx,args);
+extern "C" hipError_t hipModuleLaunchKernel(hipFunction_t f,unsigned gx,unsigned gy,unsigned gz,unsigned bx,unsigned by,unsigned bz,unsigned,hipStream_t stream,void** args,void** extra){assert(uintptr_t(f)>=1&&uintptr_t(f)<=21&&gx&&gy&&gz==1&&bx&&by&&bz==1&&!stream&&!extra);++launches;layer_numeric::execute(unsigned(uintptr_t(f)),gx*bx,args);
 #ifdef PS5HIP_SAME_INPUT_ORACLE
 same_input(unsigned(uintptr_t(f)),args);
 #endif

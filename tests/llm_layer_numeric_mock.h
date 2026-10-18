@@ -77,6 +77,9 @@ inline void execute(unsigned id,unsigned work_items,void** a){
  case 16:layer_quantize_q8_cpu(arg<const float*>(a,0),arg<unsigned char*>(a,1),arg<unsigned>(a,2));break;
  case 17:layer_q4_cpu(arg<const unsigned char*>(a,0),arg<const unsigned char*>(a,1),arg<float*>(a,2),arg<unsigned>(a,3),arg<unsigned>(a,4));break;
  case 18:layer_rms_cpu(arg<const float*>(a,0),arg<float*>(a,1));break;
+ case 19:layer_silu_cpu(arg<const float*>(a,0),arg<float*>(a,1),arg<unsigned>(a,2));break;
+ case 20:layer_softmax_cpu(arg<const float*>(a,0),arg<const float*>(a,1),arg<float*>(a,2),arg<unsigned>(a,3));break;
+ case 21:layer_rope_cpu(arg<const float*>(a,0),arg<float*>(a,1),arg<unsigned>(a,2),arg<unsigned>(a,3));break;
  default:throw std::runtime_error("unknown numerical HIP symbol");
  }
 }

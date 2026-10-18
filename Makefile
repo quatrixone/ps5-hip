@@ -578,6 +578,7 @@ llm-generation-reference: llm-deps-fetch
 
 llm-generation-numeric-tests: llm-deps-fetch
 	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi
+	$(PYTHON) tests/llm_cpu_math_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
 	$(PYTHON) tests/llm_generation_numeric_test.py
 	$(PYTHON) tools/build_llm_generation_numeric_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_GENERATION_NUMERIC_TEST_DIR)"
 

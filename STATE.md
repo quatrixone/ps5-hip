@@ -3,7 +3,40 @@
 Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
-## M4 CPU generation oracle passes; new HIP numerical case fails
+## M4 short greedy arithmetic now passes offline
+
+The new full-mode GPU-source SiLU, softmax and RoPE routines pass the unchanged
+16-request generated-history gate. All 16 complete 32,000-logit outputs are
+bitwise CPU-identical, with actual token feedback, KV reset/repeat, 12,768 nodes,
+11,728 interpreted launches and balanced 16/16 storage plus 1/1 instances.
+All 384 raw boundary files are finite and reset exactly; CPU numerical comparison
+in this profile covers logits. There is no CPU activation substitution in this
+passing production test. See `evidence/offline-greedy-canonical-arithmetic.json`.
+
+Diagnostics isolated SiLU differences and a passing combination of polynomial
+exponential/softmax arithmetic and RoPE contraction. Full mode now uses the
+pinned AVX2 lane arithmetic and explicit RoPE FMAs; legacy selected-layer symbols
+and its 12-function-query route are unchanged. The original full smoke regression
+still matches all 72 CPU outputs bitwise. Standalone math passes 33 SiLU / 134 softmax
+cases in both sanitized and optimized modes; 37 focused test methods and direct
+kernel/node programs pass.
+
+`results/llm-layer-fixture-v8` is the current 16-symbol device module: all kernels
+pass Initial admission, no undefined symbols/LDS/private/spills, and the Q4
+16-byte-load contract is retained. New SiLU/softmax/RoPE use 12/23/18 VGPRs.
+Preserve `results/m4-generation-canonical-v1`, `results/m4-cpu-math-v2`,
+`results/m4-full-smoke-regression-v1` and their raw evidence. Fixture v7 has
+identical shader bytes but a superseded math-test source closure; use v8.
+
+Next integrate an explicit native generation profile, full short-sequence
+capture/feedback/EOS/reset contracts and monotonic phase/request timing. Bind
+its reference through assets, image audit, freezer and controller before a fresh
+cache-backed native build and .40 test. Current client/app receipts are historical
+for the old backend: do not pretend they authenticate these changed sources.
+The accepted installed smoke baseline below is unchanged. No new native package
+or console run has occurred; GPU denormal/transcendental results remain unproved.
+
+## Historical first M4 numerical failure (resolved offline)
 
 The shared bounded generation driver and source-only Make targets now execute
 actual tokenizer/prefill/greedy feedback, with four selected tokens and explicit
@@ -29,10 +62,9 @@ logits at positions 0/1 in both runs, but 12 outputs still fail; substituting
 softmax as well does not finish the fix. These injected CPU operations establish
 no GPU capability and must never enter the accepted runtime.
 
-Next localize the first remaining divergent intermediate at position 2/layer 14,
-including operation contraction/rounding. Implement real GPU arithmetic and pass
-the unchanged offline regression before native generation packaging, timings,
-ISA audit, a new frozen candidate and .40 test. The accepted installed native
+The current offline fix above supersedes that numerical failure; preserve it
+as history. Native generation still needs packaging, timings, image audit, a
+new frozen candidate and .40 test. The accepted installed native
 smoke baseline below remains unchanged; no console contact or native rebuild
 was needed for this offline milestone. Longer context and all M4/M5 gates stay open.
 

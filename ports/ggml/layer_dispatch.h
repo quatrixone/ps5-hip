@@ -11,13 +11,13 @@ namespace ps5hip_layer {
 struct Dispatch {
     ps5hip_prefix::Dispatch base;
     hipModule_t module=nullptr;
-    std::array<hipFunction_t,13> functions{};
+    std::array<hipFunction_t,16> functions{};
     void* half=nullptr;
     void* full_scratch=nullptr; // Owned and span-validated by the full-model dispatcher.
     unsigned expected_position=0;
     static constexpr size_t half_bytes=32*512*2;
     static constexpr const char* symbols[]={"layer_add","layer_mul","layer_silu","layer_rope",
-        "layer_set_rows","layer_scores","layer_softmax","layer_values","layer_copy","layer_to_f16","layer_quantize_q8_cpu","layer_q4_cpu","layer_rms_cpu"};
+        "layer_set_rows","layer_scores","layer_softmax","layer_values","layer_copy","layer_to_f16","layer_quantize_q8_cpu","layer_q4_cpu","layer_rms_cpu","layer_silu_cpu","layer_softmax_cpu","layer_rope_cpu"};
     using Call=ps5hip_prefix::Call;
     Dispatch(ps5hip_prefix::Dispatch::Span owned,ps5hip_prefix::Dispatch::Fail fail):base(owned,fail,5632){}
     void initialize(const std::array<const char*,6>& paths,bool full_precision=false) {
@@ -25,7 +25,7 @@ struct Dispatch {
         base.initialize({paths[0],paths[1],paths[2],paths[3],paths[4]});
         base.call(Call::module_load,0,"layer_module",[&]{return hipModuleLoad(&module,paths[5]);});
         base.ok(module?hipSuccess:hipErrorInvalidValue,"null_layer_module");
-        for(size_t i=0;i<(full_precision?functions.size():functions.size()-1);++i) {
+        for(size_t i=0;i<(full_precision?functions.size():12);++i) {
             base.call(Call::module_function,0,"layer_function",[&]{return hipModuleGetFunction(&functions[i],module,symbols[i]);});
             base.ok(functions[i]?hipSuccess:hipErrorInvalidValue,"null_layer_function");
         }
@@ -155,7 +155,7 @@ struct Dispatch {
             }
             case GGML_OP_ROPE: {
                 void* x=t->src[0]->data;void* out=t->data;unsigned heads=unsigned(t->ne[1]),position=expected_position;
-                void* args[]={&x,&out,&heads,&position};launch(3,heads*32,args);break;
+                void* args[]={&x,&out,&heads,&position};launch(functions[15]?15:3,heads*32,args);break;
             }
             case GGML_OP_SET_ROWS: {
                 void* x=t->src[0]->data;void* ids=t->src[1]->data;void* out=t->data;
@@ -167,7 +167,7 @@ struct Dispatch {
                 const bool aliased=direct_inputs&&x==out;
                 if(aliased&&!full_scratch)return false;
                 if(aliased)out=full_scratch;
-                void* args[]={&x,&mask,&out,&n};launch(6,32,args);
+                void* args[]={&x,&mask,&out,&n};launch(functions[14]?14:6,32,args);
                 // Softmax rereads the entire row for each output; exact input alias is unsafe.
                 if(aliased){void* destination=t->data;unsigned count=n*32;
                     void* copy[]={&out,&destination,&count};launch(8,count,copy);}
@@ -183,7 +183,7 @@ struct Dispatch {
             }
             case GGML_OP_GLU: {
                 void* x=t->src[0]->data;void* y=t->src[1]->data;void* out=t->data;unsigned n=5632;
-                void* silu[]={&x,&out,&n};launch(2,n,silu);
+                void* silu[]={&x,&out,&n};launch(functions[13]?13:2,n,silu);
                 void* mul[]={&out,&y,&out,&n};launch(1,n,mul);break;
             }
             default:return false;
