@@ -19,7 +19,13 @@
 #ifndef PS5HIP_LLM_FULL_GENERATION
 #define PS5HIP_LLM_FULL_GENERATION 0
 #endif
-#if PS5HIP_LLM_FULL_GENERATION && !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+#ifndef PS5HIP_LLM_FULL_CORPUS
+#define PS5HIP_LLM_FULL_CORPUS 0
+#endif
+#if PS5HIP_LLM_FULL_CORPUS && PS5HIP_LLM_FULL_GENERATION
+#error only one full generation profile may be selected
+#endif
+#if (PS5HIP_LLM_FULL_GENERATION || PS5HIP_LLM_FULL_CORPUS) && !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
 #error generation requires the authenticated full-model title
 #endif
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
@@ -212,7 +218,38 @@ static std::string configured_model_path(const std::string& config_path){
  return path;
 }
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER || PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
+#if PS5HIP_LLM_FULL_CORPUS
+static void prepare_corpus_directories(const std::string& directory){
+ for(const auto& item:m0::native_generation_cases){
+  const auto path=directory+"/"+item.id;
+  if(::mkdir(path.c_str(),0700)!=0)ps5hip_clr_gpu_fail("corpus-directory-not-fresh");
+ }
+}
+static bool corpus_output_name(const char* filename){
+ if(!filename)return false;
+ if(!std::strcmp(filename,"corpus.json"))return true;
+ const char* base=nullptr;
+ for(const auto& item:m0::native_generation_cases){const size_t n=std::strlen(item.id);if(!std::strncmp(filename,item.id,n)&&filename[n]=='/')base=filename+n+1;}
+ if(!base||std::strchr(base,'/'))return false;
+ if(!std::strcmp(base,"generation.json")||!std::strcmp(base,"steps.jsonl"))return true;
+ if(std::strncmp(base,"run-",4)||(base[4]!='0'&&base[4]!='1')||std::strncmp(base+5,"-pos-",5))return false;
+ const unsigned run=unsigned(base[4]-'0');const char* digit=base+10;
+ if(*digit<'0'||*digit>'9')return false;
+ unsigned position=unsigned(*digit++-'0');
+ if(*digit>='0'&&*digit<='9')position=position*10+unsigned(*digit++-'0');
+ if(*digit!='-'||position>46)return false;
+ for(unsigned i=0;i<24;++i){char stage[24],name[96];
+  if(i<22)std::snprintf(stage,sizeof(stage),"layer-%u",i);else std::snprintf(stage,sizeof(stage),"%s",i==22?"norm":"logits");
+  std::snprintf(name,sizeof(name),"run-%u-pos-%u-%s.f32le",run,position,stage);
+  if(!std::strcmp(base,name))return true;
+ }
+ return false;
+}
+#endif
 static void prefix_write(const char* filename,const void* data,size_t bytes,void* state){
+#if PS5HIP_LLM_FULL_CORPUS
+ if(!corpus_output_name(filename))ps5hip_clr_gpu_fail("corpus-output-name");
+#endif
  const auto& directory=*static_cast<const std::string*>(state);
  const auto path=directory+"/"+filename;
  const int fd=::open(path.c_str(),O_WRONLY|O_CREAT|O_EXCL,0600);
@@ -243,7 +280,7 @@ int main() {
     const auto phase=configured_model_phase();
     const bool full_model=phase!=ClientPhase::vocab;
     // Conservative bounded experiment budget, not a performance measurement.
-    ps5hip_clr_gpu::watchdog_start(full_model ? 120000 : 30000);
+    ps5hip_clr_gpu::watchdog_start(PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
     const hipError_t initialized = hipInit(0);
     int count = -1;
     const hipError_t discovered = hipGetDeviceCount(&count);
@@ -263,7 +300,12 @@ int main() {
           "/system_ex/app/PPSA99014/model-layer/q8.hsaco",
           "/system_ex/app/PPSA99014/model-layer/q4.hsaco",
           "/system_ex/app/PPSA99014/model-layer/layer.hsaco"};
-#if PS5HIP_LLM_FULL_GENERATION
+#if PS5HIP_LLM_FULL_CORPUS
+        prepare_corpus_directories(directory);
+        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::corpus);
+        m0::require(result.files==6539&&result.bytes==86091236&&result.full.requests==272&&result.full.completed_nodes==217056&&result.full.launches==199376);
+        m0::require(observed.launches==199376&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
+#elif PS5HIP_LLM_FULL_GENERATION
         const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::generation);
         m0::require(result.files==386&&result.bytes==5064354&&result.full.requests==16&&result.full.completed_nodes==12768&&result.full.launches==11728);
         m0::require(observed.launches==11728&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
@@ -325,7 +367,9 @@ int main() {
     }
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
-#if PS5HIP_LLM_FULL_GENERATION
+#if PS5HIP_LLM_FULL_CORPUS
+    if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false");
+#elif PS5HIP_LLM_FULL_GENERATION
     if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=generation watchdog_joined=true numerical=pending finalization=pending inference=false");
 #else
     if(phase==ClientPhase::model_full)std::puts("M3_FULL APP_COMPLETE profile=smoke watchdog_joined=true numerical=pending finalization=pending inference=false");

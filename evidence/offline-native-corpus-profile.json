@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "scope": "Offline native corpus title, asset and audit contracts; no linked package or console execution",
+  "test_methods": 107,
+  "tests": [
+    {
+      "test": "public_hip_full_assets_test.py",
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-profile-public_hip_full_assets_test.py.log",
+      "sha256": "8eff19dd626951307bc73230976c50c80295145bb08666d396eca39927462293"
+    },
+    {
+      "test": "llm_native_app_build_test.py",
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-profile-llm_native_app_build_test.py.log",
+      "sha256": "f8cae25dec59f5c274cfb76d1860ca3e8b5a4b22145aab06cb1d027200486760"
+    },
+    {
+      "test": "llm_client_native_audit_test.py",
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-profile-llm_client_native_audit_test.py.log",
+      "sha256": "19f3e4402f367587718bdb3bee1d117138ae2a7fe71d3cd04c1e6dce45dffea5"
+    },
+    {
+      "test": "native_full_title_test.py",
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-profile-native_full_title_test.py.log",
+      "sha256": "c00b867e5a990db3751ec31eeb67dea69dccc42833651741789640df511ca7c1"
+    }
+  ],
+  "inputs": {
+    "tools/public_hip_full_assets.py": "ee67aa975098f4be74b094394d38d8d196e5d709205de4551ca8aebc413f73e6",
+    "tools/build_public_hip_full_assets.py": "cd84156b8857c80f2bfcb81e2d94e6bcbf28044e48afce82982aafa569b6a794",
+    "tools/build_llm_native_app.py": "7034a974f81b3f127f5a42986e12261091b13b6edd7ab5d6a2e2b0d1e3ed5f2c",
+    "tools/build_public_hip.py": "7fa10ee9c2272fec4d691e04702d971c37809dfb9b4369c81c845605c1ac4b46",
+    "tools/audit_public_hip_llm_client_native.py": "b6d9e6c03fb8f69b8f07bc5d8601e122866db9a651cf4981e8d2f39100d2e5f3",
+    "tools/public_hip_llm_client_console_title.cpp": "473c51007299d8394df4f1abcd188c8fdb7df9e8db175ba4058983ac8d11caeb",
+    "tests/public_hip_full_assets_test.py": "c10f0121020a9e3c786ec515a8fb7b15d1d93607cbdb928907a8d04a02086893",
+    "tests/llm_native_app_build_test.py": "9f859f239a8873df6ffb81d4afe1e4897469b7dd6434a05852c18c9d34b642fd",
+    "tests/llm_client_native_audit_test.py": "3305bd1bb5c6473d92f86dac539b6343c4e53b6761dedc11d3a8f687cfea13c0",
+    "tests/native_full_title_test.py": "1c292348d95e040789f384562d84bc9d87c15f71e6a74787b79f12c35d8d208f"
+  },
+  "corpus": {
+    "profile_operand": 3,
+    "requests": 272,
+    "files": 6539,
+    "bytes": 86091236,
+    "metadata_bytes": 26084,
+    "watchdog_ms": 1800000
+  },
+  "native_package_built": false,
+  "console_contacted": false,
+  "remaining": [
+    "freeze/readback/controller corpus admission",
+    "linked image audit",
+    "native corpus validation on .40"
+  ]
+}

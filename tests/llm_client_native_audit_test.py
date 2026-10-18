@@ -353,6 +353,10 @@ class Generation(unittest.TestCase):
   body=Full.smoke_body().replace('$0x1','$0x2');a.full_profile_operand(body,'run','generation')
   for profile,changed in [('smoke',body),('generation',Full.smoke_body()),('generation',body.replace('40: callq','38: movl $0x1, 0x8(%rsp)\n40: callq')),('long',body)]:
    with self.subTest(profile=profile),self.assertRaises(RuntimeError):a.full_profile_operand(changed,'run',profile)
+ def test_corpus_abi_is_distinct_and_not_overwritten(self):
+  body=Full.smoke_body().replace('$0x1','$0x3');a.full_profile_operand(body,'run','corpus')
+  for profile,changed in [('smoke',body),('generation',body),('corpus',Full.smoke_body()),('corpus',body.replace('$0x3','$0x2')),('corpus',body.replace('40: callq','38: movl $0x1, 0x8(%rsp)\n40: callq'))]:
+   with self.subTest(profile=profile),self.assertRaises(RuntimeError):a.full_profile_operand(changed,'run',profile)
  def test_all_actual_generation_edges_required(self):
   bodies,full,r,scope=self.fixture();a.generation_contract(bodies,full,r,scope)
   for caller,targets in a.generation_edges(full,r).items():

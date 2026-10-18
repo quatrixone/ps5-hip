@@ -116,6 +116,39 @@ class FullAssets(unittest.TestCase):
   self.write('reference/raw/generation.json',b'{"runs":[]}')
   with patch.object(generation,'authenticate_generation_reference',return_value=(self.refdata,self.refinputs)):
    with self.assertRaisesRegex(ValueError,'generation reference'):a.assemble(self.parents,self.reference,'generation')
+ def test_corpus_inventory_profile_and_closure(self):
+  import build_llm_generation_reference as generation
+  for path in (self.reference/'raw').iterdir():
+   self.refinputs.pop(str(path),None);path.unlink()
+  files={};cases=generation.corpus_cases()
+  for key,prompt in cases:
+   generated=list(range(3,19));policy=dict(prompt=prompt,max_new_tokens=16,prompt_tokens=[1],runs=[dict(run=r,processed=[1]+generated[:-1],generated=generated,stop='step_limit') for r in range(2)])
+   for r in range(2):
+    for pos in range(16):
+     for stage in generation.STAGES:
+      name=f'{key}/run-{r}-pos-{pos}-{stage}.f32le';size=128000 if stage=='logits' else 8192
+      path=self.write('reference/raw/'+name,bytes(size));files[name]=size;self.refinputs[str(path)]=a.sha(path)
+   for name,content in [('generation.json',json.dumps(policy).encode()),('steps.jsonl',b'steps')]:
+    path=self.write('reference/raw/'+key+'/'+name,content);files[key+'/'+name]=len(content);self.refinputs[str(path)]=a.sha(path)
+  index=dict(schema=1,profile='corpus',max_new_tokens=16,cases=[key for key,_ in cases]);path=self.write('reference/raw/corpus.json',json.dumps(index).encode());files['corpus.json']=path.stat().st_size;self.refinputs[str(path)]=a.sha(path)
+  self.refdata.update(profile='corpus',classification='successful-greedy-generation-cpu-reference',requests=160,raw_files=3840)
+  with patch.object(generation,'authenticate_generation_reference',return_value=(self.refdata,self.refinputs)):
+   out=self.root/'corpus-assets';result=build(self.parents,self.reference,out,'corpus')
+   self.assertEqual((result['profile'],result['classification']),('corpus','authenticated-full-model-corpus-assets'))
+   self.assertEqual(result['raw_files'],files);self.assertEqual(len(result['assets']),6);self.assertEqual(result,a.full_inputs(out))
+   with self.assertRaisesRegex(ValueError,'profile'):a.assemble(self.parents,self.reference,'generation')
+   extra=self.write('reference/raw/unexpected',b'x')
+   with self.assertRaisesRegex(ValueError,'inventory'):a.assemble(self.parents,self.reference,'corpus')
+   extra.unlink();extra=self.reference/'raw/empty';extra.mkdir()
+   with self.assertRaisesRegex(ValueError,'inventory'):a.assemble(self.parents,self.reference,'corpus')
+   extra.rmdir();target=self.reference/'raw/story/run-0-pos-0-layer-0.f32le';digest=self.refinputs.pop(str(target))
+   with self.assertRaisesRegex(ValueError,'reference output'):a.assemble(self.parents,self.reference,'corpus')
+   self.refinputs[str(target)]=digest;target.unlink();target.symlink_to(self.reference/'raw/science/run-0-pos-0-layer-0.f32le')
+   with self.assertRaisesRegex(ValueError,'inventory'):a.assemble(self.parents,self.reference,'corpus')
+ def test_corpus_requires_explicit_reference_profile(self):
+  import build_llm_generation_reference as generation
+  with patch.object(generation,'authenticate_generation_reference',return_value=(self.refdata,self.refinputs)):
+   with self.assertRaisesRegex(ValueError,'profile'):a.assemble(self.parents,self.reference,'corpus')
  def test_no_overwrite(self):
   out=self.root/'aggregate';build(self.parents,self.reference,out)
   with self.assertRaises(FileExistsError):build(self.parents,self.reference,out)

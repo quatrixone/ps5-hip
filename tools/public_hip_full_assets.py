@@ -15,7 +15,7 @@ def validate_reference(folder):
  return authenticate_full_model_reference(folder)
 
 def assemble(parents,reference,profile='smoke'):
- if profile not in ('smoke','generation'):raise ValueError('altered or unsupported full profile')
+ if profile not in ('smoke','generation','corpus'):raise ValueError('altered or unsupported full profile')
  if set(parents)!=set(KINDS):raise ValueError('exact five module parents required')
  inputs={str(ROOT/n):sha(ROOT/n) for n in SOURCES};assets={};resolved={}
  for kind in KINDS:
@@ -36,13 +36,25 @@ def assemble(parents,reference,profile='smoke'):
   data,closure=validate_reference(reference)
   if data.get('status')!='PASS' or data.get('classification')!='successful-full-model-cpu-boundary-reference' or data.get('requests')!=514 or data.get('raw_files')!=168:raise ValueError('full reference contract')
  else:
-  from build_llm_generation_reference import authenticate_generation_reference,loads,STAGES
+  from build_llm_generation_reference import authenticate_generation_reference,loads,STAGES,corpus_cases
   data,closure=authenticate_generation_reference(reference)
-  policy=loads((reference/'raw/generation.json').read_text())
-  raw_files={f'run-{row["run"]}-pos-{pos}-{stage}.f32le':128000 if stage=='logits' else 8192
-             for row in policy['runs'] for pos in range(len(row['processed'])) for stage in STAGES}
-  if data.get('requests')!=16 or data.get('raw_files')!=384 or len(raw_files)!=384:raise ValueError('generation reference contract')
-  raw_files.update({name:(reference/'raw'/name).stat().st_size for name in ('generation.json','steps.jsonl')})
+  if data.get('classification')!='successful-greedy-generation-cpu-reference' or data.get('profile','short')!=('corpus' if profile=='corpus' else 'short'):raise ValueError('generation reference profile')
+  policies=[('',loads((reference/'raw/generation.json').read_text()))] if profile=='generation' else [(key+'/',loads((reference/'raw'/key/'generation.json').read_text())) for key,_ in corpus_cases()]
+  raw_files={prefix+f'run-{row["run"]}-pos-{pos}-{stage}.f32le':128000 if stage=='logits' else 8192
+             for prefix,policy in policies for row in policy['runs'] for pos in range(len(row['processed'])) for stage in STAGES}
+  requests=sum(len(row['processed']) for _,policy in policies for row in policy['runs'])
+  if data.get('requests')!=requests or data.get('raw_files')!=len(raw_files) or (profile=='generation' and (requests!=16 or len(raw_files)!=384)):raise ValueError('generation reference contract')
+  raw_files.update({prefix+name:(reference/'raw'/(prefix+name)).stat().st_size for prefix,_ in policies for name in ('generation.json','steps.jsonl')})
+  if profile=='corpus':
+   cases=corpus_cases();index=loads((reference/'raw/corpus.json').read_text())
+   if index!=dict(schema=1,profile='corpus',max_new_tokens=16,cases=[key for key,_ in cases]):raise ValueError('corpus index')
+   for (key,prompt),(prefix,policy) in zip(cases,policies):
+    if policy.get('prompt')!=prompt or policy.get('max_new_tokens')!=16 or len(policy.get('runs',[]))!=2:raise ValueError('corpus policy')
+    for run,row in enumerate(policy['runs']):
+     if row.get('run')!=run or len(row.get('generated',[]))!=16 or row.get('stop')!='step_limit' or row.get('processed')!=policy.get('prompt_tokens',[])+row['generated'][:-1]:raise ValueError('corpus feedback')
+   raw_files['corpus.json']=(reference/'raw/corpus.json').stat().st_size
+   entries=list((reference/'raw').rglob('*'))
+   if any(p.is_symlink() or not (p.is_file() or p.is_dir()) for p in entries) or {str(p.relative_to(reference/'raw')) for p in entries if p.is_file()}!=set(raw_files) or {str(p.relative_to(reference/'raw')) for p in entries if p.is_dir()}!={key for key,_ in cases}:raise ValueError('corpus raw inventory')
  if data.get('receipt')!=str(receipt) or data.get('receipt_sha256')!=closure.get(str(receipt)):raise ValueError('reference receipt identity mismatch')
  model=data.get('model',{})
  if set(model)!={'path','bytes','sha256'}:raise ValueError('model identity')
@@ -52,7 +64,7 @@ def assemble(parents,reference,profile='smoke'):
   path=reference/'raw'/name
   if path.is_symlink() or not path.is_file() or path.stat().st_size!=size or closure.get(str(path))!=sha(path):raise ValueError('smoke reference output absent from closure: '+name)
  merge(inputs,closure);check_inputs(inputs)
- return {'schema':1,'status':'PASS','classification':CLASSIFICATION if profile=='smoke' else 'authenticated-full-model-generation-assets','profile':profile,'parents':resolved,
+ return {'schema':1,'status':'PASS','classification':CLASSIFICATION if profile=='smoke' else 'authenticated-full-model-'+profile+'-assets','profile':profile,'parents':resolved,
          'reference':str(reference),'reference_data':str(reference/'raw'),'model':model,'inputs':inputs,'assets':assets,
          'raw_files':raw_files,'native_execution':False,'gpu_execution':False,'numerical_acceptance':False}
 

@@ -8,6 +8,24 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Native corpus integration resume point
+
+Corpus asset aggregation, CLI, native build profile, title selection/writer and
+image-audit profile admission are implemented. The title uses ABI 3, 272 commits,
+6,539 files / 86,091,236 bytes and a fixed 1,800,000-ms watchdog. Case directories
+must be fresh; output names are bounded and writes remain exclusive. There is
+no new linked package and no console run. The numerical milestone is on main at
+`086e370`; its completed run must not be restarted.
+
+Next: extend source_model_freeze and freeze_source_candidate for explicit corpus,
+the 128 MiB reference limit and matching experiment budgets; extend full readback
+verification and source_console for nested case paths, corpus application logs
+and bounded observation/capture. Keep short defaults. Only after this integration
+build/audit one fresh native candidate and validate on idle .40. Existing freezer
+rejection currently prevents accidentally deploying the incomplete corpus path.
+Validation: 107 focused tests pass; compact evidence and source/test-log hashes
+are in `evidence/offline-native-corpus-profile.json`.
+
 ## M4 production-helper corpus arithmetic passes offline
 
 `results/m4-corpus-native-generation-numeric-v1` completes with final PASS.

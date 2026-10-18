@@ -278,7 +278,7 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
     jobs = build_jobs()
     if client_phase not in ("vocab", "model-gate", "model-prefix", "model-layer", "model-full") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
-    if full_profile not in ("smoke", "generation") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
+    if full_profile not in ("smoke", "generation", "corpus") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
         raise ValueError("invalid full compile profile")
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
@@ -312,6 +312,8 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
                 extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_FULL=1")
                 if full_profile == "generation":
                     extra.append("-DPS5HIP_LLM_FULL_GENERATION=1")
+                elif full_profile == "corpus":
+                    extra.append("-DPS5HIP_LLM_FULL_CORPUS=1")
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]

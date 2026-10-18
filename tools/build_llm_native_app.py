@@ -12,8 +12,13 @@ from source_public_hip_log import package_limit
 
 
 def validate_full_profile(info,model):
- if info['model']['sha256']!=model['sha256'] or info['model']['bytes']!=model['bytes'] or info['profile'] not in ('smoke','generation'):raise ValueError('full/model profile identity differs')
+ if info['model']['sha256']!=model['sha256'] or info['model']['bytes']!=model['bytes'] or info['profile'] not in ('smoke','generation','corpus'):raise ValueError('full/model profile identity differs')
  if info['profile']=='generation' and (len(info['raw_files'])!=386 or info['raw_files'].get('generation.json')!=590 or info['raw_files'].get('steps.jsonl')!=1108):raise ValueError('generation title metadata contract differs')
+ if info['profile']=='corpus':
+  # The authenticated inventory must fit the fixed native title's output contract.
+  from build_llm_generation_reference import corpus_cases
+  files=info['raw_files'];metadata={'corpus.json',*(case+'/'+name for case,_ in corpus_cases() for name in ('generation.json','steps.jsonl'))}
+  if len(files)!=6539 or not metadata<=files.keys() or sum(files.values())!=86091236 or sum(files[n] for n in metadata)!=26084:raise ValueError('corpus title metadata contract differs')
  return info['profile']
 
 
@@ -432,7 +437,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if phase=='model-prefix' and ar.get('actual_prefix_call_chain_audited') is not True:raise ValueError('actual prefix call chain not audited')
   if phase=='model-layer' and ar.get('actual_layer_call_chain_audited') is not True:raise ValueError('actual layer call chain not audited')
   if phase=='model-full' and (ar.get('actual_full_call_chain_audited') is not True or ar.get('full_profile')!=full_info['profile']):raise ValueError('actual full profile/call chain not audited')
-  if full_info and full_info['profile']=='generation' and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
+  if full_info and full_info['profile'] in ('generation','corpus') and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
   merge(ar['inputs']);bind(audit)

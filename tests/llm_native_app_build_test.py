@@ -25,6 +25,15 @@ class Driver(unittest.TestCase):
    with self.subTest(key=key),self.assertRaises(ValueError):d.validate_full_profile({**info,key:value},model)
   for name in ('generation.json','steps.jsonl'):
    with self.subTest(name=name),self.assertRaisesRegex(ValueError,'metadata'):d.validate_full_profile({**info,'raw_files':{**info['raw_files'],name:1}},model)
+ def test_corpus_profile_fixed_native_output_totals(self):
+  from build_llm_generation_reference import corpus_cases
+  model={'sha256':'a'*64,'bytes':619831552}
+  files={f'{i}-{stage}.f32le':128000 if stage==23 else 8192 for i in range(272) for stage in range(24)}
+  files.update({case+'/'+name:2500 for case,_ in corpus_cases() for name in ('generation.json','steps.jsonl')});files['corpus.json']=1084
+  info={'model':model,'profile':'corpus','raw_files':files}
+  self.assertEqual(d.validate_full_profile(info,model),'corpus')
+  for changed in ({**files,'corpus.json':1083},{k:v for k,v in files.items() if k!='corpus.json'},{**files,'extra':0},{**files,'story/generation.json':2499,'0-0.f32le':8193}):
+   with self.assertRaisesRegex(ValueError,'metadata'):d.validate_full_profile({**info,'raw_files':changed},model)
  def test_outputs_never_treated_as_input(self):
   with tempfile.TemporaryDirectory() as name:
    folder=Path(name);a=folder/'input';o=folder/'output';dep=folder/'out.d'

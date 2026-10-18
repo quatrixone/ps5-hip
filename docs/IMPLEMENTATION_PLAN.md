@@ -14,7 +14,11 @@ float outputs bitwise CPU-equal. Wider prompts and long context remain open.
 Host verification improvements are committed. The five-prompt / 16-token corpus
 now passes actual production-helper HIP numerical interpretation: all 6,528 float
 files are bytewise CPU equal with validated feedback, reset and ownership. Next
-coordinate native corpus packaging, auditing and controller bounds before .40.
+finish native corpus freezing/readback and controller bounds before .40. Corpus
+title selection, asset inventory and audit profile contracts are now implemented;
+107 focused tests pass. An actual linked package audit remains pending.
+
+- 2026-10-18 | Native corpus profile | offline | explicit ABI3/title writer/asset inventory/audit contracts;107 tests pass; no package or console run | evidence/offline-native-corpus-profile.json | next: freezer/readback/controller then linked package and .40
 
 - 2026-10-18 | M4 corpus arithmetic | offline | production helper272commits/6528bitwise CPU-equal outputs,285timing intervals and balanced ownership;85test methods pass | evidence/offline-production-helper-corpus-numerics.json | next: coordinated native corpus admission and package
 

@@ -14,7 +14,7 @@ def build(parents,reference,output,profile='smoke'):
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  for name in ('getrows','normalized','weighted','q4','layer','reference','output'):p.add_argument('--'+name,type=Path,required=True)
- p.add_argument('--profile',choices=('smoke','generation'),default='smoke')
+ p.add_argument('--profile',choices=('smoke','generation','corpus'),default='smoke')
  a=p.parse_args();result=build({n:getattr(a,n) for n in ('getrows','normalized','weighted','q4','layer')},a.reference,a.output,a.profile)
  print(json.dumps({'receipt':result['receipt'],'receipt_sha256':result['receipt_sha256'],'assets':result['assets']},indent=2))
 

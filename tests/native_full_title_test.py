@@ -67,53 +67,111 @@ class FullTitle(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             folder=pathlib.Path(folder);source=folder/'source';hip=source/'hipamd/src';hip.mkdir(parents=True)
             for i in range(30):(hip/(str(i)+'.cpp')).touch()
-            for profile in ('smoke','generation'):
+            for profile in ('smoke','generation','corpus'):
                 calls=[];out=folder/profile;out.mkdir()
                 def compile_unit(output,path,obj,flags,label,source_root=None):
                     calls.append((path.name,flags));return {'object':str(obj.relative_to(output))}
                 with patch.object(builder,'compiler_flags',return_value=[]),patch.object(builder,'compile_bound_unit',side_effect=compile_unit):
                     builder.compile_units(out,source,'llm_client',client_phase='model-full',full_profile=profile)
                 self.assertEqual([name for name,flags in calls if '-DPS5HIP_LLM_FULL_GENERATION=1' in flags],['public_hip_llm_client_console_title.cpp'] if profile=='generation' else [])
-            for phase,profile in [('vocab','generation'),('model-gate','generation'),('model-layer','generation'),('model-full','long')]:
+                self.assertEqual([name for name,flags in calls if '-DPS5HIP_LLM_FULL_CORPUS=1' in flags],['public_hip_llm_client_console_title.cpp'] if profile=='corpus' else [])
+            for phase,profile in [('vocab','generation'),('model-gate','generation'),('model-layer','generation'),('model-full','long'),('vocab','corpus'),('model-layer','corpus')]:
                 with patch.object(builder,'compile_bound_unit') as compile_unit,self.assertRaisesRegex(ValueError,'full compile profile'):
                     builder.compile_units(folder,source,'llm_client',client_phase=phase,full_profile=profile)
                 compile_unit.assert_not_called()
 
     def test_production_profile_dispatch_and_counts(self):
         text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
-        start=text.index('#if PS5HIP_LLM_FULL_GENERATION\n        const auto result=')
+        start=text.index('#if PS5HIP_LLM_FULL_CORPUS\n        prepare_corpus_directories')
         end=text.index('\n#endif',start)+len('\n#endif');branch=text[start:end]
         fixture=r"""
 #include <array>
 #include <stdexcept>
 #include <string>
 namespace m0 {
-enum class NativeFullProfile {sequence,smoke,generation};
+enum class NativeFullProfile {sequence,smoke,generation,corpus};
 struct Full {unsigned requests,completed_nodes,launches;};
 struct Result {unsigned files,bytes;Full full;};
 static int seen;
 void require(bool ok){if(!ok)throw std::runtime_error("contract");}
 Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int,int,NativeFullProfile p){
- seen=int(p);Result r=p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
+ seen=int(p);Result r=p==NativeFullProfile::corpus?Result{6539,86091236,{272,217056,199376}}:p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
 #ifdef BAD_RESULT
  ++r.full.launches;
 #endif
  return r;
 }}
 namespace ps5hip_canary {constexpr int sync_log=0;}
+static void prepare_corpus_directories(int){}
 int main(){const std::string model_path="unused";std::array<const char*,6> modules{};int prefix_write=0,directory=0,model_memory_snapshot=0;
- struct {unsigned launches;bool uncertain;unsigned allocations,frees;} observed{PS5HIP_LLM_FULL_GENERATION?11728u:2199u,false,16,16};
+ struct {unsigned launches;bool uncertain;unsigned allocations,frees;} observed{PS5HIP_LLM_FULL_CORPUS?199376u:PS5HIP_LLM_FULL_GENERATION?11728u:2199u,false,16,16};
  try{
 """
         with tempfile.TemporaryDirectory() as folder:
             folder=pathlib.Path(folder);cpp=folder/'title.cpp';binary=folder/'title'
-            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_GENERATION?2:1)?0:1;}catch(...){return 99;}}\n')
-            for profile in (0,1):
+            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_CORPUS?3:PS5HIP_LLM_FULL_GENERATION?2:1)?0:1;}catch(...){return 99;}}\n')
+            for profile in (0,1,2):
                 for bad in (False,True):
-                    command=['c++','-std=c++17','-DPS5HIP_LLM_FULL_GENERATION='+str(profile),str(cpp),'-o',str(binary)]
+                    command=['c++','-std=c++17','-DPS5HIP_LLM_FULL_GENERATION='+str(int(profile==1)),'-DPS5HIP_LLM_FULL_CORPUS='+str(int(profile==2)),str(cpp),'-o',str(binary)]
                     if bad:command.append('-DBAD_RESULT=1')
                     subprocess.run(command,check=True)
                     self.assertEqual(subprocess.run([str(binary)]).returncode,99 if bad else 0)
+
+    def test_corpus_writer_fresh_directories_names_and_exclusive_files(self):
+        text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
+        start=text.index('#if PS5HIP_LLM_FULL_CORPUS\nstatic void prepare_corpus_directories')
+        end=text.index('\n#endif\nint main()',start)
+        source=r"""
+#include <string>
+#include <cstring>
+#include <cstdint>
+#include <cstdio>
+#include <cerrno>
+#include <stdexcept>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+[[noreturn]] void ps5hip_clr_gpu_fail(const char* p){throw std::runtime_error(p);}
+namespace m0 {
+struct Case {const char* id;const char* prompt;};
+static const Case native_generation_cases[]={
+#define PS5HIP_GENERATION_CASE(id,prompt) {id,prompt},
+#include "generation_cases.def"
+#undef PS5HIP_GENERATION_CASE
+};
+}
+"""+text[start:end]+r"""
+int main(int argc,char** argv){if(argc!=4)return 2;std::string directory=argv[1];
+try{prepare_corpus_directories(directory);const char data[]="ok";prefix_write(argv[2],data,2,&directory);
+if(!std::strcmp(argv[3],"repeat"))prefix_write(argv[2],data,2,&directory);
+return 0;}catch(...){return 99;}}
+"""
+        with tempfile.TemporaryDirectory() as folder:
+            folder=pathlib.Path(folder);cpp=folder/'writer.cpp';binary=folder/'writer';cpp.write_text(source)
+            subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-DPS5HIP_LLM_FULL_CORPUS=1','-I'+str(ROOT/'ports/ggml'),str(cpp),'-o',str(binary)],check=True)
+            valid=['corpus.json','story/generation.json','science/steps.jsonl','arithmetic/run-0-pos-0-layer-0.f32le','structured/run-1-pos-46-layer-21.f32le','unicode/run-1-pos-1-logits.f32le','story/run-0-pos-0-norm.f32le']
+            invalid=['generation.json','../escape','story/../escape','story/run-0-pos-0-layer-22.f32le','story/run-2-pos-0-logits.f32le','story/run-0-pos-47-logits.f32le','story/run-00-pos-0-logits.f32le','unknown/generation.json','story/sub/generation.json','story/','story/corpus.json','story/run-0-pos-0-logits.f16le']
+            for index,name in enumerate(valid+invalid):
+                directory=folder/str(index);directory.mkdir()
+                with self.subTest(name=name):
+                    self.assertEqual(subprocess.run([str(binary),str(directory),name,'once']).returncode,0 if name in valid else 99)
+                    if name in valid:self.assertEqual((directory/name).read_bytes(),b'ok')
+            directory=folder/'repeat';directory.mkdir()
+            self.assertEqual(subprocess.run([str(binary),str(directory),'story/generation.json','repeat']).returncode,99)
+            self.assertEqual((directory/'story/generation.json').read_bytes(),b'ok')
+            for kind in ('directory','file','symlink'):
+                directory=folder/kind;directory.mkdir();stale=directory/'story'
+                if kind=='directory':stale.mkdir()
+                elif kind=='file':stale.write_bytes(b'preserve')
+                else:stale.symlink_to(folder/'repeat/story',target_is_directory=True)
+                self.assertEqual(subprocess.run([str(binary),str(directory),'story/generation.json','once']).returncode,99)
+                if kind=='file':self.assertEqual(stale.read_bytes(),b'preserve')
+
+    def test_corpus_watchdog_argument_and_completion_marker(self):
+        text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
+        self.assertIn('watchdog_start(PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000)',text)
+        self.assertIn('M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false',text)
+        self.assertIn('#if PS5HIP_LLM_FULL_CORPUS && PS5HIP_LLM_FULL_GENERATION',text)
 
 
 if __name__ == '__main__':

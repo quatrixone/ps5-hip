@@ -3,6 +3,24 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Native corpus title and asset integration
+
+The native build now admits the explicit corpus profile: ABI operand 3, the
+same six GPU modules and external model, 272 decoder commits, 6,539 output files
+and 86,091,236 total bytes. The title creates five fresh case directories, rejects
+unexpected output names and preserves exclusive writes. Corpus selection uses
+the fixed 30-minute watchdog; smoke and short-generation limits stay unchanged.
+The image auditor requires the generation call chain for corpus as well.
+All 107 focused tests pass, including compiled production writer/dispatch tests.
+See `evidence/offline-native-corpus-profile.json` for source and test-log hashes.
+
+This is offline integration, not a linked package or hardware result. Next finish
+corpus support in candidate freezing, nested readback collection/comparison,
+application log parsing and controller deadlines. Existing deployment admission
+still rejects corpus until those pieces are complete. Then build once, inspect
+the actual linked images and run on idle .40. The arithmetic milestone is pushed
+as `086e370`; no console contact occurred during this integration.
+
 ## M4 production-helper corpus arithmetic passes offline
 
 `results/m4-corpus-native-generation-numeric-v1` completes with final PASS.
