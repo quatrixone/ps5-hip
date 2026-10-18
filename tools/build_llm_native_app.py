@@ -221,6 +221,15 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   return path
  def merge(values):
   for p,h in values.items():bind(p,h)
+ def merge_authenticated(values):
+  # Successful prerequisite consumers already hashed these bytes; final recheck stays fresh.
+  for name,digest in values.items():
+   path=Path(name)
+   if not path.is_absolute() or not path.is_file():raise ValueError('invalid authenticated input path: '+name)
+   with lock:
+    if name in inputs and inputs[name]!=digest:raise ValueError('input changed: '+name)
+    inputs[name]=digest
+    if path.is_symlink():links[name]=str(path.resolve())
  def tree(path):
   path=Path(path);files=[p for p in path.rglob('*') if p.is_file() and '.git' not in p.relative_to(path).parts and '__pycache__' not in p.parts]
   if not files:raise ValueError('empty dependency tree: '+str(path))
@@ -289,26 +298,26 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for line in result.stdout.splitlines():
    fields=line.split();name=fields[2] if len(fields)>2 and fields[1]=='=>' else fields[0] if fields else ''
    if name.startswith('/') and Path(name).is_file():bind(name)
- client=client_builder.app_objects(native_client);merge(client['inputs'])
- vocab=vocab_inputs(vocab_fixture);merge(vocab['inputs'])
+ client=client_builder.app_objects(native_client);merge_authenticated(client['inputs'])
+ vocab=vocab_inputs(vocab_fixture);merge_authenticated(vocab['inputs'])
  model_info=model_inputs(model,model_source,cpu_build) if phase in ('model-gate','model-prefix','model-layer','model-full') else None
  external_model={'path':model_remote_path,'bytes':model_info['bytes'],'sha256':model_info['sha256']} if model_info else None
  if external_model:validate_external_model(external_model)
- if model_info:merge(model_info['inputs'])
+ if model_info:merge_authenticated(model_info['inputs'])
  prefix_info=None
  if phase=='model-prefix':
   from public_hip_prefix_assets import prefix_inputs
-  prefix_info=prefix_inputs(prefix_fixture);merge(prefix_info['inputs'])
+  prefix_info=prefix_inputs(prefix_fixture);merge_authenticated(prefix_info['inputs'])
   if prefix_info['model']['sha256']!=model_info['sha256'] or prefix_info['model']['bytes']!=model_info['bytes']:raise ValueError('prefix/model identity differs')
  layer_info=None
  if phase=='model-layer':
   from public_hip_layer_assets import layer_inputs
-  layer_info=layer_inputs(layer_fixture);merge(layer_info['inputs'])
+  layer_info=layer_inputs(layer_fixture);merge_authenticated(layer_info['inputs'])
   if layer_info['model']['sha256']!=model_info['sha256'] or layer_info['model']['bytes']!=model_info['bytes']:raise ValueError('layer/model identity differs')
  full_info=None
  if phase=='model-full':
   from public_hip_full_assets import full_inputs
-  full_info=full_inputs(full_fixture);merge(full_info['inputs'])
+  full_info=full_inputs(full_fixture);merge_authenticated(full_info['inputs'])
   validate_full_profile(full_info,model_info)
  output.mkdir(parents=True)
  original_run=b.run

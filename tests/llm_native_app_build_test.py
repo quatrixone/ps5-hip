@@ -1,4 +1,5 @@
-import importlib.util,json,tempfile,unittest
+import importlib.util,json,tempfile,unittest,ast,hashlib,os,threading
+from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('driver',Path(__file__).resolve().parents[1]/'tools/build_llm_native_app.py');d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
@@ -160,6 +161,95 @@ class RelativeCommandInputs(unittest.TestCase):
   text=ast.unparse(runner)
   self.assertIn("'cwd': str(ROOT if cwd is None else cwd)",text)
   self.assertIn("original_run(out, label, argv, **{} if cwd is None else {'cwd': cwd})",text)
+
+def nodes(path):
+ tree=ast.parse(path.read_text())
+ build=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='build')
+ return {n.name:n for n in build.body if isinstance(n,ast.FunctionDef)}
+
+
+def isolated():
+ functions=nodes(Path(d.__file__))
+ reads=[]
+ def sha(path):
+  reads.append(str(path))
+  return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+ scope=dict(Path=Path,b=SimpleNamespace(sha=sha),inputs={},links={},inventories={},lock=threading.RLock())
+ module=ast.Module(body=[functions[n] for n in ('bind','merge_authenticated','recheck')],type_ignores=[])
+ exec(compile(ast.fix_missing_locations(module),'<actual builder input helpers>','exec'),scope)
+ return SimpleNamespace(**scope),reads
+
+
+class AuthenticatedMerge(unittest.TestCase):
+ def setUp(self):
+  self.temp=tempfile.TemporaryDirectory(prefix='ps5-hip-merge-test-')
+  self.addCleanup(self.temp.cleanup)
+  self.folder=Path(self.temp.name)
+  self.file=self.folder/'input';self.file.write_bytes(b'abcd')
+  self.digest=hashlib.sha256(b'abcd').hexdigest()
+  self.ctx,self.reads=isolated()
+
+ def test_authenticated_merge_never_reads_bytes_and_final_rechecks(self):
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  self.assertEqual(self.reads,[])
+  self.ctx.recheck()
+  self.assertEqual(self.reads,[str(self.file)])
+
+ def test_unverified_bind_still_hashes(self):
+  self.ctx.bind(self.file,self.digest)
+  self.assertEqual(self.reads,[str(self.file)])
+  with self.assertRaises(ValueError):self.ctx.bind(self.file,'0'*64)
+
+ def test_conflicts_fail_closed(self):
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  with self.assertRaises(ValueError):self.ctx.merge_authenticated({str(self.file):'0'*64})
+  self.assertEqual(self.ctx.inputs[str(self.file)],self.digest)
+  self.assertEqual(self.reads,[])
+
+ def test_invalid_paths_rejected(self):
+  for path in ['relative',str(self.folder/'missing'),str(self.folder)]:
+   with self.subTest(path=path),self.assertRaises(ValueError):self.ctx.merge_authenticated({path:self.digest})
+  self.assertEqual(self.ctx.inputs,{})
+
+ def test_symlink_route_is_bound_and_retarget_rejected(self):
+  link=self.folder/'link';link.symlink_to(self.file)
+  self.ctx.merge_authenticated({str(link):self.digest})
+  self.assertEqual(set(self.ctx.inputs),{str(link)})
+  self.assertEqual(self.ctx.links[str(link)],str(self.file.resolve()))
+  other=self.folder/'other';other.write_bytes(b'abcd')
+  link.unlink();link.symlink_to(other)
+  with self.assertRaisesRegex(ValueError,'symlink changed'):self.ctx.recheck()
+
+ def test_same_size_restored_mtime_mutation_rejected(self):
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  original=self.file.stat();self.file.write_bytes(b'wxyz')
+  os.utime(self.file,ns=(original.st_atime_ns,original.st_mtime_ns))
+  self.assertEqual(self.file.stat().st_size,original.st_size)
+  self.assertEqual(self.file.stat().st_mtime_ns,original.st_mtime_ns)
+  with self.assertRaisesRegex(ValueError,'changed before publication'):self.ctx.recheck()
+  self.assertEqual(self.reads,[str(self.file)])
+
+ def test_no_global_state_between_builds(self):
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  second,reads=isolated()
+  self.assertEqual(second.inputs,{})
+  self.assertEqual(second.links,{})
+  second.bind(self.file,self.digest)
+  self.assertEqual(reads,[str(self.file)])
+  self.assertEqual(self.reads,[])
+
+ def test_wrong_authenticated_digest_still_rejected_by_final_recheck(self):
+  self.ctx.merge_authenticated({str(self.file):'0'*64})
+  with self.assertRaises(ValueError):self.ctx.recheck()
+
+ def test_inventory_recheck_remains_live(self):
+  self.ctx.merge_authenticated({str(self.file):self.digest})
+  self.ctx.inventories[str(self.folder)]=[str(self.file)]
+  (self.folder/'extra').write_bytes(b'x')
+  with self.assertRaisesRegex(ValueError,'inventory changed'):self.ctx.recheck()
+
+
 
 if __name__ == '__main__':
     unittest.main()

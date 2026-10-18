@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-authenticated-prerequisite-merge",
+  "date": "2026-10-18",
+  "base_commit": "fde15fc4cd98bf61f08acdf091daeef4776a4913",
+  "change": "Merge already-authenticated initial prerequisite closures without a second byte read; ordinary bind, consumed headers/audit merges and all fresh final consumers/recheck are retained.",
+  "changed_initial_consumers": [
+    "native_client",
+    "vocabulary",
+    "model",
+    "prefix",
+    "layer",
+    "full"
+  ],
+  "tests": [
+    {
+      "command": "python3 tests/llm_native_app_build_test.py",
+      "methods": 29,
+      "status": "PASS"
+    },
+    {
+      "command": "python3 tests/source_model_full_freeze_test.py",
+      "methods": 28,
+      "status": "PASS"
+    },
+    {
+      "command": "python3 tests/llm_prefix_make_test.py",
+      "methods": 16,
+      "status": "PASS"
+    }
+  ],
+  "regression_cases": [
+    "No byte hashing during authenticated merge; final recheck always hashes",
+    "Ordinary unverified bind still hashes",
+    "Conflicting digests and non-absolute/missing/non-file paths reject",
+    "Symlink retargeting and inventory changes reject",
+    "Same-size mutation with restored mtime rejects",
+    "Incorrect expected digest rejects at final check",
+    "Independent builds have no shared cache"
+  ],
+  "locked_generation_case_avoided_reads": {
+    "gguf_reads": 3,
+    "gguf_bytes_each": 619831552,
+    "safetensors_reads": 1,
+    "safetensors_bytes_each": 2200119864,
+    "total_bytes": 4059614520,
+    "basis": "Static call-path count and locked input sizes; lower bound excludes other prerequisite closures"
+  },
+  "native_rebuilt": false,
+  "console_contact": false,
+  "wall_time_speedup_measured": false,
+  "inputs": {
+    "tools/build_llm_native_app.py": "76481f764b38121e07112b252163dd20ce62bbd4fbaf20dc786d06aac7c19558",
+    "tests/llm_native_app_build_test.py": "82daa6c999398af741eb0ced176882a08babcfff63f226d80d9bbf205180e81b"
+  },
+  "limits": [
+    "This removes one initial build duplication; repeated producer validation in freeze/control still needs improvement.",
+    "Helpers accept digests only from successful internal consumers; fresh final consumers and recheck remain mandatory.",
+    "Consumed native generation proof stays bound to42f74b3; future candidates require new current-source receipts."
+  ]
+}

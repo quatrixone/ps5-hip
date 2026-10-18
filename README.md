@@ -4,13 +4,13 @@ An experimental native HIP compute platform for PlayStation 5 homebrew.
 
 **First release: native LLM inference.** The active [v1 plan](docs/LLM_V1_PLAN.md)
 targets one small Llama-family model, GGUF Q4_0, batch one and a 512-token context
-through a standalone PS5 HIP client. Model execution is not yet qualified.
+through a standalone PS5 HIP client. [Short native generation now passes on .40](evidence/console40-native-short-generation-success.json):
+TinyLlama 1.1B generates four tokens using live feedback and repeats after reset.
+All 384 captured layer/norm/logit outputs across 16 decoder commits match the CPU
+oracle bitwise, with clean native teardown. Diagnostic decode timings include
+readback and file writes; throughput is not qualified. Wider prompts/context,
+remaining numerical fixtures and release qualification are still open.
 Training, broad frameworks and general SDK expansion remain later goals.
-
-The [upstream RMSNorm operator](evidence/console40-public-rmsnorm-success.json)
-now passes six native cases on .40 through public HIP, checking 81,920 values
-against CPU references. Remaining operators and end-to-end model inference
-remain unqualified.
 
 The ambition is to make the PS5 a programmable GPU compute machine: compile real
 HIP C++ kernels, reuse useful ROCm libraries, support standalone inference clients,
@@ -31,7 +31,7 @@ The [CPU threading proof](evidence/native-host-threads.json) passed two joined
 workers, isolated thread-local values and synchronization cleanup on the console.
 Concurrent HIP calls and GPU access from worker threads remain unqualified.
 The runtime currently
-requires one module and serialized host calls; unsupported features fail explicitly.
+requires serialized host calls; unsupported features fail explicitly.
 See [current state](STATE.md) for the latest candidate and its exact limits.
 
 The earlier G2 milestone checked 292 exact values over two clean cycles of one

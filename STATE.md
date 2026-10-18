@@ -3,6 +3,24 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Build prerequisite rereads reduced after the native milestone
+
+Initial native-app prerequisite closures now merge their already-authenticated
+path/digest identities without hashing the same bytes immediately again. Unverified
+operands, consumed headers and image-audit inputs retain ordinary hashing; fresh
+final consumers, symlink/inventory checks and uncached final recheck are unchanged.
+The locked generation case avoids three GGUF reads and one safetensors read,
+4,059,614,520 bytes plus other closure rereads. No elapsed-time speedup is claimed.
+All 73 focused builder, freeze and Make test methods pass; no native rebuild or
+console cycle was needed for this tooling change. See
+`evidence/offline-authenticated-prerequisite-merge.json`.
+
+The consumed native generation proof below remains bound to source `42f74b3`.
+Current tooling/test identities changed, so retain its historical receipts and
+raw outputs; obtain a fresh current-source app receipt for any new candidate.
+Next reduce repeated producer validation in the freeze/console-control path;
+this small builder change alone does not resolve that larger bottleneck.
+
 ## M4 short native greedy generation passes on .40
 
 The installed PPSA99014 generation app produces `, there was a` from
