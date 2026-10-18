@@ -4,6 +4,7 @@ from pathlib import Path
 import build_llm_executed_graph as provenance
 ROOT=Path(__file__).resolve().parents[1]
 LINE='GENERATION_REFERENCE_PASS runs=2 max_new_tokens=4 original_cpu_decode=true GPU_execution=false\n'
+STAGES=[*(f'layer-{i}' for i in range(22)),'norm','logits']
 SOURCES=[Path(__file__).resolve(),ROOT/'tests/llm_generation_reference.cpp',ROOT/'tests/llm_generation_reference_test.py',ROOT/'ports/ggml/generation.h',ROOT/'tests/llm_generation_test.cpp',ROOT/'tests/llm_generation_test.py',Path(provenance.__file__).resolve(),ROOT/'llm-inputs.json',ROOT/'evidence/offline-llm-model-conversion.json']
 
 def loads(text):
@@ -42,7 +43,15 @@ def validate(folder):
   except (ValueError,TypeError):raise ValueError('decoded hex')
   if any(len(p)>4096 for p in pieces) or b''.join(pieces)!=text:raise ValueError('decoded text')
   for pos,token in enumerate(processed):
-   name=f'run-{run}-pos-{pos}-logits.f32le';inventory.add(name)
+   for stage in STAGES:
+    name=f'run-{run}-pos-{pos}-{stage}.f32le';inventory.add(name)
+    path=folder/name
+    if not path.is_file():raise ValueError('generation inventory')
+    raw=path.read_bytes();count=32000 if stage=='logits' else 2048
+    if len(raw)!=count*4:raise ValueError('boundary size')
+    if not all(map(math.isfinite,struct.unpack('<'+str(count)+'f',raw))):raise ValueError('nonfinite boundary')
+    raws[(run,pos,stage)]=raw
+   name=f'run-{run}-pos-{pos}-logits.f32le'
    if not (folder/name).is_file():raise ValueError('generation inventory')
    raw=(folder/name).read_bytes()
    if len(raw)!=128000:raise ValueError('logits size')
@@ -52,18 +61,20 @@ def validate(folder):
     # Independent Python argmax: first maximum wins, no shared C++ implementation.
     best=max(range(32000),key=values.__getitem__)
     if generated[pos-len(prompt)+1]!=best:raise ValueError('greedy argmax')
-   raws[(run,pos)]=raw;expected_steps.append(dict(run=run,position=pos,token=token,status=0,committed_position=pos))
+   expected_steps.append(dict(run=run,position=pos,token=token,status=0,committed_position=pos))
   runs.append({k:v for k,v in row.items() if k!='run'})
  if any(not isinstance(s,dict) or any(type(v)is not int for v in s.values()) for s in steps) or steps!=expected_steps:raise ValueError('committed progression')
- if runs[0]!=runs[1] or any(raws[(0,p)]!=raws[(1,p)] for p in range(len(runs[0]['processed']))):raise ValueError('reset equality')
+ if runs[0]!=runs[1] or any(raws[(0,p,stage)]!=raws[(1,p,stage)] for p in range(len(runs[0]['processed'])) for stage in STAGES):raise ValueError('reset equality')
  if {p.name for p in folder.iterdir()}!=inventory or any(not p.is_file() or p.is_symlink() for p in folder.iterdir()):raise ValueError('generation inventory')
- return dict(requests=len(steps),raw_files=len(raws),raw_bytes=len(raws)*128000,prompt_tokens=prompt,generated=runs[0]['generated'],stop=runs[0]['stop'],text_hex=runs[0]['text_hex'])
+ return dict(requests=len(steps),raw_files=len(raws),raw_bytes=sum(map(len,raws.values())),prompt_tokens=prompt,generated=runs[0]['generated'],stop=runs[0]['stop'],text_hex=runs[0]['text_hex'])
 
 def commands_valid(data,folder,cpu,model):
  rows=loads((folder/'commands.json').read_text())
  if not isinstance(rows,list) or any(not isinstance(x,dict) or set(x)!={'label','argv','exit_code'} or type(x['exit_code'])is not int or not isinstance(x['argv'],list) or not all(isinstance(v,str) for v in x['argv']) for x in rows):raise ValueError('command schema')
  if rows!=data['commands'] or [x.get('label') for x in rows]!=['headers','compile','ldd','capture'] or any(x.get('exit_code')!=0 for x in rows):raise ValueError('command completion')
- expected=command_plan(folder,cpu,model)
+ producer=Path(data['producer_output'])
+ if not producer.is_absolute() or not producer.is_relative_to(ROOT/'results') or producer!=producer.resolve():raise ValueError('producer output identity')
+ expected=command_plan(producer,cpu,model)
  if any(row['argv']!=expected[row['label']] for row in rows):raise ValueError('exact command identity')
 
 def command_plan(folder,cpu,model):
@@ -128,7 +139,7 @@ def build(cpu,model,output):
  summary=validate(raw);(output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n');provenance.recheck(inputs)
  artifacts={str(p.relative_to(output)):provenance.sha(p) for p in output.rglob('*') if p.is_file()}
  if sum(p.stat().st_size for p in output.rglob('*') if p.is_file())>32*1024*1024:raise ValueError('reference bound')
- data=dict(status='PASS',classification='successful-greedy-generation-cpu-reference',cpu_build=str(cpu),model=dict(path=str(model),bytes=model.stat().st_size,sha256=inputs[str(model)]),inputs=inputs,artifacts=artifacts,commands=commands,requests=summary['requests'],raw_files=summary['raw_files'],max_new_tokens=4,gpu_executed=False,limits=['CPU reference only; no GPU execution','Reset/repeat in one process, not independent-process determinism','Text pieces are source-bound vocabulary API output; Python independently validates greedy IDs and feedback'])
+ data=dict(producer_output=str(output),status='PASS',classification='successful-greedy-generation-cpu-reference',cpu_build=str(cpu),model=dict(path=str(model),bytes=model.stat().st_size,sha256=inputs[str(model)]),inputs=inputs,artifacts=artifacts,commands=commands,requests=summary['requests'],raw_files=summary['raw_files'],max_new_tokens=4,gpu_executed=False,limits=['CPU reference only; no GPU execution','Reset/repeat in one process, not independent-process determinism','Text pieces are source-bound vocabulary API output; Python independently validates greedy IDs and feedback'])
  commands_valid(data,output,cpu,model);(output/'receipt.json').write_text(json.dumps(data,indent=2)+'\n');print('PASS CPU greedy generation reference')
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)

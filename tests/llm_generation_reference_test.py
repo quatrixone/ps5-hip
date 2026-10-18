@@ -12,6 +12,7 @@ class Reference(unittest.TestCase):
    for pos,t in enumerate([1,4,5,6,7]):
     values=[0.0]*32000;values[[3,5,6,7,8][pos]]=1.0
     (self.root/f'run-{run}-pos-{pos}-logits.f32le').write_bytes(struct.pack('<32000f',*values))
+    for stage in ref.STAGES[:-1]:(self.root/f'run-{run}-pos-{pos}-{stage}.f32le').write_bytes(bytes(8192))
     self.steps.append(dict(run=run,position=pos,token=t,status=0,committed_position=pos))
   self.save()
  def save(self):
@@ -35,7 +36,8 @@ class Reference(unittest.TestCase):
   self.steps=[s for s in self.steps if s['position']<2]
   for run,row in enumerate(self.meta['runs']):
    row.update(processed=[1,4],generated=[5],stop='eos',pieces_hex=['61'],text_hex='61')
-   for pos in range(2,5):(self.root/f'run-{run}-pos-{pos}-logits.f32le').unlink()
+   for pos in range(2,5):
+    for stage in ref.STAGES:(self.root/f'run-{run}-pos-{pos}-{stage}.f32le').unlink()
   self.save();self.assertEqual(ref.validate(self.root)['stop'],'eos')
   self.meta['runs'][0]['stop']='step_limit';self.save()
   with self.assertRaisesRegex(ValueError,'EOS'):ref.validate(self.root)
@@ -68,14 +70,22 @@ class Reference(unittest.TestCase):
   for bad in (None,[],3):
    (self.root/'generation.json').write_text(json.dumps(bad))
    with self.assertRaises(ValueError):ref.validate(self.root)
+ def test_all_boundaries_count_size_finite_and_reset(self):
+  summary=ref.validate(self.root);self.assertEqual((summary['raw_files'],summary['raw_bytes']),(240,10*(23*8192+128000)))
+  p=self.root/'run-1-pos-0-layer-21.f32le';original=p.read_bytes()
+  for content,error in ((b'', 'size'),(struct.pack('<f',float('nan'))+original[4:], 'nonfinite'),(struct.pack('<f',1.)+original[4:], 'reset')):
+   p.write_bytes(content)
+   with self.subTest(error=error),self.assertRaisesRegex(ValueError,error):ref.validate(self.root)
+  p.write_bytes(original);p.unlink()
+  with self.assertRaisesRegex(ValueError,'inventory'):ref.validate(self.root)
  def test_exact_compiler_commands(self):
-  cpu=Path('/cpu');model=Path('/model');plan=ref.command_plan(self.root,cpu,model)
-  rows=[dict(label=k,argv=v,exit_code=0) for k,v in plan.items()];p=self.root/'commands.json';p.write_text(json.dumps(rows));ref.commands_valid({'commands':rows},self.root,cpu,model)
+  cpu=Path('/cpu');model=Path('/model');producer=ref.ROOT/'results/test-producer';plan=ref.command_plan(producer,cpu,model)
+  rows=[dict(label=k,argv=v,exit_code=0) for k,v in plan.items()];p=self.root/'commands.json';p.write_text(json.dumps(rows));ref.commands_valid({'commands':rows,'producer_output':str(producer)},self.root,cpu,model)
   for label in ('headers','compile','ldd','capture'):
    bad=copy.deepcopy(rows);next(x for x in bad if x['label']==label)['argv'].append('-DUNREVIEWED=1');p.write_text(json.dumps(bad))
-   with self.subTest(label=label),self.assertRaisesRegex(ValueError,'exact command'):ref.commands_valid({'commands':bad},self.root,cpu,model)
+   with self.subTest(label=label),self.assertRaisesRegex(ValueError,'exact command'):ref.commands_valid({'commands':bad,'producer_output':str(producer)},self.root,cpu,model)
   bad=copy.deepcopy(rows);bad[0]['exit_code']=False;p.write_text(json.dumps(bad))
-  with self.assertRaisesRegex(ValueError,'schema'):ref.commands_valid({'commands':bad},self.root,cpu,model)
+  with self.assertRaisesRegex(ValueError,'schema'):ref.commands_valid({'commands':bad,'producer_output':str(producer)},self.root,cpu,model)
  def test_artifacts_rechecked_after_authentication(self):
   receipt=self.root/'receipt.json';receipt.write_text('{}');before=ref.artifact_inventory(self.root,receipt);digest=ref.provenance.sha(receipt)
   ref.final_artifact_check(self.root,receipt,before,digest)

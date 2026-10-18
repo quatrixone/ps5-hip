@@ -42,11 +42,10 @@ make llm-generation-numeric-tests \
 
 Builders require fresh output directories. Receipts bind source, compiler,
 consumed headers, runtime libraries, model and raw outputs. References contain
-every committed input/position and full logits, generated IDs and vocabulary
-pieces. Python independently checks argmax, feedback, stopping and exact reset.
-The HIP interpreter additionally checks all captured layer boundaries for finite
-values and reset equality, and compares logits to CPU under the existing
-numerical budgets. It uses the actual graph scheduler and production arithmetic
+every committed input/position, all 22 layer outputs, final normalization and
+full logits, generated IDs and vocabulary pieces. Python independently checks
+argmax, feedback, stopping and exact reset. The HIP interpreter compares every
+captured boundary to CPU under the existing numerical budgets. It uses the actual graph scheduler and production arithmetic
 in a host interpreter; it does not execute a GPU.
 
 Native generation still needs profile-specific packaging, image audit, frozen
@@ -91,7 +90,8 @@ LDS, spills or undefined calls. Native arithmetic and performance remain open.
 
 The initial arithmetic proof used `results/llm-layer-fixture-v8`, CPU oracle v1
 and canonical numeric v1. These are historical generation receipts after the
-combined-context fix; use oracle v2 and the production-helper result below. Old failures/diagnostics are preserved; their CPU
+combined-context fix. The production-helper result below used oracle v2; the
+current all-boundary result uses v3. Old failures/diagnostics are preserved; their CPU
 substitutions are never native proof. Next finish native profile/audit/reference
 contracts and timings, then freeze and test a fresh package on .40.
 
@@ -138,3 +138,25 @@ The native title currently selects smoke. Generation still needs an authenticate
 build selection, profile-specific reference/assets, image audit, full transcript,
 freezer/controller integration and .40 validation. Do not treat the host helper
 as an accepted native application.
+
+## All-boundary oracle and generation assets
+
+The current oracle is `results/m4-generation-reference-v3`, and the production
+helper comparison is `results/m4-native-generation-numeric-v5`. All 384 float
+outputs are bitwise CPU-equal across 16 actual committed decodes. The CPU callback
+captures each completed tensor before reuse and checks that captured logits are
+exactly those consumed by sampling. The prompt and generated text are unchanged.
+Old v2 oracle/v4 numerical receipts remain historical evidence.
+
+References record the original producer output directory. Authentication checks
+its exact compile/run command identities even after copying the entire reference
+into a candidate, while hashing the actual copied artifacts. A copied reference
+with a modified intermediate is rejected. This does not make toolchain paths
+portable to another computer: source-only builds create fresh references there.
+
+`build_public_hip_full_assets.py --profile generation` authenticates the same six
+modules and binds all 384 float files plus `generation.json` and `steps.jsonl`.
+The default remains `smoke`. This asset profile alone cannot deploy generation;
+the native title, image audit, freezer and application controller must all agree
+on that profile before console use. No native SDK/library rebuild was needed for
+this oracle/host-comparison milestone.

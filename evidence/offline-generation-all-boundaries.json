@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-greedy-all-boundaries-CPU-comparison",
+  "source_base_commit": "439f7a6",
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "results/m4-generation-reference-v3/receipt.json": "df2bdf5a70d60968a65df7734b1908c76071405f434697b4a9cf23c95e5a9eee",
+    "results/m4-generation-reference-v3/summary.json": "d081e5cb6c48957618757d32048f11fc59bdb2ea2bb07761bb55cbe85a272036",
+    "results/m4-native-generation-numeric-v5/receipt.json": "c79c06007018c9c967604f9d94aae72bc412f9b5d17e4ef92e76d66e6aa87f01",
+    "results/m4-native-generation-numeric-v5/comparison.json": "e56d96cccd1292bf5064adf727fe664e5f2fb8b386af2d25b4c0da9af5b011e5",
+    "results/m4-native-generation-numeric-v5/timing.json": "cf418f6bab2383cbfecda845f1b6ccb119c5f667344cbddfccbd4d301d0294f1",
+    "results/m4-native-generation-numeric-v5/raw/generation.json": "dc23e0cbece6f12d21cdee2be67ac91d9288175a53c2ace1234cd21c23ba239c",
+    "results/m4-native-generation-numeric-v5/raw/steps.jsonl": "543593580dff68a3b671bad93e6951c8caa2abd7438d869e7c83b54bff88cb29",
+    "results/m4-generation-reference-copy-check-v1.json": "68e2c4a99f895fb41d1521657dd4952baea67e29fac3a4522fac3898b7df6a81",
+    "results/m4-generation-assets-v1/receipt.json": "a356ed681328077461e4db38142303168ca91bc65fcc7b7cd91e1abb0e19482a"
+  },
+  "numerical": {
+    "requests": 16,
+    "layers": 22,
+    "boundaries_per_request": 24,
+    "float_files": 384,
+    "float_bytes": 5062656,
+    "full_logits_per_request": 32000,
+    "all_bitwise_CPU_equal": true,
+    "maximum_absolute_error": 0,
+    "maximum_relative_l2": 0,
+    "actual_live_logit_feedback": true,
+    "captured_CPU_logits_equal_sampler_input": true,
+    "reset_repeat_equal": true,
+    "output": ", there was a",
+    "budgets": {
+      "absolute": 2e-05,
+      "relative": 0.0002,
+      "relative_l2": 0.0002
+    }
+  },
+  "frozen_copy": {
+    "original_producer_commands_bound": true,
+    "copied_artifacts_authenticated": true,
+    "modified_intermediate_rejected": true,
+    "reference_total_bytes": 5395303
+  },
+  "validation": {
+    "unit_methods": 72,
+    "groups": {
+      "generation": 30,
+      "full_assets": 23,
+      "layer_assets": 19
+    },
+    "ASan_UBSan_host_helper": true,
+    "new_host_translation_units": 2,
+    "CPU_libraries_rebuilt": false,
+    "native_package_built": false,
+    "console_contact": false
+  },
+  "limits": [
+    "Host HIP interpretation is not PS5 execution; new native arithmetic remains unproved.",
+    "Short fixed prompt/four outputs only; long-context, EOS model case, wider M4/M5 and original model formats remain open.",
+    "Native title, linked image audit, freezer, application transcript/controller and readback consumers still need the generation profile.",
+    "Earlier generation oracle/numeric receipts are historical after source changes; preserve raw data."
+  ],
+  "next": [
+    "Bind generation through native title/image/freezer/controller without weakening smoke.",
+    "Build and freeze/review one fresh cache-backed package after offline checks, then validate idle .40."
+  ],
+  "assets": {
+    "profile": "generation",
+    "modules": 6,
+    "expected_files": 386,
+    "metadata_files": [
+      "generation.json",
+      "steps.jsonl"
+    ],
+    "model_external": true,
+    "actual_parent_closures_authenticated": true,
+    "receipt_reauthenticated_after_write": true,
+    "native_package_ready": false
+  }
+}

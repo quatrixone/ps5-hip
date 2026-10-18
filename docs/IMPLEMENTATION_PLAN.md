@@ -12,6 +12,8 @@ native full-model smoke now passes all 22 layers, normalization and logits with
 actual decoder commits/reset. Next qualify short greedy generation and timing;
 long full-model context and token generation are not yet established.
 
+- 2026-10-17 | M4 all-boundary oracle | offline | all 384 layer/norm/logit outputs bitwise CPU-equal under live greedy feedback; portable frozen-copy authentication and explicit generation assets | evidence/offline-generation-all-boundaries.json | next: native title/image/freezer/controller profile integration
+
 - 2026-10-17 | M4 production helper | offline | native helper tokenizer/live feedback, metadata, KV reset and monotonic timings pass 16 CPU-logit cases; legacy 514/smoke 3 and EOS transport pass; combined 512-token budget fixed | evidence/offline-native-generation-helper.json | next: native title/assets/image/freezer/controller generation profile
 
 - 2026-10-17 | M4 canonical greedy arithmetic | offline | 16/16 full logits bitwise CPU-equal with genuine GPU-source math, 72-file smoke regression preserved; 16-symbol ISA/Initial pass | evidence/offline-greedy-canonical-arithmetic.json | next: native generation profile and .40

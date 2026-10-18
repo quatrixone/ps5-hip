@@ -95,6 +95,27 @@ class FullAssets(unittest.TestCase):
   out=self.root/'aggregate';build(self.parents,self.reference,out)
   path=out/'receipt.json';data=json.loads(path.read_text());data['profile']='sequence';path.write_text(json.dumps(data))
   with self.assertRaisesRegex(ValueError,'altered'):a.full_inputs(out)
+ def test_generation_profile_binds_all_boundaries_and_metadata(self):
+  import build_llm_generation_reference as generation
+  policy={'runs':[{'run':r,'processed':list(range(8))} for r in range(2)]}
+  files={f'run-{r}-pos-{pos}-{stage}.f32le':128000 if stage=='logits' else 8192 for r in range(2) for pos in range(8) for stage in generation.STAGES}
+  files.update({'generation.json':len(json.dumps(policy).encode()),'steps.jsonl':5})
+  for name,size in files.items():
+   contents=json.dumps(policy).encode() if name=='generation.json' else b'0'*size
+   path=self.write('reference/raw/'+name,contents);self.refinputs[str(path)]=a.sha(path)
+  self.refdata.update(classification='successful-greedy-generation-cpu-reference',requests=16,raw_files=384)
+  with patch.object(generation,'authenticate_generation_reference',return_value=(self.refdata,self.refinputs)):
+   out=self.root/'generation-assets';result=build(self.parents,self.reference,out,profile='generation')
+   self.assertEqual(result['profile'],'generation');self.assertEqual(result['raw_files'],files)
+   self.assertEqual(result['classification'],'authenticated-full-model-generation-assets')
+   self.assertEqual(result,a.full_inputs(out))
+   del self.refinputs[str(self.reference/'raw/generation.json')]
+   with self.assertRaisesRegex(ValueError,'reference output'):a.full_inputs(out)
+ def test_generation_rejects_smoke_reference(self):
+  import build_llm_generation_reference as generation
+  self.write('reference/raw/generation.json',b'{"runs":[]}')
+  with patch.object(generation,'authenticate_generation_reference',return_value=(self.refdata,self.refinputs)):
+   with self.assertRaisesRegex(ValueError,'generation reference'):a.assemble(self.parents,self.reference,'generation')
  def test_no_overwrite(self):
   out=self.root/'aggregate';build(self.parents,self.reference,out)
   with self.assertRaises(FileExistsError):build(self.parents,self.reference,out)

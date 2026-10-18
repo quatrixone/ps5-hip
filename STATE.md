@@ -3,6 +3,32 @@
 Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## M4 generation now compares every CPU boundary offline
+
+The greedy CPU oracle now captures all 22 layer outputs, final normalization and
+32,000 logits for every committed request, before activation reuse. Its completed
+callback logits must equal the actual sampler input. All 384 outputs from the
+production native generation helper under numerical HIP interpretation are
+bitwise CPU-equal, including reset/repeat. Token histories still produce
+`, there was a`. The existing absolute/relative/L2 budgets are unchanged.
+
+Use `results/m4-generation-reference-v3` and
+`results/m4-native-generation-numeric-v5`; earlier references/numerical receipts
+are historical after these source changes. A copied oracle authenticates using
+its bound original producer command paths while checking all copied artifacts;
+a deliberately mutated intermediate is rejected. This makes the reference usable
+inside a frozen candidate. The complete reference is about 5.4 MB.
+
+Full assets now accept an explicit `generation` profile, bind its CPU oracle,
+384 float files and both actual metadata files, and retain the default smoke
+contract. The actual six-module closure passes and is recorded in
+`results/m4-generation-assets-v1`. See
+`evidence/offline-generation-all-boundaries.json`. The native title,
+linked image audit, freezer, application transcript/controller and readback
+consumer still need generation profile integration. No native package build or
+console contact occurred; host interpretation proves no new device arithmetic.
+Preserve the installed .40 smoke baseline and its consumed candidate.
+
 ## M4 production generation helper integrated and timed offline
 
 `NativeFullProfile::generation` now uses the shared native model/context lifecycle,

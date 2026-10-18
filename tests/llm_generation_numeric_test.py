@@ -19,11 +19,11 @@ class NumericGeneration(unittest.TestCase):
     name=f'run-{r}-pos-0-{stage}.f32le';size=128000 if stage=='logits' else 8192
     content=bytes(8)+struct.pack('<f',1.)+bytes(size-12) if stage=='logits' else bytes(size)
     (self.raw/name).write_bytes(content)
-    if stage=='logits':(self.ref/name).write_bytes(content)
+    (self.ref/name).write_bytes(content)
   (self.raw/'backend.json').write_text(json.dumps(dict(requests=2,nodes=1596,launches=1466,CPU_arithmetic=0,scheduler_forwarded=2,allocations=16,frees=16,instances_created=1,instances_freed=1)))
  def compare(self):return test.compare_generation(self.raw,self.ref)
  def test_pass_inventory_and_budget(self):
-  rows,files,requests=self.compare();self.assertEqual((len(rows),len(files),requests),(2,48,2));self.assertTrue(all(r['pass_budget'] for r in rows));self.assertEqual((test.ABS_TOL,test.REL_TOL,test.L2_TOL),(2e-5,2e-4,2e-4))
+  rows,files,requests=self.compare();self.assertEqual((len(rows),len(files),requests),(48,48,2));self.assertTrue(all(r['pass_budget'] for r in rows));self.assertEqual((test.ABS_TOL,test.REL_TOL,test.L2_TOL),(2e-5,2e-4,2e-4))
  def test_feedback_metadata(self):
   p=self.raw/'generation.json';p.write_text(p.read_text().replace('"generated": [2]','"generated": [3]'))
   with self.assertRaisesRegex(ValueError,'feedback'):self.compare()
@@ -41,6 +41,9 @@ class NumericGeneration(unittest.TestCase):
  def test_logit_error_fails_unchanged_gate(self):
   for r in range(2):(self.raw/f'run-{r}-pos-0-logits.f32le').write_bytes(bytes(8)+struct.pack('<f',1.)+bytes(8)+struct.pack('<f',.1)+bytes(127976))
   rows,_,_=self.compare();self.assertFalse(all(r['pass_budget'] for r in rows))
+ def test_intermediate_error_fails_even_with_correct_logits(self):
+  for r in range(2):(self.raw/f'run-{r}-pos-0-layer-21.f32le').write_bytes(struct.pack('<f',.1)+bytes(8188))
+  rows,_,_=self.compare();self.assertEqual(sum(not row['pass_budget'] for row in rows),2)
  def test_no_cpu_or_owner_leak(self):
   p=self.raw/'backend.json';original=json.loads(p.read_text())
   for key,value in [('CPU_arithmetic',1),('frees',15),('scheduler_forwarded',1),('CPU_arithmetic',False)]:

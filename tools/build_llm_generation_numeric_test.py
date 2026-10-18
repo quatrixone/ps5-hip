@@ -40,15 +40,14 @@ def compare_generation(raw, reference):
             raise ValueError("nonfinite generation boundary")
         if name.startswith("run-1-") and content != (raw / name.replace("run-1-", "run-0-")).read_bytes():
             raise ValueError("generation boundary reset differs")
-        if not name.endswith("-logits.f32le"):
-            continue
-        winners[name] = max(range(32000), key=lambda i: values[i])
+        if name.endswith("-logits.f32le"):
+            winners[name] = max(range(32000), key=lambda i: values[i])
         target = reference / name
         if target.is_symlink() or not target.is_file() or target.stat().st_size != size:
-            raise ValueError("generation reference logits")
-        wanted = struct.unpack("<32000f", target.read_bytes())
+            raise ValueError("generation reference boundary")
+        wanted = struct.unpack("<" + str(size // 4) + "f", target.read_bytes())
         if not all(math.isfinite(x) for x in wanted):
-            raise ValueError("nonfinite reference logits")
+            raise ValueError("nonfinite reference boundary")
         differences = [abs(x-y) for x,y in zip(values,wanted)]
         bad = sum(d > ABS_TOL + REL_TOL * abs(y) for d,y in zip(differences,wanted))
         relative = math.sqrt(sum(d*d for d in differences) / max(sum(y*y for y in wanted), 1e-30))
@@ -150,7 +149,7 @@ def build(cpu, model, reference, output, native_helper=False):
     (output / "comparison.json").write_text(json.dumps(rows, indent=2) + "\n")
     provenance.recheck(inputs)
     receipt = {"status": classification, "classification": "generation-host-HIP-numerical-comparison",
-               "gpu_executed": False, "native_executed": False, "native_helper": native_helper, "limits": ["Numerical HIP interpreter only; no GPU execution", "CPU numerical comparison covers logits; other captured boundaries are checked for size, finiteness and exact reset only"], "raw_files": len(files), "requests": requests, "inputs": inputs, "commands": commands,
+               "gpu_executed": False, "native_executed": False, "native_helper": native_helper, "limits": ["Numerical HIP interpreter only; no GPU execution", "CPU numerical comparison covers every layer, final normalization and complete logits; no native device arithmetic is established"], "raw_files": len(files), "requests": requests, "inputs": inputs, "commands": commands,
                "reference_receipt": reference_data["receipt"], "reference_sha256": reference_data["receipt_sha256"],
                "model": reference_data["model"], "tolerances": {"absolute": ABS_TOL, "relative": REL_TOL, "relative_l2": L2_TOL},
                "artifacts": {str(p.relative_to(output)): provenance.sha(p) for p in output.rglob("*") if p.is_file()}}

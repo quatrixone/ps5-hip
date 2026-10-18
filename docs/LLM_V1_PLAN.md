@@ -4,8 +4,10 @@ Reviewed: 2026-10-17. This is the authoritative first-release execution plan.
 M0, M1, the bounded prefix and the selected real Q4 first-layer sequence pass
 native validation. M3's full 22-layer native smoke, final normalization/logits
 and three actual decoder commits/reset now pass. Next implement short greedy
-generation with phase/request timing; retain M2 dense/extreme and long-context
-qualification. Use idle .40 for meaningful validation and push each validated
+generation with phase/request timing. Its production helper now passes all 384
+CPU layer/norm/logit comparisons offline; native profile packaging, linked image
+audit and controller binding remain before .40. Retain M2 dense/extreme and
+long-context qualification. Use idle .40 for meaningful validation and push each validated
 milestone to main.
 
 ## Outcome and scope
