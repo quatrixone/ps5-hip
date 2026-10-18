@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "classification": "supported-original-format-host-generation",
+  "source_commit": "c473730",
+  "model": "TinyLlama-1.1B-Chat-v1.0",
+  "format": "original safetensors plus original configuration/tokenizer sidecars",
+  "complete_tensors": 201,
+  "decoder_commits": 16,
+  "reset_runs": 2,
+  "boundary_files": 384,
+  "bitwise_equal_files": 384,
+  "max_absolute_error": 0,
+  "relative_l2_error": 0,
+  "fresh_weight_sha256": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+  "native_executed": false,
+  "gpu_executed": false,
+  "receipts": {
+    "results/original-short-comparison-v1/receipt.json": "0badbc07f2e4ea8b2b6cda24c0ba83abeab53901d7360e25ecee09dbde6c2991",
+    "results/original-short-comparison-v1/comparison.json": "7acdff85f95d48f76fde068c252ea25a334cc5636dbf7178cb3f617d98863d1a",
+    "results/original-short-oracle-v1/receipt.json": "0d2de9b166690fb0b6994fed376f1d4573712f81e4353959553c2dc55ad58855",
+    "build/llm-original-format-cpu-v1/receipt.json": "22e080dcbb66f039be1b22ccb0849888e931cb20a4a5603526c19f49ac07dfeb"
+  },
+  "limits": [
+    "Host CPU comparison only; native original-format deployment and execution remain unqualified.",
+    "Fixed TinyLlama single-safetensors model and short profile; not arbitrary model or PyTorch checkpoint support."
+  ]
+}

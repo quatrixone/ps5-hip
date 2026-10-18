@@ -3,7 +3,7 @@
 Main `6a7b941` ships the bounded reader, mapping, tokenizer metadata, target-byte
 reader and callback. The optional-loader CPU producer, production generation
 runner and Make wiring are now integrated. Their first complete supported-producer
-CPU build and portable tests pass; full-model comparison is in progress. Native
+CPU build, portable tests and full-model comparison pass. Native
 original-format loading remains unqualified.
 Use the source checkout and Linux/WSL prerequisites in `SOURCE_ONLY_REBUILD.md`;
 no `.local` script or artifact is a build dependency.
@@ -67,6 +67,10 @@ serve as an independent GGUF oracle. Neither successful compilation nor the
 small tests substitutes for this run.
 
 ## Proven and still missing
+
+The supported Make comparison now passes with fresh weight hashes and a fresh CPU
+build: complete201 and all384 boundaries bitwise-equal across two reset runs.
+See `../evidence/offline-supported-original-model-generation.json`.
 
 Scratch host evidence already loaded all 201 tensors and compared every prepared
 byte (619,094,016) exactly; short decoding also matched all 384 boundaries bitwise.

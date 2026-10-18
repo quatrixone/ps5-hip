@@ -3,7 +3,7 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
-## Original-format inference: components shipped, production qualification pending
+## Original-format inference: supported host generation passes, native pending
 
 Main `6a7b941` contains bounded safetensors/index readers, strict TinyLlama
 mapping, original tokenizer metadata, row conversion and the tensor callback.
@@ -18,8 +18,9 @@ They do not qualify the supported production build or the PS5 path.
 
 The shared optional-loader fix, original-mode producer, Make targets and CPU
 ccache support are integrated. The fresh supported CPU build and eight portable
-test scripts pass; fresh short-generation oracle/comparison qualification is running.
-See `evidence/offline-supported-original-format-build.json`.
+test scripts pass. The supported Make comparison also passes with fresh weight
+hashes: complete201 and all384 boundaries bitwise-equal over16 commits/two resets.
+See `evidence/offline-supported-original-model-generation.json`.
 The original runtime consumes safetensors/config/tokenizers; GGUF is only the
 independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUILD.md)
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch

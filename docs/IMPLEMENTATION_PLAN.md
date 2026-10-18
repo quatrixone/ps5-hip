@@ -11,9 +11,10 @@ Keep that proof separate from supported-producer and native acceptance.
 
 1. Integrated: shared optional-tensor loader fix, source-bound CPU producer,
    original-format Make targets and CPU ccache; upstream checkout stays clean.
-2. Run the portable Make suite from a fresh CPU build directory. Capture a fresh
-   short GGUF oracle and run the production original-source mode with fresh
-   weight authentication, exact numerical gates and two reset rounds.
+2. Passed: fresh CPU build, portable Make suite, fresh GGUF oracle and supported
+   original-source generation with fresh weight hashes; complete201 and all384
+   boundaries bitwise-equal across two reset rounds. See
+   `evidence/offline-supported-original-model-generation.json`.
 3. Qualify the original metadata/callback path in the native app with bounded
    allocation, complete201, upload/read failures and clean ownership; then run
    the existing short decoder acceptance profile on available .40.
