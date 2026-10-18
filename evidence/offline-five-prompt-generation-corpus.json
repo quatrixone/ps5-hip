@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-five-prompt-generation-corpus",
+  "date": "2026-10-18",
+  "base_commit": "3ea3209eba3af5f9c76c793b7cd97c07a0633254",
+  "cpu_reference": {
+    "receipt": "results/m4-generation-corpus-reference-v2/receipt.json",
+    "requests": 272,
+    "layers_per_commit": 22,
+    "logits_per_commit": 32000,
+    "raw_files": 6528,
+    "raw_bytes": 86065152,
+    "metadata_files": 11,
+    "cases": {
+      "story": {
+        "requests": 40,
+        "raw_files": 960,
+        "raw_bytes": 12656640,
+        "prompt_tokens": [
+          1,
+          9038,
+          2501,
+          263,
+          931
+        ],
+        "generated": [
+          29892,
+          727,
+          471,
+          263,
+          4123,
+          7826,
+          4257,
+          365,
+          2354,
+          29889,
+          2296,
+          10600,
+          297,
+          263,
+          2319,
+          5720
+        ],
+        "stop": "step_limit",
+        "text_hex": "2c20746865726520776173206120796f756e67206769726c206e616d6564204c696c792e20536865206c6976656420696e206120736d616c6c2076696c6c616765"
+      },
+      "science": {
+        "requests": 42,
+        "raw_files": 1008,
+        "raw_bytes": 13289472,
+        "prompt_tokens": [
+          1,
+          450,
+          14744,
+          338,
+          7254,
+          1363
+        ],
+        "generated": [
+          372,
+          29915,
+          29879,
+          7254,
+          29889,
+          13,
+          13,
+          29933,
+          1463,
+          373,
+          278,
+          1426,
+          5518,
+          2038,
+          29892,
+          5706
+        ],
+        "stop": "step_limit",
+        "text_hex": "206974277320626c75652e0a0a4261736564206f6e207468652074657874206d6174657269616c2061626f76652c2067656e6572617465"
+      },
+      "arithmetic": {
+        "requests": 66,
+        "raw_files": 1584,
+        "raw_bytes": 20883456,
+        "prompt_tokens": [
+          1,
+          2866,
+          14150,
+          445,
+          5665,
+          29901,
+          29871,
+          29906,
+          29892,
+          29871,
+          29946,
+          29892,
+          29871,
+          29953,
+          29892,
+          29871,
+          29947,
+          29892
+        ],
+        "generated": [
+          29871,
+          29896,
+          29900,
+          29892,
+          29871,
+          29896,
+          29906,
+          29892,
+          29871,
+          29896,
+          29946,
+          29892,
+          29871,
+          29896,
+          29953,
+          29892
+        ],
+        "stop": "step_limit",
+        "text_hex": "2031302c2031322c2031342c2031362c"
+      },
+      "structured": {
+        "requests": 68,
+        "raw_files": 1632,
+        "raw_bytes": 21516288,
+        "prompt_tokens": [
+          1,
+          830,
+          24044,
+          363,
+          263,
+          658,
+          2142,
+          310,
+          18423,
+          29901,
+          13,
+          797,
+          29887,
+          1127,
+          10070,
+          29901,
+          13,
+          29896,
+          29889
+        ],
+        "generated": [
+          29871,
+          29896,
+          29871,
+          29896,
+          29914,
+          29906,
+          2723,
+          567,
+          599,
+          29899,
+          15503,
+          4220,
+          1652,
+          473,
+          13,
+          29906
+        ],
+        "stop": "step_limit",
+        "text_hex": "203120312f32206375707320616c6c2d707572706f736520666c6f75720a32"
+      },
+      "unicode": {
+        "requests": 56,
+        "raw_files": 1344,
+        "raw_bytes": 17719296,
+        "prompt_tokens": [
+          1,
+          8407,
+          274,
+          28059,
+          29892,
+          9932,
+          1153,
+          535,
+          371,
+          1597,
+          298,
+          6844,
+          29901
+        ],
+        "generated": [
+          13,
+          13,
+          23572,
+          707,
+          1597,
+          15096,
+          9577,
+          13052,
+          2016,
+          634,
+          9577,
+          6079,
+          904,
+          2608,
+          1318,
+          29889
+        ],
+        "stop": "step_limit",
+        "text_hex": "0a0a4d617269652065737420756e652066656d6d65207472c3a87320696e74656c6c6967656e7465206574207472c3a873206269656e20c3a96c6576c3a9652e"
+      }
+    },
+    "reset_equality": "All captured float bytes and generation histories repeat exactly within each case"
+  },
+  "production_helper": {
+    "receipt": "results/m4-corpus-native-helper-v1/receipt.json",
+    "modes": [
+      "sequence",
+      "smoke",
+      "generation",
+      "generation-eos",
+      "corpus",
+      "corpus-eos"
+    ],
+    "requests_per_mode": {
+      "sequence": 514,
+      "smoke": 3,
+      "generation": 16,
+      "generation-eos": 10,
+      "corpus": 272
+    },
+    "corpus_model_instances": 1,
+    "corpus_resets": 10,
+    "sanitizers": "ASan/UBSan passed; prebuilt CPU libraries not instrumented",
+    "numerical_verified": false,
+    "verification": "Input-dependent mock logits verify live feedback, exact case inventory, reset and balanced ownership; strict corpus EOS and clock regression rejection pass"
+  },
+  "tests": [
+    {
+      "command": "python3 -m unittest discover -s tests -p \"*generation*_test.py\" -q",
+      "methods": 55,
+      "status": "PASS"
+    },
+    {
+      "command": "python3 tests/llm_prefix_make_test.py",
+      "methods": 17,
+      "status": "PASS"
+    }
+  ],
+  "initial_attempt": {
+    "path": "results/m4-generation-corpus-reference-v1",
+    "status": "REJECTED",
+    "reason": "Original science instruction produced EOS before 16 tokens; strict acceptance rejected it. Retained raw attempt. Continuation prompts then selected; EOS and numerical gates were not weakened."
+  },
+  "independent_review": "Native helper diff reviewed by next_generation_gate; no defect found",
+  "inputs": {
+    "ports/ggml/generation_cases.def": "fdd4727a8d51dd5360f1e7d0be3f672f3b2c4dc162d0ee558e9c573dbc5d4e57",
+    "ports/ggml/native_full.h": "c29ef2bd335269535569844e13ba214aa6bddc32be11ec155943c66d876e009e",
+    "tests/llm_generation_reference.cpp": "e32f19a21a75555a38c5a229ad53da962e7792b663730d2064b5ababb437ff9e",
+    "tools/build_llm_generation_reference.py": "e86ec188c115c1922bc6d760ec781327243d5262811a45076da4346000d04193",
+    "tests/llm_generation_reference_test.py": "d2b9568d8dfaae1a222d27e134e1162358e925333910a8232638cd7dd63ca31f",
+    "tests/llm_native_full_test.cpp": "f547fbeda2e19fbd588b1d49f32dcb7ea65b1c929894c4d2d309591663cdfaed",
+    "tests/llm_native_generation_numeric_test.cpp": "23b71edf8fbabe358fc4b361ddc6cc84f4cc43f83bece2fafba2cd800921f3f7",
+    "tools/build_llm_full_backend_test.py": "a11fc5793ea22082d2f83dfce07c18e00873a4922690f940468def1d842bc37d",
+    "tools/build_llm_generation_numeric_test.py": "eab3a28845483d26b0298ba00feb87e037ee3c5c95717696dc2af92ef7c9c846",
+    "tests/llm_generation_numeric_test.py": "cea915f715860441e4722b29093e722f1f03d1a0907a8f3c932659fdec703e1d",
+    "Makefile": "60dd8e42eefbc1e30655a8434dc2dee2722c918c82277ca01755a87511fddb5a",
+    "tests/llm_prefix_make_test.py": "d19d99a1b1931f0c7b275ea23479f8b16c87bb08b8d0268449a550ec83694d88"
+  },
+  "provenance": {
+    "results/m4-generation-corpus-reference-v2/receipt.json": "642365a89706ad09f6d1fcea5a081f27e16c6878d1e38d396c85066629d6c32c",
+    "results/m4-generation-corpus-reference-v2/summary.json": "3fc04f1709f3a1b73bc21333a8efd9c48f22d5654e031d49cd2302e31d9fbe3f",
+    "results/m4-generation-corpus-reference-v2/capture.stdout": "22af8bb017757999fcdd9c1ccdcf7cda1bf28af7f9a31e3a3262969fddaf040c",
+    "results/m4-generation-corpus-reference-v2/commands.json": "316d04474cbfe4338ce3ee6ff999102d4570009d6cd17323970bdfbb9cf8092f",
+    "results/m4-corpus-native-helper-v1/receipt.json": "cf576056ddaf9dcd02c2a12313cc9f21a42dcfc0c404904d09b408b9d9e1425d",
+    "results/m4-corpus-native-helper-v1/corpus.stdout": "8449b72bb4d38dc63b02f57d33eeee31e8c5b41a120a1ed73b3a5390dce5111c",
+    "results/m4-corpus-native-helper-v1/corpus-eos.stderr": "587372a8aef46b72b17ff4c27e94d2f0ce2f5f4f284204150ee67a68005338af",
+    "results/m4-generation-corpus-reference-v1/commands.json": "ca45ac053ae86c9e8a21c9aef0da1e39aea662d18b381ed8cd3cd9f81b421958",
+    "results/m4-generation-corpus-reference-v1/capture.stderr": "3a0414e2fb8b916d95d133d9d71519f6664ee43d4ff83ad4173dd7fdd2f5dba0",
+    ".local/m4-corpus-generation-regression.log": "d26d1fbe28df872b6eafb25be24365c11a842ce2e3456ca60f6e283fdfda1dac"
+  },
+  "console_contact": false,
+  "native_package_built": false,
+  "gpu_corpus_qualified": false,
+  "limits": [
+    "CPU oracle and mocked transport only; actual HIP numerical corpus comparison pending.",
+    "Native title writer, asset/profile/image audit, transcript/readback controls and bounded deadlines require corpus integration before console validation.",
+    "Short installed generation baseline remains historical; no consumed candidate replayed."
+  ]
+}

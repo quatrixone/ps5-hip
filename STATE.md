@@ -3,6 +3,33 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## M4 five-prompt CPU corpus and production-helper transport pass
+
+`results/m4-generation-corpus-reference-v2` passes real TinyLlama CPU capture:
+five fixed continuation prompts, 16 generated tokens each, two reset rounds,
+272 actual decoder commits, 6,528 float outputs / 86,065,152 bytes plus 11 metadata
+files. Every layer, normalization and logits boundary repeats bitwise within
+each case. Shared cases are in `ports/ggml/generation_cases.def`; Make exposes
+`llm-generation-corpus-reference` with a separate output directory. Existing CPU
+libraries and model were reused. The v1 science instruction stopped at EOS and
+was correctly rejected; preserve that failed attempt and its raw evidence.
+
+The production helper implements corpus profile 3 with one resident model/context
+and case-specific paths/logs. `results/m4-corpus-native-helper-v1` passes changing
+mock-logit feedback, ten resets, one created/freed instance, exact file inventory,
+balanced ownership, EOS rejection and clock rejection under ASan/UBSan. Sequence,
+smoke and short-generation regressions also pass. This mock does no tensor math.
+55 generation test methods and 17 Make tests pass; independent native-helper
+review found no defect. See `evidence/offline-five-prompt-generation-corpus.json`.
+
+Next integrate corpus in the HIP numerical builder/comparator and strict transcript
+parser, then run the actual production helper against the CPU oracle offline.
+The numeric builder currently rejects corpus explicitly. After that pass, extend
+native title writer/selection, asset profile, image audit, frozen readback inventory
+and bounded application/capture deadlines. Only then build one fresh native
+candidate and validate on idle .40. No console contact or native package build
+occurred for this milestone; the installed short-generation baseline is unchanged.
+
 ## Native-client duplicate identity reads removed
 
 Initial artifact, object and tool comparisons now reuse the native client's

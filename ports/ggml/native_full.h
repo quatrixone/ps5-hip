@@ -7,16 +7,28 @@
 #include "generation.h"
 
 namespace m0 {
-enum class NativeFullProfile { sequence, smoke, generation };
+enum class NativeFullProfile { sequence, smoke, generation, corpus };
+struct NativeGenerationCase {const char* id;const char* prompt;};
+inline constexpr NativeGenerationCase native_generation_cases[]={
+#define PS5HIP_GENERATION_CASE(id,prompt) {id,prompt},
+#include "generation_cases.def"
+#undef PS5HIP_GENERATION_CASE
+};
+static_assert(sizeof(native_generation_cases)/sizeof(native_generation_cases[0])==5);
 struct NativeFullResult {FullStatistics full;unsigned files;size_t bytes;};
 struct NativeFullClock {
- uint64_t previous=0;
+ uint64_t previous=0;std::string case_tag;
  uint64_t now(){timespec t{};require(clock_gettime(CLOCK_MONOTONIC,&t)==0&&t.tv_sec>=0&&t.tv_nsec>=0&&t.tv_nsec<1000000000L&&uint64_t(t.tv_sec)<=UINT64_MAX/1000000000ULL-1);
   const uint64_t value=uint64_t(t.tv_sec)*1000000000ULL+uint64_t(t.tv_nsec);require(value>=previous);previous=value;return value;}
- void report(const char* scope,uint64_t begin,unsigned run=0,unsigned position=0){const auto end=now();std::printf("M4_GEN TIMING scope=%s run=%u position=%u begin_ns=%llu end_ns=%llu elapsed_ns=%llu\n",scope,run,position,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)(end-begin));}
+ void report(const char* scope,uint64_t begin,unsigned run=0,unsigned position=0){const auto end=now();std::printf("M4_GEN TIMING%s scope=%s run=%u position=%u begin_ns=%llu end_ns=%llu elapsed_ns=%llu\n",case_tag.c_str(),scope,run,position,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)(end-begin));}
 };
 struct NativeFullSink {
  PrefixWrite write;void* user;PrefixLogSync sync;unsigned run=0,position=0,files=0;size_t bytes=0;
+ const char* case_id=nullptr;
+ void output(const char* name,const void* data,size_t size){
+  if(!case_id){write(name,data,size,user);return;}
+  char path[128];const int n=std::snprintf(path,sizeof(path),"%s/%s",case_id,name);require(n>0&&size_t(n)<sizeof(path));write(path,data,size,user);
+ }
  bool all=false;unsigned seen=0;int last_boundary=-1;NativeFullClock* clock=nullptr;uint64_t readback_ns=0;
  std::vector<float> values=std::vector<float>(32000);
  bool checkpoint() const{return all||run||position==0||position==1||position==255||position==256||position==511;}
@@ -36,20 +48,24 @@ struct NativeFullSink {
   ggml_backend_tensor_get(t,s.values.data(),0,size);for(size_t i=0;i<size/4;++i)require(std::isfinite(s.values[i]));
   char stage[24];if(index<22)std::snprintf(stage,sizeof(stage),"layer-%d",index);else std::snprintf(stage,sizeof(stage),"%s",index==22?"norm":"logits");
   char name[96];const int n=std::snprintf(name,sizeof(name),"run-%u-pos-%u-%s.f32le",s.run,s.position,stage);require(n>0&&size_t(n)<sizeof(name));
-  s.write(name,s.values.data(),size,s.user);++s.files;s.bytes+=size;
-  std::printf("M3_FULL RAW file=%s bytes=%zu synced=true\n",name,size);require(s.sync());
+  s.output(name,s.values.data(),size);++s.files;s.bytes+=size;
+  std::printf("M3_FULL RAW file=%s%s%s bytes=%zu synced=true\n",s.case_id?s.case_id:"",s.case_id?"/":"",name,size);require(s.sync());
   if(s.clock){const auto elapsed=s.clock->now()-began;require(elapsed<=UINT64_MAX-s.readback_ns);s.readback_ns+=elapsed;}
   return true;
  }
 };
 struct NativeFullGenerationData {unsigned requests;size_t metadata_bytes;};
-inline NativeFullGenerationData run_full_generation(llama_model* model,llama_context* context,NativeFullSink& sink,NativeFullClock& clock,ModelGateLog& logs){
+inline NativeFullGenerationData run_full_generation(llama_model* model,llama_context* context,NativeFullSink& sink,NativeFullClock& clock,ModelGateLog& logs,const NativeGenerationCase* selected=nullptr){
  unsigned actual_requests=0;size_t metadata_bytes=0;const auto log_sync=sink.sync;
+ const unsigned budget=selected?16:4;sink.case_id=selected?selected->id:nullptr;
+ if(selected){require(*selected->id);for(const char* c=selected->id;*c;++c)require(*c>='a'&&*c<='z');}
+ clock.case_tag=selected?std::string(" case=")+selected->id:"";
   sink.all=true;sink.clock=&clock;const auto* vocab=llama_model_get_vocab(model);require(vocab&&llama_vocab_n_tokens(vocab)==32000);
-  const char* prompt="Once upon a time";int32_t prompt_tokens[32];const int count=llama_tokenize(vocab,prompt,int(std::strlen(prompt)),prompt_tokens,32,true,false);require(count>0&&count<=32);
+  const char* prompt=selected?selected->prompt:"Once upon a time";int32_t prompt_tokens[32];const int count=llama_tokenize(vocab,prompt,int(std::strlen(prompt)),prompt_tokens,32,true,false);require(count>0&&count<=32);
   auto ids=[](const int32_t* tokens,size_t n){std::string text="[";for(size_t i=0;i<n;++i){if(i)text+=',';text+=std::to_string(tokens[i]);}return text+"]";};
   auto hex=[](const char* bytes,size_t n){static const char* digits="0123456789abcdef";std::string text;for(size_t i=0;i<n;++i){const auto c=static_cast<unsigned char>(bytes[i]);text+=digits[c>>4];text+=digits[c&15];}return text;};
-  std::string evidence="{\"schema\":1,\"prompt\":\"Once upon a time\",\"add_special\":true,\"parse_special\":false,\"max_new_tokens\":4,\"vocab_size\":32000,\"prompt_tokens\":"+ids(prompt_tokens,size_t(count))+",\"eog_tokens\":[";bool first_eog=true;
+  std::string escaped_prompt;for(const char* c=prompt;*c;++c){if(*c=='\n')escaped_prompt+="\\n";else{if(*c=='"'||*c=='\\')escaped_prompt+='\\';escaped_prompt+=*c;}}
+  std::string evidence="{\"schema\":1,\"prompt\":\""+escaped_prompt+"\",\"add_special\":true,\"parse_special\":false,\"max_new_tokens\":"+std::to_string(budget)+",\"vocab_size\":32000,\"prompt_tokens\":"+ids(prompt_tokens,size_t(count))+",\"eog_tokens\":[";bool first_eog=true;
   for(int token=0;token<32000;++token)if(llama_vocab_is_eog(vocab,token)){if(!first_eog)evidence+=',';evidence+=std::to_string(token);first_eog=false;}evidence+="],\"runs\":[";
   std::string steps;ps5hip_generation::Result first;
   for(unsigned run=0;run<2;++run){
@@ -62,30 +78,32 @@ inline NativeFullGenerationData run_full_generation(llama_model* model,llama_con
     require(status==0&&!logs.unexpected.load()&&llama_memory_seq_pos_min(llama_get_memory(context),0)==0&&llama_memory_seq_pos_max(llama_get_memory(context),0)==position);
     require(sink.files-before==24&&sink.seen==0xffffffu&&sink.last_boundary==23);const float* logits=llama_get_logits_ith(context,-1);require(logits&&std::memcmp(logits,sink.values.data(),128000)==0);
     const auto end=clock.now(),elapsed=end-begin,readback=sink.readback_ns-before_readback;require(readback<=elapsed&&elapsed<=UINT64_MAX-decode_ns);decode_ns+=elapsed;
-    std::printf("M4_GEN DECODE run=%u position=%d token=%d committed_position=%d layers=22 logits=32000 begin_ns=%llu end_ns=%llu elapsed_ns=%llu readback_ns=%llu inclusive_readback=true\n",run,position,token,position,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)elapsed,(unsigned long long)readback);require(log_sync());
+    std::printf("M4_GEN DECODE%s run=%u position=%d token=%d committed_position=%d layers=22 logits=32000 begin_ns=%llu end_ns=%llu elapsed_ns=%llu readback_ns=%llu inclusive_readback=true\n",clock.case_tag.c_str(),run,position,token,position,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)elapsed,(unsigned long long)readback);require(log_sync());
     steps+="{\"run\":"+std::to_string(run)+",\"position\":"+std::to_string(position)+",\"token\":"+std::to_string(token)+",\"status\":0,\"committed_position\":"+std::to_string(position)+"}\n";++actual_requests;return {logits,32000};
    };
-   const auto result=ps5hip_generation::generate(prompt_tokens,size_t(count),4,decode,[&](int32_t token){return llama_vocab_is_eog(vocab,token);});
-   const auto end=clock.now();require(end-began>=decode_ns);std::printf("M4_GEN RUN_TIME run=%u begin_ns=%llu end_ns=%llu elapsed_ns=%llu decode_ns=%llu scheduling_sampling_log_ns=%llu\n",run,(unsigned long long)began,(unsigned long long)end,(unsigned long long)(end-began),(unsigned long long)decode_ns,(unsigned long long)(end-began-decode_ns));require(log_sync());
+   const auto result=ps5hip_generation::generate(prompt_tokens,size_t(count),budget,decode,[&](int32_t token){return llama_vocab_is_eog(vocab,token);});
+   require(!selected||(result.generated_count==16&&result.stop==ps5hip_generation::StopReason::step_limit));
+   const auto end=clock.now();require(end-began>=decode_ns);std::printf("M4_GEN RUN_TIME%s run=%u begin_ns=%llu end_ns=%llu elapsed_ns=%llu decode_ns=%llu scheduling_sampling_log_ns=%llu\n",clock.case_tag.c_str(),run,(unsigned long long)began,(unsigned long long)end,(unsigned long long)(end-began),(unsigned long long)decode_ns,(unsigned long long)(end-began-decode_ns));require(log_sync());
    if(!run)first=result;else require(result.processed==first.processed&&result.generated==first.generated&&result.processed_count==first.processed_count&&result.generated_count==first.generated_count&&result.stop==first.stop);
    if(run)evidence+=',';evidence+="{\"run\":"+std::to_string(run)+",\"processed\":"+ids(result.processed.data(),result.processed_count)+",\"generated\":"+ids(result.generated.data(),result.generated_count)+",\"stop\":\""+(result.stop==ps5hip_generation::StopReason::eos?"eos":"step_limit")+"\",\"pieces_hex\":[";
    std::string text;for(size_t i=0;i<result.generated_count;++i){char piece[4096];const int n=llama_token_to_piece(vocab,result.generated[i],piece,sizeof(piece),0,true);require(n>=0&&size_t(n)<=sizeof(piece));const auto encoded=hex(piece,size_t(n));if(i)evidence+=',';evidence+='\"';evidence+=encoded;evidence+='\"';text+=encoded;}
-   evidence+="],\"text_hex\":\""+text+"\"}";std::printf("M4_GEN RESULT run=%u processed=%zu generated=%zu stop=%s text_hex=%s\n",run,result.processed_count,result.generated_count,result.stop==ps5hip_generation::StopReason::eos?"eos":"step_limit",text.c_str());require(log_sync());
+   evidence+="],\"text_hex\":\""+text+"\"}";std::printf("M4_GEN RESULT%s run=%u processed=%zu generated=%zu stop=%s text_hex=%s\n",clock.case_tag.c_str(),run,result.processed_count,result.generated_count,result.stop==ps5hip_generation::StopReason::eos?"eos":"step_limit",text.c_str());require(log_sync());
   }
-  evidence+="]}\n";sink.write("generation.json",evidence.data(),evidence.size(),sink.user);sink.write("steps.jsonl",steps.data(),steps.size(),sink.user);metadata_bytes=evidence.size()+steps.size();
-  std::printf("M4_GEN METADATA files=2 generation_bytes=%zu steps_bytes=%zu synced=true\n",evidence.size(),steps.size());require(log_sync());
+  evidence+="]}\n";sink.output("generation.json",evidence.data(),evidence.size());sink.output("steps.jsonl",steps.data(),steps.size());metadata_bytes=evidence.size()+steps.size();
+  std::printf("M4_GEN METADATA%s files=2 generation_bytes=%zu steps_bytes=%zu synced=true\n",clock.case_tag.c_str(),evidence.size(),steps.size());require(log_sync());
  return {actual_requests,metadata_bytes};
 }
 inline NativeFullResult run_native_full(const char* model_path,const std::array<const char*,6>& modules,
  PrefixWrite writer,void* writer_state,PrefixLogSync log_sync,void (*memory_snapshot)(const char*)=nullptr,
  NativeFullProfile profile=NativeFullProfile::sequence){
- require(model_path&&writer&&log_sync&&(profile==NativeFullProfile::sequence||profile==NativeFullProfile::smoke||profile==NativeFullProfile::generation));
- const bool smoke=profile==NativeFullProfile::smoke,generation=profile==NativeFullProfile::generation;
+ require(model_path&&writer&&log_sync&&(profile==NativeFullProfile::sequence||profile==NativeFullProfile::smoke||profile==NativeFullProfile::generation||profile==NativeFullProfile::corpus));
+ const bool smoke=profile==NativeFullProfile::smoke,generation=profile==NativeFullProfile::generation||profile==NativeFullProfile::corpus,corpus=profile==NativeFullProfile::corpus;
  NativeFullClock clock;uint64_t phase_begin=generation?clock.now():0;
  const unsigned requests=smoke?3:514,raw_files=smoke?72:168;
  const size_t raw_bytes=smoke?949248:2214912;
  const uint64_t nodes=smoke?2394:410172,launches=smoke?2199:376762;
- if(generation)std::puts("M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512");
+ if(corpus)std::puts("M4_GEN PROFILE name=greedy-corpus cases=5 runs=2 max_new_tokens=16 context=512");
+ else if(generation)std::puts("M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512");
  else std::printf("M3_FULL PROFILE name=%s requests=%u raw_files=%u raw_bytes=%zu\n",smoke?"smoke":"sequence",requests,raw_files,raw_bytes);require(log_sync());
  std::puts("M3_FULL PHASE load_begin");if(memory_snapshot)memory_snapshot("before_load");
  ModelGateLog logs;llama_log_set(ModelGateLog::callback,&logs);llama_backend_init();ggml_backend_register(registration());enable_full(modules);
@@ -102,7 +120,11 @@ inline NativeFullResult run_native_full(const char* model_path,const std::array<
  std::puts("M3_FULL PHASE context_complete");if(memory_snapshot)memory_snapshot("after_context");reset_statistics();
  unsigned actual_requests=0,metadata_files=0;size_t metadata_bytes=0;
  if(generation){
-  const auto generated=run_full_generation(model.get(),context.get(),sink,clock,logs);actual_requests=generated.requests;metadata_files=2;metadata_bytes=generated.metadata_bytes;
+  for(unsigned i=0;i<(corpus?5u:1u);++i){
+   const auto generated=run_full_generation(model.get(),context.get(),sink,clock,logs,corpus?&native_generation_cases[i]:nullptr);actual_requests+=generated.requests;metadata_files+=2;metadata_bytes+=generated.metadata_bytes;
+  }
+  sink.case_id=nullptr;clock.case_tag.clear();
+  if(corpus){std::string index="{\"schema\":1,\"profile\":\"corpus\",\"max_new_tokens\":16,\"cases\":[";for(unsigned i=0;i<5;++i){if(i)index+=',';index+='\"';index+=native_generation_cases[i].id;index+='\"';}index+="]}\n";sink.output("corpus.json",index.data(),index.size());++metadata_files;metadata_bytes+=index.size();std::printf("M4_GEN CORPUS cases=5 runs=2 max_new_tokens=16 index_bytes=%zu synced=true\n",index.size());require(log_sync());}
  }else{
  constexpr int32_t tokens[]={0,1,2,31999};
  for(unsigned run=0;run<2;++run){

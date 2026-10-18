@@ -25,6 +25,7 @@ help:
 	@echo 'make llm-deps-fetch  Fetch the optional locked standalone inference client'
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
 	@echo 'make llm-generation-reference  Capture short greedy CPU generation and reset references'
+	@echo 'make llm-generation-corpus-reference  Capture five prompts with 16 generated tokens and reset'
 	@echo 'make llm-generation-numeric-tests  Compare live HIP-interpreted greedy feedback to CPU (no GPU execution)'
 	@echo 'make llm-native-generation-tests  Qualify the native helper under host HIP interpretation (no PS5 execution)'
 	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
@@ -571,15 +572,20 @@ llm-full-reference: llm-deps-fetch
 
 LLM_FULL_NUMERIC_TEST_DIR ?= results/llm-full-numeric-host-tests
 LLM_GENERATION_REFERENCE_DIR ?= results/llm-generation-reference
+LLM_GENERATION_REFERENCE_PROFILE ?= short
+LLM_GENERATION_CORPUS_REFERENCE_DIR ?= results/llm-generation-corpus-reference
 LLM_GENERATION_NUMERIC_TEST_DIR ?= results/llm-generation-numeric-host-tests
 LLM_NATIVE_GENERATION_TEST_DIR ?= results/llm-native-generation-numeric-host-tests
-.PHONY: llm-generation-reference llm-generation-numeric-tests
+.PHONY: llm-generation-reference llm-generation-corpus-reference llm-generation-numeric-tests
+llm-generation-corpus-reference: LLM_GENERATION_REFERENCE_PROFILE = corpus
+llm-generation-corpus-reference: LLM_GENERATION_REFERENCE_DIR = $(LLM_GENERATION_CORPUS_REFERENCE_DIR)
+llm-generation-corpus-reference: llm-generation-reference
 llm-generation-reference: llm-deps-fetch
 	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
 	@if ! test -f "$(LLM_FULL_GRAPH_MODEL)"; then if test "$(LLM_FULL_GRAPH_MODEL)" = "$(LLM_GGUF_DIR)/tinyllama-q4_0.gguf"; then $(MAKE) llm-model-fetch && $(MAKE) llm-model-convert; else echo "Missing selected LLM_FULL_GRAPH_MODEL: $(LLM_FULL_GRAPH_MODEL)" >&2; exit 1; fi; fi
 	$(PYTHON) tests/llm_generation_test.py
 	$(PYTHON) tests/llm_generation_reference_test.py
-	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_GENERATION_REFERENCE_DIR)"
+	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_GENERATION_REFERENCE_DIR)" --profile "$(LLM_GENERATION_REFERENCE_PROFILE)"
 
 llm-generation-numeric-tests: llm-deps-fetch
 	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi

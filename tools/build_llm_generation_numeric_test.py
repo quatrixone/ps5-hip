@@ -77,6 +77,8 @@ def build(cpu, model, reference, output, native_helper=False):
     if output.exists() or not output.is_relative_to(ROOT / "results"):
         raise ValueError("fresh results output required")
     reference_data, inputs = authenticate_generation_reference(reference)
+    if reference_data.get('profile', 'short') != 'short':
+        raise ValueError('corpus numerical execution requires the pending corpus helper integration')
     inputs = dict(inputs)
     for path, digest in provenance.cpu_inputs(cpu, model).items():
         provenance.merge(inputs, path, digest)

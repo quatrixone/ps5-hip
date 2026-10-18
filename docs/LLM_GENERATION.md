@@ -61,7 +61,7 @@ native generation and smoke candidates; never replay either. This short profile
 does not replace five-prompt/16-step, 64-step, 512-token, EOS and repeated-request
 release gates in `LLM_V1_PLAN.md`, nor original-format loading requirements.
 
-The next implementation uses a fixed source-bound five-case table shared by the
+The corpus implementation uses a fixed source-bound five-case table shared by the
 CPU oracle, numerical harness and production helper. Each case requests 16 new
 tokens and repeats after KV/backend reset; preserve the short case as regression
 coverage. Bind case/run/position to all boundary files, token histories and
@@ -72,6 +72,35 @@ corpus offline before building and running one native image. A naturally early
 EOS cannot silently satisfy the required 16-token case. Later use the same fixed
 case mechanism for 64 tokens and combined prompt/output length 512; that combined
 limit ends at decoder position 510 because the final emitted token is not decoded.
+
+The fixed table is now `ports/ggml/generation_cases.def`. Capture its CPU oracle
+with `make llm-generation-corpus-reference`; select a fresh output using
+`LLM_GENERATION_CORPUS_REFERENCE_DIR`. Existing `LLM_CPU_BUILD_DIR` and
+`LLM_FULL_GRAPH_MODEL` inputs are reused, with no CPU library rebuild when their
+receipts exist. The short target and its output directory remain the default.
+The corpus contains story, science, arithmetic, structured text and non-ASCII
+continuations, each with 16 generated tokens and two reset rounds. Output is
+`raw/<case-id>/` with a source-bound `corpus.json` index, and the total reference
+artifact size is capped at 128 MiB.
+
+The production helper exposes corpus profile 3 with one resident model/context,
+case-specific output paths and logs, and strict early-EOS rejection. The native
+title's writer, image audit, aggregate assets, numerical harness builder,
+transcript parser and console budgets still need corpus integration. The current
+numerical builder explicitly rejects a corpus reference so it cannot accidentally
+run the four-token harness against it. This implementation is not a console or
+GPU numerical qualification of the corpus.
+
+The first accepted CPU corpus is `results/m4-generation-corpus-reference-v2`:
+272 actual decoder commits, 6,528 float files (86,065,152 bytes), exact reset
+equality in all five cases, and 11 metadata files. The first attempt's science
+instruction produced early EOS and was rejected; its evidence remains in v1.
+Continuation prompts were selected for the 16-token gate without weakening EOS
+or numerical checks. `results/m4-corpus-native-helper-v1` passes mocked transport
+and ownership checks with input-dependent feedback under ASan/UBSan. These are
+separate CPU arithmetic and mocked transport results; HIP numerical equivalence
+and console corpus acceptance remain pending. See
+`../evidence/offline-five-prompt-generation-corpus.json`.
 
 ## Historical first offline outcome
 

@@ -8,6 +8,13 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import build_llm_generation_numeric_test as test
 
 class NumericGeneration(unittest.TestCase):
+ def test_corpus_not_silently_run_through_short_harness(self):
+  from unittest.mock import patch
+  with patch.object(test,'ROOT',self.root),patch.object(test,'authenticate_generation_reference',return_value=({'profile':'corpus'},{})),patch.object(test.provenance,'cpu_inputs') as cpu:
+   with self.assertRaisesRegex(ValueError,'corpus numerical execution'):
+    test.build(self.root/'cpu',self.root/'model',self.ref,self.root/'results/output')
+   cpu.assert_not_called()
+  self.assertFalse((self.root/'results/output').exists())
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
   self.root=Path(self.tmp.name);self.raw=self.root/'raw';self.ref=self.root/'reference';self.raw.mkdir();self.ref.mkdir()

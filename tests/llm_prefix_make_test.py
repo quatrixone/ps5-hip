@@ -135,5 +135,14 @@ class FullExecutionMake(unittest.TestCase):
   text=self.run_make('llm-full-dispatch-tests','LLM_FULL_GRAPH_TRACE_DIR=results/selected-full-graph','LLM_FULL_DISPATCH_TEST_DIR=results/selected-dispatch')
   self.assertIn('--graph "results/selected-full-graph/raw/run-0-pos-0.graph.json" --output "results/selected-dispatch"',text)
   self.assertIn('tools/build_llm_full_dispatch_test.py',text)
+ def test_generation_corpus_has_separate_output_and_preserves_short_default(self):
+  short=self.run_make('llm-generation-reference')
+  self.assertIn('--output "results/llm-generation-reference" --profile "short"',short)
+  with tempfile.TemporaryDirectory() as folder:
+   model=Path(folder)/'selected.gguf';model.touch()
+   corpus=self.run_make('llm-generation-corpus-reference','LLM_GENERATION_CORPUS_REFERENCE_DIR=results/selected-corpus','LLM_CPU_BUILD_DIR=build/selected-cpu','LLM_FULL_GRAPH_MODEL='+str(model))
+  self.assertIn('--output "results/selected-corpus" --profile "corpus"',corpus)
+  self.assertIn('--cpu-build "build/selected-cpu" --model "'+str(model)+'"',corpus)
+  self.assertNotIn('build_llm_native_app.py',corpus);self.assertNotIn('source_console.py',corpus)
 
 if __name__=='__main__':unittest.main()

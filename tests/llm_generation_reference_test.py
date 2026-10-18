@@ -91,4 +91,50 @@ class Reference(unittest.TestCase):
   ref.final_artifact_check(self.root,receipt,before,digest)
   raw=self.root/'run-0-pos-0-logits.f32le';raw.write_bytes(b'X'+raw.read_bytes()[1:])
   with self.assertRaisesRegex(ValueError,'changed during'):ref.final_artifact_check(self.root,receipt,before,digest)
+class Corpus(unittest.TestCase):
+ def test_fixed_cases_commands_and_profile_bounds(self):
+  cases=ref.corpus_cases();self.assertEqual(len(cases),5);self.assertTrue(any(not text.isascii() for _,text in cases))
+  short=ref.command_plan(Path('/out'),Path('/cpu'),Path('/model'))
+  corpus=ref.command_plan(Path('/out'),Path('/cpu'),Path('/model'),'corpus')
+  self.assertEqual(corpus['capture'],short['capture']+['corpus'])
+  self.assertEqual(corpus['compile'],short['compile'])
+  self.assertEqual(ref.profile_policy('corpus')[2],128*1024*1024)
+  with self.assertRaisesRegex(ValueError,'profile'):ref.command_plan(Path('/out'),Path('/cpu'),Path('/model'),'unknown')
+ def test_corpus_all_boundaries_and_rejections(self):
+  import os
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp)/'raw';root.mkdir();cases=ref.corpus_cases()
+   index=dict(schema=1,profile='corpus',max_new_tokens=16,cases=[key for key,_ in cases])
+   (root/'corpus.json').write_text(json.dumps(index))
+   zeros=Path(tmp)/'zeros';zeros.write_bytes(bytes(8192))
+   for key,prompt in cases:
+    folder=root/key;folder.mkdir();steps=[];runs=[]
+    for run in range(2):
+     processed=[1]+list(range(3,18));generated=list(range(3,19))
+     runs.append(dict(run=run,processed=processed,generated=generated,stop='step_limit',pieces_hex=['61']*16,text_hex='61'*16))
+     for pos,token in enumerate(processed):
+      logits=bytearray(128000);struct.pack_into('<f',logits,(pos+3)*4,1)
+      (folder/f'run-{run}-pos-{pos}-logits.f32le').write_bytes(logits)
+      for stage in ref.STAGES[:-1]:os.link(zeros,folder/f'run-{run}-pos-{pos}-{stage}.f32le')
+      steps.append(dict(run=run,position=pos,token=token,status=0,committed_position=pos))
+    meta=dict(schema=1,prompt=prompt,add_special=True,parse_special=False,max_new_tokens=16,vocab_size=32000,prompt_tokens=[1],eog_tokens=[2],runs=runs)
+    (folder/'generation.json').write_text(json.dumps(meta));(folder/'steps.jsonl').write_text(''.join(json.dumps(v)+'\n' for v in steps))
+   summary=ref.validate(root,'corpus');self.assertEqual((summary['requests'],summary['raw_files'],summary['raw_bytes']),(160,3840,160*316416))
+   first=root/cases[0][0];p=first/'generation.json';original=p.read_text();meta=json.loads(original)
+   meta['prompt']='different';p.write_text(json.dumps(meta))
+   with self.assertRaisesRegex(ValueError,'metadata'):ref.validate(root,'corpus')
+   meta=json.loads(original);meta['eog_tokens']=[18];meta['runs'][0]['stop']='eos';p.write_text(json.dumps(meta))
+   with self.assertRaisesRegex(ValueError,'sixteen'):ref.validate(root,'corpus')
+   p.write_text(original);index['cases'].reverse();(root/'corpus.json').write_text(json.dumps(index))
+   with self.assertRaisesRegex(ValueError,'metadata'):ref.validate(root,'corpus')
+   index['cases'].reverse();index['schema']=True;(root/'corpus.json').write_text(json.dumps(index))
+   with self.assertRaisesRegex(ValueError,'metadata'):ref.validate(root,'corpus')
+ def test_corpus_capture_cannot_be_authenticated_as_short(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   folder=Path(tmp);producer=ref.ROOT/'results/test-corpus';cpu=Path('/cpu');model=Path('/model')
+   plan=ref.command_plan(producer,cpu,model,'corpus');rows=[dict(label=k,argv=v,exit_code=0) for k,v in plan.items()]
+   (folder/'commands.json').write_text(json.dumps(rows));data=dict(commands=rows,producer_output=str(producer),profile='corpus')
+   ref.commands_valid(data,folder,cpu,model);del data['profile']
+   with self.assertRaisesRegex(ValueError,'exact command'):ref.commands_valid(data,folder,cpu,model)
+
 if __name__=='__main__':unittest.main()

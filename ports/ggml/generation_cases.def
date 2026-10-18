@@ -1,0 +1,6 @@
+// Fixed M4 corpus: same tokenizer flags and sixteen generated tokens per case.
+PS5HIP_GENERATION_CASE("story", "Once upon a time")
+PS5HIP_GENERATION_CASE("science", "The sky is blue because")
+PS5HIP_GENERATION_CASE("arithmetic", "Continue this sequence: 2, 4, 6, 8,")
+PS5HIP_GENERATION_CASE("structured", "Recipe for a loaf of bread:\nIngredients:\n1.")
+PS5HIP_GENERATION_CASE("unicode", "Au caf\u00e9, Marie raconte une histoire:")
