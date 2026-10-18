@@ -8,14 +8,23 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
-## Dense F16 learned projection: primitive only
+## Dense F16 whole-layer fixture: host comparison passes
 
-The opt-in learned-projection kernel matches actual ggml CPU F16 dot/conversion
-across 9,984 rows at four fixed shapes, in sanitized and optimized host runs.
-Four Make/export tests preserve the default 16-symbol module; the new symbol
-requires explicit opt-in. See `evidence/offline-dense-f16-projection-primitive.json`.
-Dense graph admission, whole-layer fixture/extremes, native lowering and console
-execution remain open. This does not expand the currently admitted model types.
+The explicit dense fixture now passes 526 requests and 11,084 intermediate/cache
+comparisons against actual ggml CPU execution, with maximum absolute difference
+zero. It covers positions 0 through 511, reset repeatability for all 21 outputs,
+six finite activation scales, seven learned projections and two attention
+operations per request. Strict near-zero, embedding, cache/mask and attention
+checks, failure quarantine and default Q4 regressions pass.
+
+Run `make llm-dense-layer-tests LLM_CPU_BUILD_DIR=<existing-cpu-build>`; use
+`LLM_DENSE_LAYER_OUTPUT_DIR=<fresh-directory>` for subsequent runs. The supported
+main run reused `build/llm-original-format-cpu-v1`; no CPU library rebuild or model
+transfer was needed. See `evidence/offline-dense-f16-whole-layer.json`.
+
+This is synthetic host kernel interpretation with fixed F16 weights and an F32
+embedding vector. Native lowering, GPU execution, arbitrary dense-model admission
+and native extreme-input qualification remain open. M2 is not complete.
 
 ## Extended host generation and build-overhead improvements
 

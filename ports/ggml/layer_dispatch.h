@@ -11,6 +11,7 @@ namespace ps5hip_layer {
 struct Dispatch {
     ps5hip_prefix::Dispatch base;
     hipModule_t module=nullptr;
+    hipFunction_t dense_function=nullptr; // Explicit fixture initializer only.
     std::array<hipFunction_t,16> functions{};
     void* half=nullptr;
     void* full_scratch=nullptr; // Owned and span-validated by the full-model dispatcher.
@@ -32,10 +33,15 @@ struct Dispatch {
         base.call(Call::scratch_allocate,half_bytes,"layer_half_allocate",[&]{return hipMalloc(&half,half_bytes);});
         base.ok(half?hipSuccess:hipErrorInvalidValue,"null_layer_half");
     }
+    void initialize_dense_fixture(const std::array<const char*,6>& paths) {
+        initialize(paths,true);
+        base.call(Call::module_function,0,"dense_fixture_function",[&]{return hipModuleGetFunction(&dense_function,module,"layer_dense_f16");});
+        base.ok(dense_function?hipSuccess:hipErrorInvalidValue,"null_dense_fixture_function");
+    }
     void shutdown() {
         base.shutdown();
         base.call(Call::scratch_free,half_bytes,"layer_half_free",[&]{return hipFree(half);});half=nullptr;
-        base.call(Call::module_unload,0,"layer_unload",[&]{return hipModuleUnload(module);});module=nullptr;functions={};
+        base.call(Call::module_unload,0,"layer_unload",[&]{return hipModuleUnload(module);});module=nullptr;functions={};dense_function=nullptr;
     }
     void reset(){ps5hip_prefix::check(base.ready&&!base.terminal,"layer reset state");expected_position=0;}
     void launch(unsigned f,unsigned count,void** args) {
@@ -58,7 +64,7 @@ struct Dispatch {
     bool preflight(ggml_cgraph* g) {
         try {
             if(ggml_graph_n_nodes(g)!=37)return false;
-            (void)select(g); // Exact operation, layout, source and parameter inventory.
+            if(dense_function)(void)select_dense_fixture(g);else (void)select(g); // Exact operation, layout, source and parameter inventory.
             if(expected_position>=512)return false;
             std::vector<const ggml_tensor*> owners;
             auto check_tensor=[&](const ggml_tensor* t) {
@@ -77,10 +83,16 @@ struct Dispatch {
             }
             for(size_t i=0;i<owners.size();++i)for(size_t j=0;j<i;++j)
                 if(!ps5hip_prefix::Dispatch::disjoint(owners[i],owners[j]))return false;
+            if(dense_function)for(const auto* t:owners) {
+                const auto begin=reinterpret_cast<uintptr_t>(t->data);
+                for(auto scratch:{std::pair<void*,size_t>{half,half_bytes},{base.q8,base.scratch_bytes}}){
+                    const auto b=reinterpret_cast<uintptr_t>(scratch.first);if(begin<=b ? ggml_nbytes(t)>b-begin : scratch.second>begin-b)return false;
+                }
+            }
             int32_t token=-1,position=-1;int64_t k=-1;std::array<int64_t,256> v{};
             read(input(g,"inp_tokens"),&token,sizeof(token));read(input(g,"inp_pos"),&position,sizeof(position));
             read(input(g,"attn_inp_k_idxs"),&k,sizeof(k));read(input(g,"attn_inp_v_idxs"),v.data(),sizeof(v));
-            if(token<0||token>=32000||position!=int32_t(expected_position)||k!=position)return false;
+            if(token<0||token>=(dense_function?1:32000)||position!=int32_t(expected_position)||k!=position)return false;
             for(size_t i=0;i<v.size();++i)if(v[i]!=int64_t(i*512+expected_position))return false;
             const unsigned extent=expected_position<256?256:512;
             std::array<float,512> mask{};read(input(g,"attn_inp_kq_mask"),mask.data(),extent*sizeof(float));
@@ -146,6 +158,21 @@ struct Dispatch {
                     void* quantize[]={&x,&base.q8,&width};launch(10,width/32,quantize);
                     void* project[]={&weight,&base.q8,&out,&width,&rows};launch(11,rows,project);break;
                 }
+                if(dense_function&&t->src[0]->op==GGML_OP_NONE) {
+                    auto* w=t->src[0];auto* x=t->src[1];
+                    static const char* names[]={"blk.0.attn_q.weight","blk.0.attn_k.weight","blk.0.attn_v.weight","blk.0.attn_output.weight","blk.0.ffn_gate.weight","blk.0.ffn_up.weight","blk.0.ffn_down.weight"};
+                    static const int widths[]={2048,2048,2048,2048,2048,2048,5632},rows_list[]={2048,256,256,2048,5632,5632,2048};
+                    unsigned role=0;while(role<7&&std::strcmp(w->name,names[role]))++role;
+                    if(role==7||!base.valid(w,GGML_TYPE_F16,widths[role],rows_list[role])||
+                       !base.valid(x,GGML_TYPE_F32,widths[role],1)||!base.valid(t,GGML_TYPE_F32,rows_list[role],1)||
+                       !base.disjoint(w,x)||!base.disjoint(w,t)||!base.disjoint(x,t))return false;
+                    void* input=x->data;void* weight=w->data;void* out=t->data;
+                    unsigned width=unsigned(widths[role]),rows=unsigned(rows_list[role]);
+                    void* convert[]={&input,&half,&width};launch(9,width,convert);
+                    void* args[]={&weight,&half,&out,&width,&rows};
+                    base.call(Call::launch,0,"dense_fixture_launch",[&]{return hipModuleLaunchKernel(dense_function,(rows+63)/64,1,1,64,1,1,0,nullptr,args,nullptr);});
+                    base.call(Call::completion_sync,0,"dense_fixture_sync",[]{return hipDeviceSynchronize();});++base.completed_launches;break;
+                }
                 const bool score=t->src[0]->ne[0]==64;
                 unsigned n=unsigned(score?t->ne[0]:t->src[0]->ne[0]);
                 unsigned count=score?2048:32*n;
@@ -194,7 +221,7 @@ struct Dispatch {
         ps5hip_prefix::check(base.ready&&!base.terminal&&half&&module,"layer not ready");
         if(!g||!preflight(g))return false;
         for(int i=0;i<ggml_graph_n_nodes(g);++i)
-            ps5hip_prefix::check(execute_node(ggml_graph_node(g,i),false),"layer node dispatch");
+            ps5hip_prefix::check(execute_node(ggml_graph_node(g,i),dense_function!=nullptr),"layer node dispatch");
         ++expected_position;return true;
     }
 };

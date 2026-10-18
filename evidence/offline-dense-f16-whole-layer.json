@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "classification": "synthetic-dense-layer-host-arithmetic",
+  "source_base": "bcd6c72",
+  "command": "make llm-dense-layer-tests LLM_CPU_BUILD_DIR=build/llm-original-format-cpu-v1 LLM_DENSE_LAYER_OUTPUT_DIR=results/llm-dense-layer-main-v1",
+  "receipt_sha256": "108157771f6ad6bfdb1d50f95b1b504ea39a7c5b0fbee7c9e20459fe6e236792",
+  "requests": 526,
+  "comparisons": 11084,
+  "maximum_absolute_difference": 0,
+  "resident_f16_weight_bytes": 88080384,
+  "numeric_seconds": 21.63749476801604,
+  "command_stages": 15,
+  "make_tests": 4,
+  "native_executed": false,
+  "gpu_executed": false,
+  "limits": [
+    "Existing CPU libraries are not instrumented; no complete producer closure reauthentication",
+    "Seven fixed deterministic F16 learned matrices; F32 vector replaces embedding lookup",
+    "Host kernel interpretation; native ISA and complete dense model admission remain unqualified"
+  ],
+  "coverage": [
+    "positions 0..511 and 256 boundary",
+    "all 21 outputs bitwise repeated after reset",
+    "six finite activation scales",
+    "strict relative RMS, exact embedding and zeros, chained attention bound",
+    "scratch overlap, missing symbol, launch and sync failure quarantine",
+    "default Q4 selector and launch regression"
+  ],
+  "preserved_history": [
+    "numeric-v1: CPU output capture omitted by fusion; fixed requested output markers",
+    "numeric-v2: deliberately superseded for stricter comparator, not accepted",
+    "strict-v3 and final-v4: scratch passes using historical CPU libraries",
+    "two supported Make attempts stopped in workflow tests before numerical execution; inherited environment isolation fixed"
+  ],
+  "source_hashes": {
+    "tests/llm_dense_layer_default_test.cpp": "aeb0089a4475c33405adeaa12e7499a2f5a7a9fe5b896d64461edaae5de5c32c",
+    "tests/llm_dense_layer_test.cpp": "15d05b1ab516f9c587c91cf4ea636543c4325df5c69e1fd6e7a290b937e3db2b",
+    "tests/llm_dense_layer_failure_test.cpp": "2f4681a1ad68630eb46b5536200356c717193c32ebf3ea6840cc538c755ff41d",
+    "tests/llm_dense_layer_checks_test.cpp": "ae329278cb73a37e7ea5381f49dc7bb5482203d49d1a889834c619a4ded87bdc",
+    "tests/llm_dense_layer_checks.h": "009f91e146412dc0dfb4a167a921f5dab19d4ac0cd63983b385db6dd851a7480",
+    "tests/llm_layer_numeric_mock.h": "619ef9eae2f781432ccea5eeef6efbea9144ec355f357e1d8060d46c23a508df",
+    "kernels/llm_layer.hip": "bae2b60314a16e4974fe2cf83ffeb12fe0f24e6b67a5122706e66d8312c38bf4",
+    "kernels/llm_cpu_math.h": "aa5096bcfdd6d415a6ca8e8f78e81b702b41908e1c1eaf7d189717e3a43d9b90",
+    "ports/ggml/model_layer.h": "8594bcae4f710bb9ed41a417ccd30344e4a0b9880b04e14fa621c0cfe1d75e08",
+    "ports/ggml/layer_dispatch.h": "0116dfe58ff4011d4715e98de376b4342703c8f046a769cbf6b944a4adc915ab",
+    "ports/ggml/prefix_dispatch.h": "8bc041ecfc5c1153fc918cd8474b882a941c35d3d948846b56e09a323046d59a",
+    "ports/ggml/model_prefix.h": "1099b845859a947c03ba33ba74e228686c1046cbc2722edbcbc5b646fe3dc99d",
+    "ports/ggml/prefix_calls.h": "0c0948630fc079b39ae064ebeb8a0be882e9eb24626817f0b07f177968d06649",
+    "tools/build_llm_dense_layer_test.py": "eb1189db3724fc0181961440de473b7a86030e97251bc2f97436c70a1e6e49f1"
+  }
+}

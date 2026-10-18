@@ -9,7 +9,7 @@
 namespace ps5hip_layer {
 inline void check(bool value,const char* why){if(!value)throw std::runtime_error(why);}
 struct Upload {ggml_tensor *original;ggml_tensor *clone;};
-struct Selection {std::array<ggml_tensor*,37> nodes{};std::array<ggml_tensor*,10> weights{};std::array<ggml_tensor*,5> requests{};std::array<ggml_tensor*,2> caches{};int64_t extent=0;};
+struct Selection {std::array<ggml_tensor*,37> nodes{};std::array<ggml_tensor*,10> weights{};std::array<ggml_tensor*,5> requests{};std::array<ggml_tensor*,2> caches{};int64_t extent=0;bool dense_fixture=false;};
 struct Weights {std::array<Upload,10> uploads{};};
 struct Cache {ggml_tensor *k;ggml_tensor *v;};
 struct Graph {ggml_cgraph* graph=nullptr;std::array<ggml_tensor*,37> nodes{};std::array<Upload,5> uploads{};std::array<ggml_tensor*,21> outputs{};int64_t extent=0;};
@@ -73,7 +73,7 @@ static const std::array<Spec,17> leaf_specs={{
 {"cache_k_l0",GGML_TYPE_F16,GGML_OP_NONE,{256,512,1,1},{2,512,262144,262144},{0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u},{-100,-100,-100,-100},-100},
 {"cache_v_l0",GGML_TYPE_F16,GGML_OP_NONE,{256,512,1,1},{2,512,262144,262144},{0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u,0u},{-100,-100,-100,-100},-100}
 }};
-inline Spec spec(size_t index,int64_t n,bool leaf=false){
+inline Spec spec(size_t index,int64_t n,bool leaf=false,bool dense=false){
  check(n==256||n==512,"layer cache extent");auto s=leaf?leaf_specs.at(index):node_specs.at(index);
  if(leaf&&index==14){s.ne[0]=n;s.nb[1]=s.nb[2]=s.nb[3]=size_t(4*n);}
  if(!leaf){
@@ -81,6 +81,10 @@ inline Spec spec(size_t index,int64_t n,bool leaf=false){
   if(index==19)s.ne[2]=n;
   if(index==20)s.ne[1]=n;
   if(index==23||index==24){s.ne[0]=n;s.nb[1]=s.nb[2]=size_t(4*n);s.nb[3]=size_t(128*n);}
+ }
+ if(dense&&leaf&&(index==0||index==2||index==3||index==4||index==5||index==7||index==8||index==9)){
+  s.type=index==0?GGML_TYPE_F32:GGML_TYPE_F16;if(index==0)s.ne[1]=1;
+  s.nb[0]=index==0?4:2;s.nb[1]=s.nb[0]*size_t(s.ne[0]);s.nb[2]=s.nb[3]=s.nb[1]*size_t(s.ne[1]);
  }
  return s;
 }
@@ -93,8 +97,8 @@ inline void match(const ggml_tensor* t,const Spec& s){
 inline ggml_tensor* leaf(const Selection& s,size_t i){return i<10?s.weights[i]:i<15?s.requests[i-10]:s.caches[i-15];}
 inline ggml_tensor* ref(const Selection& s,int index){return index>=0?s.nodes.at(size_t(index)):leaf(s,size_t(-1-index));}
 }
-inline Selection select(ggml_cgraph* graph){
- check(graph,"layer missing graph");Selection s{};ggml_tensor *end=nullptr,*ks=nullptr,*vs=nullptr;std::set<ggml_tensor*> available;
+inline Selection select_impl(ggml_cgraph* graph,bool dense){
+ check(graph,"layer missing graph");Selection s{};s.dense_fixture=dense;ggml_tensor *end=nullptr,*ks=nullptr,*vs=nullptr;std::set<ggml_tensor*> available;
  for(int i=0;i<ggml_graph_n_nodes(graph);++i){auto* t=ggml_graph_node(graph,i);check(t&&available.insert(t).second,"layer null/duplicate graph node");
   if(!std::strcmp(t->name,"l_out-0")&&t->op==GGML_OP_ADD){check(!end,"layer duplicate endpoint");end=t;}
   if(!std::strcmp(t->name,"cache_k_l0 (view)")&&t->op==GGML_OP_SET_ROWS){check(!ks,"layer duplicate K store");ks=t;}
@@ -119,12 +123,14 @@ inline Selection select(ggml_cgraph* graph){
    else {const size_t k=size_t(-1-index);check(!leaves.at(k)||leaves[k]==source,"layer inconsistent leaf");leaves[k]=source;}
   }
  }
- for(size_t i=0;i<leaves.size();++i){auto* t=leaves[i];detail::match(t,detail::spec(i,s.extent,true));check(!t->view_src,"layer leaf aliases");for(auto* source:t->src)check(!source,"layer computed leaf");
+ for(size_t i=0;i<leaves.size();++i){auto* t=leaves[i];detail::match(t,detail::spec(i,s.extent,true,dense));check(!t->view_src,"layer leaf aliases");for(auto* source:t->src)check(!source,"layer computed leaf");
   if(i<10)s.weights[i]=t;else if(i<15)s.requests[i-10]=t;else s.caches[i-15]=t;
  }
  for(size_t i=0;i<s.nodes.size();++i){int owner=detail::node_specs[i].owner;check(s.nodes[i]->view_src==(owner==-100?nullptr:detail::ref(s,owner)),"layer view owner");}
  return s;
 }
+inline Selection select(ggml_cgraph* graph){return select_impl(graph,false);}
+inline Selection select_dense_fixture(ggml_cgraph* graph){return select_impl(graph,true);}
 inline Weights make_weights(ggml_context* ctx,const Selection& selected){
  check(ctx,"layer weight context");Weights result{};
  for(size_t i=0;i<result.uploads.size();++i){auto* t=ggml_dup_tensor(ctx,selected.weights[i]);check(t,"layer weight allocation");ggml_set_name(t,selected.weights[i]->name);ggml_set_input(t);result.uploads[i]={selected.weights[i],t};}
@@ -138,10 +144,10 @@ inline Cache make_cache(ggml_context* ctx){
 // it must never copy original CPU cache bytes or stale original request controls.
 inline Graph materialize(ggml_context* ctx,const Selection& source,const Weights& weights,const Cache& cache,int64_t extent=0){
  check(ctx,"layer request context");Graph result{};result.extent=extent?extent:source.extent;check(result.extent==256||result.extent==512,"layer materialized extent");std::array<ggml_tensor*,17> leaves{};
- for(size_t i=0;i<10;++i){check(weights.uploads[i].original==source.weights[i],"layer changed resident weight identity");auto* t=weights.uploads[i].clone;detail::match(t,detail::spec(i,result.extent,true));check(!t->view_src,"layer resident weight alias");leaves[i]=t;}
- for(size_t i=10;i<15;++i){auto expected=detail::spec(i,result.extent,true);auto* t=ggml_new_tensor(ctx,expected.type,4,expected.ne);check(t,"layer request allocation");ggml_set_name(t,expected.name);ggml_set_input(t);leaves[i]=t;result.uploads[i-10]={source.requests[i-10],t};}
+ for(size_t i=0;i<10;++i){check(weights.uploads[i].original==source.weights[i],"layer changed resident weight identity");auto* t=weights.uploads[i].clone;detail::match(t,detail::spec(i,result.extent,true,source.dense_fixture));check(!t->view_src,"layer resident weight alias");leaves[i]=t;}
+ for(size_t i=10;i<15;++i){auto expected=detail::spec(i,result.extent,true,source.dense_fixture);auto* t=ggml_new_tensor(ctx,expected.type,4,expected.ne);check(t,"layer request allocation");ggml_set_name(t,expected.name);ggml_set_input(t);leaves[i]=t;result.uploads[i-10]={source.requests[i-10],t};}
  leaves[15]=cache.k;leaves[16]=cache.v;
- for(size_t i=15;i<17;++i){detail::match(leaves[i],detail::spec(i,result.extent,true));check(!leaves[i]->view_src,"layer cache owner alias");}
+ for(size_t i=15;i<17;++i){detail::match(leaves[i],detail::spec(i,result.extent,true,source.dense_fixture));check(!leaves[i]->view_src,"layer cache owner alias");}
  auto ref=[&](int index){return index>=0?result.nodes.at(size_t(index)):leaves.at(size_t(-1-index));};
  result.graph=ggml_new_graph_custom(ctx,64,false);check(result.graph,"layer graph allocation");size_t outputs=0;
  for(size_t i=0;i<result.nodes.size();++i){auto expected=detail::spec(i,result.extent);ggml_tensor* t;
@@ -154,6 +160,6 @@ inline Graph materialize(ggml_context* ctx,const Selection& source,const Weights
  }
  check(outputs==result.outputs.size()&&ggml_graph_n_nodes(result.graph)==37,"layer materialized graph inventory");
  for(size_t i=0;i<result.nodes.size();++i)check(ggml_graph_node(result.graph,int(i))==result.nodes[i],"layer materialized cache write order");
- select(result.graph);return result;
+ select_impl(result.graph,source.dense_fixture);return result;
 }
 } // namespace ps5hip_layer

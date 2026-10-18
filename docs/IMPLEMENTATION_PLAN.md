@@ -16,6 +16,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Dense F16 primitive | host | 9,984 rows match actual CPU; sanitized/optimized and default-export/Make checks pass; whole-layer/native open | evidence/offline-dense-f16-projection-primitive.json
 
+- 2026-10-18 | Dense whole-layer fixture | host | supported Make reuses current CPU libraries; 526 requests / 11,084 comparisons / zero absolute difference; native remains open | evidence/offline-dense-f16-whole-layer.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main
