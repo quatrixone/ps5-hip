@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-client-identity-reuse",
+  "date": "2026-10-18",
+  "base_commit": "6bf70f669b44bf902b8e86e7ca16cd960c748b65",
+  "change": "Reuse freshly verified input digests for initial native artifact/object/tool comparisons. Final input and artifact rehashes remain uncached. Unknown artifacts are always read. Path, size, membership, inventory and source/symlink/receipt checks remain.",
+  "tests": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/llm_native_client_build_test.py"
+      ],
+      "methods": 24,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/llm_native_app_build_test.py"
+      ],
+      "methods": 29,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/llm_native_loader_test.py"
+      ],
+      "methods": 3,
+      "status": "PASS"
+    }
+  ],
+  "independent_review": {
+    "reviewer": "next_generation_gate subagent",
+    "scope": "Current diff and six added trust-boundary tests; read-only source review",
+    "result": "No correctness or trust-boundary defect found"
+  },
+  "static_measurement": {
+    "basis": "Static read count and receipt/current file sizes only; no historical receipt reauthentication or wall-time claim",
+    "overlapping_artifacts": 86,
+    "overlapping_artifact_bytes": 52383031,
+    "object_reads": 71,
+    "object_bytes": 52179680,
+    "tool_reads": 12,
+    "tool_bytes": 66414432,
+    "avoided_bytes_per_app_objects_call": 170977143
+  },
+  "inputs": {
+    "tools/build_llm_native_client.py": "a25b1bc4cf18acad1079582d32acef286b0fa0a75128f35669fb4f441f98ab2b",
+    "tests/llm_native_client_build_test.py": "ce20b59760918fb23dc018b1bcd02d6f6e902ca26cb7bb6627e08fa627766e63",
+    ".local/check_native_client_overlap.py": "34628af01d4ff1f61adeb130cd5f0b55d82e2cc91fe24093870ff88ba2a7eff1",
+    ".local/native-client-overlap-tests.json": "36317b80df5188922a438b9eb0b63021721e46fe9c88dd168a8efc831de8f8cb",
+    ".local/native-client-overlap-measurement.json": "4eae21a8c6e36f377f77db9a1ac79fc8209365f64af1176a9aca5534ccfe806a"
+  },
+  "native_rebuilt": false,
+  "console_contact": false,
+  "limits": [
+    "No whole-phase elapsed-time speedup measured.",
+    "Repeated producer authentication still occurs; initial within-client duplicates alone are removed.",
+    "Historical native receipts remain historical; new candidates require current-source receipts."
+  ]
+}

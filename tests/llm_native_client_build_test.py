@@ -131,4 +131,51 @@ class PreparedGenerated(unittest.TestCase):
    (folder/'ggml-version.h').write_bytes(texts['ggml-version.h'].encode());alias=root/'alias';alias.symlink_to(folder,target_is_directory=True)
    with self.assertRaisesRegex(ValueError,'unsafe'):b.verify_generated(alias,texts)
 
+class AuthenticatedArtifacts(unittest.TestCase):
+ def setUp(self):
+  self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+  self.folder=Path(self.tmp.name);self.path=self.folder/'0.o';self.path.write_bytes(b'object')
+  self.receipt=self.folder/'receipt.json';self.receipt.write_text('{}')
+  self.digest=b.sha(self.path);self.inputs={str(self.path):self.digest}
+  self.artifacts={'0.o':{'sha256':self.digest,'bytes':6}}
+ def test_initial_overlap_not_rehashed_but_final_is_fresh(self):
+  with patch.object(b,'sha',wraps=b.sha) as digest:
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+   digest.assert_not_called()
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt)
+   digest.assert_called_once_with(self.path)
+ def test_unverified_artifact_is_always_hashed(self):
+  with patch.object(b,'sha',wraps=b.sha) as digest:
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated={})
+   digest.assert_called_once_with(self.path)
+ def test_conflicting_artifact_claim_rejected(self):
+  self.artifacts['0.o']['sha256']='0'*64
+  with self.assertRaisesRegex(ValueError,'artifact differs'):
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+ def test_final_rejects_same_size_mutation_with_preserved_mtime(self):
+  import os
+  b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+  before=self.path.stat();self.path.write_bytes(b'OBJECT')
+  os.utime(self.path,ns=(before.st_atime_ns,before.st_mtime_ns))
+  with self.assertRaisesRegex(ValueError,'artifact differs'):
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt)
+ def test_authenticated_content_still_checks_inventory_size_and_symlink(self):
+  self.artifacts['0.o']['bytes']=5
+  with self.assertRaisesRegex(ValueError,'artifact differs'):
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+  self.artifacts['0.o']['bytes']=6;extra=self.folder/'extra';extra.write_bytes(b'object')
+  with self.assertRaisesRegex(ValueError,'inventory'):
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+  self.path.unlink();self.path.symlink_to(extra)
+  with self.assertRaisesRegex(ValueError,'unsafe'):
+   b.verify_artifacts(self.folder,self.artifacts,self.receipt,authenticated=self.inputs)
+ def test_only_initial_app_artifact_call_uses_authenticated_inputs(self):
+  import ast,inspect
+  fn=ast.parse(inspect.getsource(b.app_objects)).body[0]
+  calls=[node for node in ast.walk(fn) if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='verify_artifacts']
+  calls.sort(key=lambda node:node.lineno)
+  self.assertEqual(len(calls),2)
+  self.assertEqual([(kw.arg,ast.unparse(kw.value)) for kw in calls[0].keywords],[('authenticated','inputs')])
+  self.assertEqual(calls[1].keywords,[]);self.assertEqual(len(calls[1].args),3)
+
 if __name__=='__main__':unittest.main()

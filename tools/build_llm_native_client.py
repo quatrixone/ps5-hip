@@ -68,11 +68,13 @@ def verify_generated(folder, texts):
  return folder
 
 
-def verify_artifacts(folder,artifacts,receipt_path):
+def verify_artifacts(folder,artifacts,receipt_path,authenticated=None):
  for name,identity in artifacts.items():
   p=folder/name
   if Path(name).is_absolute() or '..' in Path(name).parts or not p.resolve().is_relative_to(folder) or p.is_symlink():raise ValueError('unsafe native artifact path')
-  if not isinstance(identity,dict) or identity.get('sha256')!=sha(p) or identity.get('bytes')!=p.stat().st_size:raise ValueError('native artifact differs: '+name)
+  # Only the initial caller supplies its freshly verified input closure; final checks reread bytes.
+  digest=authenticated[str(p)] if authenticated is not None and str(p) in authenticated else sha(p)
+  if not isinstance(identity,dict) or identity.get('sha256')!=digest or identity.get('bytes')!=p.stat().st_size:raise ValueError('native artifact differs: '+name)
  if set(artifacts)!={str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file() and p!=receipt_path}:raise ValueError('native artifact inventory differs')
 
 def verify_commands(commands,expected,record,artifacts):
@@ -131,11 +133,11 @@ def app_objects(folder):
  if set(tools)!=set(names):raise ValueError('tool inventory differs')
  for name,t in tools.items():
   p=Path(shutil.which(name,path='/usr/bin:/bin'));required(p)
-  if t.get('path')!=str(p) or t.get('resolved')!=str(p.resolve()) or t.get('sha256')!=sha(p):raise ValueError('tool identity differs: '+name)
+  if t.get('path')!=str(p) or t.get('resolved')!=str(p.resolve()) or t.get('sha256')!=inputs[str(p)]:raise ValueError('tool identity differs: '+name)
   if name.endswith('-18') and '18.1.8' not in t.get('version',''):raise ValueError('tool version differs')
- verify_artifacts(folder,artifacts,receipt_path)
+ verify_artifacts(folder,artifacts,receipt_path,authenticated=inputs)
  objects=[folder/(str(i)+'.o') for i in range(71)]
- if r.get('objects')!={str(p):sha(p) for p in objects}:raise ValueError('native object inventory differs')
+ if r.get('objects')!={str(p):inputs.get(str(p)) for p in objects}:raise ValueError('native object inventory differs')
  for p in objects:required(p)
  flags=compile_flags(generated,client)
  compiler=ROOT/'tools/ps5-clangxx';expected={}

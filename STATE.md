@@ -3,6 +3,25 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Native-client duplicate identity reads removed
+
+Initial artifact, object and tool comparisons now reuse the native client's
+freshly verified input digests. Unbound artifacts still require a byte read;
+path, size, inventory and membership checks remain. Final input and artifact
+checks still read every byte afresh. All 56 focused client/app/loader tests pass,
+including six new trust-boundary tests; independent source review found no defect.
+The retained v7 receipt implies 170,977,143 redundant bytes avoided per client
+authentication call (169 reads); this is a static count, not a timing claim.
+See `evidence/offline-native-client-identity-reuse.json`.
+
+No native rebuild or console contact was needed. Next implement the fixed
+five-prompt / 16-token M4 corpus across oracle, production helper and validators,
+with reset/repeat and all-boundary comparison offline before one native build.
+Retain the short generation regression. Corpus-specific bounded application and
+capture deadlines must account for measured diagnostic time; do not reuse the
+150-second short-case budget. Further producer authentication overlap remains
+open, but these tooling changes do not need another standalone console cycle.
+
 ## Frozen manifest verification now overlaps filesystem reads
 
 The controller verifies frozen manifest files with four bounded workers. Every

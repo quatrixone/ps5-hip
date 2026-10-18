@@ -13,6 +13,8 @@ actual decoder commits/reset. Short native greedy generation now passes two rese
 float outputs bitwise CPU-equal. Wider prompts and long context remain open.
 Reduce repeated host authentication before expanding console qualification.
 
+- 2026-10-18 | Native-client identity reuse | offline | 56 focused tests and independent review pass; 169 duplicate reads / 171 MB avoided per authentication, final fresh checks retained | evidence/offline-native-client-identity-reuse.json | next: fixed five-prompt / 16-token M4 corpus offline
+
 - 2026-10-18 | Parallel frozen manifest verification | offline | 288 source/controller tests pass; 512-file warm-cache median 6.643s serial / 1.121s with four workers; all fresh reads retained | evidence/offline-parallel-frozen-verification.json | next: repeated producer authentication
 
 - 2026-10-18 | Build prerequisite reads | offline | 73 focused tests pass; authenticated initial merge avoids4.06GB in locked generation case; final checks retained | evidence/offline-authenticated-prerequisite-merge.json | next: console-control verification overhead

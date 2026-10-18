@@ -55,11 +55,23 @@ argmax, feedback, stopping and exact reset. The HIP interpreter compares every
 captured boundary to CPU under the existing numerical budgets. It uses the actual graph scheduler and production arithmetic
 in a host interpreter; it does not execute a GPU.
 
-Native generation still needs profile-specific packaging, image audit, frozen
+The short generation profile has passed packaging, image audit, frozen
 reference/readback contracts, timing and .40 validation. Preserve the accepted
-native smoke and its consumed candidate; never replay it. This short profile
+native generation and smoke candidates; never replay either. This short profile
 does not replace five-prompt/16-step, 64-step, 512-token, EOS and repeated-request
 release gates in `LLM_V1_PLAN.md`, nor original-format loading requirements.
+
+The next implementation uses a fixed source-bound five-case table shared by the
+CPU oracle, numerical harness and production helper. Each case requests 16 new
+tokens and repeats after KV/backend reset; preserve the short case as regression
+coverage. Bind case/run/position to all boundary files, token histories and
+transcripts. Keep one model/context resident across cases. Derive bounded app
+and capture deadlines from the corpus commit count and measured diagnostic
+cost; the short profile's 150-second limit is insufficient. Validate the complete
+corpus offline before building and running one native image. A naturally early
+EOS cannot silently satisfy the required 16-token case. Later use the same fixed
+case mechanism for 64 tokens and combined prompt/output length 512; that combined
+limit ends at decoder position 510 because the final emitted token is not decoded.
 
 ## Historical first offline outcome
 
