@@ -372,7 +372,7 @@ def _freeze_full_reference(receipt,output,data):
 
 def _freeze_reference(receipt,output,data,kind):
     from source_model_freeze import _frozen_reference_manifest,PREFIX_REFERENCE_LIMIT,_reference_authenticator
-    authenticate_prefix_reference=_reference_authenticator(kind)
+    authenticate_prefix_reference=_reference_authenticator(kind,data.get('profile','smoke'))
     original=Path(data['reference']);closure=data['inputs']
     if original.is_symlink() or not original.is_dir():raise ValueError('unsafe prefix reference')
     planned=[];total=0
@@ -602,6 +602,8 @@ def main():
             manifest['hypothesis']='Actual model first layer runs through public HIP for 512 declared steps and reset2 with persistent GPU KV. Require authenticated 151 readbacks, original full graph rejection and balanced cleanup; no full-model inference claim.'
         if args.client_phase=='model-full':
             manifest['hypothesis']='Full TinyLlama decoder smoke: tokens 0,1 at committed positions 0,1 then reset and repeat 0, all 22 layers and 32000 logits through actual HIP scheduler. Require 72 authenticated numerical readbacks, balanced native cleanup and exact reset; no generated-text or long-context claim.'
+            if model_prefix['profile']=='generation':
+                manifest['hypothesis']='Full TinyLlama greedy generation: actual tokenizer and live-logit feedback, 16 committed decodes over two reset rounds, all 22 layers and full logits through HIP. Require 384 CPU-compared float outputs, exact token metadata, bounded timings and balanced native cleanup; wider prompts and long context remain separate.'
         _validate_model_candidate(output,manifest,prefix_evidence)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(output / 'manifest.json')

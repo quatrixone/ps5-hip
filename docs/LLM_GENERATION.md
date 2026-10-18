@@ -160,3 +160,28 @@ The default remains `smoke`. This asset profile alone cannot deploy generation;
 the native title, image audit, freezer and application controller must all agree
 on that profile before console use. No native SDK/library rebuild was needed for
 this oracle/host-comparison milestone.
+
+## Generation reference and controller contract
+
+The explicit generation profile now survives the original/copy authentication
+boundaries in the reference freezer. It binds all 386 expected output files.
+Package admission additionally requires matching `full_profile=generation` and
+`actual_generation_call_chain_audited=true` from the native image audit. A smoke
+image audit is rejected. The actual native builder/title/audit integration is
+still pending, so this does not authorize a console deployment.
+
+The readback verifier accepts `profile='generation'`, checks metadata bytes against
+the authenticated oracle, independently validates greedy/reset controls, and
+compares all 384 float tensors under unchanged budgets. It hashes captured bytes
+before and after comparison and rechecks the complete reference closure. It does
+not accept the interpreter's synthetic `backend.json` as a native readback.
+The controller uses the frozen inventory, rejects stale token metadata, and checks
+that numerical verification used precisely its captured bytes.
+
+Application transcript validation adds the unchanged startup/finalization frame,
+four ordered allocator snapshots with cleanup recovery, ownership, watchdog join
+and generation timings. Transcript success still proves neither GPU origin nor
+process teardown; those require the fresh image audit and actual controller run.
+`make llm-native-generation-tests` runs these offline tests and the numerical
+helper. Current helper output is `results/m4-native-generation-numeric-v6`, with all
+384 tensors still bitwise CPU-equal. No native package rebuild was needed here.

@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-generation-freeze-readback-and-controller-contract",
+  "source_base_commit": "e0f7a79",
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "results/m4-generation-reference-v3/receipt.json": "df2bdf5a70d60968a65df7734b1908c76071405f434697b4a9cf23c95e5a9eee",
+    "results/m4-generation-assets-v1/receipt.json": "a356ed681328077461e4db38142303168ca91bc65fcc7b7cd91e1abb0e19482a",
+    "results/m4-native-generation-numeric-v6/receipt.json": "9cdd52db288707cabf5d2976945c02d5f683d368a9be7c423ef8259bc7376f57",
+    "results/m4-native-generation-numeric-v6/comparison.json": "e56d96cccd1292bf5064adf727fe664e5f2fb8b386af2d25b4c0da9af5b011e5",
+    "results/m4-native-generation-numeric-v6/timing.json": "4146de729d3b342c88f7ed65e3ba630b9b5ced8ac0e0511e8fe26bcb52f7b87c",
+    "results/m4-generation-reference-freeze-v1/receipt.json": "cb4f5b21d9feb69705f69c757401522a2864832b7c2d693f7a40028d3e0a137d",
+    "results/m4-generation-reference-freeze-v1/reference-manifest.json": "2a6f9f01ef49a59897dcf86b6863c8852c3927bd317ef5c7a6cec3c5ccc710a6",
+    "results/m4-generation-reference-freeze-v1/comparison.json": "4658c55ee0e42063309e97b613afb651243cd923d9ad9bf33adb8dd5a46a4926",
+    "results/cleanup-generation-numeric-v5-1792288749477757541.json": "60d37faa9e296f6799bec7cb92fe44e7d036541db63a7ca8907e53cc13465c58"
+  },
+  "reference_freeze": {
+    "real_six_module_closure_authenticated": true,
+    "original_and_copy_authenticated": true,
+    "profile": "generation",
+    "reference_receipt_sha256": "df2bdf5a70d60968a65df7734b1908c76071405f434697b4a9cf23c95e5a9eee",
+    "expected_files": 386,
+    "metadata_files": [
+      "generation.json",
+      "steps.jsonl"
+    ],
+    "package_candidate_frozen": false
+  },
+  "numerical": {
+    "requests": 16,
+    "float_files": 384,
+    "metadata_files": 2,
+    "total_captured_bytes": 5064354,
+    "all_bitwise_CPU_equal": true,
+    "actual_generation_helper": true,
+    "CPU_backend_tensor_arithmetic": 0,
+    "host_backend_counters_still_required_by_interpreter": true,
+    "synthetic_backend_file_rejected_by_native_readback_verifier": true,
+    "captured_hashes_rechecked": true
+  },
+  "controller_contract": {
+    "frozen_metadata_identities_checked": true,
+    "stale_metadata_blocks_launch": true,
+    "expected_capture_inventory": 386,
+    "numerical_verification_requires_identical_captured_bytes": true,
+    "startup_memory_timing_ownership_watchdog_and_finalization_parser_tests": true,
+    "generation_rejects_smoke_image_audit": true,
+    "requires_full_profile_generation_and_actual_generation_call_chain_audited": true
+  },
+  "validation": {
+    "make_target": "make llm-native-generation-tests LLM_CPU_BUILD_DIR=build/llm-cpu-reference-v3 LLM_FULL_GRAPH_MODEL=/tmp/ps5-hip-tinyllama-gguf-v3/tinyllama-q4_0.gguf LLM_GENERATION_REFERENCE_DIR=results/m4-generation-reference-v3 LLM_NATIVE_GENERATION_TEST_DIR=results/m4-native-generation-numeric-v6",
+    "make_target_status": "PASS",
+    "unit_groups": {
+      "generation": 51,
+      "prefix_layer_full_freeze": 66,
+      "console_contracts": 93,
+      "legacy_full_application": 2,
+      "legacy_full_readbacks": 6,
+      "model_authentication": 27,
+      "model_callsites": 3
+    },
+    "groups_overlap": true,
+    "ASan_UBSan_helper": true,
+    "CPU_libraries_rebuilt": false,
+    "native_package_built": false,
+    "console_contact": false
+  },
+  "cleanup": {
+    "superseded_host_version": "m4-native-generation-numeric-v5",
+    "removed_bytes": 4457720,
+    "artifacts": [
+      "full-numeric",
+      "unit-0.o",
+      "unit-1.o"
+    ],
+    "raw_receipts_sources_logs_preserved": true,
+    "limits": [
+      "Old v5 artifact inventory requires rebuild to rehash removed host outputs"
+    ]
+  },
+  "limits": [
+    "Host interpretation, parser fixtures and copied offline readbacks do not establish native origin or GPU execution.",
+    "Only the reference was frozen; no complete generation package/candidate exists yet.",
+    "The native title still selects smoke; title/builder selection and actual linked generation image audit remain open.",
+    "Four generated tokens for one fixed prompt and reset repeat; wider M4/M5, long-context and original model formats remain open."
+  ],
+  "next": [
+    "Wire generation selection through native title and builder, with matching asset/profile/image audit identity.",
+    "Audit real linked generation/helper/sampler/decoder calls, then build/freeze/review one cache-backed native candidate.",
+    "Validate the fresh native application on idle .40 and push that hardware milestone."
+  ]
+}

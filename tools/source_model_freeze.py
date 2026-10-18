@@ -117,6 +117,9 @@ def _validate_model_receipt(build,receipt):
  for name,h in audit_inputs.items():require(Path(name).is_absolute() and stream_digest(name)==h,'audit input changed')
  app=build/'package/app';package=build/'package/PPSA99014.ffpkg'
  prefix_data=_binding(bound,inputs,kind) if prefix else None
+ if prefix and kind=='full':
+  require(audit.get('full_profile','smoke')==prefix_data['profile'],'native full audit profile differs')
+  if prefix_data['profile']=='generation':require(audit.get('actual_generation_call_chain_audited') is True,'missing actual generation call-chain proof')
  names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model-path.txt'}|(set(prefix_data['assets']) if prefix else set())
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact model package assets required')
  require(type(receipt['package_bytes']) is int and 0<receipt['package_bytes']<=package_limit('llm_client') and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
@@ -134,11 +137,12 @@ def validate_model_receipt(build,receipt):
 def validator_identities():
  import sys,types,importlib
  driver=importlib.import_module('build_llm_native_app')
- pending=[importlib.import_module('public_hip_full_assets'),importlib.import_module('build_llm_full_model_reference'),importlib.import_module('verify_llm_full_readbacks'),importlib.import_module('public_hip_layer_assets'),importlib.import_module('build_llm_layer_reference'),importlib.import_module('verify_llm_layer_readbacks'),importlib.import_module('public_hip_prefix_assets'),importlib.import_module('build_llm_prefix_reference'),driver,importlib.import_module('freeze_source_candidate'),importlib.import_module('fetch_llm_model')]
+ pending=[importlib.import_module('build_llm_generation_numeric_test'),importlib.import_module('build_llm_generation_reference'),importlib.import_module('public_hip_full_assets'),importlib.import_module('build_llm_full_model_reference'),importlib.import_module('verify_llm_full_readbacks'),importlib.import_module('public_hip_layer_assets'),importlib.import_module('build_llm_layer_reference'),importlib.import_module('verify_llm_layer_readbacks'),importlib.import_module('public_hip_prefix_assets'),importlib.import_module('build_llm_prefix_reference'),driver,importlib.import_module('freeze_source_candidate'),importlib.import_module('fetch_llm_model')]
  paths={Path(__file__).resolve(),ROOT/'tests/llm_native_app_build_test.py'}
  paths.update(ROOT/n for n in ('tools/build_public_hip_prefix_assets.py','tests/public_hip_prefix_assets_test.py','tests/source_model_prefix_freeze_test.py','tests/llm_prefix_reference_test.py','tests/source_prefix_console_test.py','tests/source_prefix_authentication_test.py','tools/source_llm_prefix_log.py','tools/verify_llm_prefix_readbacks.py','tests/native_prefix_transcript_test.py','tests/llm_prefix_readbacks_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_layer_assets.py','tools/build_public_hip_layer_assets.py','tools/build_llm_layer_reference.py','tools/source_llm_layer_raw.py','tools/source_llm_layer_log.py','tools/verify_llm_layer_readbacks.py','tests/source_model_layer_freeze_test.py','tests/llm_layer_reference_test.py','tests/public_hip_layer_assets_test.py','tests/native_layer_transcript_test.py','tests/llm_layer_readbacks_test.py','tests/source_layer_console_test.py','tests/source_layer_authentication_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tools/build_llm_full_model_reference.py','tools/build_llm_full_numeric_test.py','tools/source_llm_full_log.py','tools/verify_llm_full_readbacks.py','tests/source_model_full_freeze_test.py','tests/llm_full_model_reference_test.py','tests/public_hip_full_assets_test.py','tests/native_full_transcript_test.py','tests/llm_full_readbacks_test.py','tests/source_full_console_test.py'))
+ paths.update(ROOT/n for n in ('tests/llm_generation_readbacks_test.py','tests/llm_generation_reference_test.py','tests/llm_generation_numeric_test.py','tools/source_llm_generation_log.py','tests/native_generation_transcript_test.py','tests/native_generation_application_test.py','tests/source_generation_console_test.py'))
  paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
  seen=set()
@@ -173,7 +177,7 @@ def _validate_model_candidate(candidate,manifest,freeze_evidence=None):
  if bound['phase'] in ('model-prefix','model-layer','model-full'):
   kind='full' if bound['phase']=='model-full' else 'layer' if bound['phase']=='model-layer' else 'prefix'
   if freeze_evidence is None:
-   authenticate=_reference_authenticator(kind)
+   authenticate=_reference_authenticator(kind,prefix_data.get('profile','smoke'))
    copied=authenticate(candidate/(kind+'-reference'))
   else:
    original,copied=freeze_evidence
@@ -204,8 +208,12 @@ def layer_binding(bound,inputs):
 def full_binding(bound,inputs):
  return _binding(bound,inputs,'full')
 
-def _reference_authenticator(kind):
+def _reference_authenticator(kind,profile='smoke'):
+ if kind=='full' and profile=='generation':
+  from build_llm_generation_reference import authenticate_generation_reference
+  return authenticate_generation_reference
  if kind=='full':
+  require(profile=='smoke','full profile differs')
   from build_llm_full_model_reference import authenticate_full_model_reference
   return authenticate_full_model_reference
  if kind=='layer':
@@ -223,7 +231,7 @@ def _binding(bound,inputs,kind):
   from public_hip_prefix_assets import prefix_inputs as aggregate_inputs
  link=bound.get(kind,{})
  require(set(link)==({'receipt','receipt_sha256','reference','profile'} if kind=='full' else {'receipt','receipt_sha256','reference'}),'prefix binding fields differ')
- if kind=='full':require(link['profile']=='smoke','full profile differs')
+ if kind=='full':require(link['profile'] in ('smoke','generation'),'full profile differs')
  receipt=Path(link['receipt'])
  require(receipt.is_absolute() and receipt.name=='receipt.json' and receipt.is_relative_to(ROOT),'prefix aggregate path differs')
  data=aggregate_inputs(receipt.parent)
@@ -232,6 +240,9 @@ def _binding(bound,inputs,kind):
  require(set(data['assets'])=={'model-'+asset_kind+'/'+n+'.hsaco' for n in (LAYER_MODULES if kind in ('layer','full') else PREFIX_MODULES)},'prefix exact modules required')
  if kind=='full':
   from source_llm_full_log import FILES as FULL_FILES
+  if link['profile']=='generation':
+   from verify_llm_full_readbacks import generation_files
+   FULL_FILES=generation_files(data['reference'])
   require(data.get('raw_files')==FULL_FILES,'full raw inventory differs')
  model=bound['model']
  require(data['model']=={'path':str(Path(model['asset']).resolve()),'bytes':model['bytes'],'sha256':model['sha256']},'prefix model identity differs')
@@ -254,7 +265,7 @@ def frozen_layer_manifest(candidate,bound,inputs):
 
 def frozen_full_manifest(candidate,bound,inputs):
  data=full_binding(bound,inputs)
- return _frozen_reference_manifest(candidate,data,_reference_authenticator('full')(candidate/'full-reference'),'full')
+ return _frozen_reference_manifest(candidate,data,_reference_authenticator('full',data['profile'])(candidate/'full-reference'),'full')
 
 def _frozen_reference_manifest(candidate,data,authenticated,kind):
  """Construct from local authentication evidence; recheck exact copied bytes."""
@@ -274,11 +285,15 @@ def _frozen_reference_manifest(candidate,data,authenticated,kind):
  raw_files=FILES if kind=='layer' else PREFIX_RAW_FILES
  if kind=='full':
   from source_llm_full_log import FILES as FULL_FILES
-  require(data.get('profile')=='smoke','full profile differs')
+  require(data.get('profile') in ('smoke','generation'),'full profile differs')
+  if data['profile']=='generation':
+   from verify_llm_full_readbacks import generation_files
+   FULL_FILES=generation_files(reference)
+  require(data['raw_files']==FULL_FILES,'frozen full raw inventory differs')
   raw_files=FULL_FILES
  result={'aggregate':str(Path(data['receipt']).relative_to(ROOT)),'aggregate_sha256':data['receipt_sha256'],
          'reference':str(reference.relative_to(ROOT)),'reference_receipt_sha256':copied['receipt_sha256'],
          'module_sha256':{n:stream_digest(data['assets']['model-'+asset_kind+'/'+n+'.hsaco']) for n in (LAYER_MODULES if kind in ('layer','full') else PREFIX_MODULES)},
          'raw_files':dict(raw_files)}
- if kind=='full':result['profile']='smoke'
+ if kind=='full':result['profile']=data['profile']
  return result

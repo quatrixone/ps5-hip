@@ -12,7 +12,7 @@ from build_llm_generation_reference import authenticate_generation_reference, lo
 
 ROOT = Path(__file__).resolve().parents[1]
 ABS_TOL, REL_TOL, L2_TOL = 2e-5, 2e-4, 2e-4
-def compare_generation(raw, reference):
+def compare_generation(raw, reference, host_backend=True):
     raw, reference = Path(raw), Path(reference)
     expected = loads((reference / "generation.json").read_text())
     actual = loads((raw / "generation.json").read_text())
@@ -24,9 +24,9 @@ def compare_generation(raw, reference):
     files = {f"run-{run['run']}-pos-{p}-{stage}.f32le": 128000 if stage == "logits" else 8192
              for run in runs for p in range(len(run["processed"]))
              for stage in [*(f"layer-{i}" for i in range(22)), "norm", "logits"]}
-    if raw.is_symlink() or {p.name for p in raw.iterdir()} != set(files) | {"generation.json", "steps.jsonl", "backend.json"}:
+    if raw.is_symlink() or {p.name for p in raw.iterdir()} != set(files) | {"generation.json", "steps.jsonl"} | ({"backend.json"} if host_backend else set()):
         raise ValueError("generation output inventory")
-    for name in ("generation.json", "steps.jsonl", "backend.json"):
+    for name in ("generation.json", "steps.jsonl", *(("backend.json",) if host_backend else ())):
         if (raw / name).is_symlink() or not (raw / name).is_file():
             raise ValueError("generation metadata kind")
     winners = {}
@@ -58,15 +58,17 @@ def compare_generation(raw, reference):
             name = f"run-{run['run']}-pos-{prompt_count-1+i}-logits.f32le"
             if winners.get(name) != token:
                 raise ValueError("actual logits greedy argmax differs")
-    counters = loads((raw / "backend.json").read_text()); requests = sum(len(run["processed"]) for run in runs)
-    keys = {"requests", "nodes", "launches", "CPU_arithmetic", "scheduler_forwarded", "allocations", "frees", "instances_created", "instances_freed"}
-    if set(counters) != keys or any(type(value) is not int for value in counters.values()):
-        raise ValueError("generation backend counter types/keys")
-    if (counters.get("requests"), counters.get("nodes"), counters.get("launches"), counters.get("CPU_arithmetic"), counters.get("scheduler_forwarded")) != (requests, requests*798, requests*733, 0, requests):
-        raise ValueError("generation backend counters")
-    for a,b in (("allocations","frees"),("instances_created","instances_freed")):
-        if type(counters.get(a)) is not int or counters[a] <= 0 or counters[a] != counters.get(b):
-            raise ValueError("generation backend ownership")
+    requests = sum(len(run["processed"]) for run in runs)
+    if host_backend:
+        counters = loads((raw / "backend.json").read_text())
+        keys = {"requests", "nodes", "launches", "CPU_arithmetic", "scheduler_forwarded", "allocations", "frees", "instances_created", "instances_freed"}
+        if set(counters) != keys or any(type(value) is not int for value in counters.values()):
+            raise ValueError("generation backend counter types/keys")
+        if (counters.get("requests"), counters.get("nodes"), counters.get("launches"), counters.get("CPU_arithmetic"), counters.get("scheduler_forwarded")) != (requests, requests*798, requests*733, 0, requests):
+            raise ValueError("generation backend counters")
+        for a,b in (("allocations","frees"),("instances_created","instances_freed")):
+            if type(counters.get(a)) is not int or counters[a] <= 0 or counters[a] != counters.get(b):
+                raise ValueError("generation backend ownership")
     return rows, files, requests
 
 
@@ -84,7 +86,7 @@ def build(cpu, model, reference, output, native_helper=False):
     for path in (Path(__file__), ROOT / "tests/llm_generation_numeric_test.py", ROOT / "tests/llm_rms_numeric_mock_test.cpp", Path(provenance.__file__), compiler, Path("/usr/bin/ldd")):
         provenance.merge(inputs, path, provenance.sha(path))
     if native_helper:
-        for path in (ROOT / "tools/source_llm_generation_log.py", ROOT / "tests/native_generation_transcript_test.py"):
+        for path in (ROOT / "tools/source_llm_generation_log.py", ROOT / "tools/source_llm_full_log.py", ROOT / "tests/native_generation_transcript_test.py"):
             provenance.merge(inputs, path, provenance.sha(path))
     output.mkdir(parents=True); raw = output / "raw"; raw.mkdir()
     commands = []

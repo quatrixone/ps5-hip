@@ -8,6 +8,45 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## M4 generation freeze, readback and application contracts integrated offline
+
+The generation profile now selects its CPU oracle during reference freezing and
+binds all 384 float outputs plus both metadata files. Admission requires a native
+image audit that explicitly identifies `generation` and proves the actual
+generation call chain; the old smoke audit cannot authorize it. The default smoke
+profile and its raw contract are retained.
+
+The controller collects the exact 386 files, rejects stale metadata before launch,
+uses hash-bound frozen token policy, and requires numerical comparison of the same
+captured bytes. The generation application parser checks startup, four memory
+snapshots and recovery, phase/request timing, ownership balance, watchdog join and
+finalization. Shared framing/memory checks retain the smoke contract. These are
+offline parser/controller tests, not native-origin evidence.
+
+`make llm-native-generation-tests` now runs generation application/readback/freeze/
+controller checks and the production helper. The refreshed numerical helper is
+`results/m4-native-generation-numeric-v6`: all 384 outputs remain bitwise CPU-equal,
+with balanced storage and no CPU backend tensor arithmetic. CPU oracle v3 and
+six-module assets v1 remain current. See
+`evidence/offline-generation-freeze-and-controller.json` for qualification details.
+The real reference-only freeze/readback case is
+`results/m4-generation-reference-freeze-v1`: original/copy authentication and
+386-file comparison pass, all 384 float outputs bitwise CPU-equal. Those readbacks
+were copied from offline v5 output; they are not console captures. Preserve the
+reference manifest, comparison, receipt and ignored qualification script.
+
+Removed only v5's superseded host executable and two objects (4,457,720 bytes),
+after process and current-receipt dependency checks. Ledger:
+`results/cleanup-generation-numeric-v5-1792288749477757541.json`. Raw outputs,
+receipts, logs and sources remain; v5 requires rebuilding pruned host outputs for
+a complete artifact rehash.
+
+Next wire the native title/builder compile-time generation selection and extend
+the linked-image audit to its real helper/sampler/decoder path. The current title
+still selects smoke, and the audit cannot yet produce generation proof. Do not
+build/deploy a generation candidate until those checks pass. No native package
+build or console contact occurred; preserve the installed .40 smoke baseline.
+
 ## M4 generation now compares every CPU boundary offline
 
 The greedy CPU oracle now captures all 22 layer outputs, final normalization and

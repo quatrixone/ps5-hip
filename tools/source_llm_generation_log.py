@@ -3,9 +3,12 @@
 This checks controls and timing only. It cannot establish GPU origin or numerics.
 """
 import re
+from source_llm_full_log import application_frame, memory_snapshot, check_memory_lifecycle
+
+APP_COMPLETE = 'M4_GEN APP_COMPLETE profile=generation watchdog_joined=true numerical=pending finalization=pending inference=false'
 
 
-def check_fragment(raw, metadata, metadata_sizes):
+def check_fragment(raw, metadata, metadata_sizes, native=False):
     if not isinstance(raw, bytes) or not raw or len(raw) > 65536 or b'\0' in raw or b'\r' in raw:
         raise ValueError('generation transcript encoding/bound')
     text = raw.decode('ascii')
@@ -14,6 +17,11 @@ def check_fragment(raw, metadata, metadata_sizes):
     lines = iter(text.splitlines())
     previous = 0
     timings = []
+    memory = []
+
+    def snapshot(phase):
+        if native:
+            memory.append(memory_snapshot(next(lines, ''), phase))
 
     def exact(value):
         if next(lines, None) != value:
@@ -43,10 +51,13 @@ def check_fragment(raw, metadata, metadata_sizes):
         raise ValueError('generation metadata sizes')
     exact('M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512')
     exact('M3_FULL PHASE load_begin')
+    snapshot('before_load')
     phase('load')
     exact('M3_FULL PHASE load_complete')
+    snapshot('after_load')
     phase('context')
     exact('M3_FULL PHASE context_complete')
+    snapshot('after_context')
     requests = 0
     for run, policy in enumerate(metadata['runs']):
         phase('reset', run)
@@ -77,8 +88,20 @@ def check_fragment(raw, metadata, metadata_sizes):
     generation_bytes, steps_bytes = (metadata_sizes[k] for k in ('generation.json', 'steps.jsonl'))
     exact(f'M4_GEN METADATA files=2 generation_bytes={generation_bytes} steps_bytes={steps_bytes} synced=true')
     exact('M3_FULL PHASE cleanup_begin')
+    snapshot('after_cleanup')
     phase('cleanup')
     row = match(r'M4_GEN TRANSPORT_COMPLETE requests=' + str(requests) + r' layers=22 logits=32000 nodes=' + str(requests * 798) + r' launches=' + str(requests * 733) + r' raw_files=' + str(requests * 24) + r' raw_bytes=' + str(requests * 316416) + r' metadata_files=2 metadata_bytes=' + str(generation_bytes + steps_bytes) + r' instances=([1-9]\d{0,9})/([1-9]\d{0,9}) numerical=pending finalization=pending')
     if row[1] != row[2] or next(lines, None) is not None:
         raise ValueError('generation completion/ownership')
-    return dict(status='PASS', classification='generation-helper-transcript-only', requests=requests, raw_files=requests * 24, metadata_files=2, timings=timings, numerical_verified=False, gpu_origin_established=False, finalization_verified=False)
+    if native:
+        check_memory_lifecycle(memory)
+    return dict(status='PASS', classification='generation-helper-transcript-only', requests=requests, raw_files=requests * 24, metadata_files=2, metadata_bytes=sum(metadata_sizes.values()), raw_bytes=requests*316416, nodes=requests*798, gpu_submits=requests*733, instances=int(row[1]), memory=memory, timings=timings, numerical_verified=False, gpu_origin_established=False, finalization_verified=False)
+
+
+def check_full_log(raw, metadata, metadata_sizes):
+    if sum(len(row['processed']) for row in metadata['runs']) != 16:
+        raise ValueError('native generation request profile')
+    fragment, lifecycle = application_frame(raw, APP_COMPLETE)
+    result = check_fragment(fragment, metadata, metadata_sizes, native=True)
+    result.update(phase='model-full', profile='generation', classification='native-generation-transcript-only', **lifecycle)
+    return result

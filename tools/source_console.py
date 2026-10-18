@@ -335,11 +335,37 @@ class Control:
     def full_phase(self):
         return self.model_phase() and self.manifest['llm_client']['phase']=='model-full'
 
+    def generation_phase(self):
+        return self.full_phase() and self.manifest.get('model_full',{}).get('profile','smoke')=='generation'
+
+    def prefix_files(self):
+        if self.generation_phase():return self.manifest['model_full']['raw_files']
+        return self.compute_contract().FILES
+
+    def prefix_dump_name(self,name):
+        if self.generation_phase() and name in ('generation.json','steps.jsonl'):return True
+        return name.startswith('run-') and name.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else name.startswith('token-') and name.endswith('.f32le')
+
+    def generation_policy(self):
+        from build_llm_generation_reference import loads
+        binding=self.manifest['model_full'];reference=(ROOT/binding['reference']).resolve()
+        require(reference.is_relative_to(self.candidate.resolve()),'generation reference outside candidate')
+        values={}
+        for name in ('generation.json','steps.jsonl'):
+            path=reference/'raw'/name
+            require(path.resolve()==path and not path.is_symlink() and path.stat().st_size==binding['raw_files'][name],'generation metadata kind/size')
+            raw=path.read_bytes()
+            require(self.manifest['files'].get(str(path.relative_to(ROOT)))==sha(raw),'generation frozen metadata identity differs')
+            values[name]=raw
+        return loads(values['generation.json'].decode('utf-8')),{name:len(raw) for name,raw in values.items()}
+
     def layer_phase(self):
         return self.model_phase() and self.manifest['llm_client']['phase']=='model-layer'
 
     def compute_contract(self):
-        if self.full_phase():
+        if self.generation_phase():
+            import source_llm_generation_log as contract
+        elif self.full_phase():
             import source_llm_full_log as contract
         elif self.layer_phase():
             import source_llm_layer_log as contract
@@ -358,6 +384,9 @@ class Control:
             import verify_llm_full_readbacks
             import build_llm_full_model_reference
             import public_hip_full_assets
+            import source_llm_generation_log
+            import build_llm_generation_reference
+            import build_llm_generation_numeric_test
         elif self.layer_phase():
             import source_llm_layer_log
             import verify_llm_layer_readbacks
@@ -661,21 +690,21 @@ class Control:
 
     def fresh_prefix_dumps(self):
         if not self.prefix_phase():return
-        FILES=self.compute_contract().FILES
+        FILES=self.prefix_files()
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
-        require(not any((n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else n.startswith('token-') and n.endswith('.f32le')) for n in names),'prefix raw files already exist')
+        require(not any(self.prefix_dump_name(n) for n in names),'prefix raw files already exist')
         self.record['prefix_raw_absent_before_launch']=sorted(FILES)
 
     def collect_prefix_dumps(self,partial=False):
         if not self.prefix_phase():return
-        FILES=self.compute_contract().FILES
+        FILES=self.prefix_files()
         if not hasattr(self,'prefix_capture_deadline'):
             self.prefix_capture_deadline=time.monotonic()+120
             self.record['prefix_raw_capture_limit_seconds']=120
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
         records=self.record.setdefault('prefix_raw_files',{})
         folder=self.out/'raw';folder.mkdir(exist_ok=True)
-        if not partial:require({n for n in names if (n.startswith('run-') and n.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else n.startswith('token-') and n.endswith('.f32le'))}==set(FILES),'prefix raw inventory differs')
+        if not partial:require({n for n in names if self.prefix_dump_name(n)}==set(FILES),'prefix raw inventory differs')
         for name,size in FILES.items():
             if name in records or (partial and name not in names):continue
             remaining=self.prefix_capture_deadline-time.monotonic()
@@ -704,8 +733,8 @@ class Control:
             from verify_llm_prefix_readbacks import verify
         output=self.out/'prefix-numerical.json'
         binding=self.manifest['model_full' if self.full_phase() else 'model_layer' if self.layer_phase() else 'model_prefix']
-        result=verify(ROOT/binding['reference'],self.out/'raw',output)
-        require(result.get('status')=='PASS' and result.get('raw_files')==len(self.compute_contract().FILES) and result.get('raw_bytes')==sum(self.compute_contract().FILES.values()),'prefix numerical verification failed')
+        result=verify(ROOT/binding['reference'],self.out/'raw',output,**({'profile':'generation'} if self.generation_phase() else {}))
+        require(result.get('status')=='PASS' and result.get('raw_files')==len(self.prefix_files()) and result.get('raw_bytes')==sum(self.prefix_files().values()),'prefix numerical verification failed')
         require(result.get('reference_receipt_sha256')==binding['reference_receipt_sha256'],'prefix numerical reference differs')
         require(result.get('raw_sha256')=={name:entry['sha256'] for name,entry in self.record['prefix_raw_files'].items()},'prefix compared bytes differ from captured bytes')
         self.record['prefix_numerical']={'status':'PASS','receipt_sha256':sha(output.read_bytes())}
@@ -903,6 +932,9 @@ class Control:
         return 150 if self.model_phase() else 40
 
     def check_application(self, raw):
+        if self.generation_phase():
+            from source_llm_generation_log import check_full_log
+            return check_full_log(raw,*self.generation_policy())
         if self.full_phase():
             from source_llm_full_log import check_full_log
             return check_full_log(raw)

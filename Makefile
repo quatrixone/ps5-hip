@@ -588,6 +588,10 @@ llm-generation-numeric-tests: llm-deps-fetch
 llm-native-generation-tests: llm-deps-fetch
 	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi
 	$(PYTHON) tests/native_generation_transcript_test.py
+	$(PYTHON) tests/native_generation_application_test.py
+	$(PYTHON) tests/llm_generation_readbacks_test.py
+	$(PYTHON) tests/source_model_full_freeze_test.py
+	$(PYTHON) tests/source_generation_console_test.py
 	$(PYTHON) tools/build_llm_generation_numeric_test.py --native-helper --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_NATIVE_GENERATION_TEST_DIR)"
 
 .PHONY: llm-full-numeric-tests

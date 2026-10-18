@@ -109,6 +109,33 @@ class FullFreeze(unittest.TestCase):
    manifest['model_full']=m.copy();manifest['model_full']['raw_files']=dict(RAW_FILES);manifest['files']={}
    with self.assertRaisesRegex(ValueError,'file identity'):f.validate_model_candidate(out,manifest)
 
+ def generation_setup(self):
+  import build_llm_generation_reference as generation
+  from llm_generation_readbacks_test import write_generation_raw
+  files=write_generation_raw(self.refdir/'raw')
+  self.data.update(profile='generation',raw_files=files)
+  self.r['llm_client']['full']['profile']='generation'
+  self.base.audit.update(full_profile='generation',actual_generation_call_chain_audited=True);self.update_audit()
+  for path in (self.refdir/'raw').iterdir():
+   self.data['inputs'][str(path)]=f.stream_digest(path);self.inputs[str(path)]=f.stream_digest(path)
+  self.genmock=patch.object(generation,'authenticate_generation_reference',side_effect=self.authenticate).start()
+ def test_generation_freeze_and_copied_manifest(self):
+  self.generation_setup();self.assertEqual(self.validate()['full']['profile'],'generation')
+  out,m=self.freeze();self.assertEqual(m['profile'],'generation');self.assertEqual(len(m['raw_files']),386)
+  self.assertEqual(m,f.frozen_full_manifest(out,self.r['llm_client'],self.inputs));self.assertEqual(self.refmock.call_count,0)
+  self.assertTrue((out/'full-reference/raw/generation.json').is_file())
+ def test_generation_cannot_reuse_smoke_image_audit(self):
+  self.generation_setup();self.base.audit.pop('full_profile');self.update_audit()
+  with self.assertRaisesRegex(ValueError,'audit profile'):self.validate()
+  self.base.audit['full_profile']='generation';self.base.audit['actual_generation_call_chain_audited']=False;self.update_audit()
+  with self.assertRaisesRegex(ValueError,'generation call-chain'):self.validate()
+ def test_generation_raw_contract_and_metadata_are_required(self):
+  self.generation_setup();self.data['raw_files'].pop('generation.json')
+  with self.assertRaisesRegex(ValueError,'raw inventory'):self.validate()
+ def test_generation_copied_metadata_not_trusted_from_receipt(self):
+  self.generation_setup();out,_=self.freeze();p=out/'full-reference/raw/generation.json';p.write_text(p.read_text().replace('"run": 0','"run": false'))
+  with self.assertRaises(ValueError):f.frozen_full_manifest(out,self.r['llm_client'],self.inputs)
+
  def test_actual_full_freeze_cli(self):
   import external_model as em
   for name in ('source_console.py','source_public_hip_log.py','freeze_source_candidate.py','helper.py'):self.put(self.root/'tools'/name)

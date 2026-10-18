@@ -5,8 +5,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from source_llm_generation_log import check_fragment
 
 
-def fixture():
-    policy = dict(max_new_tokens=4, runs=[dict(processed=[1, 2, 3, 4, 5], generated=[3, 4, 5, 6], stop='step_limit', text_hex='6162') for _ in range(2)])
+def fixture(processed_count=5):
+    policy = dict(max_new_tokens=4, runs=[dict(processed=list(range(1,processed_count+1)), generated=list(range(processed_count-2,processed_count+2)), stop='step_limit', text_hex='6162') for _ in range(2)])
     sizes = {'generation.json': 500, 'steps.jsonl': 700}
     lines = ['M4_GEN PROFILE name=greedy-short runs=2 max_new_tokens=4 context=512', 'M3_FULL PHASE load_begin']
     tick = 100
@@ -26,11 +26,11 @@ def fixture():
                 lines.append(f'M3_FULL RAW file=run-{run}-pos-{pos}-{stage}.f32le bytes={size} synced=true')
             lines.append(f'M4_GEN DECODE run={run} position={pos} token={token} committed_position={pos} layers=22 logits=32000 begin_ns={tick} end_ns={tick+10} elapsed_ns=10 readback_ns=3 inclusive_readback=true')
             tick += 12
-        lines.append(f'M4_GEN RUN_TIME run={run} begin_ns={began} end_ns={tick} elapsed_ns={tick-began} decode_ns=50 scheduling_sampling_log_ns={tick-began-50}')
-        lines.append(f'M4_GEN RESULT run={run} processed=5 generated=4 stop=step_limit text_hex=6162')
+        lines.append(f'M4_GEN RUN_TIME run={run} begin_ns={began} end_ns={tick} elapsed_ns={tick-began} decode_ns={processed_count*10} scheduling_sampling_log_ns={tick-began-processed_count*10}')
+        lines.append(f'M4_GEN RESULT run={run} processed={processed_count} generated=4 stop=step_limit text_hex=6162')
     lines += ['M4_GEN METADATA files=2 generation_bytes=500 steps_bytes=700 synced=true', 'M3_FULL PHASE cleanup_begin']
     phase('cleanup')
-    lines.append('M4_GEN TRANSPORT_COMPLETE requests=10 layers=22 logits=32000 nodes=7980 launches=7330 raw_files=240 raw_bytes=3164160 metadata_files=2 metadata_bytes=1200 instances=1/1 numerical=pending finalization=pending')
+    lines.append(f'M4_GEN TRANSPORT_COMPLETE requests={processed_count*2} layers=22 logits=32000 nodes={processed_count*2*798} launches={processed_count*2*733} raw_files={processed_count*48} raw_bytes={processed_count*2*316416} metadata_files=2 metadata_bytes=1200 instances=1/1 numerical=pending finalization=pending')
     return ('\n'.join(lines)+'\n').encode(), policy, sizes
 
 
