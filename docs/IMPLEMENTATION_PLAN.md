@@ -1,6 +1,6 @@
 # Native HIP and ROCm capabilities on PlayStation 5
 
-Updated: 2026-10-17, America/New_York.
+Updated: 2026-10-18, America/New_York.
 
 ## Active release priority: native LLM inference v1
 
@@ -9,8 +9,11 @@ the original acceptance gates. M0, M1, the actual-model prefix and the selected
 Q4 first-layer sequence are native-validated. M2 remains open for a dense
 floating-point whole-layer fixture and representative extreme inputs. M3's
 native full-model smoke now passes all 22 layers, normalization and logits with
-actual decoder commits/reset. Next qualify short greedy generation and timing;
-long full-model context and token generation are not yet established.
+actual decoder commits/reset. Short native greedy generation now passes two reset rounds with all 384
+float outputs bitwise CPU-equal. Wider prompts and long context remain open.
+Reduce repeated host authentication before expanding console qualification.
+
+- 2026-10-18 | M4 short greedy generation | .40 | pass:16 commits,22 layers,4 generated tokens/reset,384 bitwise CPU-equal outputs and clean lifecycle | evidence/console40-native-short-generation-success.json | next: host verification overhead and wider M4
 
 - 2026-10-17 | M4 native generation package | offline | 149 objects, 15 files and415-function image audit pass independent review; external model retained | evidence/offline-native-generation-linked-package.json | next: freeze/review and .40
 

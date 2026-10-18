@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "console40-native-short-greedy-generation-success",
+  "source_commit": "42f74b34a1aa177ffe2f5ba2aea0c903f8aae224",
+  "manifest_sha256": "f08f405927cf4eb31bc73504bd3d02bac31ea12335babab0479795ff8f0e3b72",
+  "execution_receipt_sha256": "4fc2b45c8c171b7deebc194a06c1cf7b7a3f964d4fc5fb93e1f23972838c0e5b",
+  "deployment_review_sha256": "f1a929cae9aea33126c387109e9c3ff92b178bc9534c9b02e6317758413641c4",
+  "package_sha256": "4032fac68e2761ac4d1bb10aceb2ad38155a0150ca05958559c35dc4da70bca3",
+  "findings": [],
+  "requests": 16,
+  "runs": 2,
+  "generated_tokens_per_run": 4,
+  "generated_ids": [
+    29892,
+    727,
+    471,
+    263
+  ],
+  "generated_text": ", there was a",
+  "layers_per_request": 22,
+  "logits_per_request": 32000,
+  "nodes": 12768,
+  "gpu_launches": 11728,
+  "float_outputs": 384,
+  "metadata_files": 2,
+  "raw_bytes": 5064354,
+  "bitwise_cpu_reference_equal": true,
+  "reset_exact": true,
+  "native_origin_established_by_combined_evidence": true,
+  "numerical_only_gpu_origin_established": false,
+  "full_feedback_callback_dataflow_proven": false,
+  "host_storage": {
+    "allocations": 411,
+    "releases": 411,
+    "peak_requested_bytes": 37028496
+  },
+  "native_final_counts": [
+    16,
+    16,
+    1,
+    1
+  ],
+  "memory": [
+    {
+      "phase": "before_load",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12882804736
+    },
+    {
+      "phase": "after_load",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12253069312
+    },
+    {
+      "phase": "after_context",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12206473216
+    },
+    {
+      "phase": "after_cleanup",
+      "pool_bytes": 12884901888,
+      "largest_free_bytes": 12882804736
+    }
+  ],
+  "timings": {
+    "decode_seconds": [
+      4.476366269,
+      4.407328627,
+      4.419324847,
+      4.448537358,
+      4.426033399,
+      4.460518583,
+      4.408740612,
+      4.579258437,
+      4.40212764,
+      4.447157447,
+      4.40129756,
+      4.427353091,
+      4.462775563,
+      4.435758769,
+      4.46852181,
+      4.40971759
+    ],
+    "decode_min_seconds": 4.40129756,
+    "decode_max_seconds": 4.579258437,
+    "decode_median_seconds": 4.43155593,
+    "decode_total_seconds": 71.080817602,
+    "phase_timings": [
+      {
+        "scope": "load",
+        "run": 0,
+        "elapsed_ns": 952320546
+      },
+      {
+        "scope": "context",
+        "run": 0,
+        "elapsed_ns": 205849927
+      },
+      {
+        "scope": "reset",
+        "run": 0,
+        "elapsed_ns": 61457394
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 0,
+        "elapsed_ns": 4476366269,
+        "readback_ns": 1377307926
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 1,
+        "elapsed_ns": 4407328627,
+        "readback_ns": 1310533115
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 2,
+        "elapsed_ns": 4419324847,
+        "readback_ns": 1326951003
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 3,
+        "elapsed_ns": 4448537358,
+        "readback_ns": 1352739995
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 4,
+        "elapsed_ns": 4426033399,
+        "readback_ns": 1328025324
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 5,
+        "elapsed_ns": 4460518583,
+        "readback_ns": 1367107384
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 6,
+        "elapsed_ns": 4408740612,
+        "readback_ns": 1315047313
+      },
+      {
+        "scope": "decode",
+        "run": 0,
+        "position": 7,
+        "elapsed_ns": 4579258437,
+        "readback_ns": 1482679429
+      },
+      {
+        "scope": "reset",
+        "run": 1,
+        "elapsed_ns": 61499732
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 0,
+        "elapsed_ns": 4402127640,
+        "readback_ns": 1314953898
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 1,
+        "elapsed_ns": 4447157447,
+        "readback_ns": 1349340053
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 2,
+        "elapsed_ns": 4401297560,
+        "readback_ns": 1308988907
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 3,
+        "elapsed_ns": 4427353091,
+        "readback_ns": 1331180141
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 4,
+        "elapsed_ns": 4462775563,
+        "readback_ns": 1365916464
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 5,
+        "elapsed_ns": 4435758769,
+        "readback_ns": 1338269493
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 6,
+        "elapsed_ns": 4468521810,
+        "readback_ns": 1368068798
+      },
+      {
+        "scope": "decode",
+        "run": 1,
+        "position": 7,
+        "elapsed_ns": 4409717590,
+        "readback_ns": 1312067543
+      },
+      {
+        "scope": "cleanup",
+        "run": 0,
+        "elapsed_ns": 131778244
+      }
+    ],
+    "readback_total_seconds": 21.549176786,
+    "runs": [
+      {
+        "run": 0,
+        "elapsed_seconds": 36.802044247,
+        "decode_seconds": 35.626108132,
+        "scheduling_sampling_log_seconds": 1.175936115
+      },
+      {
+        "run": 1,
+        "elapsed_seconds": 36.638632213,
+        "decode_seconds": 35.45470947,
+        "scheduling_sampling_log_seconds": 1.183922743
+      }
+    ]
+  },
+  "normal_stop": true,
+  "mounts_unchanged": true,
+  "healthy_after": true,
+  "both_owned_locks_released": true,
+  "current_lock_files_absent": {
+    "C:/Users/denis/Documents/PS5/lock.txt": true,
+    "C:/Users/denis/Documents/PS5-Claude/lock.txt": true
+  },
+  "final_authentication": {
+    "status": "PASS",
+    "elapsed_seconds": 633.9644369950402
+  },
+  "provenance": {
+    "results/source-public-llm-generation-console-v1/execute/receipt.json": "4fc2b45c8c171b7deebc194a06c1cf7b7a3f964d4fc5fb93e1f23972838c0e5b",
+    "results/source-public-llm-generation-console-v1/execute-secondary-lock.json": "0005c9789c698718c1c28bb704f202f8b83ea013b5e6db54d226ceabc266328f",
+    "results/source-public-llm-generation-console-v1/execute/application.log": "9940d2ce2bcf654f786e53c9b29090dd4929664a2b0f19676d434f730bfeb095",
+    "results/source-public-llm-generation-console-v1/execute/prefix-numerical.json": "4658c55ee0e42063309e97b613afb651243cd923d9ad9bf33adb8dd5a46a4926",
+    "results/source-public-llm-generation-console-v1/execute/snapshot.log": "5ac44d1c51511d0ba91599db49a0f59dd7567c42abdd60173b498173b76b7603",
+    "results/source-public-llm-generation-console-v1/execute/post_snapshot.log": "5ac44d1c51511d0ba91599db49a0f59dd7567c42abdd60173b498173b76b7603",
+    "results/source-public-llm-generation-console-v1/execute/before-launch.log": "b452cd776ad479122a7df85652e040b625babe131b3ca7bf29ccbac205250be4",
+    "results/source-public-llm-generation-console-v1/execute/observed.log": "d07ef01bd1a34954d83a885177c76f29ecf2d2198032061a3b5c83fe8cdaee83",
+    "results/source-public-llm-generation-console-v1/execute/klog.log": "a6e94976443a8b5c73979cf90320f2df438cd28f3b50b81a7f15558ff6301481",
+    "results/m4-native-generation-build-review-v1/execution-numerical-review.json": "be896c140b0a1a569b7cae4360f61989f3037ad28a1c59b9914224124fcf2a05",
+    "results/m4-native-generation-build-review-v1/execution-transcript-review.json": "b7d406fc2e7c5a94495eb027dcf70b7a006771d350d54739f123b8f3dbecae93",
+    "results/m4-native-generation-build-review-v1/execution-review.json": "e462d39ab335501ec8390b9570209d82279121980931c23a8e4243c69a0770f4",
+    "results/m4-native-generation-build-review-v1/deployment-review.json": "f1a929cae9aea33126c387109e9c3ff92b178bc9534c9b02e6317758413641c4",
+    "results/source-public-llm-generation-console-v1/manifest.json": "f08f405927cf4eb31bc73504bd3d02bac31ea12335babab0479795ff8f0e3b72",
+    "results/source-public-llm-generation-console-v1/deploy/receipt.json": "950c5a1b4e0a6c99b38e6007bd56e7727b6852f330a01c481f82317a5e8dc4d5",
+    "build/llm-native-generation-app-v1/receipt.json": "a96cf6cadf87c72438606119804f952265493dda38c04e9be5284f7ef85d765d",
+    "build/llm-native-generation-app-v1/llm-client-native-audit.json": "5f549def67168c5034078a87d28d5076913b7589342248d1b0d244b4963073c4"
+  },
+  "limits": [
+    "One short prompt and four generated tokens per reset round; fullM4/M5 release, other prompts and long contexts remain open.",
+    "Decode timings include readback/file writes; they are not isolated GPU or token throughput.",
+    "No remote access or external producer/dependency/model rehash by this reviewer; terminal controller final authentication is relied on."
+  ],
+  "date": "2026-10-18",
+  "console": "192.168.4.40",
+  "title_id": "PPSA99014",
+  "native_executed": true,
+  "bounded_greedy_generation_qualified": true,
+  "inference_release_complete": false,
+  "package_bytes": 22478848,
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  }
+}

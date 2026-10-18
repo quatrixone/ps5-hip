@@ -1,16 +1,14 @@
 # LLM-first implementation plan
 
-Reviewed: 2026-10-17. This is the authoritative first-release execution plan.
-M0, M1, the bounded prefix and the selected real Q4 first-layer sequence pass
-native validation. M3's full 22-layer native smoke, final normalization/logits
-and three actual decoder commits/reset now pass. Next implement short greedy
-generation with phase/request timing. Its production helper now passes all 384
-CPU layer/norm/logit comparisons offline. Generation reference freezing, readback
-comparison and application/controller contracts now pass offline; native title
-selection, packaging and the 415-function linked generation image audit now pass
-independent offline review. A fresh frozen/reviewed .40 generation test remains. Retain M2 dense/extreme and
-long-context qualification. Use idle .40 for meaningful validation and push each validated
-milestone to main.
+Reviewed: 2026-10-18. This is the authoritative first-release execution plan.
+M0, M1, the selected real Q4 first-layer sequence and native full-decoder smoke
+pass. Short native greedy generation now passes: two reset rounds, four new
+tokens per round, 16 actual commits through all 22 layers, and all 384 float
+boundaries bitwise CPU-oracle equal with clean lifecycle. This closes the bounded
+short-generation checkpoint, not full M4/M5. Reduce repeated host verification
+before wider prompts/context qualification. Retain M2 dense/extreme cases and
+the original source-format loading requirement. Use idle .40 for meaningful
+validation and push each validated milestone to main.
 
 ## Outcome and scope
 
@@ -129,7 +127,7 @@ clarification and retained locally under `results/deferred-host-checkpoint-proto
 | Native arithmetic | Unweighted RMSNorm, Q8/Q4 and the learned weighted-normalization/full-QKV chain passed on .40 | Dense floating-point whole-layer and extreme-input coverage |
 | Weighted QKV | M1 passed: 2048 weighted values, 2304 Q8 bytes, 2560 projections, all 30 buffers and clean lifecycle; now integrated in the bounded actual-model prefix | General input/sequence coverage beyond the four qualified position-zero tokens |
 | Client | Full native decoder commits positions 0/1/reset0; all 22 layers and logits pass with clean ownership | Long full-model cache progression and remaining M2 fixtures |
-| Full inference | All 22 GPU layers, final normalization and 32000 logits per request match CPU bitwise | Sampling feedback, generated tokens, long context and release qualification |
+| Full inference | Native live greedy feedback produces four tokens per reset round; all 384 layer/norm/logit outputs match CPU bitwise | Wider prompts, long context, performance and release qualification |
 
 See STATE.md and the referenced compact evidence for individual outcomes.
 A running package build is not a passed build. Historical compile-probe limits

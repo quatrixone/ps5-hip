@@ -1,5 +1,12 @@
 # Greedy generation qualification
 
+Native short-generation qualification now passes on .40: actual live-logit feedback
+produces `, there was a` twice after reset, 16 commits traverse all 22 layers and
+all 384 captured float outputs match the CPU oracle bitwise. See
+`../evidence/console40-native-short-generation-success.json`. The 4.4-second
+per-decode diagnostic timings include readbacks and file writes. Wider prompts,
+long context and full M4/M5 acceptance remain open.
+
 The native full-decoder smoke already qualifies three forced-token requests,
 all 22 layers and full logits. M4 adds actual sampling feedback: the next input
 must come from the preceding live logits, rather than a reference token list.

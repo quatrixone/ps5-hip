@@ -1,7 +1,41 @@
 # Current state
 
-Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
+Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
+
+## M4 short native greedy generation passes on .40
+
+The installed PPSA99014 generation app produces `, there was a` from
+`Once upon a time` using actual live-logit feedback, then repeats after a real
+KV/backend reset. All 16 commits execute 22 layers and 32,000 logits through
+public HIP: 12,768 nodes and 11,728 GPU launches. All 384 captured float outputs
+are bitwise CPU-oracle equal; both metadata files and reset/token histories match.
+Native kernel fixture v8's generation arithmetic is now qualified for this case.
+
+Independent combined execution review passes: 411 host allocations/releases,
+16 GPU allocations/frees, one retired queue, restored largest free extent,
+normal title stop, unchanged mounts, healthy services and both locks released.
+The 12,882,804,736-byte largest free extent recovers; total free memory remains
+unknown. Decode timings range 4.401-4.579 seconds including boundary readbacks
+and file writes; this is a diagnostic correctness run, not throughput evidence.
+
+See `evidence/console40-native-short-generation-success.json` and
+`results/m4-native-generation-build-review-v1/execution-review.json`.
+`results/source-public-llm-generation-console-v1` is consumed: never replay it.
+The installed baseline is package SHA
+`4032fac68e2761ac4d1bb10aceb2ad38155a0150ca05958559c35dc4da70bca3`,
+22,478,848 bytes, results `/user/homebrew/ps5-hip/m4-greedy-v1`, application log SHA
+`9940d2ce2bcf654f786e53c9b29090dd4929664a2b0f19676d434f730bfeb095`.
+The external model was verified and reused at `/data/hip/models/tinyllama-q4_0.gguf`.
+Preserve the prior smoke package/log recovery and all raw generation evidence.
+
+Before wider console tests, reduce repeated host-side build/control input
+verification while retaining frozen package/reference/controller identities,
+model validation and native lifecycle checks. The package upload took 2.414
+seconds; deployment took 1,783 seconds and execution control 1,489 seconds,
+including fresh local authentication. Cost analysis and an unapplied small
+builder improvement are in the review folder. M4 wider prompts/context, M2
+remaining dense/extreme fixtures, M5 and original-format native loading remain open.
 
 ## M4 native generation package and linked audit pass
 
