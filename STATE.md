@@ -26,6 +26,17 @@ independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUI
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
 `.bin/.pt/.pth`, other architectures, training and native original loading remain open.
 
+## Native original-format image audit corrected
+
+The original-format app compiled, linked and packaged, but its producer stopped
+at an audit assumption: nested template names confused loader selection, then
+initialization resets violated the old single-reset expectation. The corrected
+auditor uses the existing unique loader selector and strict per-signature reset
+counts/order. All three existing images now pass the main auditor (435 functions);
+six original and 45 legacy tests pass. No native rebuild was needed for this audit.
+See `evidence/offline-original-native-audit-correction.json`. The failed producer
+has no final receipt: producer completion and console execution remain pending.
+
 ## Native original-format integration: offline checks pass
 
 The native title, builder, image auditor, freezer and controller now share the

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-original-native-linked-image-audit-correction",
+  "build_source_commit": "ad49c98",
+  "build": "build/llm-native-original-app-v1",
+  "audit_sha256": "8354e4bb8b9a1a9b28a2ef6007aa2751ed88b7cab751718631e3151250421b89",
+  "audited_function_count": 435,
+  "model_format": "original_safetensors",
+  "images": {
+    "title.elf": {
+      "bytes": 25050336,
+      "sha256": "38404a15570f146ec3e44b204e0236686d4514ad5e97c9095bb2499e9ddde3ee"
+    },
+    "eboot.elf": {
+      "bytes": 15300644,
+      "sha256": "6158019b59dbbd0a6c233b4fc119215583c25a77c27143eb299016ba4724d90e"
+    },
+    "extracted.elf": {
+      "bytes": 15300644,
+      "sha256": "9197a75813ebb6db30c9d21135e1223b41009f8989febf591f40ab4bdd3ac015"
+    }
+  },
+  "tests": {
+    "original": 6,
+    "legacy": 45
+  },
+  "original_model_call_chain_audited": true,
+  "actual_full_call_chain_audited": true,
+  "actual_generation_call_chain_audited": true,
+  "native_executed": false,
+  "gpu_executed": false,
+  "producer_receipt_complete": false,
+  "limits": [
+    "Original producer stopped on audit ambiguity; failed output and diagnostic preserved.",
+    "Corrected main auditor passes existing images; this does not complete the producer receipt or approve deployment.",
+    "Static selected call-chain/image checks do not prove exhaustive indirect callback dataflow or native model execution."
+  ]
+}

@@ -4,6 +4,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Native original-format integration | offline | 212 tests and independent review pass; linked image pending | evidence/offline-native-original-format-integration.json
 
+- 2026-10-18 | Original native image audit | offline | existing3images/435functions pass;51tests; producer receipt pending | evidence/offline-original-native-audit-correction.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

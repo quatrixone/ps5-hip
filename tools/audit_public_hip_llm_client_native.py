@@ -413,11 +413,25 @@ def full_profile_operand(body,run,profile="smoke",model_format="gguf"):
  require(not any(re.search(r', (?:0x(?:8|10)\(%r(?:ax|sp)\)|%rax|%rsp)$',s) for s in window[first+len(expected):]),'full profile/source operand overwritten')
 
 
+def full_model_cleanup_contract(body,r,model_format):
+ resets=symbol_calls(body,r['model_reset'])
+ modern='NativeFullModelSourceE' in r['run']
+ require(model_format=='gguf' or modern,'original model source signature absent')
+ require(len(resets)==(3 if model_format=='original_safetensors' else 2 if modern else 1),'model reset callsite count differs')
+ def once(name):
+  positions=symbol_calls(body,name);require(len(positions)==1,'missing/duplicated model lifecycle '+name);return positions[0]
+ require(once(r['context_reset'])<resets[-1]<once(r['disable']),'model cleanup order differs')
+ if modern:
+  require(once('llama_model_load_from_file')<resets[-2]<once('llama_init_from_model'),'GGUF model reset order differs')
+ if model_format=='original_safetensors':
+  require(once('llama_model_init_from_user')<resets[0]<once('llama_model_load_from_file'),'original model reset order differs')
+
 def full_contract(bodies,r,dispatch_names,profile="smoke",model_format="gguf"):
  load="llama_model_init_from_user" if model_format=="original_safetensors" else "llama_model_load_from_file"
  for caller,targets in full_edges(r,model_format).items():
   for callee in targets:require(symbol_calls(bodies[caller],callee),'full call missing: '+caller+' -> '+callee)
- ordered_calls(bodies[r['run']],[r['enable'],load,'llama_init_from_model','llama_synchronize','llama_memory_clear',r['reset'],'llama_process',r['context_reset'],r['model_reset'],r['disable'],'llama_backend_free'])
+ full_model_cleanup_contract(bodies[r['run']],r,model_format)
+ ordered_calls(bodies[r['run']],[r['enable'],load,'llama_init_from_model','llama_synchronize','llama_memory_clear',r['reset'],'llama_process',r['context_reset'],r['disable'],'llama_backend_free'])
  full_profile_operand(bodies['main'],r['run'],profile,model_format)
  # Audit all connected dispatcher helpers, including counter-recording lambdas.
  def reachable(start,target):
@@ -478,7 +492,7 @@ ORIGINAL_SOURCES=['ports/ggml/native_original_config.h','ports/ggml/safetensors_
  'ports/ggml/tinyllama_source_metadata.h','ports/ggml/tinyllama_target_reader.h',
  'ports/ggml/tinyllama_tensor_callback.h','tests/llm_original_native_audit_test.py']
 
-def original_roles(match):
+def original_roles(match,load_data):
  return {role:match(fragment) for role,fragment in {
   'metadata':'_ZN11direct_tiny9constructE',
   'descriptors':'_ZNK6ps5hip23TinyLlamaTensorCallback15add_descriptorsE',
@@ -493,8 +507,7 @@ def original_roles(match):
   'user_impl':'llama_model_load_from_file_impl',
   'model_load':'_ZL16llama_model_loadP',
   'load_tensors':'_ZN16llama_model_base12load_tensorsE',
-  'load_data':'_ZN18llama_model_loader13load_all_data',
- }.items()}
+ }.items()} | {'load_data':load_data}
 
 def original_edges(full,r):
  return {full['run']:[r['metadata'],r['descriptors'],'llama_model_init_from_user',r['complete']],
@@ -602,7 +615,7 @@ def audit(raw,converted,extracted,phase="vocab",full_profile="smoke",model_forma
   names+=list(dict.fromkeys(n for n in loader.values() if n not in names))
   full=full_roles(match)
   if model_format=="original_safetensors":
-   original=original_roles(match)
+   original=original_roles(match,loader['load'])
    names+=list(dict.fromkeys(n for n in [*original.values(),"ggml_backend_tensor_set",*[n for targets in original_edges(full,original).values() for n in targets]] if n not in names))
   full_dispatch_names=[n for n in values if any(p in n for p in ('ps5hip_full8Dispatch','ps5hip_layer8Dispatch','ps5hip_prefix8Dispatch')) and (n.startswith('_ZN') or n.startswith('_ZZ')) and len(values[n])==1 and one(n) in function_addresses]
   if full_profile in ('generation','corpus'):
