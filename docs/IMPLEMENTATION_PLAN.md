@@ -11,9 +11,12 @@ floating-point whole-layer fixture and representative extreme inputs. M3's
 native full-model smoke now passes all 22 layers, normalization and logits with
 actual decoder commits/reset. Short native greedy generation now passes two reset rounds with all 384
 float outputs bitwise CPU-equal. Wider prompts and long context remain open.
-Host verification improvements are committed. The five-prompt / 16-token CPU
-corpus and production-helper mocked transport now pass offline. Next compare the
-actual HIP numerical interpreter against that oracle before native corpus packaging.
+Host verification improvements are committed. The five-prompt / 16-token corpus
+now passes actual production-helper HIP numerical interpretation: all 6,528 float
+files are bytewise CPU equal with validated feedback, reset and ownership. Next
+coordinate native corpus packaging, auditing and controller bounds before .40.
+
+- 2026-10-18 | M4 corpus arithmetic | offline | production helper272commits/6528bitwise CPU-equal outputs,285timing intervals and balanced ownership;85test methods pass | evidence/offline-production-helper-corpus-numerics.json | next: coordinated native corpus admission and package
 
 - 2026-10-18 | M4 five-prompt corpus | offline | real CPU 272 commits/6528 boundaries/reset equality; production helper mocked transport passes all regressions and rejection checks | evidence/offline-five-prompt-generation-corpus.json | next: HIP numerical corpus comparison and transcript integration
 

@@ -98,12 +98,12 @@ class WatchdogTest(unittest.TestCase):
         self.assertEqual(result.stderr, '')
 
     def test_valid_deadlines_finish_one_nanosecond_before_limit(self):
-        for milliseconds in (1, 15000, 30000, 60000, 120000):
+        for milliseconds in (1, 15000, 30000, 60000, 120000, 1800000):
             with self.subTest(milliseconds=milliseconds):
                 self.check('valid', milliseconds, 'PASS')
 
     def test_invalid_state_never_creates_an_extra_worker(self):
-        for milliseconds in (0, 120001, 4294967295):
+        for milliseconds in (0, 120001, 1799999, 1800001, 4294967295):
             with self.subTest(milliseconds=milliseconds):
                 self.check('valid', milliseconds, 'watchdog-state', creates=0)
         self.check('missing-start', 120000, 'watchdog-state', creates=0)
@@ -111,7 +111,7 @@ class WatchdogTest(unittest.TestCase):
         self.check('repeat-finish', 120000, 'watchdog-state', joins=1)
 
     def test_timeout_and_late_cleanup_remain_strict(self):
-        for milliseconds in (30000, 60000, 120000):
+        for milliseconds in (30000, 60000, 120000, 1800000):
             with self.subTest(milliseconds=milliseconds):
                 self.check('timeout', milliseconds, 'watchdog-timeout')
                 self.check('missing-finish', milliseconds, 'watchdog-timeout', sleeps=1)

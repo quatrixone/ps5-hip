@@ -144,5 +144,12 @@ class FullExecutionMake(unittest.TestCase):
   self.assertIn('--output "results/selected-corpus" --profile "corpus"',corpus)
   self.assertIn('--cpu-build "build/selected-cpu" --model "'+str(model)+'"',corpus)
   self.assertNotIn('build_llm_native_app.py',corpus);self.assertNotIn('source_console.py',corpus)
+ def test_native_corpus_uses_corpus_oracle_and_production_helper(self):
+  with tempfile.TemporaryDirectory() as folder:
+   text=self.run_make('llm-native-generation-corpus-tests','LLM_GENERATION_CORPUS_REFERENCE_DIR='+folder,'LLM_NATIVE_GENERATION_CORPUS_TEST_DIR=results/selected-corpus-numeric')
+  self.assertIn('then echo llm-generation-corpus-reference;',text)
+  self.assertIn('--native-helper',text)
+  self.assertIn('--reference "'+folder+'" --output "results/selected-corpus-numeric"',text)
+  self.assertNotIn('source_console.py',text);self.assertNotIn('build_llm_native_app.py',text)
 
 if __name__=='__main__':unittest.main()

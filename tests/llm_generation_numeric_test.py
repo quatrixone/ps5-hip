@@ -66,4 +66,60 @@ class NumericGeneration(unittest.TestCase):
   p=self.raw/'run-0-pos-0-logits.f32le';p.unlink();p.symlink_to(self.ref/p.name)
   with self.assertRaisesRegex(ValueError,'kind'):self.compare()
 
+class CorpusComparison(unittest.TestCase):
+ def test_corpus_real_validation_comparison_and_inventory(self):
+  import os,shutil
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp);reference=root/'reference';reference.mkdir();raw=root/'raw'
+   cases=test.corpus_cases();index=dict(schema=1,profile='corpus',max_new_tokens=16,cases=[key for key,_ in cases])
+   (reference/'corpus.json').write_text(json.dumps(index));zero=root/'zero';zero.write_bytes(bytes(8192))
+   for key,prompt in cases:
+    folder=reference/key;folder.mkdir();steps=[];runs=[]
+    for run in range(2):
+     processed=[1]+list(range(3,18));generated=list(range(3,19))
+     runs.append(dict(run=run,processed=processed,generated=generated,stop='step_limit',pieces_hex=['61']*16,text_hex='61'*16))
+     for pos,token in enumerate(processed):
+      values=bytearray(128000);struct.pack_into('<f',values,(pos+3)*4,1)
+      (folder/f'run-{run}-pos-{pos}-logits.f32le').write_bytes(values)
+      for stage in [*(f'layer-{i}' for i in range(22)),'norm']:os.link(zero,folder/f'run-{run}-pos-{pos}-{stage}.f32le')
+      steps.append(dict(run=run,position=pos,token=token,status=0,committed_position=pos))
+    (folder/'generation.json').write_text(json.dumps(dict(schema=1,prompt=prompt,add_special=True,parse_special=False,max_new_tokens=16,vocab_size=32000,prompt_tokens=[1],eog_tokens=[2],runs=runs)))
+    (folder/'steps.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in steps))
+   shutil.copytree(reference,raw,copy_function=os.link)
+   counters=dict(requests=160,nodes=160*798,launches=160*733,CPU_arithmetic=0,scheduler_forwarded=160,allocations=16,frees=16,instances_created=1,instances_freed=1)
+   (raw/'backend.json').write_text(json.dumps(counters))
+   rows,files,requests=test.compare_corpus(raw,reference)
+   self.assertEqual((len(rows),len(files),requests),(3840,3840,160));self.assertTrue(all(row['pass_budget'] for row in rows));self.assertTrue(all('/run-' in name for name in files))
+   with self.assertRaisesRegex(ValueError,'inventory'):test.compare_corpus(raw,reference,host_backend=False)
+   (raw/'backend.json').unlink();rows,_,_=test.compare_corpus(raw,reference,host_backend=False);self.assertEqual(len(rows),3840)
+   (raw/'extra').write_text('x')
+   with self.assertRaisesRegex(ValueError,'inventory'):test.compare_corpus(raw,reference,False)
+   (raw/'extra').unlink();indexfile=raw/'corpus.json';indexfile.unlink();indexfile.write_text('{}')
+   with self.assertRaisesRegex(ValueError,'index'):test.compare_corpus(raw,reference,False)
+   indexfile.unlink();os.link(reference/'corpus.json',indexfile)
+   meta=raw/cases[0][0]/'generation.json';original=meta.read_bytes();meta.unlink();meta.write_bytes(original.replace(b'\"schema\": 1',b'\"schema\": true'))
+   with self.assertRaisesRegex(ValueError,'metadata'):test.compare_corpus(raw,reference,False)
+   meta.write_bytes(original)
+   nested=raw/cases[0][0]/'backend.json';nested.write_text('{}')
+   with self.assertRaisesRegex(ValueError,'inventory'):test.compare_corpus(raw,reference,False)
+   nested.unlink()
+   target=raw/cases[0][0]/'run-0-pos-0-logits.f32le';target.unlink();target.symlink_to(reference/cases[0][0]/target.name)
+   with self.assertRaisesRegex(ValueError,'kind'):test.compare_corpus(raw,reference,False)
+ def test_aggregate_backend_checked_once(self):
+  from unittest.mock import patch
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp);raw=root/'raw';reference=root/'ref';raw.mkdir();reference.mkdir()
+   for base in (raw,reference):(base/'corpus.json').write_text('{}')
+   (raw/'backend.json').write_text('{}')
+   for key,_ in test.corpus_cases():
+    for base in (raw,reference):
+     (base/key).mkdir();(base/key/'generation.json').write_text('{}')
+   with patch.object(test,'validate',return_value={'requests':10,'raw_files':5}) as validate,patch.object(test,'compare_generation',return_value=([{'file':'x','pass_budget':True}],{'x':4},2)) as compare,patch.object(test,'check_backend',return_value={'instances_created':1,'instances_freed':1}) as backend:
+    rows,files,requests=test.compare_corpus(raw,reference)
+    validate.assert_called_once_with(reference,'corpus');self.assertEqual(compare.call_count,5)
+    self.assertTrue(all(call.kwargs=={'host_backend':False} for call in compare.call_args_list));backend.assert_called_once_with(raw,10)
+    self.assertEqual((len(rows),len(files),requests),(5,5,10))
+    backend.return_value={'instances_created':2,'instances_freed':2}
+    with self.assertRaisesRegex(ValueError,'one resident'):test.compare_corpus(raw,reference)
+
 if __name__=='__main__':unittest.main()

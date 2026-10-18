@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-production-helper-corpus-HIP-numerical-comparison",
+  "date": "2026-10-18",
+  "base_commit": "c3a08d1cd6d36a1efb50daf74088e7f41e9b2e14",
+  "reference": "results/m4-generation-corpus-reference-v2",
+  "output": "results/m4-corpus-native-generation-numeric-v1",
+  "scope": "Actual production helper, actual ggml scheduler and real TinyLlama tensors through host interpretation of HIP kernel arithmetic; no native GPU execution",
+  "requests": 272,
+  "cases": 5,
+  "runs_per_case": 2,
+  "generated_tokens_per_run": 16,
+  "layers_per_commit": 22,
+  "logits_per_commit": 32000,
+  "raw_files": 6528,
+  "bitwise_equal_files": 6528,
+  "max_abs": 0.0,
+  "max_relative_l2": 0.0,
+  "tolerances": {
+    "absolute": 2e-05,
+    "relative": 0.0002,
+    "relative_l2": 0.0002
+  },
+  "backend": {
+    "requests": 272,
+    "nodes": 217056,
+    "launches": 199376,
+    "CPU_arithmetic": 0,
+    "scheduler_forwarded": 272,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1
+  },
+  "transcript": {
+    "status": "PASS",
+    "timing_intervals": 285,
+    "metadata_files": 11,
+    "metadata_bytes": 26084,
+    "raw_bytes": 86065152,
+    "instances": 1
+  },
+  "tests": [
+    {
+      "suite": "generation Python regression",
+      "methods": 63,
+      "status": "PASS"
+    },
+    {
+      "suite": "Make profile routing",
+      "methods": 18,
+      "status": "PASS"
+    },
+    {
+      "suite": "watchdog simulated clock",
+      "methods": 4,
+      "status": "PASS"
+    }
+  ],
+  "watchdog_preparation": "Exactly1800000ms admitted as sole exception above120000ms; existing title callers unchanged. Expiry/latecleanup/adjacentinvalid durations tested. Native corpus title selection and controller budgets remain pending.",
+  "independent_review": "Numerical comparator/builder and transcript parser cross-reviewed by next_generation_gate and corpus_native_helper; no remaining findings",
+  "provenance": {
+    "results/m4-corpus-native-generation-numeric-v1/receipt.json": "45d5aa369bafd1b45f2e0e0dc3d80fc59133dc1bb7968110bc08e31a70535b58",
+    "results/m4-corpus-native-generation-numeric-v1/comparison.json": "065d0227c1aab65faf1fdf384ba252ea271f16e0f2f490140072ac58b458e888",
+    "results/m4-corpus-native-generation-numeric-v1/timing.json": "273abb479333c09a276e47eb6486ae2357ff048a86d7a37e2653e46001fe8cba",
+    "results/m4-corpus-native-generation-numeric-v1/commands.json": "9b447cab77c9d826cac8dbd4cd4326c843cf502c2ee90fc9545725f3fcc5929a",
+    "results/m4-corpus-native-generation-numeric-v1/raw/backend.json": "fc73b5369d4482fa2e559d75f10ec86bb3f475a6858569ecda353fd589bd47dc",
+    "results/m4-generation-corpus-reference-v2/receipt.json": "642365a89706ad09f6d1fcea5a081f27e16c6878d1e38d396c85066629d6c32c",
+    ".local/m4-corpus-numeric-regression.log": "e0ec3100dfc0c3cd5c15ff16216505a99227518df160acc8f00cd2873bf784a7"
+  },
+  "inputs": {
+    "tools/build_llm_generation_numeric_test.py": "2bafa0fdde4786764fca20b793c7819aae9a774fd65e92aefdc79b679ff25ccc",
+    "tests/llm_generation_numeric_test.py": "3bb34d333091535979d5f68ae5c9137f343dfbea6a367b8ce42710615be0e420",
+    "tools/source_llm_generation_log.py": "d236c65d9fcada4e84deb51679d5a0485ccbf53a1985dbb8b3e148062bd8d69d",
+    "tests/native_generation_transcript_test.py": "d25afffbb1bd03651159d5f01f4750c2f309d30e8c946459a0c985e599f435b9",
+    "Makefile": "5b02ff01ea1ac2bdca1dc6508224171aa065d1cc064833ee04768a58000c7736",
+    "tests/llm_prefix_make_test.py": "b9844870787bcac85c4e99875c1b5b46a5620e57639c6cc318d43ad7f48b6976",
+    "tools/clr_gpu/watchdog.cpp": "3bd742aae4ef58b7c0dfe791a08df18f1b2aa924c69237af46a104970644028a",
+    "tests/watchdog_test.py": "687ff32bc57c0691b4559708c5c897f7f1cc8c1e845c6d3de493575b42159d90"
+  },
+  "gpu_executed": false,
+  "native_package_built": false,
+  "console_contact": false,
+  "limits": [
+    "Host HIP interpretation is not native device arithmetic qualification.",
+    "Corpus title writer/profile/image audit, assets/freeze/readback and explicit controller/log bounds remain to integrate before .40.",
+    "Host execution timings are diagnostic; no PS5 throughput claim."
+  ]
+}

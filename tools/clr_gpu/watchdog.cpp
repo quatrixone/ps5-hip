@@ -30,7 +30,8 @@ void* worker(void*) {
 }
 namespace ps5hip_clr_gpu {
 void watchdog_start(unsigned milliseconds) {
- if(state.started||!milliseconds||milliseconds>120000)ps5hip_clr_gpu_fail("watchdog-state");
+ // The fixed corpus deadline is the only long-run exception; existing callers retain their limits.
+ if(state.started||!milliseconds||(milliseconds>120000&&milliseconds!=1800000))ps5hip_clr_gpu_fail("watchdog-state");
  const uint64_t start=now();const uint64_t duration=uint64_t(milliseconds)*1000000ULL;
  if(start>UINT64_MAX-duration)ps5hip_clr_gpu_fail("watchdog-clock");
  state.start=start;state.deadline=start+duration;

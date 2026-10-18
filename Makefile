@@ -26,6 +26,7 @@ help:
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
 	@echo 'make llm-generation-reference  Capture short greedy CPU generation and reset references'
 	@echo 'make llm-generation-corpus-reference  Capture five prompts with 16 generated tokens and reset'
+	@echo 'make llm-native-generation-corpus-tests  Compare the production corpus helper with its CPU oracle'
 	@echo 'make llm-generation-numeric-tests  Compare live HIP-interpreted greedy feedback to CPU (no GPU execution)'
 	@echo 'make llm-native-generation-tests  Qualify the native helper under host HIP interpretation (no PS5 execution)'
 	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
@@ -576,6 +577,8 @@ LLM_GENERATION_REFERENCE_PROFILE ?= short
 LLM_GENERATION_CORPUS_REFERENCE_DIR ?= results/llm-generation-corpus-reference
 LLM_GENERATION_NUMERIC_TEST_DIR ?= results/llm-generation-numeric-host-tests
 LLM_NATIVE_GENERATION_TEST_DIR ?= results/llm-native-generation-numeric-host-tests
+LLM_NATIVE_GENERATION_CORPUS_TEST_DIR ?= results/llm-native-generation-corpus-host-tests
+LLM_NATIVE_GENERATION_REFERENCE_TARGET ?= llm-generation-reference
 .PHONY: llm-generation-reference llm-generation-corpus-reference llm-generation-numeric-tests
 llm-generation-corpus-reference: LLM_GENERATION_REFERENCE_PROFILE = corpus
 llm-generation-corpus-reference: LLM_GENERATION_REFERENCE_DIR = $(LLM_GENERATION_CORPUS_REFERENCE_DIR)
@@ -593,9 +596,13 @@ llm-generation-numeric-tests: llm-deps-fetch
 	$(PYTHON) tests/llm_generation_numeric_test.py
 	$(PYTHON) tools/build_llm_generation_numeric_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_GENERATION_NUMERIC_TEST_DIR)"
 
-.PHONY: llm-native-generation-tests
+.PHONY: llm-native-generation-tests llm-native-generation-corpus-tests
+llm-native-generation-corpus-tests: LLM_GENERATION_REFERENCE_DIR = $(LLM_GENERATION_CORPUS_REFERENCE_DIR)
+llm-native-generation-corpus-tests: LLM_NATIVE_GENERATION_TEST_DIR = $(LLM_NATIVE_GENERATION_CORPUS_TEST_DIR)
+llm-native-generation-corpus-tests: LLM_NATIVE_GENERATION_REFERENCE_TARGET = llm-generation-corpus-reference
+llm-native-generation-corpus-tests: llm-native-generation-tests
 llm-native-generation-tests: llm-deps-fetch
-	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi
+	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) $(LLM_NATIVE_GENERATION_REFERENCE_TARGET); fi
 	$(PYTHON) tests/native_generation_transcript_test.py
 	$(PYTHON) tests/native_generation_application_test.py
 	$(PYTHON) tests/llm_generation_readbacks_test.py

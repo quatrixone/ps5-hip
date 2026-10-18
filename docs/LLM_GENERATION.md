@@ -84,12 +84,42 @@ continuations, each with 16 generated tokens and two reset rounds. Output is
 artifact size is capped at 128 MiB.
 
 The production helper exposes corpus profile 3 with one resident model/context,
-case-specific output paths and logs, and strict early-EOS rejection. The native
-title's writer, image audit, aggregate assets, numerical harness builder,
-transcript parser and console budgets still need corpus integration. The current
-numerical builder explicitly rejects a corpus reference so it cannot accidentally
-run the four-token harness against it. This implementation is not a console or
-GPU numerical qualification of the corpus.
+case-specific output paths and logs, and strict early-EOS rejection. Run
+`make llm-native-generation-corpus-tests` to compare the production helper with
+the oracle under host HIP interpretation; select fresh output with
+`LLM_NATIVE_GENERATION_CORPUS_TEST_DIR`. The builder authenticates the corpus
+profile, uses its strict transcript parser and retains unchanged numerical gates.
+It rejects corpus execution through the older non-production short harness.
+The native title writer, image audit, aggregate assets and console budgets still
+need corpus integration. This is not native GPU qualification of the corpus.
+
+Native corpus admission must be coordinated across the following existing gates:
+
+- Assets/app builder: admit an explicit `corpus` profile and derive its exact
+  case-prefixed inventory and metadata sizes from the authenticated CPU oracle.
+  For this corpus the counts are 272 requests, 217,056 nodes, 199,376 launches,
+  6,528 float files and 11 metadata files. Preserve short/smoke profiles.
+- Title/auditor: select ABI profile 3, retain generation call-chain checks in all
+  three images, bind the shared case table, and review `NativeFullSink::output`.
+  Create only the five fixed case directories with fresh-output checks; retain
+  exclusive output creation. Use a distinct corpus application completion marker.
+- Deadlines: the watchdog now admits exactly 1,800,000 ms as its sole exception
+  above 120,000 ms; simulated-clock tests cover expiry, late cleanup and adjacent
+  invalid durations. Existing title arguments are unchanged. Proposed corpus budgets are
+  1,800 seconds watchdog, 1,830 seconds application observation, 600 seconds raw
+  capture and 4,200 seconds whole execution including final authentication.
+  Bind these in the manifest and validate exact profile-specific values. These
+  margins derive from measured diagnostic cost, not a throughput guarantee.
+- Freeze/readback: both frozen-reference paths currently cap the entire reference
+  at 16 MiB. Corpus needs an explicit 128 MiB bound and exact nested inventory,
+  copied-reference authentication, and `compare_corpus(..., host_backend=False)`.
+- Logs/capture: the existing application frame and normal/error/baseline log reads
+  cap at 64 KiB; corpus needs a profile-specific 2 MiB bound, including preservation
+  on the next deployment. Capture and freshness checks must inspect all five
+  fixed subdirectories and create corresponding local parents safely.
+- Test profile/ABI mutations, watchdog and phase bounds, directory traversal and
+  stale outputs, nested captures, frozen size limits and baseline preservation
+  before building a package. Keep unrelated klog and short-profile limits intact.
 
 The first accepted CPU corpus is `results/m4-generation-corpus-reference-v2`:
 272 actual decoder commits, 6,528 float files (86,065,152 bytes), exact reset
@@ -97,10 +127,17 @@ equality in all five cases, and 11 metadata files. The first attempt's science
 instruction produced early EOS and was rejected; its evidence remains in v1.
 Continuation prompts were selected for the 16-token gate without weakening EOS
 or numerical checks. `results/m4-corpus-native-helper-v1` passes mocked transport
-and ownership checks with input-dependent feedback under ASan/UBSan. These are
-separate CPU arithmetic and mocked transport results; HIP numerical equivalence
-and console corpus acceptance remain pending. See
+and ownership checks with input-dependent feedback under ASan/UBSan. See
 `../evidence/offline-five-prompt-generation-corpus.json`.
+
+`results/m4-corpus-native-generation-numeric-v1` subsequently passes the actual
+production helper with real model tensors and HIP kernel arithmetic interpreted
+on the host. All 6,528 float files match the CPU oracle byte-for-byte, with exact
+metadata and reset equality, 16 balanced allocations/frees, one backend instance
+and 285 validated timing intervals. The final provenance/artifact receipt passes.
+Host execution took 542.509 seconds; this is diagnostic timing, not PS5 throughput.
+See `../evidence/offline-production-helper-corpus-numerics.json`. Native console
+acceptance and the remaining M4/M5 gates are still open.
 
 ## Historical first offline outcome
 

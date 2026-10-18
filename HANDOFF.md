@@ -8,6 +8,34 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## M4 production-helper corpus arithmetic passes offline
+
+`results/m4-corpus-native-generation-numeric-v1` completes with final PASS.
+The actual production helper and ggml scheduler execute all five cases through
+host interpretation of HIP arithmetic: 272 commits, 22 layers and 32,000 logits
+per commit. All 6,528 float files are byte-for-byte equal to CPU corpus reference
+v2 (86,065,152 bytes); maximum absolute and relative-L2 errors are zero. Exact
+metadata, live greedy feedback, reset repeats and all numerical gates pass.
+
+The corpus transcript validates 285 timing intervals, 11 metadata files / 26,084
+bytes, 217,056 nodes and 199,376 interpreted launches. Ownership is balanced:
+16 allocations/frees and one created/freed backend instance. ASan/UBSan found no
+diagnostics; prebuilt CPU libraries are not instrumented. Host execution took
+542.509 seconds including diagnostic capture; this is not PS5 performance.
+63 generation tests, 18 Make tests and four watchdog tests pass. See
+`evidence/offline-production-helper-corpus-numerics.json` and the local receipt.
+`make llm-native-generation-corpus-tests` now selects the corpus oracle and
+production helper while preserving the short target. The watchdog admits the
+fixed 1,800,000-ms corpus duration; existing title arguments remain unchanged.
+
+Next coordinate explicit native corpus admission: title writer/selection,
+asset profile, three-image audit, frozen nested inventory/readback, application
+log/baseline bounds, watchdog selection and controller deadlines. The exact map
+is in `docs/LLM_GENERATION.md`. Then build one fresh package and validate on idle
+.40. No console contact or native package build occurred in this milestone;
+the installed short-generation proof remains the native baseline. No process
+from this offline corpus run remains active; do not restart the completed run.
+
 ## M4 five-prompt CPU corpus and production-helper transport pass
 
 `results/m4-generation-corpus-reference-v2` passes real TinyLlama CPU capture:

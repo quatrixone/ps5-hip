@@ -6,9 +6,10 @@ pass. Short native greedy generation now passes: two reset rounds, four new
 tokens per round, 16 actual commits through all 22 layers, and all 384 float
 boundaries bitwise CPU-oracle equal with clean lifecycle. This closes the bounded
 short-generation checkpoint, not full M4/M5. Host verification improvements are
-committed; the five-prompt / 16-token CPU oracle and production-helper mocked
-transport now pass. Next qualify actual HIP numerical execution for that corpus
-before native packaging and .40. Retain M2 dense/extreme cases and
+committed; the five-prompt / 16-token corpus now passes production-helper HIP
+numerical interpretation with all 6,528 float files bytewise CPU equal and clean
+ownership. Next integrate native corpus packaging and controller bounds, then
+validate on .40. Retain M2 dense/extreme cases and
 the original source-format loading requirement. Use idle .40 for meaningful
 validation and push each validated milestone to main.
 

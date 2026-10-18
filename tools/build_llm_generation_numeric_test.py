@@ -8,7 +8,7 @@ import struct
 import subprocess
 import time
 import build_llm_executed_graph as provenance
-from build_llm_generation_reference import authenticate_generation_reference, loads
+from build_llm_generation_reference import authenticate_generation_reference, loads, corpus_cases, validate, CASES
 
 ROOT = Path(__file__).resolve().parents[1]
 ABS_TOL, REL_TOL, L2_TOL = 2e-5, 2e-4, 2e-4
@@ -60,15 +60,47 @@ def compare_generation(raw, reference, host_backend=True):
                 raise ValueError("actual logits greedy argmax differs")
     requests = sum(len(run["processed"]) for run in runs)
     if host_backend:
-        counters = loads((raw / "backend.json").read_text())
-        keys = {"requests", "nodes", "launches", "CPU_arithmetic", "scheduler_forwarded", "allocations", "frees", "instances_created", "instances_freed"}
-        if set(counters) != keys or any(type(value) is not int for value in counters.values()):
-            raise ValueError("generation backend counter types/keys")
-        if (counters.get("requests"), counters.get("nodes"), counters.get("launches"), counters.get("CPU_arithmetic"), counters.get("scheduler_forwarded")) != (requests, requests*798, requests*733, 0, requests):
-            raise ValueError("generation backend counters")
-        for a,b in (("allocations","frees"),("instances_created","instances_freed")):
-            if type(counters.get(a)) is not int or counters[a] <= 0 or counters[a] != counters.get(b):
-                raise ValueError("generation backend ownership")
+        check_backend(raw, requests)
+    return rows, files, requests
+
+
+def check_backend(raw, requests):
+    counters = loads((raw / "backend.json").read_text())
+    keys = {"requests", "nodes", "launches", "CPU_arithmetic", "scheduler_forwarded", "allocations", "frees", "instances_created", "instances_freed"}
+    if set(counters) != keys or any(type(value) is not int for value in counters.values()):
+        raise ValueError("generation backend counter types/keys")
+    if (counters.get("requests"), counters.get("nodes"), counters.get("launches"), counters.get("CPU_arithmetic"), counters.get("scheduler_forwarded")) != (requests, requests*798, requests*733, 0, requests):
+        raise ValueError("generation backend counters")
+    for a,b in (("allocations","frees"),("instances_created","instances_freed")):
+        if type(counters.get(a)) is not int or counters[a] <= 0 or counters[a] != counters.get(b):
+            raise ValueError("generation backend ownership")
+    return counters
+
+def compare_corpus(raw, reference, host_backend=True):
+    raw, reference = Path(raw), Path(reference)
+    summary = validate(reference, 'corpus')
+    cases = corpus_cases()
+    names = {key for key, _ in cases} | {"corpus.json"} | ({"backend.json"} if host_backend else set())
+    if raw.is_symlink() or not raw.is_dir() or {p.name for p in raw.iterdir()} != names or any(p.is_symlink() for p in raw.iterdir()):
+        raise ValueError("corpus output inventory/kind")
+    if not (raw / "corpus.json").is_file() or (raw / "corpus.json").read_bytes() != (reference / "corpus.json").read_bytes():
+        raise ValueError("corpus index differs")
+    rows, files, requests = [], {}, 0
+    for key, _ in cases:
+        if not (raw / key).is_dir():raise ValueError("corpus case directory")
+        metadata = raw / key / 'generation.json'
+        if metadata.is_symlink() or not metadata.is_file() or metadata.read_bytes() != (reference / key / 'generation.json').read_bytes():
+            raise ValueError('corpus case metadata differs')
+        case_rows, case_files, count = compare_generation(raw / key, reference / key, host_backend=False)
+        rows.extend({**row, "file": key + "/" + row["file"]} for row in case_rows)
+        files.update({key + "/" + name: size for name, size in case_files.items()})
+        requests += count
+    if requests != summary["requests"] or len(files) != summary["raw_files"]:raise ValueError("corpus aggregate inventory")
+    if host_backend:
+        if not (raw / "backend.json").is_file():raise ValueError("corpus backend kind")
+        counters = check_backend(raw, requests)
+        if counters["instances_created"] != 1 or counters["instances_freed"] != 1:
+            raise ValueError("corpus requires one resident backend instance")
     return rows, files, requests
 
 
@@ -77,8 +109,11 @@ def build(cpu, model, reference, output, native_helper=False):
     if output.exists() or not output.is_relative_to(ROOT / "results"):
         raise ValueError("fresh results output required")
     reference_data, inputs = authenticate_generation_reference(reference)
-    if reference_data.get('profile', 'short') != 'short':
-        raise ValueError('corpus numerical execution requires the pending corpus helper integration')
+    profile = reference_data.get('profile', 'short')
+    if profile not in ('short', 'corpus'):raise ValueError('generation profile')
+    corpus = profile == 'corpus'
+    if corpus and not native_helper:
+        raise ValueError('corpus numerical execution requires native helper')
     inputs = dict(inputs)
     for path, digest in provenance.cpu_inputs(cpu, model).items():
         provenance.merge(inputs, path, digest)
@@ -88,7 +123,7 @@ def build(cpu, model, reference, output, native_helper=False):
     for path in (Path(__file__), ROOT / "tests/llm_generation_numeric_test.py", ROOT / "tests/llm_rms_numeric_mock_test.cpp", Path(provenance.__file__), compiler, Path("/usr/bin/ldd")):
         provenance.merge(inputs, path, provenance.sha(path))
     if native_helper:
-        for path in (ROOT / "tools/source_llm_generation_log.py", ROOT / "tools/source_llm_full_log.py", ROOT / "tests/native_generation_transcript_test.py"):
+        for path in (ROOT / "tools/source_llm_generation_log.py", ROOT / "tools/source_llm_full_log.py", ROOT / "tests/native_generation_transcript_test.py", CASES):
             provenance.merge(inputs, path, provenance.sha(path))
     output.mkdir(parents=True); raw = output / "raw"; raw.mkdir()
     commands = []
@@ -98,7 +133,7 @@ def build(cpu, model, reference, output, native_helper=False):
 
     def run(label, argv):
         argv = list(map(str, argv)); start = time.monotonic()
-        result = subprocess.run(argv, cwd=ROOT, env=env, capture_output=True, timeout=600)
+        result = subprocess.run(argv, cwd=ROOT, env=env, capture_output=True, timeout=1800 if corpus and label == "execute" else 600)
         (output / (label + ".stdout")).write_bytes(result.stdout)
         (output / (label + ".stderr")).write_bytes(result.stderr)
         commands.append({"label": label, "argv": argv, "returncode": result.returncode, "seconds": time.monotonic()-start})
@@ -132,22 +167,28 @@ def build(cpu, model, reference, output, native_helper=False):
     for path, digest in provenance.runtime_inputs(run("ldd", ["/usr/bin/ldd", binary]), lib, inputs).items():
         provenance.merge(inputs, path, digest)
     binary_hash = provenance.sha(binary)
-    executed = run("execute", [binary, model, raw])
+    executed = run("execute", [binary, model, raw, *(["corpus"] if corpus else [])])
     marker = "GENERATION_NUMERIC_PASS actual_scheduler=true CPU_arithmetic=0 live_logit_feedback=true GPU_execution=false"
+    if corpus:marker = "GENERATION_NUMERIC_PASS profile=corpus cases=5 runs=2 max_new_tokens=16 actual_scheduler=true CPU_arithmetic=0 live_logit_feedback=true GPU_execution=false"
     if executed.splitlines().count(marker) != 1:
         raise ValueError("generation completion marker missing/duplicated")
     if provenance.sha(binary) != binary_hash:
         raise ValueError("binary changed")
     if native_helper:
-        from source_llm_generation_log import check_fragment
-        policy = loads((reference / "raw/generation.json").read_text())
-        metadata_sizes = {name: (raw / name).stat().st_size for name in ("generation.json", "steps.jsonl")}
+        from source_llm_generation_log import check_fragment, check_corpus_fragment
         # The exact marker follows the production helper; no arbitrary log filtering.
         if not executed.endswith(marker + "\n"):
             raise ValueError("generation helper terminal marker")
-        timing = check_fragment(executed[:-len(marker)-1].encode('ascii'), policy, metadata_sizes)
+        fragment = executed[:-len(marker)-1].encode('ascii')
+        if corpus:
+            policies = {key: loads((reference / 'raw' / key / 'generation.json').read_text()) for key, _ in corpus_cases()}
+            metadata_names = ['corpus.json', *(key + '/' + name for key, _ in corpus_cases() for name in ('generation.json', 'steps.jsonl'))]
+            timing = check_corpus_fragment(fragment, policies, {name: (raw / name).stat().st_size for name in metadata_names}, native=False)
+        else:
+            policy = loads((reference / 'raw/generation.json').read_text())
+            timing = check_fragment(fragment, policy, {name: (raw / name).stat().st_size for name in ('generation.json', 'steps.jsonl')})
         (output / "timing.json").write_text(json.dumps(timing, indent=2) + "\n")
-    rows, files, requests = compare_generation(raw, reference / "raw")
+    rows, files, requests = (compare_corpus if corpus else compare_generation)(raw, reference / "raw")
     classification = "PASS" if all(row["pass_budget"] for row in rows) else "NUMERICAL_FAIL"
     exit_code = 0 if classification == "PASS" else 1
     (output / "comparison.json").write_text(json.dumps(rows, indent=2) + "\n")
@@ -157,6 +198,7 @@ def build(cpu, model, reference, output, native_helper=False):
                "reference_receipt": reference_data["receipt"], "reference_sha256": reference_data["receipt_sha256"],
                "model": reference_data["model"], "tolerances": {"absolute": ABS_TOL, "relative": REL_TOL, "relative_l2": L2_TOL},
                "artifacts": {str(p.relative_to(output)): provenance.sha(p) for p in output.rglob("*") if p.is_file()}}
+    if corpus:receipt["profile"] = "corpus"
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(classification)
     return exit_code
