@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "classification": "supported-original-format-cpu-build-and-portable-tests",
+  "source_commit": "c473730",
+  "command": "make llm-original-format-tests JOBS=4 CCACHE=1 LLM_ORIGINAL_CPU_BUILD_DIR=build/llm-original-format-cpu-v1",
+  "cpu_build": "build/llm-original-format-cpu-v1",
+  "test_scripts": 8,
+  "source_weights_read": false,
+  "native_executed": false,
+  "production_model_comparison": "running separately; not proved by portable tests",
+  "log": {
+    "path": ".local/original-format-rehearsal/supported-make-build-v1.log",
+    "sha256": "51fe66a3d41ad11f675e9de06d2d95fdb92bede5fd15071a5be87be1c0d16564"
+  },
+  "limits": [
+    "Prebuilt llama/ggml libraries are not sanitizer-instrumented.",
+    "Printed comparison PASS in route unit tests is mocked and is not real model qualification."
+  ]
+}

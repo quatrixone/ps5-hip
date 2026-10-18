@@ -33,7 +33,7 @@ remains open. Finish the reviewed artifact-admission fix offline and establish
 console condition before a fresh hardware attempt. See
 `evidence/console40-corpus-model-read-transport-failure.json`.
 
-- 2026-10-18 | Frozen-artifact admission | offline | 19 admission and373 controller tests pass; real issuer qualification pending | evidence/offline-frozen-artifact-admission.json | next: fresh offline freeze
+- 2026-10-18 | Frozen-artifact admission | offline | 19 admission and373 controller tests pass; real issuer and isolated runtime PASS; 4.6s offline runtime check | evidence/offline-real-frozen-runtime-qualification.json | next: establish console condition and review fresh deployment
 
 The release plan in [LLM_V1_PLAN.md](LLM_V1_PLAN.md) defines M0-M5 within
 the original acceptance gates. M0, M1, the actual-model prefix and the selected

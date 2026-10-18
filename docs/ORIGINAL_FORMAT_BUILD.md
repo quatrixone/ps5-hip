@@ -3,7 +3,8 @@
 Main `6a7b941` ships the bounded reader, mapping, tokenizer metadata, target-byte
 reader and callback. The optional-loader CPU producer, production generation
 runner and Make wiring are now integrated. Their first complete supported-producer
-run is in progress; native original-format loading remains unqualified.
+CPU build and portable tests pass; full-model comparison is in progress. Native
+original-format loading remains unqualified.
 Use the source checkout and Linux/WSL prerequisites in `SOURCE_ONLY_REBUILD.md`;
 no `.local` script or artifact is a build dependency.
 

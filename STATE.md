@@ -17,8 +17,9 @@ patched loader and prior source authentication, not a fresh whole-weight hash.
 They do not qualify the supported production build or the PS5 path.
 
 The shared optional-loader fix, original-mode producer, Make targets and CPU
-ccache support are integrated. Fresh supported CPU build qualification is running;
-then capture and compare two fresh short-generation output directories.
+ccache support are integrated. The fresh supported CPU build and eight portable
+test scripts pass; fresh short-generation oracle/comparison qualification is running.
+See `evidence/offline-supported-original-format-build.json`.
 The original runtime consumes safetensors/config/tokenizers; GGUF is only the
 independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUILD.md)
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
@@ -44,8 +45,11 @@ Frozen-artifact admission is now integrated as an explicit freezer option.
 All 19 admission tests and 373 source-controller regressions pass; independent
 review defects (post-authentication identity rebinding and omitted prompt policy)
 are corrected and covered by tests. See
-`evidence/offline-frozen-artifact-admission.json`. Next qualify one fresh real
-issuer freeze before using the new route; no deployment speedup is claimed yet.
+`evidence/offline-frozen-artifact-admission.json`. The real v3 issuer now passes;
+its isolated frozen runtime validates in 4.6 seconds on Linux /tmp after adding
+the receipt-bound dependencies.json root marker. See
+`evidence/offline-real-frozen-runtime-qualification.json`. Current main has changed;
+use the isolated frozen runtime for this candidate. No deployment speedup is claimed.
 Longer-generation helper and original-format producer integration remain isolated.
 The additive original-format components are already on main.
 The native four-token generation proof remains the latest GPU generation result.

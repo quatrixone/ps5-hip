@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "scope": "Offline real issuer and isolated runtime validation; no deployment or execution approval",
+  "candidate": "results/source-public-llm-generation-corpus-console-v3",
+  "manifest_sha256": "713f128662b0d5333c8acf3c1a0421a95ef0f0ff90a635a2a6828f1c32f23ba6",
+  "frozen_source_commit": "8cdd3f56331820eea465d2be4cc7c0887b8128b7",
+  "runtime_files": 100,
+  "frozen_artifacts": 6590,
+  "isolated_validation_seconds": 4.584610144956969,
+  "bootstrap_marker": {
+    "path": "dependencies.json",
+    "sha256": "b57fce26a6b8433a7e7485c82862615c2e355d7918b5cc6f3f59970118b25127",
+    "binding": "Frozen build-receipt.json inputs"
+  },
+  "native_executed": false,
+  "console_contact": false,
+  "limitations": [
+    "Initial isolated import failed because dependencies.json root marker was omitted; original failure preserved.",
+    "Isolated runtime is ephemeral Linux /tmp; original candidate and receipts remain preserved.",
+    "After main changes, this candidate must use its frozen runtime; current main is not interchangeable.",
+    "Runtime timing is one same-machine Linux-filesystem measurement, not console deployment timing."
+  ],
+  "local_report": {
+    "path": ".local/runtime-v3-validation-with-marker.json",
+    "sha256": "bf7ac86ad63256a7a2bc4f0cd6bbfcf7522d1b67a51dc806a7dbe34c1aa0fdd4"
+  }
+}
