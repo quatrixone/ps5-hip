@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "classification": "offline-dense-native-compiler-and-cpu-reference",
+  "source_base": "5c02831",
+  "native_executed": false,
+  "gpu_executed": false,
+  "reference": {
+    "receipt_sha256": "598cc15781f3e48605b64cb1b59cfa44dbb50910864b64b6f96469c2fd5f8c63",
+    "export": {
+      "raw": "results/llm-dense-reference-main-v1/reference.bin",
+      "raw_sha256": "5b20242c9e53309a360520639277b8f5f1f848a017d75f0aed778c12ded2f81c",
+      "manifest": "results/llm-dense-reference-main-v1/reference.json",
+      "manifest_sha256": "494265843b59dda75b1e32523539af4fde0284b2fa6c10000349ee79b1eaf517",
+      "records": 11084,
+      "bytes": 154392576
+    },
+    "requests": 526,
+    "comparisons": 11084,
+    "maximum_absolute_difference": 0,
+    "limits": [
+      "Existing CPU libraries are not instrumented; no complete producer closure reauthentication",
+      "Seven fixed deterministic F16 learned matrices; F32 vector replaces embedding lookup",
+      "Host kernel interpretation; native ISA and complete dense model admission remain unqualified"
+    ]
+  },
+  "compiler": {
+    "receipt_sha256": "4515f6c9d3c6c81d333a698e1f984f920d0e38167b333162f2eec3c7194574ed",
+    "module_sha256": "10ac1afb49701b1c27e02be8270a5bb88c2475997c2c275106a0f31c265b854f",
+    "module_bytes": 33696,
+    "classification": "source-only-bounded-dense-f16-layer-fixture",
+    "profile": "dense-f16",
+    "dense_descriptor": {
+      "group_bytes": 0,
+      "private_bytes": 0,
+      "kernarg_bytes": 32,
+      "rsrc1": 1622081606,
+      "rsrc2": 140,
+      "rsrc3": 0,
+      "properties": 1033,
+      "preload": 0
+    },
+    "exports": 17,
+    "source_input_count": 1133
+  },
+  "commands": [
+    "make llm-dense-layer-tests LLM_CPU_BUILD_DIR=build/llm-original-format-cpu-v1 LLM_DENSE_LAYER_OUTPUT_DIR=results/llm-dense-reference-main-v1 LLM_DENSE_LAYER_EXPORT_REFERENCE=1",
+    "make llm-dense-layer-fixture LLM_RMSNORM_FIXTURE_DIR=results/llm-rmsnorm-fixture-v2 LLM_DENSE_LAYER_FIXTURE_DIR=results/llm-dense-native-main-v1"
+  ],
+  "remaining": [
+    "Native synthetic title execution glue and package/auditor/controller integration",
+    "Native float comparison including device Q/K attention bound",
+    "PS5 extreme-input numerical qualification, cleanup and restored memory"
+  ]
+}

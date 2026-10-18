@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 class Delivery(unittest.TestCase):
  def make(self,*args):
-  return subprocess.run(['make','-f',str(ROOT/'Makefile'),'JOBS=1','UFS_REV=x','ZLIB_VERSION=x','TITLE_ID=x',*args,'llm-dense-layer-tests'],cwd=ROOT,env={k:v for k,v in os.environ.items() if k not in ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','LLM_DENSE_LAYER_OUTPUT_DIR','LLM_CPU_BUILD_DIR','PYTHON','MAKE')},text=True,capture_output=True,timeout=20)
+  return subprocess.run(['make','-f',str(ROOT/'Makefile'),'JOBS=1','UFS_REV=x','ZLIB_VERSION=x','TITLE_ID=x',*args,'llm-dense-layer-tests'],cwd=ROOT,env={k:v for k,v in os.environ.items() if k not in ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','LLM_DENSE_LAYER_EXPORT_REFERENCE','LLM_DENSE_LAYER_OUTPUT_DIR','LLM_CPU_BUILD_DIR','PYTHON','MAKE')},text=True,capture_output=True,timeout=20)
  def test_dryrun(self):
   p=self.make('-n','MAKE=echo','PYTHON=echo','LLM_CPU_BUILD_DIR=/tmp/dense selected')
   self.assertEqual(p.returncode,0,p.stderr)
@@ -15,6 +15,15 @@ class Delivery(unittest.TestCase):
  def test_parent_make_options_are_isolated(self):
   with patch.dict(os.environ,LLM_DENSE_LAYER_OUTPUT_DIR='/tmp/exported-output',LLM_CPU_BUILD_DIR='/tmp/exported-cpu',MAKEFLAGS='-- LLM_DENSE_LAYER_OUTPUT_DIR=/tmp/parent-output',MFLAGS='--silent',MAKEOVERRIDES='LLM_DENSE_LAYER_OUTPUT_DIR=/tmp/parent-output'):
    self.test_dryrun()
+ def test_export_option(self):
+  for value in ('0','1'):
+   p=self.make('-n','MAKE=echo','PYTHON=echo','LLM_DENSE_LAYER_EXPORT_REFERENCE='+value)
+   self.assertEqual(p.returncode,0,p.stderr)
+   self.assertEqual('--export-reference' in p.stdout,value=='1')
+  for value in ('yes','2',''):
+   p=self.make('MAKE=false','PYTHON=echo','LLM_DENSE_LAYER_EXPORT_REFERENCE='+value)
+   self.assertNotEqual(p.returncode,0)
+   self.assertIn('must be 0 or 1',p.stderr)
  def test_receipt_reuses(self):
   with tempfile.TemporaryDirectory() as d:
    Path(d,'receipt.json').write_text('{}')

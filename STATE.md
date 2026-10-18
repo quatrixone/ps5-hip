@@ -3,6 +3,26 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Dense native compiler and complete CPU reference
+
+The supported `llm-dense-layer-fixture` target now compiles and audits an explicit
+17-export gfx1013/wave32 module using existing device libraries. Dense admission
+passes with a 32-byte argument block, no private/group memory or spills, and no
+unresolved symbols. ISA review confirms 64-bit addressing and the source's
+32-FMA / 31-add reduction. Default consumers retain the 16-export profile.
+
+`llm-dense-layer-tests LLM_DENSE_LAYER_EXPORT_REFERENCE=1` now exports all 11,084
+CPU records across 526 requests (154,392,576 bytes), with exact offsets, case and
+stage identities and hashes. The supported run retains zero numerical difference
+and all reset/extreme checks. Shared fixture definitions support native reuse.
+Use existing `LLM_CPU_BUILD_DIR` and a fresh `LLM_DENSE_LAYER_OUTPUT_DIR`.
+See `evidence/offline-dense-native-and-reference.json` for commands and receipts.
+
+Next: integrate the synthetic profile into PPSA99014, with image audit, frozen
+controller and numerical readback verification. No dense PS5 execution is claimed;
+M2 and the full release gates remain open. Preserve existing frozen console
+candidates and external models. No console was contacted for this milestone.
+
 ## Dense F16 whole-layer fixture: host comparison passes
 
 The explicit dense fixture now passes 526 requests and 11,084 intermediate/cache
@@ -18,7 +38,7 @@ main run reused `build/llm-original-format-cpu-v1`; no CPU library rebuild or mo
 transfer was needed. See `evidence/offline-dense-f16-whole-layer.json`.
 
 This is synthetic host kernel interpretation with fixed F16 weights and an F32
-embedding vector. Native lowering, GPU execution, arbitrary dense-model admission
+embedding vector. GPU execution, arbitrary dense-model admission
 and native extreme-input qualification remain open. M2 is not complete.
 
 ## Extended host generation and build-overhead improvements

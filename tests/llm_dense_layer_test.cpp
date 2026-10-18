@@ -1,6 +1,7 @@
 #define PS5HIP_ENABLE_DENSE_F16 1
 #include "llm_layer_numeric_mock.h"
 #include "llm_dense_layer_checks.h"
+#include "dense_layer_fixture.h"
 #include "layer_dispatch.h"
 #include "ggml-cpu.h"
 #include "ggml-backend.h"
@@ -57,20 +58,24 @@ static void score_oracle(const ps5hip_layer::Graph& g,const ps5hip_layer::Cache&
 }
 static DenseSnapshot snapshot(const ps5hip_layer::Graph& g){DenseSnapshot result;for(const auto* t:g.outputs){const auto* p=static_cast<const unsigned char*>(t->data);result.emplace_back(p,p+ggml_nbytes(t));}return result;}
 int main(int argc,char**argv){
- assert(argc==2);const bool admission=std::string(argv[1])=="admission";assert(admission||std::string(argv[1])=="numeric");
+ assert(argc==2||argc==3);const bool admission=std::string(argv[1])=="admission";assert(admission||std::string(argv[1])=="numeric");
+ assert(!admission||argc==2);
+ FILE* exported=argc==3?std::fopen(argv[2],"wbx"):nullptr;if(argc==3&&!exported)throw std::runtime_error("exclusive reference creation");
+ size_t export_bytes=0;unsigned export_records=0;
+ auto export_tensor=[&](const ggml_tensor* t){if(!exported)return;const size_t n=ggml_nbytes(t);if(std::fwrite(t->data,1,n,exported)!=n)throw std::runtime_error("reference write");export_bytes+=n;++export_records;};
  Context resident(100*1024*1024);ps5hip_layer::Selection selection{};selection.dense_fixture=true;selection.extent=256;
  ps5hip_layer::Weights weights{};size_t matrix_bytes=0;
  for(unsigned i=0;i<15;i++){
   auto spec=ps5hip_layer::detail::spec(i,256,true,true);auto* t=ggml_new_tensor(resident.p,spec.type,4,spec.ne);ggml_set_name(t,spec.name);
   if(i<10){selection.weights[i]=t;weights.uploads[i]={t,t};remember(t);
-   if(t->type==GGML_TYPE_F16){matrix_bytes+=ggml_nbytes(t);auto* data=static_cast<_Float16*>(t->data);for(int64_t n=0;n<ggml_nelements(t);n++)data[n]=(_Float16)(float(int((uint64_t(n)*17+i*23)%61)-30)*0.000125f);}
-   else {auto* data=static_cast<float*>(t->data);for(int64_t n=0;n<ggml_nelements(t);n++)data[n]=i==0?0.f:1.f+float(int(n%7)-3)*.01f;}
+   if(t->type==GGML_TYPE_F16){matrix_bytes+=ggml_nbytes(t);auto* data=static_cast<_Float16*>(t->data);for(int64_t n=0;n<ggml_nelements(t);n++)data[n]=(_Float16)(ps5hip_dense_fixture::weight(i,uint64_t(n)));}
+   else {auto* data=static_cast<float*>(t->data);for(int64_t n=0;n<ggml_nelements(t);n++)data[n]=i==0?0.f:ps5hip_dense_fixture::norm(uint64_t(n));}
   }else selection.requests[i-10]=t;
  }
  assert(matrix_bytes==88080384);
  auto immutable_weights=[&]{for(unsigned role=1;role<10;role++){auto* t=selection.weights[role];for(int64_t n=0;n<ggml_nelements(t);n++){
-  if(t->type==GGML_TYPE_F16){const _Float16 expected=(_Float16)(float(int((uint64_t(n)*17+role*23)%61)-30)*0.000125f);assert(!std::memcmp(static_cast<_Float16*>(t->data)+n,&expected,2));}
-  else assert(static_cast<float*>(t->data)[n]==1.f+float(int(n%7)-3)*.01f);
+  if(t->type==GGML_TYPE_F16){const _Float16 expected=(_Float16)(ps5hip_dense_fixture::weight(role,uint64_t(n)));assert(!std::memcmp(static_cast<_Float16*>(t->data)+n,&expected,2));}
+  else assert(static_cast<float*>(t->data)[n]==ps5hip_dense_fixture::norm(uint64_t(n)));
  }}};immutable_weights();
  Context cache_context(2*1024*1024);auto hostcache=ps5hip_layer::make_cache(cache_context.p),devicecache=ps5hip_layer::make_cache(cache_context.p);
  for(auto* t:{hostcache.k,hostcache.v,devicecache.k,devicecache.v}){std::memset(t->data,0,ggml_nbytes(t));remember(t);}
@@ -98,21 +103,21 @@ int main(int argc,char**argv){
  auto* cpu=ggml_backend_cpu_init();assert(cpu);ggml_backend_cpu_set_n_threads(cpu,2);
  unsigned requests_done=0;std::vector<DenseSnapshot> reset_reference;
  auto step=[&](unsigned position,float scale,bool save_reset){
-  auto* data=static_cast<float*>(input->data);for(unsigned i=0;i<2048;i++)data[i]=scale*float(int((i*13+position*7)%73)-36)/36.f;
+  auto* data=static_cast<float*>(input->data);for(unsigned i=0;i<2048;i++)data[i]=ps5hip_dense_fixture::input(i,position,scale);
   auto& h=host[position<256?0:1];auto& d=device[position<256?0:1];controls(h,position);controls(d,position);
   assert(ggml_backend_graph_compute(cpu,h.graph)==GGML_STATUS_SUCCESS);assert(dispatch.execute_graph(d.graph));
-  for(unsigned i=0;i<21;i++)compare(d.outputs[i],h.outputs[i],i==0,i==9);
+  for(unsigned i=0;i<21;i++){compare(d.outputs[i],h.outputs[i],i==0,i==9);export_tensor(h.outputs[i]);}
   score_oracle(d,devicecache);
-  if(position==0||position==1||position==255||position==256||position==511){compare(devicecache.k,hostcache.k);compare(devicecache.v,hostcache.v);}
+  if(ps5hip_dense_fixture::cache_checkpoint(position)){compare(devicecache.k,hostcache.k);compare(devicecache.v,hostcache.v);export_tensor(hostcache.k);export_tensor(hostcache.v);}
   for(auto* t:{devicecache.k,devicecache.v}){const auto* p=static_cast<const _Float16*>(t->data);for(unsigned f=0;f<256;f++)for(unsigned slot=position+1;slot<512;slot++)assert(p[t==devicecache.k?slot*256+f:f*512+slot]==0);}
   if(position<2&&save_reset)reset_reference.push_back(snapshot(d));
   else if(position<2&&scale==1.f)dense_check_reset(snapshot(d),reset_reference[position]);
   ++requests_done;
  };
- for(unsigned p=0;p<512;p++){step(p,1.f,true);if(p==0||p==1||p==255||p==256||p==511){std::printf("checkpoint %u checked=%u\n",p,checked);std::fflush(stdout);}}
+ for(unsigned p=0;p<ps5hip_dense_fixture::cases[0].count;p++){step(p,ps5hip_dense_fixture::cases[0].scale,true);if(p==0||p==1||p==255||p==256||p==511){std::printf("checkpoint %u checked=%u\n",p,checked);std::fflush(stdout);}}
  auto reset=[&]{for(auto* t:{hostcache.k,hostcache.v,devicecache.k,devicecache.v})std::memset(t->data,0,ggml_nbytes(t));dispatch.reset();};
- reset();step(0,1.f,false);step(1,1.f,false);
- for(float scale:{0.f,-0.f,1e-40f,1e-20f,0.00316227766f,1e10f}){reset();step(0,scale,false);step(1,scale,false);}
+ for(unsigned c=1;c<sizeof(ps5hip_dense_fixture::cases)/sizeof(ps5hip_dense_fixture::cases[0]);++c){reset();const auto& item=ps5hip_dense_fixture::cases[c];for(unsigned p=0;p<item.count;++p)step(p,item.scale,false);}
+ if(exported){const bool flushed=std::fflush(exported)==0;const bool closed=std::fclose(exported)==0;if(!flushed||!closed)throw std::runtime_error("reference close");assert(export_records==11084&&export_bytes==154392576);}
  immutable_weights();ggml_backend_free(cpu);dispatch.shutdown();assert(allocations.empty()&&loads==6&&unloads==6);
  assert(dense_launches==requests_done*7&&attention_launches==requests_done*2);
  std::printf("DENSE_LAYER_NUMERIC_PASS requests=%u checked=%u resident_f16_bytes=%zu max_abs=%.12g GPU_execution=false\n",requests_done,checked,matrix_bytes,maximum_error);

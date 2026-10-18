@@ -296,6 +296,33 @@ model weights. The selected real-model milestone is complete; M2 remains open
 for native dense-fixture and representative extreme-input validation.
 Keep activations on the GPU and reuse the integrated implementations.
 
+Native dense-fixture sequence (preserve the actual-model profile):
+Steps 1 and 2 now pass through supported Make targets; see
+`evidence/offline-dense-native-and-reference.json`. Steps 3 through 5 remain open.
+
+1. Compile an explicitly opted-in 17-symbol layer module using the existing
+   device libraries. Audit exact dense arguments, wave32/gfx1013 descriptors,
+   no private/group memory, spills, unresolved symbols or unsupported calls.
+   Default 16-symbol modules and consumers must still reject this extra export.
+2. Export the existing CPU fixture's raw reference boundaries and exact request
+   inventory: all 21 outputs across 526 requests, the existing cache checkpoints,
+   reset identity and all six finite activation scales. Share deterministic
+   weights/controls with the native fixture; do not substitute hashes for float
+   tolerance comparisons or silently reduce coverage to selected final outputs.
+3. Add a distinct synthetic profile inside the native PPSA99014 title, reusing
+   the backend's owned allocations, tensor transfers and explicit dense dispatch.
+   Generate fixed weights once and retain them and the KV cache across requests.
+   Preserve the existing real-GGUF profile and its evidence classification.
+4. Extend the package builder, image audit, authenticated assets and frozen
+   controller profile together. Bind exact raw-file inventory and failure/reset
+   behavior; keep external real models in /data/hip/models. Reuse cached native
+   objects and compile only changed translation units.
+5. Validate host execution, negative admission and package/ISA audits before
+   console use. Once .40 services recover, freeze one reviewed candidate, acquire
+   both console locks, verify idle state, run the native title and collect raw
+   results. Compare the same stage/cache tolerances, exact zeros and reset bits;
+   verify cleanup and restored memory. A compiler PASS alone does not close M2.
+
 Exit: one real layer matches CPU intermediate and final outputs for a token
 sequence, with cache reuse at positions 0/1 and nontrivial lengths up to 512.
 Include a small dense floating-point fixture to isolate indexing/numerics,

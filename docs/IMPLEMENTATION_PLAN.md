@@ -18,6 +18,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Dense whole-layer fixture | host | supported Make reuses current CPU libraries; 526 requests / 11,084 comparisons / zero absolute difference; native remains open | evidence/offline-dense-f16-whole-layer.json
 
+- 2026-10-18 | Dense native compiler and CPU reference | offline | explicit17-export module admission; all11,084CPU reference records exported; no native execution | evidence/offline-dense-native-and-reference.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

@@ -3,17 +3,20 @@
 #include <iterator>
 #include <iostream>
 #include <map>
+#include <cstring>
 int main(int argc,char**argv) {
- if(argc!=2)return 2;
+ if(argc!=2&&(argc!=3||std::strcmp(argv[2],"--dense-f16")))return 2;
+ const bool dense=argc==3;
  std::ifstream f(argv[1],std::ios::binary);
  std::vector<unsigned char>b((std::istreambuf_iterator<char>(f)),{});
  auto o=ps5hip::inspect_code_object(b.data(),b.size());
- const std::map<std::string,std::vector<unsigned>> expected={
+ std::map<std::string,std::vector<unsigned>> expected={
   {"layer_rms_cpu",{8,8}},{"layer_quantize_q8_cpu",{8,8,4}},{"layer_q4_cpu",{8,8,8,4,4}},{"layer_copy",{8,8,4}},{"layer_to_f16",{8,8,4}},{"layer_silu",{8,8,4}},
   {"layer_silu_cpu",{8,8,4}},{"layer_softmax_cpu",{8,8,8,4}},{"layer_rope_cpu",{8,8,4,4}},
   {"layer_add",{8,8,8,4}},{"layer_mul",{8,8,8,4}},
   {"layer_rope",{8,8,4,4}},{"layer_set_rows",{8,8,8,4,4}},
   {"layer_scores",{8,8,8,4}},{"layer_softmax",{8,8,8,4}},{"layer_values",{8,8,8,4}}};
+ if(dense)expected.emplace("layer_dense_f16",std::vector<unsigned>{8,8,8,4,4});
  if(o.kernels.size()!=expected.size())return 3;
  for(auto&k:o.kernels) {
   auto r=ps5hip::initial_launch_rejection(k);auto it=expected.find(k.name);

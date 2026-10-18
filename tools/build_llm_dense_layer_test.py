@@ -4,14 +4,19 @@ import argparse,hashlib,json,os,subprocess,time
 ROOT=Path(__file__).resolve().parents[1]
 def sha(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
-def build(cpu,output,numeric):
+def bind_reference(raw,manifest,validated):
+ if sha(raw)!=validated['sha256'] or sha(manifest)!=validated['manifest_sha256']:raise ValueError('validated reference changed')
+ return dict(raw=str(raw),raw_sha256=validated['sha256'],manifest=str(manifest),manifest_sha256=validated['manifest_sha256'],records=11084,bytes=154392576)
+
+def build(cpu,output,numeric,export_reference=False):
+ if export_reference and not numeric:raise ValueError("reference export requires numerical comparison")
  features=Path('/proc/cpuinfo').read_text().split()
  if any(k not in features for k in ('avx2','fma','f16c')):raise ValueError('host AVX2/FMA/F16C required')
  cpu=cpu.resolve();output=output.resolve();lib=cpu/'cmake/bin';cache=cpu/'cmake/CMakeCache.txt'
  if output.exists():raise ValueError('fresh output directory required')
  config={s.split('=',1)[0]:s.split('=',1)[1] for s in cache.read_text().splitlines() if '=' in s and not s.startswith(('#','//'))}
  if any(config.get(k)!=v for k,v in {'GGML_AVX2:BOOL':'ON','GGML_FMA:BOOL':'ON','GGML_AVX512:BOOL':'OFF'}.items()):raise ValueError('AVX2/FMA reference configuration required')
- names=['tests/llm_dense_layer_default_test.cpp','tests/llm_dense_layer_test.cpp','tests/llm_dense_layer_failure_test.cpp','tests/llm_dense_layer_checks_test.cpp','tests/llm_dense_layer_checks.h','tests/llm_layer_numeric_mock.h','kernels/llm_layer.hip','kernels/llm_cpu_math.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/model_prefix.h','ports/ggml/prefix_calls.h','tools/build_llm_dense_layer_test.py']
+ names=['ports/ggml/dense_layer_fixture.h','ports/ggml/dense_layer_cases.def','tools/dense_layer_reference.py','tests/llm_dense_layer_default_test.cpp','tests/llm_dense_layer_test.cpp','tests/llm_dense_layer_failure_test.cpp','tests/llm_dense_layer_checks_test.cpp','tests/llm_dense_layer_checks.h','tests/llm_layer_numeric_mock.h','kernels/llm_layer.hip','kernels/llm_cpu_math.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/model_prefix.h','ports/ggml/prefix_calls.h','tools/build_llm_dense_layer_test.py']
  files=[ROOT/n for n in names]+[cache,Path('/usr/bin/clang++-18'),(lib/'libggml-cpu.so').resolve(),(lib/'libggml-base.so').resolve()]
  inputs={str(p.resolve()):sha(p) for p in files};output.mkdir(parents=True)
  env={k:v for k,v in os.environ.items() if not k.startswith(('LD_','GGML_','OMP_','ASAN_','UBSAN_','LSAN_')) and k not in ('CPATH','CPLUS_INCLUDE_PATH','C_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH','GCC_EXEC_PREFIX')}
@@ -34,9 +39,16 @@ def build(cpu,output,numeric):
   return binary
  for name,source in [('default','tests/llm_dense_layer_default_test.cpp'),('checks','tests/llm_dense_layer_checks_test.cpp'),('failures','tests/llm_dense_layer_failure_test.cpp')]:run(name,[compile_unit(name,source,True)])
  run('admission',[compile_unit('admission','tests/llm_dense_layer_test.cpp',True),'admission'])
- if numeric:run('numeric',[compile_unit('numeric','tests/llm_dense_layer_test.cpp',False),'numeric'],900)
+ if numeric:run('numeric',[compile_unit('numeric','tests/llm_dense_layer_test.cpp',False),'numeric',*([output/'reference.bin'] if export_reference else [])],900)
+ reference=None
+ if export_reference:
+  from dense_layer_reference import write_manifest,validate
+  raw=output/'reference.bin';manifest=output/'reference.json'
+  write_manifest(raw,manifest);validated=validate(raw,manifest)
+  reference=bind_reference(raw,manifest,validated)
  if any(sha(Path(p))!=h for p,h in inputs.items()):raise ValueError('fixture inputs changed')
  result=dict(status='PASS',classification='synthetic-dense-layer-host-arithmetic' if numeric else 'synthetic-dense-layer-admission',inputs=inputs,commands=commands,gpu_executed=False,native_executed=False,limits=['Existing CPU libraries are not instrumented; no complete producer closure reauthentication','Seven fixed deterministic F16 learned matrices; F32 vector replaces embedding lookup','Host kernel interpretation; native ISA and complete dense model admission remain unqualified'])
+ if reference:result['reference_export']=reference
  (output/'receipt.json').write_text(json.dumps(result,indent=2)+'\n');print(result['classification']+' PASS')
 if __name__=='__main__':
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--cpu-build',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--numeric',action='store_true');a=p.parse_args();build(a.cpu_build,a.output,a.numeric)
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--cpu-build',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--numeric',action='store_true');p.add_argument('--export-reference',action='store_true');a=p.parse_args();build(a.cpu_build,a.output,a.numeric,a.export_reference)

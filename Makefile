@@ -19,6 +19,7 @@ export RESULTS_DIR
 all: host-test native-core public-hip-package
 
 help:
+	@echo 'make llm-dense-layer-fixture  Compile and audit explicit17-export dense module; no GPU qualification'
 	@echo 'make llm-dense-layer-tests  Deterministic F16 whole-layer host comparison; reuses LLM_CPU_BUILD_DIR'
 	@echo 'make llm-dense-projection-test  Host F16 projection primitive; reuse LLM_CPU_BUILD_DIR (no GPU qualification)'
 	@echo 'make llm-original-generation-reference  Explicit fresh host comparison of original weights against GGUF; requires four input/output path variables'
@@ -720,9 +721,19 @@ llm-dense-projection-test:
 	$(PYTHON) tests/llm_dense_make_test.py
 	$(PYTHON) tests/llm_dense_projection_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
 
+LLM_DENSE_LAYER_EXPORT_REFERENCE ?= 0
 LLM_DENSE_LAYER_OUTPUT_DIR ?= results/llm-dense-layer
 .PHONY: llm-dense-layer-tests
 llm-dense-layer-tests:
+	@case "$(LLM_DENSE_LAYER_EXPORT_REFERENCE)" in 0|1) ;; *) echo "LLM_DENSE_LAYER_EXPORT_REFERENCE must be 0 or 1" >&2; exit 1;; esac
 	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference LLM_CPU_BUILD_DIR="$(LLM_CPU_BUILD_DIR)"; fi
 	$(PYTHON) tests/llm_dense_layer_make_test.py
-	$(PYTHON) tools/build_llm_dense_layer_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --output "$(LLM_DENSE_LAYER_OUTPUT_DIR)" --numeric
+	$(PYTHON) tools/build_llm_dense_layer_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --output "$(LLM_DENSE_LAYER_OUTPUT_DIR)" --numeric $(if $(filter 1,$(LLM_DENSE_LAYER_EXPORT_REFERENCE)),--export-reference,)
+
+LLM_DENSE_LAYER_FIXTURE_DIR ?= results/llm-dense-layer-fixture
+.PHONY: llm-dense-layer-fixture
+llm-dense-layer-fixture:
+	@if ! test -f "$(LLM_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-fixture LLM_RMSNORM_FIXTURE_DIR="$(LLM_RMSNORM_FIXTURE_DIR)"; fi
+	$(PYTHON) tests/llm_layer_fixture_test.py
+	@if ! test -f "$(LLM_DENSE_LAYER_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_layer_fixture.py --profile dense-f16 --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_DENSE_LAYER_FIXTURE_DIR)"; fi
+	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from build_llm_layer_fixture import fixture_inputs; fixture_inputs(Path(sys.argv[1]).resolve(),"dense-f16")' "$(LLM_DENSE_LAYER_FIXTURE_DIR)"
