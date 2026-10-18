@@ -1,9 +1,9 @@
 # Original TinyLlama loading: reproducible qualification
 
 Main `6a7b941` ships the bounded reader, mapping, tokenizer metadata, target-byte
-reader and callback. The commands below require the separately reviewed
-optional-loader CPU producer, production generation runner and Make wiring to
-be integrated. Their first complete supported-producer run is still pending.
+reader and callback. The optional-loader CPU producer, production generation
+runner and Make wiring are now integrated. Their first complete supported-producer
+run is in progress; native original-format loading remains unqualified.
 Use the source checkout and Linux/WSL prerequisites in `SOURCE_ONLY_REBUILD.md`;
 no `.local` script or artifact is a build dependency.
 
@@ -19,7 +19,8 @@ The shared optional-tensor transformation generates a loader under the build
 directory; the upstream checkout remains clean. It preserves the generated
 loader's unity exclusion. Reuse an unchanged directory, but choose a new one
 when producer inputs/configuration change; do not reuse historical pre-fix CPU
-receipts. CPU parallelism is supported; these changes do not add CPU ccache.
+receipts. CPU builds honor JOBS and CCACHE=auto/0/1. The ccache launcher has
+passed a real tiny C/C++ reuse test; full-build speedup is not measured.
 Tests create/remove only synthetic files, including a sparse inventory fixture.
 
 Optional original tokenizer check, with explicit local metadata and a small

@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "classification": "original-source-native-helper-host-HIP-interpreter-short",
+  "requests": 16,
+  "raw_files": 384,
+  "bitwise_equal": 384,
+  "tolerances": [
+    2e-05,
+    0.0002,
+    0.0002
+  ],
+  "native_executed": false,
+  "gpu_executed": false,
+  "fresh_weight_hash": false,
+  "source_identity_limit": "Prior locked receipt plus current sidecar hashes and unchanged before/after weight stats; not fresh full weight authentication",
+  "backend": {
+    "requests": 16,
+    "nodes": 12768,
+    "launches": 11728,
+    "CPU_arithmetic": 0,
+    "scheduler_forwarded": 16,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1
+  },
+  "scope": "Scratch proposed native helper using host interpretation of GPU kernels; supported/native qualification pending",
+  "local_evidence": {
+    "receipt.json": "9e0c900be4c18b4dfdddfce44f626122c247cc7e0bfe77ef59fa775749d9e35f",
+    "comparison.json": "877aec56933f75bd470d83b3a95de0bacb9a1dc2710a58035c98f87d3f8046bc",
+    "commands.json": "6cc7fcf7a45497479cb538920437af62f3b2125a57d761b1cf1d7f722303ca82",
+    "harness.diff": "220534c42d6faf6c0ec099bf0ee712d0d452533bc0879e7a5157aae50d8150ee"
+  }
+}

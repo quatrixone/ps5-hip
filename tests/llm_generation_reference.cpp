@@ -1,3 +1,7 @@
+#ifdef PS5HIP_ORIGINAL_MODEL
+#include "../ports/ggml/tinyllama_source_metadata.h"
+#include "../ports/ggml/tinyllama_tensor_callback.h"
+#endif
 // CPU-only oracle: actual tokenizer, committed decoder calls and greedy feedback.
 #include "llama.h"
 #include "ggml.h"
@@ -36,10 +40,35 @@ static bool capture(ggml_tensor* tensor,bool ask,void* pointer){
 }
 int main(int argc,char** argv){
  const bool corpus=argc==4&&!std::strcmp(argv[3],"corpus");
- if(argc!=3&&!corpus)return 2;setenv("GGML_CPU_DISABLE_FUSION","1",1);llama_backend_init();int status=0;
+ bool original=false;
+#ifdef PS5HIP_ORIGINAL_MODEL
+ original=argc==4&&!std::strcmp(argv[3],"--original-source");
+#endif
+ if(argc!=3&&!corpus&&!original)return 2;setenv("GGML_CPU_DISABLE_FUSION","1",1);llama_backend_init();int status=0;
  try{
   auto mp=llama_model_default_params();mp.n_gpu_layers=0;mp.check_tensors=true;mp.use_extra_bufts=false;
-  std::unique_ptr<llama_model,decltype(&llama_model_free)> model(llama_model_load_from_file(argv[1],mp),llama_model_free);check(bool(model),"model");
+  #ifdef PS5HIP_ORIGINAL_MODEL
+  direct_tiny::Metadata metadata(nullptr,gguf_free);
+  std::unique_ptr<ps5hip::SafetensorsReader> source;
+  std::unique_ptr<ps5hip::TinyLlamaTensorCallback> callback;
+#endif
+  std::unique_ptr<llama_model,decltype(&llama_model_free)> model(nullptr,llama_model_free);
+#ifdef PS5HIP_ORIGINAL_MODEL
+  if(original){
+   metadata=direct_tiny::construct(argv[1]);
+   auto config=direct_tiny::json(direct_tiny::read(std::filesystem::path(argv[1])/"config.json",65536));
+   source=std::make_unique<ps5hip::SafetensorsReader>((std::filesystem::path(argv[1])/"model.safetensors").string());
+   callback=std::make_unique<ps5hip::TinyLlamaTensorCallback>(*source,config);callback->add_descriptors(metadata.get());
+   mp.lazy_mode=LLAMA_LAZY_MODE_OFF;
+   model.reset(llama_model_init_from_user(metadata.get(),ps5hip::TinyLlamaTensorCallback::callback,callback.get(),mp));
+   check(bool(model)&&callback->complete(),"complete201 original model");
+  }else{
+#endif
+   model.reset(llama_model_load_from_file(argv[1],mp));
+#ifdef PS5HIP_ORIGINAL_MODEL
+  }
+#endif
+  check(bool(model),"model");
   const auto* vocab=llama_model_get_vocab(model.get());check(vocab&&llama_vocab_n_tokens(vocab)==32000,"vocab");
   Trace state;state.folder=argv[2];
   auto cp=llama_context_default_params();cp.n_ctx=512;cp.n_batch=cp.n_ubatch=cp.n_seq_max=1;cp.n_threads=cp.n_threads_batch=4;cp.type_k=cp.type_v=GGML_TYPE_F16;cp.flash_attn_type=LLAMA_FLASH_ATTN_TYPE_DISABLED;cp.offload_kqv=cp.op_offload=false;cp.cb_eval=capture;cp.cb_eval_user_data=&state;

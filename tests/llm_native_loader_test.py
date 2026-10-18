@@ -68,7 +68,7 @@ class NativeLoader(unittest.TestCase):
     def test_render_is_narrow(self):
         original = SOURCE.read_text(); generated = producer.render(original)
         restored = generated.replace(producer.REPLACEMENT, producer.ALLOCATE).replace('\n#include "ggml-impl.h"\n#include <new>', '')
-        self.assertEqual(restored, original)
+        self.assertEqual(restored.replace(producer.USER_GUARD, ''), original)
         for changed in (original.replace(producer.ALLOCATE, ''), original + producer.ALLOCATE,
                         original.replace('read_buf(n_size)', 'read_buf(n_size + 1)'),
                         original + '\n#include <new>\n'):

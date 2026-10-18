@@ -19,6 +19,9 @@ export RESULTS_DIR
 all: host-test native-core public-hip-package
 
 help:
+	@echo 'make llm-original-generation-reference  Explicit fresh host comparison of original weights against GGUF; requires four input/output path variables'
+	@echo 'make llm-original-format-tests  Build CPU prerequisites and test original-format readers/mapping/metadata/callbacks using synthetic fixtures'
+	@echo 'make llm-original-metadata-test  Explicit local original tokenizer comparison; set LLM_ORIGINAL_METADATA_DIR and LLM_ORIGINAL_VOCAB_FIXTURE'
 	@echo 'CCACHE=auto uses native compiler caching when installed; 0 disables, 1 requires it'
 	@echo 'JOBS=N controls compiler workers (JOBS=1 is serial); default is bounded by CPU/available memory, capped at 8'
 	@echo 'make deps-fetch  Fetch and verify locked upstream sources and archives'
@@ -278,6 +281,32 @@ llm-deps-fetch:
 llm-cpu-reference: llm-deps-fetch llm-tool-test
 	$(PYTHON) tools/build_llm_cpu_reference.py --output $(LLM_CPU_BUILD_DIR)
 
+# Portable original-format prerequisites; no model download or PS5 qualification.
+# Keep the optional-user-loader configuration separate from historical CPU builds.
+LLM_ORIGINAL_CPU_BUILD_DIR ?= build/llm-original-format-cpu-reference
+LLM_ORIGINAL_METADATA_DIR ?=
+LLM_ORIGINAL_VOCAB_FIXTURE ?=
+.PHONY: llm-original-format-cpu llm-original-format-tests llm-original-metadata-test
+llm-original-format-cpu:
+	$(MAKE) llm-cpu-reference LLM_CPU_BUILD_DIR="$(LLM_ORIGINAL_CPU_BUILD_DIR)"
+
+llm-original-format-tests: llm-original-format-cpu
+	$(PYTHON) tests/safetensors_reader_test.py
+	$(PYTHON) tests/tinyllama_source_tensors_test.py
+	$(PYTHON) tests/tinyllama_target_reader_test.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)"
+	$(PYTHON) tests/tinyllama_source_metadata_test.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --sanitize
+	$(PYTHON) tests/tinyllama_tensor_callback_test.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)"
+	$(PYTHON) tests/llm_user_loader_test.py
+	$(PYTHON) tests/llm_native_loader_test.py
+	$(PYTHON) tests/llm_original_generation_test.py
+
+# Explicit opt-in: authenticate/provide local originals and an independent vocab oracle.
+# Check arguments before fetching/building prerequisites. No weights are opened.
+llm-original-metadata-test:
+	@test -n "$(LLM_ORIGINAL_METADATA_DIR)" -a -n "$(LLM_ORIGINAL_VOCAB_FIXTURE)" || { echo 'Set LLM_ORIGINAL_METADATA_DIR and LLM_ORIGINAL_VOCAB_FIXTURE explicitly' >&2; exit 2; }
+	$(MAKE) llm-original-format-cpu
+	$(PYTHON) tests/tinyllama_source_metadata_test.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --sanitize --original-metadata "$(LLM_ORIGINAL_METADATA_DIR)" --vocab-fixture "$(LLM_ORIGINAL_VOCAB_FIXTURE)"
+
 llm-tool-test:
 	$(PYTHON) tests/llm_rmsnorm_reference_test.py
 	$(PYTHON) tests/llm_reference_fixtures_test.py
@@ -285,6 +314,7 @@ llm-tool-test:
 	$(PYTHON) tests/fetch_llm_model_test.py
 	$(PYTHON) tests/profile_llm_model_test.py
 	$(PYTHON) tests/llm_reference_test.py
+	$(PYTHON) tests/llm_cpu_ccache_test.py
 
 llm-model-profile: llm-tool-test
 	$(PYTHON) tools/profile_llm_model.py --output $(LLM_PROFILE_DIR) --check-lock models/tinyllama-1.1b-chat-v1.0.json
@@ -642,3 +672,16 @@ llm-full-assets: llm-deps-fetch deps-fetch
 	$(PYTHON) tests/public_hip_full_assets_test.py
 	@if ! test -f "$(LLM_FULL_ASSETS_DIR)/receipt.json"; then $(PYTHON) tools/build_public_hip_full_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --layer "$(LLM_LAYER_FIXTURE_DIR)" --reference "$(LLM_FULL_PROFILE_REFERENCE)" --profile "$(LLM_FULL_PROFILE)" --output "$(LLM_FULL_ASSETS_DIR)"; fi
 	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_full_assets import full_inputs; data=full_inputs(Path(sys.argv[1]).resolve()); assert data["profile"]==sys.argv[2], "full asset profile differs"' "$(LLM_FULL_ASSETS_DIR)" "$(LLM_FULL_PROFILE)"
+
+# Explicit full-weight host short generation: both output directories must be fresh.
+LLM_ORIGINAL_SOURCE_DIR ?=
+LLM_ORIGINAL_GGUF ?=
+LLM_ORIGINAL_REFERENCE_DIR ?=
+LLM_ORIGINAL_GENERATION_DIR ?=
+.PHONY: llm-original-generation-reference
+llm-original-generation-reference:
+	@test -n "$(LLM_ORIGINAL_SOURCE_DIR)" -a -n "$(LLM_ORIGINAL_GGUF)" -a -n "$(LLM_ORIGINAL_REFERENCE_DIR)" -a -n "$(LLM_ORIGINAL_GENERATION_DIR)" || { echo 'Set LLM_ORIGINAL_SOURCE_DIR, LLM_ORIGINAL_GGUF, LLM_ORIGINAL_REFERENCE_DIR and LLM_ORIGINAL_GENERATION_DIR explicitly' >&2; exit 2; }
+	@test ! -e "$(LLM_ORIGINAL_REFERENCE_DIR)" -a ! -e "$(LLM_ORIGINAL_GENERATION_DIR)" -a "$(LLM_ORIGINAL_REFERENCE_DIR)" != "$(LLM_ORIGINAL_GENERATION_DIR)" || { echo 'Choose two distinct fresh output directories' >&2; exit 2; }
+	$(MAKE) llm-original-format-cpu
+	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --model "$(LLM_ORIGINAL_GGUF)" --output "$(LLM_ORIGINAL_REFERENCE_DIR)"
+	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --model "$(LLM_ORIGINAL_GGUF)" --output "$(LLM_ORIGINAL_GENERATION_DIR)" --original-source "$(LLM_ORIGINAL_SOURCE_DIR)" --reference "$(LLM_ORIGINAL_REFERENCE_DIR)"

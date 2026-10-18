@@ -102,17 +102,20 @@ def commands_valid(data,folder,cpu,model):
  if rows!=data['commands'] or [x.get('label') for x in rows]!=['headers','compile','ldd','capture'] or any(x.get('exit_code')!=0 for x in rows):raise ValueError('command completion')
  producer=Path(data['producer_output'])
  if not producer.is_absolute() or not producer.is_relative_to(ROOT/'results') or producer!=producer.resolve():raise ValueError('producer output identity')
- expected=command_plan(producer,cpu,model,data.get('profile','short'))
+ expected=command_plan(producer,cpu,model,data.get('profile','short'),Path(data['original_source']) if 'original_source' in data else None)
  if any(row['argv']!=expected[row['label']] for row in rows):raise ValueError('exact command identity')
 
-def command_plan(folder,cpu,model,profile='short'):
+def command_plan(folder,cpu,model,profile='short',original_source=None):
  profile_policy(profile)
  client=ROOT/'.deps/sources/llama-client';lib=cpu/'cmake/bin';harness=ROOT/'tests/llm_generation_reference.cpp'
  flags=['-std=c++17','-O2','-Wall','-Wextra','-Werror','-I'+str(client/'include'),'-I'+str(client/'ggml/include'),'-isystem',str(client/'ggml/src')]
+ if original_source is not None:
+  if profile!='short':raise ValueError('original source requires short profile')
+  flags += ['-DPS5HIP_ORIGINAL_MODEL=1','-I'+str(client/'vendor')]
  return {k:list(map(str,v)) for k,v in {
   'headers':['/usr/bin/clang++-18',*flags,'-M','-MF',folder/'headers.d',harness],
   'compile':['/usr/bin/clang++-18',*flags,'-MD','-MF',folder/'compile.d',harness,'-L'+str(lib),'-Wl,-rpath,'+str(lib),'-lllama','-lggml-cpu','-lggml-base','-o',folder/'trace'],
-  'ldd':['/usr/bin/ldd',folder/'trace'],'capture':[folder/'trace',model,folder/'raw',*(['corpus'] if profile=='corpus' else [])]}.items()}
+  'ldd':['/usr/bin/ldd',folder/'trace'],'capture':[folder/'trace',original_source if original_source is not None else model,folder/'raw',*(['--original-source'] if original_source is not None else ['corpus'] if profile=='corpus' else [])]}.items()}
 
 def artifact_inventory(folder,receipt):
  if any(p.is_symlink() for p in folder.rglob('*')):raise ValueError('generation artifact symlink')
@@ -123,6 +126,7 @@ def final_artifact_check(folder,receipt,artifacts,digest):
 
 def authenticate_generation_reference(folder):
  folder=Path(folder).resolve();receipt=folder/'receipt.json';digest=provenance.sha(receipt);data=loads(receipt.read_text())
+ if any(k in data for k in ('original_source','reference','complete201')):raise ValueError('original-source comparison is not an independent GGUF oracle')
  profile=data.get('profile','short');budget,line,limit=profile_policy(profile)
  if sum(p.stat().st_size for p in folder.rglob('*') if p.is_file())>limit:raise ValueError('reference bound')
  if data.get('status')!='PASS' or data.get('classification')!='successful-greedy-generation-cpu-reference' or data.get('gpu_executed') is not False or data.get('max_new_tokens')!=budget:raise ValueError('generation receipt')
@@ -147,12 +151,33 @@ def authenticate_generation_reference(folder):
  provenance.merge(closure,receipt,digest)
  return {**data,'receipt':str(receipt),'receipt_sha256':digest,'reference_data':str(folder/'raw')},closure
 
-def build(cpu,model,output,profile='short'):
+def build(cpu,model,output,profile='short',original_source=None,reference=None):
  budget,completion,limit=profile_policy(profile)
  cpu,model,output=map(lambda p:Path(p).resolve(),(cpu,model,output))
  if output.exists() or not output.is_relative_to(ROOT/'results'):raise ValueError('fresh results directory required')
  inputs=provenance.cpu_inputs(cpu,model);compiler=Path('/usr/bin/clang++-18');lib=cpu/'cmake/bin';client=ROOT/'.deps/sources/llama-client';harness=ROOT/'tests/llm_generation_reference.cpp'
  for p in [*SOURCES,compiler,Path('/usr/bin/ldd')]:provenance.merge(inputs,p,provenance.sha(p))
+ if (original_source is None)!=(reference is None):raise ValueError('original source and reference must be supplied together')
+ if original_source is not None:
+  if profile!='short':raise ValueError('original source requires short profile')
+  original_source=Path(original_source).resolve();reference=Path(reference).resolve()
+  from prepare_llm_native_loader import render_user
+  for name in ('tools/prepare_llm_native_loader.py','tools/llm_user_loader.cmake'):
+   if loads((cpu/'receipt.json').read_text())['identity']['inputs'].get(name)!=provenance.sha(ROOT/name):raise ValueError('patched CPU loader prerequisite')
+  generated=cpu/'llama-model-loader-user.cpp'
+  if generated.is_symlink() or generated.read_text()!=render_user((client/'src/llama-model-loader.cpp').read_text()):raise ValueError('patched CPU loader source')
+  oracle,closure=authenticate_generation_reference(reference)
+  if oracle.get('profile','short')!='short' or oracle['cpu_build']!=str(cpu) or oracle['model']['path']!=str(model):raise ValueError('short oracle CPU/model differs')
+  for p,h in closure.items():provenance.merge(inputs,p,h)
+  lock=ROOT/'models/tinyllama-1.1b-chat-v1.0.json';spec=loads(lock.read_text());provenance.merge(inputs,lock,provenance.sha(lock))
+  originals=dict(spec['metadata']);originals['model.safetensors']=dict(bytes=spec['weights']['file_bytes'],sha256=spec['weights']['expected_file_sha256'])
+  for name,item in originals.items():
+   p=original_source/name
+   if p.is_symlink() or not p.is_file() or p.stat().st_size!=item['bytes'] or provenance.sha(p)!=item['sha256']:raise ValueError('original source identity')
+   provenance.merge(inputs,p,item['sha256'])
+  for name in ('tools/prepare_llm_native_loader.py','tools/llm_user_loader.cmake','tools/build_llm_generation_numeric_test.py','tests/llm_original_generation_test.py'):provenance.merge(inputs,ROOT/name,provenance.sha(ROOT/name))
+  provenance.merge(inputs,generated,provenance.sha(generated))
+
  output.mkdir(parents=True);raw=output/'raw';raw.mkdir();commands=[]
  env={k:v for k,v in os.environ.items() if not k.startswith(('LD_','GGML_','OMP_')) and k not in ('CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH','GCC_EXEC_PREFIX')}
  def run(label,args):
@@ -160,22 +185,32 @@ def build(cpu,model,output,profile='short'):
   (output/(label+'.stdout')).write_bytes(result.stdout);(output/(label+'.stderr')).write_bytes(result.stderr);commands.append(dict(label=label,argv=args,exit_code=result.returncode));(output/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
   if result.returncode:raise ValueError(label+' failed')
   return result.stdout.decode()
- flags=['-std=c++17','-O2','-Wall','-Wextra','-Werror','-I'+str(client/'include'),'-I'+str(client/'ggml/include'),'-isystem',str(client/'ggml/src')]
- run('headers',[compiler,*flags,'-M','-MF',output/'headers.d',harness])
+ plan=command_plan(output,cpu,model,profile,original_source)
+ run('headers',plan['headers'])
  for p in provenance.dependencies(output/'headers.d'):provenance.merge(inputs,p,provenance.sha(p))
- run('compile',[compiler,*flags,'-MD','-MF',output/'compile.d',harness,'-L'+str(lib),'-Wl,-rpath,'+str(lib),'-lllama','-lggml-cpu','-lggml-base','-o',output/'trace'])
+ run('compile',plan['compile'])
  if provenance.dependencies(output/'headers.d')!=provenance.dependencies(output/'compile.d'):raise ValueError('compiler dependency drift')
  for p,h in provenance.runtime_inputs(run('ldd',['/usr/bin/ldd',output/'trace']),lib,inputs).items():provenance.merge(inputs,p,h)
- binary=provenance.sha(output/'trace');line=run('capture',[output/'trace',model,raw,*(['corpus'] if profile=='corpus' else [])])
+ binary=provenance.sha(output/'trace');line=run('capture',plan['capture'])
  if line!=completion or binary!=provenance.sha(output/'trace'):raise ValueError('capture completion/binary')
  summary=validate(raw,profile);(output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n');provenance.recheck(inputs)
+ if original_source is not None:
+  from build_llm_generation_numeric_test import compare_generation
+  rows,files,requests=compare_generation(raw,reference/'raw',host_backend=False)
+  if requests!=16 or len(files)!=384 or not all(r['pass_budget'] for r in rows):raise ValueError('original-source numerical comparison')
+  provenance.recheck(inputs)
+  (output/'comparison.json').write_text(json.dumps(dict(rows=rows,requests=requests,raw_files=len(files)),indent=2)+'\n')
  artifacts={str(p.relative_to(output)):provenance.sha(p) for p in output.rglob('*') if p.is_file()}
  if sum(p.stat().st_size for p in output.rglob('*') if p.is_file())>limit:raise ValueError('reference bound')
  data=dict(producer_output=str(output),status='PASS',classification='successful-greedy-generation-cpu-reference',cpu_build=str(cpu),model=dict(path=str(model),bytes=model.stat().st_size,sha256=inputs[str(model)]),inputs=inputs,artifacts=artifacts,commands=commands,requests=summary['requests'],raw_files=summary['raw_files'],max_new_tokens=budget,gpu_executed=False,limits=['CPU reference only; no GPU execution','Reset/repeat in one process, not independent-process determinism','Text pieces are source-bound vocabulary API output; Python independently validates greedy IDs and feedback'])
+ if original_source is not None:
+  data.update(classification='original-format-host-short-generation-compared',original_source=str(original_source),reference=str(reference),complete201=True,native_executed=False)
  if profile=='corpus':data['profile']=profile
- commands_valid(data,output,cpu,model);(output/'receipt.json').write_text(json.dumps(data,indent=2)+'\n');print('PASS CPU greedy generation reference')
+ commands_valid(data,output,cpu,model);(output/'receipt.json').write_text(json.dumps(data,indent=2)+'\n');print('PASS original-format host short generation compared' if original_source is not None else 'PASS CPU greedy generation reference')
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for name in ('cpu-build','model','output'):parser.add_argument('--'+name,type=Path,required=True)
  parser.add_argument('--profile',choices=('short','corpus'),default='short')
- args=parser.parse_args();build(args.cpu_build,args.model,args.output,args.profile)
+ parser.add_argument('--original-source',type=Path)
+ parser.add_argument('--reference',type=Path)
+ args=parser.parse_args();build(args.cpu_build,args.model,args.output,args.profile,args.original_source,args.reference)

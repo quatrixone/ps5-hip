@@ -14,7 +14,9 @@ class ReferenceTest(unittest.TestCase):
     def test_driver_alias_and_failed_rerun_receipt(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            for name in ('llm-inputs.json', 'tools/build_llm_cpu_reference.py', 'tools/build_jobs.py', 'tools/fetch_locked_deps.py'):
+            for name in ('llm-inputs.json', 'tools/build_llm_cpu_reference.py', 'tools/build_jobs.py', 'tools/fetch_locked_deps.py',
+                         'tools/native_ccache.py', 'tests/llm_cpu_ccache_test.py', 'tools/prepare_llm_native_loader.py',
+                         'tools/llm_user_loader.cmake', 'tests/llm_user_loader_test.py', 'client/src/llama-model-loader.cpp'):
                 target = root / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text('test input')
@@ -30,6 +32,8 @@ class ReferenceTest(unittest.TestCase):
             spec = {'client': {'revision': 'test-revision', 'source_url': 'test-source'}}
             with patch.object(builder, 'ROOT', root), patch.object(builder, 'read', return_value=spec), \
                  patch.object(builder, 'source', return_value=client), \
+                 patch.object(builder, 'compiler_cache', return_value=({'enabled': False, 'requested': '0'}, [])), \
+                 patch.object(builder.loader, 'render_user', return_value='generated loader'), \
                  patch.object(builder.shutil, 'which', side_effect=lambda name: str(binaries / name)), \
                  patch.object(builder.subprocess, 'check_output', return_value='clang version 18.1.8\n'), \
                  patch.object(sys, 'argv', ['builder', '--output', str(output)]):

@@ -9,8 +9,8 @@ The bounded safetensors/tokenizer/mapping/callback prerequisites are on main
 619,094,016 compared bytes, then 16 commits/384 bitwise-equal boundary files.
 Keep that proof separate from supported-producer and native acceptance.
 
-1. Integrate the shared optional-tensor loader fix and source-bound CPU producer;
-   preserve clean upstream checkouts and default GGUF behavior.
+1. Integrated: shared optional-tensor loader fix, source-bound CPU producer,
+   original-format Make targets and CPU ccache; upstream checkout stays clean.
 2. Run the portable Make suite from a fresh CPU build directory. Capture a fresh
    short GGUF oracle and run the production original-source mode with fresh
    weight authentication, exact numerical gates and two reset rounds.

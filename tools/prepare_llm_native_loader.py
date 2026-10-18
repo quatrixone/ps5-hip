@@ -18,7 +18,27 @@ REPLACEMENT = '''                    // Tensor staging must use the bounded nati
                     } read_buf(n_size);'''
 
 
+USER_ANCHOR = """    if (files.empty()) {
+        if (flags & TENSOR_SKIP_IF_VIRTUAL) {
+            return nullptr;
+        }
+        ggml_type type = GGML_TYPE_F32;
+        const int64_t tid = gguf_find_tensor(metadata, tn.str().c_str());"""
+USER_GUARD = """
+        // User metadata declares supplied tensors; absent optional weights stay absent.
+        if (tid == -1 && (flags & TENSOR_NOT_REQUIRED)) {
+            return nullptr;
+        }"""
+
+
+def render_user(text):
+    if text.count(USER_ANCHOR) != 1 or USER_GUARD in text:
+        raise ValueError('upstream user loader optional branch changed')
+    return text.replace(USER_ANCHOR, USER_ANCHOR + USER_GUARD)
+
+
 def render(text):
+    text = render_user(text)
     anchor = '#include "ggml-alloc.h"'
     if text.count(ALLOCATE) != 1 or text.count(anchor) != 1:
         raise ValueError('upstream loader staging allocation changed')

@@ -21,8 +21,9 @@ from 16 commits were bitwise CPU-reference equal. These runs used a scratch
 patched loader and prior source authentication, not a fresh whole-weight hash.
 They do not qualify the supported production build or the PS5 path.
 
-Next integrate the reviewed shared optional-loader fix, original-mode producer
-and Make wiring, then qualify a fresh CPU build and two fresh output directories.
+The shared optional-loader fix, original-mode producer, Make targets and CPU
+ccache support are integrated. Fresh supported CPU build qualification is running;
+then capture and compare two fresh short-generation output directories.
 The original runtime consumes safetensors/config/tokenizers; GGUF is only the
 independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUILD.md)
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
