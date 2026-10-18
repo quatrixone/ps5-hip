@@ -6,6 +6,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Original native image audit | offline | existing3images/435functions pass;51tests; producer receipt pending | evidence/offline-original-native-audit-correction.json
 
+- 2026-10-18 | Original native package | offline |149objects/201commands/435functions and final receipt pass; no embedded weights | evidence/offline-native-original-linked-package.json | next: freeze and .40
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

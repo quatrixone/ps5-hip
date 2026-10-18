@@ -78,8 +78,9 @@ Those runs used a scratch relink and prior source authentication with fresh
 sidecar hashes/stat checks, without a fresh whole-weight SHA. See
 `../evidence/offline-original-format-host-prerequisites.json`.
 
-Native compilation and standalone linking of the new headers passed, but no
-original-format PS5 app load/decode has run. Keep source/config/metadata and
+The complete native package and 435-function image audit now pass; see
+`../evidence/offline-native-original-linked-package.json`. No original-format
+PS5 app load/decode has run. Keep source/config/metadata and
 callback owners alive and immutable; discard failed partial uploads. The
 default backend setter cannot report silent backend failures. Native allocation,
 error handling, ownership and GPU execution need their own milestone.
@@ -104,5 +105,5 @@ contains only original-model.json and code/assets, not model weights.
 The controller accepts `--model-directory` for explicit missing-file provisioning.
 It authenticates existing files first and never overwrites a mismatch. Original
 mode uses a600-second diagnostic watchdog and630-second observation limit. These
-are bounded test allowances, not PS5 performance estimates. A real linked-image
-audit and hardware validation are still required before native support is claimed.
+are bounded test allowances, not PS5 performance estimates. The linked-image
+audit now passes; hardware validation remains required before native support is claimed.

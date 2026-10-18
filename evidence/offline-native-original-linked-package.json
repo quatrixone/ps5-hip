@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-original-safetensors-linked-package",
+  "source_commit": "ccea21e",
+  "build": "build/llm-native-original-app-v2",
+  "build_receipt_sha256": "ed2a980f641ebc4159dfc5d8910f3e6dc36323a0b783998f9882f6bbc7b83155",
+  "audit_sha256": "7eff66ff2abf1e5a0351a6bf9e7be37ea20e624980d3f7e4148ae271481f1cb9",
+  "review_sha256": "03bafad2fa30d52599ba3a716530aba2b14da22db79030ce2076cfac84f9b742",
+  "commands_sha256": "97d63b19c76af1ea2101f4caa4df1f85be1577486f8082d03140fc0a412e9968",
+  "command_count": 201,
+  "object_count": 149,
+  "package_bytes": 23363584,
+  "package_sha256": "5196f855773b2182ad1a0df14bb017f2a29746145edd3506d9d8e3e7ec34de36",
+  "package_file_count": 15,
+  "images": {
+    "title.elf": {
+      "bytes": 25050336,
+      "sha256": "38404a15570f146ec3e44b204e0236686d4514ad5e97c9095bb2499e9ddde3ee"
+    },
+    "eboot.elf": {
+      "bytes": 15300644,
+      "sha256": "6158019b59dbbd0a6c233b4fc119215583c25a77c27143eb299016ba4724d90e"
+    },
+    "extracted.elf": {
+      "bytes": 15300644,
+      "sha256": "9197a75813ebb6db30c9d21135e1223b41009f8989febf591f40ab4bdd3ac015"
+    }
+  },
+  "audited_function_count": 435,
+  "profile": "generation",
+  "external_original_model": {
+    "schema": 1,
+    "format": "original_safetensors",
+    "directory": "/data/hip/models/tinyllama-source",
+    "files": {
+      "config.json": {
+        "bytes": 608,
+        "sha256": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9"
+      },
+      "tokenizer.model": {
+        "bytes": 499723,
+        "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+      },
+      "tokenizer_config.json": {
+        "bytes": 1289,
+        "sha256": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+      },
+      "tokenizer.json": {
+        "bytes": 1842767,
+        "sha256": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e"
+      },
+      "special_tokens_map.json": {
+        "bytes": 551,
+        "sha256": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db"
+      },
+      "model.safetensors": {
+        "bytes": 2200119864,
+        "sha256": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+      }
+    }
+  },
+  "results_dir": "/data/hip/results/original-short-v1",
+  "observed_cache_counter_delta": {
+    "hits": 79,
+    "misses": 2,
+    "scope": "Project cache counters around compilation; aggregate observation, not per-command cache attribution"
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "limits": [
+    "Complete offline producer and independent package/image review; no console original-format load/decode yet.",
+    "Original safetensors stay external; runtime prepares F32 norms/Q4_0 matrices, not a PyTorch runtime.",
+    "Failed v1 and its audit diagnostic remain preserved."
+  ]
+}

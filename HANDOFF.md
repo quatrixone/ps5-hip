@@ -31,6 +31,19 @@ independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUI
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
 `.bin/.pt/.pth`, other architectures, training and native original loading remain open.
 
+## Native original-safetensors package: offline complete
+
+The fresh v2 producer completed successfully on ccea21e: 149 objects, 201 commands,
+435 audited functions and a 23,363,584-byte package. Independent final review
+confirms all image/package/configuration/receipt identities and exactly 15 app
+files with no embedded model weights. The app selects the six original files
+under `/data/hip/models/tinyllama-source`. Project cache counters recorded 79 hits
+and 2 misses across compilation; this is not a whole-build speedup measurement.
+See `evidence/offline-native-original-linked-package.json`.
+Next: freeze and isolate this candidate, then validate original loading and the
+short generation/reset profile on available .40. Its latest service check still
+fails; no original-format console execution or release readiness is claimed.
+
 ## Native original-format image audit corrected
 
 The original-format app compiled, linked and packaged, but its producer stopped
@@ -39,8 +52,8 @@ initialization resets violated the old single-reset expectation. The corrected
 auditor uses the existing unique loader selector and strict per-signature reset
 counts/order. All three existing images now pass the main auditor (435 functions);
 six original and 45 legacy tests pass. No native rebuild was needed for this audit.
-See `evidence/offline-original-native-audit-correction.json`. The failed producer
-has no final receipt: producer completion and console execution remain pending.
+See `evidence/offline-original-native-audit-correction.json`. The failed v1 producer remains preserved without a final receipt. The fresh v2
+producer has since completed; console execution remains pending.
 
 ## Native original-format integration: offline checks pass
 
@@ -48,8 +61,8 @@ The native title, builder, image auditor, freezer and controller now share the
 six-file original-safetensors contract. Make exposes explicit model format
 selection; model files stay external under `/data/hip/models`. Focused tests and
 independent integration review pass. See
-`evidence/offline-native-original-format-integration.json`. The next gate is a
-fresh linked native package and its full image audit, followed by console review.
+`evidence/offline-native-original-format-integration.json`. The linked native package and full image audit now pass; console review and
+execution remain pending.
 No native original-format execution is claimed.
 
 ## Current: corpus deployment interrupted before launch
