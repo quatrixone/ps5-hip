@@ -1,0 +1,42 @@
+{
+  "status": "PASS_SCRATCH_HOST_PROOF_PRODUCTION_PENDING",
+  "shipped_components_commit": "6a7b941",
+  "full_load": {
+    "tensors": 201,
+    "compared_bytes": 619094016,
+    "exact": true,
+    "runtime_original_only": true
+  },
+  "short_decode": {
+    "commits": 16,
+    "boundary_files": 384,
+    "bitwise_equal": 384,
+    "generated_ids": [
+      29892,
+      727,
+      471,
+      263
+    ],
+    "text": ", there was a",
+    "reset_runs": 2
+  },
+  "fresh_whole_weight_hash": false,
+  "native_executed": false,
+  "gpu_executed": false,
+  "production_producer_qualified": false,
+  "limits": [
+    "Scratch patched host loader; not a fresh production CPU build.",
+    "Current sidecar hashes and unchanged file stats supplement prior source authentication; no fresh whole-weight SHA.",
+    "Complete original-format PS5 loading, PyTorch checkpoints and training remain unqualified."
+  ],
+  "local_receipts": {
+    "full_load": {
+      "path": ".local/full-original-load-v2/receipt.json",
+      "sha256": "4d1ab3e16f9b26fe8a4526b54c4d1872f6514a69b4a0fd579c8fb906e00b1a5b"
+    },
+    "short_decode": {
+      "path": ".local/original-format-short-decode/receipt.json",
+      "sha256": "b1c8d916895f5183257b445ff4adc6b0f3d9b9f8e5b9cab9c2c62061b003326d"
+    }
+  }
+}

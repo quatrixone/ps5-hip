@@ -2,6 +2,28 @@
 
 Updated: 2026-10-18, America/New_York.
 
+## Original-format acceptance gates
+
+The bounded safetensors/tokenizer/mapping/callback prerequisites are on main
+(`6a7b941`). Scratch host loading and short decoding now pass: 201 exact tensors,
+619,094,016 compared bytes, then 16 commits/384 bitwise-equal boundary files.
+Keep that proof separate from supported-producer and native acceptance.
+
+1. Integrate the shared optional-tensor loader fix and source-bound CPU producer;
+   preserve clean upstream checkouts and default GGUF behavior.
+2. Run the portable Make suite from a fresh CPU build directory. Capture a fresh
+   short GGUF oracle and run the production original-source mode with fresh
+   weight authentication, exact numerical gates and two reset rounds.
+3. Qualify the original metadata/callback path in the native app with bounded
+   allocation, complete201, upload/read failures and clean ownership; then run
+   the existing short decoder acceptance profile on available .40.
+4. Keep wider/long-context native validation, sharded loading integration and
+   PyTorch checkpoint loading separate. This does not require all of PyTorch,
+   but no `.bin/.pt/.pth` loader or training support is implemented here.
+
+Build commands and limits: [ORIGINAL_FORMAT_BUILD.md](ORIGINAL_FORMAT_BUILD.md).
+The latest native generation result remains the GGUF four-token/reset proof.
+
 ## Active release priority: native LLM inference v1
 
 Current v2 corpus deployment failed before launch during existing-model FTP

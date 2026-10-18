@@ -3,6 +3,26 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Original-format inference: components shipped, production qualification pending
+
+Main `6a7b941` contains bounded safetensors/index readers, strict TinyLlama
+mapping, original tokenizer metadata, row conversion and the tensor callback.
+They are reusable prerequisites; no native original-format model has run.
+
+Separate scratch host evidence loaded all 201 original tensors and compared all
+619,094,016 prepared bytes exactly to the GGUF oracle. The unchanged short
+decoder then produced four tokens over two reset rounds: all 384 boundaries
+from 16 commits were bitwise CPU-reference equal. These runs used a scratch
+patched loader and prior source authentication, not a fresh whole-weight hash.
+They do not qualify the supported production build or the PS5 path.
+
+Next integrate the reviewed shared optional-loader fix, original-mode producer
+and Make wiring, then qualify a fresh CPU build and two fresh output directories.
+The original runtime consumes safetensors/config/tokenizers; GGUF is only the
+independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUILD.md)
+and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
+`.bin/.pt/.pth`, other architectures, training and native original loading remain open.
+
 ## Current: corpus deployment interrupted before launch
 
 Candidate `results/source-public-llm-generation-corpus-console-v2` froze and
@@ -25,7 +45,8 @@ review defects (post-authentication identity rebinding and omitted prompt policy
 are corrected and covered by tests. See
 `evidence/offline-frozen-artifact-admission.json`. Next qualify one fresh real
 issuer freeze before using the new route; no deployment speedup is claimed yet.
-Longer-generation helper and original-format reader patches remain isolated.
+Longer-generation helper and original-format producer integration remain isolated.
+The additive original-format components are already on main.
 The native four-token generation proof remains the latest GPU generation result.
 
 ## Historical: corpus pre-launch rejection fixed
