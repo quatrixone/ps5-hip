@@ -22,8 +22,10 @@ The isolated extended host numerical run passes 1,176 commits and all 2,096
 float outputs bitwise CPU-equal across the fixed 64-step, normal-EOS and
 combined-512 cases, with reset/ownership checks. The implementation is integrated after rebasing
 onto `167b22d` with numerical code unchanged; 229 combined tests pass. This is
-scratch host evidence: a supported authenticated main extended oracle and
-native extended execution remain unproven. Full M4/M5 acceptance stays open.
+scratch host HIP evidence. The supported main extended GGUF CPU reference now
+passes fresh authentication and all 2,096 outputs match that scratch baseline.
+See `evidence/offline-supported-extended-cpu-reference.json`. Native extended
+execution remains unproven; full M4/M5 acceptance stays open.
 
 Two independently reviewed overhead changes are integrated: shared initial/
 final header verification for the native compile batch (41 focused tests), and

@@ -338,7 +338,9 @@ numerical tolerances are unchanged; this profile does not admit a native run.
 Short and corpus behavior remains unchanged. Extended asset assembly and host
 numerical integration are implemented. The scratch host HIP arithmetic run passes
 all 1,176 commits and 2,096 outputs bitwise against its scratch CPU baseline;
-a supported authenticated main extended oracle remains unqualified. Native package building rejects extended until measured
+the supported main extended GGUF CPU oracle also passes fresh authentication
+and all 2,096 outputs match the scratch baseline. See
+`evidence/offline-supported-extended-cpu-reference.json`. Native package building rejects extended until measured
 watchdog budgets are qualified; console admission still rejects this profile.
 Producing the CPU reference alone does not establish long-context HIP execution,
 native EOS behavior or completion of M4.

@@ -16,8 +16,9 @@ proof remains the latest console generation result. Original-safetensors host
 inference and the linked native package now pass their separate offline gates;
 original-format console execution remains pending. Extended scratch host numerical qualification passes: 1,176 commits and all
 2,096 float outputs bitwise CPU-equal. The implementation is integrated after rebasing to `167b22d`
-with unchanged numerical code and 229 combined tests passing. Native extended
-execution and a supported authenticated main extended oracle remain unproven. Retain M2 dense/extreme cases and
+with unchanged numerical code and 229 combined tests passing. The supported main extended GGUF CPU oracle now passes fresh authentication
+and matches all 2,096 scratch baseline outputs. Native extended execution remains
+unproven. Retain M2 dense/extreme cases and
 the original source-format loading requirement. Use idle .40 for meaningful
 validation and push each validated milestone to main.
 
@@ -353,8 +354,10 @@ but its native v2 attempt stopped before launch on a transport failure; see
 64-step, combined-512 and normal-EOS scratch host numerical proof now passes
 1,176 commits and all 2,096 float outputs bitwise CPU-equal. Its implementation is integrated after rebasing
 to `167b22d` with unchanged numerical code and 229 combined tests passing;
-this does not establish a supported authenticated main extended oracle or
-native extended execution. Preserve full logits,
+the supported main extended GGUF CPU oracle now passes fresh authentication
+and matches every scratch baseline output. See
+`evidence/offline-supported-extended-cpu-reference.json`. Native extended
+execution remains open. Preserve full logits,
 generated-history comparisons, reset and monotonic phase timings. The short
 proof does not replace the full M4 gates below, and the 17-second whole-app
 smoke observation cannot budget the longer profiles.
