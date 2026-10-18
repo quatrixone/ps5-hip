@@ -93,4 +93,49 @@ class Authentication(unittest.TestCase):
   with patch.object(c,'LOCK',lock),patch.object(c.ftplib,'FTP',FTP):self.assertEqual(self.obj.run(),1)
   self.assertFalse(self.obj.record['accepted']);self.assertTrue(self.obj.record['lock_released']);self.assertFalse(lock.exists())
 
+class FrozenVerification(unittest.TestCase):
+ setUp=Authentication.setUp
+ save=Authentication.save
+ def verify(self):c.Control.verify(self.obj)
+ def test_every_file_read_again_on_every_call(self):
+  with patch.object(c,'stream_digest',wraps=c.stream_digest) as digest:
+   self.verify();self.verify()
+  self.assertEqual(digest.call_count,2*len(self.obj.manifest['files']))
+ def test_same_size_change_with_restored_mtime_rejected(self):
+  import os
+  self.verify();path=self.root/self.obj.manifest['launch'];before=path.stat()
+  path.write_bytes(b'LAUNCH');os.utime(path,ns=(before.st_atime_ns,before.st_mtime_ns))
+  with self.assertRaisesRegex(RuntimeError,'frozen input changed'):self.verify()
+ def test_missing_file_propagates(self):
+  (self.root/self.obj.manifest['launch']).unlink()
+  with self.assertRaises(FileNotFoundError):self.verify()
+ def test_manifest_checked_before_any_file_read(self):
+  (self.candidate/'manifest.json').write_bytes(b'changed')
+  with patch.object(c,'stream_digest') as digest,self.assertRaisesRegex(RuntimeError,'manifest changed'):self.verify()
+  digest.assert_not_called()
+ def test_outside_symlink_rejected_even_with_matching_bytes(self):
+  with tempfile.TemporaryDirectory() as other:
+   target=Path(other)/'launch';target.write_bytes(b'launch')
+   path=self.root/self.obj.manifest['launch'];path.unlink();path.symlink_to(target)
+   with self.assertRaisesRegex(RuntimeError,'frozen input changed'):self.verify()
+ def test_read_error_propagates(self):
+  with patch.object(c,'stream_digest',side_effect=OSError('read failed')),self.assertRaisesRegex(OSError,'read failed'):self.verify()
+ def test_workers_overlap_but_are_joined_on_failure(self):
+  import threading
+  for index in range(4):
+   path=self.candidate/str(index);path.write_bytes(b'extra')
+   self.obj.manifest['files'][str(path.relative_to(self.root))]=c.sha(b'extra')
+  self.save()
+  barrier=threading.Barrier(4);lock=threading.Lock();active=0;peak=0
+  def read(path):
+   nonlocal active,peak
+   with lock:active+=1;peak=max(peak,active)
+   try:
+    barrier.wait(timeout=5)
+    raise OSError('worker failed')
+   finally:
+    with lock:active-=1
+  with patch.object(c,'stream_digest',side_effect=read),self.assertRaisesRegex(OSError,'worker failed'):self.verify()
+  self.assertEqual(peak,4);self.assertEqual(active,0)
+
 if __name__=='__main__':unittest.main()

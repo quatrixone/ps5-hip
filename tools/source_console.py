@@ -10,6 +10,7 @@ import socket
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from source_public_hip_log import LOG_NAMES, package_limit
 from source_model_streaming import local_identity, readback, stage_upload
 from source_model_freeze import model_contract, stream_digest, validate_model_candidate, MODEL_PACKAGE_LIMIT
@@ -153,9 +154,14 @@ class Control:
 
     def verify(self):
         require(sha((self.candidate / 'manifest.json').read_bytes()) == self.manifest_sha, 'manifest changed')
-        for name, digest in self.manifest['files'].items():
+        def check(item):
+            name, digest = item
             path = ROOT / name
             require(path.resolve().is_relative_to(ROOT) and stream_digest(path) == digest, 'frozen input changed: ' + name)
+        # Bound open files and overlap WSL filesystem latency; every call still reads fresh bytes.
+        with ThreadPoolExecutor(max_workers=4) as workers:
+            for _ in workers.map(check, self.manifest['files'].items()):
+                pass
 
     def phase_remaining(self, requested=1800):
         if not self.model_phase(): return requested

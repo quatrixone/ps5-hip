@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-parallel-frozen-verification",
+  "date": "2026-10-18",
+  "base_commit": "3095368d1c96d4fa6ad75c4991117ca286a04565",
+  "change": "Four bounded workers overlap independent frozen manifest file verification. Each invocation freshly resolves containment and reads every file. Manifest identity is checked first; worker errors propagate and workers join before return. Producer and final authentication remain unchanged.",
+  "tests": {
+    "command": "python3 -m unittest discover -s tests -p \"source_*_test.py\" -q",
+    "methods": 288,
+    "status": "PASS",
+    "new_cases": 7
+  },
+  "benchmark": {
+    "files": 512,
+    "bytes": 7967282,
+    "seconds": {
+      "serial": [
+        6.011224280053284,
+        6.573455968988128,
+        6.711915019026492,
+        6.768247728003189
+      ],
+      "parallel": [
+        1.0942014990141615,
+        1.1021580210071988,
+        1.1592590890359133,
+        1.1398409549728967
+      ]
+    },
+    "median_seconds": {
+      "serial": 6.64268549400731,
+      "parallel": 1.1209994879900478
+    },
+    "scope": "512 existing sub-1MiB manifest inputs, warm-cache alternating order, fresh hashes on each pass; no console or full phase timing"
+  },
+  "inputs": {
+    "tools/source_console.py": "5fbbf6a85108892e396571a167c12e3df69be8b9a2dc0fba25fae11a627299e0",
+    "tests/source_prefix_authentication_test.py": "c9a0e490a71b14cd44acfd57975ff176cec0b82b78b7446d5cd826784cb54d42",
+    ".local/parallel-verification-tests.log": "31dbaaa206fc366fbadbf8004602820c120f87151259ffed097687cb5e33e924",
+    ".local/benchmark_frozen_verification.py": "e45ce14331999aea0386bb6bd807166cd338b9a3727318550c92241d8c1f426a",
+    ".local/frozen-verification-benchmark.json": "2e4c4596de5bb007f52cdba49d74c76bc02f0c63e630075933fa4d16b95fede0"
+  },
+  "native_rebuilt": false,
+  "console_contact": false,
+  "limits": [
+    "Warm-cache 512-file subset only; no whole control-phase or cold-cache speedup measured.",
+    "Repeated producer validation remains unchanged and still dominates overall control time.",
+    "Existing consumed native proof is historical; future candidates need current-source receipts."
+  ]
+}

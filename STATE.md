@@ -3,6 +3,23 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Frozen manifest verification now overlaps filesystem reads
+
+The controller verifies frozen manifest files with four bounded workers. Every
+invocation still reads fresh bytes and checks resolved path containment; manifest
+identity is checked first, worker failures propagate, and all workers finish
+before control returns. Producer authentication and final checks remain intact.
+All 288 source/controller regression tests pass, including seven fresh-read,
+tamper, symlink, I/O failure and worker-lifetime cases.
+
+A warm-cache alternating benchmark of 512 existing manifest inputs (7,967,282
+bytes) measured median 6.643 seconds serial versus 1.121 seconds parallel.
+This measures the manifest scan only, not total deployment or execution time.
+See `evidence/offline-parallel-frozen-verification.json`. No native rebuild or
+console contact was needed. Repeated producer authentication remains the next
+bottleneck; preserve all consumed native proof and obtain fresh source-bound
+receipts for future candidates.
+
 ## Build prerequisite rereads reduced after the native milestone
 
 Initial native-app prerequisite closures now merge their already-authenticated

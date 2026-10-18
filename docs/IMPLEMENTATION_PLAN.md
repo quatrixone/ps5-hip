@@ -13,6 +13,8 @@ actual decoder commits/reset. Short native greedy generation now passes two rese
 float outputs bitwise CPU-equal. Wider prompts and long context remain open.
 Reduce repeated host authentication before expanding console qualification.
 
+- 2026-10-18 | Parallel frozen manifest verification | offline | 288 source/controller tests pass; 512-file warm-cache median 6.643s serial / 1.121s with four workers; all fresh reads retained | evidence/offline-parallel-frozen-verification.json | next: repeated producer authentication
+
 - 2026-10-18 | Build prerequisite reads | offline | 73 focused tests pass; authenticated initial merge avoids4.06GB in locked generation case; final checks retained | evidence/offline-authenticated-prerequisite-merge.json | next: console-control verification overhead
 
 - 2026-10-18 | M4 short greedy generation | .40 | pass:16 commits,22 layers,4 generated tokens/reset,384 bitwise CPU-equal outputs and clean lifecycle | evidence/console40-native-short-generation-success.json | next: host verification overhead and wider M4
