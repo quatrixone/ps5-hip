@@ -52,7 +52,7 @@ def check_fragment(raw):
 
 
 def application_frame(raw, app_complete):
-    if not isinstance(raw, bytes) or not raw or len(raw) > 65536:
+    if not isinstance(raw, bytes) or not raw or len(raw) > (2 * 1024 * 1024 if app_complete == 'M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false' else 65536):
         raise ValueError('full transcript bounds')
     lines = raw.decode('ascii').splitlines()
     if raw != ('\n'.join(lines) + '\n').encode() or b'\0' in raw or tuple(lines[:2]) != LLM_CLIENT_LINES[:2]:

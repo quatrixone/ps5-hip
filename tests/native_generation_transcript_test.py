@@ -71,7 +71,7 @@ class GenerationTranscript(unittest.TestCase):
                 check_fragment(raw, policy, bad)
 
 
-def corpus_fixture():
+def corpus_fixture(prompt_counts=None):
     policies = {}; sizes = {'corpus.json': 123}
     lines = ['M4_GEN PROFILE name=greedy-corpus cases=5 runs=2 max_new_tokens=16 context=512', 'M3_FULL PHASE load_begin']
     tick = 100
@@ -83,7 +83,7 @@ def corpus_fixture():
     phase('context'); lines.append('M3_FULL PHASE context_complete')
     requests = 0
     for index, (key, prompt) in enumerate(corpus_cases()):
-        tokens = [1, index + 3]; generated = list(range(100 + index, 116 + index))
+        tokens = [1] * (prompt_counts[index]-1) + [index+3] if prompt_counts else [1, index + 3]; generated = list(range(100 + index, 116 + index))
         runs = [dict(run=run, processed=tokens + generated[:-1], generated=generated, stop='step_limit', text_hex='6162') for run in range(2)]
         policies[key] = dict(prompt=prompt, max_new_tokens=16, prompt_tokens=tokens, eog_tokens=[2], runs=runs)
         sizes[key + '/generation.json'] = 500; sizes[key + '/steps.jsonl'] = 700
@@ -97,7 +97,7 @@ def corpus_fixture():
                 tick += 12; requests += 1
             elapsed = tick - began; decoded = len(row['processed']) * 10
             lines.append(f'M4_GEN RUN_TIME case={key} run={run} begin_ns={began} end_ns={tick} elapsed_ns={elapsed} decode_ns={decoded} scheduling_sampling_log_ns={elapsed-decoded}')
-            lines.append(f'M4_GEN RESULT case={key} run={run} processed=17 generated=16 stop=step_limit text_hex=6162')
+            lines.append(f'M4_GEN RESULT case={key} run={run} processed={len(row['processed'])} generated=16 stop=step_limit text_hex=6162')
         lines.append(f'M4_GEN METADATA case={key} files=2 generation_bytes=500 steps_bytes=700 synced=true')
     lines.append('M4_GEN CORPUS cases=5 runs=2 max_new_tokens=16 index_bytes=123 synced=true')
     lines.append('M3_FULL PHASE cleanup_begin'); phase('cleanup')

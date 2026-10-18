@@ -146,3 +146,13 @@ def check_full_log(raw, metadata, metadata_sizes):
     result = check_fragment(fragment, metadata, metadata_sizes, native=True)
     result.update(phase='model-full', profile='generation', classification='native-generation-transcript-only', **lifecycle)
     return result
+
+
+def check_corpus_full_log(raw, policies_by_id, metadata_sizes_flat):
+    if sum(len(row['processed']) for policy in policies_by_id.values() for row in policy['runs']) != 272:
+        raise ValueError('native corpus request profile')
+    complete = 'M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false'
+    fragment, lifecycle = application_frame(raw, complete)
+    result = check_corpus_fragment(fragment, policies_by_id, metadata_sizes_flat, native=True)
+    result.update(phase='model-full', profile='corpus', classification='native-corpus-transcript-only', **lifecycle)
+    return result

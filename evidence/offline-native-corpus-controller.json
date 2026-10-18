@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "scope": "Offline corpus freeze, capture, log and numerical readback contracts; synthetic test tensors",
+  "test_methods": 277,
+  "tests": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "source_*console_test.py"
+      ],
+      "methods": 99,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-0.log",
+      "sha256": "1aaf9d59824299933836a43a4c541767192f2aa7426c53d3dc96f0811d768582"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "source_model*_test.py"
+      ],
+      "methods": 131,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-1.log",
+      "sha256": "6141451113d4bda8e350b1adff1738f52b1ce38b0f1c76b85e3e16de19186a6b"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "llm_generation_readbacks_test.py"
+      ],
+      "methods": 12,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-2.log",
+      "sha256": "fa3ca64f43dd9b72063161d2ede8503677eb630ddf3083a8edd61e7a8cab9fe7"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "native_generation_application_test.py"
+      ],
+      "methods": 6,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-3.log",
+      "sha256": "6046464914a5f03cbd2b8b3ff7085e6c53dd1065f0dffca2ea04abcc5009ee61"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "native_generation_transcript_test.py"
+      ],
+      "methods": 10,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-4.log",
+      "sha256": "3a6f02efd4bcdebb60bc36a31b319e6178f9898534cb50e3288370946ea15c67"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/llm_prefix_make_test.py"
+      ],
+      "methods": 19,
+      "exit_code": 0,
+      "log": "/mnt/c/Users/denis/Documents/PS5/workspace/dev/ps5-hip/.local/corpus-controller-make.log",
+      "sha256": "fb0d085c35f5c87848ed6007f7433e458fa67f9b88836eddb6481abffd0a6dce",
+      "log_format": "PowerShell captured stderr"
+    }
+  ],
+  "inputs": {
+    "tests/llm_generation_readbacks_test.py": "357bb421ca7677d3830e6a4232b91001b4b4a7f2ad67a096bb0f8e1d49a72122",
+    "tests/native_generation_application_test.py": "fa33652a383586e4329d71f764b857a1f95c76e0ad17b61a4e2574f4f8a8c170",
+    "tests/native_generation_transcript_test.py": "0164a1597b4378e9d297b59672a301ef1f0df012e99c285a81c261d261a9f8a0",
+    "tests/source_model_full_freeze_test.py": "cef3b01aa3db2cc2dfac9af8ec853ed1574057b225e31c43f4aabe879e68ddf6",
+    "tools/freeze_source_candidate.py": "7eb0a5439c8599cacebed97855cff90ef74ef4828cc5bd9d8e3f470ffe2d8829",
+    "tools/source_console.py": "32e7ed1cc8d83f2f1270e9c2d4ba891d494ecdea0b0f5d49ffcd6d9ecc5b1c90",
+    "tools/source_llm_full_log.py": "a2147bae8254fa6c9c749c291149b30d77714ab5549a7c98d45ee504d88689f9",
+    "tools/source_llm_generation_log.py": "5b7bc3875779338b0b91fe9b155c18ff39828f7ae4b29f4bdaedf927aa0fdce5",
+    "tools/source_model_freeze.py": "41911f591fc8ba5ba7fb17a02619cb9c6e5f1758799d0402357b76ad5c68603c",
+    "tools/verify_llm_full_readbacks.py": "071ed2d6cd2af7e3001d9f6c6c6d921318ff5ec09049186b3ebfa4f916e429b3",
+    "tests/source_corpus_console_test.py": "5a8d4d17a5924f005ea78be44d29ac052abbcea5dafc461c1fadbb7bf6db55c3",
+    "Makefile": "e6d3c80204019b3685bcd188ad707f069737bea21c8adb14b1c7fc02c9767ba1",
+    "tests/llm_prefix_make_test.py": "315754695ab00f1bf0990a25a3bd2a61c2ddc427911b8f2b08b0457ad5e871c9"
+  },
+  "console_contacted": false,
+  "native_package_built": false,
+  "limits": [
+    "Actual linked package audit and .40 corpus validation remain pending"
+  ]
+}

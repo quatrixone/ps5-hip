@@ -165,7 +165,7 @@ class Control:
 
     def phase_remaining(self, requested=1800):
         if not self.model_phase(): return requested
-        if not hasattr(self, 'phase_deadline'): self.phase_deadline = time.monotonic() + 1800
+        if not hasattr(self, 'phase_deadline'): self.phase_deadline = time.monotonic() + (4200 if self.corpus_phase() else 1800)
         remaining = self.phase_deadline - time.monotonic()
         require(remaining > 0, 'whole model phase deadline exhausted')
         return min(requested, remaining)
@@ -297,7 +297,7 @@ class Control:
         else:
             self.absent(backup)
             source = self.baseline_log
-        raw = self.fetch(source, 65536)
+        raw = self.fetch(source, 2*1024*1024)
         require(sha(raw) == digest, 'baseline log changed')
         (self.out / 'previous-application.log').write_bytes(raw)
         return raw, backup
@@ -309,10 +309,10 @@ class Control:
         if self.baseline_log_preserved:
             self.absent(self.baseline_log)
         else:
-            require(self.fetch(self.baseline_log, 65536) == raw, 'baseline log changed before preservation')
+            require(self.fetch(self.baseline_log, 2*1024*1024) == raw, 'baseline log changed before preservation')
             self.absent(backup)
             self.ftp.rename(self.baseline_log, backup)
-        require(self.fetch(backup, 65536) == raw, 'preserved log mismatch')
+        require(self.fetch(backup, 2*1024*1024) == raw, 'preserved log mismatch')
         self.record['log_backup'] = backup
         self.record['log_already_preserved'] = self.baseline_log_preserved
 
@@ -342,13 +342,20 @@ class Control:
         return self.model_phase() and self.manifest['llm_client']['phase']=='model-full'
 
     def generation_phase(self):
-        return self.full_phase() and self.manifest.get('model_full',{}).get('profile','smoke')=='generation'
+        return self.full_phase() and self.manifest.get('model_full',{}).get('profile','smoke') in ('generation','corpus')
+
+    def corpus_phase(self):
+        return self.full_phase() and self.manifest.get('model_full',{}).get('profile')=='corpus'
+
+    def application_log_limit(self):
+        return 2*1024*1024 if self.corpus_phase() else 65536
 
     def prefix_files(self):
         if self.generation_phase():return self.manifest['model_full']['raw_files']
         return self.compute_contract().FILES
 
     def prefix_dump_name(self,name):
+        if self.corpus_phase():return name=='corpus.json' or '/' in name or name.startswith('run-')
         if self.generation_phase() and name in ('generation.json','steps.jsonl'):return True
         return name.startswith('run-') and name.endswith(('.f32le','.f16le')) if self.layer_phase() or self.full_phase() else name.startswith('token-') and name.endswith('.f32le')
 
@@ -357,13 +364,16 @@ class Control:
         binding=self.manifest['model_full'];reference=(ROOT/binding['reference']).resolve()
         require(reference.is_relative_to(self.candidate.resolve()),'generation reference outside candidate')
         values={}
-        for name in ('generation.json','steps.jsonl'):
+        from build_llm_generation_reference import corpus_cases
+        names=['corpus.json',*(case+'/'+name for case,_ in corpus_cases() for name in ('generation.json','steps.jsonl'))] if self.corpus_phase() else ('generation.json','steps.jsonl')
+        for name in names:
             path=reference/'raw'/name
             require(path.resolve()==path and not path.is_symlink() and path.stat().st_size==binding['raw_files'][name],'generation metadata kind/size')
             raw=path.read_bytes()
             require(self.manifest['files'].get(str(path.relative_to(ROOT)))==sha(raw),'generation frozen metadata identity differs')
             values[name]=raw
-        return loads(values['generation.json'].decode('utf-8')),{name:len(raw) for name,raw in values.items()}
+        policy={case:loads(values[case+'/generation.json'].decode('utf-8')) for case,_ in corpus_cases()} if self.corpus_phase() else loads(values['generation.json'].decode('utf-8'))
+        return policy,{name:len(raw) for name,raw in values.items()}
 
     def layer_phase(self):
         return self.model_phase() and self.manifest['llm_client']['phase']=='model-layer'
@@ -698,6 +708,10 @@ class Control:
         if not self.prefix_phase():return
         FILES=self.prefix_files()
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        if self.corpus_phase():
+            from build_llm_generation_reference import corpus_cases
+            require(not names.intersection(case for case,_ in corpus_cases()),'corpus case directories already exist')
+            require(names <= {LOG_NAMES['llm_client']},'corpus unexpected files already exist')
         require(not any(self.prefix_dump_name(n) for n in names),'prefix raw files already exist')
         self.record['prefix_raw_absent_before_launch']=sorted(FILES)
 
@@ -705,9 +719,21 @@ class Control:
         if not self.prefix_phase():return
         FILES=self.prefix_files()
         if not hasattr(self,'prefix_capture_deadline'):
-            self.prefix_capture_deadline=time.monotonic()+120
-            self.record['prefix_raw_capture_limit_seconds']=120
+            limit=600 if self.corpus_phase() else 120
+            self.prefix_capture_deadline=time.monotonic()+limit
+            self.record['prefix_raw_capture_limit_seconds']=limit
         names={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir'])}
+        if self.corpus_phase():
+            from build_llm_generation_reference import corpus_cases
+            require(names <= {'corpus.json',LOG_NAMES['llm_client'],*(case for case,_ in corpus_cases())},'corpus root inventory differs')
+            for case,_ in corpus_cases():
+                if case not in names:
+                    require(partial,'corpus case directory missing')
+                    continue
+                names.remove(case)
+                children={row.rsplit(' ',1)[-1] for row in self.listing(self.manifest['results_dir']+'/'+case)}
+                require(all(n not in ('.','..') and '/' not in n and '\\' not in n for n in children),'corpus child name')
+                names.update(case+'/'+n for n in children)
         records=self.record.setdefault('prefix_raw_files',{})
         folder=self.out/'raw';folder.mkdir(exist_ok=True)
         if not partial:require({n for n in names if self.prefix_dump_name(n)}==set(FILES),'prefix raw inventory differs')
@@ -722,7 +748,11 @@ class Control:
                 raw=self.fetch(self.manifest['results_dir']+'/'+name,size,self.phase_remaining(min(15,remaining)))
                 require(len(raw)==size,'prefix raw byte count differs: '+name)
                 require(time.monotonic()<self.prefix_capture_deadline,'prefix total raw capture deadline')
-                with (folder/name).open('xb') as stream:stream.write(raw)
+                path=folder/name
+                if self.corpus_phase():
+                    path.parent.mkdir(exist_ok=True)
+                    require(path.parent.resolve()==path.parent and not path.parent.is_symlink(),'corpus local output directory')
+                with path.open('xb') as stream:stream.write(raw)
                 records[name]={'bytes':len(raw),'sha256':sha(raw)}
             except Exception as error:
                 if not partial:raise
@@ -739,7 +769,7 @@ class Control:
             from verify_llm_prefix_readbacks import verify
         output=self.out/'prefix-numerical.json'
         binding=self.manifest['model_full' if self.full_phase() else 'model_layer' if self.layer_phase() else 'model_prefix']
-        result=verify(ROOT/binding['reference'],self.out/'raw',output,**({'profile':'generation'} if self.generation_phase() else {}))
+        result=verify(ROOT/binding['reference'],self.out/'raw',output,**({'profile':binding['profile']} if self.generation_phase() else {}))
         require(result.get('status')=='PASS' and result.get('raw_files')==len(self.prefix_files()) and result.get('raw_bytes')==sum(self.prefix_files().values()),'prefix numerical verification failed')
         require(result.get('reference_receipt_sha256')==binding['reference_receipt_sha256'],'prefix numerical reference differs')
         require(result.get('raw_sha256')=={name:entry['sha256'] for name,entry in self.record['prefix_raw_files'].items()},'prefix compared bytes differ from captured bytes')
@@ -828,7 +858,7 @@ class Control:
         require(self.fetch_image(backup, len(old)) == old, 'preserved image changed')
         if baseline_log:
             previous_log, log_backup = previous
-            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')
+            require(self.fetch(log_backup, 2*1024*1024) == previous_log, 'preserved log changed')
         self.fresh_log()
         snapshot(self.send('post_snapshot'))
         self.record['accepted'] = True
@@ -889,7 +919,7 @@ class Control:
         self.model_readback(backup,old_size,old_sha,self.record.setdefault('ftp_reads',[]),baseline['deadline_seconds'])
         if baseline_log:
             previous_log, log_backup = previous
-            require(self.fetch(log_backup, 65536) == previous_log, 'preserved log changed')
+            require(self.fetch(log_backup, 2*1024*1024) == previous_log, 'preserved log changed')
         self.fresh_log()
         snapshot(self.send('post_snapshot'))
         self.record['accepted'] = True
@@ -935,9 +965,12 @@ class Control:
         self.record['idle_after_safety_close']=not self.cleanup_active();self.cleanup_history('after-safety-close')
 
     def observation_seconds(self):
-        return 150 if self.model_phase() else 40
+        return 1830 if self.corpus_phase() else 150 if self.model_phase() else 40
 
     def check_application(self, raw):
+        if self.corpus_phase():
+            from source_llm_generation_log import check_corpus_full_log
+            return check_corpus_full_log(raw,*self.generation_policy())
         if self.generation_phase():
             from source_llm_generation_log import check_full_log
             return check_full_log(raw,*self.generation_policy())
@@ -1005,7 +1038,7 @@ class Control:
                 require(time.monotonic() < deadline, 'title observation deadline')
                 time.sleep(1)
             self.idle()
-            application = self.fetch(self.log, 65536)
+            application = self.fetch(self.log, self.application_log_limit())
             (self.out / 'application.log').write_bytes(application)
             self.collect_rmsnorm_dumps(); self.collect_q4_dumps(); self.collect_weighted_qkv_dumps(); self.collect_prefix_dumps()
             from source_public_hip_log import check_log
@@ -1059,7 +1092,7 @@ class Control:
             (self.out / 'klog.log').write_bytes(self.klog)
             if not (self.out / 'application.log').exists():
                 try:
-                    (self.out / 'application.log').write_bytes(self.cleanup_fetch(self.log,65536) if self.model_phase() else self.fetch(self.log,65536))
+                    (self.out / 'application.log').write_bytes(self.cleanup_fetch(self.log,self.application_log_limit()) if self.model_phase() else self.fetch(self.log,self.application_log_limit()))
                 except Exception as error:
                     self.record['application_capture_error'] = repr(error)
             require(not worker.is_alive(), 'klog collector did not stop')

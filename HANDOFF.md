@@ -8,6 +8,21 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Native corpus controller complete; package next
+
+The corpus freezer/controller/readback/application-log integration now passes
+277 tests. Evidence: `evidence/offline-native-corpus-controller.json`. Exact
+budgets are 1,830-second observation, 600-second capture, 4,200-second whole phase;
+corpus reference bound is 128 MiB. Nested case captures and 2 MiB logs are supported.
+No console was contacted and no new package was built.
+
+Next assemble corpus assets using CPU oracle
+`results/m4-generation-corpus-reference-v2`, reuse existing six kernel modules,
+build one fresh native corpus package, inspect linked audits, freeze and validate
+on idle .40 under both locks. Existing model path and installed short-generation
+recovery candidate below remain unchanged. The completed numerical run must not
+be restarted just because parser/controller source identities have advanced.
+
 ## Native corpus integration resume point
 
 Corpus asset aggregation, CLI, native build profile, title selection/writer and
@@ -911,7 +926,7 @@ native build inputs, so no package rebuild is required.
 Next freeze `results/source-public-llm-model-console-v1` from this build after
 committing the reviewed controls. Use `.local/m0-model-console-case-v3.json`:
 installed vocabulary app-v4 is the recovery baseline (19,922,944 bytes,
-SHA256 `ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`).
+SHA256 `ec318ba7456c1ebf86e6186e01f27759c2fd32c69788721ac49214a543442720`).
 Independently review the fresh candidate, then deploy-only and review its receipt
 before one bounded installed-title execution on idle .40 under both locks.
 No full-model console validation or inference has been established. Preserve
@@ -924,7 +939,7 @@ finalization passed. Controller receipt accepts the run, with healthy services
 and lock release; see `evidence/console40-native-vocab-success.json`.
 Do not replay this consumed candidate. The installed recovery baseline is now
 the 19,922,944-byte app-v4 package, SHA256
-`ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`.
+`ec318ba7456c1ebf86e6186e01f27759c2fd32c69788721ac49214a543442720`.
 Next promote the reviewed full-model changes and build a fresh model-gate app;
 actual model loading/reused-graph rejection and native inference remain unproven.
 Earlier failure/build notes below are historical.
@@ -941,7 +956,7 @@ freeze-admission review session 99699 is terminal zero, report
 `results/m0-native-app-final-review-v4/review.json` (6,988 inputs/2,395 artifacts).
 Receipt SHA `7f84867f483e77def8080d2642f56b226e702ae01173ab1454d452670426d2db`;
 package 19,922,944 bytes, SHA
-`ec318ba7456c1ebf86e6186e01f25859c2fd32c69788721ac49214a543442720`.
+`ec318ba7456c1ebf86e6186e01f27759c2fd32c69788721ac49214a543442720`.
 Current client-v3/vocabulary-v1 prerequisites are unchanged; results directory is
 `/user/homebrew/ps5-hip/m0-vocab-v4`. Build logs are in
 `results/m0-native-app-production-make-v4`; compact evidence is
@@ -1299,7 +1314,7 @@ The frozen Q4 candidate deployed successfully on .40, including 78 verified
 readbacks and preserved RMSNorm baseline. Its one execution passed the four
 standalone width256 Q8 cases, then failed the first `attn-k-1` frozen-Q8 Q4
 comparison: actual `0.1636260598897934` (`0x3e278d97`) versus FP64 reference
-`0.21718877422972582`, budget `8.8989529262781016e-06`. This is a numerical
+`0.21718877422972772`, budget `8.8989529262781016e-06`. This is a numerical
 failure, not a passed Q4 operator gate. Model-width Q8 and chained Q4 were not
 reached. Do not change the tolerance to accept the result.
 
@@ -1812,7 +1827,7 @@ This proves the bounded producer/consumer topology, not concurrent GPU dispatch.
 See `evidence/console40-copy-joined-success.json`.
 
 Installed image: `6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5`.
-Current log: `cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79`.
+Current log: `cb4542048a934f644c064fda2eb252c2771f71dc2d535245f3965813fb49ec79`.
 Both phases of `results/source-public-copy-joined-console-v1` are consumed.
 Next: share the host allocation-lifetime cases with the CPU-only copy title,
 qualify offline, then validate native allocation/worker retirement. Keep static
@@ -2579,7 +2594,7 @@ The fresh native memory package SHA-256 is
 its tracked evidence is `.local/g5-native-public-memory/evidence/offline-native-public-hip-memory.json`
 and independent review is local at
 `.local/g5-native-public-memory/results/native-memory-independent-review-v1/review.json`
-(SHA-256 `f96cc4a5d5cf4330ff2582d0465149eb2d6d681a114596bf313662447a78b425`).
+(SHA-256 `f96cc4a5d5cf4330ff2772d0465149eb2d6d681a114596bf313662447a78b425`).
 The GEMM package image SHA-256 is
 `9c229e4221570716ec1cc2ee9bea08d41299bd6b433aad46a30ebf121f5777e4`;
 see `../ps5-hip-gemm-bridge/evidence/offline-clr-gemm-admission-repair.json`,

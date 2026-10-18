@@ -118,6 +118,20 @@ class FullExecutionMake(unittest.TestCase):
   text=self.run_make('llm-full-assets','LLM_FULL_PROFILE=generation','LLM_GENERATION_REFERENCE_DIR=results/selected-generation-reference')
   self.assertIn('llm-generation-reference',text);self.assertIn('--reference "results/selected-generation-reference" --profile "generation"',text);self.assertIn('results/llm-generation-assets',text);self.assertNotIn('then echo llm-full-reference',text)
   smoke=self.run_make('llm-full-assets');self.assertIn('--profile "smoke"',smoke);self.assertIn('results/llm-full-assets',smoke)
+ def test_corpus_assets_and_native_app_route_selected_reference(self):
+  text=self.run_make('llm-full-assets','LLM_FULL_PROFILE=corpus','LLM_GENERATION_CORPUS_REFERENCE_DIR=results/selected-corpus-reference')
+  self.assertIn('then echo llm-generation-corpus-reference;',text)
+  self.assertIn('--reference "results/selected-corpus-reference" --profile "corpus"',text)
+  self.assertIn('results/llm-corpus-assets',text);self.assertNotIn('then echo llm-full-reference;',text)
+  for profile in ('smoke','generation','corpus'):
+   app=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-full','LLM_FULL_PROFILE='+profile)
+   if profile=='corpus':
+    self.assertIn('--full-fixture "results/llm-corpus-assets"',app)
+    for name in ('native_generation_application_test.py','llm_generation_readbacks_test.py','source_generation_console_test.py','source_corpus_console_test.py'):
+     self.assertLess(app.index('tests/'+name),app.index('tools/build_llm_native_app.py'))
+   else:self.assertNotIn('tests/source_corpus_console_test.py',app)
+  app=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-gate','LLM_FULL_PROFILE=corpus')
+  self.assertNotIn('tests/source_corpus_console_test.py',app)
  def test_generation_app_checks_existing_profile_and_runs_its_tests(self):
   with tempfile.TemporaryDirectory() as directory:
    (Path(directory)/'receipt.json').write_text('{"profile":"generation"}')

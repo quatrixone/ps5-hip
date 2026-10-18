@@ -1,5 +1,5 @@
 import unittest
-from native_generation_transcript_test import fixture
+from native_generation_transcript_test import fixture, corpus_fixture
 from native_full_transcript_test import transcript
 import source_llm_generation_log as log
 
@@ -27,5 +27,25 @@ class GenerationApplication(unittest.TestCase):
  def test_helper_is_not_native_app(self):
   with self.assertRaises(ValueError):log.check_full_log(*fixture(8))
   with self.assertRaisesRegex(ValueError,'request profile'):log.check_full_log(*fixture())
+
+class CorpusApplication(unittest.TestCase):
+ def fixture(self):
+  raw,policies,sizes=corpus_fixture([5,6,18,19,13])
+  for phase,name,free in [('load_begin','before_load',12882804736),('load_complete','after_load',12000002048),('context_complete','after_context',11000004608),('cleanup_begin','after_cleanup',12882804736)]:
+   marker=f'M3_FULL PHASE {phase}\n'.encode();line=f'M0_APP MEMORY phase={name} pool_bytes=12882804736 largest_free_bytes={free} total_free_bytes=unknown alignment=16384\n'.encode();raw=raw.replace(marker,marker+line)
+  baseline=transcript().decode().splitlines();footer=baseline[-9:];footer[1]='M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false'
+  return ('\n'.join(baseline[:2])+'\n').encode()+raw+('\n'.join(footer)+'\n').encode(),policies,sizes
+ def test_full_corpus_native_frame(self):
+  raw,p,s=self.fixture();self.assertGreater(len(raw),65536)
+  r=log.check_corpus_full_log(raw,p,s);self.assertEqual((r['requests'],r['raw_files'],r['metadata_files']),(272,6528,11));self.assertEqual(r['profile'],'corpus');self.assertEqual(len(r['memory']),4);self.assertTrue(r['finalization_transcript_complete']);self.assertFalse(r['gpu_origin_established']);self.assertFalse(r['numerical_verified'])
+  with self.assertRaisesRegex(ValueError,'bounds'):log.application_frame(raw,log.APP_COMPLETE)
+ def test_corpus_frame_rejections(self):
+  raw,p,s=self.fixture()
+  for old,new in [(b'profile=corpus watchdog',b'profile=generation watchdog'),(b'releases=10',b'releases=9'),(b'frees=16',b'frees=15'),(b'retired=1',b'retired=2'),(b'phase=after_cleanup',b'phase=after_load')]:
+   self.assertIn(old,raw)
+   with self.subTest(old=old),self.assertRaises(ValueError):log.check_corpus_full_log(raw.replace(old,new,1),p,s)
+  for data in (raw[:-1],raw+b'extra\n',b'x'*(2*1024*1024+1),raw.replace(b'\n',b'\r\n')):
+   with self.assertRaises(ValueError):log.check_corpus_full_log(data,p,s)
+  with self.assertRaisesRegex(ValueError,'request profile'):log.check_corpus_full_log(*corpus_fixture())
 
 if __name__=='__main__':unittest.main()

@@ -243,9 +243,10 @@ llm-native-app: deps-build llm-deps-fetch
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/llm_full_readbacks_test.py,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_full_console_test.py,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/source_model_full_freeze_test.py,@true)
-	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation,$(LLM_FULL_PROFILE))),$(PYTHON) tests/native_generation_application_test.py,@true)
-	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation,$(LLM_FULL_PROFILE))),$(PYTHON) tests/llm_generation_readbacks_test.py,@true)
-	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation,$(LLM_FULL_PROFILE))),$(PYTHON) tests/source_generation_console_test.py,@true)
+	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/native_generation_application_test.py,@true)
+	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/llm_generation_readbacks_test.py,@true)
+	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/source_generation_console_test.py,@true)
+	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/source_corpus_console_test.py,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_FULL_FIXTURE)/receipt.json"; then $(MAKE) llm-full-assets LLM_FULL_ASSETS_DIR="$(LLM_NATIVE_APP_FULL_FIXTURE)" LLM_FULL_GRAPH_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; else $(PYTHON) -c 'import json; import sys; from pathlib import Path; json.loads((Path(sys.argv[1])/"receipt.json").read_text())["profile"]==sys.argv[2] or sys.exit("requested full profile differs")' "$(LLM_NATIVE_APP_FULL_FIXTURE)" "$(LLM_FULL_PROFILE)"; fi,@true)
 	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),--layer-fixture "$(LLM_NATIVE_APP_LAYER_FIXTURE)") $(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),--full-fixture "$(LLM_NATIVE_APP_FULL_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
 
@@ -624,18 +625,18 @@ llm-full-helper-tests: llm-deps-fetch
 	$(PYTHON) tools/build_llm_full_backend_test.py --native-helper --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --output "$(LLM_FULL_HELPER_TEST_DIR)"
 
 LLM_FULL_PROFILE ?= smoke
-LLM_FULL_ASSETS_DIR ?= $(if $(filter generation,$(LLM_FULL_PROFILE)),results/llm-generation-assets,results/llm-full-assets)
-LLM_FULL_PROFILE_REFERENCE = $(if $(filter generation,$(LLM_FULL_PROFILE)),$(LLM_GENERATION_REFERENCE_DIR),$(LLM_FULL_REFERENCE_DIR))
+LLM_FULL_ASSETS_DIR ?= $(if $(filter corpus,$(LLM_FULL_PROFILE)),results/llm-corpus-assets,$(if $(filter generation,$(LLM_FULL_PROFILE)),results/llm-generation-assets,results/llm-full-assets))
+LLM_FULL_PROFILE_REFERENCE = $(if $(filter corpus,$(LLM_FULL_PROFILE)),$(LLM_GENERATION_CORPUS_REFERENCE_DIR),$(if $(filter generation,$(LLM_FULL_PROFILE)),$(LLM_GENERATION_REFERENCE_DIR),$(LLM_FULL_REFERENCE_DIR)))
 .PHONY: llm-full-assets
 llm-full-assets: llm-deps-fetch deps-fetch
-	$(PYTHON) -c 'import sys; assert sys.argv[1] in ("smoke","generation"), "unsupported full profile"' "$(LLM_FULL_PROFILE)"
+	$(PYTHON) -c 'import sys; assert sys.argv[1] in ("smoke","generation","corpus"), "unsupported full profile"' "$(LLM_FULL_PROFILE)"
 	@if ! test -f "$(LLM_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-rmsnorm-fixture; fi
 	@if ! test -f "$(LLM_GETROWS_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-getrows-fixture; fi
 	@if ! test -f "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_weighted_rmsnorm_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)"; fi
 	@if ! test -f "$(LLM_Q4_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_q4_fixture.py --rmsnorm-fixture "$(LLM_RMSNORM_FIXTURE_DIR)" --output "$(LLM_Q4_FIXTURE_DIR)"; fi
 	@if ! test -f "$(LLM_Q4_HALFWORD_FIXTURE_DIR)/receipt.json"; then $(PYTHON) tools/build_llm_q4_halfword_fixture.py --original-fixture "$(LLM_Q4_FIXTURE_DIR)" --output "$(LLM_Q4_HALFWORD_FIXTURE_DIR)"; fi
 	@if ! test -f "$(LLM_LAYER_FIXTURE_DIR)/receipt.json"; then $(MAKE) llm-layer-fixture; fi
-	@if ! test -f "$(LLM_FULL_PROFILE_REFERENCE)/receipt.json"; then $(MAKE) $(if $(filter generation,$(LLM_FULL_PROFILE)),llm-generation-reference,llm-full-reference); fi
+	@if ! test -f "$(LLM_FULL_PROFILE_REFERENCE)/receipt.json"; then $(MAKE) $(if $(filter corpus,$(LLM_FULL_PROFILE)),llm-generation-corpus-reference,$(if $(filter generation,$(LLM_FULL_PROFILE)),llm-generation-reference,llm-full-reference)); fi
 	$(PYTHON) tests/public_hip_full_assets_test.py
 	@if ! test -f "$(LLM_FULL_ASSETS_DIR)/receipt.json"; then $(PYTHON) tools/build_public_hip_full_assets.py --getrows "$(LLM_GETROWS_FIXTURE_DIR)" --normalized "$(LLM_RMSNORM_FIXTURE_DIR)" --weighted "$(LLM_WEIGHTED_RMSNORM_FIXTURE_DIR)" --q4 "$(LLM_Q4_HALFWORD_FIXTURE_DIR)" --layer "$(LLM_LAYER_FIXTURE_DIR)" --reference "$(LLM_FULL_PROFILE_REFERENCE)" --profile "$(LLM_FULL_PROFILE)" --output "$(LLM_FULL_ASSETS_DIR)"; fi
 	$(PYTHON) -c 'import sys; from pathlib import Path; sys.path.insert(0,"tools"); from public_hip_full_assets import full_inputs; data=full_inputs(Path(sys.argv[1]).resolve()); assert data["profile"]==sys.argv[2], "full asset profile differs"' "$(LLM_FULL_ASSETS_DIR)" "$(LLM_FULL_PROFILE)"

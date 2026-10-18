@@ -371,7 +371,7 @@ def _freeze_full_reference(receipt,output,data):
     return _freeze_reference(receipt,output,data,'full')
 
 def _freeze_reference(receipt,output,data,kind):
-    from source_model_freeze import _frozen_reference_manifest,PREFIX_REFERENCE_LIMIT,_reference_authenticator
+    from source_model_freeze import _frozen_reference_manifest,reference_limit,_reference_authenticator
     authenticate_prefix_reference=_reference_authenticator(kind,data.get('profile','smoke'))
     original=Path(data['reference']);closure=data['inputs']
     if original.is_symlink() or not original.is_dir():raise ValueError('unsafe prefix reference')
@@ -384,7 +384,7 @@ def _freeze_reference(receipt,output,data,kind):
         planned.append((source,relative,closure[str(source)]))
     expected={name for name in closure if Path(name).is_relative_to(original)}
     if {str(source) for source,_,_ in planned}!=expected:raise ValueError('prefix reference inventory changed')
-    if total>PREFIX_REFERENCE_LIMIT:raise ValueError('prefix reference exceeds16MiB bound')
+    if total>reference_limit(kind,data.get('profile','smoke')):raise ValueError('prefix reference exceeds128MiB corpus bound' if kind=='full' and data.get('profile')=='corpus' else 'prefix reference exceeds16MiB bound')
     destination=output/(kind+'-reference');destination.mkdir()
     for source,relative,h in planned:
         target=destination/relative;target.parent.mkdir(parents=True,exist_ok=True)
@@ -602,6 +602,9 @@ def main():
             manifest['hypothesis']='Actual model first layer runs through public HIP for 512 declared steps and reset2 with persistent GPU KV. Require authenticated 151 readbacks, original full graph rejection and balanced cleanup; no full-model inference claim.'
         if args.client_phase=='model-full':
             manifest['hypothesis']='Full TinyLlama decoder smoke: tokens 0,1 at committed positions 0,1 then reset and repeat 0, all 22 layers and 32000 logits through actual HIP scheduler. Require 72 authenticated numerical readbacks, balanced native cleanup and exact reset; no generated-text or long-context claim.'
+            if model_prefix['profile']=='corpus':
+                manifest.update(deadline_seconds=1830,control_phase_seconds=4200,raw_capture_seconds=600)
+                manifest['hypothesis']='Full TinyLlama five-prompt greedy corpus: sixteen generated tokens per prompt over two reset rounds each, 272 committed decodes through all 22 layers and full logits, one resident model/backend. Require 6528 CPU-compared float outputs and eleven exact metadata files, actual feedback, no early EOS, bounded timing and clean native ownership; long context remains separate.'
             if model_prefix['profile']=='generation':
                 manifest['hypothesis']='Full TinyLlama greedy generation: actual tokenizer and live-logit feedback, 16 committed decodes over two reset rounds, all 22 layers and full logits through HIP. Require 384 CPU-compared float outputs, exact token metadata, bounded timings and balanced native cleanup; wider prompts and long context remain separate.'
         _validate_model_candidate(output,manifest,prefix_evidence)

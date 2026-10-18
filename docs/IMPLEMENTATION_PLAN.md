@@ -14,9 +14,11 @@ float outputs bitwise CPU-equal. Wider prompts and long context remain open.
 Host verification improvements are committed. The five-prompt / 16-token corpus
 now passes actual production-helper HIP numerical interpretation: all 6,528 float
 files are bytewise CPU equal with validated feedback, reset and ownership. Next
-finish native corpus freezing/readback and controller bounds before .40. Corpus
-title selection, asset inventory and audit profile contracts are now implemented;
-107 focused tests pass. An actual linked package audit remains pending.
+build and audit one native corpus package before .40. Corpus title, assets,
+freezing, readback and controller integration are implemented; 277 controller and
+readback tests pass. An actual linked package audit remains pending.
+
+- 2026-10-18 | Native corpus controller | offline | nested freeze/capture/numerics/lifecycle logs and exact profile budgets;277 tests pass | evidence/offline-native-corpus-controller.json | next: linked package audit, candidate freeze and .40
 
 - 2026-10-18 | Native corpus profile | offline | explicit ABI3/title writer/asset inventory/audit contracts;107 tests pass; no package or console run | evidence/offline-native-corpus-profile.json | next: freezer/readback/controller then linked package and .40
 
@@ -444,7 +446,7 @@ This proves the bounded producer/consumer topology, not concurrent GPU dispatch.
 See `../evidence/console40-copy-joined-success.json`.
 
 Installed image: `6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5`.
-Current log: `cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79`.
+Current log: `cb4542048a934f644c064fda2eb252c2771f71dc2d535245f3965813fb49ec79`.
 Both phases of `results/source-public-copy-joined-console-v1` are consumed.
 Next: share the host allocation-lifetime cases with the CPU-only copy title,
 qualify offline, then validate native allocation/worker retirement. Keep static

@@ -119,7 +119,7 @@ def _validate_model_receipt(build,receipt):
  prefix_data=_binding(bound,inputs,kind) if prefix else None
  if prefix and kind=='full':
   require(audit.get('full_profile','smoke')==prefix_data['profile'],'native full audit profile differs')
-  if prefix_data['profile']=='generation':require(audit.get('actual_generation_call_chain_audited') is True,'missing actual generation call-chain proof')
+  if prefix_data['profile'] in ('generation','corpus'):require(audit.get('actual_generation_call_chain_audited') is True,'missing actual generation call-chain proof')
  names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model-path.txt'}|(set(prefix_data['assets']) if prefix else set())
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact model package assets required')
  require(type(receipt['package_bytes']) is int and 0<receipt['package_bytes']<=package_limit('llm_client') and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
@@ -142,7 +142,7 @@ def validator_identities():
  paths.update(ROOT/n for n in ('tools/build_public_hip_prefix_assets.py','tests/public_hip_prefix_assets_test.py','tests/source_model_prefix_freeze_test.py','tests/llm_prefix_reference_test.py','tests/source_prefix_console_test.py','tests/source_prefix_authentication_test.py','tools/source_llm_prefix_log.py','tools/verify_llm_prefix_readbacks.py','tests/native_prefix_transcript_test.py','tests/llm_prefix_readbacks_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_layer_assets.py','tools/build_public_hip_layer_assets.py','tools/build_llm_layer_reference.py','tools/source_llm_layer_raw.py','tools/source_llm_layer_log.py','tools/verify_llm_layer_readbacks.py','tests/source_model_layer_freeze_test.py','tests/llm_layer_reference_test.py','tests/public_hip_layer_assets_test.py','tests/native_layer_transcript_test.py','tests/llm_layer_readbacks_test.py','tests/source_layer_console_test.py','tests/source_layer_authentication_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tools/build_llm_full_model_reference.py','tools/build_llm_full_numeric_test.py','tools/source_llm_full_log.py','tools/verify_llm_full_readbacks.py','tests/source_model_full_freeze_test.py','tests/llm_full_model_reference_test.py','tests/public_hip_full_assets_test.py','tests/native_full_transcript_test.py','tests/llm_full_readbacks_test.py','tests/source_full_console_test.py'))
- paths.update(ROOT/n for n in ('tests/llm_generation_readbacks_test.py','tests/llm_generation_reference_test.py','tests/llm_generation_numeric_test.py','tools/source_llm_generation_log.py','tests/native_generation_transcript_test.py','tests/native_generation_application_test.py','tests/source_generation_console_test.py'))
+ paths.update(ROOT/n for n in ('tests/llm_generation_readbacks_test.py','tests/llm_generation_reference_test.py','tests/llm_generation_numeric_test.py','tools/source_llm_generation_log.py','tests/native_generation_transcript_test.py','tests/native_generation_application_test.py','tests/source_generation_console_test.py','tests/source_corpus_console_test.py'))
  paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
  seen=set()
@@ -165,7 +165,8 @@ def validate_model_candidate(candidate,manifest):
  return _validate_model_candidate(candidate,manifest)
 
 def _validate_model_candidate(candidate,manifest,freeze_evidence=None):
- require(manifest.get('deadline_seconds')==150 and manifest.get('control_phase_seconds')==1800,'model phase budget differs')
+ corpus=manifest.get('llm_client',{}).get('phase')=='model-full' and manifest.get('model_full',{}).get('profile')=='corpus'
+ require(manifest.get('deadline_seconds')==(1830 if corpus else 150) and manifest.get('control_phase_seconds')==(4200 if corpus else 1800) and (manifest.get('raw_capture_seconds')==600 if corpus else 'raw_capture_seconds' not in manifest),'model phase budget differs')
  initial=validator_identities()
  require(all(manifest['files'].get(n)==h for n,h in initial.items()),'live validator identity not frozen')
  model_contract(manifest)
@@ -196,6 +197,10 @@ PREFIX_MODULES=('getrows','normalized','weighted','q8','q4')
 PREFIX_RAW_FILES={f'token-{token}-{name}.f32le':width*4 for token in (0,1,2,31999)
                   for name,width in (('embedding',2048),('normalized',2048),('weighted',2048),('q',2048),('k',256),('v',256))}
 PREFIX_REFERENCE_LIMIT=16*1024*1024
+CORPUS_REFERENCE_LIMIT=128*1024*1024
+
+def reference_limit(kind,profile):
+ return CORPUS_REFERENCE_LIMIT if kind=='full' and profile=='corpus' else PREFIX_REFERENCE_LIMIT
 LAYER_MODULES=PREFIX_MODULES+('layer',)
 
 
@@ -209,7 +214,7 @@ def full_binding(bound,inputs):
  return _binding(bound,inputs,'full')
 
 def _reference_authenticator(kind,profile='smoke'):
- if kind=='full' and profile=='generation':
+ if kind=='full' and profile in ('generation','corpus'):
   from build_llm_generation_reference import authenticate_generation_reference
   return authenticate_generation_reference
  if kind=='full':
@@ -231,7 +236,7 @@ def _binding(bound,inputs,kind):
   from public_hip_prefix_assets import prefix_inputs as aggregate_inputs
  link=bound.get(kind,{})
  require(set(link)==({'receipt','receipt_sha256','reference','profile'} if kind=='full' else {'receipt','receipt_sha256','reference'}),'prefix binding fields differ')
- if kind=='full':require(link['profile'] in ('smoke','generation'),'full profile differs')
+ if kind=='full':require(link['profile'] in ('smoke','generation','corpus'),'full profile differs')
  receipt=Path(link['receipt'])
  require(receipt.is_absolute() and receipt.name=='receipt.json' and receipt.is_relative_to(ROOT),'prefix aggregate path differs')
  data=aggregate_inputs(receipt.parent)
@@ -240,9 +245,9 @@ def _binding(bound,inputs,kind):
  require(set(data['assets'])=={'model-'+asset_kind+'/'+n+'.hsaco' for n in (LAYER_MODULES if kind in ('layer','full') else PREFIX_MODULES)},'prefix exact modules required')
  if kind=='full':
   from source_llm_full_log import FILES as FULL_FILES
-  if link['profile']=='generation':
-   from verify_llm_full_readbacks import generation_files
-   FULL_FILES=generation_files(data['reference'])
+  if link['profile'] in ('generation','corpus'):
+   from verify_llm_full_readbacks import generation_files,corpus_files
+   FULL_FILES=(corpus_files if link['profile']=='corpus' else generation_files)(data['reference'])
   require(data.get('raw_files')==FULL_FILES,'full raw inventory differs')
  model=bound['model']
  require(data['model']=={'path':str(Path(model['asset']).resolve()),'bytes':model['bytes'],'sha256':model['sha256']},'prefix model identity differs')
@@ -279,16 +284,16 @@ def _frozen_reference_manifest(candidate,data,authenticated,kind):
  files={str(p):p for p in paths if p.is_file()}
  expected={name for name in closure if Path(name).is_relative_to(reference)}
  require(set(files)==expected,'frozen prefix reference inventory differs')
- require(sum(p.stat().st_size for p in files.values())<=PREFIX_REFERENCE_LIMIT,'prefix reference too large')
+ require(sum(p.stat().st_size for p in files.values())<=reference_limit(kind,data.get('profile','smoke')),'prefix reference too large')
  for name,path in files.items():require(stream_digest(path)==closure[name],'frozen prefix reference file changed')
  asset_kind='layer' if kind=='full' else kind
  raw_files=FILES if kind=='layer' else PREFIX_RAW_FILES
  if kind=='full':
   from source_llm_full_log import FILES as FULL_FILES
-  require(data.get('profile') in ('smoke','generation'),'full profile differs')
-  if data['profile']=='generation':
-   from verify_llm_full_readbacks import generation_files
-   FULL_FILES=generation_files(reference)
+  require(data.get('profile') in ('smoke','generation','corpus'),'full profile differs')
+  if data['profile'] in ('generation','corpus'):
+   from verify_llm_full_readbacks import generation_files,corpus_files
+   FULL_FILES=(corpus_files if data['profile']=='corpus' else generation_files)(reference)
   require(data['raw_files']==FULL_FILES,'frozen full raw inventory differs')
   raw_files=FULL_FILES
  result={'aggregate':str(Path(data['receipt']).relative_to(ROOT)),'aggregate_sha256':data['receipt_sha256'],

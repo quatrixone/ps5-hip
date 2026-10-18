@@ -3,6 +3,21 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Native corpus deployment/readback integration
+
+Corpus candidate freezing, nested capture, numerical readback and full application
+log validation are implemented. The manifest binds 1,830-second observation,
+600-second capture and 4,200-second whole-phase limits, with a corpus-only 128 MiB
+reference bound. The controller verifies all 6,539 captured files and supports
+2 MiB corpus logs, including preservation for the next deployment. 277 focused
+controller/model/readback/transcript tests pass; see
+`evidence/offline-native-corpus-controller.json`.
+
+Next build one fresh corpus package, inspect all three linked-image audits, freeze
+the exact candidate and test on idle .40. No new native package or console result
+exists yet. Reuse the existing model, CPU oracle and kernel modules; do not rerun
+the completed host numerical corpus solely for these controller changes.
+
 ## Native corpus title and asset integration
 
 The native build now admits the explicit corpus profile: ABI operand 3, the
@@ -1001,7 +1016,7 @@ The frozen Q4 candidate deployed successfully on .40, including 78 verified
 readbacks and preserved RMSNorm baseline. Its one execution passed the four
 standalone width256 Q8 cases, then failed the first `attn-k-1` frozen-Q8 Q4
 comparison: actual `0.1636260598897934` (`0x3e278d97`) versus FP64 reference
-`0.21718877422972582`, budget `8.8989529262781016e-06`. This is a numerical
+`0.21718877422972772`, budget `8.8989529262781016e-06`. This is a numerical
 failure, not a passed Q4 operator gate. Model-width Q8 and chained Q4 were not
 reached. Do not change the tolerance to accept the result.
 
@@ -1497,7 +1512,7 @@ This proves the bounded producer/consumer topology, not concurrent GPU dispatch.
 See `evidence/console40-copy-joined-success.json`.
 
 Installed image: `6949263ffac68b8ea42df743c80fb38f5ee3f68299ead22809766cbcd83b4fd5`.
-Current log: `cb4542048a934f644c064fda2eb252c2581f71dc2d535245f3965813fb49ec79`.
+Current log: `cb4542048a934f644c064fda2eb252c2771f71dc2d535245f3965813fb49ec79`.
 Both phases of `results/source-public-copy-joined-console-v1` are consumed.
 Next: share the host allocation-lifetime cases with the CPU-only copy title,
 qualify offline, then validate native allocation/worker retirement. Keep static
