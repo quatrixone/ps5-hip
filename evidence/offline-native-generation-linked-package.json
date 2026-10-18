@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-generation-linked-package",
+  "date": "2026-10-17",
+  "source_commit": "95ba2edbc300c3b5205a7a262c75bcf62f497c31",
+  "phase": "model-full",
+  "full_profile": "generation",
+  "object_count": 149,
+  "command_count": 201,
+  "audited_function_count": 415,
+  "package_bytes": 22478848,
+  "package_sha256": "4032fac68e2761ac4d1bb10aceb2ad38155a0150ca05958559c35dc4da70bca3",
+  "package_files": 15,
+  "gpu_modules": 6,
+  "actual_generation_call_chain_audited": true,
+  "independent_linked_package_review": "PASS",
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "expected_requests": 16,
+  "expected_readback_files": 386,
+  "expected_readback_bytes": 5064354,
+  "expected_gpu_launches": 11728,
+  "native_executed": false,
+  "gpu_executed": false,
+  "provenance": {
+    "build/llm-native-generation-app-v1/receipt.json": "a96cf6cadf87c72438606119804f952265493dda38c04e9be5284f7ef85d765d",
+    "build/llm-native-generation-app-v1/llm-client-native-audit.json": "5f549def67168c5034078a87d28d5076913b7589342248d1b0d244b4963073c4",
+    "results/m4-native-generation-build-review-v1/linked-package-review.json": "06ec2fd5805d7d79a76ff3368f61c3cc0a5f36738c62775538d6c37422d77fc8",
+    "results/m4-native-generation-build-review-v1/source-object-review.json": "5ec4ad201fa77b8dd74459d701498b3d1acb1a9260d784158890a19749b3224d"
+  },
+  "limits": [
+    "No console contact or generated-text execution established in this milestone.",
+    "Static selected edges do not prove complete indirect feedback dataflow.",
+    "Keep consumed full-smoke baseline and current artifacts; next freeze and independently review fresh candidate.",
+    "Repeated prerequisite hashing remains a build bottleneck; no speedup claim."
+  ]
+}

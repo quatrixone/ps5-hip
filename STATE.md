@@ -3,6 +3,26 @@
 Updated: 2026-10-17, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## M4 native generation package and linked audit pass
+
+`build/llm-native-generation-app-v1` finishes with 149 authenticated objects,
+201 commands and a 415-function raw/converted/extracted-image audit. Generation
+profile operand 2 and the actual helper/sampler/process/decode/EOS/greedy edges
+pass. Independent review reproduces the audit and extracts all 15 package files,
+confirming six GPU modules and external `/data/hip/models` model storage. The
+package is 22,478,848 bytes; weights are not embedded. Native client v7 and the
+prepared public source/compiler paths were reused.
+
+See `evidence/offline-native-generation-linked-package.json` and
+`results/m4-native-generation-build-review-v1/linked-package-review.json`.
+This is offline package qualification: no generation execution or new native
+arithmetic is claimed. Next freeze/review a fresh candidate, verify idle .40,
+and validate 16 commits, all 384 float boundaries and both token metadata files,
+reset/repeat, timings and clean ownership. Keep the consumed smoke baseline.
+The exact freeze command is drafted in `.local/native-generation-freeze-command-v1.json`.
+Repeated input authentication, rather than recompilation, is a measured build
+phase bottleneck; a read-only cost analysis is in the same local review folder.
+
 ## M4 native generation profile and audit contract prepared
 
 The builder now derives the title's compile-time generation selection from its

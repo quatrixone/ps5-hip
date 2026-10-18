@@ -7,7 +7,8 @@ and three actual decoder commits/reset now pass. Next implement short greedy
 generation with phase/request timing. Its production helper now passes all 384
 CPU layer/norm/logit comparisons offline. Generation reference freezing, readback
 comparison and application/controller contracts now pass offline; native title
-selection, packaging and linked generation image audit remain before .40. Retain M2 dense/extreme and
+selection, packaging and the 415-function linked generation image audit now pass
+independent offline review. A fresh frozen/reviewed .40 generation test remains. Retain M2 dense/extreme and
 long-context qualification. Use idle .40 for meaningful validation and push each validated
 milestone to main.
 

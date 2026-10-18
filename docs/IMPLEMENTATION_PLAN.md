@@ -12,6 +12,8 @@ native full-model smoke now passes all 22 layers, normalization and logits with
 actual decoder commits/reset. Next qualify short greedy generation and timing;
 long full-model context and token generation are not yet established.
 
+- 2026-10-17 | M4 native generation package | offline | 149 objects, 15 files and415-function image audit pass independent review; external model retained | evidence/offline-native-generation-linked-package.json | next: freeze/review and .40
+
 - 2026-10-17 | M4 native generation selection | offline object/contracts | authenticated profile drives native title; profile2 ABI and generation symbols confirmed; static audit contract tests pass; client v7 authenticated/reused | evidence/offline-native-generation-profile.json | next: actual linked package audit and .40
 
 - 2026-10-17 | M4 generation controller | offline | profile-aware reference freeze and 386-file numerical readbacks; startup/memory/timing/ownership/finalization contracts; fresh helper 384/384 bitwise | evidence/offline-generation-freeze-and-controller.json | next: native title/build and linked generation audit
