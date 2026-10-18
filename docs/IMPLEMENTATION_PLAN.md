@@ -14,6 +14,8 @@ Updated: 2026-10-18, America/New_York.
 
 - 2026-10-18 | Supported extended CPU reference | offline | reused CPU libraries/model, 1,176 commits, 2,096 bitwise baseline outputs and fresh receipt PASS | evidence/offline-supported-extended-cpu-reference.json
 
+- 2026-10-18 | Dense F16 primitive | host | 9,984 rows match actual CPU; sanitized/optimized and default-export/Make checks pass; whole-layer/native open | evidence/offline-dense-f16-projection-primitive.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

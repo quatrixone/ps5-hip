@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "classification": "host-dense-f16-learned-projection-primitive",
+  "source_base": "eed1d29",
+  "make_command": "make llm-dense-projection-test LLM_CPU_BUILD_DIR=build/llm-original-format-cpu-v1",
+  "shapes": [
+    [
+      2048,
+      256
+    ],
+    [
+      2048,
+      2048
+    ],
+    [
+      2048,
+      5632
+    ],
+    [
+      5632,
+      2048
+    ]
+  ],
+  "rows_compared_per_run": 9984,
+  "modes": [
+    "fatal ASan/UBSan/float-cast-overflow",
+    "optimized"
+  ],
+  "oracle": "Existing ggml CPU F16 dot and conversion routines",
+  "default_exports": 16,
+  "opt_in_exports": 17,
+  "make_and_export_tests": 4,
+  "inputs": {
+    "Makefile": "b0e614cfed633a75d25bd13e5dfeb25e9cf98367215371cd9c671da89e2b5308",
+    "kernels/llm_layer.hip": "bae2b60314a16e4974fe2cf83ffeb12fe0f24e6b67a5122706e66d8312c38bf4",
+    "tests/llm_dense_projection_test.cpp": "e7d240df524dcb2034f1a251e83afb35add8923695eee4874fb614b8fefb01cc",
+    "tests/llm_dense_projection_test.py": "119c5b710540981cd6f36d1ddb3eacc92af6973b3ebf5641466a5494759acd77",
+    "tests/llm_dense_make_test.py": "5b94bffb5a11e9d8c367743a21c303da5c436a72c5e4f2290a4b0519a750ed4e"
+  },
+  "evidence": {
+    ".local/dense-f16-main-make.log": "873e63c542e641729e8a7c9effd740d15890e04d9bf851b61ff3ec229fc0a814",
+    ".local/dense-f16-primitive/independent-review.json": "40b1fdb5355a6e57243a32c57d174ab0026e6eeea57873744cb0e6027abfc4cb"
+  },
+  "native_executed": false,
+  "gpu_executed": false,
+  "limits": [
+    "No dense graph admission or whole-layer dispatch; opt-in primitive only.",
+    "No native lowering, ISA or FTZ validation.",
+    "CPU reference libraries are uninstrumented; no full CPU closure reauthentication in this primitive test."
+  ]
+}

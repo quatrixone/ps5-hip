@@ -285,6 +285,13 @@ residual; reset is exact and 528 allocations/frees balance with restored
 memory. See `evidence/console40-model-layer-success.json`. The original full
 graph remains rejected; this does not establish inference or decoder commits.
 
+The opt-in dense F16 learned-projection primitive now passes actual CPU dot/
+conversion comparison across 9,984 rows in sanitized and optimized host runs.
+Run `make llm-dense-projection-test LLM_CPU_BUILD_DIR=<existing-cpu-build>`.
+Default module exports stay unchanged. Dense graph admission, complete-layer
+fixture, native lowering and execution remain open; see
+`evidence/offline-dense-f16-projection-primitive.json`.
+
 The selected real-model milestone is complete. M2 remains open for the small
 dense floating-point whole-layer fixture and representative extreme inputs.
 Keep activations on the GPU and reuse the integrated implementations.

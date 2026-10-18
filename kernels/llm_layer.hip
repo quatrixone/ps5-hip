@@ -121,3 +121,15 @@ KERNEL void layer_rope_cpu(const float* x,float* out,u32 heads,u32 position) {
  const float c=__ocml_cos_f32(theta),s=__ocml_sin_f32(theta),a=x[j],b=x[j+1];
  out[j]=__builtin_fmaf(a,c,-b*s);out[j+1]=__builtin_fmaf(a,s,b*c);
 }
+
+#ifdef PS5HIP_ENABLE_DENSE_F16
+// Host primitive opt-in only; not admitted by the native module builder.
+// Only the seven learned-projection shapes of the fixed TinyLlama layer.
+// Caller converts the F32 activation with layer_to_f16 before this operation.
+KERNEL void layer_dense_f16(const _Float16* weights,const _Float16* x,float* out,u32 width,u32 rows) {
+ const bool valid=(width==2048&&(rows==256||rows==2048||rows==5632))||(width==5632&&rows==2048);
+ const u32 row=index();
+ if(!valid||row>=rows||!weights||!x||!out)return;
+ out[row]=half_dot(weights+static_cast<unsigned long long>(row)*width,x,width);
+}
+#endif

@@ -3,6 +3,15 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Dense F16 learned projection: primitive only
+
+The opt-in learned-projection kernel matches actual ggml CPU F16 dot/conversion
+across 9,984 rows at four fixed shapes, in sanitized and optimized host runs.
+Four Make/export tests preserve the default 16-symbol module; the new symbol
+requires explicit opt-in. See `evidence/offline-dense-f16-projection-primitive.json`.
+Dense graph admission, whole-layer fixture/extremes, native lowering and console
+execution remain open. This does not expand the currently admitted model types.
+
 ## Extended host generation and build-overhead improvements
 
 The isolated extended host numerical run passes 1,176 commits and all 2,096

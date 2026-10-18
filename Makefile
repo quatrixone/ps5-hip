@@ -19,6 +19,7 @@ export RESULTS_DIR
 all: host-test native-core public-hip-package
 
 help:
+	@echo 'make llm-dense-projection-test  Host F16 projection primitive; reuse LLM_CPU_BUILD_DIR (no GPU qualification)'
 	@echo 'make llm-original-generation-reference  Explicit fresh host comparison of original weights against GGUF; requires four input/output path variables'
 	@echo 'make llm-original-format-tests  Build CPU prerequisites and test original-format readers/mapping/metadata/callbacks using synthetic fixtures'
 	@echo 'make llm-original-metadata-test  Explicit local original tokenizer comparison; set LLM_ORIGINAL_METADATA_DIR and LLM_ORIGINAL_VOCAB_FIXTURE'
@@ -711,3 +712,9 @@ llm-original-generation-reference:
 	$(MAKE) llm-original-format-cpu
 	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --model "$(LLM_ORIGINAL_GGUF)" --output "$(LLM_ORIGINAL_REFERENCE_DIR)"
 	$(PYTHON) tools/build_llm_generation_reference.py --cpu-build "$(LLM_ORIGINAL_CPU_BUILD_DIR)" --model "$(LLM_ORIGINAL_GGUF)" --output "$(LLM_ORIGINAL_GENERATION_DIR)" --original-source "$(LLM_ORIGINAL_SOURCE_DIR)" --reference "$(LLM_ORIGINAL_REFERENCE_DIR)"
+
+.PHONY: llm-dense-projection-test
+llm-dense-projection-test:
+	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference LLM_CPU_BUILD_DIR="$(LLM_CPU_BUILD_DIR)"; fi
+	$(PYTHON) tests/llm_dense_make_test.py
+	$(PYTHON) tests/llm_dense_projection_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"

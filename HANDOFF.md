@@ -8,6 +8,15 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Dense F16 learned projection: primitive only
+
+The opt-in learned-projection kernel matches actual ggml CPU F16 dot/conversion
+across 9,984 rows at four fixed shapes, in sanitized and optimized host runs.
+Four Make/export tests preserve the default 16-symbol module; the new symbol
+requires explicit opt-in. See `evidence/offline-dense-f16-projection-primitive.json`.
+Dense graph admission, whole-layer fixture/extremes, native lowering and console
+execution remain open. This does not expand the currently admitted model types.
+
 ## Extended host generation and build-overhead improvements
 
 Original candidate: `results/source-public-llm-original-console-v1`, manifest
