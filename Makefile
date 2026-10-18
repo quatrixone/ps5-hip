@@ -26,6 +26,7 @@ help:
 	@echo 'make llm-cpu-reference  Build host-only inference reference tools (no PS5 execution)'
 	@echo 'make llm-generation-reference  Capture short greedy CPU generation and reset references'
 	@echo 'make llm-generation-numeric-tests  Compare live HIP-interpreted greedy feedback to CPU (no GPU execution)'
+	@echo 'make llm-native-generation-tests  Qualify the native helper under host HIP interpretation (no PS5 execution)'
 	@echo 'make llm-model-profile  Verify locked model metadata/tensor headers without downloading weights'
 	@echo 'make llm-model-fetch  Fetch and verify locked source weights/tokenizer (2.2 GB; fresh receipt required)'
 	@echo 'make llm-conversion-env  Prepare isolated, hash-locked CPU conversion dependencies (Linux x86-64)'
@@ -568,6 +569,7 @@ llm-full-reference: llm-deps-fetch
 LLM_FULL_NUMERIC_TEST_DIR ?= results/llm-full-numeric-host-tests
 LLM_GENERATION_REFERENCE_DIR ?= results/llm-generation-reference
 LLM_GENERATION_NUMERIC_TEST_DIR ?= results/llm-generation-numeric-host-tests
+LLM_NATIVE_GENERATION_TEST_DIR ?= results/llm-native-generation-numeric-host-tests
 .PHONY: llm-generation-reference llm-generation-numeric-tests
 llm-generation-reference: llm-deps-fetch
 	@if ! test -f "$(LLM_CPU_BUILD_DIR)/receipt.json"; then $(MAKE) llm-cpu-reference; fi
@@ -581,6 +583,12 @@ llm-generation-numeric-tests: llm-deps-fetch
 	$(PYTHON) tests/llm_cpu_math_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)"
 	$(PYTHON) tests/llm_generation_numeric_test.py
 	$(PYTHON) tools/build_llm_generation_numeric_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_GENERATION_NUMERIC_TEST_DIR)"
+
+.PHONY: llm-native-generation-tests
+llm-native-generation-tests: llm-deps-fetch
+	@if ! test -f "$(LLM_GENERATION_REFERENCE_DIR)/receipt.json"; then $(MAKE) llm-generation-reference; fi
+	$(PYTHON) tests/native_generation_transcript_test.py
+	$(PYTHON) tools/build_llm_generation_numeric_test.py --native-helper --cpu-build "$(LLM_CPU_BUILD_DIR)" --model "$(LLM_FULL_GRAPH_MODEL)" --reference "$(LLM_GENERATION_REFERENCE_DIR)" --output "$(LLM_NATIVE_GENERATION_TEST_DIR)"
 
 .PHONY: llm-full-numeric-tests
 llm-full-numeric-tests: llm-deps-fetch

@@ -8,6 +8,41 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## M4 production generation helper integrated and timed offline
+
+`NativeFullProfile::generation` now uses the shared native model/context lifecycle,
+actual tokenizer and live-logit greedy feedback. It captures every layer/norm/logit
+at every short-sequence position, writes actual generation/commit metadata, clears
+real KV/backend state before each round and compares repeat token histories.
+Captured logits must equal the exact logits consumed by the sampler. The helper
+reports checked monotonic load/context/reset/decode/run/cleanup timings; decoder
+intervals include callback readback/file writes. Run overhead combines scheduling,
+sampling and logging; it is not isolated sampling or GPU throughput.
+
+The production helper passes numerical HIP interpretation against the refreshed
+CPU oracle: 16 committed decodes, all 16 full-logit files bitwise CPU-equal, 384 raw
+boundaries plus 2 metadata files, exact reset and balanced GPU-storage ownership.
+See `evidence/offline-native-generation-helper.json`. Transport tests also pass
+514-request sequence, smoke 3, greedy 16 and forced-EOS 10 profiles. The EOS case
+observes only prompt inputs: selected EOS is never submitted. A regressing clock
+fails in an isolated host process. These transport mocks are not GPU arithmetic.
+
+The shared driver now reserves the full combined 512-token prompt/output budget,
+including the final selected token. A 512-token prompt plus one output is rejected
+before any decoder submission. This fixes the prior one-token budget discrepancy;
+the short generated history is unchanged. Preserve CPU oracle
+`results/m4-generation-reference-v2`, numerical helper
+`results/m4-native-generation-numeric-v4`, and mock qualification
+`results/m4-native-generation-mock-v9` with their logs/receipts/raw data.
+
+Next wire the explicit generation profile through the native title/builder,
+profile-specific assets/reference, linked image audit, freezer, full application
+transcript/ownership and controller. The current title still selects smoke;
+helper transcript validation alone proves neither native origin nor finalization.
+Do not deploy a generation candidate until those contracts pass offline and a
+fresh cache-backed client/package is frozen/reviewed. The installed .40 smoke
+baseline remains unchanged. No console use or native package build occurred.
+
 ## M4 short greedy arithmetic now passes offline
 
 The new full-mode GPU-source SiLU, softmax and RoPE routines pass the unchanged

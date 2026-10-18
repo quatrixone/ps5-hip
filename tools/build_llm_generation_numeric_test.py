@@ -71,7 +71,7 @@ def compare_generation(raw, reference):
     return rows, files, requests
 
 
-def build(cpu, model, reference, output):
+def build(cpu, model, reference, output, native_helper=False):
     cpu, model, reference, output = (Path(p).resolve() for p in (cpu, model, reference, output))
     if output.exists() or not output.is_relative_to(ROOT / "results"):
         raise ValueError("fresh results output required")
@@ -84,6 +84,9 @@ def build(cpu, model, reference, output):
     compiler = Path("/usr/bin/clang++-18")
     for path in (Path(__file__), ROOT / "tests/llm_generation_numeric_test.py", ROOT / "tests/llm_rms_numeric_mock_test.cpp", Path(provenance.__file__), compiler, Path("/usr/bin/ldd")):
         provenance.merge(inputs, path, provenance.sha(path))
+    if native_helper:
+        for path in (ROOT / "tools/source_llm_generation_log.py", ROOT / "tests/native_generation_transcript_test.py"):
+            provenance.merge(inputs, path, provenance.sha(path))
     output.mkdir(parents=True); raw = output / "raw"; raw.mkdir()
     commands = []
     excluded = {"CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH", "COMPILER_PATH", "GCC_EXEC_PREFIX"}
@@ -107,7 +110,7 @@ def build(cpu, model, reference, output):
     flags = [compiler, "-std=c++17", "-O1", "-gline-tables-only", "-Wall", "-Wextra", "-Werror",
              "-Wno-misleading-indentation", "-fsanitize=address,undefined", "-D__HIP_PLATFORM_AMD__",
              *("-I"+str(p) for p in includes), "-isystem", client / "ggml/src"]
-    units = [ROOT / "tests/llm_generation_numeric_test.cpp", ROOT / "ports/ggml/ps5_backend.cpp"]
+    units = [ROOT / ("tests/llm_native_generation_numeric_test.cpp" if native_helper else "tests/llm_generation_numeric_test.cpp"), ROOT / "ports/ggml/ps5_backend.cpp"]
     objects = []
     for i, unit in enumerate(units):
         dep = output / f"headers-{i}.d"
@@ -132,13 +135,22 @@ def build(cpu, model, reference, output):
         raise ValueError("generation completion marker missing/duplicated")
     if provenance.sha(binary) != binary_hash:
         raise ValueError("binary changed")
+    if native_helper:
+        from source_llm_generation_log import check_fragment
+        policy = loads((reference / "raw/generation.json").read_text())
+        metadata_sizes = {name: (raw / name).stat().st_size for name in ("generation.json", "steps.jsonl")}
+        # The exact marker follows the production helper; no arbitrary log filtering.
+        if not executed.endswith(marker + "\n"):
+            raise ValueError("generation helper terminal marker")
+        timing = check_fragment(executed[:-len(marker)-1].encode('ascii'), policy, metadata_sizes)
+        (output / "timing.json").write_text(json.dumps(timing, indent=2) + "\n")
     rows, files, requests = compare_generation(raw, reference / "raw")
     classification = "PASS" if all(row["pass_budget"] for row in rows) else "NUMERICAL_FAIL"
     exit_code = 0 if classification == "PASS" else 1
     (output / "comparison.json").write_text(json.dumps(rows, indent=2) + "\n")
     provenance.recheck(inputs)
     receipt = {"status": classification, "classification": "generation-host-HIP-numerical-comparison",
-               "gpu_executed": False, "native_executed": False, "limits": ["Numerical HIP interpreter only; no GPU execution", "CPU numerical comparison covers logits; other captured boundaries are checked for size, finiteness and exact reset only"], "raw_files": len(files), "requests": requests, "inputs": inputs, "commands": commands,
+               "gpu_executed": False, "native_executed": False, "native_helper": native_helper, "limits": ["Numerical HIP interpreter only; no GPU execution", "CPU numerical comparison covers logits; other captured boundaries are checked for size, finiteness and exact reset only"], "raw_files": len(files), "requests": requests, "inputs": inputs, "commands": commands,
                "reference_receipt": reference_data["receipt"], "reference_sha256": reference_data["receipt_sha256"],
                "model": reference_data["model"], "tolerances": {"absolute": ABS_TOL, "relative": REL_TOL, "relative_l2": L2_TOL},
                "artifacts": {str(p.relative_to(output)): provenance.sha(p) for p in output.rglob("*") if p.is_file()}}
@@ -151,5 +163,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("cpu-build", "model", "reference", "output"):
         parser.add_argument("--"+name, type=Path, required=True)
+    parser.add_argument("--native-helper", action="store_true", help="Execute the production native generation helper under numerical HIP interpretation")
     args = parser.parse_args()
-    raise SystemExit(build(args.cpu_build, args.model, args.reference, args.output))
+    raise SystemExit(build(args.cpu_build, args.model, args.reference, args.output, args.native_helper))

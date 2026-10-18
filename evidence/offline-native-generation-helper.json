@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "PASS",
+  "classification": "offline-production-native-generation-helper",
+  "native_executed": false,
+  "gpu_executed": false,
+  "source_base_commit": "07ab0df",
+  "provenance": {
+    "results/m4-generation-reference-v2/receipt.json": "3f36a3011cd94630635f944c699e3b5873f490c3b5db33005a81e12de6891c1d",
+    "results/m4-native-generation-numeric-v4/receipt.json": "d279c8a998f81dcaeecce2b0f104a7d37563ce97926ec171fd7d552ab83dd76c",
+    "results/m4-native-generation-numeric-v4/comparison.json": "3fd0f0659fa5665fda546269a9a98d93633a08f4e4d91f97fa851029b2806f5f",
+    "results/m4-native-generation-numeric-v4/timing.json": "93709ff075305da38897c2abf6cb0364f0e976f09e6f75df98dfa22cd3fa97aa",
+    "results/m4-native-generation-numeric-v4/raw/generation.json": "dc23e0cbece6f12d21cdee2be67ac91d9288175a53c2ace1234cd21c23ba239c",
+    "results/m4-native-generation-numeric-v4/raw/steps.jsonl": "543593580dff68a3b671bad93e6951c8caa2abd7438d869e7c83b54bff88cb29",
+    "results/m4-native-generation-mock-v9/receipt.json": "024aa7dd94a2744d5d8e0586c1c8277695571e36bc32beb1c5cf3cf775cf1d75"
+  },
+  "native_helper": {
+    "profile": "NativeFullProfile::generation",
+    "shared_model_context_lifecycle": true,
+    "actual_tokenizer": true,
+    "actual_live_logit_feedback": true,
+    "captured_logits_equal_sampler_input": true,
+    "actual_KV_and_backend_reset": true,
+    "repeated_histories_equal": true,
+    "metadata_files": [
+      "generation.json",
+      "steps.jsonl"
+    ],
+    "timing_clock": "CLOCK_MONOTONIC",
+    "timing_scope": [
+      "load",
+      "context",
+      "reset",
+      "decode_including_readback",
+      "run_including_scheduling_sampling_logging",
+      "cleanup"
+    ]
+  },
+  "numerical": {
+    "requests": 16,
+    "nodes": 12768,
+    "launches": 11728,
+    "layers": 22,
+    "full_logit_files": 16,
+    "bitwise_CPU_equal": true,
+    "maximum_absolute_error": 0,
+    "maximum_relative_l2": 0,
+    "float_boundary_files": 384,
+    "float_boundary_bytes": 5062656,
+    "metadata_bytes": 1698,
+    "allocations": 16,
+    "frees": 16,
+    "instances_created": 1,
+    "instances_freed": 1,
+    "CPU_backend_tensor_arithmetic": 0,
+    "output": ", there was a"
+  },
+  "transport": {
+    "profiles": {
+      "sequence": 514,
+      "smoke": 3,
+      "generation": 16,
+      "generation-eos": 10
+    },
+    "actual_submitted_feedback_observed": true,
+    "EOS_selected_but_never_submitted": true,
+    "clock_regression_rejected": true,
+    "legacy_profiles_retained": true
+  },
+  "context_limit": {
+    "combined_prompt_and_output": 512,
+    "final_selected_token_included": true,
+    "overflow_rejected_before_decode": true,
+    "accepted_boundary": "one prompt token plus511 generated tokens",
+    "rejected_boundary": "512 prompt tokens plus one generated token"
+  },
+  "validation": {
+    "unit_methods": 73,
+    "ASan_UBSan": true,
+    "unmodified_native_smoke_audit_contract_tests": 40,
+    "transcript_scope": "helper only; startup/memory/watchdog/finalization not established"
+  },
+  "limits": [
+    "Numerical HIP interpretation is not native GPU execution; timing describes this host interpreter only.",
+    "Numerical reference compares full logits; other raw boundaries check shape/finiteness/reset, not independent CPU intermediates.",
+    "Forced EOS is transport-only; real model/native EOS and full M4/M5 gates remain open.",
+    "The native title still selects smoke; generation package/profile/image/freezer/controller contracts remain to be integrated.",
+    "No native client/package rebuild, model upload or console contact in this milestone.",
+    "Earlier numeric/mocks are historical after source changes; preserve raw data and receipts."
+  ],
+  "next": [
+    "Bind explicit generation profile through native title/build/asset/oracle contracts without changing smoke acceptance.",
+    "Extend linked image audit to actual generation helper, sampler and callbacks; bind profile-specific raw inventory and complete application lifecycle.",
+    "Freeze/review fresh cache-backed native client/package after offline checks, then validate on idle .40 and push the hardware milestone."
+  ]
+}

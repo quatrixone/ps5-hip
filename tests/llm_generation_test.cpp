@@ -33,10 +33,11 @@ int main() {
     rejects([&]{generate(prompt,2,512,decode,never);});rejects([&]{generate(prompt,2,0,decode,never);});
     rejects([&]{generate(prompt,0,1,decode,never);});rejects([&]{generate(nullptr,1,1,decode,never);});
     rejects([&]{generate(negative,1,1,decode,never);});rejects([&]{generate(large,1,1,decode,never);});assert(calls.empty());
-    // Full 512-position boundary: 512th emitted token is never submitted at 512.
+    // Combined 512-token boundary includes the final selected, unprocessed token.
     const int32_t one[]={0};size_t submitted=0;
-    auto boundary=generate(one,1,512,[&](int32_t token,int32_t position){assert(token==0&&position==int32_t(submitted)&&position<512);++submitted;std::fill(logits.begin(),logits.end(),0.f);return Logits{logits.data(),logits.size()};},never);
-    assert(submitted==512&&boundary.processed_count==512&&boundary.generated_count==512);
+    auto boundary=generate(one,1,511,[&](int32_t token,int32_t position){assert(token==0&&position==int32_t(submitted)&&position<512);++submitted;std::fill(logits.begin(),logits.end(),0.f);return Logits{logits.data(),logits.size()};},never);
+    assert(submitted==511&&boundary.processed_count==511&&boundary.generated_count==511);
+    std::array<int32_t,512> full_prompt{};calls.clear();rejects([&]{generate(full_prompt.data(),512,1,decode,never);});assert(calls.empty());
     // Exceptions propagate; caller must reset/quarantine its own decoder state.
     size_t failed=0;rejects([&]{generate(prompt,2,1,[&](int32_t,int32_t)->Logits{++failed;throw std::runtime_error("decode failed");},never);});assert(failed==1);
     return 0;

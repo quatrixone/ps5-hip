@@ -318,6 +318,13 @@ and RoPE arithmetic fixes. The device fixture passes ISA/Initial admission. See
 Next bind and test the native generation profile; matching text is insufficient.
 Diagnostic CPU substitutions are never acceptance.
 
+The exact production helper now passes the same short numerical gate, including
+actual tokenizer/feedback, metadata, KV reset and checked phase/request timing.
+See `evidence/offline-native-generation-helper.json`. Combined prompt/output
+context is enforced before submission, including the final selected token. Next
+finish explicit native title/assets/audit/freezer/controller profile binding;
+the title remains on smoke until those contracts are ready.
+
 Immediate next proof: one fixed tokenized prompt, sequential prefill, then a
 few actual CPU-argmax selections from GPU logits fed into the next decoder
 request. Compare tokens and full logits against CPU on that generated history;

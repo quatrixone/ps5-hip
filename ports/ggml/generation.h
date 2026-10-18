@@ -33,11 +33,11 @@ inline int32_t greedy(Logits logits) {
 template<class Decode, class IsEog>
 Result generate(const int32_t* prompt, size_t prompt_count, size_t max_new_tokens,
                 Decode&& decode, IsEog&& is_eog) {
-    // Reserve the worst-case decode budget before any submission. The final
-    // emitted token is not decoded: its logits already came from the prior call.
+    // Reserve the combined prompt/output budget before any submission, including
+    // the final selected token even though it is not decoded.
     if (!prompt || !prompt_count || prompt_count > context_size ||
         !max_new_tokens || max_new_tokens > context_size ||
-        max_new_tokens - 1 > context_size - prompt_count)
+        max_new_tokens > context_size - prompt_count)
         throw std::invalid_argument("generation context/budget");
     for (size_t i = 0; i < prompt_count; ++i)
         if (prompt[i] < 0 || static_cast<size_t>(prompt[i]) >= vocabulary_size)
