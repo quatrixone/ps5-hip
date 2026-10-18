@@ -3,20 +3,19 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
-## Native corpus deployment/readback integration
+## Native corpus linked package complete
 
-Corpus candidate freezing, nested capture, numerical readback and full application
-log validation are implemented. The manifest binds 1,830-second observation,
-600-second capture and 4,200-second whole-phase limits, with a corpus-only 128 MiB
-reference bound. The controller verifies all 6,539 captured files and supports
-2 MiB corpus logs, including preservation for the next deployment. 277 focused
-controller/model/readback/transcript tests pass; see
-`evidence/offline-native-corpus-controller.json`.
+The corpus native package is complete: 201 commands passed, 149 linked objects,
+15 package files and a 415-function audit across the three executable images.
+The final producer receipt and independent package review pass. Package size is
+22,478,848 bytes; the model remains external at
+`/data/hip/models/tinyllama-q4_0.gguf`. Evidence:
+`evidence/offline-native-corpus-linked-package.json`.
 
-Next build one fresh corpus package, inspect all three linked-image audits, freeze
-the exact candidate and test on idle .40. No new native package or console result
-exists yet. Reuse the existing model, CPU oracle and kernel modules; do not rerun
-the completed host numerical corpus solely for these controller changes.
+Next freeze `build/llm-native-corpus-app-v1`, independently review the candidate,
+and validate five prompts / sixteen generated tokens / two reset runs on idle
+.40 under both locks. No native corpus execution is claimed yet. Reuse the
+completed client v8 and corpus assets v1; do not rebuild or rerun the host corpus.
 
 ## Native corpus title and asset integration
 

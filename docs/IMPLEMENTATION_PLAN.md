@@ -16,7 +16,9 @@ now passes actual production-helper HIP numerical interpretation: all 6,528 floa
 files are bytewise CPU equal with validated feedback, reset and ownership. Next
 build and audit one native corpus package before .40. Corpus title, assets,
 freezing, readback and controller integration are implemented; 277 controller and
-readback tests pass. An actual linked package audit remains pending.
+readback tests pass. The actual linked package and final receipt now pass; candidate freeze and .40 remain pending.
+
+- 2026-10-18 | Native corpus package | offline | 201 commands,149 objects,415-function audit and final receipt pass | evidence/offline-native-corpus-linked-package.json | next: freeze and .40
 
 - 2026-10-18 | Native corpus controller | offline | nested freeze/capture/numerics/lifecycle logs and exact profile budgets;277 tests pass | evidence/offline-native-corpus-controller.json | next: linked package audit, candidate freeze and .40
 

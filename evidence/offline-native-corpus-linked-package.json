@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "classification": "offline-native-corpus-linked-package",
+  "source_commit": "a27ff453ede0208d22f2249ff9d7f8dee2c60cd8",
+  "build": "build/llm-native-corpus-app-v1",
+  "build_receipt_sha256": "82dbcbf71ebfff5505c1c9496773128fcbd4fe94bdd72ff95ddf5dffdc868421",
+  "audit_sha256": "c35ee649d4031edcdd26e546b2bdadc4869640ff20fd211e55d060ad9c774664",
+  "review_sha256": "401504da2d8d0100aa105398f87dcf54a3dcbdb9e47d95fc7a78ff39643b0606",
+  "commands_sha256": "7dc211eec24610ced30083279b7c6d82445e243b39aa996703358e878a51049a",
+  "command_count": 201,
+  "object_count": 149,
+  "package_bytes": 22478848,
+  "package_sha256": "8c0127cc3beecc0b39728d2bf4ad2b8e1658d7f64a24ebe3ca1d2fac69519ae2",
+  "images": {
+    "title.elf": {
+      "sha256": "773b9360a7557ea1d581bfcd73289b030f80bbcb49567fb8ea498e22e1df1a8b",
+      "bytes": 23451856
+    },
+    "eboot.elf": {
+      "sha256": "0a9e82c972a31682d30d3a9ed8a385db9e133ef112b60a3af2f1a81d0e78e284",
+      "bytes": 14656828
+    },
+    "extracted.elf": {
+      "sha256": "024040c1ea991eba8a5993d4027a5ba0d3fbf726d6250cdadece2eb387a6838e",
+      "bytes": 14656828
+    }
+  },
+  "audited_function_count": 415,
+  "profile": "corpus",
+  "external_model": {
+    "path": "/data/hip/models/tinyllama-q4_0.gguf",
+    "bytes": 619831552,
+    "sha256": "c42ff3ebdfc0b8a0aa0c35a499ccf81303fb9fbdc1a0798c096a098df85003aa"
+  },
+  "results_dir": "/user/homebrew/ps5-hip/m4-corpus-v1",
+  "native_executed": false,
+  "gpu_executed": false,
+  "limits": [
+    "Linked package and static call-chain audit only; native corpus validation on .40 remains pending",
+    "Final build closure checked by producer; compact evidence does not embed local package or dependency artifacts"
+  ]
+}
