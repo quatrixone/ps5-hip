@@ -207,7 +207,9 @@ def select_prepared_source(output, fresh, previous):
  return old
 
 
-def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None,layer_fixture=None,full_fixture=None):
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None,layer_fixture=None,full_fixture=None,model_format="gguf"):
+ if model_format not in ('gguf','original_safetensors') or (model_format!='gguf' and (phase!='model-full' or model_source is None)):
+  raise ValueError('original format requires full model and original source directory')
  validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture,layer_fixture,full_fixture)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
@@ -306,8 +308,15 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
  client=client_builder.app_objects(native_client);merge_authenticated(client['inputs'])
  vocab=vocab_inputs(vocab_fixture);merge_authenticated(vocab['inputs'])
  model_info=model_inputs(model,model_source,cpu_build) if phase in ('model-gate','model-prefix','model-layer','model-full') else None
- external_model={'path':model_remote_path,'bytes':model_info['bytes'],'sha256':model_info['sha256']} if model_info else None
+ external_model={'path':model_remote_path,'bytes':model_info['bytes'],'sha256':model_info['sha256']} if model_info and model_format=='gguf' else None
  if external_model:validate_external_model(external_model)
+ external_original_model=None
+ if model_format=='original_safetensors':
+  from external_original_model import contract
+  external_original_model=contract(model_source,model_remote_path,read('models/tinyllama-1.1b-chat-v1.0.json'))
+  for name in external_original_model['files']:bind(Path(model_source)/name)
+  for name in ('models/tinyllama-1.1b-chat-v1.0.json','tools/external_original_model.py','ports/ggml/native_original_config.h','ports/ggml/tinyllama_source_metadata.h','ports/ggml/tinyllama_tensor_callback.h','ports/ggml/tinyllama_target_reader.h','ports/ggml/tinyllama_source_tensors.h','ports/ggml/safetensors_reader.h','tests/native_original_title_test.py'):bind(ROOT/name)
+
  if model_info:merge_authenticated(model_info['inputs'])
  prefix_info=None
  if phase=='model-prefix':
@@ -324,6 +333,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   from public_hip_full_assets import full_inputs
   full_info=full_inputs(full_fixture);merge_authenticated(full_info['inputs'])
   validate_full_profile(full_info,model_info)
+  if model_format!='gguf' and full_info['profile']!='generation':raise ValueError('original format requires short generation')
  output.mkdir(parents=True)
  original_run=b.run
  def recorded_run(out,label,argv,cwd=None):
@@ -401,7 +411,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   reused_source=public!=output/'source-public'
   if reused_source:
    tree(public);bind(public.parent/'source-base/receipt.json');bind(output/'source-base/receipt.json')
-  units=b.compile_units(output,public,'llm_client',client_phase=phase,full_profile=full_info['profile'] if full_info else 'smoke')
+  units=b.compile_units(output,public,'llm_client',client_phase=phase,full_profile=full_info['profile'] if full_info else 'smoke',**({'model_format':model_format} if model_format!='gguf' else {}))
   merge(merged_unit_headers(units))
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
   flags=b.compiler_flags(public)+['-I'+str(upstream_client/n) for n in ('include','ggml/include','ggml/src')]+['-I'+str(ROOT/'ports/ggml')]
@@ -418,6 +428,9 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)
   phase_file=output/'client-phase.txt';write_phase(phase_file,phase);bind(phase_file)
   assets={'vocab.gguf':vocab['asset'],'client-phase.txt':phase_file}
+  if external_original_model:
+   from external_original_model import encode
+   original_config=output/'original-model.json';original_config.write_bytes(encode(external_original_model));bind(original_config);assets['original-model.json']=original_config
   if external_model:
    model_path_file=output/'model-path.txt';model_path_file.write_bytes(encode_model_path(external_model['path']));bind(model_path_file)
    assets['model-path.txt']=model_path_file
@@ -430,7 +443,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
   audit=output/'llm-client-native-audit.json'
-  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full') else []),*(['--full-profile',full_info['profile']] if full_info else [])])
+  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full') else []),*(['--full-profile',full_info['profile']] if full_info else []),*(['--model-format',model_format] if model_format!='gguf' else [])])
   ar=json.loads(audit.read_text())
   if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!=phase or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
   if phase in ('model-gate','model-prefix','model-layer','model-full') and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
@@ -440,6 +453,7 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if full_info and full_info['profile'] in ('generation','corpus') and ar.get('actual_generation_call_chain_audited') is not True:raise ValueError('actual generation call chain not audited')
   for p in [output/n for n in ('title.elf','eboot.elf','extracted.elf')]+[ROOT/'tools/audit_public_hip_llm_client_native.py']:
    if ar.get('inputs',{}).get(str(p))!=b.sha(p):raise ValueError('audit omits required identity')
+  if external_original_model and (ar.get('model_format')!=model_format or ar.get('original_model_call_chain_audited') is not True):raise ValueError('original model call chain not audited')
   merge(ar['inputs']);bind(audit)
   # Source-closure authentication must inspect the original runner, not our instrumentation.
   b.run=original_run
@@ -459,6 +473,10 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if prefix_info:receipt['llm_client']['prefix']={k:prefix_info[k] for k in ('receipt','receipt_sha256','reference')}
   if layer_info:receipt['llm_client']['layer']={k:layer_info[k] for k in ('receipt','receipt_sha256','reference')}
   if full_info:receipt['llm_client']['full']={k:full_info[k] for k in ('receipt','receipt_sha256','reference','profile')}
+  if external_original_model:
+   if contract(model_source,model_remote_path,read('models/tinyllama-1.1b-chat-v1.0.json'))!=external_original_model:raise ValueError('original source contract changed')
+   receipt['external_original_model']=external_original_model
+   receipt['model_format']='original_safetensors'
   if external_model:receipt['external_model']=external_model
   (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
   return receipt
@@ -474,4 +492,5 @@ if __name__=='__main__':
  parser.add_argument('--full-fixture',type=Path)
  parser.add_argument('--prepared-source-build',type=Path,help='Reuse compiler paths only after fresh preparation proves identical source bytes')
  parser.add_argument('--model-remote-path',default=DEFAULT_MODEL_PATH)
- a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build,a.layer_fixture,a.full_fixture)
+ parser.add_argument('--model-format',choices=('gguf','original_safetensors'),default='gguf')
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build,a.layer_fixture,a.full_fixture,a.model_format)

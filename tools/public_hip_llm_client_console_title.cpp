@@ -16,6 +16,15 @@
 #include "ps5_backend.h"
 #include "model_gate.h"
 #include "native_host_allocator.h"
+#ifndef PS5HIP_LLM_ORIGINAL_MODEL
+#define PS5HIP_LLM_ORIGINAL_MODEL 0
+#endif
+#if PS5HIP_LLM_ORIGINAL_MODEL
+#include "native_original_config.h"
+#if !defined(PS5HIP_NATIVE_ORIGINAL_MODEL) || !PS5HIP_LLM_AUTHENTICATED_MODEL_FULL || !PS5HIP_LLM_FULL_GENERATION
+#error original source requires explicit full short-generation build
+#endif
+#endif
 #ifndef PS5HIP_LLM_FULL_GENERATION
 #define PS5HIP_LLM_FULL_GENERATION 0
 #endif
@@ -280,7 +289,7 @@ int main() {
     const auto phase=configured_model_phase();
     const bool full_model=phase!=ClientPhase::vocab;
     // Conservative bounded experiment budget, not a performance measurement.
-    ps5hip_clr_gpu::watchdog_start(PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
+    ps5hip_clr_gpu::watchdog_start(PS5HIP_LLM_ORIGINAL_MODEL ? 600000 : PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
     const hipError_t initialized = hipInit(0);
     int count = -1;
     const hipError_t discovered = hipGetDeviceCount(&count);
@@ -289,8 +298,13 @@ int main() {
     if(full_model){
       // Builder and freeze controller must authenticate locked model bytes before enabling this phase.
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
+#if PS5HIP_LLM_ORIGINAL_MODEL
+      m0::require(phase==ClientPhase::model_full);
+      const std::string model_path=ps5hip::original_model_directory(std::string(title_root)+"original-model.json");
+#else
       const std::string model_path=configured_model_path(std::string(title_root)+"model-path.txt");
       struct stat st{};m0::require(::stat(model_path.c_str(),&st)==0&&S_ISREG(st.st_mode)&&st.st_size==619831552);
+#endif
       if(phase==ClientPhase::model_full){
 #if PS5HIP_LLM_AUTHENTICATED_MODEL_FULL
         const std::array<const char*,6> modules={
@@ -306,7 +320,11 @@ int main() {
         m0::require(result.files==6539&&result.bytes==86091236&&result.full.requests==272&&result.full.completed_nodes==217056&&result.full.launches==199376);
         m0::require(observed.launches==199376&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
 #elif PS5HIP_LLM_FULL_GENERATION
-        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::generation);
+        const auto result=m0::run_native_full(model_path.c_str(),modules,prefix_write,&directory,ps5hip_canary::sync_log,model_memory_snapshot,m0::NativeFullProfile::generation
+#if PS5HIP_LLM_ORIGINAL_MODEL
+          ,m0::NativeFullModelSource::original_safetensors
+#endif
+        );
         m0::require(result.files==386&&result.bytes==5064354&&result.full.requests==16&&result.full.completed_nodes==12768&&result.full.launches==11728);
         m0::require(observed.launches==11728&&!observed.uncertain&&observed.allocations>0&&observed.allocations==observed.frees);
 #else

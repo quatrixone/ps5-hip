@@ -2,6 +2,8 @@
 
 Updated: 2026-10-18, America/New_York.
 
+- 2026-10-18 | Native original-format integration | offline | 212 tests and independent review pass; linked image pending | evidence/offline-native-original-format-integration.json
+
 ## Original-format acceptance gates
 
 The bounded safetensors/tokenizer/mapping/callback prerequisites are on main

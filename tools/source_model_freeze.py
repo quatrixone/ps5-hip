@@ -12,13 +12,29 @@ def stream_digest(path):
  with Path(path).open('rb') as f:
   for b in iter(lambda:f.read(CHUNK),b''):h.update(b)
  return h.hexdigest()
+def original_contract(value):
+ from external_original_model import validate
+ return validate(value,json.loads((ROOT/'models/tinyllama-1.1b-chat-v1.0.json').read_text()))
+
+def runtime_model(value):
+ original=value.get('external_original_model')
+ if original is not None:
+  require('external_model' not in value,'ambiguous original/GGUF runtime model')
+  original_contract(original)
+  require(value.get('llm_client',{}).get('phase')=='model-full' and value['llm_client'].get('full',{}).get('profile')=='generation','original source requires full short generation')
+  return 'external_original_model',original
+ require('external_original_model' not in value,'invalid original runtime model')
+ validate_external_model(value.get('external_model'))
+ return 'external_model',value['external_model']
+
 def model_contract(manifest):
  require(manifest.get('fixture')=='llm_client' and manifest.get('llm_client',{}).get('phase') in ('model-gate','model-prefix','model-layer','model-full'),'wrong model phase')
  model=manifest['llm_client']['model']
  require(model['bytes']==MODEL_BYTES and model['sha256']==MODEL_SHA,'wrong locked model')
  t=manifest['model_transfer'];b=manifest['baseline_transfer']
  external=manifest.get('external_model')
- if external is not None:validate_external_model(external)
+ if 'external_original_model' in manifest:_,external=runtime_model(manifest)
+ elif external is not None:validate_external_model(external)
  # Historical embedded transfer contracts remain readable; new receipt admission requires external storage.
  require(type(t['bytes']) is int and (0<t['bytes']<=package_limit('llm_client') if external is not None else MODEL_BYTES<t['bytes']<=MODEL_PACKAGE_LIMIT),'model package bound')
  for v in (t,b):
@@ -89,7 +105,8 @@ def _validate_model_receipt(build,receipt):
  classification='source-only-model-'+kind+'-native-client-app' if prefix else 'source-only-model-rejection-native-client-app'
  require(receipt.get('schema')==1 and receipt.get('status')=='PASS' and receipt.get('classification')==classification,'wrong model receipt')
  require(receipt.get('fixture')=='llm_client' and phase in ('model-gate','model-prefix','model-layer','model-full') and receipt.get('native_executed') is False and receipt.get('gpu_executed') is False,'wrong phase/execution')
- external=receipt.get('external_model');validate_external_model(external)
+ runtime_key,external=runtime_model(receipt)
+ is_original=runtime_key=='external_original_model'
  bound=receipt['llm_client'];require(bound.get('phase')==phase,'wrong bound phase')
  inputs=receipt.get('inputs');require(isinstance(inputs,dict) and inputs,'missing input closure')
  import native_ccache as cache
@@ -108,6 +125,7 @@ def _validate_model_receipt(build,receipt):
  audit_path=build/'llm-client-native-audit.json';require(stream_digest(audit_path)==bound['audit']['sha256'],'audit hash differs')
  audit=json.loads(audit_path.read_text())
  require(audit.get('status')=='PASS' and audit.get('classification')=='offline-public-hip-llm-client-native-image-audit' and audit.get('phase')==phase,'wrong native audit phase')
+ if is_original:require(audit.get('original_model_call_chain_audited') is True and audit.get('model_format')=='original_safetensors','missing original model call-chain proof')
  for field in ('wrapper_retained','wrapper_no_bypass','actual_client_call_chain_audited'):require(audit.get(field) is True,'missing native call-chain proof')
  if prefix:require(audit.get('actual_'+kind+'_call_chain_audited') is True,'missing actual prefix call-chain proof')
  for field in ('actual_client_gate_executed','native_executed','gpu_executed'):require(audit.get(field) is False,'unearned execution claim')
@@ -120,12 +138,17 @@ def _validate_model_receipt(build,receipt):
  if prefix and kind=='full':
   require(audit.get('full_profile','smoke')==prefix_data['profile'],'native full audit profile differs')
   if prefix_data['profile'] in ('generation','corpus'):require(audit.get('actual_generation_call_chain_audited') is True,'missing actual generation call-chain proof')
- names=legacy.LLM_CLIENT_PACKAGE_FILES|{'model-path.txt'}|(set(prefix_data['assets']) if prefix else set())
+ names=legacy.LLM_CLIENT_PACKAGE_FILES|({'original-model.json'} if is_original else {'model-path.txt'})|(set(prefix_data['assets']) if prefix else set())
  require(set(receipt['package_files'])==names and {str(p.relative_to(app)) for p in app.rglob('*') if p.is_file()}==names,'exact model package assets required')
  require(type(receipt['package_bytes']) is int and 0<receipt['package_bytes']<=package_limit('llm_client') and package.stat().st_size==receipt['package_bytes'] and stream_digest(package)==receipt['package_sha256'],'package identity/bound differs')
  for name,h in receipt['package_files'].items():require(not (app/name).is_symlink() and stream_digest(app/name)==h,'package asset differs')
  require((app/'client-phase.txt').read_bytes()==(phase+'\n').encode() and (app/'results-dir.txt').read_text()==receipt['results_dir'],'package configuration differs')
- require((app/'model-path.txt').read_bytes()==encode_model_path(external['path']) and receipt['package_files']['vocab.gguf']==stream_digest(vocab['asset']),'packaged model path/vocabulary differs')
+ if is_original:
+  from external_original_model import encode
+  require((app/'original-model.json').read_bytes()==encode(external),'packaged original manifest differs')
+  for name,item in external['files'].items():require(inputs.get(str(Path(bound['model']['source_dir'])/name))==item['sha256'],'original source input omitted')
+ else:require((app/'model-path.txt').read_bytes()==encode_model_path(external['path']),'packaged model path differs')
+ require(receipt['package_files']['vocab.gguf']==stream_digest(vocab['asset']),'packaged vocabulary differs')
  if prefix:
   require({n:receipt['package_files'][n] for n in prefix_data['assets']}=={n:stream_digest(p) for n,p in prefix_data['assets'].items()},'packaged prefix modules differ')
  for name,h in inputs.items():require(stream_digest(name)==h,'input changed during admission')
@@ -143,7 +166,7 @@ def validator_identities():
  paths.update(ROOT/n for n in ('tools/public_hip_layer_assets.py','tools/build_public_hip_layer_assets.py','tools/build_llm_layer_reference.py','tools/source_llm_layer_raw.py','tools/source_llm_layer_log.py','tools/verify_llm_layer_readbacks.py','tests/source_model_layer_freeze_test.py','tests/llm_layer_reference_test.py','tests/public_hip_layer_assets_test.py','tests/native_layer_transcript_test.py','tests/llm_layer_readbacks_test.py','tests/source_layer_console_test.py','tests/source_layer_authentication_test.py'))
  paths.update(ROOT/n for n in ('tools/public_hip_full_assets.py','tools/build_public_hip_full_assets.py','tools/build_llm_full_model_reference.py','tools/build_llm_full_numeric_test.py','tools/source_llm_full_log.py','tools/verify_llm_full_readbacks.py','tests/source_model_full_freeze_test.py','tests/llm_full_model_reference_test.py','tests/public_hip_full_assets_test.py','tests/native_full_transcript_test.py','tests/llm_full_readbacks_test.py','tests/source_full_console_test.py'))
  paths.update(ROOT/n for n in ('tests/llm_generation_readbacks_test.py','tests/llm_generation_reference_test.py','tests/llm_generation_numeric_test.py','tools/source_llm_generation_log.py','tests/native_generation_transcript_test.py','tests/native_generation_application_test.py','tests/source_generation_console_test.py','tests/source_corpus_console_test.py'))
- paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py'))
+ paths.update(ROOT/n for n in ('tests/native_model_path_test.py','tests/source_external_model_test.py','tools/external_original_model.py','tests/source_original_model_test.py','models/tinyllama-1.1b-chat-v1.0.json'))
  paths.update(ROOT/n for n in ('tools/source_console.py', 'tools/source_model_streaming.py', 'tools/source_llm_model_log.py', 'tests/source_model_auth_test.py', 'tests/source_model_callsites_test.py', 'tests/source_model_cleanup_budget_test.py', 'tests/source_model_execute_test.py', 'tests/source_model_phase_budget_test.py', 'tests/source_model_storage_edges_test.py', 'tests/source_model_streaming_test.py'))
  paths.update(ROOT/n for n in ('tests/source_console_finalization_test.py','tests/source_console_deployment_boundaries_test.py'))
  seen=set()
@@ -166,14 +189,15 @@ def validate_model_candidate(candidate,manifest):
  return _validate_model_candidate(candidate,manifest)
 
 def _validate_model_candidate(candidate,manifest,freeze_evidence=None):
+ original='external_original_model' in manifest
  corpus=manifest.get('llm_client',{}).get('phase')=='model-full' and manifest.get('model_full',{}).get('profile')=='corpus'
- require(manifest.get('deadline_seconds')==(1830 if corpus else 150) and manifest.get('control_phase_seconds')==(4200 if corpus else 1800) and (manifest.get('raw_capture_seconds')==600 if corpus else 'raw_capture_seconds' not in manifest),'model phase budget differs')
+ require(manifest.get('deadline_seconds')==(630 if original else 1830 if corpus else 150) and manifest.get('control_phase_seconds')==(2400 if original else 4200 if corpus else 1800) and (manifest.get('raw_capture_seconds')==600 if corpus else 'raw_capture_seconds' not in manifest),'model phase budget differs')
  initial=validator_identities()
  require(all(manifest['files'].get(n)==h for n,h in initial.items()),'live validator identity not frozen')
  model_contract(manifest)
  receipt=json.loads((candidate/'build-receipt.json').read_text())
  bound,prefix_data=_validate_model_receipt(candidate,receipt)
- require(bound==manifest['llm_client'] and receipt['external_model']==manifest.get('external_model'),'manifest provenance differs')
+ require(bound==manifest['llm_client'] and {k:receipt[k] for k in ('external_model','external_original_model') if k in receipt}=={k:manifest[k] for k in ('external_model','external_original_model') if k in manifest},'manifest provenance differs')
  require(manifest['model_transfer']['bytes']==receipt['package_bytes'] and manifest['model_transfer']['sha256']==receipt['package_sha256'],'transfer identity differs')
  require(manifest['package_files']==receipt['package_files'],'manifest package inventory differs')
  if bound['phase'] in ('model-prefix','model-layer','model-full'):

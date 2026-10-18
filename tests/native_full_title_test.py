@@ -83,19 +83,30 @@ class FullTitle(unittest.TestCase):
     def test_production_profile_dispatch_and_counts(self):
         text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
         start=text.index('#if PS5HIP_LLM_FULL_CORPUS\n        prepare_corpus_directories')
-        end=text.index('\n#endif',start)+len('\n#endif');branch=text[start:end]
+        # Match the outer conditional, including the nested original-source arm.
+        depth=0;lines=[]
+        for line in text[start:].splitlines():
+            lines.append(line)
+            directive=line.lstrip()
+            if directive.startswith(('#if ', '#ifdef ', '#ifndef ')):depth+=1
+            elif directive.startswith('#endif'):
+                depth-=1
+                if depth==0:break
+        self.assertEqual(depth,0)
+        branch='\n'.join(lines)
         fixture=r"""
 #include <array>
 #include <stdexcept>
 #include <string>
 namespace m0 {
 enum class NativeFullProfile {sequence,smoke,generation,corpus};
+enum class NativeFullModelSource {gguf,original_safetensors};
 struct Full {unsigned requests,completed_nodes,launches;};
 struct Result {unsigned files,bytes;Full full;};
-static int seen;
+static int seen,source_seen;
 void require(bool ok){if(!ok)throw std::runtime_error("contract");}
-Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int,int,NativeFullProfile p){
- seen=int(p);Result r=p==NativeFullProfile::corpus?Result{6539,86091236,{272,217056,199376}}:p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
+Result run_native_full(const char*,const std::array<const char*,6>&,int,int*,int,int,NativeFullProfile p,NativeFullModelSource source=NativeFullModelSource::gguf){
+ seen=int(p);source_seen=int(source);Result r=p==NativeFullProfile::corpus?Result{6539,86091236,{272,217056,199376}}:p==NativeFullProfile::generation?Result{386,5064354,{16,12768,11728}}:Result{72,949248,{3,2394,2199}};
 #ifdef BAD_RESULT
  ++r.full.launches;
 #endif
@@ -109,10 +120,10 @@ int main(){const std::string model_path="unused";std::array<const char*,6> modul
 """
         with tempfile.TemporaryDirectory() as folder:
             folder=pathlib.Path(folder);cpp=folder/'title.cpp';binary=folder/'title'
-            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_CORPUS?3:PS5HIP_LLM_FULL_GENERATION?2:1)?0:1;}catch(...){return 99;}}\n')
-            for profile in (0,1,2):
+            cpp.write_text(fixture+branch+'\nreturn m0::seen==(PS5HIP_LLM_FULL_CORPUS?3:PS5HIP_LLM_FULL_GENERATION?2:1)&&m0::source_seen==PS5HIP_LLM_ORIGINAL_MODEL?0:1;}catch(...){return 99;}}\n')
+            for profile,original in ((0,False),(1,False),(2,False),(1,True)):
                 for bad in (False,True):
-                    command=['c++','-std=c++17','-DPS5HIP_LLM_FULL_GENERATION='+str(int(profile==1)),'-DPS5HIP_LLM_FULL_CORPUS='+str(int(profile==2)),str(cpp),'-o',str(binary)]
+                    command=['c++','-std=c++17','-DPS5HIP_LLM_ORIGINAL_MODEL='+str(int(original)),'-DPS5HIP_LLM_FULL_GENERATION='+str(int(profile==1)),'-DPS5HIP_LLM_FULL_CORPUS='+str(int(profile==2)),str(cpp),'-o',str(binary)]
                     if bad:command.append('-DBAD_RESULT=1')
                     subprocess.run(command,check=True)
                     self.assertEqual(subprocess.run([str(binary)]).returncode,99 if bad else 0)
@@ -169,7 +180,20 @@ return 0;}catch(...){return 99;}}
 
     def test_corpus_watchdog_argument_and_completion_marker(self):
         text=(ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
-        self.assertIn('watchdog_start(PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000)',text)
+        start=text.index('ps5hip_clr_gpu::watchdog_start(')+len('ps5hip_clr_gpu::watchdog_start(')
+        expression=text[start:text.index(');',start)]
+        source='enum class ClientPhase {vocab,model_full};\nint budget(bool PS5HIP_LLM_ORIGINAL_MODEL,bool PS5HIP_LLM_FULL_CORPUS,ClientPhase phase,bool full_model){return '+expression+';}\nint main(){'
+        cases=[(False,False,'vocab',False,30000),(False,False,'vocab',True,120000),
+               (False,False,'model_full',True,120000),(False,True,'model_full',True,1800000),
+               (False,True,'vocab',False,30000),(True,False,'model_full',True,600000)]
+        for original,corpus,phase,full,expected in cases:
+            source+=f'if(budget({int(original)},{int(corpus)},ClientPhase::{phase},{int(full)})!={expected})return 1;'
+        source+='return 0;}'
+        with tempfile.TemporaryDirectory() as directory:
+            folder=pathlib.Path(directory);cpp=folder/'watchdog.cpp';binary=folder/'watchdog'
+            cpp.write_text(source)
+            subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror',str(cpp),'-o',str(binary)],check=True)
+            self.assertEqual(subprocess.run([str(binary)]).returncode,0)
         self.assertIn('M4_GEN APP_COMPLETE profile=corpus watchdog_joined=true numerical=pending finalization=pending inference=false',text)
         self.assertIn('#if PS5HIP_LLM_FULL_CORPUS && PS5HIP_LLM_FULL_GENERATION',text)
 

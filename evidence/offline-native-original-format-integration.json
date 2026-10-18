@@ -1,0 +1,112 @@
+{
+  "status": "PASS",
+  "classification": "offline-native-original-format-integration",
+  "tests": 212,
+  "suites": [
+    {
+      "test": "native_full_original_loader_test.py",
+      "count": 2,
+      "log": ".local/original-format-rehearsal/native-main-native_full_original_loader_test.py.log",
+      "sha256": "eb9d213c54911a4a81bfd096d6748e629427777e3f0b56ae4fe38b88fb39a978"
+    },
+    {
+      "test": "native_original_title_test.py",
+      "count": 4,
+      "log": ".local/original-format-rehearsal/native-main-native_original_title_test.py.log",
+      "sha256": "1e10ec9f32a1102ce8ba89c824811885a46bd28cea6a192aa4ab9f717f23ce91"
+    },
+    {
+      "test": "llm_original_native_audit_test.py",
+      "count": 4,
+      "log": ".local/original-format-rehearsal/native-main-llm_original_native_audit_test.py.log",
+      "sha256": "bf7dcac0b79efbc45b48183e4fb256198febe14d06570821cd04d8f13aca97c8"
+    },
+    {
+      "test": "llm_client_native_audit_test.py",
+      "count": 45,
+      "log": ".local/original-format-rehearsal/native-main-llm_client_native_audit_test.py.log",
+      "sha256": "60913d732d4a207ee97f11b48a49ba83b51a9279f5409281b5cb2cfb6d422dff"
+    },
+    {
+      "test": "source_original_model_test.py",
+      "count": 13,
+      "log": ".local/original-format-rehearsal/native-main-source_original_model_test.py.log",
+      "sha256": "ae81c70ab177bb40a5a057b03665433e6485c78656491abe8b44b78cdb8a283e"
+    },
+    {
+      "test": "source_model_full_freeze_test.py",
+      "count": 33,
+      "log": ".local/original-format-rehearsal/native-main-source_model_full_freeze_test.py.log",
+      "sha256": "de9a210e170114a72c979c9d0730d3b32b3ceb54dd457389e7ee6050c1b12407"
+    },
+    {
+      "test": "frozen_full_admission_test.py",
+      "count": 19,
+      "log": ".local/original-format-rehearsal/native-main-frozen_full_admission_test.py.log",
+      "sha256": "637456f41a17e6d0cbc5127d42bed54c1b4bca81643e208d96178a6b999843d1"
+    },
+    {
+      "test": "source_corpus_console_test.py",
+      "count": 12,
+      "log": ".local/original-format-rehearsal/native-main-source_corpus_console_test.py.log",
+      "sha256": "1eb7464fdb886702af5169376662820cc271b628719b2bad037fa9eb42b1b486"
+    },
+    {
+      "test": "native_full_title_test.py",
+      "count": 7,
+      "log": ".local/original-format-rehearsal/native-main-native_full_title_test.py.log",
+      "sha256": "c2a95b380e9f0711d540f02eb83bdc37078718fa2f7306be324326230666886a"
+    },
+    {
+      "test": "source_external_model_test.py",
+      "count": 9,
+      "log": ".local/original-format-rehearsal/native-main-source_external_model_test.py.log",
+      "sha256": "44a3ff721c429f064247ef2cc68e6e10fc663cdaf149fc798c3577d7c4accff9"
+    },
+    {
+      "test": "source_model_phase_budget_test.py",
+      "count": 4,
+      "log": ".local/original-format-rehearsal/native-main-source_model_phase_budget_test.py.log",
+      "sha256": "e73c3805f810fdcf3d0167ced7085c48306c9482a952ffb710551d230cdb3e51"
+    },
+    {
+      "test": "source_model_auth_test.py",
+      "count": 27,
+      "log": ".local/original-format-rehearsal/native-main-source_model_auth_test.py.log",
+      "sha256": "9e220a85cc6ca2098e43a6b10ec717c727343035ef034255a67c56fc5ae8dc0e"
+    },
+    {
+      "test": "source_model_execute_test.py",
+      "count": 7,
+      "log": ".local/original-format-rehearsal/native-main-source_model_execute_test.py.log",
+      "sha256": "2bd17b02a30520a51d0c9de71fe88027b46658d46f691e43763ec2568824eb82"
+    },
+    {
+      "test": "source_model_storage_edges_test.py",
+      "count": 4,
+      "log": ".local/original-format-rehearsal/native-main-source_model_storage_edges_test.py.log",
+      "sha256": "af55efa5c3ceb122f8184c380aa405d3f3b4e7e0c1e892773d0eff31d0645c8a"
+    },
+    {
+      "test": "llm_prefix_make_test.py",
+      "count": 22,
+      "log": ".local/original-format-rehearsal/native-main-llm_prefix_make_test.py.log",
+      "sha256": "1ab059abe4a02163465f9758f53c7de7aaff730ebd6f3587f266ceb2bb9a6aee"
+    }
+  ],
+  "contract": "Six locked external files under /data/hip/models; original-model.json in package, no embedded model",
+  "profiles": [
+    "original_safetensors: short generation",
+    "gguf: existing smoke/generation/corpus"
+  ],
+  "watchdog_seconds": 600,
+  "observation_seconds": 630,
+  "phase_budget_seconds": 2400,
+  "review": "No blocking cross-component defect found in independent read-only review",
+  "native_executed": false,
+  "linked_original_image_audited": false,
+  "limits": [
+    "Actual linked original-format package and native execution remain unqualified.",
+    "A legacy title test initially truncated the new nested preprocessor branch; fixed and rerun against integrated source."
+  ]
+}

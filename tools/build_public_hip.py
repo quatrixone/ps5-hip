@@ -274,12 +274,14 @@ def compile_bound_unit(output, path, obj, flags, label, source_root=None):
             "headers": headers}
 
 
-def compile_units(output, source, fixture="bootstrap", client_phase="vocab", full_profile="smoke"):
+def compile_units(output, source, fixture="bootstrap", client_phase="vocab", full_profile="smoke", model_format="gguf"):
     jobs = build_jobs()
     if client_phase not in ("vocab", "model-gate", "model-prefix", "model-layer", "model-full") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
     if full_profile not in ("smoke", "generation", "corpus") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
         raise ValueError("invalid full compile profile")
+    if model_format not in ('gguf','original_safetensors') or (model_format!='gguf' and (fixture!='llm_client' or client_phase!='model-full' or full_profile!='generation')):
+        raise ValueError('original format requires full short generation')
     object_dir = output / "objects"
     object_dir.mkdir(exist_ok=True)
     units = [source / name for name in SOURCE_UNITS]
@@ -314,6 +316,8 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
                     extra.append("-DPS5HIP_LLM_FULL_GENERATION=1")
                 elif full_profile == "corpus":
                     extra.append("-DPS5HIP_LLM_FULL_CORPUS=1")
+            if model_format=='original_safetensors':
+                extra += ['-DPS5HIP_LLM_ORIGINAL_MODEL=1','-DPS5HIP_NATIVE_ORIGINAL_MODEL=1','-I'+str(DEPS/'sources/llama-client/vendor')]
             client = DEPS / "sources/llama-client"
             extra += ["-I" + str(p) for p in (ROOT / "ports/ggml", client / "include",
                       client / "ggml/include", client / "ggml/src")]
@@ -699,7 +703,9 @@ def validate_client_assets(assets):
     phase = Path(assets["client-phase.txt"]).read_bytes() if "client-phase.txt" in assets else b""
     expected = {"vocab.gguf", "client-phase.txt"}
     if phase in (b"model-gate\n", b"model-prefix\n", b"model-layer\n", b"model-full\n"):
-        expected.add("model-path.txt")
+        original='original-model.json' in assets
+        if original and phase!=b'model-full\n':raise ValueError('original format requires model-full')
+        expected.add('original-model.json' if original else "model-path.txt")
         if phase == b"model-prefix\n":
             expected.update("model-prefix/" + name + ".hsaco" for name in ("getrows", "normalized", "weighted", "q8", "q4"))
         if phase in (b"model-layer\n", b"model-full\n"):
@@ -709,6 +715,11 @@ def validate_client_assets(assets):
     if set(assets) != expected or any(Path(p).is_symlink() or not Path(p).is_file() for p in assets.values()):
         raise ValueError("invalid phase-specific client assets")
     if phase in (b"model-gate\n", b"model-prefix\n", b"model-layer\n", b"model-full\n"):
+        if 'original-model.json' in assets:
+            from external_original_model import encode
+            data=Path(assets['original-model.json']).read_bytes()
+            if encode(json.loads(data))!=data:raise ValueError('original contract canonical bytes')
+            return
         from external_model import encode_model_path
         data = Path(assets["model-path.txt"]).read_bytes()
         if encode_model_path(data.decode("ascii")) != data:

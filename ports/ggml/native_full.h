@@ -5,9 +5,14 @@
 #include <string>
 #include <time.h>
 #include "generation.h"
+#ifdef PS5HIP_NATIVE_ORIGINAL_MODEL
+#include "tinyllama_source_metadata.h"
+#include "tinyllama_tensor_callback.h"
+#endif
 
 namespace m0 {
 enum class NativeFullProfile { sequence, smoke, generation, corpus };
+enum class NativeFullModelSource { gguf, original_safetensors };
 struct NativeGenerationCase {const char* id;const char* prompt;};
 inline constexpr NativeGenerationCase native_generation_cases[]={
 #define PS5HIP_GENERATION_CASE(id,prompt) {id,prompt},
@@ -95,8 +100,12 @@ inline NativeFullGenerationData run_full_generation(llama_model* model,llama_con
 }
 inline NativeFullResult run_native_full(const char* model_path,const std::array<const char*,6>& modules,
  PrefixWrite writer,void* writer_state,PrefixLogSync log_sync,void (*memory_snapshot)(const char*)=nullptr,
- NativeFullProfile profile=NativeFullProfile::sequence){
+ NativeFullProfile profile=NativeFullProfile::sequence,NativeFullModelSource model_source=NativeFullModelSource::gguf){
  require(model_path&&writer&&log_sync&&(profile==NativeFullProfile::sequence||profile==NativeFullProfile::smoke||profile==NativeFullProfile::generation||profile==NativeFullProfile::corpus));
+ require(model_source==NativeFullModelSource::gguf||model_source==NativeFullModelSource::original_safetensors);
+#ifndef PS5HIP_NATIVE_ORIGINAL_MODEL
+ require(model_source==NativeFullModelSource::gguf);
+#endif
  const bool smoke=profile==NativeFullProfile::smoke,generation=profile==NativeFullProfile::generation||profile==NativeFullProfile::corpus,corpus=profile==NativeFullProfile::corpus;
  NativeFullClock clock;uint64_t phase_begin=generation?clock.now():0;
  const unsigned requests=smoke?3:514,raw_files=smoke?72:168;
@@ -110,7 +119,29 @@ inline NativeFullResult run_native_full(const char* model_path,const std::array<
  auto mp=llama_model_default_params();mp.n_gpu_layers=99;mp.use_extra_bufts=false;mp.check_tensors=true;mp.load_mode=LLAMA_LOAD_MODE_NONE;mp.lazy_mode=LLAMA_LAZY_MODE_OFF;
  ggml_backend_dev_t devices[]={device_handle(),nullptr};mp.devices=devices;
  llama_model_tensor_buft_override overrides[]={{"^token_embd\\.weight$",ggml_backend_dev_buffer_type(devices[0])},{nullptr,nullptr}};mp.tensor_buft_overrides=overrides;
- std::unique_ptr<llama_model,decltype(&llama_model_free)> model(llama_model_load_from_file(model_path,mp),llama_model_free);require(bool(model)&&!logs.unexpected.load());
+ // Keep source descriptors and callback state alive through model destruction.
+#ifdef PS5HIP_NATIVE_ORIGINAL_MODEL
+ direct_tiny::Metadata original_metadata(nullptr,gguf_free);
+ std::unique_ptr<ps5hip::SafetensorsReader> original_reader;
+ std::unique_ptr<ps5hip::TinyLlamaTensorCallback> original_callback;
+#endif
+ std::unique_ptr<llama_model,decltype(&llama_model_free)> model(nullptr,llama_model_free);
+#ifdef PS5HIP_NATIVE_ORIGINAL_MODEL
+ if(model_source==NativeFullModelSource::original_safetensors){
+  original_metadata=direct_tiny::construct(model_path);
+  const auto config=direct_tiny::json(direct_tiny::read(std::filesystem::path(model_path)/"config.json",65536));
+  original_reader=std::make_unique<ps5hip::SafetensorsReader>((std::filesystem::path(model_path)/"model.safetensors").string());
+  original_callback=std::make_unique<ps5hip::TinyLlamaTensorCallback>(*original_reader,config);
+  original_callback->add_descriptors(original_metadata.get());
+  model.reset(llama_model_init_from_user(original_metadata.get(),ps5hip::TinyLlamaTensorCallback::callback,original_callback.get(),mp));
+  require(bool(model)&&original_callback->complete());
+ }else{
+#endif
+  model.reset(llama_model_load_from_file(model_path,mp));
+#ifdef PS5HIP_NATIVE_ORIGINAL_MODEL
+ }
+#endif
+ require(bool(model)&&!logs.unexpected.load());
  if(generation){clock.report("load",phase_begin);phase_begin=clock.now();}
  std::puts("M3_FULL PHASE load_complete");if(memory_snapshot)memory_snapshot("after_load");
  NativeFullSink sink{writer,writer_state,log_sync};auto cp=llama_context_default_params();cp.n_ctx=512;cp.n_batch=cp.n_ubatch=cp.n_seq_max=1;cp.n_threads=cp.n_threads_batch=4;

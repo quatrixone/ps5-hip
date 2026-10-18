@@ -26,6 +26,16 @@ independent test oracle. See [ORIGINAL_FORMAT_BUILD.md](docs/ORIGINAL_FORMAT_BUI
 and `evidence/offline-original-format-host-prerequisites.json`. PyTorch
 `.bin/.pt/.pth`, other architectures, training and native original loading remain open.
 
+## Native original-format integration: offline checks pass
+
+The native title, builder, image auditor, freezer and controller now share the
+six-file original-safetensors contract. Make exposes explicit model format
+selection; model files stay external under `/data/hip/models`. Focused tests and
+independent integration review pass. See
+`evidence/offline-native-original-format-integration.json`. The next gate is a
+fresh linked native package and its full image audit, followed by console review.
+No native original-format execution is claimed.
+
 ## Current: corpus deployment interrupted before launch
 
 Candidate `results/source-public-llm-generation-corpus-console-v2` froze and

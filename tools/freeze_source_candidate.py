@@ -60,7 +60,7 @@ def validate_client_units(original, receipt):
     if model_phase and (ROOT/units[78]['source']).resolve()!=(ROOT/'ports/ggml/native_host_allocator.cpp').resolve():
         raise ValueError('missing native model host allocator')
     if model_phase:
-        path=ROOT/'tools/external_model.py'
+        path=ROOT/('tools/external_original_model.py' if 'external_original_model' in receipt else 'tools/external_model.py')
         if inputs.get(str(path))!=digest(path):raise ValueError('external model contract input omitted or changed')
         for name in ('ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h','tests/llm_native_host_allocator_test.py','src/native_memory.cpp','include/ps5hip/native_memory.h'):
             path=ROOT/name
@@ -495,7 +495,7 @@ def main():
         baseline_transfer={'bytes':args.baseline_image_bytes,'sha256':args.baseline_image_sha256,'deadline_seconds':args.transfer_seconds}
         if args.baseline_model_receipt:
             baseline_transfer.update(receipt=str(args.baseline_model_receipt.resolve()),receipt_sha256=digest(args.baseline_model_receipt))
-        model_contract({'fixture':fixture,'llm_client':llm_client,'external_model':receipt['external_model'],'model_transfer':model_transfer,'baseline_transfer':baseline_transfer,'baseline_image_sha256':args.baseline_image_sha256,'baseline_log_fixture':args.baseline_log_fixture})
+        model_contract({'fixture':fixture,'llm_client':llm_client,**{k:receipt[k] for k in ('external_model','external_original_model') if k in receipt},'model_transfer':model_transfer,'baseline_transfer':baseline_transfer,'baseline_image_sha256':args.baseline_image_sha256,'baseline_log_fixture':args.baseline_log_fixture})
     output.mkdir(parents=True, exist_ok=False)
     shutil.copytree(args.build / 'package', output / 'package')
     shutil.copyfile(receipt_path, output / 'build-receipt.json')
@@ -597,7 +597,7 @@ def main():
     if weighted_qkv is not None:
         manifest['weighted_qkv']=weighted_qkv
     if model_phase:
-        manifest.update(external_model=receipt['external_model'],model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
+        manifest.update(**{k:receipt[k] for k in ('external_model','external_original_model') if k in receipt},model_transfer=model_transfer,baseline_transfer=baseline_transfer,deadline_seconds=150,control_phase_seconds=1800,
             hypothesis='Source-authenticated full model loads without mmap/lazy loading; two same-position actual llama_process calls are rejected by mandatory wrapped scheduler before CPU/GPU computation, with measured graph reuse and zero final allocation/queue counters. This is rejection readiness, not inference.')
         if model_prefix is not None:
             manifest['model_full' if args.client_phase=='model-full' else 'model_layer' if args.client_phase=='model-layer' else 'model_prefix']=model_prefix
@@ -611,6 +611,9 @@ def main():
                 manifest['hypothesis']='Full TinyLlama five-prompt greedy corpus: sixteen generated tokens per prompt over two reset rounds each, 272 committed decodes through all 22 layers and full logits, one resident model/backend. Require 6528 CPU-compared float outputs and eleven exact metadata files, actual feedback, no early EOS, bounded timing and clean native ownership; long context remains separate.'
             if model_prefix['profile']=='generation':
                 manifest['hypothesis']='Full TinyLlama greedy generation: actual tokenizer and live-logit feedback, 16 committed decodes over two reset rounds, all 22 layers and full logits through HIP. Require 384 CPU-compared float outputs, exact token metadata, bounded timings and balanced native cleanup; wider prompts and long context remain separate.'
+        if 'external_original_model' in receipt:
+            manifest.update(deadline_seconds=630,control_phase_seconds=2400)
+            manifest['hypothesis']='Original safetensors six-file runtime load and short full HIP generation, independently compared against unchanged GGUF oracle; 600-second app watchdog is a bounded experiment allowance, not a performance claim.'
         if not args.frozen_artifact_admission:
             _validate_model_candidate(output,manifest,prefix_evidence)
     if args.frozen_artifact_admission:

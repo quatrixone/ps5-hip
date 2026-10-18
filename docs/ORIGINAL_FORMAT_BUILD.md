@@ -89,3 +89,20 @@ profile with original SentencePiece/HF sidecars, prepared into F32 norms and
 Q4_0 matrices through the verified F16 roundtrip. A bounded sharded index reader
 exists independently; full sharded callback integration, generic model variants,
 PyTorch `.bin/.pt/.pth` files and training are not implemented by these targets.
+
+## Native experimental package
+
+The existing `make llm-native-app` now accepts
+`LLM_NATIVE_APP_MODEL_FORMAT=original_safetensors` with
+`LLM_NATIVE_APP_PHASE=model-full LLM_FULL_PROFILE=generation`. It defaults the
+remote directory to `/data/hip/models/tinyllama-source`; override
+`LLM_NATIVE_APP_MODEL_REMOTE_PATH` to choose another descendant directory.
+Supply the normal fresh native-client, vocabulary, CPU and full-fixture build
+paths. The GGUF input remains an independent numerical oracle; the package
+contains only original-model.json and code/assets, not model weights.
+
+The controller accepts `--model-directory` for explicit missing-file provisioning.
+It authenticates existing files first and never overwrites a mismatch. Original
+mode uses a600-second diagnostic watchdog and630-second observation limit. These
+are bounded test allowances, not PS5 performance estimates. A real linked-image
+audit and hardware validation are still required before native support is claimed.

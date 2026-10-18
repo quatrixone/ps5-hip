@@ -166,4 +166,31 @@ class FullExecutionMake(unittest.TestCase):
   self.assertIn('--reference "'+folder+'" --output "results/selected-corpus-numeric"',text)
   self.assertNotIn('source_console.py',text);self.assertNotIn('build_llm_native_app.py',text)
 
+class OriginalNativeMake(unittest.TestCase):
+ run_make=PrefixMake.run_make
+ def test_original_native_routes_directory_and_tests(self):
+  args=('LLM_NATIVE_APP_PHASE=model-full','LLM_FULL_PROFILE=generation','LLM_NATIVE_APP_MODEL_FORMAT=original_safetensors')
+  text=self.run_make('llm-native-app',*args)
+  line=next(x for x in text.splitlines() if 'tools/build_llm_native_app.py' in x)
+  self.assertIn('--model-format "original_safetensors"',line)
+  self.assertIn('--model-remote-path "/data/hip/models/tinyllama-source"',line)
+  self.assertIn('--full-fixture "results/llm-generation-assets"',line)
+  for name in ('native_full_original_loader_test.py','native_original_title_test.py','llm_original_native_audit_test.py'):
+   self.assertLess(text.index('tests/'+name),text.index('tools/build_llm_native_app.py'))
+  custom=self.run_make('llm-native-app',*args,'LLM_NATIVE_APP_MODEL_REMOTE_PATH=/data/hip/models/custom-original','LLM_NATIVE_APP_MODEL_SOURCE=models/selected-source')
+  self.assertIn('--model-remote-path "/data/hip/models/custom-original"',custom)
+  self.assertIn('--model-source "models/selected-source"',custom)
+ def test_gguf_default_argv_preserved(self):
+  text=self.run_make('llm-native-app','LLM_NATIVE_APP_PHASE=model-full','LLM_FULL_PROFILE=generation')
+  line=next(x for x in text.splitlines() if 'tools/build_llm_native_app.py' in x)
+  self.assertNotIn('--model-format',line)
+  self.assertIn('--model-remote-path "/data/hip/models/tinyllama-q4_0.gguf"',line)
+  self.assertNotIn('tests/native_original_title_test.py',text)
+ def test_original_rejects_incompatible_scope_before_recipe(self):
+  for phase,profile,fmt in [('vocab','generation','original_safetensors'),('model-gate','generation','original_safetensors'),('model-full','smoke','original_safetensors'),('model-full','corpus','original_safetensors'),('model-full','generation','safetensors'),('model-full','generation','gguf original_safetensors'),('model-full','generation','')]:
+   result=subprocess.run(['make','--no-print-directory','-n','-f',str(MAKEFILE),'llm-native-app','LLM_NATIVE_APP_PHASE='+phase,'LLM_FULL_PROFILE='+profile,'LLM_NATIVE_APP_MODEL_FORMAT='+fmt],cwd=ROOT,capture_output=True,text=True)
+   self.assertNotEqual(result.returncode,0)
+   self.assertNotIn('tools/build_llm_native_app.py',result.stdout)
+   self.assertIn('original_safetensors',result.stderr)
+
 if __name__=='__main__':unittest.main()

@@ -79,8 +79,12 @@ def validate(candidate, manifest, root):
     require(receipt.get('status')=='PASS' and receipt.get('classification')=='source-only-model-full-native-client-app' and receipt.get('phase')=='model-full' and receipt.get('fixture')=='llm_client','build receipt semantics')
     require(bound['full']['profile']==selected,'bound full profile')
     require(receipt.get('native_executed') is False and receipt.get('gpu_executed') is False and receipt['llm_client']==bound,'build receipt binding')
-    require(receipt['external_model']==manifest['external_model'] and receipt['package_sha256']==manifest['model_transfer']['sha256'] and receipt['package_bytes']==manifest['model_transfer']['bytes'] and receipt['package_files']==manifest['package_files'],'package/model contract')
+    from source_model_freeze import runtime_model
+    runtime_key,runtime=runtime_model(manifest)
+    original=runtime_key=='external_original_model'
+    require(runtime_model(receipt)==(runtime_key,runtime) and receipt['package_sha256']==manifest['model_transfer']['sha256'] and receipt['package_bytes']==manifest['model_transfer']['bytes'] and receipt['package_files']==manifest['package_files'],'package/model contract')
     require(audit.get('status')=='PASS' and audit.get('classification')=='offline-public-hip-llm-client-native-image-audit' and audit.get('phase')=='model-full' and audit.get('full_profile','smoke')==selected,'audit semantics')
+    if original:require(audit.get('original_model_call_chain_audited') is True and audit.get('model_format')=='original_safetensors','original model call chain')
     for field in ('wrapper_retained','wrapper_no_bypass','actual_client_call_chain_audited','actual_full_call_chain_audited'):
         require(audit.get(field) is True,'audit call chain')
     if selected!='smoke':require(audit.get('actual_generation_call_chain_audited') is True,'generation call chain')
@@ -91,13 +95,17 @@ def validate(candidate, manifest, root):
     app=root/manifest['app'];package=root/manifest['package'];require(app.resolve()==(candidate/'package/app').resolve() and package.resolve()==(candidate/'package/PPSA99014.ffpkg').resolve(),'package location')
     require(digest(package)==receipt['package_sha256'] and package.stat().st_size==receipt['package_bytes'],'package identity')
     require({p.relative_to(app).as_posix():digest(p) for p in app.rglob('*') if p.is_file()}==receipt['package_files'],'staged package')
-    require((app/'client-phase.txt').read_text()=='model-full\n' and (app/'results-dir.txt').read_text()==manifest['results_dir'] and (app/'model-path.txt').read_text().strip()==manifest['external_model']['path'],'package configuration')
+    require((app/'client-phase.txt').read_text()=='model-full\n' and (app/'results-dir.txt').read_text()==manifest['results_dir'],'package configuration')
+    if original:
+        from external_original_model import encode
+        require((app/'original-model.json').read_bytes()==encode(runtime) and 'model-path.txt' not in receipt['package_files'] and 'model.gguf' not in receipt['package_files'],'original runtime configuration')
+    else:require((app/'model-path.txt').read_text().strip()==runtime['path'] and 'original-model.json' not in receipt['package_files'],'GGUF runtime configuration')
     reference=root/manifest['model_full']['reference'];require(reference.resolve()==(candidate/'full-reference').resolve(),'reference location')
     require(digest(reference/'receipt.json')==manifest['model_full']['reference_receipt_sha256'],'reference receipt identity')
     oracle=load((reference/'receipt.json').read_bytes());require(oracle.get('status')=='PASS' and oracle.get('gpu_executed') is False,'oracle semantics')
     require(oracle.get('classification')==('successful-full-model-cpu-boundary-reference' if selected=='smoke' else 'successful-greedy-generation-cpu-reference'),'oracle classification')
     require(oracle.get('requests')==(514 if selected=='smoke' else PROFILES[selected][0]) and oracle.get('raw_files')==(168 if selected=='smoke' else PROFILES[selected][1]),'oracle counts')
-    require(oracle['model']['bytes']==manifest['external_model']['bytes'] and oracle['model']['sha256']==manifest['external_model']['sha256'],'oracle model')
+    require(oracle['model']['bytes']==bound['model']['bytes'] and oracle['model']['sha256']==bound['model']['sha256'],'oracle model')
     require(oracle.get('profile','short')==('corpus' if selected=='corpus' else 'short') if selected!='smoke' else 'profile' not in oracle,'oracle profile')
     from verify_llm_full_readbacks import corpus_files,generation_files
     from build_llm_full_numeric_test import FILES
@@ -110,7 +118,7 @@ def validate(candidate, manifest, root):
     from source_public_hip_log import package_limit
     require(manifest['baseline_transfer']['bytes']<=package_limit(manifest.get('baseline_log_fixture','bootstrap')),'new artifact path does not support historical embedded baseline')
     model_contract(manifest)
-    require(manifest['deadline_seconds']==(1830 if selected=='corpus' else 150) and manifest['control_phase_seconds']==(4200 if selected=='corpus' else 1800),'phase budgets')
+    require(manifest['deadline_seconds']==(630 if original else 1830 if selected=='corpus' else 150) and manifest['control_phase_seconds']==(2400 if original else 4200 if selected=='corpus' else 1800),'phase budgets')
     require(manifest.get('raw_capture_seconds')==(600 if selected=='corpus' else None),'capture budget')
     require(att['runtime']==runtime_identities(root),'runtime changed during admission')
     require(digest(path)==manifest['artifact_admission']['sha256'],'attestation changed during admission')

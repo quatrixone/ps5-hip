@@ -91,8 +91,9 @@ class PhaseFTP:
         return guarded
 
 class Control:
-    def __init__(self, candidate, phase, model_file=None):
+    def __init__(self, candidate, phase, model_file=None, model_directory=None):
         self.model_file=model_file
+        self.model_directory=model_directory
         self.candidate, self.phase = candidate, phase
         manifest_bytes = (candidate / 'manifest.json').read_bytes()
         self.manifest_sha = sha(manifest_bytes)
@@ -124,7 +125,7 @@ class Control:
                     'deployment receipt has not been independently reviewed')
         if self.prefix_phase():self.preload_prefix_validators()
         self.verify()
-        require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() and 'external_model' not in self.manifest else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
+        require((ROOT/self.manifest['package']).stat().st_size <= (MODEL_PACKAGE_LIMIT if self.model_phase() and 'external_model' not in self.manifest and 'external_original_model' not in self.manifest else package_limit(self.fixture)), 'candidate package size exceeds fixture bound')
         if self.fixture == 'llm_client':
             self.authenticate_llm_client()
         if self.fixture == 'rmsnorm':
@@ -196,7 +197,7 @@ class Control:
 
     def phase_remaining(self, requested=1800):
         if not self.model_phase(): return requested
-        if not hasattr(self, 'phase_deadline'): self.phase_deadline = time.monotonic() + (4200 if self.corpus_phase() else 1800)
+        if not hasattr(self, 'phase_deadline'): self.phase_deadline = time.monotonic() + (2400 if self.original_model_phase() else 4200 if self.corpus_phase() else 1800)
         remaining = self.phase_deadline - time.monotonic()
         require(remaining > 0, 'whole model phase deadline exhausted')
         return min(requested, remaining)
@@ -559,7 +560,62 @@ class Control:
             require(found[0][0].startswith('-'), 'external model must be a regular file')
         return bool(found)
 
+    def original_model_phase(self):
+        return 'external_original_model' in self.manifest
+
+    def original_runtime(self):
+        from source_model_freeze import runtime_model
+        key,model=runtime_model(self.manifest)
+        require(key=='external_original_model','original runtime required')
+        require(getattr(self,'model_file',None) is None,'original runtime requires --model-directory, not --model-file')
+        return model
+
+    def verify_original_model(self):
+        model=self.original_runtime()
+        self.ensure_directory(model['directory'], 'model', create=False)
+        for name,item in model['files'].items():
+            path=model['directory']+'/'+name
+            require(self.external_model_entry(path),'original model file missing: '+name)
+            self.model_readback(path,item['bytes'],item['sha256'],self.record.setdefault('external_original_model_reads',[]),1800)
+
+    def provision_original_model(self):
+        require(self.phase=='deploy','original model provisioning is deploy-only')
+        model=self.original_runtime()
+        self.ensure_directory(model['directory'],'model')
+        evidence=self.record['external_original_model']={**model,'complete':False,'entries':{}}
+        source=getattr(self,'model_directory',None)
+        if source is not None:
+            source=Path(source)
+            require(source.is_absolute() and source.is_dir() and not any(p.is_symlink() for p in (source,*source.parents)),'unsafe original source directory')
+        # Existing entries must all authenticate before uploading any missing file.
+        missing=[]
+        for name,item in model['files'].items():
+            remote=model['directory']+'/'+name
+            if self.external_model_entry(remote):
+                self.model_readback(remote,item['bytes'],item['sha256'],self.record.setdefault('external_original_model_reads',[]),1800)
+                evidence['entries'][name]={'action':'reuse'}
+            else:missing.append(name)
+        require(not missing or source is not None,'missing originals require explicit --model-directory')
+        for name in missing:
+            item=model['files'][name];local=source/name
+            require(local.is_file() and not local.is_symlink(),'unsafe original source file')
+            local_identity(local,item['bytes'],item['sha256'])
+        for name in missing:
+            item=model['files'][name];remote=model['directory']+'/'+name
+            temporary=model['directory']+'/.original-'+sha(self.token.encode())[:32]+'-'+name+'.upload'
+            require(not self.external_model_entry(temporary),'original staging path already exists')
+            evidence['entries'][name]={'action':'upload','temporary':temporary,'promoted':False}
+            self.model_upload(source/name,temporary,item['bytes'],item['sha256'],self.record.setdefault('external_original_model_transfers',[]),1800)
+            self.idle();require(not self.external_model_entry(remote),'original file appeared before promotion')
+            self.phase_remaining();self.ftp.rename(temporary,remote);self.phase_remaining()
+            evidence['entries'][name]['promoted']=True
+        self.verify_original_model()
+        evidence['complete']=True
+
     def verify_external_model(self):
+        if self.original_model_phase():
+            return self.verify_original_model()
+        require(getattr(self,'model_directory',None) is None,'GGUF runtime does not accept --model-directory')
         if 'external_model' not in self.manifest:
             return
         from external_model import validate_external_model
@@ -570,6 +626,9 @@ class Control:
                             self.record.setdefault('external_model_reads', []), 1800)
 
     def provision_external_model(self):
+        if self.original_model_phase():
+            return self.provision_original_model()
+        require(getattr(self,'model_directory',None) is None,'GGUF runtime does not accept --model-directory')
         if 'external_model' not in self.manifest:
             return
         require(self.phase == 'deploy', 'model provisioning is deploy-only')
@@ -855,8 +914,8 @@ class Control:
         validate_results_directory(directory)
         self.ensure_directory(directory, 'results')
 
-    def ensure_directory(self, directory, kind):
-        require(self.phase == 'deploy', 'directory creation is deploy-only')
+    def ensure_directory(self, directory, kind, create=True):
+        require(not create or self.phase == 'deploy', 'directory creation is deploy-only')
         parent = '/'
         for leaf in directory[1:].split('/'):
             path = parent.rstrip('/') + '/' + leaf
@@ -869,6 +928,7 @@ class Control:
             if found:
                 require(found[0][0].startswith('d'), 'results path is not a directory')
             else:
+                require(create, 'required directory missing')
                 self.ftp.mkd(path)
                 self.record.setdefault(kind + '_directories_created', []).append(path)
                 if path == directory:
@@ -1038,7 +1098,7 @@ class Control:
         self.record['idle_after_safety_close']=not self.cleanup_active();self.cleanup_history('after-safety-close')
 
     def observation_seconds(self):
-        return 1830 if self.corpus_phase() else 150 if self.model_phase() else 40
+        return 630 if self.original_model_phase() else 1830 if self.corpus_phase() else 150 if self.model_phase() else 40
 
     def check_application(self, raw):
         if self.corpus_phase():
@@ -1223,5 +1283,6 @@ if __name__ == '__main__':
     parser.add_argument('phase', choices=('deploy', 'execute'))
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--model-file', type=Path)
+    parser.add_argument('--model-directory', type=Path)
     args = parser.parse_args()
-    raise SystemExit(Control(args.candidate.resolve(), args.phase, model_file=args.model_file).run())
+    raise SystemExit(Control(args.candidate.resolve(), args.phase, model_file=args.model_file, model_directory=args.model_directory).run())
