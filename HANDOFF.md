@@ -8,6 +8,49 @@ For a new computer with GitHub source only, read `docs/SOURCE_ONLY_REBUILD.md`:
 `make` builds a new public HIP package from source on `main`. The historical
 installed image and D evidence cannot be recreated by Make.
 
+## Resume here: dense native package integration (2026-10-18)
+
+The dense app builder is integrated on main. Five dense tests and all 30 existing
+app-builder tests pass. It packages six authenticated modules, uses the existing
+149-object allocator-enabled link, and requires an explicit dense image-audit
+success. It does not package model weights, model configuration or vocabulary.
+See `evidence/offline-dense-app-builder.json`.
+
+**The dense app is not yet buildable end to end:** title, image auditor and frozen
+controller support remain unfinished. Do not interpret the new Make target as a
+validated package or relax its audit check to make it pass. The latest PS5 proof
+remains the GGUF 22-layer, full-logit, four-token/reset result; no new console run.
+
+Native helper milestone `5741e1d` is pushed and its supported sanitizer run passed.
+No build/test process remains running from the prerequisite check: both existing
+native-client and vocabulary closures completed PASS without rebuilding.
+
+Draft title/audit work is preserved in `docs/handoff/2026-10-18-dense-package/`
+with explicit status and integration instructions. It is not active build code.
+
+Next steps:
+1. Finish the dense title and image auditor together. Use a dedicated dense entry
+   boundary so the audit can distinguish its path from model-loading branches;
+   textual call ordering alone is insufficient to prove successful finalization.
+2. Run title/auditor and existing-phase regressions; build one native candidate
+   using the existing inputs below. Do not rebuild CPU libraries or fetch models.
+3. Complete freezer/controller admission, strict packed readback verification,
+   and isolated frozen runtime. Commit/freeze candidate before hardware use.
+4. Establish .40 service health and idle status under both shared locks; test
+   only PPSA99014, retain raw output, compare all 526 requests/11,084 records,
+   then push the hardware milestone if it passes. Availability is not established.
+
+Existing local inputs (rebuild instructions remain in docs/SOURCE_ONLY_REBUILD.md):
+- Native client: `build/llm-native-original-client-v1` (freshly authenticated).
+- Vocabulary/toolchain prerequisite: `results/llm-original-vocab-v1` (authenticated).
+- Prepared source: `build/llm-native-full-smoke-app-v1`; revalidate on reuse.
+- Dense assets: `results/llm-dense-assets-main-v1`.
+- CPU reference: `results/llm-dense-reference-main-v1`.
+- Helper results: `results/llm-native-dense-helper-main-v1`.
+- CPU libraries: `build/llm-original-format-cpu-v1`.
+Use fresh output paths, ccache and the supported Make targets. Preserve frozen
+original-format/corpus candidates, models, receipts and failed raw evidence.
+
 ## Native dense execution helper: host qualification passes
 
 The supported `llm-native-dense-layer-tests` run passed with ASan/UBSan:

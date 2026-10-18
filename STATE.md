@@ -3,6 +3,14 @@
 Updated: 2026-10-18, America/New_York. See `HANDOFF.md` for the exact
 resume point, branch map, and evidence identities.
 
+## Dense native app builder integrated; package pending
+
+The explicit dense builder passes five focused and 30 existing builder tests.
+Existing native-client/vocabulary inputs reauthenticate without rebuilding.
+Title/image-audit/controller integration is unfinished; the dense target cannot
+produce an accepted package yet. See HANDOFF.md for the exact resume point and
+`evidence/offline-dense-app-builder.json`. No new console execution is claimed.
+
 ## Native dense execution helper: host qualification passes
 
 The supported `llm-native-dense-layer-tests` run passed with ASan/UBSan:

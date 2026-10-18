@@ -24,6 +24,10 @@ def validate_full_profile(info,model):
  return info['profile']
 
 
+def validate_dense_audit(audit):
+ if audit.get('phase')!='dense-layer' or audit.get('actual_dense_call_chain_audited') is not True:raise ValueError('dense call chain not audited')
+
+
 def file_inputs(argv,cwd=None):
  """Existing explicit file operands, excluding compiler/converter output operands."""
  skipped={i+1 for i,a in enumerate(argv) if a in ('-o','--out','-MF')}
@@ -41,7 +45,7 @@ def command_file_inputs(output,label,argv,title,cwd=None):
 
 
 def write_phase(path,phase='vocab'):
- if phase not in ('vocab','model-gate','model-prefix','model-layer','model-full'):raise ValueError('invalid app phase')
+ if phase not in ('vocab','model-gate','model-prefix','model-layer','model-full','dense-layer'):raise ValueError('invalid app phase')
  Path(path).write_bytes((phase+'\n').encode())
 
 
@@ -107,13 +111,14 @@ def vocab_inputs(folder):
  return {'asset':str(asset),'receipt':str(receipt),'receipt_sha256':digest,'inputs':{**inputs,**{str(folder/n):h for n,h in artifacts.items()},str(receipt):digest}}
 
 
-def validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture=None,layer_fixture=None,full_fixture=None):
+def validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture=None,layer_fixture=None,full_fixture=None,dense_fixture=None):
+ if (phase=='dense-layer') != (dense_fixture is not None):raise ValueError('dense fixture does not match phase')
  if (phase=='model-full') != (full_fixture is not None):raise ValueError('full fixture does not match phase')
  if (phase=='model-layer') != (layer_fixture is not None):raise ValueError('layer fixture does not match phase')
  if (phase=='model-prefix') != (prefix_fixture is not None):raise ValueError('prefix fixture does not match phase')
- if phase not in ('vocab','model-gate','model-prefix','model-layer','model-full'):raise ValueError('invalid app phase')
+ if phase not in ('vocab','model-gate','model-prefix','model-layer','model-full','dense-layer'):raise ValueError('invalid app phase')
  supplied=(model is not None,model_source is not None,cpu_build is not None)
- if (phase=='vocab' and any(supplied)) or (phase in ('model-gate','model-prefix','model-layer','model-full') and not all(supplied)):raise ValueError('model prerequisites do not match phase')
+ if (phase in ('vocab','dense-layer') and any(supplied)) or (phase in ('model-gate','model-prefix','model-layer','model-full') and not all(supplied)):raise ValueError('model prerequisites do not match phase')
 
 
 def model_inputs(model,source_dir,cpu_build,*,authenticated_original_inputs=None):
@@ -218,10 +223,10 @@ def select_prepared_source(output, fresh, previous):
  return old
 
 
-def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None,layer_fixture=None,full_fixture=None,model_format="gguf"):
+def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=None,model_source=None,cpu_build=None,model_remote_path=DEFAULT_MODEL_PATH,prefix_fixture=None,prepared_source_build=None,layer_fixture=None,full_fixture=None,model_format="gguf",dense_fixture=None):
  if model_format not in ('gguf','original_safetensors') or (model_format!='gguf' and (phase!='model-full' or model_source is None)):
   raise ValueError('original format requires full model and original source directory')
- validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture,layer_fixture,full_fixture)
+ validate_phase_arguments(phase,model,model_source,cpu_build,prefix_fixture,layer_fixture,full_fixture,dense_fixture)
  output=Path(output).resolve()
  if output.exists() or not (output.is_relative_to(ROOT/'build') or output.is_relative_to(ROOT/'results')):raise ValueError('fresh build/results output required')
  b.validate_results_directory(results_dir)
@@ -272,10 +277,11 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   name=getattr(module,'__file__',None)
   if name and Path(name).is_file():bind(Path(name).resolve())
  required_sources=['tools/public_hip_llm_client_console_title.cpp','ports/ggml/ps5_backend.cpp','ports/ggml/ps5_backend.h','ports/ggml/model_gate.h','tools/audit_public_hip_llm_client_native.py']
- if phase in ('model-gate','model-prefix','model-layer','model-full'):
+ if phase in ('model-gate','model-prefix','model-layer','model-full','dense-layer'):
   required_sources+=['ports/ggml/native_host_allocator.cpp','ports/ggml/native_host_allocator.h',
    'tests/llm_native_host_allocator_test.py','tests/llm_native_scheduler_test.py',
    'src/native_memory.cpp','include/ps5hip/native_memory.h']
+ if phase=='dense-layer':required_sources += ['ports/ggml/native_dense_layer.h','ports/ggml/dense_layer_qualification.h','ports/ggml/dense_layer_fixture.h','ports/ggml/dense_layer_cases.def','ports/ggml/layer_qualification.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_dense_layer_assets.py','tests/native_dense_app_build_test.py']
  if phase=='model-prefix':required_sources += ['ports/ggml/native_prefix.h','ports/ggml/prefix_qualification.h','ports/ggml/model_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_prefix_assets.py']
  if phase=='model-layer':required_sources += ['ports/ggml/native_layer.h','ports/ggml/layer_qualification.h','ports/ggml/model_layer.h','ports/ggml/layer_dispatch.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','tools/public_hip_layer_assets.py']
  if phase=='model-full':required_sources += ['ports/ggml/extended_generation.h','ports/ggml/extended_generation_cases.def','ports/ggml/extended_title_output.h','ports/ggml/native_full.h','ports/ggml/full_qualification.h','ports/ggml/full_dispatch.h','ports/ggml/full_graph.h','ports/ggml/layer_dispatch.h','ports/ggml/model_layer.h','ports/ggml/native_prefix.h','ports/ggml/prefix_dispatch.h','ports/ggml/prefix_calls.h','ports/ggml/model_prefix.h','tools/public_hip_full_assets.py']
@@ -345,6 +351,10 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   full_info=full_inputs(full_fixture);merge_authenticated(full_info['inputs'])
   validate_full_profile(full_info,model_info)
   if model_format!='gguf' and full_info['profile']!='generation':raise ValueError('original format requires short generation')
+ dense_info=None
+ if phase=='dense-layer':
+  from public_hip_dense_layer_assets import dense_inputs
+  dense_info=dense_inputs(dense_fixture);merge_authenticated(dense_info['inputs'])
  output.mkdir(parents=True)
  original_run=b.run
  def recorded_run(out,label,argv,cwd=None):
@@ -427,18 +437,20 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   for unit in units:bind(output/unit['object'],unit['object_sha256'])
   flags=b.compiler_flags(public)+['-I'+str(upstream_client/n) for n in ('include','ggml/include','ggml/src')]+['-I'+str(ROOT/'ports/ggml')]
   backend=b.compile_bound_unit(output,ROOT/'ports/ggml/ps5_backend.cpp',output/'ps5_backend.o',flags,'compile-ps5-backend');merge(backend['headers']);bind(output/backend['object'],backend['object_sha256']);units.append(backend)
-  if phase in ('model-gate','model-prefix','model-layer','model-full'):
+  if phase in ('model-gate','model-prefix','model-layer','model-full','dense-layer'):
    # llama_context destruction references the upstream optimizer cleanup even without training.
    opt=b.compile_bound_unit(output,upstream_client/'ggml/src/ggml-opt.cpp',output/'ggml-opt.o',flags,'compile-ggml-opt');merge(opt['headers']);bind(output/opt['object'],opt['object_sha256']);units.append(opt)
    allocator=b.compile_bound_unit(output,ROOT/'ports/ggml/native_host_allocator.cpp',output/'native_host_allocator.o',flags,'compile-native-host-allocator');merge(allocator['headers']);bind(output/allocator['object'],allocator['object_sha256']);units.append(allocator)
   units.extend({'object':p,'object_sha256':inputs[p],'source':'authenticated-native-client'} for p in client['objects'])
-  if len(units)!=(149 if phase in ('model-gate','model-prefix','model-layer','model-full') else 147):raise ValueError('unexpected app object count')
-  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client',native_host_allocator=(phase in ('model-gate','model-prefix','model-layer','model-full')))
+  if len(units)!=(149 if phase in ('model-gate','model-prefix','model-layer','model-full','dense-layer') else 147):raise ValueError('unexpected app object count')
+  b.native_stubs(output);recheck();b.link_title(output,units,'llm_client',native_host_allocator=(phase in ('model-gate','model-prefix','model-layer','model-full','dense-layer')))
   bind(output/'title.elf');tool=b.native_tool(output);bind(tool);libc=b.clean_room_libc(output,tool);bind(libc)
   image,roundtrip=b.convert_title(output,tool,'llm_client')
   for name in ('eboot.elf','eboot.bin','extracted.elf'):bind(output/name)
   phase_file=output/'client-phase.txt';write_phase(phase_file,phase);bind(phase_file)
-  assets={'vocab.gguf':vocab['asset'],'client-phase.txt':phase_file}
+  assets={'client-phase.txt':phase_file}
+  if phase!='dense-layer':assets['vocab.gguf']=vocab['asset']
+  if dense_info:assets.update(dense_info['assets'])
   if external_original_model:
    from external_original_model import encode
    original_config=output/'original-model.json';original_config.write_bytes(encode(external_original_model));bind(original_config);assets['original-model.json']=original_config
@@ -454,10 +466,11 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   scratch_rows=[c for c in commands if c.get('temporary_package_inputs')]
   if [c['label'] for c in scratch_rows]!=['fsck','package-extract'] or any(len(c['temporary_package_inputs'])!=1 or next(iter(c['temporary_package_inputs'].values()))!=b.sha(package) for c in scratch_rows):raise ValueError('temporary package evidence differs from final package')
   audit=output/'llm-client-native-audit.json'
-  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full') else []),*(['--full-profile',full_info['profile']] if full_info else []),*(['--model-format',model_format] if model_format!='gguf' else [])])
+  recorded_run(output,'audit-client',[sys.executable,ROOT/'tools/audit_public_hip_llm_client_native.py','--raw',output/'title.elf','--converted',output/'eboot.elf','--extracted',output/'extracted.elf','--output',audit,*(['--phase',phase] if phase in ('model-gate','model-prefix','model-layer','model-full','dense-layer') else []),*(['--full-profile',full_info['profile']] if full_info else []),*(['--model-format',model_format] if model_format!='gguf' else [])])
   ar=json.loads(audit.read_text())
   if ar.get('status')!='PASS' or ar.get('classification')!='offline-public-hip-llm-client-native-image-audit' or ar.get('native_executed') is not False or ar.get('gpu_executed') is not False or ar.get('phase')!=phase or ar.get('actual_client_gate_executed') is not False:raise ValueError('native app audit not accepted')
   if phase in ('model-gate','model-prefix','model-layer','model-full') and ar.get('actual_client_call_chain_audited') is not True:raise ValueError('actual model call chain not audited')
+  if phase=='dense-layer':validate_dense_audit(ar)
   if phase=='model-prefix' and ar.get('actual_prefix_call_chain_audited') is not True:raise ValueError('actual prefix call chain not audited')
   if phase=='model-layer' and ar.get('actual_layer_call_chain_audited') is not True:raise ValueError('actual layer call chain not audited')
   if phase=='model-full' and (ar.get('actual_full_call_chain_audited') is not True or ar.get('full_profile')!=full_info['profile']):raise ValueError('actual full profile/call chain not audited')
@@ -472,15 +485,17 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
   if client_builder.app_objects(native_client)!=client or vocab_inputs(vocab_fixture)!=vocab or (model_info and model_inputs(model,model_source,cpu_build)!=model_info):raise ValueError('app prerequisite changed')
   if prefix_info and prefix_inputs(prefix_fixture)!=prefix_info:raise ValueError('prefix prerequisite changed')
   if layer_info and layer_inputs(layer_fixture)!=layer_info:raise ValueError('layer prerequisite changed')
+  if dense_info and dense_inputs(dense_fixture)!=dense_info:raise ValueError('dense prerequisite changed')
   if full_info and full_inputs(full_fixture)!=full_info:raise ValueError('full prerequisite changed')
   for name in ('clr','hip-headers','sdk','native-tools','ufs2tool','eden','lapy','ps5log'):source(name,specs[name],False)
   if reused_source:select_prepared_source(output,output/'source-public',public.parent)
   recheck()
   artifacts={str(p.relative_to(output)):b.sha(p) for p in output.rglob('*') if p.is_file()}
-  receipt={'schema':1,'status':'PASS','classification':'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-layer-native-client-app' if phase=='model-layer' else 'source-only-model-full-native-client-app' if phase=='model-full' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
+  receipt={'schema':1,'status':'PASS','classification':'source-only-synthetic-dense-layer-native-client-app' if phase=='dense-layer' else 'source-only-vocabulary-native-client-app' if phase=='vocab' else 'source-only-model-prefix-native-client-app' if phase=='model-prefix' else 'source-only-model-layer-native-client-app' if phase=='model-layer' else 'source-only-model-full-native-client-app' if phase=='model-full' else 'source-only-model-rejection-native-client-app','fixture':'llm_client','results_dir':results_dir,'phase':phase,'llm_client':{'phase':phase,'model':{k:model_info[k] for k in ('asset','source_dir','cpu_build','bytes','sha256','receipt','receipt_sha256')} if model_info else None,'vocabulary':{k:vocab[k] for k in ('receipt','receipt_sha256','asset')},'native_client':{k:client[k] for k in ('receipt','receipt_sha256')},'audit':{'path':str(audit),'sha256':b.sha(audit)}},'inputs':inputs,'symlinks':links,'tools':tools,'units':units,'host_units':host_units,'object_count':len(units),'commands':commands,'roundtrip':roundtrip,'package_files':files,'package_sha256':b.sha(package),'package_bytes':package.stat().st_size,'artifacts':artifacts,'native_executed':False,'gpu_executed':False,'limits':['Offline '+phase+' app; model-gate tests rejection only, not inference.','Installed SDK, elevation and packaging runtime bytes bound; historical prerequisite build provenance inherited from deps-build.','No console execution or model operation support claim.']}
   b.cache.verify(ROOT,cache_record)
   receipt['compiler_cache']=cache_record
   if reused_source:receipt['prepared_source_build']=str(public.parent)
+  if dense_info:receipt['llm_client']['dense']={k:dense_info[k] for k in ('receipt','receipt_sha256','reference')}
   if prefix_info:receipt['llm_client']['prefix']={k:prefix_info[k] for k in ('receipt','receipt_sha256','reference')}
   if layer_info:receipt['llm_client']['layer']={k:layer_info[k] for k in ('receipt','receipt_sha256','reference')}
   if full_info:receipt['llm_client']['full']={k:full_info[k] for k in ('receipt','receipt_sha256','reference','profile')}
@@ -496,12 +511,13 @@ def build(output,native_client,vocab_fixture,results_dir,phase='vocab',model=Non
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for name in ('output','native-client','vocab-fixture'):parser.add_argument('--'+name,type=Path,required=True)
- parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full'),default='vocab')
+ parser.add_argument('--results-dir',required=True);parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full','dense-layer'),default='vocab')
  for name in ('model','model-source','cpu-build'):parser.add_argument('--'+name,type=Path)
  parser.add_argument('--prefix-fixture',type=Path)
  parser.add_argument('--layer-fixture',type=Path)
  parser.add_argument('--full-fixture',type=Path)
+ parser.add_argument('--dense-fixture',type=Path)
  parser.add_argument('--prepared-source-build',type=Path,help='Reuse compiler paths only after fresh preparation proves identical source bytes')
  parser.add_argument('--model-remote-path',default=DEFAULT_MODEL_PATH)
  parser.add_argument('--model-format',choices=('gguf','original_safetensors'),default='gguf')
- a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build,a.layer_fixture,a.full_fixture,a.model_format)
+ a=parser.parse_args();build(a.output,a.native_client,a.vocab_fixture,a.results_dir,a.phase,a.model,a.model_source,a.cpu_build,a.model_remote_path,a.prefix_fixture,a.prepared_source_build,a.layer_fixture,a.full_fixture,a.model_format,a.dense_fixture)

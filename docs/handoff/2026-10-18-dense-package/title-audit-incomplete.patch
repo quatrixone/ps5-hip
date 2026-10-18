@@ -1,0 +1,395 @@
+--- a/tools/audit_public_hip_llm_client_native.py
++++ b/tools/audit_public_hip_llm_client_native.py
+@@ -533,7 +533,146 @@
+  # Complete indirect ownership/routing remains source and runtime evidence, as with the existing full backend.
+  return original_edges(full,r)
+ 
++# Dense-only normal-control-flow proof. Existing phase contracts are unchanged.
++def dense_dominates(body, before, after, fatal=('ps5hip_clr_gpu_fail','ps5hip_llm_fail')):
++ """Require each after instruction to be unreachable when before is removed.
++
++ Addresses come from extracted disassembly; unknown/indirect branches reject.
++ Calls may return or fail, so only explicit known fatal calls terminate a path.
++ This is normal CFG evidence, not exception or callback dataflow proof.
++ """
++ rows=list(re.finditer(r'^\s*([0-9a-f]+):\s+(\S+)([^\n]*)',body,re.M))
++ require(rows,'dense empty CFG')
++ addresses={int(r[1],16):i for i,r in enumerate(rows)}
++ require(len(addresses)==len(rows),'dense duplicate instruction address')
++ def instruction(offset):
++  hits=[i for i,r in enumerate(rows) if r.start()<=offset<r.end()]
++  require(len(hits)==1,'dense call position is not an instruction');return hits[0]
++ blocked={instruction(p) for p in before};goals={instruction(p) for p in after}
++ require(blocked and goals,'dense missing ordering calls')
++ fatal_nodes={instruction(p) for n in fatal for p in symbol_calls(body,n)}
++ edges={}
++ for i,r in enumerate(rows):
++  op,arg=r[2],r[3].strip();following=[i+1] if i+1<len(rows) else []
++  if op.startswith('ret') or op in ('ud2','int3') or i in fatal_nodes:edges[i]=[]
++  elif op.startswith('j') or op.startswith('loop'):
++   target=re.match(r'0x([0-9a-f]+)(?:\s|$)',arg)
++   require(target is not None and int(target[1],16) in addresses,'dense unresolved branch')
++   edges[i]=[addresses[int(target[1],16)]]+([] if op in ('jmp','jmpq') else following)
++  else:edges[i]=following
++ def reachable(omit):
++  todo=[0];seen=set()
++  while todo:
++   i=todo.pop()
++   if i in seen or i in omit:continue
++   seen.add(i);todo.extend(edges[i])
++  return seen
++ live=reachable(set());require(goals<=live and blocked<=live,'dense required call unreachable')
++ require(not goals.intersection(reachable(blocked)),'dense required call bypass')
++
++def dense_order(body,names):
++ positions=[]
++ for name in names:
++  found=symbol_calls(body,name);require(len(found)==1,'dense missing/repeated call: '+name);positions.append(found)
++ for before,after in zip(positions,positions[1:]):dense_dominates(body,before,after)
++ return positions
++
++def dense_contract(bodies,r,reader,slots):
++ dense_order(bodies['main'],['ps5hip_dense_phase',r['watchdog_finish'],'ps5hip_dense_app_complete'])
++ dense_order(bodies['ps5hip_dense_phase'],[r['open'],r['run'],r['finish'],'ps5hip_dense_transport_complete'])
++ finish=bodies[r['finish']]
++ fsync=prefix_writer_import_calls(finish,slots['fsync'],reader)
++ close=prefix_writer_import_calls(finish,slots['close'],reader)
++ require(len(fsync)==len(close)==1,'dense finish fsync/close identity')
++ returns=[m.start()+len(m[1]) for m in re.finditer(r'^(\s*[0-9a-f]+:\s+)(retq?)(?:\s|$)',finish,re.M)]
++ dense_dominates(finish,fsync,close);dense_dominates(finish,close,returns)
++ for name,key in [('open','open'),('write','write')]:
++  require(len(prefix_writer_import_calls(bodies[r[key]],slots[name],reader))==1,'dense writer import '+name)
++ # Every selected direct project call reachable from the entry is inspected.
++ def reachable(start):
++  seen=set();todo=[start]
++  while todo:
++   n=todo.pop()
++   if n in seen:continue
++   seen.add(n);todo.extend(k for k in bodies if k not in seen and symbol_calls(bodies[n],k))
++  return seen
++ live=reachable('ps5hip_dense_phase')
++ forbidden=('llama_model_load','llama_model_init_from_user','vocabulary_check','configured_model_path','original_model_directory','reject_actual_model','run_native_full','run_native_prefix','run_native_layer','ggml_backend_cpu_init')
++ for n in live|{'main'}:
++  for fragment in forbidden:require(fragment not in bodies[n],'dense model/fallback call: '+fragment)
++ for caller,callees in [(r['run'],[r['configure'],r['execute'],r['disable'],'ggml_backend_buffer_free','ggml_free','ggml_backend_free']),
++                        (r['configure'],[r['initialize']]),(r['execute'],['ggml_backend_graph_compute']),
++                        (r['graph'],[r['dispatch']])]:
++  for callee in callees:require(symbol_calls(bodies[caller],callee),'dense missing edge '+caller+' -> '+callee)
++ require(r['graph'] in bodies,'dense backend callback absent')
++ for start,api in [(r['initialize'],'hipModuleLoad'),(r['initialize'],'hipModuleGetFunction'),(r['dispatch'],'hipModuleLaunchKernel'),(r['dispatch'],'hipDeviceSynchronize'),(r['disable'],'hipFree'),(r['disable'],'hipModuleUnload')]:
++  require(any(symbol_calls(bodies[n],api) for n in reachable(start)),'dense missing public HIP path '+api)
++ # Cleanup completion is a prerequisite to every ordinary helper return.
++ run=bodies[r['run']];returns=[m.start()+len(m[1]) for m in re.finditer(r'^(\s*[0-9a-f]+:\s+)(retq?)(?:\s|$)',run,re.M)]
++ for callee in (r['disable'],'ggml_backend_free'):
++  dense_dominates(run,symbol_calls(run,callee),returns)
++ return sorted(live)
++
++def audit_dense(raw,converted,extracted):
++ paths=[Path(p).resolve() for p in (raw,converted,extracted)]
++ tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
++ sources=list(dict.fromkeys(SOURCES+ALLOCATOR_SOURCES+LAYER_SOURCES+PREFIX_SOURCES+[
++  'ports/ggml/native_dense_layer.h','ports/ggml/dense_layer_qualification.h',
++  'ports/ggml/dense_layer_fixture.h','ports/ggml/dense_layer_cases.def',
++  'tests/native_dense_title_test.py','tests/llm_dense_native_audit_test.py']))
++ identities={str(p.resolve()):sha(p) for p in [*paths,tool,*[ROOT/n for n in sources]]}
++ data=paths[0].read_bytes();values=symbol_values(data)
++ def one(n):require(n in values and len(values[n])==1,'dense symbol absent/ambiguous '+n);return values[n][0]
++ def match(fragment):
++  ns=[n for n in values if fragment in n and not n.startswith('_ZZ')];require(len(ns)==1,'dense role absent/ambiguous '+fragment);return ns[0]
++ r={key:match(fragment) for key,fragment in {
++  'run':'run_native_dense_layer','configure':'configure_dense_layer','execute':'execute_dense_layer',
++  'disable':'disable_layer','initialize':'Dispatch24initialize_dense_fixture',
++  'dispatch':'ps5hip_layer8Dispatch13execute_graph','graph':'_ZN2m0L5graphE',
++  'open':'DensePackedWriter4open','write':'DensePackedWriter5write','finish':'DensePackedWriter6finish',
++  'watchdog_finish':'watchdog_finish','finalized':'finalizedEv','stats':'native_host_allocator_stats'}.items()}
++ sizes={}
++ table=section(data,b'.symtab')
++ for at in range(0,len(table),24):
++  _,info,_,index,address,size=struct.unpack_from('<IBBHQQ',table,at)
++  if index and info&15==2 and size:sizes[address]=max(sizes.get(address,0),size)
++ # Project bodies include callback targets and dispatch counter lambdas, not just the entry.
++ names=[n for n,v in values.items() if len(v)==1 and v[0] in sizes and any(x in n for x in ('_ZN2m0','_ZZN2m0','ps5hip_layer','ps5hip_prefix','DensePackedWriter'))]
++ names=list(dict.fromkeys(names+list(r.values())+['_start','_init','main','ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','ps5hip_dense_phase','ps5hip_dense_transport_complete','ps5hip_dense_app_complete']))
++ for n in names:one(n)
++ text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
++ raw_bodies={a:t for a,n,t in blocks(text)}
++ bodies={n:bounded_body(raw_bodies[one(n)],one(n),sizes.get(one(n),0)) for n in names}
++ reader=load_regions(paths[0])[0]
++ slots={n:import_slots(data,n) for n in ('open','write','fsync','close','atexit','_init_env')}
++ live=dense_contract(bodies,r,reader,slots)
++ # Callback addresses are bound, but complete indirect dataflow is not inferred.
++ for caller,callee in [('ps5hip_dense_phase',r['write']),('ps5hip_dense_phase',match('model_memory_snapshot'))]:
++  require(one(callee) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',bodies[caller])},'dense callback address missing')
++ require(symbol_calls(bodies['ps5hip_dense_phase'],r['stats']) and symbol_calls(bodies[r['finalized']],r['stats']),'dense allocator observations missing')
++ positions=ordered_calls(bodies['_start'],['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
++ env=bound_calls(bodies['_start'],slots['_init_env'],reader);require(len(env)==1 and positions[0]<env[0]<positions[1],'startup env ordering')
++ require(len(bound_calls(bodies['ps5hip_install_vector_title_finalizer'],slots['atexit'],reader))==1,'atexit callback')
++ require(one(r['finalized']) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',bodies['ps5hip_install_vector_title_finalizer'])},'dense finalizer identity')
++ audit_text([load_regions(p)[0] for p in paths],{one(n) for n in names},sizes)
++ imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]
++ require(imports[0]==imports[1],'dense converted/extracted imports differ')
++ require(all(sha(p)==h for p,h in identities.items()),'dense audit inputs changed')
++ return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase='dense-layer',
++  model_format='gguf',full_profile=None,inputs=identities,audited_functions=names,audited_function_count=len(names),
++  layouts=[dict(file=str(p),segments=load_layout(p.read_bytes())) for p in paths],imports=imports[0],
++  actual_dense_call_chain_audited=True,dense_direct_project_reach=live,dense_callback_dataflow_proven=False,
++  actual_client_call_chain_audited=False,actual_full_call_chain_audited=False,original_model_call_chain_audited=False,
++  actual_generation_call_chain_audited=False,native_allocator_routing_audited=False,
++  native_executed=False,gpu_executed=False,limits=[
++   'Dense normal CFG binds entry/helper/finish/completion and fsync/close before return; exception and complete indirect callback dataflow remain source/runtime evidence.',
++   'Selected project call graph and backend callback/direct public HIP paths are checked. This is not native execution or numerical evidence.',
++   'Writer flags, sequential offsets, success-result predicates, counters and allocator routing additionally require authenticated source/tests and native runtime evidence.'])
++
+ def audit(raw,converted,extracted,phase="vocab",full_profile="smoke",model_format="gguf"):
++ if phase=='dense-layer':
++  require(full_profile=='smoke' and model_format=='gguf','dense mixed audit profile')
++  return audit_dense(raw,converted,extracted)
+  require(model_format in ("gguf","original_safetensors") and (model_format=="gguf" or (phase=="model-full" and full_profile=="generation")),"unsupported original model audit profile")
+  require(full_profile in ('smoke','generation','corpus','extended') and (full_profile=='smoke' or phase=='model-full'),'invalid full audit profile')
+  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
+@@ -731,7 +870,7 @@
+ if __name__=='__main__':
+  parser=argparse.ArgumentParser(description=__doc__)
+  for n in ['raw','converted','extracted','output']:parser.add_argument('--'+n,type=Path,required=True)
+- parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full'),default='vocab')
++ parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full','dense-layer'),default='vocab')
+  parser.add_argument('--model-format',choices=('gguf','original_safetensors'),default='gguf')
+  parser.add_argument('--full-profile',choices=('smoke','generation','corpus','extended'),default='smoke')
+  args=parser.parse_args()
+--- a/tools/public_hip_llm_client_console_title.cpp
++++ b/tools/public_hip_llm_client_console_title.cpp
+@@ -16,6 +16,17 @@
+ #include "ps5_backend.h"
+ #include "model_gate.h"
+ #include "native_host_allocator.h"
++#ifndef PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
++#define PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER 0
++#endif
++#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
++#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER || PS5HIP_LLM_AUTHENTICATED_MODEL_FULL || PS5HIP_LLM_ORIGINAL_MODEL
++#error dense fixture requires an exclusive synthetic title profile
++#endif
++#include "native_dense_layer.h"
++#include <fcntl.h>
++#include <cerrno>
++#endif
+ #ifndef PS5HIP_LLM_ORIGINAL_MODEL
+ #define PS5HIP_LLM_ORIGINAL_MODEL 0
+ #endif
+@@ -72,7 +83,7 @@
+   return std::make_unique<ps5hip::AgcBackend>();
+ }
+ void finalized() {
+-#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
++#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE || PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+   const auto host = ps5hip::llm::native_host_allocator_stats();
+   if (host.poisoned || host.failures || host.live_allocations ||
+       host.live_requested_bytes || host.allocations != host.releases) {
+@@ -196,7 +207,7 @@
+   std::printf("M0_APP MEMORY phase=%s pool_bytes=%llu largest_free_bytes=%llu total_free_bytes=unknown alignment=16384\n",
+               phase,static_cast<unsigned long long>(pool),static_cast<unsigned long long>(largest));
+ }
+-enum class ClientPhase { vocab, model_gate, model_prefix, model_layer, model_full };
++enum class ClientPhase { vocab, model_gate, model_prefix, model_layer, model_full, dense_layer };
+ static ClientPhase configured_model_phase(){
+  std::ifstream file(std::string(title_root)+"client-phase.txt",std::ios::binary);
+  if(!file.is_open())ps5hip_clr_gpu_fail("client-phase-open");
+@@ -209,6 +220,7 @@
+  if(n==13&&std::memcmp(phase,"model-prefix\n",13)==0)return ClientPhase::model_prefix;
+  if(n==12&&std::memcmp(phase,"model-layer\n",12)==0)return ClientPhase::model_layer;
+  if(n==11&&std::memcmp(phase,"model-full\n",11)==0)return ClientPhase::model_full;
++ if(n==12&&std::memcmp(phase,"dense-layer\n",12)==0)return ClientPhase::dense_layer;
+  ps5hip_clr_gpu_fail("client-phase-config");
+ }
+ static std::string configured_model_path(const std::string& config_path){
+@@ -290,6 +302,62 @@
+  if(!ok||!synced||!closed)ps5hip_clr_gpu_fail("raw-dump-write-sync-close");
+ }
+ #endif
++#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
++struct DensePackedWriter {
++ static constexpr uint64_t expected_bytes=154392576;
++ int fd=-1;uint64_t bytes=0;unsigned records=0;
++ ~DensePackedWriter(){if(fd>=0)(void)::close(fd);}
++ void open(const std::string& directory){
++  fd=::open((directory+"/readback.bin").c_str(),O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW,0600);
++  if(fd<0)ps5hip_clr_gpu_fail("dense-raw-open");
++  struct stat info{};
++  if(::fstat(fd,&info)!=0||!S_ISREG(info.st_mode)||info.st_size!=0)ps5hip_clr_gpu_fail("dense-raw-kind");
++ }
++ static bool write(uint64_t offset,const void* data,size_t count,void* state){
++  auto& out=*static_cast<DensePackedWriter*>(state);
++  if(out.fd<0||offset!=out.bytes||!data||!count||out.records>=11084||out.bytes>expected_bytes||count>expected_bytes-out.bytes)return false;
++  size_t done=0;unsigned interruptions=0;
++  while(done<count){
++   const auto n=::write(out.fd,static_cast<const unsigned char*>(data)+done,count-done);
++   if(n<0&&errno==EINTR&&++interruptions<=8)continue;
++   if(n<=0||size_t(n)>count-done)return false;
++   done+=size_t(n);
++  }
++  out.bytes+=count;++out.records;return true;
++ }
++ __attribute__((noinline)) void finish(){
++  if(fd<0||bytes!=expected_bytes||records!=11084)ps5hip_clr_gpu_fail("dense-raw-incomplete");
++  struct stat info{};const bool sized=::fstat(fd,&info)==0&&S_ISREG(info.st_mode)&&info.st_size==static_cast<off_t>(expected_bytes);
++  const bool synced=::fsync(fd)==0;const bool closed=::close(fd)==0;fd=-1;
++  if(!sized||!synced||!closed)ps5hip_clr_gpu_fail("dense-raw-sync-close");
++ }
++};
++extern "C" __attribute__((noinline)) void ps5hip_dense_transport_complete(){
++      std::puts("M2_DENSE TRANSPORT_COMPLETE requests=526 records=11084 bytes=154392576 fsync=true closed=true numerical=pending inference=false");
++      m0::require(ps5hip_canary::sync_log());
++}
++extern "C" __attribute__((noinline)) void ps5hip_dense_phase(){
++      const std::array<const char*,6> modules={
++        "/system_ex/app/PPSA99014/dense-layer/getrows.hsaco",
++        "/system_ex/app/PPSA99014/dense-layer/normalized.hsaco",
++        "/system_ex/app/PPSA99014/dense-layer/weighted.hsaco",
++        "/system_ex/app/PPSA99014/dense-layer/q8.hsaco",
++        "/system_ex/app/PPSA99014/dense-layer/q4.hsaco",
++        "/system_ex/app/PPSA99014/dense-layer/layer.hsaco"};
++      DensePackedWriter packed;packed.open(directory);
++      const auto result=m0::run_native_dense_layer(modules,DensePackedWriter::write,&packed,ps5hip_canary::sync_log,model_memory_snapshot);
++      m0::require(result.requests==526&&result.records==11084&&result.bytes==DensePackedWriter::expected_bytes&&result.records==packed.records&&result.bytes==packed.bytes&&result.layer.invocations==526&&result.layer.cache_resets==7&&result.layer.completed_launches==17358);
++      packed.finish();
++      const auto host=ps5hip::llm::native_host_allocator_stats();
++      m0::require(host.allocations>0&&host.allocations==host.releases&&!host.live_allocations&&!host.live_requested_bytes&&!host.failures&&!host.poisoned);
++      std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false scope=ggml_aligned\n",(unsigned long long)host.allocations,(unsigned long long)host.releases,(unsigned long long)host.peak_requested_bytes);
++      m0::require(!observed.terminal&&!observed.uncertain&&observed.allocations==observed.frees);
++      ps5hip_dense_transport_complete();
++}
++extern "C" __attribute__((noinline)) void ps5hip_dense_app_complete(){
++ std::puts("M2_DENSE APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
++}
++#endif
+ int main() {
+   try {
+     std::ifstream config("/app0/results-dir.txt", std::ios::binary);
+@@ -305,14 +373,20 @@
+     if (!finalizer_installed) ps5hip_clr_gpu_fail("finalizer-install");
+     ps5hip_canary::check_runtime();
+     const auto phase=configured_model_phase();
+-    const bool full_model=phase!=ClientPhase::vocab;
++    const bool dense_layer=phase==ClientPhase::dense_layer;
++    const bool full_model=phase!=ClientPhase::vocab&&!dense_layer;
+     // Conservative bounded experiment budget, not a performance measurement.
+-    ps5hip_clr_gpu::watchdog_start(PS5HIP_LLM_ORIGINAL_MODEL ? 600000 : PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
++    ps5hip_clr_gpu::watchdog_start(dense_layer ? 120000 : PS5HIP_LLM_ORIGINAL_MODEL ? 600000 : PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
+     const hipError_t initialized = hipInit(0);
+     int count = -1;
+     const hipError_t discovered = hipGetDeviceCount(&count);
+     if (initialized != hipSuccess || discovered != hipSuccess || count != 1)
+       ps5hip_clr_gpu_fail("public-discovery");
++#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
++    m0::require(dense_layer);
++    ps5hip_dense_phase();
++#else
++    if(dense_layer)ps5hip_clr_gpu_fail("dense-layer-not-authenticated");
+     if(full_model){
+       // Builder and freeze controller must authenticate locked model bytes before enabling this phase.
+       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
+@@ -406,8 +480,12 @@
+     }else{
+       vocabulary_check();storage_and_gate_check();
+     }
++#endif
+     ps5hip_clr_gpu::watchdog_finish();
+     completed = true;
++#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
++    ps5hip_dense_app_complete();
++#else
+ #if PS5HIP_LLM_FULL_EXTENDED
+     if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=extended watchdog_joined=true numerical=pending finalization=pending inference=false");
+ #elif PS5HIP_LLM_FULL_CORPUS
+@@ -420,6 +498,7 @@
+     else if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+     else if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+     else std::puts("M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending");
++#endif
+     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
+     return 0;
+   } catch (...) { ps5hip_clr_gpu_fail("exception"); }
+--- /dev/null
++++ b/tests/native_dense_title_test.py
+@@ -0,0 +1,81 @@
++"""Exercise exact dense title parser/sink without SDK, model or console."""
++from pathlib import Path
++import subprocess,tempfile,unittest
++ROOT=Path(__file__).resolve().parents[1]
++class DenseTitle(unittest.TestCase):
++ def source(self):return (ROOT/'tools/public_hip_llm_client_console_title.cpp').read_text()
++ def compile_run(self,source,args=()):
++  with tempfile.TemporaryDirectory() as directory:
++   p=Path(directory);(p/'test.cpp').write_text(source)
++   subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror',str(p/'test.cpp'),'-o',str(p/'test')],check=True,capture_output=True)
++   subprocess.run([str(p/'test'),*args],check=True,capture_output=True)
++ def test_exact_phase_reader(self):
++  s=self.source();reader=s[s.index('enum class ClientPhase'):s.index('static std::string configured_model_path')]
++  pre='#include <fstream>\n#include <string>\n#include <cstring>\n#include <stdexcept>\n#include <cassert>\nstatic const char* title_root;\n[[noreturn]] void ps5hip_clr_gpu_fail(const char* s){throw std::runtime_error(s);}\n'
++  with tempfile.TemporaryDirectory() as d:
++   body='''int main(int,char** a){std::string root=std::string(a[1])+"/";title_root=root.c_str();
++for(const auto& text:{std::string("dense-layer\\n"),std::string("dense-layer"),std::string("dense-layer\\r\\n"),std::string("dense-layer\\nextra")}){
++{std::ofstream f(root+"client-phase.txt",std::ios::binary);f<<text;}
++bool valid=false;try{valid=configured_model_phase()==ClientPhase::dense_layer;}catch(const std::runtime_error&){}assert(valid==(text=="dense-layer\\n"));}}
++'''
++   self.compile_run(pre+reader+body,(d,))
++ def test_sink_bounds_partial_writes_and_finalization(self):
++  s=self.source();writer=s[s.index('struct DensePackedWriter'):s.index('extern "C" __attribute__((noinline)) void ps5hip_dense_transport_complete',s.index('struct DensePackedWriter'))]
++  pre='''#include <string>
++#include <cstdint>
++#include <cstddef>
++#include <stdexcept>
++#include <cassert>
++#include <fcntl.h>
++#include <cerrno>
++#include <sys/stat.h>
++static int flags=0,writes=0,syncs=0,closes=0,interrupts=0;static bool sync_fail=false,close_fail=false,zero=false;static off_t size=0;
++int test_open(const char*,int f,int){flags=f;return 7;}
++int test_fstat(int,struct stat* s){s->st_mode=S_IFREG;s->st_size=size;return 0;}
++ssize_t test_write(int,const void*,size_t n){++writes;if(interrupts){--interrupts;errno=EINTR;return -1;}if(zero)return 0;auto count=n>2?2:n;size+=count;return count;}
++int test_fsync(int){++syncs;return sync_fail?-1:0;}
++int test_close(int){++closes;return close_fail?-1:0;}
++[[noreturn]] void ps5hip_clr_gpu_fail(const char* s){throw std::runtime_error(s);}
++#define open test_open
++#define fstat test_fstat
++#define write test_write
++#define fsync test_fsync
++#define close test_close
++'''
++  # Macros also rename the public callback; its implementation is otherwise exact.
++  body='''
++int main(){DensePackedWriter w;w.test_open("/results");assert((flags&(O_NOFOLLOW|O_EXCL|O_CREAT))==(O_NOFOLLOW|O_EXCL|O_CREAT));char b[4]{};
++assert(!DensePackedWriter::test_write(1,b,4,&w)&&writes==0);interrupts=1;assert(DensePackedWriter::test_write(0,b,4,&w)&&writes==3&&w.bytes==4&&w.records==1);
++assert(!DensePackedWriter::test_write(4,nullptr,4,&w));zero=true;assert(!DensePackedWriter::test_write(4,b,4,&w)&&w.bytes==4);zero=false;
++interrupts=9;assert(!DensePackedWriter::test_write(4,b,4,&w)&&w.bytes==4);interrupts=0;
++w.bytes=w.expected_bytes;assert(!DensePackedWriter::test_write(w.bytes,b,1,&w));w.records=11084;size=w.expected_bytes;sync_fail=true;
++bool rejected=false;try{w.finish();}catch(...){rejected=true;}assert(rejected&&syncs==1&&closes==1&&w.fd==-1);
++w.fd=7;sync_fail=false;close_fail=true;try{w.finish();assert(false);}catch(...){}assert(syncs==2&&closes==2&&w.fd==-1);
++w.fd=7;close_fail=false;size--;try{w.finish();assert(false);}catch(...){}assert(syncs==3&&closes==3&&w.fd==-1);
++w.fd=7;size=w.expected_bytes;w.finish();assert(syncs==4&&closes==4&&w.fd==-1);
++}
++'''
++  self.compile_run(pre+writer+body)
++ def test_compile_gate_rejects_mixed_profiles(self):
++  s=self.source();gate=s[s.index('#ifndef PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER'):s.index('#ifndef PS5HIP_LLM_ORIGINAL_MODEL')]
++  gate='\n'.join(line for line in gate.splitlines() if not line.startswith('#include'))
++  for other in ('', 'PS5HIP_LLM_AUTHENTICATED_MODEL_FULL','PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER','PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX','PS5HIP_LLM_ORIGINAL_MODEL'):
++   command=['c++','-E','-x','c++','-DPS5HIP_LLM_AUTHENTICATED_DENSE_LAYER=1']+(['-D'+other+'=1'] if other else [])+['-']
++   result=subprocess.run(command,input=gate,text=True,capture_output=True)
++   self.assertEqual(result.returncode==0,not bool(other))
++ def test_title_callsite_and_audit_expectations(self):
++  s=self.source();branch=s[s.index('void ps5hip_dense_phase()'):s.index('void ps5hip_dense_app_complete()')]
++  self.assertNotIn('configured_model_path',branch);self.assertNotIn('llama_model_load',branch)
++  self.assertEqual(branch.count('/dense-layer/'),6)
++  self.assertLess(branch.index('packed.finish();'),branch.index('ps5hip_dense_transport_complete();'))
++  self.assertIn('watchdog_start(dense_layer ? 120000',s)
++  self.assertIn('PS5HIP_LLM_AUTHENTICATED_MODEL_GATE || PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER',s)
++  main=s[s.index('int main()'):]
++  self.assertLess(main.index('watchdog_finish();'),main.index('ps5hip_dense_app_complete();'))
++  # Actual preprocessor must eliminate model routes in the dense main branch.
++  main='\n'.join(line for line in main.splitlines() if not line.startswith('#include'))
++  result=subprocess.run(['c++','-E','-P','-x','c++','-DPS5HIP_LLM_AUTHENTICATED_DENSE_LAYER=1','-'],input=main,text=True,capture_output=True,check=True).stdout
++  self.assertIn('ps5hip_dense_phase();',result)
++  for forbidden in ('configured_model_path','vocabulary_check','reject_actual_model','run_native_full','run_native_layer','run_native_prefix'):
++   self.assertNotIn(forbidden,result)
++if __name__=='__main__':unittest.main()

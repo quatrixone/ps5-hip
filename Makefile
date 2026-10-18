@@ -149,8 +149,8 @@ $(error original_safetensors requires LLM_NATIVE_APP_PHASE=model-full)
 endif
 endif
 LLM_NATIVE_APP_CPU_BUILD ?= $(LLM_CPU_BUILD_DIR)
-ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate model-prefix model-layer model-full),$(LLM_NATIVE_APP_PHASE))
-$(error LLM_NATIVE_APP_PHASE must be vocab, model-gate, model-prefix, model-layer or model-full)
+ifneq ($(filter $(LLM_NATIVE_APP_PHASE),vocab model-gate model-prefix model-layer model-full dense-layer),$(LLM_NATIVE_APP_PHASE))
+$(error LLM_NATIVE_APP_PHASE must be vocab, model-gate, model-prefix, model-layer, model-full or dense-layer)
 endif
 LLM_NATIVE_APP_MODEL_ARGS = $(if $(filter model-gate model-prefix model-layer model-full,$(LLM_NATIVE_APP_PHASE)),--model "$(LLM_NATIVE_APP_MODEL)" --model-source "$(LLM_NATIVE_APP_MODEL_SOURCE)" --cpu-build "$(LLM_NATIVE_APP_CPU_BUILD)" --model-remote-path "$(LLM_NATIVE_APP_MODEL_REMOTE_PATH)")
 LLM_CPU_BUILD_DIR ?= build/llm-cpu-reference
@@ -275,7 +275,9 @@ llm-native-app: deps-build llm-deps-fetch
 	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter generation corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/source_generation_console_test.py,@true)
 	$(if $(and $(filter model-full,$(LLM_NATIVE_APP_PHASE)),$(filter corpus,$(LLM_FULL_PROFILE))),$(PYTHON) tests/source_corpus_console_test.py,@true)
 	$(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_NATIVE_APP_FULL_FIXTURE)/receipt.json"; then $(MAKE) llm-full-assets LLM_FULL_ASSETS_DIR="$(LLM_NATIVE_APP_FULL_FIXTURE)" LLM_FULL_GRAPH_MODEL="$(LLM_NATIVE_APP_MODEL)" LLM_CPU_BUILD_DIR="$(LLM_NATIVE_APP_CPU_BUILD)"; else $(PYTHON) -c 'import json; import sys; from pathlib import Path; json.loads((Path(sys.argv[1])/"receipt.json").read_text())["profile"]==sys.argv[2] or sys.exit("requested full profile differs")' "$(LLM_NATIVE_APP_FULL_FIXTURE)" "$(LLM_FULL_PROFILE)"; fi,@true)
-	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter original_safetensors,$(LLM_NATIVE_APP_MODEL_FORMAT)),--model-format "original_safetensors") $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),--layer-fixture "$(LLM_NATIVE_APP_LAYER_FIXTURE)") $(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),--full-fixture "$(LLM_NATIVE_APP_FULL_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
+	$(if $(filter dense-layer,$(LLM_NATIVE_APP_PHASE)),$(PYTHON) tests/native_dense_app_build_test.py,@true)
+	$(if $(filter dense-layer,$(LLM_NATIVE_APP_PHASE)),@if ! test -f "$(LLM_DENSE_ASSETS_DIR)/receipt.json"; then $(MAKE) llm-dense-layer-assets; fi,@true)
+	$(PYTHON) tools/build_llm_native_app.py --output "$(LLM_NATIVE_APP_BUILD_DIR)" --native-client "$(LLM_NATIVE_CLIENT_BUILD_DIR)" --vocab-fixture "$(LLM_VOCAB_FIXTURE_DIR)" --results-dir "$(RESULTS_DIR)" --phase "$(LLM_NATIVE_APP_PHASE)" $(if $(filter dense-layer,$(LLM_NATIVE_APP_PHASE)),--dense-fixture "$(LLM_DENSE_ASSETS_DIR)") $(LLM_NATIVE_APP_MODEL_ARGS) $(if $(filter original_safetensors,$(LLM_NATIVE_APP_MODEL_FORMAT)),--model-format "original_safetensors") $(if $(filter model-prefix,$(LLM_NATIVE_APP_PHASE)),--prefix-fixture "$(LLM_NATIVE_APP_PREFIX_FIXTURE)") $(if $(filter model-layer,$(LLM_NATIVE_APP_PHASE)),--layer-fixture "$(LLM_NATIVE_APP_LAYER_FIXTURE)") $(if $(filter model-full,$(LLM_NATIVE_APP_PHASE)),--full-fixture "$(LLM_NATIVE_APP_FULL_FIXTURE)") $(if $(strip $(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)),--prepared-source-build "$(LLM_NATIVE_APP_PREPARED_SOURCE_BUILD)")
 
 .PHONY: llm-executed-graph
 llm-executed-graph: llm-cpu-reference
@@ -761,3 +763,7 @@ llm-native-dense-layer-tests:
 	$(PYTHON) tests/llm_native_dense_layer_make_test.py
 	$(PYTHON) tests/llm_native_dense_layer_runner_test.py
 	$(PYTHON) tools/build_llm_native_dense_layer_test.py --cpu-build "$(LLM_CPU_BUILD_DIR)" --reference "$(LLM_DENSE_REFERENCE_DIR)" --output "$(LLM_NATIVE_DENSE_TEST_DIR)"
+
+.PHONY: llm-native-dense-app
+llm-native-dense-app:
+	$(MAKE) llm-native-app LLM_NATIVE_APP_PHASE=dense-layer LLM_NATIVE_APP_MODEL_FORMAT=gguf

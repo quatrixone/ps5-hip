@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "scope": "dense native app builder integration only",
+  "native_executed": false,
+  "gpu_executed": false,
+  "tests": {
+    "tests/native_dense_app_build_test.py": 5,
+    "tests/llm_native_app_build_test.py": 30
+  },
+  "reused_prerequisites": {
+    "native_client": {
+      "status": "PASS",
+      "path": "build/llm-native-original-client-v1",
+      "seconds": 198.17998577997787,
+      "receipt_sha256": "16964fb6c9bd4a891df61de33e14df1c9276d5873e1e6e7c0f3ac2ab24a4896c"
+    },
+    "vocabulary": {
+      "status": "PASS",
+      "path": "results/llm-original-vocab-v1",
+      "seconds": 6.658638074004557,
+      "receipt_sha256": "e9594c79542e356d2d5a81451ef75a629cec346cab1a09cd1101311cd58b39a1"
+    }
+  },
+  "limitations": [
+    "Dense native title/image auditor/controller integration remains incomplete",
+    "No dense package built or console contacted",
+    "New dense target intentionally rejects until image auditor implements its required flag"
+  ]
+}

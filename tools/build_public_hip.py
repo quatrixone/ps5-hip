@@ -312,7 +312,7 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
     if full_profile == "extended":
         raise ValueError("extended native watchdog not qualified from measured corpus timing")
     jobs = build_jobs()
-    if client_phase not in ("vocab", "model-gate", "model-prefix", "model-layer", "model-full") or (fixture != "llm_client" and client_phase != "vocab"):
+    if client_phase not in ("vocab", "model-gate", "model-prefix", "model-layer", "model-full", "dense-layer") or (fixture != "llm_client" and client_phase != "vocab"):
         raise ValueError("invalid client compile phase")
     if full_profile not in ("smoke", "generation", "corpus", "extended") or (full_profile != "smoke" and (fixture != "llm_client" or client_phase != "model-full")):
         raise ValueError("invalid full compile profile")
@@ -342,6 +342,8 @@ def compile_units(output, source, fixture="bootstrap", client_phase="vocab", ful
         if fixture == "llm_client" and path.name == "public_hip_llm_client_console_title.cpp":
             if client_phase in ("model-gate", "model-prefix", "model-layer", "model-full"):
                 extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_GATE=1")
+            if client_phase == "dense-layer":
+                extra.append("-DPS5HIP_LLM_AUTHENTICATED_DENSE_LAYER=1")
             if client_phase == "model-prefix":
                 extra.append("-DPS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX=1")
             if client_phase == "model-layer":
@@ -750,6 +752,8 @@ def validate_client_assets(assets):
             expected.update("model-prefix/" + name + ".hsaco" for name in ("getrows", "normalized", "weighted", "q8", "q4"))
         if phase in (b"model-layer\n", b"model-full\n"):
             expected.update("model-layer/" + name + ".hsaco" for name in ("getrows", "normalized", "weighted", "q8", "q4", "layer"))
+    elif phase == b"dense-layer\n":
+        expected = {"client-phase.txt", *("dense-layer/" + name + ".hsaco" for name in ("getrows", "normalized", "weighted", "q8", "q4", "layer"))}
     elif phase != b"vocab\n":
         raise ValueError("invalid client phase bytes")
     if set(assets) != expected or any(Path(p).is_symlink() or not Path(p).is_file() for p in assets.values()):
