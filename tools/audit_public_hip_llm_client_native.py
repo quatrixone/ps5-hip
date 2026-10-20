@@ -533,7 +533,146 @@ def original_contract(bodies,full,r,addresses):
  # Complete indirect ownership/routing remains source and runtime evidence, as with the existing full backend.
  return original_edges(full,r)
 
+# Dense-only normal-control-flow proof. Existing phase contracts are unchanged.
+def dense_dominates(body, before, after, fatal=('ps5hip_clr_gpu_fail','ps5hip_llm_fail')):
+ """Require each after instruction to be unreachable when before is removed.
+
+ Addresses come from extracted disassembly; unknown/indirect branches reject.
+ Calls may return or fail, so only explicit known fatal calls terminate a path.
+ This is normal CFG evidence, not exception or callback dataflow proof.
+ """
+ rows=list(re.finditer(r'^\s*([0-9a-f]+):\s+(\S+)([^\n]*)',body,re.M))
+ require(rows,'dense empty CFG')
+ addresses={int(r[1],16):i for i,r in enumerate(rows)}
+ require(len(addresses)==len(rows),'dense duplicate instruction address')
+ def instruction(offset):
+  hits=[i for i,r in enumerate(rows) if r.start()<=offset<r.end()]
+  require(len(hits)==1,'dense call position is not an instruction');return hits[0]
+ blocked={instruction(p) for p in before};goals={instruction(p) for p in after}
+ require(blocked and goals,'dense missing ordering calls')
+ fatal_nodes={instruction(p) for n in fatal for p in symbol_calls(body,n)}
+ edges={}
+ for i,r in enumerate(rows):
+  op,arg=r[2],r[3].strip();following=[i+1] if i+1<len(rows) else []
+  if op.startswith('ret') or op in ('ud2','int3') or i in fatal_nodes:edges[i]=[]
+  elif op.startswith('j') or op.startswith('loop'):
+   target=re.match(r'0x([0-9a-f]+)(?:\s|$)',arg)
+   require(target is not None and int(target[1],16) in addresses,'dense unresolved branch')
+   edges[i]=[addresses[int(target[1],16)]]+([] if op in ('jmp','jmpq') else following)
+  else:edges[i]=following
+ def reachable(omit):
+  todo=[0];seen=set()
+  while todo:
+   i=todo.pop()
+   if i in seen or i in omit:continue
+   seen.add(i);todo.extend(edges[i])
+  return seen
+ live=reachable(set());require(goals<=live and blocked<=live,'dense required call unreachable')
+ require(not goals.intersection(reachable(blocked)),'dense required call bypass')
+
+def dense_order(body,names):
+ positions=[]
+ for name in names:
+  found=symbol_calls(body,name);require(len(found)==1,'dense missing/repeated call: '+name);positions.append(found)
+ for before,after in zip(positions,positions[1:]):dense_dominates(body,before,after)
+ return positions
+
+def dense_contract(bodies,r,reader,slots):
+ dense_order(bodies['main'],['ps5hip_dense_phase',r['watchdog_finish'],'ps5hip_dense_app_complete'])
+ dense_order(bodies['ps5hip_dense_phase'],[r['open'],r['run'],r['finish'],'ps5hip_dense_transport_complete'])
+ finish=bodies[r['finish']]
+ fsync=prefix_writer_import_calls(finish,slots['fsync'],reader)
+ close=prefix_writer_import_calls(finish,slots['close'],reader)
+ require(len(fsync)==len(close)==1,'dense finish fsync/close identity')
+ returns=[m.start()+len(m[1]) for m in re.finditer(r'^(\s*[0-9a-f]+:\s+)(retq?)(?:\s|$)',finish,re.M)]
+ dense_dominates(finish,fsync,close);dense_dominates(finish,close,returns)
+ for name,key in [('open','open'),('write','write')]:
+  require(len(prefix_writer_import_calls(bodies[r[key]],slots[name],reader))==1,'dense writer import '+name)
+ # Every selected direct project call reachable from the entry is inspected.
+ def reachable(start):
+  seen=set();todo=[start]
+  while todo:
+   n=todo.pop()
+   if n in seen:continue
+   seen.add(n);todo.extend(k for k in bodies if k not in seen and symbol_calls(bodies[n],k))
+  return seen
+ live=reachable('ps5hip_dense_phase')
+ forbidden=('llama_model_load','llama_model_init_from_user','vocabulary_check','configured_model_path','original_model_directory','reject_actual_model','run_native_full','run_native_prefix','run_native_layer','ggml_backend_cpu_init')
+ for n in live|{'main'}:
+  for fragment in forbidden:require(fragment not in bodies[n],'dense model/fallback call: '+fragment)
+ for caller,callees in [(r['run'],[r['configure'],r['execute'],r['disable'],'ggml_backend_buffer_free','ggml_free','ggml_backend_free']),
+                        (r['configure'],[r['initialize']]),(r['execute'],['ggml_backend_graph_compute']),
+                        (r['graph'],[r['dispatch']])]:
+  for callee in callees:require(symbol_calls(bodies[caller],callee),'dense missing edge '+caller+' -> '+callee)
+ require(r['graph'] in bodies,'dense backend callback absent')
+ for start,api in [(r['initialize'],'hipModuleLoad'),(r['initialize'],'hipModuleGetFunction'),(r['dispatch'],'hipModuleLaunchKernel'),(r['dispatch'],'hipDeviceSynchronize'),(r['disable'],'hipFree'),(r['disable'],'hipModuleUnload')]:
+  require(any(symbol_calls(bodies[n],api) for n in reachable(start)),'dense missing public HIP path '+api)
+ # Cleanup completion is a prerequisite to every ordinary helper return.
+ run=bodies[r['run']];returns=[m.start()+len(m[1]) for m in re.finditer(r'^(\s*[0-9a-f]+:\s+)(retq?)(?:\s|$)',run,re.M)]
+ for callee in (r['disable'],'ggml_backend_free'):
+  dense_dominates(run,symbol_calls(run,callee),returns)
+ return sorted(live)
+
+def audit_dense(raw,converted,extracted):
+ paths=[Path(p).resolve() for p in (raw,converted,extracted)]
+ tool=Path(shutil.which('llvm-objdump-18') or '');require(tool.is_file(),'objdump unavailable')
+ sources=list(dict.fromkeys(SOURCES+ALLOCATOR_SOURCES+LAYER_SOURCES+PREFIX_SOURCES+[
+  'ports/ggml/native_dense_layer.h','ports/ggml/dense_layer_qualification.h',
+  'ports/ggml/dense_layer_fixture.h','ports/ggml/dense_layer_cases.def',
+  'tests/native_dense_title_test.py','tests/llm_dense_native_audit_test.py']))
+ identities={str(p.resolve()):sha(p) for p in [*paths,tool,*[ROOT/n for n in sources]]}
+ data=paths[0].read_bytes();values=symbol_values(data)
+ def one(n):require(n in values and len(values[n])==1,'dense symbol absent/ambiguous '+n);return values[n][0]
+ def match(fragment):
+  ns=[n for n in values if fragment in n and not n.startswith('_ZZ')];require(len(ns)==1,'dense role absent/ambiguous '+fragment);return ns[0]
+ r={key:match(fragment) for key,fragment in {
+  'run':'run_native_dense_layer','configure':'configure_dense_layer','execute':'execute_dense_layer',
+  'disable':'disable_layer','initialize':'Dispatch24initialize_dense_fixture',
+  'dispatch':'ps5hip_layer8Dispatch13execute_graph','graph':'_ZN2m0L5graphE',
+  'open':'DensePackedWriter4open','write':'DensePackedWriter5write','finish':'DensePackedWriter6finish',
+  'watchdog_finish':'watchdog_finish','finalized':'finalizedEv','stats':'native_host_allocator_stats'}.items()}
+ sizes={}
+ table=section(data,b'.symtab')
+ for at in range(0,len(table),24):
+  _,info,_,index,address,size=struct.unpack_from('<IBBHQQ',table,at)
+  if index and info&15==2 and size:sizes[address]=max(sizes.get(address,0),size)
+ # Project bodies include callback targets and dispatch counter lambdas, not just the entry.
+ names=[n for n,v in values.items() if len(v)==1 and v[0] in sizes and any(x in n for x in ('_ZN2m0','_ZZN2m0','ps5hip_layer','ps5hip_prefix','DensePackedWriter'))]
+ names=list(dict.fromkeys(names+list(r.values())+['_start','_init','main','ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','ps5hip_dense_phase','ps5hip_dense_transport_complete','ps5hip_dense_app_complete']))
+ for n in names:one(n)
+ text=subprocess.check_output([str(tool),'-d','--no-show-raw-insn','--print-imm-hex','--disassemble-symbols='+','.join(names),str(paths[0])],text=True)
+ raw_bodies={a:t for a,n,t in blocks(text)}
+ bodies={n:bounded_body(raw_bodies[one(n)],one(n),sizes.get(one(n),0)) for n in names}
+ reader=load_regions(paths[0])[0]
+ slots={n:import_slots(data,n) for n in ('open','write','fsync','close','atexit','_init_env')}
+ live=dense_contract(bodies,r,reader,slots)
+ # Callback addresses are bound, but complete indirect dataflow is not inferred.
+ for caller,callee in [('ps5hip_dense_phase',r['write']),('ps5hip_dense_phase',match('model_memory_snapshot'))]:
+  require(one(callee) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',bodies[caller])},'dense callback address missing')
+ require(symbol_calls(bodies['ps5hip_dense_phase'],r['stats']) and symbol_calls(bodies[r['finalized']],r['stats']),'dense allocator observations missing')
+ positions=ordered_calls(bodies['_start'],['ps5_fp_ieee','ps5hip_install_shell_exit_probe','ps5hip_install_vector_title_finalizer','_init','main'])
+ env=bound_calls(bodies['_start'],slots['_init_env'],reader);require(len(env)==1 and positions[0]<env[0]<positions[1],'startup env ordering')
+ require(len(bound_calls(bodies['ps5hip_install_vector_title_finalizer'],slots['atexit'],reader))==1,'atexit callback')
+ require(one(r['finalized']) in {int(v,16) for v in re.findall(r'0x([0-9a-f]+)',bodies['ps5hip_install_vector_title_finalizer'])},'dense finalizer identity')
+ audit_text([load_regions(p)[0] for p in paths],{one(n) for n in names},sizes)
+ imports=[{**verify_imports(p),**lifecycle_imports(read_imports(p,verify_hash=True)[2])} for p in paths[1:]]
+ require(imports[0]==imports[1],'dense converted/extracted imports differ')
+ require(all(sha(p)==h for p,h in identities.items()),'dense audit inputs changed')
+ return dict(status='PASS',classification='offline-public-hip-llm-client-native-image-audit',phase='dense-layer',
+  model_format='gguf',full_profile=None,inputs=identities,audited_functions=names,audited_function_count=len(names),
+  layouts=[dict(file=str(p),segments=load_layout(p.read_bytes())) for p in paths],imports=imports[0],
+  actual_dense_call_chain_audited=True,dense_direct_project_reach=live,dense_callback_dataflow_proven=False,
+  actual_client_call_chain_audited=False,actual_full_call_chain_audited=False,original_model_call_chain_audited=False,
+  actual_generation_call_chain_audited=False,native_allocator_routing_audited=False,
+  native_executed=False,gpu_executed=False,limits=[
+   'Dense normal CFG binds entry/helper/finish/completion and fsync/close before return; exception and complete indirect callback dataflow remain source/runtime evidence.',
+   'Selected project call graph and backend callback/direct public HIP paths are checked. This is not native execution or numerical evidence.',
+   'Writer flags, sequential offsets, success-result predicates, counters and allocator routing additionally require authenticated source/tests and native runtime evidence.'])
+
 def audit(raw,converted,extracted,phase="vocab",full_profile="smoke",model_format="gguf"):
+ if phase=='dense-layer':
+  require(full_profile=='smoke' and model_format=='gguf','dense mixed audit profile')
+  return audit_dense(raw,converted,extracted)
  require(model_format in ("gguf","original_safetensors") and (model_format=="gguf" or (phase=="model-full" and full_profile=="generation")),"unsupported original model audit profile")
  require(full_profile in ('smoke','generation','corpus','extended') and (full_profile=='smoke' or phase=='model-full'),'invalid full audit profile')
  paths=[Path(p).resolve() for p in (raw,converted,extracted)]
@@ -731,7 +870,7 @@ def audit(raw,converted,extracted,phase="vocab",full_profile="smoke",model_forma
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__)
  for n in ['raw','converted','extracted','output']:parser.add_argument('--'+n,type=Path,required=True)
- parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full'),default='vocab')
+ parser.add_argument('--phase',choices=('vocab','model-gate','model-prefix','model-layer','model-full','dense-layer'),default='vocab')
  parser.add_argument('--model-format',choices=('gguf','original_safetensors'),default='gguf')
  parser.add_argument('--full-profile',choices=('smoke','generation','corpus','extended'),default='smoke')
  args=parser.parse_args()

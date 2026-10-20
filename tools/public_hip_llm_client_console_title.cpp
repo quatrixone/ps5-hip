@@ -16,6 +16,17 @@
 #include "ps5_backend.h"
 #include "model_gate.h"
 #include "native_host_allocator.h"
+#ifndef PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+#define PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER 0
+#endif
+#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_PREFIX || PS5HIP_LLM_AUTHENTICATED_MODEL_LAYER || PS5HIP_LLM_AUTHENTICATED_MODEL_FULL || PS5HIP_LLM_ORIGINAL_MODEL
+#error dense fixture requires an exclusive synthetic title profile
+#endif
+#include "native_dense_layer.h"
+#include <fcntl.h>
+#include <cerrno>
+#endif
 #ifndef PS5HIP_LLM_ORIGINAL_MODEL
 #define PS5HIP_LLM_ORIGINAL_MODEL 0
 #endif
@@ -72,7 +83,7 @@ std::unique_ptr<ps5hip::SubmissionBackend> backend() {
   return std::make_unique<ps5hip::AgcBackend>();
 }
 void finalized() {
-#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE
+#if PS5HIP_LLM_AUTHENTICATED_MODEL_GATE || PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
   const auto host = ps5hip::llm::native_host_allocator_stats();
   if (host.poisoned || host.failures || host.live_allocations ||
       host.live_requested_bytes || host.allocations != host.releases) {
@@ -196,7 +207,7 @@ __attribute__((noinline)) static void model_memory_snapshot(const char* phase){
   std::printf("M0_APP MEMORY phase=%s pool_bytes=%llu largest_free_bytes=%llu total_free_bytes=unknown alignment=16384\n",
               phase,static_cast<unsigned long long>(pool),static_cast<unsigned long long>(largest));
 }
-enum class ClientPhase { vocab, model_gate, model_prefix, model_layer, model_full };
+enum class ClientPhase { vocab, model_gate, model_prefix, model_layer, model_full, dense_layer };
 static ClientPhase configured_model_phase(){
  std::ifstream file(std::string(title_root)+"client-phase.txt",std::ios::binary);
  if(!file.is_open())ps5hip_clr_gpu_fail("client-phase-open");
@@ -209,6 +220,7 @@ static ClientPhase configured_model_phase(){
  if(n==13&&std::memcmp(phase,"model-prefix\n",13)==0)return ClientPhase::model_prefix;
  if(n==12&&std::memcmp(phase,"model-layer\n",12)==0)return ClientPhase::model_layer;
  if(n==11&&std::memcmp(phase,"model-full\n",11)==0)return ClientPhase::model_full;
+ if(n==12&&std::memcmp(phase,"dense-layer\n",12)==0)return ClientPhase::dense_layer;
  ps5hip_clr_gpu_fail("client-phase-config");
 }
 static std::string configured_model_path(const std::string& config_path){
@@ -290,6 +302,66 @@ static void prefix_write(const char* filename,const void* data,size_t bytes,void
  if(!ok||!synced||!closed)ps5hip_clr_gpu_fail("raw-dump-write-sync-close");
 }
 #endif
+#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+struct DensePackedWriter {
+ static constexpr uint64_t expected_bytes=154392576;
+ int fd=-1;uint64_t bytes=0;unsigned records=0;
+ ~DensePackedWriter(){if(fd>=0)(void)::close(fd);}
+ void open(const std::string& directory){
+  fd=::open((directory+"/readback.bin").c_str(),O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW,0600);
+  if(fd<0)ps5hip_clr_gpu_fail("dense-raw-open");
+  struct stat info{};
+  if(::fstat(fd,&info)!=0||!S_ISREG(info.st_mode)||info.st_size!=0)ps5hip_clr_gpu_fail("dense-raw-kind");
+ }
+ static bool write(uint64_t offset,const void* data,size_t count,void* state){
+  auto& out=*static_cast<DensePackedWriter*>(state);
+  if(out.fd<0||offset!=out.bytes||!data||!count||out.records>=11084||out.bytes>expected_bytes||count>expected_bytes-out.bytes)return false;
+  size_t done=0;unsigned interruptions=0;
+  while(done<count){
+   const auto n=::write(out.fd,static_cast<const unsigned char*>(data)+done,count-done);
+   if(n<0&&errno==EINTR&&++interruptions<=8)continue;
+   if(n<=0||size_t(n)>count-done)return false;
+   done+=size_t(n);
+  }
+  out.bytes+=count;++out.records;return true;
+ }
+ __attribute__((noinline)) void finish(){
+  if(fd<0||bytes!=expected_bytes||records!=11084)ps5hip_clr_gpu_fail("dense-raw-incomplete");
+  struct stat info{};const bool sized=::fstat(fd,&info)==0&&S_ISREG(info.st_mode)&&info.st_size==static_cast<off_t>(expected_bytes);
+  const bool synced=::fsync(fd)==0;const bool closed=::close(fd)==0;fd=-1;
+  if(!sized||!synced||!closed)ps5hip_clr_gpu_fail("dense-raw-sync-close");
+ }
+};
+extern "C" __attribute__((noinline)) void ps5hip_dense_transport_complete(){
+ std::puts("M2_DENSE TRANSPORT_COMPLETE requests=526 records=11084 bytes=154392576 fsync=true closed=true numerical=pending inference=false");
+ m0::require(ps5hip_canary::sync_log());
+}
+// Dedicated synthetic entry: the results directory arrives as an argument so this
+// boundary never reaches the model configuration readers used by the other phases.
+extern "C" __attribute__((noinline)) void ps5hip_dense_phase(const char* results_directory){
+ m0::require(results_directory!=nullptr);
+ const std::string directory(results_directory);
+ const std::array<const char*,6> modules={
+  "/system_ex/app/PPSA99014/dense-layer/getrows.hsaco",
+  "/system_ex/app/PPSA99014/dense-layer/normalized.hsaco",
+  "/system_ex/app/PPSA99014/dense-layer/weighted.hsaco",
+  "/system_ex/app/PPSA99014/dense-layer/q8.hsaco",
+  "/system_ex/app/PPSA99014/dense-layer/q4.hsaco",
+  "/system_ex/app/PPSA99014/dense-layer/layer.hsaco"};
+ DensePackedWriter packed;packed.open(directory);
+ const auto result=m0::run_native_dense_layer(modules,DensePackedWriter::write,&packed,ps5hip_canary::sync_log,model_memory_snapshot);
+ m0::require(result.requests==526&&result.records==11084&&result.bytes==DensePackedWriter::expected_bytes&&result.records==packed.records&&result.bytes==packed.bytes&&result.layer.invocations==526&&result.layer.cache_resets==7&&result.layer.completed_launches==17358);
+ packed.finish();
+ const auto host=ps5hip::llm::native_host_allocator_stats();
+ m0::require(host.allocations>0&&host.allocations==host.releases&&!host.live_allocations&&!host.live_requested_bytes&&!host.failures&&!host.poisoned);
+ std::printf("M0_APP HOST_STORAGE allocations=%llu releases=%llu live_allocations=0 live_requested_bytes=0 peak_requested_bytes=%llu failures=0 poisoned=false scope=ggml_aligned\n",(unsigned long long)host.allocations,(unsigned long long)host.releases,(unsigned long long)host.peak_requested_bytes);
+ m0::require(!observed.terminal&&!observed.uncertain&&observed.allocations==observed.frees);
+ ps5hip_dense_transport_complete();
+}
+extern "C" __attribute__((noinline)) void ps5hip_dense_app_complete(){
+ std::puts("M2_DENSE APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
+}
+#endif
 int main() {
   try {
     std::ifstream config("/app0/results-dir.txt", std::ios::binary);
@@ -305,14 +377,20 @@ int main() {
     if (!finalizer_installed) ps5hip_clr_gpu_fail("finalizer-install");
     ps5hip_canary::check_runtime();
     const auto phase=configured_model_phase();
-    const bool full_model=phase!=ClientPhase::vocab;
+    const bool dense_layer=phase==ClientPhase::dense_layer;
+    const bool full_model=phase!=ClientPhase::vocab&&!dense_layer;
     // Conservative bounded experiment budget, not a performance measurement.
-    ps5hip_clr_gpu::watchdog_start(PS5HIP_LLM_ORIGINAL_MODEL ? 600000 : PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
+    ps5hip_clr_gpu::watchdog_start(dense_layer ? 120000 : PS5HIP_LLM_ORIGINAL_MODEL ? 600000 : PS5HIP_LLM_FULL_CORPUS && phase==ClientPhase::model_full ? 1800000 : full_model ? 120000 : 30000);
     const hipError_t initialized = hipInit(0);
     int count = -1;
     const hipError_t discovered = hipGetDeviceCount(&count);
     if (initialized != hipSuccess || discovered != hipSuccess || count != 1)
       ps5hip_clr_gpu_fail("public-discovery");
+#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+    m0::require(dense_layer);
+    ps5hip_dense_phase(directory.c_str());
+#else
+    if(dense_layer)ps5hip_clr_gpu_fail("dense-layer-not-authenticated");
     if(full_model){
       // Builder and freeze controller must authenticate locked model bytes before enabling this phase.
       if(!PS5HIP_LLM_AUTHENTICATED_MODEL_GATE)ps5hip_clr_gpu_fail("model-gate-not-authenticated");
@@ -406,8 +484,12 @@ int main() {
     }else{
       vocabulary_check();storage_and_gate_check();
     }
+#endif
     ps5hip_clr_gpu::watchdog_finish();
     completed = true;
+#if PS5HIP_LLM_AUTHENTICATED_DENSE_LAYER
+    ps5hip_dense_app_complete();
+#else
 #if PS5HIP_LLM_FULL_EXTENDED
     if(phase==ClientPhase::model_full)std::puts("M4_GEN APP_COMPLETE profile=extended watchdog_joined=true numerical=pending finalization=pending inference=false");
 #elif PS5HIP_LLM_FULL_CORPUS
@@ -420,6 +502,7 @@ int main() {
     else if(phase==ClientPhase::model_layer)std::puts("M2_LAYER APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else if(phase==ClientPhase::model_prefix)std::puts("M2_PREFIX APP_COMPLETE watchdog_joined=true numerical=pending finalization=pending inference=false");
     else std::puts("M0_APP PASS init=0 count_error=0 count=1 watchdog_joined=true finalization=pending");
+#endif
     if (!ps5hip_canary::sync_log()) ps5hip_clr_gpu_fail("result-log");
     return 0;
   } catch (...) { ps5hip_clr_gpu_fail("exception"); }
